@@ -120,6 +120,7 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("eb_order", m_ebOrder);
   pp.get("eb_weight", m_ebWeight);
   pp.get("jump_bc", jumpBc);
+  pp.get("interface_points", m_interfacePoints);
 
   if (jumpBc == "natural") {
     m_jumpBcType = JumpBCType::Natural;
@@ -318,6 +319,11 @@ FieldSolverAMG::setupSolver()
   m_petscEbBc->setWeight(m_ebWeight);
   m_petscJumpBc->setOrder(m_ebOrder);
   m_petscJumpBc->setWeight(m_ebWeight);
+
+  // Impose the interface conditions on the dielectric surface rather than at the EB face centroids.
+  if (m_interfacePoints) {
+    m_petscJumpBc->setInterface(m_computationalGeometry->getSolidImplicitFunction());
+  }
 
   // The coarse-fine interpolators of both phases on each level, in the phase order of the PetscGrid.
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);

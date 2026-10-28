@@ -143,6 +143,8 @@ public:
    * @param[in]  a_order          Order of the gradient.
    * @param[in]  a_addStartingVof Use a_vof in the expression for the gradient. This can be ill-conditioned for
    * cell-centered expressions.
+   * @param[in]  a_originShift    Position of the expansion point relative to the boundary centroid, in units of the
+   * cell size. Zero expands about the boundary centroid.
    * @return     Returns a least squares stencil for evaluating an approximation normal derivative on the boundary
    * centroid.
    */
@@ -155,7 +157,8 @@ public:
                    int             a_radius,
                    int             a_p,
                    int             a_order,
-                   bool            a_addStartingVof);
+                   bool            a_addStartingVof,
+                   const RealVect& a_originShift);
 
   /**
    * @brief Return the sum of weights in the stencil, for a specific variable.

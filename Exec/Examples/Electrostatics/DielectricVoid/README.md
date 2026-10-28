@@ -23,6 +23,29 @@ The field solver is selected with `DielectricVoid.field_solver`: `gmg` (`FieldSo
 which needs `USE_PETSC=TRUE`). With `DielectricVoid.box_tagger = true` and `Driver.initial_regrids = 1`, the box of
 `RefinementBoxTagger` is refined as well, e.g. to put the whole void on the finest level.
 
+By default the interface condition is imposed at the centroids of the EB faces of the cut cells, which lie off the curved
+void surface, and the electric field in the cut cells is first order. With `FieldSolverGMG.gmg_interface_points = true`
+(or `FieldSolverAMG.interface_points = true`) it is imposed at the closest points on the void surface instead. With
+second-order interface stencils, i.e.
+
+```
+FieldSolverGMG.gmg_use_default_settings = false
+FieldSolverGMG.gmg_jump_order           = 2
+FieldSolverGMG.gmg_jump_weight          = 1
+FieldSolverGMG.gmg_bc_order             = 2
+FieldSolverGMG.gmg_bc_weight            = 1
+```
+
+(or `FieldSolverAMG.eb_order = 2` and `FieldSolverAMG.eb_weight = 1`), the error D in the cut cells is then second order
+in 2D. The refinement study below puts the void on level `N` of a larger domain, so that the images of the dipole matter
+less:
+
+```
+mpirun -np <num_proc> main2d.*.ex example2d.inputs "AmrMesh.lo_corner=-8E-3 -8E-3" "AmrMesh.hi_corner=8E-3 8E-3" \
+  AmrMesh.max_amr_depth=N "AmrMesh.ref_rat=2 2 2 2 2 2 2 2 2" Driver.refine_dielectrics=N \
+  DielectricVoid.box_tagger=true Driver.initial_regrids=1 RefinementBoxTagger.ref_box1_lvl=N
+```
+
 To compile, type
 
 ```make -s -j<num_proc> USE_PETSC=TRUE MPI=TRUE DIM=2```

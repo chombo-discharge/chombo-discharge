@@ -21,6 +21,7 @@
 #include <AggStencil.H>
 #include <EBCellFAB.H>
 #include <BaseIVFAB.H>
+#include <BaseIF.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -71,17 +72,23 @@ public:
    * @param[in] a_radius       Stencil radius
    * @param[in] a_ghostCF      Number of grid cells that were filled across the CF.
    * @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
+   * @param[in] a_probLo       Lower left corner of the domain
+   * @param[in] a_interface    Implicit function whose zero level set is the interface. When it is not null, the
+   * interface gradient stencils are expanded about the point on the interface closest to the boundary centroid rather
+   * than about the boundary centroid itself.
    */
-  MFHelmholtzJumpBC(Location::Cell     a_dataLocation,
-                    const MFLevelGrid& a_mflg,
-                    const BcoefPtr&    a_Bcoef,
-                    const AmrMask&     a_validCells,
-                    Real               a_dx,
-                    int                a_order,
-                    int                a_weight,
-                    int                a_radius,
-                    int                a_ghostCF,
-                    IntVect            a_ghostPhi);
+  MFHelmholtzJumpBC(Location::Cell               a_dataLocation,
+                    const MFLevelGrid&           a_mflg,
+                    const BcoefPtr&              a_Bcoef,
+                    const AmrMask&               a_validCells,
+                    Real                         a_dx,
+                    int                          a_order,
+                    int                          a_weight,
+                    int                          a_radius,
+                    int                          a_ghostCF,
+                    IntVect                      a_ghostPhi,
+                    const RealVect&              a_probLo,
+                    const RefCountedPtr<BaseIF>& a_interface);
 
   /**
    * @brief Disallowed copy constructor
@@ -248,6 +255,17 @@ protected:
   Real m_dx;
 
   /**
+   * @brief Lower left corner of the domain
+   */
+  RealVect m_probLo;
+
+  /**
+   * @brief Implicit function whose zero level set is the interface. Null if the stencils are expanded about the
+   * boundary centroids.
+   */
+  RefCountedPtr<BaseIF> m_interface;
+
+  /**
    * @brief Stencil order
    */
   int m_order;
@@ -376,6 +394,18 @@ protected:
                                      const EBISBox&               a_ebisbox,
                                      VofUtils::Neighborhood       a_neighborhood,
                                      int                          a_order) const;
+
+  /**
+   * @brief Position of the point on the interface closest to the boundary centroid of a cut cell.
+   * @details Projects the boundary centroid onto the zero level set of m_interface with Newton iterations along the
+   * gradient of the implicit function. Returns zero if m_interface is null or if the projection fails or moves the
+   * point further than half a cell.
+   * @param[in] a_vof     Grid cell
+   * @param[in] a_ebisbox EBISBox
+   * @return The position of the interface point relative to the boundary centroid, in units of the cell size.
+   */
+  RealVect
+  getInterfaceShift(const VolIndex& a_vof, const EBISBox& a_ebisbox) const;
 
   /**
    * @brief Check if stencil is valid.

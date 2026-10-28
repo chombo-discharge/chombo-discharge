@@ -262,6 +262,12 @@ protected:
   JumpBCType m_jumpBcType;
 
   /**
+   * @brief Impose the interface conditions at the points on the dielectric surface closest to the EB face centroids,
+   * rather than at the EB face centroids.
+   */
+  bool m_interfacePoints;
+
+  /**
    * @brief Highest order of the EB face stencils, for the electrode and the interface faces.
    */
   int m_ebOrder;

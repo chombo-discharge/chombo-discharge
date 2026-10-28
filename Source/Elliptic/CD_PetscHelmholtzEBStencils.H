@@ -21,6 +21,7 @@
 #include <Vector.H>
 #include <LayoutData.H>
 #include <BaseIVFAB.H>
+#include <BaseIF.H>
 
 // Our includes
 #include <CD_PetscGrid.H>
@@ -121,6 +122,15 @@ public:
   setWeight(const int a_weight) noexcept;
 
   /**
+   * @brief Set the implicit function whose zero level set is the boundary.
+   * @details When it is not null, the stencils for the normal derivative are expanded about the point on the boundary
+   * closest to the EB face centroid rather than about the EB face centroid itself. Takes effect at the next define().
+   * @param[in] a_interface Implicit function, or null.
+   */
+  virtual void
+  setInterface(const RefCountedPtr<BaseIF>& a_interface) noexcept;
+
+  /**
    * @brief Release the stored stencils, the grids and the interpolators, so that the object can be defined again, e.g.
    * after a regrid.
    * @details The order and the weight are settings, and are kept.
@@ -169,6 +179,12 @@ protected:
    * @brief Least-squares weighting, or -1 if not set.
    */
   int m_weight;
+
+  /**
+   * @brief Implicit function whose zero level set is the boundary, or null if the stencils are expanded about the EB
+   * face centroids.
+   */
+  RefCountedPtr<BaseIF> m_interface;
 
   /**
    * @brief PETSc grid.
@@ -276,6 +292,19 @@ protected:
                       const int        a_level,
                       const DataIndex& a_din,
                       const VolIndex&  a_vof) const noexcept;
+
+  /**
+   * @brief Get the position about which the normal-derivative stencil of a cut cell is expanded.
+   * @details This is the EB face centroid, or the point on the zero level set of m_interface closest to it. The EB
+   * face centroid is kept if m_interface is null, or if the projection fails or moves the point by half a cell or more.
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cut cell
+   * @return The expansion point relative to the EB face centroid, in physical units.
+   */
+  virtual RealVect
+  getExpansionShift(const int a_phase, const int a_level, const DataIndex& a_din, const VolIndex& a_vof) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

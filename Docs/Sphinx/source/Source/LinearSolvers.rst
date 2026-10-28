@@ -317,6 +317,16 @@ This equation can be solved for the boundary value :math:`\Phi_{\textrm{B}}`, wh
 
    For discontinuous coefficients the gradient reconstruction on one side of the EB does not reach into the other (since the solution is not differentiable across the EB).
 
+By default, the gradient reconstructions are expanded about the centroid of the EB face of the cut cell, so :math:`\Phi_{\textrm{B}}` is the potential at that point.
+The EB face is planar, and on a curved interface its centroid lies a distance :math:`\mathcal{O}(\Delta x^2)` off the interface (about :math:`\Delta x^2/(8R)` for a radius of curvature :math:`R`).
+There the two one-sided expansions of the potential differ by that distance times the jump in the normal derivative, which makes the interface flux first order and the truncation error of the cut cells :math:`\mathcal{O}(1)`.
+The electric field in the cut cells is then first order.
+
+When the implicit function of the dielectrics is given to the operator (``FieldSolverGMG.gmg_interface_points`` and ``FieldSolverAMG.interface_points``, see :ref:`Chap:FieldSolverGMG`), both gradient reconstructions are instead expanded about the point on the interface closest to the EB face centroid.
+The point is found with Newton iterations along the gradient of the implicit function, and the EB face centroid is kept where they fail or move the point by half a cell or more.
+In ``Exec/Examples/Electrostatics/DielectricVoid`` (a gas void in a dielectric, second-order stencils) this makes the electric field in the cut cells second order in 2D.
+In ``FieldSolverGMG`` the interface points are used on the AMR levels only, and the coarsened multigrid levels keep the EB face centroids.
+
 AMRMultiGrid
 ------------
 

@@ -162,7 +162,8 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
                                const int          a_radius,
                                const int          a_p,
                                const int          a_order,
-                               const bool         a_addStartingVof)
+                               const bool         a_addStartingVof,
+                               const RealVect&    a_originShift)
 {
   VoFStencil bndrySten;
 
@@ -220,6 +221,10 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
                                                                       allVofs,
                                                                       a_ebisbox,
                                                                       a_dx);
+
+      for (int i = 0; i < displacements.size(); i++) {
+        displacements[i] -= a_originShift * a_dx;
+      }
 
       // This routine eliminates a_vof from the system of equations!
       IntVectSet knownTerms;

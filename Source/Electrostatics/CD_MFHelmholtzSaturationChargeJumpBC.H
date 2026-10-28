@@ -40,19 +40,23 @@ public:
    * @param[in] a_radius       Stencil radius
    * @param[in] a_ghostCF      Number of grid cells that were filled across the CF.
    * @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
+   * @param[in] a_probLo       Lower left corner of the domain
+   * @param[in] a_interface    Implicit function whose zero level set is the interface, or null
    * @param[in] a_phase Description
    */
-  MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
-                                    const Location::Cell     a_dataLocation,
-                                    const MFLevelGrid&       a_mflg,
-                                    const BcoefPtr&          a_Bcoef,
-                                    const AmrMask&           a_validCells,
-                                    const Real               a_dx,
-                                    const int                a_order,
-                                    const int                a_weight,
-                                    const int                a_radius,
-                                    const int                a_ghostCF,
-                                    const IntVect            a_ghostPhi);
+  MFHelmholtzSaturationChargeJumpBC(const phase::which_phase     a_phase,
+                                    const Location::Cell         a_dataLocation,
+                                    const MFLevelGrid&           a_mflg,
+                                    const BcoefPtr&              a_Bcoef,
+                                    const AmrMask&               a_validCells,
+                                    const Real                   a_dx,
+                                    const int                    a_order,
+                                    const int                    a_weight,
+                                    const int                    a_radius,
+                                    const int                    a_ghostCF,
+                                    const IntVect                a_ghostPhi,
+                                    const RealVect&              a_probLo,
+                                    const RefCountedPtr<BaseIF>& a_interface);
 
   /**
    * @brief Destructor (does nothing)

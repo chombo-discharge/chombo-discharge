@@ -206,7 +206,8 @@ MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>&
                                                           lsqRadius,
                                                           lsqWeight,
                                                           lsqOrder,
-                                                          addStartVof);
+                                                          addStartVof,
+                                                          RealVect::Zero);
 
   gradStencil *= coordDx / m_dx;
 

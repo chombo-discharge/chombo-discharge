@@ -23,6 +23,7 @@ MFHelmholtzJumpBCFactory::MFHelmholtzJumpBCFactory()
 
   this->setDomainDropOrder(-1);
   this->setCoarseGridDropOrder(false);
+  this->setInterface(RealVect::Zero, RefCountedPtr<BaseIF>(nullptr));
 }
 
 MFHelmholtzJumpBCFactory::~MFHelmholtzJumpBCFactory()
@@ -40,6 +41,13 @@ void
 MFHelmholtzJumpBCFactory::setCoarseGridDropOrder(const bool a_dropOrder)
 {
   m_dropOrder = a_dropOrder;
+}
+
+void
+MFHelmholtzJumpBCFactory::setInterface(const RealVect& a_probLo, const RefCountedPtr<BaseIF>& a_interface)
+{
+  m_probLo    = a_probLo;
+  m_interface = a_interface;
 }
 
 RefCountedPtr<MFHelmholtzJumpBC>
@@ -63,16 +71,19 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
     }
   }
 
-  auto jump = RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzJumpBC(a_dataLocation,
-                                                                     a_mflg,
-                                                                     a_Bcoef,
-                                                                     a_validCells,
-                                                                     a_dx,
-                                                                     order,
-                                                                     a_weight,
-                                                                     a_radius,
-                                                                     a_ghostCF,
-                                                                     a_ghostPhi));
+  auto jump = RefCountedPtr<MFHelmholtzJumpBC>(
+    new MFHelmholtzJumpBC(a_dataLocation,
+                          a_mflg,
+                          a_Bcoef,
+                          a_validCells,
+                          a_dx,
+                          order,
+                          a_weight,
+                          a_radius,
+                          a_ghostCF,
+                          a_ghostPhi,
+                          m_probLo,
+                          a_validCells.isNull() ? RefCountedPtr<BaseIF>(nullptr) : m_interface));
 
   jump->setCoarseGridDropOrder(m_dropOrder);
 

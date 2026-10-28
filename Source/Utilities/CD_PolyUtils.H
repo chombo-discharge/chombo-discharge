@@ -45,6 +45,26 @@ brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1
  */
 Real
 brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)>& a_func) noexcept;
+
+/**
+ * @brief Project a point onto the zero level set of an implicit function.
+ * @details Newton iterations along the gradient of the implicit function, x <- x - f(x) grad(f)/|grad(f)|^2, with the
+ * gradient computed by centered differences. For a point near a smooth surface this converges to the closest point on
+ * the surface. The iterations stop when a step is shorter than a_tolerance, or after a_maxIter steps.
+ * @param[in] a_impFunc      Implicit function
+ * @param[in] a_point        Point to project
+ * @param[in] a_gradientStep Step length in the centered differences
+ * @param[in] a_tolerance    Step length below which the iterations stop
+ * @param[in] a_maxIter      Maximum number of iterations
+ * @return The projected point, or a_point if the gradient of the implicit function vanishes or is not finite along the
+ * way.
+ */
+RealVect
+projectOntoSurface(const RefCountedPtr<BaseIF>& a_impFunc,
+                   const RealVect&              a_point,
+                   const Real                   a_gradientStep,
+                   const Real                   a_tolerance,
+                   const int                    a_maxIter) noexcept;
 } // namespace PolyUtils
 
 #include <CD_NamespaceFooter.H>

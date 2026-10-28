@@ -52,17 +52,20 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
     }
   }
 
-  return RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzSaturationChargeJumpBC(m_phase,
-                                                                                a_dataLocation,
-                                                                                a_mflg,
-                                                                                a_Bcoef,
-                                                                                a_validCells,
-                                                                                a_dx,
-                                                                                order,
-                                                                                a_weight,
-                                                                                a_radius,
-                                                                                a_ghostCF,
-                                                                                a_ghostPhi));
+  return RefCountedPtr<MFHelmholtzJumpBC>(
+    new MFHelmholtzSaturationChargeJumpBC(m_phase,
+                                          a_dataLocation,
+                                          a_mflg,
+                                          a_Bcoef,
+                                          a_validCells,
+                                          a_dx,
+                                          order,
+                                          a_weight,
+                                          a_radius,
+                                          a_ghostCF,
+                                          a_ghostPhi,
+                                          m_probLo,
+                                          a_validCells.isNull() ? RefCountedPtr<BaseIF>(nullptr) : m_interface));
 }
 
 #include <CD_NamespaceFooter.H>

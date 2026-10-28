@@ -368,6 +368,12 @@ protected:
   int m_multigridJumpWeight;
 
   /**
+   * @brief Impose the interface conditions at the points on the dielectric surface closest to the EB face centroids,
+   * rather than at the EB face centroids.
+   */
+  bool m_multigridInterfacePoints;
+
+  /**
    * @brief Multigrid smoothing steps for preconditioner
    */
   int m_multigridPreCondSmooth;

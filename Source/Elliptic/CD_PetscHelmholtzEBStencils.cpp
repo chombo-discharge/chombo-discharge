@@ -23,6 +23,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_LeastSquares.H>
 #include <CD_Location.H>
+#include <CD_PolyUtils.H>
 #include <CD_NamespaceHeader.H>
 
 PetscHelmholtzEBStencils::PetscHelmholtzEBStencils() noexcept
@@ -67,6 +68,17 @@ PetscHelmholtzEBStencils::setWeight(const int a_weight) noexcept
   }
 
   m_weight = a_weight;
+}
+
+void
+PetscHelmholtzEBStencils::setInterface(const RefCountedPtr<BaseIF>& a_interface) noexcept
+{
+  CH_TIME("PetscHelmholtzEBStencils::setInterface");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzEBStencils::setInterface" << endl;
+  }
+
+  m_interface = a_interface;
 }
 
 void
@@ -370,7 +382,7 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
     return false;
   }
 
-  // Displacements from the EB face centroid to the cell centers.
+  // Displacements from the expansion point to the cell centers.
   const EBISBox&
     ebisboxFine = hasFine ? m_petscGrid->getMFLevelGridsFiCo()[a_level + 1]->getEBLevelGrid(a_phase).getEBISL()[a_din]
                           : ebisbox;
@@ -378,9 +390,12 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
   Vector<RealVect> displacementsThis;
   Vector<RealVect> displacementsFine;
 
+  const RealVect shift = this->getExpansionShift(a_phase, a_level, a_din, a_vof);
+
   for (int i = 0; i < vofsThis.size(); i++) {
     displacementsThis.push_back(
-      LeastSquares::displacement(Location::Cell::Boundary, Location::Cell::Center, a_vof, vofsThis[i], ebisbox, dx));
+      LeastSquares::displacement(Location::Cell::Boundary, Location::Cell::Center, a_vof, vofsThis[i], ebisbox, dx) -
+      shift);
   }
 
   for (int i = 0; i < vofsFine.size(); i++) {
@@ -391,7 +406,8 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
                                                            ebisbox,
                                                            ebisboxFine,
                                                            dx,
-                                                           dxFine));
+                                                           dxFine) -
+                                shift);
   }
 
   // Fit the gradient with phi_B known. The first stencil of each pair is over this level, the second over the finer.
@@ -488,6 +504,40 @@ PetscHelmholtzEBStencils::getNumCellsWithoutStencil() const noexcept
   CH_assert(m_isDefined);
 
   return m_numCellsWithoutStencil;
+}
+
+RealVect
+PetscHelmholtzEBStencils::getExpansionShift(const int        a_phase,
+                                            const int        a_level,
+                                            const DataIndex& a_din,
+                                            const VolIndex&  a_vof) const noexcept
+{
+  CH_TIME("PetscHelmholtzEBStencils::getExpansionShift");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzEBStencils::getExpansionShift" << endl;
+  }
+
+  RealVect shift = RealVect::Zero;
+
+  if (!(m_interface.isNull())) {
+    constexpr int  maxIter  = 10;
+    constexpr Real maxShift = 0.5;
+
+    const EBISBox& ebisbox = m_petscGrid->getMFLevelGrids()[a_level]->getEBLevelGrid(a_phase).getEBISL()[a_din];
+
+    const Real     dx = m_dx[a_level];
+    const RealVect xB = m_probLo + Location::position(Location::Cell::Boundary, a_vof, ebisbox, dx);
+    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * dx, 1.E-10 * dx, maxIter);
+
+    shift = xS - xB;
+
+    // A point half a cell or more away is not on the part of the boundary that cuts this cell.
+    if (!(shift.vectorLength() < maxShift * dx)) {
+      shift = RealVect::Zero;
+    }
+  }
+
+  return shift;
 }
 
 #include <CD_NamespaceFooter.H>

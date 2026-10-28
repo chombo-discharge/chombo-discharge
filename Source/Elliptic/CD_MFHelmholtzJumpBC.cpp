@@ -18,22 +18,25 @@
 #include <CD_MFHelmholtzJumpBC.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
+#include <CD_PolyUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int MFHelmholtzJumpBC::m_comp;
 constexpr int MFHelmholtzJumpBC::m_nComp;
 
-MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
-                                     const MFLevelGrid&   a_mflg,
-                                     const BcoefPtr&      a_Bcoef,
-                                     const AmrMask&       a_validCells,
-                                     const Real           a_dx,
-                                     const int            a_order,
-                                     const int            a_weight,
-                                     const int            a_radius,
-                                     const int            a_ghostCF,
-                                     const IntVect        a_ghostPhi)
+MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell         a_dataLocation,
+                                     const MFLevelGrid&           a_mflg,
+                                     const BcoefPtr&              a_Bcoef,
+                                     const AmrMask&               a_validCells,
+                                     const Real                   a_dx,
+                                     const int                    a_order,
+                                     const int                    a_weight,
+                                     const int                    a_radius,
+                                     const int                    a_ghostCF,
+                                     const IntVect                a_ghostPhi,
+                                     const RealVect&              a_probLo,
+                                     const RefCountedPtr<BaseIF>& a_interface)
 {
   CH_TIME("MFHelmholtzJumpBC::MFHelmholtzJumpBC");
 
@@ -53,6 +56,8 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_numPhases    = m_mflg.numPhases();
   m_multiPhase   = m_numPhases > 1;
   m_ghostPhi     = a_ghostPhi;
+  m_probLo       = a_probLo;
+  m_interface    = a_interface;
 
   this->defineIterators();
   this->defineStencils();
@@ -540,7 +545,8 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
                                                           lsqRadius,
                                                           lsqWeight,
                                                           lsqOrder,
-                                                          addStartVof);
+                                                          addStartVof,
+                                                          this->getInterfaceShift(a_vof, a_ebisbox));
 
   gradStencil *= coordDx / m_dx;
 
@@ -560,6 +566,31 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
   }
 
   return foundStencil;
+}
+
+RealVect
+MFHelmholtzJumpBC::getInterfaceShift(const VolIndex& a_vof, const EBISBox& a_ebisbox) const
+{
+  CH_TIME("MFHelmholtzJumpBC::getInterfaceShift");
+
+  RealVect shift = RealVect::Zero;
+
+  if (!(m_interface.isNull())) {
+    constexpr int  maxIter  = 10;
+    constexpr Real maxShift = 0.5;
+
+    const RealVect xB = m_probLo + Location::position(Location::Cell::Boundary, a_vof, a_ebisbox, m_dx);
+    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * m_dx, 1.E-10 * m_dx, maxIter);
+
+    shift = (xS - xB) / m_dx;
+
+    // A point more than half a cell away is not on the part of the interface that cuts this cell.
+    if (!(shift.vectorLength() < maxShift)) {
+      shift = RealVect::Zero;
+    }
+  }
+
+  return shift;
 }
 
 void

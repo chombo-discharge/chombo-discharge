@@ -439,6 +439,11 @@ See :ref:`Chap:PoissonDomainBC` for details.
 The flag ``jump_bc`` indicates how the dielectric jump condition is enforced.
 See :ref:`Chap:PoissonDielectricBC` for additional details.
 
+The flag ``gmg_interface_points`` selects where the jump condition is imposed.
+If it is ``false``, it is imposed at the centroids of the EB faces of the cut cells.
+If it is ``true``, it is imposed at the points on the dielectric surface closest to them, which are found from the implicit function of the dielectrics.
+With second-order jump stencils (``gmg_jump_order = 2``) this makes the electric field in the cut cells more accurate, see :ref:`Chap:JumpCondition`.
+
 .. note::
    
    Currently, we only solve the dielectric jump condition on gas-dielectric interfaces and dielectric-dielectric interfaces are not supported.
@@ -534,6 +539,7 @@ The remaining options configure PETSc:
 * ``amg_smoother_ksp``, ``amg_smoother_pc`` and ``amg_smoother_its`` set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc's default (Chebyshev with Jacobi) for the rows of small cut cells.
 * ``gamg_threshold`` and ``gamg_aggressive_coarsening`` control how GAMG builds its coarse levels; other preconditioners ignore them. GAMG groups each unknown with its strongly connected neighbours, and each group becomes one unknown on the next coarser level. Connections weaker than ``gamg_threshold``, relative to the diagonal, are not followed when forming the groups (a negative value follows all of them). A threshold of 0.01--0.02 keeps groups from forming across the weak couplings of small cut cells and refinement boundaries, which speeds up convergence, at the cost of smaller groups and thus more memory in the hierarchy; larger values can make the setup very expensive. ``gamg_aggressive_coarsening`` is the number of levels, from the finest, that are coarsened aggressively, i.e. grouped over neighbours of neighbours. This makes the hierarchy much smaller but each coarse level cruder, so the solve takes more iterations.
 * ``eb_order`` and ``eb_weight`` are the order and the least-squares weight of the embedded-boundary stencils. ``eb_order`` must not exceed ``AmrMesh.mg_interp_radius``.
+* ``interface_points`` is as ``FieldSolverGMG.gmg_interface_points``: it imposes the jump condition at the points on the dielectric surface closest to the EB face centroids rather than at the EB face centroids.
 
 With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
 

@@ -108,6 +108,7 @@ FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition
 FieldSolverGMG.gmg_bc_weight                = 1            ## Boundary condition weights (for least squares)
 FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
 FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
+FieldSolverGMG.gmg_interface_points         = false        ## Impose the interface condition on the dielectric surface rather than at the EB face centroids
 FieldSolverGMG.gmg_reduce_order             = false        ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = simple 32    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
@@ -180,6 +181,7 @@ FieldSolverAMG.kappa_source                   = true         ## Volume weighted 
 FieldSolverAMG.eb_order                       = 1            ## Highest order of the EB face stencils (electrodes and interfaces)
 FieldSolverAMG.eb_weight                      = 4            ## Least-squares weighting of the EB face stencils
 FieldSolverAMG.jump_bc                        = natural      ## Interface condition: 'natural' or 'saturation_charge'
+FieldSolverAMG.interface_points               = false        ## Impose the interface condition on the dielectric surface rather than at the EB face centroids
 
 # ====================================================================================================
 # PetscElectrode test options

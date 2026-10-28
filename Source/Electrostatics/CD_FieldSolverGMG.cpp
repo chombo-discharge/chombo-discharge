@@ -117,6 +117,7 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_bc_weight", m_multigridBcWeight);
   pp.get("gmg_jump_order", m_multigridJumpOrder);
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
+  pp.get("gmg_interface_points", m_multigridInterfacePoints);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
   pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
@@ -733,6 +734,11 @@ FieldSolverGMG::setupHelmholtzFactory()
 
     break;
   }
+  }
+
+  // Impose the interface conditions on the dielectric surface rather than at the EB face centroids.
+  if (m_multigridInterfacePoints) {
+    jumpBcFactory->setInterface(m_amr->getProbLo(), m_computationalGeometry->getSolidImplicitFunction());
   }
 
   // Drop order stuff for EB stencils -- can facilitate safer GMG relaxations

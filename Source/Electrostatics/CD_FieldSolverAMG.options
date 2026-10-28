@@ -27,3 +27,4 @@ FieldSolverAMG.kappa_source                   = true         ## Volume weighted 
 FieldSolverAMG.eb_order                       = 1            ## Highest order of the EB face stencils (electrodes and interfaces)
 FieldSolverAMG.eb_weight                      = 4            ## Least-squares weighting of the EB face stencils
 FieldSolverAMG.jump_bc                        = natural      ## Interface condition: 'natural' or 'saturation_charge'
+FieldSolverAMG.interface_points               = false        ## Impose the interface condition on the dielectric surface rather than at the EB face centroids

@@ -84,6 +84,16 @@ public:
   virtual void
   setCoarseGridDropOrder(const bool a_dropOrder);
 
+  /**
+   * @brief Set the implicit function whose zero level set is the interface.
+   * @details On AMR levels, i.e. when the valid cells are given, the jump conditions are then imposed at the points on
+   * the interface closest to the boundary centroids. A null implicit function imposes them at the boundary centroids.
+   * @param[in] a_probLo    Lower left corner of the domain
+   * @param[in] a_interface Implicit function
+   */
+  virtual void
+  setInterface(const RealVect& a_probLo, const RefCountedPtr<BaseIF>& a_interface);
+
 protected:
   /**
    * @brief Special flag for dropping stencil order when domains become coarser than this.
@@ -95,6 +105,16 @@ protected:
    * the cut-cell is a coarsened cell
    */
   bool m_dropOrder;
+
+  /**
+   * @brief Lower left corner of the domain
+   */
+  RealVect m_probLo;
+
+  /**
+   * @brief Implicit function whose zero level set is the interface, or null.
+   */
+  RefCountedPtr<BaseIF> m_interface;
 };
 
 #include <CD_NamespaceFooter.H>

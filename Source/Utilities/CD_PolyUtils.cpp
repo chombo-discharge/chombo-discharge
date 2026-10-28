@@ -273,4 +273,43 @@ PolyUtils::brentSolve(const Real                               a_point1,
   return root;
 }
 
+RealVect
+PolyUtils::projectOntoSurface(const RefCountedPtr<BaseIF>& a_impFunc,
+                              const RealVect&              a_point,
+                              const Real                   a_gradientStep,
+                              const Real                   a_tolerance,
+                              const int                    a_maxIter) noexcept
+{
+  CH_assert(!a_impFunc.isNull());
+  CH_assert(a_gradientStep > 0.0);
+
+  RealVect x = a_point;
+
+  for (int iter = 0; iter < a_maxIter; iter++) {
+    RealVect grad = RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const RealVect h = a_gradientStep * BASISREALV(dir);
+
+      grad[dir] = (a_impFunc->value(x + h) - a_impFunc->value(x - h)) / (2.0 * a_gradientStep);
+    }
+
+    const Real gradSquared = grad.dotProduct(grad);
+
+    if (!(gradSquared > 0.0) || !std::isfinite(gradSquared)) {
+      return a_point;
+    }
+
+    const RealVect step = -(a_impFunc->value(x) / gradSquared) * grad;
+
+    x += step;
+
+    if (step.vectorLength() < a_tolerance) {
+      break;
+    }
+  }
+
+  return x;
+}
+
 #include <CD_NamespaceFooter.H>

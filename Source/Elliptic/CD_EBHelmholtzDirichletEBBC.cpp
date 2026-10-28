@@ -295,7 +295,8 @@ EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_
                                                                     a_order,
                                                                     m_weight,
                                                                     a_order,
-                                                                    addStartVof);
+                                                                    addStartVof,
+                                                                    RealVect::Zero);
 
   if (gradientStencil.size() > 0 && normal != RealVect::Zero) {
 

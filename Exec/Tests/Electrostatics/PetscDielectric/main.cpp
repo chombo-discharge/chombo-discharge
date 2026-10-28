@@ -216,6 +216,37 @@ main(int argc, char* argv[])
         "than max_difference");
     }
 
+    // New solvers that impose the interface conditions on the dielectric surface rather than at the EB face centroids.
+    // The entries are appended to the input file's, and the last definition of a parameter is the one that is read.
+    ParmParse ppInterface;
+    ppInterface.addEntries("FieldSolverAMG.interface_points = true");
+    ppInterface.addEntries("FieldSolverGMG.gmg_interface_points = true");
+
+    RefCountedPtr<FieldSolver> amgInterface = makeSolver<FieldSolverAMG>(amr, compgeom, realm);
+    RefCountedPtr<FieldSolver> gmgInterface = makeSolver<FieldSolverGMG>(amr, compgeom, realm);
+
+    const bool amgConvergedInterface = amgInterface->solve(amgInterface->getPotential(),
+                                                           amgInterface->getRho(),
+                                                           sigma,
+                                                           true);
+    const bool gmgConvergedInterface = gmgInterface->solve(gmgInterface->getPotential(),
+                                                           gmgInterface->getRho(),
+                                                           sigma,
+                                                           true);
+
+    const Real diffInterface = maxDifference(*amr, realm, amgInterface->getPotential(), gmgInterface->getPotential());
+
+    pout() << "PetscDielectric -- with the interface conditions on the dielectric surface, max |AMG - GMG| = "
+           << diffInterface << endl;
+
+    if (!amgConvergedInterface || !gmgConvergedInterface) {
+      MayDay::Abort("PetscDielectric -- a solver did not converge with the interface conditions on the surface");
+    }
+    if (diffInterface > maxAllowedDifference) {
+      MayDay::Abort("PetscDielectric -- with the interface conditions on the surface, FieldSolverAMG and "
+                    "FieldSolverGMG differ by more than max_difference");
+    }
+
     pout() << "PetscDielectric -- all tests passed" << endl;
   }
 #else
