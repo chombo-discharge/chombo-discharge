@@ -524,7 +524,7 @@ PetscHelmholtzEBStencils::getExpansionShift(const int        a_phase,
 
     const Real     dx = m_dx[a_level];
     const RealVect xB = m_probLo + Location::position(Location::Cell::Boundary, a_vof, ebisbox, dx);
-    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * dx, 1.E-10 * dx, maxIter);
+    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * dx, 1.E-6 * dx, maxIter);
 
     shift = xS - xB;
 

@@ -580,7 +580,7 @@ MFHelmholtzJumpBC::getInterfaceShift(const VolIndex& a_vof, const EBISBox& a_ebi
     constexpr Real maxShift = 0.5;
 
     const RealVect xB = m_probLo + Location::position(Location::Cell::Boundary, a_vof, a_ebisbox, m_dx);
-    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * m_dx, 1.E-10 * m_dx, maxIter);
+    const RealVect xS = PolyUtils::projectOntoSurface(m_interface, xB, 1.E-3 * m_dx, 1.E-6 * m_dx, maxIter);
 
     shift = (xS - xB) / m_dx;
 
