@@ -1153,8 +1153,9 @@ FieldSolver::setPermittivities()
 
   // The cut-face fluxes of the solvers interpolate face fluxes to the face centroid, and the interpolation can reach
   // tangential faces outside the grid patch, in the same phase. Those ghost faces must carry the permittivity of their
-  // phase, but the code above sets them to the gas permittivity. So, per phase, fill the ghost cells of the
-  // cell-centered permittivity, and average it onto the faces, including one layer of tangential ghost faces.
+  // phase, but the code above leaves the solid-phase ghost cells and faces at the gas permittivity. So, per phase, fill
+  // the ghost cells of the cell-centered permittivity, and average it onto the faces, including one layer of tangential
+  // ghost faces.
   const Average  average  = Average::Arithmetic;
   const int      tanGhost = 1;
   const Interval interv   = Interval(0, 0);
