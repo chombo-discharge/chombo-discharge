@@ -1150,6 +1150,76 @@ FieldSolver::setPermittivities()
       }
     }
   }
+
+  // The cut-face fluxes of the solvers interpolate face fluxes to the face centroid, and the interpolation can reach
+  // tangential faces outside the grid patch, in the same phase. Those ghost faces must carry the permittivity of their
+  // phase, but the code above leaves the solid-phase ghost cells and faces at the gas permittivity. So, per phase, fill
+  // the ghost cells of the cell-centered permittivity, and average it onto the faces, including one layer of tangential
+  // ghost faces.
+  const Average  average  = Average::Arithmetic;
+  const int      tanGhost = 1;
+  const Interval interv   = Interval(0, 0);
+
+  EBAMRCellData permCellGas;
+  EBAMRCellData permCellSol;
+  EBAMRFluxData permFluxGas;
+  EBAMRFluxData permFluxSol;
+  EBAMRIVData   permEBGas;
+  EBAMRIVData   permEBSol;
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  // Do the gas-phase.
+  if (!(ebisGas.isNull())) {
+    permCellGas = m_amr->alias(phase::gas, m_permittivityCell);
+    permFluxGas = m_amr->alias(phase::gas, m_permittivityFace);
+    permEBGas   = m_amr->alias(phase::gas, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellGas, m_realm, phase::gas, average);
+    m_amr->average(permEBGas, m_realm, phase::gas, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellGas, m_realm, phase::gas);
+
+    DataOps::averageCellToFace(permFluxGas,
+                               permCellGas,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas));
+
+    m_amr->average(permFluxGas, m_realm, phase::gas, average);
+  }
+
+  if (!(ebisSol.isNull())) {
+    permCellSol = m_amr->alias(phase::solid, m_permittivityCell);
+    permFluxSol = m_amr->alias(phase::solid, m_permittivityFace);
+    permEBSol   = m_amr->alias(phase::solid, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellSol, m_realm, phase::solid, average);
+    m_amr->average(permEBSol, m_realm, phase::solid, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellSol, m_realm, phase::solid);
+
+    DataOps::averageCellToFace(permFluxSol,
+                               permCellSol,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid));
+
+    m_amr->average(permFluxSol, m_realm, phase::solid, average);
+  }
 }
 
 void

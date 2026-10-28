@@ -268,7 +268,8 @@ public:
 
   /**
    * @brief Set the permittivities
-   * @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
+   * @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB, including the ghost cells and
+   * one layer of tangential ghost faces of each phase, which the face-centroid flux interpolation of cut faces reads.
    */
   virtual void
   setPermittivities();

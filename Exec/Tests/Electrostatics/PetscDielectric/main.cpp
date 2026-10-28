@@ -134,9 +134,6 @@ main(int argc, char* argv[])
     Real maxAllowedDifference;
     bool writePlotFiles;
 
-    // The 2D inputs allow 1e-6, the 3D inputs 2e-2. In 3D the two solvers agree to the solver tolerance except in solid
-    // cut cells with volume fraction 3.7e-4 on the sphere, where they differ by up to 8e-3 also at a relative residual
-    // of 1e-15. This is a difference of the discretizations in those cells, not of the convergence.
     ParmParse pp("PetscDielectric");
     pp.get("max_difference", maxAllowedDifference);
     pp.get("write_plot_files", writePlotFiles);
