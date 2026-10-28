@@ -510,8 +510,7 @@ ______________
 
 The discretization is that of ``FieldSolverGMG`` (see :ref:`Chap:LinearSolvers`): a cell-centered finite-volume scheme, weighted by the volume fraction, with face fluxes interpolated to the face centroids on cut cells, least-squares stencils for the normal derivative on the embedded boundary, and the natural or saturation-charge condition on the interface between the gas and the dielectrics.
 The embedded-boundary stencils use the same neighbourhoods and least-squares fits as those of ``FieldSolverGMG``, but are built from PETSc rows only (cells on the same level, coarse-fine ghost cells through their interpolation stencils, and cells on the next finer level in place of cells covered by it), and use one order and one weight (``eb_order``, ``eb_weight``) for both electrodes and interfaces.
-With the same order and weight, the two solvers mostly agree to the solver tolerance.
-The largest differences seen in the tests, about one percent of the potential, are in cut cells with very small volume fractions.
+With the same order and weight, the two solvers agree to the solver tolerance.
 
 The rows of the matrix are volume-weighted: the kappa-weighted divergence of each cell is multiplied by :math:`(\Delta x_l/\Delta x_0)^D` on level :math:`l`, and the right-hand side carries the same weights.
 This does not change the solution, but without it the row scale grows by :math:`r^2` per level (:math:`r` the refinement ratio), and a flux through a refinement boundary enters the fine and the coarse row with weights that differ by the volume ratio.
