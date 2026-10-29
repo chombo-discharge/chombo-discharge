@@ -187,6 +187,16 @@ public:
   getVoFIterator(const int a_iphase) const noexcept;
 
   /**
+   * @brief Get the global PETSc rows of a phase that this rank owns.
+   * @details These are the rows of the cells of the phase on all levels, e.g. for an index set that splits the matrix
+   * by phase.
+   * @param[in] a_iphase Phase index
+   * @return The rows, in ascending order.
+   */
+  virtual Vector<PetscInt>
+  getLocalRows(const int a_iphase) const noexcept;
+
+  /**
    * @brief Rewrite a stencil over cells on one level as a stencil over global PETSc rows.
    * @details Each entry of a_stencil is a cell on level a_level, in the index space of grid a_din, possibly in its
    * ghost region. Every entry must be a PETSc row on a_phase, i.e. a valid cell of a_din or of a neighbouring box.

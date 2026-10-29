@@ -13,7 +13,9 @@
 #ifdef CH_USE_PETSC
 
 // Std includes
+#include <algorithm>
 #include <sstream>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -282,6 +284,37 @@ PetscGrid::getVoFIterator(const int a_iphase) const noexcept
   CH_assert(a_iphase >= 0 && a_iphase < m_numPhases);
 
   return m_vofIterators[a_iphase];
+}
+
+Vector<PetscInt>
+PetscGrid::getLocalRows(const int a_iphase) const noexcept
+{
+  CH_TIME("PetscGrid::getLocalRows");
+  if (m_verbose) {
+    pout() << "PetscGrid::getLocalRows" << endl;
+  }
+
+  CH_assert(m_isDefined);
+  CH_assert(a_iphase >= 0 && a_iphase < m_numPhases);
+
+  std::vector<PetscInt> rows;
+
+  // A serial loop over the boxes, which appends to one vector. This runs once per solver setup.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const LayoutData<Vector<PetscDOF>>& petscToAMR = *m_petscToAMR[a_iphase][lvl];
+
+    for (DataIterator dit = petscToAMR.dataIterator(); dit.ok(); ++dit) {
+      const Vector<PetscDOF>& dofs = petscToAMR[dit()];
+
+      for (int i = 0; i < dofs.size(); i++) {
+        rows.push_back(m_localRowBegin + dofs[i].localRow);
+      }
+    }
+  }
+
+  std::sort(rows.begin(), rows.end());
+
+  return Vector<PetscInt>(rows);
 }
 
 PetscStencil
