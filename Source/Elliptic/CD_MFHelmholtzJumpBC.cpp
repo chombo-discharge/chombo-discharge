@@ -33,7 +33,8 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                                      const int            a_weight,
                                      const int            a_radius,
                                      const int            a_ghostCF,
-                                     const IntVect        a_ghostPhi)
+                                     const IntVect        a_ghostPhi,
+                                     const bool           a_dropOrder)
 {
   CH_TIME("MFHelmholtzJumpBC::MFHelmholtzJumpBC");
 
@@ -53,10 +54,10 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_numPhases    = m_mflg.numPhases();
   m_multiPhase   = m_numPhases > 1;
   m_ghostPhi     = a_ghostPhi;
+  m_dropOrder    = a_dropOrder;
 
   this->defineIterators();
   this->defineStencils();
-  this->setCoarseGridDropOrder(false);
 }
 
 MFHelmholtzJumpBC::~MFHelmholtzJumpBC()
@@ -80,12 +81,6 @@ int
 MFHelmholtzJumpBC::getRadius() const
 {
   return m_radius;
-}
-
-void
-MFHelmholtzJumpBC::setCoarseGridDropOrder(const bool a_dropOrder)
-{
-  m_dropOrder = a_dropOrder;
 }
 
 const BaseIVFAB<Real>&

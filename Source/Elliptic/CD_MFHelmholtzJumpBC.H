@@ -71,6 +71,8 @@ public:
    * @param[in] a_radius       Stencil radius
    * @param[in] a_ghostCF      Number of grid cells that were filled across the CF.
    * @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
+   * @param[in] a_dropOrder    Drop the stencil order to 1 in cells that are not valid cells (all cells if
+   * a_validCells is null)
    */
   MFHelmholtzJumpBC(Location::Cell     a_dataLocation,
                     const MFLevelGrid& a_mflg,
@@ -81,7 +83,8 @@ public:
                     int                a_weight,
                     int                a_radius,
                     int                a_ghostCF,
-                    IntVect            a_ghostPhi);
+                    IntVect            a_ghostPhi,
+                    bool               a_dropOrder);
 
   /**
    * @brief Disallowed copy constructor
@@ -137,13 +140,6 @@ public:
    */
   int
   getRadius() const;
-
-  /**
-   * @brief Signal MFHelmholtzJumpBC that it should drop the stencil order if the cell is a coarsened cell
-   * @param[in] a_dropOrder
-   */
-  void
-  setCoarseGridDropOrder(bool a_dropOrder);
 
   /**
    * @brief Match the BC

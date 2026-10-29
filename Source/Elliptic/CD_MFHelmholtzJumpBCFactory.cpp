@@ -72,9 +72,8 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
                                                                      a_weight,
                                                                      a_radius,
                                                                      a_ghostCF,
-                                                                     a_ghostPhi));
-
-  jump->setCoarseGridDropOrder(m_dropOrder);
+                                                                     a_ghostPhi,
+                                                                     m_dropOrder));
 
   return jump;
 }
