@@ -16,6 +16,7 @@
 // Std includes
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 
 // Third-party includes
@@ -292,6 +293,12 @@ protected:
   bool m_previewRates;
 
   /**
+   * @brief Abort (true) or warn (false) when a JSON object contains a key that the parser does not read.
+   * @details Set by ItoKMCJSON.unknown_keys.
+   */
+  bool m_abortOnUnknownKeys;
+
+  /**
    * @brief Total number of plasma species
    */
   int m_numPlasmaSpecies;
@@ -504,6 +511,28 @@ protected:
    */
   virtual void
   throwParserWarning(const std::string& a_warning) const noexcept;
+
+  /**
+   * @brief Report every key in a JSON object that the parser does not read.
+   * @details Each unknown key goes through throwParserError() or throwParserWarning(), as selected by
+   * ItoKMCJSON.unknown_keys. The report names the object, the key, the allowed key it most likely misspells
+   * (if any), and all the allowed keys. Values that are not JSON objects are not checked.
+   * @param[in] a_object  JSON object to check.
+   * @param[in] a_allowed Keys the parser reads from this object.
+   * @param[in] a_context Path to the object in the chemistry file, used in the report.
+   */
+  virtual void
+  checkKeys(const nlohmann::json&        a_object,
+            const std::set<std::string>& a_allowed,
+            const std::string&           a_context) const noexcept;
+
+  /**
+   * @brief Get the keys that parseTableEByN() reads from a table entry.
+   * @param[in] a_dataID Data identifier passed to parseTableEByN().
+   * @return Keys read by parseTableEByN(), plus 'type'.
+   */
+  virtual std::set<std::string>
+  getTableKeys(const std::string& a_dataID) const noexcept;
 
   /**
    * @brief Check if a file exists

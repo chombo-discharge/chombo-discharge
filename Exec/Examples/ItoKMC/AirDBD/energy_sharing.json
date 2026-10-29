@@ -40,9 +40,9 @@
 	"alpha/N column" : 11,            
 	"min E/N" : 10,               
 	"max E/N" : 1E6,              
-	"points" : 1000,              
+	"num points" : 1000,              
 	"spacing" : "exponential",    
-	"scale E/N scale" : 1.0,            
+	"scale E/N" : 1.0,            
 	"scale alpha/N" : 1.0
     },
     "eta": {
@@ -53,7 +53,7 @@
 	"eta/N column" : 12,            
 	"min E/N" : 10,               
 	"max E/N" : 1E6,              
-	"points" : 1000,              
+	"num points" : 1000,              
 	"spacing" : "exponential",    
 	"scale E/N" : 1.0,            
 	"scale eta/N" : 1.0
@@ -74,10 +74,10 @@
 		"eV column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 1E6,
-		"E/N scale": 1.0,
-		"eV scale": 1.0,
+		"scale E/N": 1.0,
+		"scale eV": 1.0,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },	    
 	    "mobility" : {
 		"type" : "table vs E/N",      
@@ -87,10 +87,10 @@
 		"mu*N column" : 2,            
 		"min E/N" : 10,               
 		"max E/N" : 1E6,              
-		"points" : 1000,              
+		"num points" : 1000,              
 		"spacing" : "exponential",    
-		"E/N scale" : 1.0,            
-		"mu*N scale" : 1.0           
+		"scale E/N" : 1.0,            
+		"scale mu*N" : 1.0           
 	    },
 	    "diffusion" : {
 		"type" : "table vs E/N",
@@ -101,9 +101,9 @@
 		"min E/N" : 10,
 		"max E/N" : 1E6,
 		"spacing" : "exponential",
-		"points" : 1000,
-		"E/N scale" : 1.0, 
-		"mu*N scale" : 1.0
+		"num points" : 1000,
+		"scale E/N" : 1.0, 
+		"scale D*N" : 1.0
 	    },
 	    "initial particles" : [
 		{
@@ -136,10 +136,10 @@
 		"mu*N column" : 2,            
 		"min E/N" : 10,               
 		"max E/N" : 1E6,              
-		"points" : 1000,              
+		"num points" : 1000,              
 		"spacing" : "exponential",    
-		"E/N scale" : 1.0,            
-		"mu*N scale" : 1.0
+		"scale E/N" : 1.0,            
+		"scale mu*N" : 1.0
 	    },
 	    "diffusion" : {
 		"type" : "table vs E/N",
@@ -150,9 +150,9 @@
 		"min E/N" : 10,
 		"max E/N" : 1E6,
 		"spacing" : "exponential",
-		"points" : 1000,
-		"E/N scale" : 1.0, 
-		"D*N scale" : 1.0
+		"num points" : 1000,
+		"scale E/N" : 1.0, 
+		"scale D*N" : 1.0
 	    }
         },	
 	{

@@ -1083,8 +1083,8 @@ To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, se
 * ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
 * ``mu*N column`` For setting which column in the data file contains the values of :math:`\mu N` (or alternatively :math:`DN` for the diffusion coefficient).
   This is an optional argument that defaults to 1.
-* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
-* ``mu*N scale`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
+* ``scale E/N`` Optional scaling of the column containing the :math:`E/N` data.
+* ``scale mu*N`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
 * ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
@@ -1114,10 +1114,10 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "mu*N column" : 1,                            // Column containing mu*N
 	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
 	     "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
-	     "points" : 1000,                              // Number of grid points kept when resampling the table
+	     "num points" : 1000,                          // Number of grid points kept when resampling the table
 	     "spacing" : "exponential",                    // Grid point spacing when resampling the table
-	     "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-	     "mu*N scale" : 1.0                            // Optional argument for scaling the E/N column
+	     "scale E/N" : 1.0,                            // Optional argument for scaling the E/N column
+	     "scale mu*N" : 1.0                            // Optional argument for scaling the mobility column
 	  }
        }
     ]
@@ -1232,8 +1232,8 @@ To set the species temperature as a function :math:`T = T\left(E/N\right)`, set 
 * ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
 * ``eV column`` For setting which column in the data file contains the energy vs :math:`E/N`.
   This is an optional argument that defaults to 1.
-* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
-* ``eV scale`` Optional scaling of the column containing the energy (in eV).
+* ``scale E/N`` Optional scaling of the column containing the :math:`E/N` data.
+* ``scale eV`` Optional scaling of the column containing the energy (in eV).
 * ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
@@ -1263,10 +1263,10 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "eV column" : 1,                         // Column containing the energy
 	     "min E/N" : 10,                          // Truncation of table
 	     "max E/N" : 2E6,                         // Truncation of table
-	     "E/N scale": 1.0,                        // Scaling of input data
-	     "eV scale": 1.0,                         // Scaling of input data
+	     "scale E/N": 1.0,                        // Scaling of input data
+	     "scale eV": 1.0,                         // Scaling of input data
 	     "spacing" : "exponential",               // Table spacing
-	     "points" : 1000                          // Number of points in table
+	     "num points" : 1000                      // Number of points in table
 	  }
        }
     ]

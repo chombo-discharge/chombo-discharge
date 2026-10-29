@@ -26,7 +26,7 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false)
+ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnknownKeys(true)
 {
   CH_TIME("ItoKMCJSON::ItoKMCJSON");
 
@@ -149,6 +149,126 @@ ItoKMCJSON::throwParserWarning(const std::string& a_warning) const noexcept
   pout() << a_warning << endl;
 
   MayDay::Warning(a_warning.c_str());
+}
+
+void
+ItoKMCJSON::checkKeys(const nlohmann::json&        a_object,
+                      const std::set<std::string>& a_allowed,
+                      const std::string&           a_context) const noexcept
+{
+  CH_TIME("ItoKMCJSON::checkKeys");
+  if (m_verbose) {
+    pout() << m_className + "::checkKeys" << endl;
+  }
+
+  if (!(a_object.is_object())) {
+    return;
+  }
+
+  // Edit distance between two keys, used for suggesting the key that the user probably meant.
+  auto editDistance = [](const std::string& a, const std::string& b) -> size_t {
+    std::vector<size_t> prev(b.size() + 1);
+    std::vector<size_t> cur(b.size() + 1);
+
+    for (size_t j = 0; j <= b.size(); j++) {
+      prev[j] = j;
+    }
+
+    for (size_t i = 1; i <= a.size(); i++) {
+      cur[0] = i;
+
+      for (size_t j = 1; j <= b.size(); j++) {
+        const size_t substitution = prev[j - 1] + ((a[i - 1] == b[j - 1]) ? 0 : 1);
+
+        cur[j] = std::min({prev[j] + 1, cur[j - 1] + 1, substitution});
+      }
+
+      std::swap(prev, cur);
+    }
+
+    return prev[b.size()];
+  };
+
+  // The words of a key in sorted order, so that e.g. 'E/N scale' and 'scale E/N' compare equal.
+  auto sortedWords = [](const std::string& a_key) -> std::vector<std::string> {
+    std::stringstream        ss(a_key);
+    std::string              word;
+    std::vector<std::string> words;
+
+    while (ss >> word) {
+      words.push_back(word);
+    }
+
+    std::sort(words.begin(), words.end());
+
+    return words;
+  };
+
+  for (const auto& entry : a_object.items()) {
+    const std::string& key = entry.key();
+
+    if (a_allowed.count(key) == 0) {
+
+      // A key is a likely misspelling of an allowed key if it has the same words in a different order, if one
+      // contains the other, or if the two are a couple of edits apart.
+      std::string suggestion;
+      size_t      bestDistance = std::numeric_limits<size_t>::max();
+
+      for (const auto& allowed : a_allowed) {
+        const size_t distance = editDistance(key, allowed);
+
+        const bool sameWords = sortedWords(key) == sortedWords(allowed);
+        const bool contained = allowed.find(key) != std::string::npos || key.find(allowed) != std::string::npos;
+        const bool closeEdit = distance <= 2;
+
+        if ((sameWords || contained || closeEdit) && distance < bestDistance) {
+          bestDistance = distance;
+          suggestion   = allowed;
+        }
+      }
+
+      std::string message = m_className + "::checkKeys -- unknown key '" + key + "' in '" + a_context + "'.";
+
+      if (!(suggestion.empty())) {
+        message += " Did you mean '" + suggestion + "'?";
+      }
+
+      message += " Allowed keys are:";
+
+      for (const auto& allowed : a_allowed) {
+        message += " '" + allowed + "'";
+      }
+
+      if (m_abortOnUnknownKeys) {
+        this->throwParserError(message);
+      }
+      else {
+        this->throwParserWarning(message);
+      }
+    }
+  }
+}
+
+std::set<std::string>
+ItoKMCJSON::getTableKeys(const std::string& a_dataID) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getTableKeys");
+  if (m_verbose) {
+    pout() << m_className + "::getTableKeys" << endl;
+  }
+
+  return std::set<std::string>{"type",
+                               "file",
+                               "header",
+                               "E/N column",
+                               a_dataID + " column",
+                               "num points",
+                               "spacing",
+                               "scale E/N",
+                               "scale " + a_dataID,
+                               "min E/N",
+                               "max E/N",
+                               "dump"};
 }
 
 bool
@@ -282,6 +402,20 @@ ItoKMCJSON::parseJSON()
 
   pp.get("chemistry_file", m_jsonFile);
 
+  std::string unknownKeys;
+
+  pp.get("unknown_keys", unknownKeys);
+
+  if (unknownKeys == "abort") {
+    m_abortOnUnknownKeys = true;
+  }
+  else if (unknownKeys == "warn") {
+    m_abortOnUnknownKeys = false;
+  }
+  else {
+    this->throwParserError(baseError + " -- 'unknown_keys' must be 'warn' or 'abort'");
+  }
+
   if (!(this->doesFileExist(m_jsonFile))) {
     const std::string parseError = baseError + " -- file '" + m_jsonFile + "' does not exist";
 
@@ -296,6 +430,20 @@ ItoKMCJSON::parseJSON()
     constexpr auto ignoreComments  = true;
 
     m_json = nlohmann::json::parse(f, callback, allowExceptions, ignoreComments);
+
+    this->checkKeys(m_json,
+                    {"gas",
+                     "plasma species",
+                     "photon species",
+                     "alpha",
+                     "eta",
+                     "plasma reactions",
+                     "photoionization",
+                     "electrode emission",
+                     "dielectric emission",
+                     "field emission",
+                     "particle placement"},
+                    "(top level)");
 
     if (m_verbose) {
       pout() << m_className + "::parseJSON - done reading file!" << endl;
@@ -318,8 +466,23 @@ ItoKMCJSON::initializeGasLaw()
   //       routine is where you would do it.
   // clang-format on
 
+  this->checkKeys(m_json["gas"], {"law", "background species"}, "gas");
+
   if (!(m_json["gas"]["law"].contains("id"))) {
     this->throwParserError(baseError + " but field 'gas/law/id' is missing");
+  }
+
+  // Every entry in 'gas/law' other than 'id' and 'plot' is a named gas law. Only the law selected by 'id' is used,
+  // but all of them are checked.
+  for (const auto& law : m_json["gas"]["law"].items()) {
+    if (law.key() != "id" && law.key() != "plot") {
+      if (!(law.value().is_object())) {
+        this->throwParserError(
+          std::string{baseError}.append(" but 'gas/law/").append(law.key()).append("' is not a gas law"));
+      }
+
+      this->checkKeys(law.value(), {"type", "temperature", "pressure"}, "gas/law/" + law.key());
+    }
   }
 
   const std::string curLaw = this->trim(m_json["gas"]["law"]["id"].get<std::string>());
@@ -389,6 +552,9 @@ ItoKMCJSON::initializeBackgroundSpecies()
         this->throwParserError(baseError + "but 'id' field is not specified");
       }
       const std::string speciesName = species["id"].get<std::string>();
+      const std::string context     = "gas/background species/" + speciesName;
+
+      this->checkKeys(species, {"id", "plot", "molar fraction"}, context);
 
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(std::string{baseError}
@@ -419,6 +585,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
       std::function<Real(const RealVect& x)> molarFraction;
 
       if (molFracType == "constant") {
+        this->checkKeys(species["molar fraction"], {"type", "value"}, context + "/molar fraction");
+
         if (!(species["molar fraction"].contains("value"))) {
           this->throwParserError(baseError + " and got constant molar fraction but field 'value' is missing");
         }
@@ -434,6 +602,21 @@ ItoKMCJSON::initializeBackgroundSpecies()
                                           .append("and got 'table vs height for species '")
                                           .append(speciesName)
                                           .append("'");
+
+        this->checkKeys(species["molar fraction"],
+                        {"type",
+                         "file",
+                         "axis",
+                         "height column",
+                         "molar fraction column",
+                         "num points",
+                         "height scale",
+                         "fraction scale",
+                         "min height",
+                         "max height",
+                         "spacing",
+                         "dump"},
+                        context + "/molar fraction");
 
         int    heightColumn   = 0;
         int    fractionColumn = 1;
@@ -595,6 +778,21 @@ ItoKMCJSON::initializePlasmaSpecies()
     const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = std::string{baseError}.append(" for species '").append(speciesID).append("'");
 
+    // The species entry is read across several initialize* functions; these are all the keys they read.
+    this->checkKeys(species,
+                    {"id",
+                     "Z",
+                     "solver",
+                     "mobile",
+                     "diffusive",
+                     "diffusion model",
+                     "initial particles",
+                     "initial density",
+                     "mobility",
+                     "diffusion",
+                     "temperature"},
+                    "plasma species/" + speciesID);
+
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(std::string{baseErrorID}
                                .append(" but species name '")
@@ -734,7 +932,19 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
 
   const std::string type = m_json[a_coeff]["type"].get<std::string>();
 
+  // Keys read for every type -- the remaining ones depend on the type.
+  std::set<std::string> allowedKeys{"type",
+                                    "plot",
+                                    "preview",
+                                    "preview min E/N",
+                                    "preview max E/N",
+                                    "preview num points",
+                                    "preview spacing",
+                                    "preview pos"};
+
   if (type == "constant") {
+    allowedKeys.insert("value");
+
     if (!(m_json[a_coeff].contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' but missing the 'value' field");
     }
@@ -754,6 +964,10 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
 
     const nlohmann::json& jsonTable = m_json[a_coeff];
 
+    const std::set<std::string> tableKeys = this->getTableKeys(a_coeff + "/N");
+
+    allowedKeys.insert(tableKeys.begin(), tableKeys.end());
+
     if (!(jsonTable.contains("file"))) {
       this->throwParserError(baseErrorTable + "but 'file' is not specified");
     }
@@ -768,6 +982,8 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     };
   }
   else if (type == "auto") {
+    allowedKeys.insert("species");
+
     if (!(m_json[a_coeff].contains("species"))) {
       this->throwParserError(baseError + " and got 'auto' but 'species' field is missing!");
     }
@@ -789,6 +1005,8 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     this->throwParserError(
       std::string{baseError}.append(" but type specification '").append(type).append("' is not supported"));
   }
+
+  this->checkKeys(m_json[a_coeff], allowedKeys, a_coeff);
 
   // Check if we should plot the coefficient
   bool plotCoeff = false;
@@ -831,6 +1049,14 @@ ItoKMCJSON::initializeParticlePlacement()
     }
     else {
       const std::string method = m_json[field]["method"].get<std::string>();
+
+      // Only the downstream method reads a species.
+      if (method == "downstream") {
+        this->checkKeys(m_json[field], {"method", "species"}, field);
+      }
+      else {
+        this->checkKeys(m_json[field], {"method"}, field);
+      }
 
       if (method == "centroid") {
         m_particlePlacement = ParticlePlacement::Centroid;
@@ -1141,8 +1367,11 @@ ItoKMCJSON::initializeParticles()
         }
 
         const std::string whichField = (*obj.begin()).first;
+        const std::string context    = "plasma species/" + speciesID + "/initial particles/" + whichField;
 
         if (whichField == "single particle") {
+          this->checkKeys(initField["single particle"], {"position", "weight"}, context);
+
           unsigned long long weight   = 1ULL;
           RealVect           position = RealVect::Zero;
 
@@ -1168,6 +1397,8 @@ ItoKMCJSON::initializeParticles()
         }
         else if (whichField == "uniform distribution") {
           const nlohmann::json& jsonEntry = initField["uniform distribution"];
+
+          this->checkKeys(jsonEntry, {"low corner", "high corner", "num particles", "weight"}, context);
 
           if (!(jsonEntry.contains("low corner"))) {
             this->throwParserError(baseError + "but 'uniform distribution' does not contain 'low corner'");
@@ -1212,6 +1443,8 @@ ItoKMCJSON::initializeParticles()
         else if (whichField == "sphere distribution") {
           const nlohmann::json& jsonEntry = initField["sphere distribution"];
 
+          this->checkKeys(jsonEntry, {"center", "radius", "num particles", "weight"}, context);
+
           if (!(jsonEntry.contains("center"))) {
             this->throwParserError(baseError + "but 'sphere distribution' does not contain 'center'");
           }
@@ -1253,6 +1486,8 @@ ItoKMCJSON::initializeParticles()
         else if (whichField == "gaussian distribution") {
           const nlohmann::json& jsonEntry = initField["gaussian distribution"];
 
+          this->checkKeys(jsonEntry, {"center", "radius", "num particles", "weight"}, context);
+
           if (!(jsonEntry.contains("center"))) {
             this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'center'");
           }
@@ -1293,6 +1528,8 @@ ItoKMCJSON::initializeParticles()
         }
         else if (whichField == "list") {
           const nlohmann::json& jsonEntry = initField["list"];
+
+          this->checkKeys(jsonEntry, {"file", "x column", "y column", "z column", "w column"}, context);
 
           if (!(jsonEntry.contains("file"))) {
             this->throwParserError(baseError + "but 'list' does not contain 'file'");
@@ -1456,7 +1693,15 @@ ItoKMCJSON::initializeMobilities()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = mobilityJSON["type"].get<std::string>();
+      const std::string type    = mobilityJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/mobility";
+
+      if (type == "constant" || type == "constant mu*N") {
+        this->checkKeys(mobilityJSON, {"type", "value"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(mobilityJSON, this->getTableKeys("mu*N"), context);
+      }
 
       if (type == "constant") {
         if (!(mobilityJSON.contains("value"))) {
@@ -1553,7 +1798,15 @@ ItoKMCJSON::initializeDiffusionCoefficients()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = diffusionJSON["type"].get<std::string>();
+      const std::string type    = diffusionJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/diffusion";
+
+      if (type == "constant" || type == "constant D*N") {
+        this->checkKeys(diffusionJSON, {"type", "value"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(diffusionJSON, this->getTableKeys("D*N"), context);
+      }
 
       if (type == "constant") {
         if (!(diffusionJSON.contains("value"))) {
@@ -1646,7 +1899,18 @@ ItoKMCJSON::initializeTemperatures()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = temperatureJSON["type"].get<std::string>();
+      const std::string type    = temperatureJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/temperature";
+
+      if (type == "gas") {
+        this->checkKeys(temperatureJSON, {"type"}, context);
+      }
+      else if (type == "constant") {
+        this->checkKeys(temperatureJSON, {"type", "T"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(temperatureJSON, this->getTableKeys("eV"), context);
+      }
 
       if (type == "gas") {
         temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect& x) -> Real {
@@ -1747,7 +2011,21 @@ ItoKMCJSON::initializePhotonSpecies()
 
     const nlohmann::json& kappaJSON = species["kappa"];
 
-    const std::string type = this->trim(kappaJSON["type"].get<std::string>());
+    const std::string type    = this->trim(kappaJSON["type"].get<std::string>());
+    const std::string context = "photon species/" + speciesID;
+
+    this->checkKeys(species, {"id", "kappa"}, context);
+
+    if (type == "constant") {
+      this->checkKeys(kappaJSON, {"type", "value"}, context + "/kappa");
+    }
+    else if (type == "stochastic A") {
+      this->checkKeys(kappaJSON, {"type", "f1", "f2", "chi min", "chi max", "neutral"}, context + "/kappa");
+    }
+    else if (type == "stochastic B") {
+      this->checkKeys(kappaJSON, {"type", "chi min", "chi max", "neutral"}, context + "/kappa");
+    }
+
     if (type == "constant") {
       if (!(kappaJSON.contains("value"))) {
         this->throwParserError(baseErrorID + " and got constant kappa but 'value' field is not specified");
@@ -1893,6 +2171,57 @@ ItoKMCJSON::initializePlasmaReactions()
     }
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string type     = this->trim(reactionJSON["type"].get<std::string>());
+    const std::string context  = "plasma reactions/" + reaction;
+
+    // Keys read for every rate type, by parsePlasmaReactionRate() and the other parsePlasmaReaction* functions.
+    // The keys holding the rate itself depend on the type. Checked once per entry rather than once per wildcard
+    // expansion, so that an unknown key is reported once.
+    std::set<std::string> allowedKeys{"reaction",
+                                      "type",
+                                      "@",
+                                      "plot",
+                                      "description",
+                                      "gradient correction",
+                                      "include_dt_calc",
+                                      "scale",
+                                      "efficiency",
+                                      "efficiency vs E/N",
+                                      "efficiency vs E",
+                                      "quenching pressure",
+                                      "quenching rates",
+                                      "ppc threshold",
+                                      "limit max k*dt"};
+
+    if (type == "constant") {
+      allowedKeys.insert("value");
+    }
+    else if (type == "alpha*v" || type == "eta*v") {
+      allowedKeys.insert("species");
+    }
+    else if (type == "table vs E/N") {
+      const std::set<std::string> tableKeys = this->getTableKeys("rate/N");
+
+      allowedKeys.insert(tableKeys.begin(), tableKeys.end());
+    }
+    else if (type == "function T A") {
+      allowedKeys.insert({"T", "c1", "c2"});
+    }
+    else if (type == "function T1T2 A") {
+      allowedKeys.insert({"T1", "T2", "c1", "c2"});
+    }
+    else if (type == "function E/N exp A") {
+      allowedKeys.insert({"c1", "c2", "c3", "c4", "c5"});
+    }
+
+    this->checkKeys(reactionJSON, allowedKeys, context);
+
+    if (reactionJSON.contains("quenching rates")) {
+      this->checkKeys(reactionJSON["quenching rates"], {"kr", "kp", "kq/N"}, context + "/quenching rates");
+    }
+    if (reactionJSON.contains("ppc threshold")) {
+      this->checkKeys(reactionJSON["ppc threshold"], {"species", "ppc", "valid region"}, context + "/ppc threshold");
+    }
 
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
     // wildcard, in which case we also build the reaction superset;
@@ -1995,6 +2324,8 @@ ItoKMCJSON::initializePhotoReactions()
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
+    this->checkKeys(reactionJSON, {"reaction", "efficiency", "@"}, "photoionization/" + reaction);
+
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
     // wildcard, in which case we also build the reaction superset;
     std::vector<std::string> reactants;
@@ -2080,6 +2411,8 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
     const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
     const std::string baseErrorID = std::string{baseError}.append(" for reaction '").append(reaction).append("'");
+
+    this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@"}, reactionSpecifier + "/" + reaction);
 
     std::vector<std::string> reactants;
     std::vector<std::string> products;
@@ -2256,6 +2589,14 @@ ItoKMCJSON::initializeFieldEmission()
     const std::string species = this->trim(reactionJSON["species"].get<std::string>());
     const std::string surface = this->trim(reactionJSON["surface"].get<std::string>());
     const std::string type    = this->trim(reactionJSON["type"].get<std::string>());
+    const std::string context = "field emission/" + species;
+
+    if (type == "fowler-nordheim") {
+      this->checkKeys(reactionJSON, {"species", "surface", "type", "work", "beta"}, context);
+    }
+    else if (type == "schottky") {
+      this->checkKeys(reactionJSON, {"species", "surface", "type", "work", "beta", "temperature", "lambda"}, context);
+    }
 
     if (!(this->isPlasmaSpecies(species))) {
       this->throwParserError(baseError + " but 'species' is not a plasma species");

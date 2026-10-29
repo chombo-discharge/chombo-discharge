@@ -5,6 +5,7 @@
 ItoKMCJSON.verbose               = false
 ItoKMCJSON.debug                 = false
 ItoKMCJSON.chemistry_file        = chemistry.json
+ItoKMCJSON.unknown_keys          = abort
 ItoKMCJSON.max_new_particles     = 16
 ItoKMCJSON.max_new_photons       = 64
 ItoKMCJSON.increment_weights     = false
