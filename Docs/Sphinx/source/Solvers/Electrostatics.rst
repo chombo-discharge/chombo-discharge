@@ -530,10 +530,16 @@ The remaining options configure PETSc:
 * ``ksp_type`` is the outer Krylov solver, any PETSc KSP type (e.g. ``gmres``, ``fgmres``, ``bicgstab``, ``cg``), and ``ksp_gmres_restart`` its restart length for GMRES and FGMRES.
 * ``ksp_rtol``, ``ksp_atol`` and ``ksp_max_iter`` are its exit criteria. They apply to the volume-weighted system, so fine-level residuals count less than coarse-level ones. Note also that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than ``ksp_rtol`` suggests.
 * ``petsc_verbosity`` controls the output of the solve. At 1 and above the residual is printed at every Krylov iteration, in the norm the KSP tests convergence on and relative to its first iteration. At 2 and above the true residual :math:`b - Ax`, relative to :math:`b`, is printed too, at the cost of computing it every iteration. At 3 and above the solver and the preconditioner (e.g. the levels of the algebraic multigrid hierarchy) are printed to standard output after each solve.
-* ``pc_type`` is the PETSc preconditioner.
+* ``pc_type`` is the PETSc preconditioner. With ``jump_bc = saturation_charge`` it is applied to each phase separately, see below.
 * ``amg_smoother_ksp``, ``amg_smoother_pc`` and ``amg_smoother_its`` set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc's default (Chebyshev with Jacobi) for the rows of small cut cells.
 * ``gamg_threshold`` and ``gamg_aggressive_coarsening`` control how GAMG builds its coarse levels; other preconditioners ignore them. GAMG groups each unknown with its strongly connected neighbours, and each group becomes one unknown on the next coarser level. Connections weaker than ``gamg_threshold``, relative to the diagonal, are not followed when forming the groups (a negative value follows all of them). A threshold of 0.01--0.02 keeps groups from forming across the weak couplings of small cut cells and refinement boundaries, which speeds up convergence, at the cost of smaller groups and thus more memory in the hierarchy; larger values can make the setup very expensive. ``gamg_aggressive_coarsening`` is the number of levels, from the finest, that are coarsened aggressively, i.e. grouped over neighbours of neighbours. This makes the hierarchy much smaller but each coarse level cruder, so the solve takes more iterations.
 * ``eb_order`` and ``eb_weight`` are the order and the least-squares weight of the embedded-boundary stencils. ``eb_order`` must not exceed ``AmrMesh.mg_interp_radius``.
+
+With the saturation charge, the gas side of the interface has no flux, so no gas row of the matrix depends on a dielectric row.
+An algebraic multigrid hierarchy over the whole matrix forms coarse unknowns across the interface, and does not converge on such a matrix.
+``FieldSolverAMG`` then preconditions with a PETSc field split with one field per phase, solved one after the other (gas, then dielectric), each with one application of ``pc_type`` and the ``amg_smoother_*`` and ``gamg_*`` settings.
+The fields can be configured with the PETSc options prefixes ``-fieldsolveramg_fieldsplit_gas_`` and ``-fieldsolveramg_fieldsplit_solid_``.
+With the natural jump condition the phases are coupled both ways, and ``pc_type`` is applied to the whole matrix.
 
 With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
 
