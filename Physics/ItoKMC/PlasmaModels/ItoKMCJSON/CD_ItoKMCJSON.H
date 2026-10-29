@@ -283,7 +283,7 @@ public:
    * @details Applies the 'domain emission' reactions and the 'domain' field emission specified for this face.
    * Secondaries are released uniformly in the boundary cell, or in the gas part of it if the EB cuts the cell.
    * @param[out] a_secondaryParticles Outgoing plasma species particles.
-   * @param[out] a_secondaryPhotons   Photons injected through the domain face.
+   * @param[out] a_secondaryPhotons   Photons injected through the domain face. The stepper does not inject these.
    * @param[in]  a_primaryParticles   Particles that left the computational domain through this face.
    * @param[in]  a_primaryPhotons     Photons that left the computational domain through this face.
    * @param[in]  a_E                  Electric field in the boundary cell.

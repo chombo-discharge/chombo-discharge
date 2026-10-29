@@ -5655,12 +5655,14 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(const Real a_dt) noexcept
 
   // Particles that left the domain
   Vector<ParticleContainer<ItoParticle>*> primaryParticles;
+
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     primaryParticles.push_back(&(it()->getParticles(ItoSolver::WhichContainer::Domain)));
   }
 
   // Photons that left the domain
   Vector<ParticleContainer<Photon>*> primaryPhotons;
+
   for (auto it = m_rte->iterator(); it.ok(); ++it) {
     primaryPhotons.push_back(&(it()->getDomainPhotons()));
   }
@@ -5730,24 +5732,28 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
     const Box                domainBox = domain.domainBox();
     const Real               dx        = m_amr->getDx()[lvl];
 
-    // The non-periodic domain faces. A particle that leaves through a periodic face re-enters on the other side
-    // and is never a primary.
+    // All domain faces, and the non-periodic ones that emit. Periodic faces do not emit.
+    std::vector<std::pair<int, Side::LoHiSide>> allFaces;
     std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+
     for (int dir = 0; dir < SpaceDim; dir++) {
-      if (!(domain.isPeriodic(dir))) {
-        for (SideIterator sit; sit.ok(); ++sit) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        allFaces.emplace_back(dir, sit());
+
+        if (!(domain.isPeriodic(dir))) {
           domainFaces.emplace_back(dir, sit());
         }
       }
     }
 
     // A primary was put just inside the domain where it crossed the boundary, so the face it crossed is the one
-    // it lies nearest.
+    // it lies nearest. All faces are considered, so a primary that crossed a periodic face is assigned to that face
+    // and does not emit, rather than being credited to a non-periodic face that shares its edge or corner cell.
     auto crossedFace = [&](const RealVect& a_pos) -> std::pair<int, Side::LoHiSide> {
-      std::pair<int, Side::LoHiSide> nearest  = domainFaces.front();
+      std::pair<int, Side::LoHiSide> nearest  = allFaces.front();
       Real                           distance = std::numeric_limits<Real>::max();
 
-      for (const auto& face : domainFaces) {
+      for (const auto& face : allFaces) {
         const int  dir = face.first;
         const Real d   = (face.second == Side::Lo) ? a_pos[dir] - probLo[dir] : probHi[dir] - a_pos[dir];
 
@@ -5770,6 +5776,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
       // The domain faces this patch touches. A patch away from the boundary has nothing to do; its secondary
       // containers were cleared above, which is the state it would be left in anyway.
       std::vector<std::pair<int, Side::LoHiSide>> patchFaces;
+
       for (const auto& face : domainFaces) {
         const int  dir     = face.first;
         const bool touches = (face.second == Side::Lo) ? box.smallEnd(dir) == domainBox.smallEnd(dir)
@@ -5816,6 +5823,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
         for (BoxIterator bit(faceCells); bit.ok(); ++bit) {
           const IntVect iv = bit();
 
+          // Primaries in a covered cell, where the EB meets the domain face, are cleared without emitting.
           if (!validCells(iv) || ebisbox.isCovered(iv)) {
             continue;
           }
@@ -5841,6 +5849,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
           for (int i = 0; i < numItoSpecies; i++) {
             selectCrossed(primaryParticles[i], primaryItoCells[i][cellIdx]);
           }
+
           for (int i = 0; i < numPhotonSpecies; i++) {
             selectCrossed(primaryPhotons[i], primaryPhotonCells[i][cellIdx]);
           }
@@ -5858,6 +5867,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
           const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
           Real faceArea = 0.0;
+
           for (int f = 0; f < faces.size(); f++) {
             faceArea += ebisbox.areaFrac(faces[f]);
           }
@@ -5881,6 +5891,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
           for (int i = 0; i < numItoSpecies; i++) {
             secondaryItoCells[i][cellIdx].append(secondaryParticles[i]);
           }
+
           for (int i = 0; i < numPhotonSpecies; i++) {
             secondaryPhotonCells[i][cellIdx].append(secondaryPhotons[i]);
           }
@@ -5891,6 +5902,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
       for (int i = 0; i < numItoSpecies; i++) {
         rebuildLeafFromCells((*a_secondaryParticles[i])[lvl][din], secondaryItoCells[i], box, dx, probLo);
       }
+
       for (int i = 0; i < numPhotonSpecies; i++) {
         rebuildLeafFromCells((*a_secondaryPhotons[i])[lvl][din], secondaryPhotonCells[i], box, dx, probLo);
       }

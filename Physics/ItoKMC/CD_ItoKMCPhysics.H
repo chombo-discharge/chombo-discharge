@@ -366,7 +366,7 @@ public:
    * called once per face it touches, and each primary is passed to the face it crossed. CDR species do not
    * take part: their domain fluxes are set by the CDR solver's own boundary conditions.
    * @param[out] a_secondaryParticles Outgoing plasma species particles.
-   * @param[out] a_secondaryPhotons   Photons injected through the domain face.
+   * @param[out] a_secondaryPhotons   Photons injected through the domain face. The stepper does not inject these.
    * @param[in]  a_primaryParticles   Particles that left the computational domain through this face.
    * @param[in]  a_primaryPhotons     Photons that left the computational domain through this face.
    * @param[in]  a_E                  Electric field in the boundary cell.
