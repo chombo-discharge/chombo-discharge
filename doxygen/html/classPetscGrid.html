@@ -128,6 +128,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscGrid</b> () 
 <tr class="memdesc:aab58a92eee4fd48723e3e08ec7b67d9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the map from AMR cells to PETSc rows, on the refined coarse grids.  <br /></td></tr>
 <tr class="memitem:a2060d945696c5bb878cf45596e24c93f" id="r_a2060d945696c5bb878cf45596e24c93f"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2060d945696c5bb878cf45596e24c93f">getVoFIterator</a> (const int a_iphase) const noexcept</td></tr>
 <tr class="memdesc:a2060d945696c5bb878cf45596e24c93f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get iterators over the cut cells that are PETSc rows on a phase.  <br /></td></tr>
+<tr class="memitem:a13d5bdee99488f27bbc842da170e9da5" id="r_a13d5bdee99488f27bbc842da170e9da5"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; PetscInt &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a13d5bdee99488f27bbc842da170e9da5">getLocalRows</a> (const int a_iphase) const noexcept</td></tr>
+<tr class="memdesc:a13d5bdee99488f27bbc842da170e9da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global PETSc rows of a phase that this rank owns.  <br /></td></tr>
 <tr class="memitem:ad57e3c20854ad25f61b1df635e93667f" id="r_ad57e3c20854ad25f61b1df635e93667f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classPetscStencil.html">PetscStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad57e3c20854ad25f61b1df635e93667f">getPetscStencil</a> (const VoFStencil &amp;a_stencil, const int a_level, const DataIndex &amp;a_din, const int a_phase) const noexcept</td></tr>
 <tr class="memdesc:ad57e3c20854ad25f61b1df635e93667f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rewrite a stencil over cells on one level as a stencil over global PETSc rows.  <br /></td></tr>
 <tr class="memitem:afacd075ae958cbf527feb3adcbb0ca42" id="r_afacd075ae958cbf527feb3adcbb0ca42"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classPetscStencil.html">PetscStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afacd075ae958cbf527feb3adcbb0ca42">getPetscStencilWithFinerLevel</a> (const VoFStencil &amp;a_stencil, const VoFStencil &amp;a_fineStencil, const int a_level, const DataIndex &amp;a_din, const int a_phase) const noexcept</td></tr>
@@ -698,6 +700,40 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
 
 <p>Get the map from AMR cells to PETSc rows, on the refined coarse grids. </p>
 <p>Entry lvl holds the rows of level lvl on the grids of <a class="el" href="#a4d509866da615f3848d2a23b7e994165" title="Get the refined coarse grids.">getMFLevelGridsFiCo()</a>[lvl]. </p><dl class="section return"><dt>Returns</dt><dd>m_amrToPetscFiCo </dd></dl>
+
+</div>
+</div>
+<a id="a13d5bdee99488f27bbc842da170e9da5" name="a13d5bdee99488f27bbc842da170e9da5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13d5bdee99488f27bbc842da170e9da5">&#9670;&#160;</a></span>getLocalRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; PetscInt &gt; PetscGrid::getLocalRows </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_iphase</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the global PETSc rows of a phase that this rank owns. </p>
+<p>These are the rows of the cells of the phase on all levels, e.g. for an index set that splits the matrix by phase. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_iphase</td><td>Phase index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The rows, in ascending order. </dd></dl>
 
 </div>
 </div>
