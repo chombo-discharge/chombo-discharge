@@ -128,8 +128,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a75a1cede969a2feac7f9b70d30510c12" id="r_a75a1cede969a2feac7f9b70d30510c12"><td class="memItemLeft" align="right" valign="top"><a id="a75a1cede969a2feac7f9b70d30510c12" name="a75a1cede969a2feac7f9b70d30510c12"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MFHelmholtzJumpBC</b> ()=delete</td></tr>
 <tr class="memdesc:a75a1cede969a2feac7f9b70d30510c12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed weak construction. <br /></td></tr>
-<tr class="memitem:a57000e509940d36bd63c0fe4278c9f9b" id="r_a57000e509940d36bd63c0fe4278c9f9b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57000e509940d36bd63c0fe4278c9f9b">MFHelmholtzJumpBC</a> (<a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="#a27cfe436f43f9894cddf1c6c84199ff9">BcoefPtr</a> &amp;a_Bcoef, const <a class="el" href="#a94608a409e89ace34952812673a729a5">AmrMask</a> &amp;a_validCells, Real a_dx, int a_order, int a_weight, int a_radius, int a_ghostCF, IntVect a_ghostPhi)</td></tr>
-<tr class="memdesc:a57000e509940d36bd63c0fe4278c9f9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <br /></td></tr>
+<tr class="memitem:ac24a5a45b263a1d8e2fbabbffc98a9ea" id="r_ac24a5a45b263a1d8e2fbabbffc98a9ea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac24a5a45b263a1d8e2fbabbffc98a9ea">MFHelmholtzJumpBC</a> (<a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="#a27cfe436f43f9894cddf1c6c84199ff9">BcoefPtr</a> &amp;a_Bcoef, const <a class="el" href="#a94608a409e89ace34952812673a729a5">AmrMask</a> &amp;a_validCells, Real a_dx, int a_order, int a_weight, int a_radius, int a_ghostCF, IntVect a_ghostPhi, bool a_dropOrder)</td></tr>
+<tr class="memdesc:ac24a5a45b263a1d8e2fbabbffc98a9ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <br /></td></tr>
 <tr class="memitem:a64b722f12762dd9ed825d6376221a09b" id="r_a64b722f12762dd9ed825d6376221a09b"><td class="memItemLeft" align="right" valign="top"><a id="a64b722f12762dd9ed825d6376221a09b" name="a64b722f12762dd9ed825d6376221a09b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MFHelmholtzJumpBC</b> (const <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a64b722f12762dd9ed825d6376221a09b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
@@ -153,8 +153,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~MFHelmholtzJumpBC
 <tr class="memdesc:a5db0377b4a3e11c0fd38fb56f3310ddb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return stencil weight (for least squares).  <br /></td></tr>
 <tr class="memitem:aa1c5efce319f0a2675b2e415a2010dbc" id="r_aa1c5efce319f0a2675b2e415a2010dbc"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1c5efce319f0a2675b2e415a2010dbc">getRadius</a> () const</td></tr>
 <tr class="memdesc:aa1c5efce319f0a2675b2e415a2010dbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return stencil radius (for least squares).  <br /></td></tr>
-<tr class="memitem:a1107a91ad90c9737cc21b097c8227906" id="r_a1107a91ad90c9737cc21b097c8227906"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1107a91ad90c9737cc21b097c8227906">setCoarseGridDropOrder</a> (bool a_dropOrder)</td></tr>
-<tr class="memdesc:a1107a91ad90c9737cc21b097c8227906"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> that it should drop the stencil order if the cell is a coarsened cell.  <br /></td></tr>
 <tr class="memitem:acc29cf716da81bb6e6c93ec238a08696" id="r_acc29cf716da81bb6e6c93ec238a08696"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc29cf716da81bb6e6c93ec238a08696">matchBC</a> (LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_jump, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, bool a_homogeneousPhysBC) const</td></tr>
 <tr class="memdesc:acc29cf716da81bb6e6c93ec238a08696"><td class="mdescLeft">&#160;</td><td class="mdescRight">Match the BC.  <br /></td></tr>
 <tr class="memitem:a9706de0d8178b7961ef6bd9a971082f3" id="r_a9706de0d8178b7961ef6bd9a971082f3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9706de0d8178b7961ef6bd9a971082f3">matchBC</a> (BaseIVFAB&lt; Real &gt; &amp;a_jump, const MFCellFAB &amp;a_phi, bool a_homogeneousPhysBC, const DataIndex &amp;a_dit) const</td></tr>
@@ -280,8 +278,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <p>This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by <a class="el" href="classMFHelmholtzEBBC.html" title="Class for making boundary conditions on the EB in a multifluid context.">MFHelmholtzEBBC</a> to compute the fluxes into the cut-cells on each side.</p>
 <p>When multi-valued cells are involved we use an "average" formulation such that we obtain the surface potential which is equal on all multi-cut surfaces. For this reason we store the bare stencils AND the averaged stencils (which are used in the matching). When stencil coefficients are updated then we use the raw stencils for recomputing the average stencils. This is done by calling setBco. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a57000e509940d36bd63c0fe4278c9f9b" name="a57000e509940d36bd63c0fe4278c9f9b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57000e509940d36bd63c0fe4278c9f9b">&#9670;&#160;</a></span>MFHelmholtzJumpBC()</h2>
+<a id="ac24a5a45b263a1d8e2fbabbffc98a9ea" name="ac24a5a45b263a1d8e2fbabbffc98a9ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac24a5a45b263a1d8e2fbabbffc98a9ea">&#9670;&#160;</a></span>MFHelmholtzJumpBC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -334,7 +332,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IntVect</td>          <td class="paramname"><span class="paramname"><em>a_ghostPhi</em></span>&#160;)</td>
+          <td class="paramtype">IntVect</td>          <td class="paramname"><span class="paramname"><em>a_ghostPhi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>a_dropOrder</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -352,6 +355,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Stencil radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Number of grid cells that were filled across the CF. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostPhi</td><td>Number of ghost cells in phi (needed for AggStencil) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td>Drop the stencil order to 1 in cells that are not valid cells (all cells if a_validCells is null) </td></tr>
   </table>
   </dd>
 </dl>
@@ -871,31 +875,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Helmholtz B-coefficient </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a1107a91ad90c9737cc21b097c8227906" name="a1107a91ad90c9737cc21b097c8227906"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1107a91ad90c9737cc21b097c8227906">&#9670;&#160;</a></span>setCoarseGridDropOrder()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void MFHelmholtzJumpBC::setCoarseGridDropOrder </td>
-          <td>(</td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>a_dropOrder</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Signal <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> that it should drop the stencil order if the cell is a coarsened cell. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td></td></tr>
   </table>
   </dd>
 </dl>
