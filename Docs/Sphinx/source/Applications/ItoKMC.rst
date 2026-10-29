@@ -558,8 +558,9 @@ Unknown keys
 ------------
 
 Every JSON object that ``ItoKMCJSON`` reads is checked against the keys the parser reads from it.
+The one exception is ``"law"`` under ``"gas"``, whose keys are user-chosen law names; each named law is checked.
 A key that the parser does not read, such as a misspelled ``"points"`` where ``"num points"`` was meant, would otherwise be silently ignored.
-Such keys are reported together with the object they appear in, the allowed key they most likely misspell, and the full list of allowed keys.
+Such keys are reported together with the object they appear in, the allowed key they most likely misspell (if one is close enough), and the full list of allowed keys.
 Some keys are only read for some settings of another key (e.g. ``"species"`` in ``"particle placement"`` is only read by the ``downstream`` method), and are reported as unknown otherwise.
 
 Whether an unknown key is a warning or an error is set by the required option
@@ -636,8 +637,8 @@ When specifying that the gas law ``type`` is ``ideal``, the user must further sp
 	    "my_ideal_gas" : {
 		"type" : "ideal",    // Ideal gas law type
 		"temperature" : 300, // Temperature must be in Kelvin
-		"pressure" : 1.0     // Pressure must be in bar
-	    },
+		"pressure" : 1E5     // Pressure must be in Pascal
+	    }
 	 }
       }
    }
@@ -732,7 +733,7 @@ An example JSON specification is
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"             // Species name
+	       "id": "O2",            // Species name
 	       "molar fraction": {    // Molar fraction specification
    	          "type": "constant", // Constant molar fraction
 	          "value": 0.2        // Molar fraction value
@@ -779,7 +780,7 @@ An example JSON specification is
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"                           // Species name
+	       "id": "O2",                          // Species name
 	       "molar fraction": {                  // Molar fraction specification
    	          "type": "table vs height",        // Constant molar fraction
 		  "file" : "O2_molar_fraction.dat", // File name containing molar fraction
@@ -812,7 +813,7 @@ For example
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"             // Species name
+	       "id": "O2",            // Species name
 	       "molar fraction": {    // Molar fraction specification
    	          "type": "constant", // Constant molar fraction
 	          "value": 0.2        // Molar fraction value
@@ -983,7 +984,7 @@ Each species *must* specify the following fields
 * ``solver`` (string) For specifying whether or not the species is tracked by a CDR or Îto solver.
   Acceptable values are *cdr* and *ito*.
 * ``mobile`` (boolean) For specifying whether or not the species is mobile.
-* ``mobile`` (boolean) For specifying whether or not the species is diffusive.
+* ``diffusive`` (boolean) For specifying whether or not the species is diffusive.
 
 An example specification is
 
@@ -1038,7 +1039,7 @@ For example,
 	    "Z" : -1,              // Charge number
 	    "solver" : "ito",      // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,       // Mobile or not
-	    "diffusive" : true     // Diffusive or not,
+	    "diffusive" : true,    // Diffusive or not
 	    "mobility": {
 	       "type": "constant", // Set constant mobility
 	       "value": 0.02
@@ -1066,7 +1067,7 @@ For example,
 	    "Z" : -1,			// Charge number
 	    "solver" : "ito",		// Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,		// Mobile or not
-	    "diffusive" : true		// Diffusive or not,
+	    "diffusive" : true,		// Diffusive or not
 	    "mobility": {
 	       "type": "constant mu*N", // Set mu*N to a constant
 	       "value": 1E24
@@ -1208,7 +1209,7 @@ For example:
 Constant
 ^^^^^^^^
 
-To set a constant temperature, set the ``type`` specifier to ``constant`` and then specify the temperature.
+To set a constant temperature, set the ``type`` specifier to ``constant`` and then specify the temperature (in Kelvin) through ``T``.
 For example:
 
 .. code-block:: json
@@ -1222,7 +1223,7 @@ For example:
           "solver" : "ito",      // Solver type. 
 	  "temperature": {       // Specify temperature
 	     "type": "constant", // Constant temperature
-	     "value": 300        // Temperature in Kelvin
+	     "T": 300            // Temperature in Kelvin
 	  }
        }
     ]
@@ -1489,10 +1490,10 @@ The particles must be organized as rows containing the coordinate positions and 
 The user must specify
 
 * ``file`` File name.
-* ``x`` Column containing the :math:`x` coordinates (optional, defaults to 0).
-* ``y`` Column containing the :math:`y` coordinates (optional, defaults to 1).
-* ``z`` Column containing the :math:`z` coordinates (optional, defaults to 2).
-* ``w`` Column containing the particle weight (optional, defaults to 3).
+* ``x column`` Column containing the :math:`x` coordinates (optional, defaults to 0).
+* ``y column`` Column containing the :math:`y` coordinates (optional, defaults to 1).
+* ``z column`` Column containing the :math:`z` coordinates (optional, defaults to 2).
+* ``w column`` Column containing the particle weight (optional, defaults to 3).
 
 For example:
 
@@ -1763,9 +1764,9 @@ A JSON specification is e.g.
 
    "plasma reactions": [
       {
-         "reaction": "e + N2 -> e + e + N2+" // Specify reaction
+         "reaction": "e + N2 -> e + e + N2+", // Specify reaction
 	 "type": "constant",                 // Reaction rate is constant
-	 "value": 1.E-30                     // Reaction rate
+	 "value": 1E-30                      // Reaction rate
       }
    ]
 
@@ -1793,7 +1794,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "       // Example reaction string. 
+         "reaction": "A + B -> ",      // Example reaction string. 
 	 "type": "function E/N exp A", // Function based rate.
 	 "c1": 1.0,                    // c1-coefficient
 	 "c2": 1.0,                    // c2-coefficient
@@ -1825,7 +1826,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> " // Example reaction string. 
+         "reaction": "A + B -> ", // Example reaction string. 
 	 "type": "function T A", // Function based rate.
 	 "c1": 1.0,              // c1-coefficient
 	 "c2": 1.0,              // c2-coefficient
@@ -1849,7 +1850,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "    // Example reaction string. 
+         "reaction": "A + B -> ",   // Example reaction string. 
 	 "type": "function T1T2 A", // Function based rate.
 	 "c1": 1.0,                 // c1-coefficient
 	 "c2": 1.0,                 // c2-coefficient
@@ -2133,7 +2134,7 @@ For example, the specification
 	    "reaction": "e -> e + e + M+", // Reaction string
 	    "type": "alpha*v",             // Rate is alpha*v
 	    "species": "e",                // Species for v,
-	    "gradient correction": "e"     // Specify gradient correction using species "e"
+	    "gradient correction": "e",    // Specify gradient correction using species "e"
 	    "quenching pressure": 4000,    // Quenching pressure
 	    "efficiency": 0.1              // Reaction efficiency
 	}	
@@ -2280,8 +2281,8 @@ Assume that photons are generated through the reaction
 	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
 	    "type": "alpha*v",                  // Rate is alpha*v
 	    "species": "e",                     // Species for v,
-	    "quenching pressure": 4000.0        // Quenching
-	    "efficiency": 0.6                   // Excitation events per ionization event
+	    "quenching pressure": 4000.0,       // Quenching
+	    "efficiency": 0.6,                  // Excitation events per ionization event
 	    "scale": 0.1                        // Photoionization events per absorbed photon
 	}	
     ]
@@ -2311,7 +2312,7 @@ In this case we modify the above into
 	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
 	    "type": "alpha*v",                  // Rate is alpha*v
 	    "species": "e",                     // Species for v,
-	    "quenching pressure": 4000.0        // Quenching
+	    "quenching pressure": 4000.0,       // Quenching
 	    "efficiency": 0.6                   // Excitation events per ionization event
 	}	
     ],
@@ -2416,6 +2417,8 @@ For example, photoemission on the low and high faces in the :math:`y`-direction 
    ]
 
 The primaries are the particles and photons that leave the domain through that face.
+Periodic faces never emit, as nothing leaves the domain through them.
+A primary that leaves through a cell on an edge or corner of the domain is assigned to the face nearest to it.
 Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
 CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver's boundary conditions.
 Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.
@@ -2426,6 +2429,8 @@ Field emission
 Field emission for a specified species is supported by including a ``field emission`` specifier.
 The emitting surface is set by ``surface``, which is either ``electrode``, ``dielectric``, or ``domain``.
 For ``domain``, a ``boundaries`` array lists the domain faces, as for ``domain emission`` (see :ref:`Chap:ItoKMCDomainEmission`).
+Only negatively charged species are emitted, and only where the surface is a cathode; an entry for any other species has no effect.
+The emitted particles are placed at the centroid of the boundary cell.
 Currently supported expressions are:
 
 #. Fowler-Nordheim emission:
@@ -2562,9 +2567,9 @@ Simulations that fail to stabilize, i.e., where the field strength diverges, may
 
    "plasma reactions": [
       {
-         "reaction": "e + N2 -> e + e + N2+"
+         "reaction": "e + N2 -> e + e + N2+",
 	 "type": "constant",
-	 "value": 1.E-12,
+	 "value": 1E-12,
 	 "limit max k*dt" : 2.0
       }
    ]

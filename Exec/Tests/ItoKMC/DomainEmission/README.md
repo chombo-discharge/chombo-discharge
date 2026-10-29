@@ -2,11 +2,12 @@
 
 Regression test for secondary emission on the faces of the computational domain in the Ito-KMC model.
 
-The geometry and solver settings are those of `Exec/Tests/ItoKMC/JSON`, but the rod is at a negative potential,
-so the grounded domain faces are anodes and the electrons drift into them. The chemistry (`chemistry.json`) turns
-every electron, and half of the photons, that leave the domain into a neutral tracer species `M`, released in the
-boundary cell they left through. Field emission on the low y face keeps the domain emission pass running every
-step.
+The geometry (a rod in 2D, a needle in 3D) and the solver settings are those of `Exec/Tests/ItoKMC/JSON`. The
+differences are that the electrode is at a negative potential, so the domain faces are anodes and the electrons
+drift into them, and that the time step is not capped, so the length of the run is set by the step count in
+`ItoKMC.ini`. The chemistry (`chemistry.json`) turns every electron, and half of the photons, that leave the domain
+into a neutral tracer species `M`, released in the boundary cell they left through. Field emission on the low y face
+keeps the domain emission pass running every step.
 
 # Compilation
 
