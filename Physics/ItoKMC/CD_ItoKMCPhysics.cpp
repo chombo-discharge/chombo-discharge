@@ -76,4 +76,12 @@ ItoKMCPhysics::emitsWithoutPrimariesEB() const noexcept
   return true;
 }
 
+bool
+ItoKMCPhysics::emitsWithoutPrimariesDomain() const noexcept
+{
+  CH_TIME("ItoKMCPhysics::emitsWithoutPrimariesDomain");
+
+  return true;
+}
+
 #include <CD_NamespaceFooter.H>

@@ -14,6 +14,7 @@
 #define CD_ITOKMCJSON_H
 
 // Std includes
+#include <array>
 #include <map>
 #include <memory>
 #include <set>
@@ -202,6 +203,13 @@ public:
   emitsWithoutPrimariesEB() const noexcept override;
 
   /**
+   * @brief Return true if field emission is specified on any domain face.
+   * @return True if the domain emission pass must run even when no primaries left the domain.
+   */
+  virtual bool
+  emitsWithoutPrimariesDomain() const noexcept override;
+
+  /**
    * @brief Compute the Ito solver mobilities.
    * @details Fills the caller's buffer; an immobile species carries a constant-zero function and so fills
    * its own slot without a table lookup.
@@ -269,6 +277,42 @@ public:
                       const Real                              a_dt,
                       const bool                              a_isDielectric,
                       const int                               a_matIndex) const noexcept override;
+
+  /**
+   * @brief Resolve secondary emission on one face of the computational domain.
+   * @details Applies the 'domain emission' reactions and the 'domain' field emission specified for this face.
+   * Secondaries are released uniformly in the boundary cell, or in the gas part of it if the EB cuts the cell.
+   * @param[out] a_secondaryParticles Outgoing plasma species particles.
+   * @param[out] a_secondaryPhotons   Photons injected through the domain face.
+   * @param[in]  a_primaryParticles   Particles that left the computational domain through this face.
+   * @param[in]  a_primaryPhotons     Photons that left the computational domain through this face.
+   * @param[in]  a_E                  Electric field in the boundary cell.
+   * @param[in]  a_cellCenter         Physical position of the cell center.
+   * @param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).
+   * @param[in]  a_bndryCentroid      EB centroid relative to the cell center (not multiplied by dx). Zero if the
+   *                                  cell is not cut by the EB.
+   * @param[in]  a_bndryNormal        EB normal, pointing into the gas. Zero if the cell is not cut by the EB.
+   * @param[in]  a_dir                Coordinate direction normal to the domain face.
+   * @param[in]  a_side               Low or high side of the domain in a_dir.
+   * @param[in]  a_faceArea           Area fraction of the cell's domain face that is open to the gas.
+   * @param[in]  a_dx                 Grid resolution on this level.
+   * @param[in]  a_dt                 Time step.
+   */
+  virtual void
+  secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                          Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                          const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                          const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                          const RealVect&                         a_E,
+                          const RealVect&                         a_cellCenter,
+                          const RealVect&                         a_cellCentroid,
+                          const RealVect&                         a_bndryCentroid,
+                          const RealVect&                         a_bndryNormal,
+                          const int                               a_dir,
+                          const Side::LoHiSide                    a_side,
+                          const Real                              a_faceArea,
+                          const Real                              a_dx,
+                          const Real                              a_dt) const noexcept override;
 
 protected:
   /**
@@ -461,6 +505,12 @@ protected:
    * @brief List of electrode field emission reactions.
    */
   std::vector<std::pair<int, FunctionEN>> m_electrodeFieldEmission;
+
+  /**
+   * @brief Field emission reactions on the domain faces.
+   * @details Indexed by 2*dir + side, with the low side first.
+   */
+  std::array<std::vector<std::pair<int, FunctionEN>>, 2 * SpaceDim> m_domainFieldEmission;
 
   /**
    * @brief Townsend ionization coefficient. Defined during parseAlpha
@@ -726,10 +776,64 @@ protected:
 
   /**
    * @brief Initialize surface reactions
-   * @param[in] a_surface Surface type
+   * @param[in] a_surface Surface type: 'dielectric', 'electrode', or 'domain'.
    */
   virtual void
   initializeSurfaceEmission(const std::string& a_surface);
+
+  /**
+   * @brief Parse the 'boundaries' list of a domain emission entry.
+   * @details Each entry is a face name such as "x lo" or "y hi". Faces in a direction that this build does not
+   * have ("z lo" and "z hi" in 2D) are skipped, so that one chemistry file serves both 2D and 3D.
+   * @param[in] a_json    JSON entry containing the 'boundaries' list.
+   * @param[in] a_context Path to the entry in the chemistry file, used in error messages.
+   * @return The faces, as (direction, side) pairs.
+   */
+  virtual std::vector<std::pair<int, Side::LoHiSide>>
+  parseDomainBoundaries(const nlohmann::json& a_json, const std::string& a_context) const;
+
+  /**
+   * @brief Sample the secondaries released by primaries that hit a surface.
+   * @details Shared by secondaryEmissionEB() and secondaryEmissionDomain(). Each primary species with a
+   * reaction on this surface triggers a multinomial draw over that species' reactions. Charged products are
+   * only released if the field pushes them away from the surface: negative products from a cathode, positive
+   * products from an anode.
+   * @param[in,out] a_secondaryParticles Secondary particles; products are appended.
+   * @param[in]     a_plasmaReactions    Surface reactions triggered by plasma species.
+   * @param[in]     a_photonReactions    Surface reactions triggered by photon species.
+   * @param[in]     a_primaryParticles   Particles that hit the surface.
+   * @param[in]     a_primaryPhotons     Photons that hit the surface.
+   * @param[in]     a_releasePosition    Draws a release position for one group of products.
+   * @param[in]     a_isCathode          Whether the surface is a cathode.
+   */
+  virtual void
+  sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&               a_secondaryParticles,
+                        const std::map<size_t, ItoKMCSurfaceReactions>& a_plasmaReactions,
+                        const std::map<size_t, ItoKMCSurfaceReactions>& a_photonReactions,
+                        const Vector<ParticleSoA<ItoParticle>>&         a_primaryParticles,
+                        const Vector<ParticleSoA<Photon>>&              a_primaryPhotons,
+                        const std::function<RealVect()>&                a_releasePosition,
+                        const bool                                      a_isCathode) const noexcept;
+
+  /**
+   * @brief Sample field emission from a cathode surface.
+   * @details Shared by secondaryEmissionEB() and secondaryEmissionDomain(). Only negative species are emitted.
+   * @param[in,out] a_secondaryParticles Secondary particles; emitted particles are appended.
+   * @param[in]     a_fieldEmission      Field emission reactions on this surface.
+   * @param[in]     a_E                  Electric field.
+   * @param[in]     a_position           Physical position where emitted particles are released.
+   * @param[in]     a_areaFraction       Surface area, not multiplied by dx (2D) or dx^2 (3D).
+   * @param[in]     a_dx                 Grid resolution.
+   * @param[in]     a_dt                 Time step.
+   */
+  virtual void
+  sampleFieldEmission(Vector<ParticleSoA<ItoParticle>>&              a_secondaryParticles,
+                      const std::vector<std::pair<int, FunctionEN>>& a_fieldEmission,
+                      const RealVect&                                a_E,
+                      const RealVect&                                a_position,
+                      const Real                                     a_areaFraction,
+                      const Real                                     a_dx,
+                      const Real                                     a_dt) const noexcept;
 
   /**
    * @brief Initialize field emission reactions

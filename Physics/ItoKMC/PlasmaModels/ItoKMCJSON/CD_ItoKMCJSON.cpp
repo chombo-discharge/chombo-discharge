@@ -65,6 +65,7 @@ ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnk
   this->initializePhotoReactions();
   this->initializeSurfaceEmission("dielectric");
   this->initializeSurfaceEmission("electrode");
+  this->initializeSurfaceEmission("domain");
   this->initializeFieldEmission();
 
   // Initialize the particle placement algorithm
@@ -441,6 +442,7 @@ ItoKMCJSON::parseJSON()
                      "photoionization",
                      "electrode emission",
                      "dielectric emission",
+                     "domain emission",
                      "field emission",
                      "particle placement"},
                     "(top level)");
@@ -2397,9 +2399,14 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
   else if (a_surface == "electrode") {
     reactionSpecifier = "electrode emission";
   }
+  else if (a_surface == "domain") {
+    reactionSpecifier = "domain emission";
+  }
   else {
     MayDay::Abort("ItoKMCJSON::initializeSurfaceEmission -- logic bust");
   }
+
+  const bool isDomain = (a_surface == "domain");
 
   for (const auto& reactionJSON : m_json[reactionSpecifier]) {
     if (!(reactionJSON.contains("reaction"))) {
@@ -2412,7 +2419,19 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
     const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
     const std::string baseErrorID = std::string{baseError}.append(" for reaction '").append(reaction).append("'");
 
-    this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@"}, reactionSpecifier + "/" + reaction);
+    const std::string context = reactionSpecifier + "/" + reaction;
+
+    // Domain reactions also say which faces of the domain they apply to.
+    std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+
+    if (isDomain) {
+      this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@", "boundaries"}, context);
+
+      domainFaces = this->parseDomainBoundaries(reactionJSON, context);
+    }
+    else {
+      this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@"}, context);
+    }
 
     std::vector<std::string> reactants;
     std::vector<std::string> products;
@@ -2511,7 +2530,15 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
       reactions.add(reaction);
 
-      if (isPlasma && a_surface == "dielectric") {
+      if (isDomain) {
+        const ItoKMCSurfaceReactionSet::Species speciesType = isPlasma ? ItoKMCSurfaceReactionSet::Species::Plasma
+                                                                       : ItoKMCSurfaceReactionSet::Species::Photon;
+
+        for (const auto& face : domainFaces) {
+          m_surfaceReactions.addDomain(reactantIndex, reaction, face.first, face.second, speciesType);
+        }
+      }
+      else if (isPlasma && a_surface == "dielectric") {
         m_surfaceReactions.add(reactantIndex,
                                reaction,
                                ItoKMCSurfaceReactionSet::Surface::Dielectric,
@@ -2591,12 +2618,20 @@ ItoKMCJSON::initializeFieldEmission()
     const std::string type    = this->trim(reactionJSON["type"].get<std::string>());
     const std::string context = "field emission/" + species;
 
+    // Domain field emission also says which faces of the domain it applies to.
+    std::set<std::string> allowedKeys{"species", "surface", "type"};
+
     if (type == "fowler-nordheim") {
-      this->checkKeys(reactionJSON, {"species", "surface", "type", "work", "beta"}, context);
+      allowedKeys.insert({"work", "beta"});
     }
     else if (type == "schottky") {
-      this->checkKeys(reactionJSON, {"species", "surface", "type", "work", "beta", "temperature", "lambda"}, context);
+      allowedKeys.insert({"work", "beta", "temperature", "lambda"});
     }
+    if (surface == "domain") {
+      allowedKeys.insert("boundaries");
+    }
+
+    this->checkKeys(reactionJSON, allowedKeys, context);
 
     if (!(this->isPlasmaSpecies(species))) {
       this->throwParserError(baseError + " but 'species' is not a plasma species");
@@ -2607,24 +2642,17 @@ ItoKMCJSON::initializeFieldEmission()
       }
     }
 
-    if (surface == "electrode") {
-      m_electrodeFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
-                                            [](const Real /*E*/, const Real /*N*/) -> Real {
-                                              return 0.0;
-                                            });
-    }
-    else if (surface == "dielectric") {
-      m_dielectricFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
-                                             [](const Real /*E*/, const Real /*N*/) -> Real {
-                                               return 0.0;
-                                             });
-    }
-    else {
-      this->throwParserError(baseError + " but 'surface' must be either 'dielectric' or 'electrode'");
+    if (!(surface == "electrode" || surface == "dielectric" || surface == "domain")) {
+      this->throwParserError(baseError + " but 'surface' must be 'dielectric', 'electrode', or 'domain'");
     }
 
-    FunctionEN& J = (surface == "electrode") ? m_electrodeFieldEmission.back().second
-                                             : m_dielectricFieldEmission.back().second;
+    std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+
+    if (surface == "domain") {
+      domainFaces = this->parseDomainBoundaries(reactionJSON, context);
+    }
+
+    FunctionEN J;
 
     if (type == "fowler-nordheim") {
       if (!(reactionJSON.contains("work"))) {
@@ -2688,7 +2716,92 @@ ItoKMCJSON::initializeFieldEmission()
       this->throwParserError(
         std::string{baseError}.append(" but 'type' specifier = '").append(type).append("' is not supported"));
     }
+
+    const int speciesIndex = m_itoSpeciesMap.at(species);
+
+    if (surface == "electrode") {
+      m_electrodeFieldEmission.emplace_back(speciesIndex, J);
+    }
+    else if (surface == "dielectric") {
+      m_dielectricFieldEmission.emplace_back(speciesIndex, J);
+    }
+    else {
+      for (const auto& face : domainFaces) {
+        const int faceIndex = 2 * face.first + ((face.second == Side::Lo) ? 0 : 1);
+
+        m_domainFieldEmission[faceIndex].emplace_back(speciesIndex, J);
+      }
+    }
   }
+}
+
+std::vector<std::pair<int, Side::LoHiSide>>
+ItoKMCJSON::parseDomainBoundaries(const nlohmann::json& a_json, const std::string& a_context) const
+{
+  CH_TIME("ItoKMCJSON::parseDomainBoundaries");
+  if (m_verbose) {
+    pout() << m_className + "::parseDomainBoundaries" << endl;
+  }
+
+  const std::string baseError = m_className + "::parseDomainBoundaries for '" + a_context + "'";
+
+  if (!(a_json.contains("boundaries"))) {
+    this->throwParserError(baseError + " but the field 'boundaries' is missing");
+  }
+
+  const std::vector<std::string> names = a_json["boundaries"].get<std::vector<std::string>>();
+
+  if (names.empty()) {
+    this->throwParserError(baseError + " but 'boundaries' is empty");
+  }
+
+  std::vector<std::pair<int, Side::LoHiSide>> faces;
+  std::set<std::string>                       seen;
+
+  for (const auto& n : names) {
+    const std::string name = this->trim(n);
+
+    if (seen.count(name) != 0) {
+      this->throwParserError(std::string{baseError}.append(" but boundary '").append(name).append("' is repeated"));
+    }
+
+    seen.insert(name);
+
+    // A face name is a direction and a side separated by whitespace, e.g. "x lo".
+    std::stringstream ss(name);
+    std::string       whichDir;
+    std::string       whichSide;
+    std::string       rest;
+
+    ss >> whichDir >> whichSide >> rest;
+
+    int dir = -1;
+
+    if (whichDir == "x") {
+      dir = 0;
+    }
+    else if (whichDir == "y") {
+      dir = 1;
+    }
+    else if (whichDir == "z") {
+      dir = 2;
+    }
+
+    const bool validSide = (whichSide == "lo" || whichSide == "hi");
+
+    if (dir < 0 || !validSide || !(rest.empty())) {
+      this->throwParserError(std::string{baseError}
+                               .append(" but boundary '")
+                               .append(name)
+                               .append("' is not one of 'x lo', 'x hi', 'y lo', 'y hi', 'z lo', 'z hi'"));
+    }
+
+    if (dir < SpaceDim) {
+      faces.emplace_back(dir, (whichSide == "lo") ? Side::Lo : Side::Hi);
+    }
+  }
+
+  return faces;
 }
 
 void
@@ -3896,7 +4009,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
   }
 
   const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
-  const bool isAnode   = !isCathode;
 
   RealVect lo = -0.5 * RealVect::Unit;
   RealVect hi = +0.5 * RealVect::Unit;
@@ -3908,7 +4020,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
   }
 
-  // Go through all primary particles.
   const std::map<size_t, ItoKMCSurfaceReactions>&
     plasmaReactions = a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
                                      : m_surfaceReactions.getElectrodePlasmaReactions();
@@ -3917,113 +4028,208 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
     photonReactions = a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
                                      : m_surfaceReactions.getElectrodePhotonReactions();
 
-  // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
-  for (int i = 0; i < m_itoSpecies.size(); i++) {
-    if (plasmaReactions.count(i) > 0) {
+  // Secondaries are released in the gas part of the cut cell.
+  auto releasePosition = [&]() -> RealVect {
+    return Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+  };
 
-      // These are the products and distribution for this reaction.
-      const auto& reactions      = plasmaReactions.at(i);
-      const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
+  this->sampleSurfaceEmission(a_secondaryParticles,
+                              plasmaReactions,
+                              photonReactions,
+                              a_primaryParticles,
+                              a_primaryPhotons,
+                              releasePosition,
+                              isCathode);
 
-      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
-      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
-      size_t N = 0;
-      for (std::size_t j = 0; j < a_primaryParticles[i].size(); j++) {
-        const Real w = a_primaryParticles[i].weight(j);
-
-        CH_assert(w >= 0.0);
-
-        if (w > 0.0) {
-          N += (size_t)w;
-        }
-      }
-
-      const std::vector<size_t> X = this->multinomial(N, distribution);
-
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          const RealVect
-            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
-
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Do secondary emission for each intersected photon if there's a corresponding surface reaction.
-  for (int i = 0; i < m_rtSpecies.size(); i++) {
-    if (photonReactions.count(i) > 0) {
-
-      // These are the products and distribution for this reaction.
-      const auto& reactions      = photonReactions.at(i);
-      const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
-
-      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
-      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
-      size_t N = 0;
-      for (std::size_t j = 0; j < a_primaryPhotons[i].size(); j++) {
-        const Real w = a_primaryPhotons[i].weight(j);
-
-        CH_assert(w >= 0.0);
-
-        if (w > 0.0) {
-          N += (size_t)w;
-        }
-      }
-
-      const std::vector<size_t> X = this->multinomial(N, distribution);
-
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          const RealVect
-            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
-
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Field emission functions.
   if (isCathode) {
-    const auto& fieldEmissionFunctions = a_isDielectric ? m_dielectricFieldEmission : m_electrodeFieldEmission;
+    const auto& fieldEmission = a_isDielectric ? m_dielectricFieldEmission : m_electrodeFieldEmission;
 
-    for (const auto& fieldEmissionFunction : fieldEmissionFunctions) {
-      const auto& species = fieldEmissionFunction.first;
-      const auto& J       = fieldEmissionFunction.second;
+    this->sampleFieldEmission(a_secondaryParticles,
+                              fieldEmission,
+                              a_E,
+                              a_cellCenter + a_cellCentroid * a_dx,
+                              a_bndryArea,
+                              a_dx,
+                              a_dt);
+  }
+}
 
-      if (m_itoSpecies[species]->getChargeNumber() < 0) {
+void
+ItoKMCJSON::secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                                    Vector<ParticleSoA<Photon>>& /*a_secondaryPhotons*/,
+                                    const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                                    const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                                    const RealVect&                         a_E,
+                                    const RealVect&                         a_cellCenter,
+                                    const RealVect&                         a_cellCentroid,
+                                    const RealVect&                         a_bndryCentroid,
+                                    const RealVect&                         a_bndryNormal,
+                                    const int                               a_dir,
+                                    const Side::LoHiSide                    a_side,
+                                    const Real                              a_faceArea,
+                                    const Real                              a_dx,
+                                    const Real                              a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::secondaryEmissionDomain" << endl;
+  }
 
-        const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
-        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
+  // Normal of the domain face, pointing into the domain.
+  const RealVect faceNormal = -sign(a_side) * RealVect(BASISV(a_dir));
+  const bool     isCathode  = a_E.dotProduct(faceNormal) <= 0.0;
 
-        const auto numEmission = Random::getPoisson<long long>(JdAdt);
+  // Secondaries are released uniformly in the boundary cell, or in the gas part of it if the EB cuts the cell.
+  // The EB sampler cannot be used for a regular cell: with a zero normal, computeMinValidBox() shrinks the box
+  // to nothing.
+  const bool isCutCell = a_bndryNormal != RealVect::Zero;
 
-        if (numEmission > 0LL) {
-          const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
+  RealVect lo = -0.5 * RealVect::Unit;
+  RealVect hi = +0.5 * RealVect::Unit;
 
-          a_secondaryParticles[species].append(x, 1.0 * static_cast<double>(numEmission), ItoParticle{});
+  if (isCutCell) {
+    DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
+  }
+
+  auto releasePosition = [&]() -> RealVect {
+    if (isCutCell) {
+      return Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+    }
+
+    return a_cellCenter + Random::randomPosition(lo, hi) * a_dx;
+  };
+
+  this->sampleSurfaceEmission(a_secondaryParticles,
+                              m_surfaceReactions.getDomainPlasmaReactions(a_dir, a_side),
+                              m_surfaceReactions.getDomainPhotonReactions(a_dir, a_side),
+                              a_primaryParticles,
+                              a_primaryPhotons,
+                              releasePosition,
+                              isCathode);
+
+  if (isCathode) {
+    const int faceIndex = 2 * a_dir + ((a_side == Side::Lo) ? 0 : 1);
+
+    this->sampleFieldEmission(a_secondaryParticles,
+                              m_domainFieldEmission[faceIndex],
+                              a_E,
+                              a_cellCenter + a_cellCentroid * a_dx,
+                              a_faceArea,
+                              a_dx,
+                              a_dt);
+  }
+}
+
+void
+ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&               a_secondaryParticles,
+                                  const std::map<size_t, ItoKMCSurfaceReactions>& a_plasmaReactions,
+                                  const std::map<size_t, ItoKMCSurfaceReactions>& a_photonReactions,
+                                  const Vector<ParticleSoA<ItoParticle>>&         a_primaryParticles,
+                                  const Vector<ParticleSoA<Photon>>&              a_primaryPhotons,
+                                  const std::function<RealVect()>&                a_releasePosition,
+                                  const bool                                      a_isCathode) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::sampleSurfaceEmission" << endl;
+  }
+
+  const bool isAnode = !a_isCathode;
+
+  // Do secondary emission for each primary species that has a reaction on this surface. Particles and photons
+  // differ only in the container type.
+  auto emit = [&](const std::map<size_t, ItoKMCSurfaceReactions>& a_reactions,
+                  const auto&                                     a_primaries,
+                  const size_t                                    a_numSpecies) -> void {
+    for (size_t i = 0; i < a_numSpecies; i++) {
+      if (a_reactions.count(i) > 0) {
+
+        // These are the products and distribution for this reaction.
+        const auto& reactions      = a_reactions.at(i);
+        const auto& plasmaProducts = reactions.getProducts();
+        const auto& distribution   = reactions.getDistribution();
+
+        // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
+        // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
+        size_t N = 0;
+        for (std::size_t j = 0; j < a_primaries[i].size(); j++) {
+          const Real w = a_primaries[i].weight(j);
+
+          CH_assert(w >= 0.0);
+
+          if (w > 0.0) {
+            N += (size_t)w;
+          }
+        }
+
+        const std::vector<size_t> X = this->multinomial(N, distribution);
+
+        // Release the particles.
+        for (int k = 0; k < X.size(); k++) {
+          if (X[k] > 0) {
+            const RealVect releasePosition = a_releasePosition();
+
+            for (const auto& p : plasmaProducts[k]) {
+              const int Z = m_itoSpecies[p]->getChargeNumber();
+
+              if ((Z < 0 && a_isCathode) || (Z > 0 && isAnode) || Z == 0) {
+                a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[k]), ItoParticle{});
+              }
+            }
+          }
         }
       }
     }
+  };
+
+  emit(a_plasmaReactions, a_primaryParticles, m_itoSpecies.size());
+  emit(a_photonReactions, a_primaryPhotons, m_rtSpecies.size());
+}
+
+void
+ItoKMCJSON::sampleFieldEmission(Vector<ParticleSoA<ItoParticle>>&              a_secondaryParticles,
+                                const std::vector<std::pair<int, FunctionEN>>& a_fieldEmission,
+                                const RealVect&                                a_E,
+                                const RealVect&                                a_position,
+                                const Real                                     a_areaFraction,
+                                const Real                                     a_dx,
+                                const Real                                     a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::sampleFieldEmission" << endl;
   }
+
+  for (const auto& fieldEmissionFunction : a_fieldEmission) {
+    const auto& species = fieldEmissionFunction.first;
+    const auto& J       = fieldEmissionFunction.second;
+
+    if (m_itoSpecies[species]->getChargeNumber() < 0) {
+
+      const Real N     = m_gasNumberDensity(a_position);
+      const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_areaFraction * a_dt;
+
+      const auto numEmission = Random::getPoisson<long long>(JdAdt);
+
+      if (numEmission > 0LL) {
+        a_secondaryParticles[species].append(a_position, 1.0 * static_cast<double>(numEmission), ItoParticle{});
+      }
+    }
+  }
+}
+
+bool
+ItoKMCJSON::emitsWithoutPrimariesDomain() const noexcept
+{
+  CH_TIME("ItoKMCJSON::emitsWithoutPrimariesDomain");
+  if (m_verbose) {
+    pout() << m_className + "::emitsWithoutPrimariesDomain" << endl;
+  }
+
+  for (const auto& fieldEmission : m_domainFieldEmission) {
+    if (!(fieldEmission.empty())) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 bool
