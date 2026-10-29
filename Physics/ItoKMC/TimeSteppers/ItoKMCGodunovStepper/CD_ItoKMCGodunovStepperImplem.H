@@ -601,9 +601,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       }
     }
 
-    // Intersect particles, but don't remove them.
+    // Intersect particles, but don't remove them. The particles were not remapped after the Euler-Maruyama step
+    // -- a remap drops every particle that left the domain -- so that the intersection test can put the ones
+    // that crossed the domain boundary in the domain containers. Remap the rest now.
     const bool deleteParticles = false;
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles, nonDeletionModifier);
+    this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
 
     // Particles that were not removed are copied to a separate data container.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
@@ -685,7 +688,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   else {
     const bool deleteParticles = true;
 
+    // See above for why the remap comes after the intersection test.
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles);
+    this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   }
 
   // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong
@@ -1972,7 +1977,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->barrier();
   m_timer.startEvent("Euler-Maruyama step");
   this->stepEulerMaruyamaParticles(a_dt);
-  this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   this->stepEulerMaruyamaCDR(a_dt);
   m_timer.stopEvent("Euler-Maruyama step");
 }
