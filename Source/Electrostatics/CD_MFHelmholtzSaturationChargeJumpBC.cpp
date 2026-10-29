@@ -24,7 +24,8 @@ MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase
                                                                      const int                a_weight,
                                                                      const int                a_radius,
                                                                      const int                a_ghostCF,
-                                                                     const IntVect            a_ghostPhi)
+                                                                     const IntVect            a_ghostPhi,
+                                                                     const bool               a_dropOrder)
   : MFHelmholtzJumpBC(a_dataLocation,
                       a_mflg,
                       a_Bcoef,
@@ -34,7 +35,8 @@ MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase
                       a_weight,
                       a_radius,
                       a_ghostCF,
-                      a_ghostPhi),
+                      a_ghostPhi,
+                      a_dropOrder),
     m_phase(a_phase)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC");

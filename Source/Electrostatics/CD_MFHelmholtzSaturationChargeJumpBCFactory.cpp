@@ -62,7 +62,8 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
                                                                                 a_weight,
                                                                                 a_radius,
                                                                                 a_ghostCF,
-                                                                                a_ghostPhi));
+                                                                                a_ghostPhi,
+                                                                                m_dropOrder));
 }
 
 #include <CD_NamespaceFooter.H>
