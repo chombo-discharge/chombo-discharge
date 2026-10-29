@@ -119,8 +119,8 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (BaseFab<Real> version) - logic bust");
     }
 
-    //    a_faceFlux(iv, m_comp) = C/B + isign*A*phiExtrap/B;
-    a_faceFlux(iv, m_comp) = C / B + isign * A * phiExtrap / B;
+    // A*phi + B*dphi/dn = C with n pointing into the domain, and dphi/dn = -isign * dphi/dx_dir on the face.
+    a_faceFlux(iv, m_comp) = isign * (A * phiExtrap - C) / B;
   };
 
   // Run the kernel
@@ -208,8 +208,8 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
         MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (VolIndex version) - logic bust");
       }
 
-      // A*phi + B*dphi/dn = C => dphi/dn = C/B - A*phi/B, with n pointing into the boundary.
-      centroidFlux = C / B + isign * A * phiExtrap / B;
+      // A*phi + B*dphi/dn = C with n pointing into the domain, and dphi/dn = -isign * dphi/dx_dir on the face.
+      centroidFlux = isign * (A * phiExtrap - C) / B;
 
       // Multiply by the Helmholtz b-coefficient and aperture.
       const FaceIndex& bndryFace = faces[0];

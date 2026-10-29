@@ -134,7 +134,7 @@ PetscHelmholtzRobinDomainBC::getFaceFluxStencil(Real&                a_boundaryW
                   "and the least-squares reconstruction is not implemented");
   }
 
-  a_boundaryWeight = 1.0 / B;
+  a_boundaryWeight = -sign(a_side) / B;
 }
 
 Real

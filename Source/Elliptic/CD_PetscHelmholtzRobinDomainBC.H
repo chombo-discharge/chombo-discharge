@@ -25,10 +25,10 @@
 /**
  * @brief Robin domain boundary condition A*phi + B*dphi/dn = C for PetscHelmholtzOp.
  * @details As in EBHelmholtzRobinDomainBC, phi is extrapolated linearly to the face from the cell and its interior
- * neighbor, and the flux is C/B + s*A*phi_face/B with s = -1 on the low side and +1 on the high side. The interior
- * neighbor must be a cell on the same level, i.e. not covered by the EB or by a finer grid. Where it is not, the
- * extrapolation needs a least-squares reconstruction over the valid cells on this level and the next finer level,
- * which is not implemented yet and aborts.
+ * neighbor, and the flux is s*(A*phi_face - C)/B with s = -1 on the low side and +1 on the high side, since n points
+ * into the domain. The interior neighbor must be a cell on the same level, i.e. not covered by the EB or by a finer
+ * grid. Where it is not, the extrapolation needs a least-squares reconstruction over the valid cells on this level and
+ * the next finer level, which is not implemented yet and aborts.
  */
 class PetscHelmholtzRobinDomainBC : public PetscHelmholtzDomainBC
 {
