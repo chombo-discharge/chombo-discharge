@@ -2417,7 +2417,7 @@ For example, photoemission on the low and high faces in the :math:`y`-direction 
    ]
 
 The primaries are the particles and photons that leave the domain through that face.
-Periodic faces never emit, as nothing leaves the domain through them.
+Periodic faces do not emit.
 A primary that leaves through a cell on an edge or corner of the domain is assigned to the face nearest to it.
 Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
 CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver's boundary conditions.
