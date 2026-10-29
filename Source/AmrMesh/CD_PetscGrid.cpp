@@ -299,6 +299,7 @@ PetscGrid::getLocalRows(const int a_iphase) const noexcept
 
   std::vector<PetscInt> rows;
 
+  // A serial loop over the boxes, which appends to one vector. This runs once per solver setup.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const LayoutData<Vector<PetscDOF>>& petscToAMR = *m_petscToAMR[a_iphase][lvl];
 

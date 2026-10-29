@@ -384,14 +384,60 @@ FieldSolverAMG::setupSolver()
   PetscCallAbort(Chombo_MPI::comm, KSPSetType(m_ksp, m_kspType.c_str()));
   PetscCallAbort(Chombo_MPI::comm, KSPGetPC(m_ksp, &pc));
 
+  // The level smoothers of a multigrid preconditioner, and the solvers of the fields of a field split, are only created
+  // when the preconditioner is set up, so their settings go into the options database, where they are picked up from.
+  // They are written on every setup, so that a change of the input options takes effect, except where the user gave the
+  // option to PETSc (PETSC_OPTIONS or the command line), which is recorded before this class first writes it. All
+  // FieldSolverAMG instances share the 'fieldsolveramg_' prefix, and the smoothers read the options when the
+  // preconditioner is set up, at the first solve. So with two instances whose amg_smoother_* or gamg_* inputs differ,
+  // the last setupSolver before a solve decides: last writer wins. With identical inputs, the normal case, this does
+  // not matter. Preconditioners that are not multigrid ignore the amg_smoother_* and gamg_* settings.
+  static const std::vector<std::string> userOptions = []() -> std::vector<std::string> {
+    std::vector<std::string> ret;
+
+    for (const std::string prefix :
+         {"-fieldsolveramg_", "-fieldsolveramg_fieldsplit_gas_", "-fieldsolveramg_fieldsplit_solid_"}) {
+      for (const std::string option : {"mg_levels_ksp_type",
+                                       "mg_levels_pc_type",
+                                       "mg_levels_ksp_max_it",
+                                       "pc_gamg_threshold",
+                                       "pc_gamg_aggressive_coarsening",
+                                       "ksp_type",
+                                       "pc_type"}) {
+        PetscBool isSet = PETSC_FALSE;
+
+        PetscCallAbort(Chombo_MPI::comm, PetscOptionsHasName(nullptr, nullptr, (prefix + option).c_str(), &isSet));
+
+        if (isSet == PETSC_TRUE) {
+          ret.push_back(prefix + option);
+        }
+      }
+    }
+
+    return ret;
+  }();
+
+  auto isUserOption = [](const std::string& a_name) -> bool {
+    return std::find(userOptions.begin(), userOptions.end(), a_name) != userOptions.end();
+  };
+
+  auto setDefaultOption = [&isUserOption](const std::string& a_name, const std::string& a_value) -> void {
+    if (!isUserOption(a_name)) {
+      PetscCallAbort(Chombo_MPI::comm, PetscOptionsSetValue(nullptr, a_name.c_str(), a_value.c_str()));
+    }
+  };
+
   // With the saturation charge, the gas side of the interface has no flux, so no gas row depends on a solid row. An
   // algebraic multigrid hierarchy over the whole matrix forms coarse unknowns across the interface, and does not
-  // converge. The preconditioner is then a field split with one field per phase, solved one after the other (gas, then
-  // solid), with the preconditioner from the input file (pc_type) on each field. The natural jump couples the phases
-  // both ways, and the preconditioner from the input file is applied to the whole matrix.
+  // converge. The preconditioner is then a field split with one field per phase, with the preconditioner from the input
+  // file (pc_type) on each field. The fields are solved one after the other, gas first, which is exact for this block
+  // lower-triangular matrix. The natural jump couples the phases both ways, and the preconditioner from the input file
+  // is applied to the whole matrix. So is it with a single phase, which has no interface, and where the user gave
+  // -fieldsolveramg_pc_type to PETSc, which replaces the field split.
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
-  const bool splitPhases = (m_jumpBcType == JumpBCType::SaturationCharge) && (petscGrid->getNumPhases() == 2);
+  const bool splitPhases = (m_jumpBcType == JumpBCType::SaturationCharge) && (petscGrid->getNumPhases() == 2) &&
+                           !isUserOption("-fieldsolveramg_pc_type");
 
   // Option prefixes of the preconditioner from the input file: the whole matrix, or each field.
   std::vector<std::string> pcPrefixes;
@@ -433,45 +479,6 @@ FieldSolverAMG::setupSolver()
 
   // No effect unless the KSP is GMRES or FGMRES.
   PetscCallAbort(Chombo_MPI::comm, KSPGMRESSetRestart(m_ksp, m_kspGmresRestart));
-
-  // The level smoothers of a multigrid preconditioner, and the solvers of the fields of a field split, are only created
-  // when the preconditioner is set up, so their settings go into the options database, where they are picked up from.
-  // They are written on every setup, so that a change of the input options takes effect, except where the user gave the
-  // option to PETSc (PETSC_OPTIONS or the command line), which is recorded before this class first writes it. All
-  // FieldSolverAMG instances share the 'fieldsolveramg_' prefix, and the smoothers read the options when the
-  // preconditioner is set up, at the first solve. So with two instances whose amg_smoother_* or gamg_* inputs differ,
-  // the last setupSolver before a solve decides: last writer wins. With identical inputs, the normal case, this does
-  // not matter. Preconditioners that are not multigrid ignore these options.
-  static const std::vector<std::string> userOptions = []() -> std::vector<std::string> {
-    std::vector<std::string> ret;
-
-    for (const std::string prefix :
-         {"-fieldsolveramg_", "-fieldsolveramg_fieldsplit_gas_", "-fieldsolveramg_fieldsplit_solid_"}) {
-      for (const std::string option : {"mg_levels_ksp_type",
-                                       "mg_levels_pc_type",
-                                       "mg_levels_ksp_max_it",
-                                       "pc_gamg_threshold",
-                                       "pc_gamg_aggressive_coarsening",
-                                       "ksp_type",
-                                       "pc_type"}) {
-        PetscBool isSet = PETSC_FALSE;
-
-        PetscCallAbort(Chombo_MPI::comm, PetscOptionsHasName(nullptr, nullptr, (prefix + option).c_str(), &isSet));
-
-        if (isSet == PETSC_TRUE) {
-          ret.push_back(prefix + option);
-        }
-      }
-    }
-
-    return ret;
-  }();
-
-  auto setDefaultOption = [](const std::string& a_name, const std::string& a_value) -> void {
-    if (std::find(userOptions.begin(), userOptions.end(), a_name) == userOptions.end()) {
-      PetscCallAbort(Chombo_MPI::comm, PetscOptionsSetValue(nullptr, a_name.c_str(), a_value.c_str()));
-    }
-  };
 
   for (const std::string& prefix : pcPrefixes) {
     setDefaultOption(prefix + "mg_levels_ksp_type", m_amgSmootherKsp);

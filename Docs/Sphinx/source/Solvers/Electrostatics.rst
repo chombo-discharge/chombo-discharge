@@ -539,6 +539,7 @@ With the saturation charge, the gas side of the interface has no flux, so no gas
 An algebraic multigrid hierarchy over the whole matrix forms coarse unknowns across the interface, and does not converge on such a matrix.
 ``FieldSolverAMG`` then preconditions with a PETSc field split with one field per phase, solved one after the other (gas, then dielectric), each with one application of ``pc_type`` and the ``amg_smoother_*`` and ``gamg_*`` settings.
 The fields can be configured with the PETSc options prefixes ``-fieldsolveramg_fieldsplit_gas_`` and ``-fieldsolveramg_fieldsplit_solid_``.
+Giving ``-fieldsolveramg_pc_type`` to PETSc replaces the field split by that preconditioner on the whole matrix.
 With the natural jump condition the phases are coupled both ways, and ``pc_type`` is applied to the whole matrix.
 
 With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
