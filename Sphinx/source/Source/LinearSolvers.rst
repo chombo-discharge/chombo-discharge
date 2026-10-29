@@ -125,14 +125,14 @@ Robin boundary conditions are in the form
 
 .. math::
 
-   A\partial_n\Phi + B\Phi = C,
+   A\Phi + B\partial_n\Phi = C,
 
-where :math:`A`, :math:`B`, and :math:`C` are constants.
+where :math:`A`, :math:`B`, and :math:`C` are constants, and :math:`\mathbf{n}` points into the computational domain.
 This boundary condition is enforced through the flux
 
 .. math::
 
-   \partial_n\Phi = \frac{1}{A}\left(C - B\Phi\right),
+   \partial_n\Phi = \frac{1}{B}\left(C - A\Phi\right),
 
 which requires an evaluation of :math:`\Phi` on the domain boundaries and the EB.
 
@@ -143,7 +143,7 @@ The Robin boundary condition takes the form
 
 .. math::
 
-   \partial_n\Phi = \frac{C}{A} - \frac{B}{A}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.
+   \partial_n\Phi = \frac{C}{B} - \frac{A}{B}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.
    
 Currently, we include the data in the cut-cell itself in the interpolation (and thus also use unweighted least squares to avoid forming an ill-conditioned system).
 

@@ -258,17 +258,17 @@ For the same reason, gradient reconstruction near the cut-cells might require in
 <h4>Robin<a class="headerlink" href="#robin" title="Permalink to this heading"></a></h4>
 <p>Robin boundary conditions are in the form</p>
 <div class="math notranslate nohighlight">
-\[A\partial_n\Phi + B\Phi = C,\]</div>
-<p>where <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span>, and <span class="math notranslate nohighlight">\(C\)</span> are constants.
+\[A\Phi + B\partial_n\Phi = C,\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span>, and <span class="math notranslate nohighlight">\(C\)</span> are constants, and <span class="math notranslate nohighlight">\(\mathbf{n}\)</span> points into the computational domain.
 This boundary condition is enforced through the flux</p>
 <div class="math notranslate nohighlight">
-\[\partial_n\Phi = \frac{1}{A}\left(C - B\Phi\right),\]</div>
+\[\partial_n\Phi = \frac{1}{B}\left(C - A\Phi\right),\]</div>
 <p>which requires an evaluation of <span class="math notranslate nohighlight">\(\Phi\)</span> on the domain boundaries and the EB.</p>
 <p>For domain boundaries we extrapolate the cell-centered solution to the domain edge, using standard first order finite differencing.</p>
 <p>On the embedded boundary, we approximate <span class="math notranslate nohighlight">\(\Phi\left(\mathbf{x}_{\text{EB}}\right)\)</span> by linearly interpolating the solution with a least squares fit, using cells which can be reached with a monotone path of radius one around the EB face (see <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details).
 The Robin boundary condition takes the form</p>
 <div class="math notranslate nohighlight">
-\[\partial_n\Phi = \frac{C}{A} - \frac{B}{A}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.\]</div>
+\[\partial_n\Phi = \frac{C}{B} - \frac{A}{B}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.\]</div>
 <p>Currently, we include the data in the cut-cell itself in the interpolation (and thus also use unweighted least squares to avoid forming an ill-conditioned system).</p>
 </section>
 </section>
