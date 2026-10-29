@@ -248,6 +248,17 @@ public:
   needGradient(const int a_plasmaIndex) const noexcept;
 
   /**
+   * @brief Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.
+   * @details The stepper skips the EB emission pass in a step where no particle or photon reached the EB and
+   * no CDR species is mobile, unless this returns true. Field emission is the typical case: it is driven by
+   * the electric field alone. The default is the conservative answer, so a model that does not override this
+   * has the emission pass run every step.
+   * @return True if the EB emission pass must run even when no primaries reached the EB.
+   */
+  virtual bool
+  emitsWithoutPrimariesEB() const noexcept;
+
+  /**
    * @brief Get the internal mapping from plasma-species index to solver type and solver index.
    * @return Map from plasma species index to (SpeciesType, solver index) pair.
    */

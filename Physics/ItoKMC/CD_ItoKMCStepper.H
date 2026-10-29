@@ -1675,15 +1675,16 @@ protected:
 
   /**
    * @brief Whether anything can be emitted from the EB this step, answered globally.
-   * @details Secondary emission is driven by three inputs: particles and photons that struck the boundary,
-   * and the advective flux a mobile CDR species delivers to it. When none of those exist anywhere, the
+   * @details Secondary emission is driven by particles and photons that struck the boundary, by the
+   * advective flux a mobile CDR species delivers to it, and by emission that needs none of these, such as
+   * field emission (ItoKMCPhysics::emitsWithoutPrimariesEB()). When none of those exist anywhere, the
    * emission routines still run their full fixed cost -- roughly twenty hierarchy-wide exchanges, per step,
    * whether or not a single particle reached the EB.
    *
    * The test has to be global, because the work it guards is collective: every rank must reach the same
    * verdict or the ones that skip leave the others waiting in an exchange that never completes. One
    * Allreduce over the local counts answers it, and those counts are free (the containers track their own
-   * size). Mobility is a static property of the CDR solvers and needs no reduction.
+   * size). Mobility and emitsWithoutPrimariesEB() are static properties and need no reduction.
    *
    * Skipping leaves the secondary containers holding whatever the last emitting step put there, which is
    * harmless: nothing reads them unless the emission runs, and fillSecondaryEmissionEB() clears them on

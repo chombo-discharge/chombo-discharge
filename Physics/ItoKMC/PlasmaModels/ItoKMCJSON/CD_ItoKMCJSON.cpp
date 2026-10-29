@@ -4069,6 +4069,17 @@ ItoKMCJSON::needGradient(const int a_plasmaIndex) const noexcept
   return false;
 }
 
+bool
+ItoKMCJSON::emitsWithoutPrimariesEB() const noexcept
+{
+  CH_TIME("ItoKMCJSON::emitsWithoutPrimariesEB");
+  if (m_verbose) {
+    pout() << m_className + "::emitsWithoutPrimariesEB" << endl;
+  }
+
+  return !(m_electrodeFieldEmission.empty()) || !(m_dielectricFieldEmission.empty());
+}
+
 int
 ItoKMCJSON::getNumberOfPlotVariables() const noexcept
 {

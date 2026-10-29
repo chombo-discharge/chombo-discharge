@@ -5130,6 +5130,11 @@ ItoKMCStepper<I, C, R, F>::needSecondaryEmissionEB() const noexcept
     pout() << m_name + "::needSecondaryEmissionEB" << endl;
   }
 
+  // Emission that needs no primaries (e.g. field emission) must run every step. Static, hence no reduction.
+  if (m_physics->emitsWithoutPrimariesEB()) {
+    return true;
+  }
+
   // A mobile CDR species can deliver flux to the boundary with no particles or photons involved at all, so
   // its presence alone forces the emission to run. Static, hence no reduction.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {

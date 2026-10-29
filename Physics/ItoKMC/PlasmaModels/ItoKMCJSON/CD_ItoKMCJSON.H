@@ -193,6 +193,15 @@ public:
   needGradient(const int a_plasmaIndex) const noexcept override;
 
   /**
+   * @brief Return true if field emission is specified on electrodes or dielectrics.
+   * @details Field emission is the only EB emission in this model that does not need a primary particle or
+   * photon.
+   * @return True if the EB emission pass must run even when no primaries reached the EB.
+   */
+  virtual bool
+  emitsWithoutPrimariesEB() const noexcept override;
+
+  /**
    * @brief Compute the Ito solver mobilities.
    * @details Fills the caller's buffer; an immobile species carries a constant-zero function and so fills
    * its own slot without a table lookup.
