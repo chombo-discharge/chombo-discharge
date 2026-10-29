@@ -42,7 +42,7 @@ public:
    * @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
    * @param[in] a_dropOrder    Drop the stencil order to 1 in cells that are not valid cells (all cells if
    * a_validCells is null)
-   * @param[in] a_phase Description
+   * @param[in] a_phase        Phase with zero normal derivative on the interface (dphi/dn = 0)
    */
   MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
                                     const Location::Cell     a_dataLocation,
