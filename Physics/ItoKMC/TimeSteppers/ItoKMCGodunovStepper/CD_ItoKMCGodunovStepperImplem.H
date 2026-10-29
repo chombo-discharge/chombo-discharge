@@ -741,6 +741,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       this->resolveSecondaryEmissionEB(a_dt);
     }
     m_timer.stopEvent("EB particle injection");
+
+    m_timer.startEvent("Domain particle injection");
+    if (this->needSecondaryEmissionDomain()) {
+      this->fillSecondaryEmissionDomain(a_dt);
+      this->resolveSecondaryEmissionDomain();
+    }
+    m_timer.stopEvent("Domain particle injection");
   }
 
   // Sort the particles and photons per cell so we can call reaction algorithms
@@ -804,6 +811,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       this->resolveSecondaryEmissionEB(a_dt);
     }
     m_timer.stopEvent("EB particle injection");
+
+    m_timer.startEvent("Domain particle injection");
+    if (this->needSecondaryEmissionDomain()) {
+      this->fillSecondaryEmissionDomain(a_dt);
+      this->resolveSecondaryEmissionDomain();
+    }
+    m_timer.stopEvent("Domain particle injection");
   }
 
   // Remove particles that are inside the EB -- this is not a part of the algorithm, just a safety measure to make sure

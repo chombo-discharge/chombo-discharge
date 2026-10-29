@@ -1752,6 +1752,53 @@ protected:
                              const Real                               a_dt) noexcept;
 
   /**
+   * @brief Whether anything can be emitted from the domain boundary this step, answered globally.
+   * @details The domain counterpart of needSecondaryEmissionEB(). Domain emission is driven by particles and
+   * photons that left the domain, and by emission that needs neither, such as field emission
+   * (ItoKMCPhysics::emitsWithoutPrimariesDomain()). CDR species do not take part.
+   * @return True if domain emission must be resolved this step.
+   */
+  virtual bool
+  needSecondaryEmissionDomain() const noexcept;
+
+  /**
+   * @brief Compute secondary emission on the domain boundary.
+   * @param[in] a_dt Time step.
+   * @note Calls the other version with the Ito solvers' domain particles and the RTE solvers' domain photons.
+   */
+  virtual void
+  fillSecondaryEmissionDomain(const Real a_dt) noexcept;
+
+  /**
+   * @brief Compute secondary emission on the domain boundary.
+   * @details Calls ItoKMCPhysics::secondaryEmissionDomain() once for every boundary cell and every
+   * non-periodic domain face the cell touches. A cell on an edge or corner of the domain touches more than one
+   * face, so its primaries are split between the faces: each goes to the face it lies nearest, which is the
+   * face it crossed. This routine fills the secondary containers but does NOT fill the solvers.
+   * @param[out] a_secondaryParticles Secondary emitted (gained) particles at the domain boundary.
+   * @param[out] a_secondaryPhotons   Secondary emitted photons at the domain boundary.
+   * @param[in]  a_primaryParticles   Primary (lost) particles at the domain boundary.
+   * @param[in]  a_primaryPhotons     Primary (lost) photons at the domain boundary.
+   * @param[in]  a_electricField      Electric field on the particle realm.
+   * @param[in]  a_dt                 Time step.
+   */
+  virtual void
+  fillSecondaryEmissionDomain(Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
+                              Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+                              Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
+                              Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
+                              const EBAMRCellData&                                   a_electricField,
+                              const Real                                             a_dt) noexcept;
+
+  /**
+   * @brief Resolve secondary emission on the domain boundary.
+   * @details Moves the secondary particles into the Ito solvers and removes the primary particles. Unlike the
+   * EB, the domain boundary carries no surface charge, so no charge is deposited.
+   */
+  virtual void
+  resolveSecondaryEmissionDomain() noexcept;
+
+  /**
    * @brief Compute a physics-based maximum time step.
    * @details This routine simply returns the non-critical KMC time step. Note that this time step
    * is the one computed AFTER advanceReactionNetwork has been called. I.e., this routine sets

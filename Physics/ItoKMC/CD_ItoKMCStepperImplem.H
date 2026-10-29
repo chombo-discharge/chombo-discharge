@@ -5617,6 +5617,321 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 }
 
 template <typename I, typename C, typename R, typename F>
+bool
+ItoKMCStepper<I, C, R, F>::needSecondaryEmissionDomain() const noexcept
+{
+  CH_TIME("ItoKMCStepper::needSecondaryEmissionDomain");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::needSecondaryEmissionDomain" << endl;
+  }
+
+  // Emission that needs no primaries (e.g. field emission) must run every step. Static, hence no reduction.
+  if (m_physics->emitsWithoutPrimariesDomain()) {
+    return true;
+  }
+
+  long long numPrimaries = 0;
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    numPrimaries += static_cast<long long>(
+      solverIt()->getParticles(ItoSolver::WhichContainer::Domain).getNumberOfValidParticlesLocal());
+  }
+
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    numPrimaries += static_cast<long long>(solverIt()->getDomainPhotons().getNumberOfValidParticlesLocal());
+  }
+
+  return ParallelOps::sum(numPrimaries) > 0LL;
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(const Real a_dt) noexcept
+{
+  CH_TIME("ItoKMCStepper::fillSecondaryEmissionDomain(Real)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::fillSecondaryEmissionDomain(Real)" << endl;
+  }
+
+  // Particles that left the domain
+  Vector<ParticleContainer<ItoParticle>*> primaryParticles;
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    primaryParticles.push_back(&(it()->getParticles(ItoSolver::WhichContainer::Domain)));
+  }
+
+  // Photons that left the domain
+  Vector<ParticleContainer<Photon>*> primaryPhotons;
+  for (auto it = m_rte->iterator(); it.ok(); ++it) {
+    primaryPhotons.push_back(&(it()->getDomainPhotons()));
+  }
+
+  this->fillSecondaryEmissionDomain(m_secondaryParticles,
+                                    m_secondaryPhotons,
+                                    primaryParticles,
+                                    primaryPhotons,
+                                    m_electricFieldParticle,
+                                    a_dt);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionDomain(
+  Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
+  Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+  Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
+  Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
+  const EBAMRCellData&                                   a_electricField,
+  const Real                                             a_dt) noexcept
+{
+  CH_TIME("ItoKMCStepper::fillSecondaryEmissionDomain(full)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::fillSecondaryEmissionDomain(full)" << endl;
+  }
+
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  CH_assert(a_secondaryParticles.size() == numItoSpecies);
+  CH_assert(a_secondaryPhotons.size() == numPhotonSpecies);
+  CH_assert(a_primaryParticles.size() == numItoSpecies);
+  CH_assert(a_primaryPhotons.size() == numPhotonSpecies);
+  CH_assert(a_electricField.getRealm() == m_particleRealm);
+  CH_assert(a_dt >= 0.0);
+
+  // Incoming/outgoing particle and photon containers must be sorted by cell.
+  for (int i = 0; i < numItoSpecies; i++) {
+    CH_assert(a_secondaryParticles[i]->getRealm() == m_particleRealm);
+    CH_assert(a_primaryParticles[i]->getRealm() == m_particleRealm);
+
+    a_secondaryParticles[i]->clearParticles();
+    a_secondaryParticles[i]->organizeParticlesByCell();
+
+    a_primaryParticles[i]->organizeParticlesByCell();
+  }
+
+  for (int i = 0; i < numPhotonSpecies; i++) {
+    CH_assert(a_secondaryPhotons[i]->getRealm() == m_particleRealm);
+    CH_assert(a_primaryPhotons[i]->getRealm() == m_particleRealm);
+
+    a_secondaryPhotons[i]->clearParticles();
+
+    a_secondaryPhotons[i]->organizeParticlesByCell();
+    a_primaryPhotons[i]->organizeParticlesByCell();
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl       = m_amr->getGrids(m_particleRealm)[lvl];
+    const DataIterator&      dit       = dbl.dataIterator();
+    const EBISLayout&        ebisl     = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[lvl];
+    const ProblemDomain&     domain    = m_amr->getDomains()[lvl];
+    const Box                domainBox = domain.domainBox();
+    const Real               dx        = m_amr->getDx()[lvl];
+
+    // The non-periodic domain faces. A particle that leaves through a periodic face re-enters on the other side
+    // and is never a primary.
+    std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (!(domain.isPeriodic(dir))) {
+        for (SideIterator sit; sit.ok(); ++sit) {
+          domainFaces.emplace_back(dir, sit());
+        }
+      }
+    }
+
+    // A primary was put just inside the domain where it crossed the boundary, so the face it crossed is the one
+    // it lies nearest.
+    auto crossedFace = [&](const RealVect& a_pos) -> std::pair<int, Side::LoHiSide> {
+      std::pair<int, Side::LoHiSide> nearest  = domainFaces.front();
+      Real                           distance = std::numeric_limits<Real>::max();
+
+      for (const auto& face : domainFaces) {
+        const int  dir = face.first;
+        const Real d   = (face.second == Side::Lo) ? a_pos[dir] - probLo[dir] : probHi[dir] - a_pos[dir];
+
+        if (d < distance) {
+          distance = d;
+          nearest  = face;
+        }
+      }
+
+      return nearest;
+    };
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+      const Box        box = dbl[din];
+
+      // The domain faces this patch touches. A patch away from the boundary has nothing to do; its secondary
+      // containers were cleared above, which is the state it would be left in anyway.
+      std::vector<std::pair<int, Side::LoHiSide>> patchFaces;
+      for (const auto& face : domainFaces) {
+        const int  dir     = face.first;
+        const bool touches = (face.second == Side::Lo) ? box.smallEnd(dir) == domainBox.smallEnd(dir)
+                                                       : box.bigEnd(dir) == domainBox.bigEnd(dir);
+
+        if (touches) {
+          patchFaces.emplace_back(face);
+        }
+      }
+
+      if (patchFaces.empty()) {
+        continue;
+      }
+
+      const EBISBox&       ebisbox       = ebisl[din];
+      const EBCellFAB&     electricField = (*a_electricField[lvl])[din];
+      const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
+
+      // Per-cell SoA scratch (indexed by Box::index(iv)). Primary cells are read from the SoA leaves;
+      // secondary cells start empty and are rebuilt into the SoA leaves after the kernel.
+      std::vector<std::vector<ParticleSoA<ItoParticle>>> primaryItoCells(numItoSpecies);
+      std::vector<std::vector<ParticleSoA<ItoParticle>>> secondaryItoCells(numItoSpecies);
+      std::vector<std::vector<ParticleSoA<Photon>>>      primaryPhotonCells(numPhotonSpecies);
+      std::vector<std::vector<ParticleSoA<Photon>>>      secondaryPhotonCells(numPhotonSpecies);
+
+      for (int i = 0; i < numItoSpecies; i++) {
+        binLeafToCells(primaryItoCells[i], (*a_primaryParticles[i])[lvl][din], box, dx, probLo);
+        secondaryItoCells[i].resize(box.numPts());
+      }
+
+      for (int i = 0; i < numPhotonSpecies; i++) {
+        binLeafToCells(primaryPhotonCells[i], (*a_primaryPhotons[i])[lvl][din], box, dx, probLo);
+        secondaryPhotonCells[i].resize(box.numPts());
+      }
+
+      for (const auto& face : patchFaces) {
+        const int            dir  = face.first;
+        const Side::LoHiSide side = face.second;
+
+        // The layer of cells just inside this domain face.
+        Box faceCells = (side == Side::Lo) ? adjCellLo(domainBox, dir, -1) : adjCellHi(domainBox, dir, -1);
+        faceCells &= box;
+
+        for (BoxIterator bit(faceCells); bit.ok(); ++bit) {
+          const IntVect iv = bit();
+
+          if (!validCells(iv) || ebisbox.isCovered(iv)) {
+            continue;
+          }
+
+          // A multi-valued cell gets all its primaries on its first VoF.
+          const VolIndex vof     = ebisbox.getVoFs(iv)[0];
+          const long     cellIdx = box.index(iv);
+
+          // The primaries in this cell that crossed this face.
+          Vector<ParticleSoA<ItoParticle>> primaryParticles(numItoSpecies);
+          Vector<ParticleSoA<Photon>>      primaryPhotons(numPhotonSpecies);
+          Vector<ParticleSoA<ItoParticle>> secondaryParticles(numItoSpecies);
+          Vector<ParticleSoA<Photon>>      secondaryPhotons(numPhotonSpecies);
+
+          auto selectCrossed = [&](auto& a_selected, const auto& a_cell) -> void {
+            for (std::size_t j = 0; j < a_cell.size(); j++) {
+              if (crossedFace(a_cell.position(j)) == face) {
+                a_selected.appendParticle(a_cell, j);
+              }
+            }
+          };
+
+          for (int i = 0; i < numItoSpecies; i++) {
+            selectCrossed(primaryParticles[i], primaryItoCells[i][cellIdx]);
+          }
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            selectCrossed(primaryPhotons[i], primaryPhotonCells[i][cellIdx]);
+          }
+
+          const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+          const RealVect cellCenter   = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+          const RealVect cellCentroid = ebisbox.centroid(vof);
+
+          // The EB geometry is only passed for cells that the EB cuts.
+          const bool     isCutCell     = ebisbox.isIrregular(iv);
+          const RealVect bndryCentroid = isCutCell ? ebisbox.bndryCentroid(vof) : RealVect::Zero;
+          const RealVect bndryNormal   = isCutCell ? ebisbox.normal(vof) : RealVect::Zero;
+
+          // Area fraction of this cell's domain face that is open to the gas.
+          const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
+
+          Real faceArea = 0.0;
+          for (int f = 0; f < faces.size(); f++) {
+            faceArea += ebisbox.areaFrac(faces[f]);
+          }
+
+          m_physics->secondaryEmissionDomain(secondaryParticles,
+                                             secondaryPhotons,
+                                             primaryParticles,
+                                             primaryPhotons,
+                                             E,
+                                             cellCenter,
+                                             cellCentroid,
+                                             bndryCentroid,
+                                             bndryNormal,
+                                             dir,
+                                             side,
+                                             faceArea,
+                                             dx,
+                                             a_dt);
+
+          // A cell on an edge or corner is visited once per face, so the secondaries are appended.
+          for (int i = 0; i < numItoSpecies; i++) {
+            secondaryItoCells[i][cellIdx].append(secondaryParticles[i]);
+          }
+          for (int i = 0; i < numPhotonSpecies; i++) {
+            secondaryPhotonCells[i][cellIdx].append(secondaryPhotons[i]);
+          }
+        }
+      }
+
+      // SoA write-back: rebuild the secondary Ito/photon leaves for this patch from the filled per-cell scratch.
+      for (int i = 0; i < numItoSpecies; i++) {
+        rebuildLeafFromCells((*a_secondaryParticles[i])[lvl][din], secondaryItoCells[i], box, dx, probLo);
+      }
+      for (int i = 0; i < numPhotonSpecies; i++) {
+        rebuildLeafFromCells((*a_secondaryPhotons[i])[lvl][din], secondaryPhotonCells[i], box, dx, probLo);
+      }
+    }
+  }
+
+  // Sort by patch
+  for (int i = 0; i < numItoSpecies; i++) {
+    a_secondaryParticles[i]->organizeParticlesByPatch();
+    a_primaryParticles[i]->organizeParticlesByPatch();
+  }
+
+  for (int i = 0; i < numPhotonSpecies; i++) {
+    a_secondaryPhotons[i]->organizeParticlesByPatch();
+    a_primaryPhotons[i]->organizeParticlesByPatch();
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionDomain() noexcept
+{
+  CH_TIME("ItoKMCStepper::resolveSecondaryEmissionDomain");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::resolveSecondaryEmissionDomain" << endl;
+  }
+
+  // Add the secondary particles into the solvers and remove the primary particles.
+  for (auto it = m_ito->iterator(); it.ok(); ++it) {
+    const RefCountedPtr<ItoSolver>& solver = it();
+
+    const int idx = it.index();
+
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    particles.transferParticles(m_secondaryParticles[idx]->getParticles());
+
+    solver->getParticles(ItoSolver::WhichContainer::Domain).clearParticles();
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
 {
