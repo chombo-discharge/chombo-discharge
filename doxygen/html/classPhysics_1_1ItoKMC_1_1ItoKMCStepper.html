@@ -395,6 +395,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:a9100de38907383b414890febd188fdb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="memitem:a989274946d637dd8b68bb50f9a9caa18" id="r_a989274946d637dd8b68bb50f9a9caa18"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a989274946d637dd8b68bb50f9a9caa18">resolveSecondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, EBAMRIVData &amp;a_surfaceChargeDensity, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a989274946d637dd8b68bb50f9a9caa18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:abf72046e193f9722cc60f2a4e69c3e99" id="r_abf72046e193f9722cc60f2a4e69c3e99"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf72046e193f9722cc60f2a4e69c3e99">needSecondaryEmissionDomain</a> () const noexcept</td></tr>
+<tr class="memdesc:abf72046e193f9722cc60f2a4e69c3e99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether anything can be emitted from the domain boundary this step, answered globally.  <br /></td></tr>
+<tr class="memitem:a3af19e5375c4093e059de8f86ffea1ac" id="r_a3af19e5375c4093e059de8f86ffea1ac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3af19e5375c4093e059de8f86ffea1ac">fillSecondaryEmissionDomain</a> (const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a3af19e5375c4093e059de8f86ffea1ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission on the domain boundary.  <br /></td></tr>
+<tr class="memitem:adc754a896fabccc555dc12fc307b1526" id="r_adc754a896fabccc555dc12fc307b1526"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adc754a896fabccc555dc12fc307b1526">fillSecondaryEmissionDomain</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;a_secondaryParticles, Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;a_secondaryPhotons, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_primaryPhotons, const EBAMRCellData &amp;a_electricField, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:adc754a896fabccc555dc12fc307b1526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission on the domain boundary.  <br /></td></tr>
+<tr class="memitem:a0a94da96a3dde02124994341df815104" id="r_a0a94da96a3dde02124994341df815104"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a94da96a3dde02124994341df815104">resolveSecondaryEmissionDomain</a> () noexcept</td></tr>
+<tr class="memdesc:a0a94da96a3dde02124994341df815104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission on the domain boundary.  <br /></td></tr>
 <tr class="memitem:a0f2ff3044d33797d8b9f7149cc4b08fd" id="r_a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f2ff3044d33797d8b9f7149cc4b08fd">computePhysicsDt</a> () noexcept</td></tr>
 <tr class="memdesc:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based maximum time step.  <br /></td></tr>
 <tr class="memitem:a38962bd222ff6b86f2e3a462050f95f2" id="r_a38962bd222ff6b86f2e3a462050f95f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38962bd222ff6b86f2e3a462050f95f2">computeDummyPhysicsDt</a> () noexcept</td></tr>
@@ -2777,6 +2785,106 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="a3af19e5375c4093e059de8f86ffea1ac" name="a3af19e5375c4093e059de8f86ffea1ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3af19e5375c4093e059de8f86ffea1ac">&#9670;&#160;</a></span>fillSecondaryEmissionDomain() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::fillSecondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute secondary emission on the domain boundary. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Calls the other version with the Ito solvers' domain particles and the RTE solvers' domain photons. </dd></dl>
+
+</div>
+</div>
+<a id="adc754a896fabccc555dc12fc307b1526" name="adc754a896fabccc555dc12fc307b1526"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc754a896fabccc555dc12fc307b1526">&#9670;&#160;</a></span>fillSecondaryEmissionDomain() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::fillSecondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electricField</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute secondary emission on the domain boundary. </p>
+<p>Calls <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">ItoKMCPhysics::secondaryEmissionDomain()</a> once for every boundary cell and every non-periodic domain face the cell touches. A cell on an edge or corner of the domain touches more than one face, so its primaries are split between the faces: each goes to the face it lies nearest, which is the face it crossed. This routine fills the secondary containers but does NOT fill the solvers. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Secondary emitted (gained) particles at the domain boundary. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryPhotons</td><td>Secondary emitted photons at the domain boundary. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Primary (lost) particles at the domain boundary. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Primary (lost) photons at the domain boundary. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field on the particle realm. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a5f165cf7747a84abe650c67ca1852ecf" name="a5f165cf7747a84abe650c67ca1852ecf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5f165cf7747a84abe650c67ca1852ecf">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[1/2]</span></h2>
 
@@ -3633,6 +3741,36 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="abf72046e193f9722cc60f2a4e69c3e99" name="abf72046e193f9722cc60f2a4e69c3e99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf72046e193f9722cc60f2a4e69c3e99">&#9670;&#160;</a></span>needSecondaryEmissionDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCStepper::needSecondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether anything can be emitted from the domain boundary this step, answered globally. </p>
+<p>The domain counterpart of <a class="el" href="#abe1aae47c80aee7c2055a853f588863c" title="Whether anything can be emitted from the EB this step, answered globally.">needSecondaryEmissionEB()</a>. Domain emission is driven by particles and photons that left the domain, and by emission that needs neither, such as field emission (<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a31d5465a2e8ff0addc5fc1d76f0194be" title="Return true if secondaryEmissionDomain() can emit in a step where nothing reached the domain boundary...">ItoKMCPhysics::emitsWithoutPrimariesDomain()</a>). CDR species do not take part. </p><dl class="section return"><dt>Returns</dt><dd>True if domain emission must be resolved this step. </dd></dl>
+
+</div>
+</div>
 <a id="abe1aae47c80aee7c2055a853f588863c" name="abe1aae47c80aee7c2055a853f588863c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abe1aae47c80aee7c2055a853f588863c">&#9670;&#160;</a></span>needSecondaryEmissionEB()</h2>
 
@@ -3659,8 +3797,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Whether anything can be emitted from the EB this step, answered globally. </p>
-<p>Secondary emission is driven by three inputs: particles and photons that struck the boundary, and the advective flux a mobile CDR species delivers to it. When none of those exist anywhere, the emission routines still run their full fixed cost &ndash; roughly twenty hierarchy-wide exchanges, per step, whether or not a single particle reached the EB.</p>
-<p>The test has to be global, because the work it guards is collective: every rank must reach the same verdict or the ones that skip leave the others waiting in an exchange that never completes. One Allreduce over the local counts answers it, and those counts are free (the containers track their own size). Mobility is a static property of the CDR solvers and needs no reduction.</p>
+<p>Secondary emission is driven by particles and photons that struck the boundary, by the advective flux a mobile CDR species delivers to it, and by emission that needs none of these, such as field emission (<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae205cd2b6ec870b929c3efffb00e6c37" title="Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.">ItoKMCPhysics::emitsWithoutPrimariesEB()</a>). When none of those exist anywhere, the emission routines still run their full fixed cost &ndash; roughly twenty hierarchy-wide exchanges, per step, whether or not a single particle reached the EB.</p>
+<p>The test has to be global, because the work it guards is collective: every rank must reach the same verdict or the ones that skip leave the others waiting in an exchange that never completes. One Allreduce over the local counts answers it, and those counts are free (the containers track their own size). Mobility and emitsWithoutPrimariesEB() are static properties and need no reduction.</p>
 <p>Skipping leaves the secondary containers holding whatever the last emitting step put there, which is harmless: nothing reads them unless the emission runs, and <a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> clears them on entry when it does. </p><dl class="section return"><dt>Returns</dt><dd>True if secondary emission must be resolved this step. </dd></dl>
 
 </div>
@@ -4778,6 +4916,36 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a0a94da96a3dde02124994341df815104" name="a0a94da96a3dde02124994341df815104"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a94da96a3dde02124994341df815104">&#9670;&#160;</a></span>resolveSecondaryEmissionDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::resolveSecondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resolve secondary emission on the domain boundary. </p>
+<p>Moves the secondary particles into the Ito solvers and removes the primary particles. Unlike the EB, the domain boundary carries no surface charge, so no charge is deposited. </p>
 
 </div>
 </div>

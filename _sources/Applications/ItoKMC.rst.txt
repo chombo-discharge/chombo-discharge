@@ -554,6 +554,21 @@ These specifications follow a pre-defined JSON format which is discussed in deta
 
    While JSON files do not formally support comments, the JSON submodule used by ``chombo-discharge`` allows them.
 
+Unknown keys
+------------
+
+Every JSON object that ``ItoKMCJSON`` reads is checked against the keys the parser reads from it.
+The one exception is ``"law"`` under ``"gas"``, whose keys are user-chosen law names; each named law is checked.
+A key that the parser does not read, such as a misspelled ``"points"`` where ``"num points"`` was meant, would otherwise be silently ignored.
+Such keys are reported together with the object they appear in, the allowed key they most likely misspell (if one is close enough), and the full list of allowed keys.
+Some keys are only read for some settings of another key (e.g. ``"species"`` in ``"particle placement"`` is only read by the ``downstream`` method), and are reported as unknown otherwise.
+
+Whether an unknown key is a warning or an error is set by the required option
+
+.. code-block:: text
+
+   ItoKMCJSON.unknown_keys = abort    ## 'warn' or 'abort' on JSON keys that the parser does not read
+
 Gas law
 -------
 
@@ -622,8 +637,8 @@ When specifying that the gas law ``type`` is ``ideal``, the user must further sp
 	    "my_ideal_gas" : {
 		"type" : "ideal",    // Ideal gas law type
 		"temperature" : 300, // Temperature must be in Kelvin
-		"pressure" : 1.0     // Pressure must be in bar
-	    },
+		"pressure" : 1E5     // Pressure must be in Pascal
+	    }
 	 }
       }
    }
@@ -718,7 +733,7 @@ An example JSON specification is
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"             // Species name
+	       "id": "O2",            // Species name
 	       "molar fraction": {    // Molar fraction specification
    	          "type": "constant", // Constant molar fraction
 	          "value": 0.2        // Molar fraction value
@@ -765,7 +780,7 @@ An example JSON specification is
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"                           // Species name
+	       "id": "O2",                          // Species name
 	       "molar fraction": {                  // Molar fraction specification
    	          "type": "table vs height",        // Constant molar fraction
 		  "file" : "O2_molar_fraction.dat", // File name containing molar fraction
@@ -798,7 +813,7 @@ For example
       "gas" : {
 	 "background species" : [
 	    {
-	       "id": "O2"             // Species name
+	       "id": "O2",            // Species name
 	       "molar fraction": {    // Molar fraction specification
    	          "type": "constant", // Constant molar fraction
 	          "value": 0.2        // Molar fraction value
@@ -969,7 +984,7 @@ Each species *must* specify the following fields
 * ``solver`` (string) For specifying whether or not the species is tracked by a CDR or Îto solver.
   Acceptable values are *cdr* and *ito*.
 * ``mobile`` (boolean) For specifying whether or not the species is mobile.
-* ``mobile`` (boolean) For specifying whether or not the species is diffusive.
+* ``diffusive`` (boolean) For specifying whether or not the species is diffusive.
 
 An example specification is
 
@@ -1024,7 +1039,7 @@ For example,
 	    "Z" : -1,              // Charge number
 	    "solver" : "ito",      // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,       // Mobile or not
-	    "diffusive" : true     // Diffusive or not,
+	    "diffusive" : true,    // Diffusive or not
 	    "mobility": {
 	       "type": "constant", // Set constant mobility
 	       "value": 0.02
@@ -1052,7 +1067,7 @@ For example,
 	    "Z" : -1,			// Charge number
 	    "solver" : "ito",		// Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,		// Mobile or not
-	    "diffusive" : true		// Diffusive or not,
+	    "diffusive" : true,		// Diffusive or not
 	    "mobility": {
 	       "type": "constant mu*N", // Set mu*N to a constant
 	       "value": 1E24
@@ -1083,8 +1098,8 @@ To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, se
 * ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
 * ``mu*N column`` For setting which column in the data file contains the values of :math:`\mu N` (or alternatively :math:`DN` for the diffusion coefficient).
   This is an optional argument that defaults to 1.
-* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
-* ``mu*N scale`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
+* ``scale E/N`` Optional scaling of the column containing the :math:`E/N` data.
+* ``scale mu*N`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
 * ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
@@ -1114,10 +1129,10 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "mu*N column" : 1,                            // Column containing mu*N
 	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
 	     "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
-	     "points" : 1000,                              // Number of grid points kept when resampling the table
+	     "num points" : 1000,                          // Number of grid points kept when resampling the table
 	     "spacing" : "exponential",                    // Grid point spacing when resampling the table
-	     "E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-	     "mu*N scale" : 1.0                            // Optional argument for scaling the E/N column
+	     "scale E/N" : 1.0,                            // Optional argument for scaling the E/N column
+	     "scale mu*N" : 1.0                            // Optional argument for scaling the mobility column
 	  }
        }
     ]
@@ -1194,7 +1209,7 @@ For example:
 Constant
 ^^^^^^^^
 
-To set a constant temperature, set the ``type`` specifier to ``constant`` and then specify the temperature.
+To set a constant temperature, set the ``type`` specifier to ``constant`` and then specify the temperature (in Kelvin) through ``T``.
 For example:
 
 .. code-block:: json
@@ -1208,7 +1223,7 @@ For example:
           "solver" : "ito",      // Solver type. 
 	  "temperature": {       // Specify temperature
 	     "type": "constant", // Constant temperature
-	     "value": 300        // Temperature in Kelvin
+	     "T": 300            // Temperature in Kelvin
 	  }
        }
     ]
@@ -1232,8 +1247,8 @@ To set the species temperature as a function :math:`T = T\left(E/N\right)`, set 
 * ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
 * ``eV column`` For setting which column in the data file contains the energy vs :math:`E/N`.
   This is an optional argument that defaults to 1.
-* ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
-* ``eV scale`` Optional scaling of the column containing the energy (in eV).
+* ``scale E/N`` Optional scaling of the column containing the :math:`E/N` data.
+* ``scale eV`` Optional scaling of the column containing the energy (in eV).
 * ``min E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``max E/N`` Optional truncation of the table representation of the data (applied after scaling).
 * ``num points`` Number of data points in internal table representation (optional, defaults to 1000).
@@ -1263,10 +1278,10 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "eV column" : 1,                         // Column containing the energy
 	     "min E/N" : 10,                          // Truncation of table
 	     "max E/N" : 2E6,                         // Truncation of table
-	     "E/N scale": 1.0,                        // Scaling of input data
-	     "eV scale": 1.0,                         // Scaling of input data
+	     "scale E/N": 1.0,                        // Scaling of input data
+	     "scale eV": 1.0,                         // Scaling of input data
 	     "spacing" : "exponential",               // Table spacing
-	     "points" : 1000                          // Number of points in table
+	     "num points" : 1000                      // Number of points in table
 	  }
        }
     ]
@@ -1475,10 +1490,10 @@ The particles must be organized as rows containing the coordinate positions and 
 The user must specify
 
 * ``file`` File name.
-* ``x`` Column containing the :math:`x` coordinates (optional, defaults to 0).
-* ``y`` Column containing the :math:`y` coordinates (optional, defaults to 1).
-* ``z`` Column containing the :math:`z` coordinates (optional, defaults to 2).
-* ``w`` Column containing the particle weight (optional, defaults to 3).
+* ``x column`` Column containing the :math:`x` coordinates (optional, defaults to 0).
+* ``y column`` Column containing the :math:`y` coordinates (optional, defaults to 1).
+* ``z column`` Column containing the :math:`z` coordinates (optional, defaults to 2).
+* ``w column`` Column containing the particle weight (optional, defaults to 3).
 
 For example:
 
@@ -1749,9 +1764,9 @@ A JSON specification is e.g.
 
    "plasma reactions": [
       {
-         "reaction": "e + N2 -> e + e + N2+" // Specify reaction
+         "reaction": "e + N2 -> e + e + N2+", // Specify reaction
 	 "type": "constant",                 // Reaction rate is constant
-	 "value": 1.E-30                     // Reaction rate
+	 "value": 1E-30                      // Reaction rate
       }
    ]
 
@@ -1779,7 +1794,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "       // Example reaction string. 
+         "reaction": "A + B -> ",      // Example reaction string. 
 	 "type": "function E/N exp A", // Function based rate.
 	 "c1": 1.0,                    // c1-coefficient
 	 "c2": 1.0,                    // c2-coefficient
@@ -1811,7 +1826,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> " // Example reaction string. 
+         "reaction": "A + B -> ", // Example reaction string. 
 	 "type": "function T A", // Function based rate.
 	 "c1": 1.0,              // c1-coefficient
 	 "c2": 1.0,              // c2-coefficient
@@ -1835,7 +1850,7 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "    // Example reaction string. 
+         "reaction": "A + B -> ",   // Example reaction string. 
 	 "type": "function T1T2 A", // Function based rate.
 	 "c1": 1.0,                 // c1-coefficient
 	 "c2": 1.0,                 // c2-coefficient
@@ -2119,7 +2134,7 @@ For example, the specification
 	    "reaction": "e -> e + e + M+", // Reaction string
 	    "type": "alpha*v",             // Rate is alpha*v
 	    "species": "e",                // Species for v,
-	    "gradient correction": "e"     // Specify gradient correction using species "e"
+	    "gradient correction": "e",    // Specify gradient correction using species "e"
 	    "quenching pressure": 4000,    // Quenching pressure
 	    "efficiency": 0.1              // Reaction efficiency
 	}	
@@ -2266,8 +2281,8 @@ Assume that photons are generated through the reaction
 	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
 	    "type": "alpha*v",                  // Rate is alpha*v
 	    "species": "e",                     // Species for v,
-	    "quenching pressure": 4000.0        // Quenching
-	    "efficiency": 0.6                   // Excitation events per ionization event
+	    "quenching pressure": 4000.0,       // Quenching
+	    "efficiency": 0.6,                  // Excitation events per ionization event
 	    "scale": 0.1                        // Photoionization events per absorbed photon
 	}	
     ]
@@ -2297,7 +2312,7 @@ In this case we modify the above into
 	    "reaction": "e + N2 -> e + N2 + Y", // Reaction string
 	    "type": "alpha*v",                  // Rate is alpha*v
 	    "species": "e",                     // Species for v,
-	    "quenching pressure": 4000.0        // Quenching
+	    "quenching pressure": 4000.0,       // Quenching
 	    "efficiency": 0.6                   // Excitation events per ionization event
 	}	
     ],
@@ -2325,8 +2340,8 @@ Secondary emission
 ------------------
 
 Secondary emission is supported for particles, including photons, but not for fluid species.
-Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries ``electrode emission`` and ``dielectric emission``.
-The internal specification for these are identical, so all examples below use ``dielectric emission``.
+Specification of secondary emission is done separately on dielectrics, electrodes, and the faces of the computational domain by specifying JSON entries ``electrode emission``, ``dielectric emission``, and ``domain emission``.
+The internal specification for these are identical (see :ref:`Chap:ItoKMCDomainEmission` for the one addition for the domain), so all examples below use ``dielectric emission``.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
 Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
@@ -2375,10 +2390,47 @@ The above example can be compressed by using a wildcard and an ``efficiencies`` 
 where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
 This has no effect on the probabilities :math:`p(i)` given above.
 
+Charged secondaries are only released if the electric field pushes them away from the surface, i.e. negative secondaries are released from cathodes and positive secondaries from anodes.
+Neutral secondaries are always released.
+
+.. _Chap:ItoKMCDomainEmission:
+
+Emission on the domain boundary
+_______________________________
+
+Secondary emission on the faces of the computational domain is specified with ``domain emission``.
+The specification is identical to the one for electrodes and dielectrics, except that each reaction also lists the domain faces it applies to in a ``boundaries`` array.
+Face names are ``x lo``, ``x hi``, ``y lo``, ``y hi``, ``z lo``, and ``z hi``.
+Faces in a direction that the build does not have (``z lo`` and ``z hi`` in 2D) are skipped, so that one chemistry file can be used in both 2D and 3D.
+For example, photoemission on the low and high faces in the :math:`y`-direction is specified by
+
+.. code-block:: json
+
+   "domain emission":
+   [
+      {
+         "reaction": "Y -> @",
+	 "@": ["e", "(null)"],
+	 "efficiencies": [0.1, 0.9],
+	 "boundaries": ["y lo", "y hi"]
+      }
+   ]
+
+The primaries are the particles and photons that leave the domain through that face.
+Periodic faces do not emit.
+A primary that leaves through a cell on an edge or corner of the domain is assigned to the face nearest to it.
+Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
+CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver's boundary conditions.
+Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.
+
 Field emission
 --------------
 
 Field emission for a specified species is supported by including a ``field emission`` specifier.
+The emitting surface is set by ``surface``, which is either ``electrode``, ``dielectric``, or ``domain``.
+For ``domain``, a ``boundaries`` array lists the domain faces, as for ``domain emission`` (see :ref:`Chap:ItoKMCDomainEmission`).
+Only negatively charged species are emitted, and only where the surface is a cathode; an entry for any other species has no effect.
+The emitted particles are placed at the centroid of the boundary cell.
 Currently supported expressions are:
 
 #. Fowler-Nordheim emission:
@@ -2414,7 +2466,7 @@ Currently supported expressions are:
    The expressions above both use a correction factor :math:`\beta` that describes local field amplifications.
    Note, however, that the number of emitted electrons is proportional to the area of the emitter, and there are no current models in ``chombo-discharge`` that can compute this effective area.
 
-Below, we show an example that includes both Schottky and Fowler-Nordheim emission
+Below, we show an example that includes both Schottky and Fowler-Nordheim emission on the electrodes, and Fowler-Nordheim emission on the low :math:`y`-face of the domain
 
 .. code-block:: json
 
@@ -2431,10 +2483,18 @@ Below, we show an example that includes both Schottky and Fowler-Nordheim emissi
 	    "species": "e",
 	    "surface": "electrode",
 	    "type": "schottky",
-	    "lambda": 0.5	    
+	    "lambda": 0.5,
 	    "temperature": 300,
 	    "work": 5.0,
-	    "beta": 1,
+	    "beta": 1
+	},
+	{
+	    "species": "e",
+	    "surface": "domain",
+	    "boundaries": ["y lo"],
+	    "type": "fowler-nordheim",
+	    "work": 5.0,
+	    "beta": 1
 	}
     ]		
 
@@ -2507,9 +2567,9 @@ Simulations that fail to stabilize, i.e., where the field strength diverges, may
 
    "plasma reactions": [
       {
-         "reaction": "e + N2 -> e + e + N2+"
+         "reaction": "e + N2 -> e + e + N2+",
 	 "type": "constant",
-	 "value": 1.E-12,
+	 "value": 1E-12,
 	 "limit max k*dt" : 2.0
       }
    ]

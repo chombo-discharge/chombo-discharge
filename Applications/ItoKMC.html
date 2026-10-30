@@ -128,6 +128,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#json-interface">JSON interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#unknown-keys">Unknown keys</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gas-law">Gas law</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ideal-gas">Ideal gas</a></li>
 </ul>
@@ -173,7 +174,10 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#chap-itokmcjsonparticleplacement">Particle placement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id15">Photoionization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#emission-on-the-domain-boundary">Emission on the domain boundary</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
@@ -653,8 +657,8 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">/**</span>
 <span class="cm"> * @brief Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.</span>
 <span class="cm"> * @details Subclasses must implement `updateReactionRates()`, `computeMobilities()`,</span>
-<span class="cm"> * `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `computeAlpha()`, `computeEta()`,</span>
-<span class="cm"> * and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and</span>
+<span class="cm"> * `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `secondaryEmissionDomain()`, `computeAlpha()`,</span>
+<span class="cm"> * `computeEta()`, and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and</span>
 <span class="cm"> * (optionally) `m_photoReactions` and `m_surfaceReactions` in the subclass constructor.</span>
 <span class="cm"> */</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ItoKMCPhysics</span>
@@ -820,6 +824,25 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="nf">needGradient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_plasmaIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.</span>
+<span class="cm">   * @details The stepper skips the EB emission pass in a step where no particle or photon reached the EB and</span>
+<span class="cm">   * no CDR species is mobile, unless this returns true. Field emission is the typical case: it is driven by</span>
+<span class="cm">   * the electric field alone. The default is the conservative answer, so a model that does not override this</span>
+<span class="cm">   * has the emission pass run every step.</span>
+<span class="cm">   * @return True if the EB emission pass must run even when no primaries reached the EB.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">emitsWithoutPrimariesEB</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return true if secondaryEmissionDomain() can emit in a step where nothing reached the domain boundary.</span>
+<span class="cm">   * @details The domain counterpart of emitsWithoutPrimariesEB(), with the same conservative default.</span>
+<span class="cm">   * @return True if the domain emission pass must run even when no primaries left the domain.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">emitsWithoutPrimariesDomain</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Get the internal mapping from plasma-species index to solver type and solver index.</span>
 <span class="cm">   * @return Map from plasma species index to (SpeciesType, solver index) pair.</span>
 <span class="cm">   */</span>
@@ -912,6 +935,43 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                              </span><span class="n">a_isDielectric</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Resolve secondary emission on one face of the computational domain.</span>
+<span class="cm">   * @details Called once per boundary cell and domain face. A cell on a corner or edge of the domain is</span>
+<span class="cm">   * called once per face it touches, and each primary is passed to the face it crossed. CDR species do not</span>
+<span class="cm">   * take part: their domain fluxes are set by the CDR solver's own boundary conditions.</span>
+<span class="cm">   * @param[out] a_secondaryParticles Outgoing plasma species particles.</span>
+<span class="cm">   * @param[out] a_secondaryPhotons   Photons injected through the domain face. The stepper does not inject these.</span>
+<span class="cm">   * @param[in]  a_primaryParticles   Particles that left the computational domain through this face.</span>
+<span class="cm">   * @param[in]  a_primaryPhotons     Photons that left the computational domain through this face.</span>
+<span class="cm">   * @param[in]  a_E                  Electric field in the boundary cell.</span>
+<span class="cm">   * @param[in]  a_cellCenter         Physical position of the cell center.</span>
+<span class="cm">   * @param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).</span>
+<span class="cm">   * @param[in]  a_bndryCentroid      EB centroid relative to the cell center (not multiplied by dx). Zero if the</span>
+<span class="cm">   *                                  cell is not cut by the EB.</span>
+<span class="cm">   * @param[in]  a_bndryNormal        EB normal, pointing into the gas. Zero if the cell is not cut by the EB.</span>
+<span class="cm">   * @param[in]  a_dir                Coordinate direction normal to the domain face.</span>
+<span class="cm">   * @param[in]  a_side               Low or high side of the domain in a_dir.</span>
+<span class="cm">   * @param[in]  a_faceArea           Area fraction of the cell's domain face that is open to the gas.</span>
+<span class="cm">   * @param[in]  a_dx                 Grid resolution on this level.</span>
+<span class="cm">   * @param[in]  a_dt                 Time step.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">secondaryEmissionDomain</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w">       </span><span class="n">a_secondaryParticles</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">            </span><span class="n">a_secondaryPhotons</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_primaryParticles</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">      </span><span class="n">a_primaryPhotons</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_cellCenter</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_cellCentroid</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_bndryCentroid</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_bndryNormal</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w">                    </span><span class="n">a_side</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_faceArea</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Advance the reaction network using the KMC algorithm.</span>
@@ -1606,6 +1666,18 @@ The JSON interface thus provides a simple entry point for users that have no int
 <p class="admonition-title">Tip</p>
 <p>While JSON files do not formally support comments, the JSON submodule used by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> allows them.</p>
 </div>
+<section id="unknown-keys">
+<h3>Unknown keys<a class="headerlink" href="#unknown-keys" title="Permalink to this heading"></a></h3>
+<p>Every JSON object that <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> reads is checked against the keys the parser reads from it.
+The one exception is <code class="docutils literal notranslate"><span class="pre">&quot;law&quot;</span></code> under <code class="docutils literal notranslate"><span class="pre">&quot;gas&quot;</span></code>, whose keys are user-chosen law names; each named law is checked.
+A key that the parser does not read, such as a misspelled <code class="docutils literal notranslate"><span class="pre">&quot;points&quot;</span></code> where <code class="docutils literal notranslate"><span class="pre">&quot;num</span> <span class="pre">points&quot;</span></code> was meant, would otherwise be silently ignored.
+Such keys are reported together with the object they appear in, the allowed key they most likely misspell (if one is close enough), and the full list of allowed keys.
+Some keys are only read for some settings of another key (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;species&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">&quot;particle</span> <span class="pre">placement&quot;</span></code> is only read by the <code class="docutils literal notranslate"><span class="pre">downstream</span></code> method), and are reported as unknown otherwise.</p>
+<p>Whether an unknown key is a warning or an error is set by the required option</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCJSON.unknown_keys = abort    ## 'warn' or 'abort' on JSON keys that the parser does not read
+</pre></div>
+</div>
+</section>
 <section id="gas-law">
 <h3>Gas law<a class="headerlink" href="#gas-law" title="Permalink to this heading"></a></h3>
 <p>The JSON gas law represents a loose definition of the gas pressure, temperature, and <em>number density</em>.
@@ -1653,8 +1725,8 @@ Currently, the supported types are</p>
 <span class="w">         </span><span class="nt">"my_ideal_gas"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">             </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"ideal"</span><span class="p">,</span><span class="w">    </span><span class="c1">// Ideal gas law type</span>
 <span class="w">             </span><span class="nt">"temperature"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="c1">// Temperature must be in Kelvin</span>
-<span class="w">             </span><span class="nt">"pressure"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="c1">// Pressure must be in bar</span>
-<span class="w">         </span><span class="p">},</span>
+<span class="w">             </span><span class="nt">"pressure"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1E5</span><span class="w">     </span><span class="c1">// Pressure must be in Pascal</span>
+<span class="w">         </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
@@ -1719,7 +1791,7 @@ An example JSON specification is</p>
 <span class="w">   </span><span class="nt">"gas"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"background species"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">         </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="nt">"O2"</span><span class="w">             </span><span class="c1">// Species name</span>
+<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2"</span><span class="p">,</span><span class="w">            </span><span class="c1">// Species name</span>
 <span class="hll"><span class="w">            </span><span class="nt">"molar fraction"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">    </span><span class="c1">// Molar fraction specification</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Constant molar fraction</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="w">        </span><span class="c1">// Molar fraction value</span>
@@ -1761,7 +1833,7 @@ Various other inputs are then also required:</p>
 <span class="w">   </span><span class="nt">"gas"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"background species"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">         </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="nt">"O2"</span><span class="w">                           </span><span class="c1">// Species name</span>
+<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2"</span><span class="p">,</span><span class="w">                          </span><span class="c1">// Species name</span>
 <span class="hll"><span class="w">            </span><span class="nt">"molar fraction"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">                  </span><span class="c1">// Molar fraction specification</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table vs height"</span><span class="p">,</span><span class="w">        </span><span class="c1">// Constant molar fraction</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">"file"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"O2_molar_fraction.dat"</span><span class="p">,</span><span class="w"> </span><span class="c1">// File name containing molar fraction</span>
@@ -1792,7 +1864,7 @@ For example</p>
 <span class="w">   </span><span class="nt">"gas"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"background species"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">         </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="nt">"O2"</span><span class="w">             </span><span class="c1">// Species name</span>
+<span class="w">            </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2"</span><span class="p">,</span><span class="w">            </span><span class="c1">// Species name</span>
 <span class="w">            </span><span class="nt">"molar fraction"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">    </span><span class="c1">// Molar fraction specification</span>
 <span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Constant molar fraction</span>
 <span class="w">               </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="w">        </span><span class="c1">// Molar fraction value</span>
@@ -1941,7 +2013,7 @@ Each species <em>must</em> specify the following fields</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">solver</span></code> (string) For specifying whether or not the species is tracked by a CDR or Îto solver.
 Acceptable values are <em>cdr</em> and <em>ito</em>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mobile</span></code> (boolean) For specifying whether or not the species is mobile.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mobile</span></code> (boolean) For specifying whether or not the species is diffusive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diffusive</span></code> (boolean) For specifying whether or not the species is diffusive.</p></li>
 </ul>
 <p>An example specification is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma species"</span><span class="w"> </span><span class="p">:</span>
@@ -1986,7 +2058,7 @@ For example,</p>
 <span class="w">         </span><span class="nt">"Z"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">              </span><span class="c1">// Charge number</span>
 <span class="w">         </span><span class="nt">"solver"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"ito"</span><span class="p">,</span><span class="w">      </span><span class="c1">// Solver type. Either 'ito' or 'cdr'</span>
 <span class="w">         </span><span class="nt">"mobile"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">       </span><span class="c1">// Mobile or not</span>
-<span class="w">         </span><span class="nt">"diffusive"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">     </span><span class="c1">// Diffusive or not,</span>
+<span class="w">         </span><span class="nt">"diffusive"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">    </span><span class="c1">// Diffusive or not</span>
 <span class="w">         </span><span class="nt">"mobility"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="hll"><span class="w">            </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set constant mobility</span>
 </span><span class="hll"><span class="w">            </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
@@ -2011,7 +2083,7 @@ For example,</p>
 <span class="w">         </span><span class="nt">"Z"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w">                   </span><span class="c1">// Charge number</span>
 <span class="w">         </span><span class="nt">"solver"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"ito"</span><span class="p">,</span><span class="w">           </span><span class="c1">// Solver type. Either 'ito' or 'cdr'</span>
 <span class="w">         </span><span class="nt">"mobile"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">            </span><span class="c1">// Mobile or not</span>
-<span class="w">         </span><span class="nt">"diffusive"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">          </span><span class="c1">// Diffusive or not,</span>
+<span class="w">         </span><span class="nt">"diffusive"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">         </span><span class="c1">// Diffusive or not</span>
 <span class="w">         </span><span class="nt">"mobility"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="hll"><span class="w">            </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant mu*N"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set mu*N to a constant</span>
 </span><span class="hll"><span class="w">            </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E24</span>
@@ -2042,8 +2114,8 @@ This is an optional argument intended for use with BOLSIG+ output data where the
 <li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(\mu N\)</span> (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).
 This is an optional argument that defaults to 1.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(\mu N\)</span> data (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">E/N</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">mu*N</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(\mu N\)</span> data (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of data points in internal table representation (optional, defaults to 1000).</p></li>
@@ -2069,10 +2141,10 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </span><span class="hll"><span class="w">          </span><span class="nt">"mu*N column"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                            </span><span class="c1">// Column containing mu*N</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"min E/N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                                </span><span class="c1">// Minimum E/N kept when resampling table</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"max E/N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2E6</span><span class="p">,</span><span class="w">                              </span><span class="c1">// Maximum E/N kept when resampling table</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"points"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w">                              </span><span class="c1">// Number of grid points kept when resampling the table</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"num points"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w">                          </span><span class="c1">// Number of grid points kept when resampling the table</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"spacing"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"exponential"</span><span class="p">,</span><span class="w">                    </span><span class="c1">// Grid point spacing when resampling the table</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"E/N scale"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                            </span><span class="c1">// Optional argument for scaling mobility coefficient</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"mu*N scale"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="w">                            </span><span class="c1">// Optional argument for scaling the E/N column</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"scale E/N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                            </span><span class="c1">// Optional argument for scaling the E/N column</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"scale mu*N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="w">                            </span><span class="c1">// Optional argument for scaling the mobility column</span>
 </span><span class="hll"><span class="w">       </span><span class="p">}</span>
 </span><span class="w">    </span><span class="p">}</span>
 <span class="w"> </span><span class="p">]</span>
@@ -2143,7 +2215,7 @@ For example:</p>
 </section>
 <section id="id6">
 <h5>Constant<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h5>
-<p>To set a constant temperature, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">constant</span></code> and then specify the temperature.
+<p>To set a constant temperature, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">constant</span></code> and then specify the temperature (in Kelvin) through <code class="docutils literal notranslate"><span class="pre">T</span></code>.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="nt">"plasma species"</span><span class="w"> </span><span class="p">:</span>
 <span class="w"> </span><span class="p">[</span>
@@ -2153,7 +2225,7 @@ For example:</p>
 <span class="w">       </span><span class="nt">"solver"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"ito"</span><span class="p">,</span><span class="w">      </span><span class="c1">// Solver type.</span>
 <span class="hll"><span class="w">       </span><span class="nt">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">       </span><span class="c1">// Specify temperature</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Constant temperature</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="w">        </span><span class="c1">// Temperature in Kelvin</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"T"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="w">            </span><span class="c1">// Temperature in Kelvin</span>
 </span><span class="hll"><span class="w">       </span><span class="p">}</span>
 </span><span class="w">    </span><span class="p">}</span>
 <span class="w"> </span><span class="p">]</span>
@@ -2177,8 +2249,8 @@ This is an optional argument intended for use with BOLSIG+ output data where the
 <li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eV</span> <span class="pre">column</span></code> For setting which column in the data file contains the energy vs <span class="math notranslate nohighlight">\(E/N\)</span>.
 This is an optional argument that defaults to 1.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">eV</span> <span class="pre">scale</span></code> Optional scaling of the column containing the energy (in eV).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">E/N</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">eV</span></code> Optional scaling of the column containing the energy (in eV).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> Optional truncation of the table representation of the data (applied after scaling).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">points</span></code> Number of data points in internal table representation (optional, defaults to 1000).</p></li>
@@ -2204,10 +2276,10 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </span><span class="hll"><span class="w">          </span><span class="nt">"eV column"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Column containing the energy</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"min E/N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">                          </span><span class="c1">// Truncation of table</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"max E/N"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2E6</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Truncation of table</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"E/N scale"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                        </span><span class="c1">// Scaling of input data</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"eV scale"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Scaling of input data</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"scale E/N"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                        </span><span class="c1">// Scaling of input data</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"scale eV"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Scaling of input data</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">"spacing"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"exponential"</span><span class="p">,</span><span class="w">               </span><span class="c1">// Table spacing</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">"points"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="w">                          </span><span class="c1">// Number of points in table</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">"num points"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="w">                      </span><span class="c1">// Number of points in table</span>
 </span><span class="hll"><span class="w">       </span><span class="p">}</span>
 </span><span class="w">    </span><span class="p">}</span>
 <span class="w"> </span><span class="p">]</span>
@@ -2398,10 +2470,10 @@ The particles must be organized as rows containing the coordinate positions and 
 <p>The user must specify</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> File name.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code> Column containing the <span class="math notranslate nohighlight">\(x\)</span> coordinates (optional, defaults to 0).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> Column containing the <span class="math notranslate nohighlight">\(y\)</span> coordinates (optional, defaults to 1).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">z</span></code> Column containing the <span class="math notranslate nohighlight">\(z\)</span> coordinates (optional, defaults to 2).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">w</span></code> Column containing the particle weight (optional, defaults to 3).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">column</span></code> Column containing the <span class="math notranslate nohighlight">\(x\)</span> coordinates (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">column</span></code> Column containing the <span class="math notranslate nohighlight">\(y\)</span> coordinates (optional, defaults to 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">column</span></code> Column containing the <span class="math notranslate nohighlight">\(z\)</span> coordinates (optional, defaults to 2).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">w</span> <span class="pre">column</span></code> Column containing the particle weight (optional, defaults to 3).</p></li>
 </ul>
 <p>For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="nt">"plasma species"</span><span class="w"> </span><span class="p">:</span>
@@ -2629,9 +2701,9 @@ To specify how the rate is computed, one must specify the <code class="docutils 
 A JSON specification is e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma reactions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"e + N2 -&gt; e + e + N2+"</span><span class="w"> </span><span class="c1">// Specify reaction</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e + N2 -&gt; e + e + N2+"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Specify reaction</span>
 <span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w">                 </span><span class="c1">// Reaction rate is constant</span>
-<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.E-30</span><span class="w">                     </span><span class="c1">// Reaction rate</span>
+<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E-30</span><span class="w">                      </span><span class="c1">// Reaction rate</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">]</span>
 </pre></div>
@@ -2652,7 +2724,7 @@ A JSON specification is e.g.</p>
 An example specification is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma reactions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"A + B -&gt; "</span><span class="w">       </span><span class="c1">// Example reaction string.</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A + B -&gt; "</span><span class="p">,</span><span class="w">      </span><span class="c1">// Example reaction string.</span>
 <span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function E/N exp A"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Function based rate.</span>
 <span class="w">      </span><span class="nt">"c1"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                    </span><span class="c1">// c1-coefficient</span>
 <span class="w">      </span><span class="nt">"c2"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                    </span><span class="c1">// c2-coefficient</span>
@@ -2676,7 +2748,7 @@ This can correspond to one of the background species.
 An example specification is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma reactions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"A + B -&gt; "</span><span class="w"> </span><span class="c1">// Example reaction string.</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A + B -&gt; "</span><span class="p">,</span><span class="w"> </span><span class="c1">// Example reaction string.</span>
 <span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function T A"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Function based rate.</span>
 <span class="w">      </span><span class="nt">"c1"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">              </span><span class="c1">// c1-coefficient</span>
 <span class="w">      </span><span class="nt">"c2"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">              </span><span class="c1">// c2-coefficient</span>
@@ -2694,7 +2766,7 @@ This can correspond to one of the background species.
 An example specification is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma reactions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"A + B -&gt; "</span><span class="w">    </span><span class="c1">// Example reaction string.</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A + B -&gt; "</span><span class="p">,</span><span class="w">   </span><span class="c1">// Example reaction string.</span>
 <span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function T1T2 A"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Function based rate.</span>
 <span class="w">      </span><span class="nt">"c1"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                 </span><span class="c1">// c1-coefficient</span>
 <span class="w">      </span><span class="nt">"c2"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                 </span><span class="c1">// c2-coefficient</span>
@@ -2917,7 +2989,7 @@ For example, the specification</p>
 <span class="w">        </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e -&gt; e + e + M+"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Reaction string</span>
 <span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha*v"</span><span class="p">,</span><span class="w">             </span><span class="c1">// Rate is alpha*v</span>
 <span class="w">        </span><span class="nt">"species"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span><span class="w">                </span><span class="c1">// Species for v,</span>
-<span class="w">        </span><span class="nt">"gradient correction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"e"</span><span class="w">     </span><span class="c1">// Specify gradient correction using species "e"</span>
+<span class="w">        </span><span class="nt">"gradient correction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span><span class="w">    </span><span class="c1">// Specify gradient correction using species "e"</span>
 <span class="w">        </span><span class="nt">"quenching pressure"</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">,</span><span class="w">    </span><span class="c1">// Quenching pressure</span>
 <span class="w">        </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w">              </span><span class="c1">// Reaction efficiency</span>
 <span class="w">    </span><span class="p">}</span>
@@ -3042,8 +3114,8 @@ Assume that photons are generated through the reaction</p>
 <span class="w">        </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e + N2 -&gt; e + N2 + Y"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Reaction string</span>
 <span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha*v"</span><span class="p">,</span><span class="w">                  </span><span class="c1">// Rate is alpha*v</span>
 <span class="w">        </span><span class="nt">"species"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span><span class="w">                     </span><span class="c1">// Species for v,</span>
-<span class="w">        </span><span class="nt">"quenching pressure"</span><span class="p">:</span><span class="w"> </span><span class="mf">4000.0</span><span class="w">        </span><span class="c1">// Quenching</span>
-<span class="w">        </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.6</span><span class="w">                   </span><span class="c1">// Excitation events per ionization event</span>
+<span class="w">        </span><span class="nt">"quenching pressure"</span><span class="p">:</span><span class="w"> </span><span class="mf">4000.0</span><span class="p">,</span><span class="w">       </span><span class="c1">// Quenching</span>
+<span class="w">        </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span><span class="w">                  </span><span class="c1">// Excitation events per ionization event</span>
 <span class="w">        </span><span class="nt">"scale"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w">                        </span><span class="c1">// Photoionization events per absorbed photon</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">]</span>
@@ -3068,7 +3140,7 @@ In this case we modify the above into</p>
 <span class="w">        </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e + N2 -&gt; e + N2 + Y"</span><span class="p">,</span><span class="w"> </span><span class="c1">// Reaction string</span>
 <span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha*v"</span><span class="p">,</span><span class="w">                  </span><span class="c1">// Rate is alpha*v</span>
 <span class="w">        </span><span class="nt">"species"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span><span class="w">                     </span><span class="c1">// Species for v,</span>
-<span class="w">        </span><span class="nt">"quenching pressure"</span><span class="p">:</span><span class="w"> </span><span class="mf">4000.0</span><span class="w">        </span><span class="c1">// Quenching</span>
+<span class="w">        </span><span class="nt">"quenching pressure"</span><span class="p">:</span><span class="w"> </span><span class="mf">4000.0</span><span class="p">,</span><span class="w">       </span><span class="c1">// Quenching</span>
 <span class="w">        </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.6</span><span class="w">                   </span><span class="c1">// Excitation events per ionization event</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">],</span>
@@ -3095,8 +3167,8 @@ When multiple pathways are specified this way, and they have probabilities <span
 <section id="secondary-emission">
 <h3>Secondary emission<a class="headerlink" href="#secondary-emission" title="Permalink to this heading"></a></h3>
 <p>Secondary emission is supported for particles, including photons, but not for fluid species.
-Specification of secondary emission is done separately on dielectrics and electrodes by specifying JSON entries <code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">emission</span></code> and <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
-The internal specification for these are identical, so all examples below use <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
+Specification of secondary emission is done separately on dielectrics, electrodes, and the faces of the computational domain by specifying JSON entries <code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">emission</span></code>, <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>, and <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">emission</span></code>.
+The internal specification for these are identical (see <a class="reference internal" href="#chap-itokmcdomainemission"><span class="std std-ref">Emission on the domain boundary</span></a> for the one addition for the domain), so all examples below use <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
 Wildcards <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> are supported, as is the <code class="docutils literal notranslate"><span class="pre">(null)</span></code> species which enables null-reactions, as further discussed below.
@@ -3137,10 +3209,41 @@ The above example can be compressed by using a wildcard and an <code class="docu
 </div>
 <p>where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
 This has no effect on the probabilities <span class="math notranslate nohighlight">\(p(i)\)</span> given above.</p>
+<p>Charged secondaries are only released if the electric field pushes them away from the surface, i.e. negative secondaries are released from cathodes and positive secondaries from anodes.
+Neutral secondaries are always released.</p>
+<section id="emission-on-the-domain-boundary">
+<span id="chap-itokmcdomainemission"></span><h4>Emission on the domain boundary<a class="headerlink" href="#emission-on-the-domain-boundary" title="Permalink to this heading"></a></h4>
+<p>Secondary emission on the faces of the computational domain is specified with <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">emission</span></code>.
+The specification is identical to the one for electrodes and dielectrics, except that each reaction also lists the domain faces it applies to in a <code class="docutils literal notranslate"><span class="pre">boundaries</span></code> array.
+Face names are <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">lo</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">hi</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">lo</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">hi</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">lo</span></code>, and <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">hi</span></code>.
+Faces in a direction that the build does not have (<code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">lo</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">hi</span></code> in 2D) are skipped, so that one chemistry file can be used in both 2D and 3D.
+For example, photoemission on the low and high faces in the <span class="math notranslate nohighlight">\(y\)</span>-direction is specified by</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"domain emission"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Y -&gt; @"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"@"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"e"</span><span class="p">,</span><span class="w"> </span><span class="s2">"(null)"</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"efficiencies"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"boundaries"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"y lo"</span><span class="p">,</span><span class="w"> </span><span class="s2">"y hi"</span><span class="p">]</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The primaries are the particles and photons that leave the domain through that face.
+Periodic faces do not emit.
+A primary that leaves through a cell on an edge or corner of the domain is assigned to the face nearest to it.
+Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
+CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver’s boundary conditions.
+Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.</p>
+</section>
 </section>
 <section id="field-emission">
 <h3>Field emission<a class="headerlink" href="#field-emission" title="Permalink to this heading"></a></h3>
 <p>Field emission for a specified species is supported by including a <code class="docutils literal notranslate"><span class="pre">field</span> <span class="pre">emission</span></code> specifier.
+The emitting surface is set by <code class="docutils literal notranslate"><span class="pre">surface</span></code>, which is either <code class="docutils literal notranslate"><span class="pre">electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">dielectric</span></code>, or <code class="docutils literal notranslate"><span class="pre">domain</span></code>.
+For <code class="docutils literal notranslate"><span class="pre">domain</span></code>, a <code class="docutils literal notranslate"><span class="pre">boundaries</span></code> array lists the domain faces, as for <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">emission</span></code> (see <a class="reference internal" href="#chap-itokmcdomainemission"><span class="std std-ref">Emission on the domain boundary</span></a>).
+Only negatively charged species are emitted, and only where the surface is a cathode; an entry for any other species has no effect.
+The emitted particles are placed at the centroid of the boundary cell.
 Currently supported expressions are:</p>
 <ol class="arabic">
 <li><p>Fowler-Nordheim emission:</p>
@@ -3170,7 +3273,7 @@ As for the Fowler-Nordheim equation, a factor that describes local field amplifi
 <p>The expressions above both use a correction factor <span class="math notranslate nohighlight">\(\beta\)</span> that describes local field amplifications.
 Note, however, that the number of emitted electrons is proportional to the area of the emitter, and there are no current models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> that can compute this effective area.</p>
 </div>
-<p>Below, we show an example that includes both Schottky and Fowler-Nordheim emission</p>
+<p>Below, we show an example that includes both Schottky and Fowler-Nordheim emission on the electrodes, and Fowler-Nordheim emission on the low <span class="math notranslate nohighlight">\(y\)</span>-face of the domain</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"field emission"</span><span class="p">:</span>
 <span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
@@ -3184,10 +3287,18 @@ Note, however, that the number of emitted electrons is proportional to the area 
 <span class="w">        </span><span class="nt">"species"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">"surface"</span><span class="p">:</span><span class="w"> </span><span class="s2">"electrode"</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"schottky"</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">"lambda"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="w">        </span><span class="nt">"lambda"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">"work"</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">"beta"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"beta"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"species"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"surface"</span><span class="p">:</span><span class="w"> </span><span class="s2">"domain"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"boundaries"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"y lo"</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fowler-nordheim"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"work"</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"beta"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">]</span>
 </pre></div>
@@ -3248,9 +3359,9 @@ An example is given below:</p>
 </ol>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"plasma reactions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="nt">"e + N2 -&gt; e + e + N2+"</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e + N2 -&gt; e + e + N2+"</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.E-12</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E-12</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">"limit max k*dt"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">]</span>

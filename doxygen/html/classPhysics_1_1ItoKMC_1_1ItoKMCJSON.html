@@ -172,12 +172,18 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCJSON</b> ()
 <tr class="memdesc:ab26daaca1d1373dc63bee1f6e7ee8a37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the physics model requires species density gradients.  <br /></td></tr>
 <tr class="memitem:acb6bd0aac5b21e39821950bdf4dcaaf6" id="r_acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb6bd0aac5b21e39821950bdf4dcaaf6">needGradient</a> (const int a_plasmaIndex) const noexcept override</td></tr>
 <tr class="memdesc:acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if any reaction's gradient correction names this plasma species.  <br /></td></tr>
+<tr class="memitem:a976b6b7053af969fcb939542894bfccc" id="r_a976b6b7053af969fcb939542894bfccc"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a976b6b7053af969fcb939542894bfccc">emitsWithoutPrimariesEB</a> () const noexcept override</td></tr>
+<tr class="memdesc:a976b6b7053af969fcb939542894bfccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if field emission is specified on electrodes or dielectrics.  <br /></td></tr>
+<tr class="memitem:afec1b1121eeafd70dee8c186f1f5702c" id="r_afec1b1121eeafd70dee8c186f1f5702c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afec1b1121eeafd70dee8c186f1f5702c">emitsWithoutPrimariesDomain</a> () const noexcept override</td></tr>
+<tr class="memdesc:afec1b1121eeafd70dee8c186f1f5702c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if field emission is specified on any domain face.  <br /></td></tr>
 <tr class="memitem:afde437524e96ab93cc359fba2b9a0ee8" id="r_afde437524e96ab93cc359fba2b9a0ee8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afde437524e96ab93cc359fba2b9a0ee8">computeMobilities</a> (Vector&lt; Real &gt; &amp;a_mobilities, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
 <tr class="memdesc:afde437524e96ab93cc359fba2b9a0ee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
 <tr class="memitem:ae25a89ea478ba9bd32e0a91bdc8e621c" id="r_ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae25a89ea478ba9bd32e0a91bdc8e621c">computeDiffusionCoefficients</a> (Vector&lt; Real &gt; &amp;a_diffusionCoefficients, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
 <tr class="memdesc:ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
 <tr class="memitem:a1e1ac5f15342141e838b766c610146d8" id="r_a1e1ac5f15342141e838b766c610146d8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e1ac5f15342141e838b766c610146d8">secondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; Real &gt; &amp;a_secondaryCDRFluxes, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; Real &gt; &amp;a_primaryCDRFluxes, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt, const bool a_isDielectric, const int a_matIndex) const noexcept override</td></tr>
 <tr class="memdesc:a1e1ac5f15342141e838b766c610146d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:a75ad153955d2bd7b938a11dd7340ca5f" id="r_a75ad153955d2bd7b938a11dd7340ca5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75ad153955d2bd7b938a11dd7340ca5f">secondaryEmissionDomain</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const int a_dir, const Side::LoHiSide a_side, const Real a_faceArea, const Real a_dx, const Real a_dt) const noexcept override</td></tr>
+<tr class="memdesc:a75ad153955d2bd7b938a11dd7340ca5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission on one face of the computational domain.  <br /></td></tr>
 <tr class="inherit_header pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html">Physics::ItoKMC::ItoKMCPhysics</a></td></tr>
 <tr class="memitem:aff7f9671e899b5f5de944c91e33afb2a inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_aff7f9671e899b5f5de944c91e33afb2a"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>ItoKMCPhysics</b> () noexcept</td></tr>
@@ -236,6 +242,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbose<
 <tr class="memdesc:a7f285ed2044cc1d8ba3120343c0ff017"><td class="mdescLeft">&#160;</td><td class="mdescRight">Throw a parser error.  <br /></td></tr>
 <tr class="memitem:a6f7b90327b6962d21b90f85ba3600ef4" id="r_a6f7b90327b6962d21b90f85ba3600ef4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f7b90327b6962d21b90f85ba3600ef4">throwParserWarning</a> (const std::string &amp;a_warning) const noexcept</td></tr>
 <tr class="memdesc:a6f7b90327b6962d21b90f85ba3600ef4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Throw a parser warning.  <br /></td></tr>
+<tr class="memitem:ab3c3f4fa030cd37a710b03307648d73d" id="r_ab3c3f4fa030cd37a710b03307648d73d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3c3f4fa030cd37a710b03307648d73d">checkKeys</a> (const nlohmann::json &amp;a_object, const std::set&lt; std::string &gt; &amp;a_allowed, const std::string &amp;a_context) const noexcept</td></tr>
+<tr class="memdesc:ab3c3f4fa030cd37a710b03307648d73d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report every key in a JSON object that the parser does not read.  <br /></td></tr>
+<tr class="memitem:ac752a5dad72d16b29e4e1a2ef3a8f393" id="r_ac752a5dad72d16b29e4e1a2ef3a8f393"><td class="memItemLeft" align="right" valign="top">virtual std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac752a5dad72d16b29e4e1a2ef3a8f393">getTableKeys</a> (const std::string &amp;a_dataID) const noexcept</td></tr>
+<tr class="memdesc:ac752a5dad72d16b29e4e1a2ef3a8f393"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the keys that <a class="el" href="#a4bd500f5b50a92554482ae5b38224d1b" title="Parse a table which is stored in E/N format.">parseTableEByN()</a> reads from a table entry.  <br /></td></tr>
 <tr class="memitem:acc4b4e8c7fb741b0345d60c840cbe0bb" id="r_acc4b4e8c7fb741b0345d60c840cbe0bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc4b4e8c7fb741b0345d60c840cbe0bb">doesFileExist</a> (const std::string &amp;a_filename) const noexcept</td></tr>
 <tr class="memdesc:acc4b4e8c7fb741b0345d60c840cbe0bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a file exists.  <br /></td></tr>
 <tr class="memitem:a9510de088c6fd34ad43dfdac39d07888" id="r_a9510de088c6fd34ad43dfdac39d07888"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9510de088c6fd34ad43dfdac39d07888">isBackgroundSpecies</a> (const std::string &amp;a_name) const noexcept</td></tr>
@@ -300,6 +310,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePho
 <tr class="memdesc:a9ed0d1a3dd8e679d17d8c2c070b48366"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize photo-reactions. <br /></td></tr>
 <tr class="memitem:a2ab6b30c6c82f40ae2fcb03170a1fafa" id="r_a2ab6b30c6c82f40ae2fcb03170a1fafa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ab6b30c6c82f40ae2fcb03170a1fafa">initializeSurfaceEmission</a> (const std::string &amp;a_surface)</td></tr>
 <tr class="memdesc:a2ab6b30c6c82f40ae2fcb03170a1fafa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize surface reactions.  <br /></td></tr>
+<tr class="memitem:a272250646f21881f382513fd71527f08" id="r_a272250646f21881f382513fd71527f08"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::pair&lt; int, Side::LoHiSide &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a272250646f21881f382513fd71527f08">parseDomainBoundaries</a> (const nlohmann::json &amp;a_json, const std::string &amp;a_context) const</td></tr>
+<tr class="memdesc:a272250646f21881f382513fd71527f08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the 'boundaries' list of a domain emission entry.  <br /></td></tr>
+<tr class="memitem:a2df2e9eed8f155d7a0d736f50eee3220" id="r_a2df2e9eed8f155d7a0d736f50eee3220"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2df2e9eed8f155d7a0d736f50eee3220">sampleSurfaceEmission</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_plasmaReactions, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_photonReactions, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const std::function&lt; RealVect()&gt; &amp;a_releasePosition, const bool a_isCathode) const noexcept</td></tr>
+<tr class="memdesc:a2df2e9eed8f155d7a0d736f50eee3220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample the secondaries released by primaries that hit a surface.  <br /></td></tr>
+<tr class="memitem:a75cb7033ee09c432f58411a316d22c62" id="r_a75cb7033ee09c432f58411a316d22c62"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75cb7033ee09c432f58411a316d22c62">sampleFieldEmission</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, const std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a> &gt; &gt; &amp;a_fieldEmission, const RealVect &amp;a_E, const RealVect &amp;a_position, const Real a_areaFraction, const Real a_dx, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a75cb7033ee09c432f58411a316d22c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample field emission from a cathode surface.  <br /></td></tr>
 <tr class="memitem:ac3b9f4f3434d70a726e60f33b481e385" id="r_ac3b9f4f3434d70a726e60f33b481e385"><td class="memItemLeft" align="right" valign="top"><a id="ac3b9f4f3434d70a726e60f33b481e385" name="ac3b9f4f3434d70a726e60f33b481e385"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializeFieldEmission</b> ()</td></tr>
 <tr class="memdesc:ac3b9f4f3434d70a726e60f33b481e385"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize field emission reactions. <br /></td></tr>
@@ -381,6 +397,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_skipReactions</b></
 <tr class="memitem:a740d36b81b15e0535cf0414f7f450f8e" id="r_a740d36b81b15e0535cf0414f7f450f8e"><td class="memItemLeft" align="right" valign="top"><a id="a740d36b81b15e0535cf0414f7f450f8e" name="a740d36b81b15e0535cf0414f7f450f8e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_previewRates</b></td></tr>
 <tr class="memdesc:a740d36b81b15e0535cf0414f7f450f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Preview rates or not. <br /></td></tr>
+<tr class="memitem:a5e937097b9341b9ba6543ee9a01a7dee" id="r_a5e937097b9341b9ba6543ee9a01a7dee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e937097b9341b9ba6543ee9a01a7dee">m_abortOnUnknownKeys</a></td></tr>
+<tr class="memdesc:a5e937097b9341b9ba6543ee9a01a7dee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort (true) or warn (false) when a JSON object contains a key that the parser does not read.  <br /></td></tr>
 <tr class="memitem:a9a9ac5466689ebbb0197ff4fc739f6d3" id="r_a9a9ac5466689ebbb0197ff4fc739f6d3"><td class="memItemLeft" align="right" valign="top"><a id="a9a9ac5466689ebbb0197ff4fc739f6d3" name="a9a9ac5466689ebbb0197ff4fc739f6d3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numPlasmaSpecies</b></td></tr>
 <tr class="memdesc:a9a9ac5466689ebbb0197ff4fc739f6d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of plasma species. <br /></td></tr>
@@ -467,6 +485,8 @@ std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169d
 <tr class="memitem:ab3f83745ac507ff6ce723068ca068be5" id="r_ab3f83745ac507ff6ce723068ca068be5"><td class="memItemLeft" align="right" valign="top"><a id="ab3f83745ac507ff6ce723068ca068be5" name="ab3f83745ac507ff6ce723068ca068be5"></a>
 std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_electrodeFieldEmission</b></td></tr>
 <tr class="memdesc:ab3f83745ac507ff6ce723068ca068be5"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of electrode field emission reactions. <br /></td></tr>
+<tr class="memitem:a2a2bc2675674d740213cf9330b7bfae0" id="r_a2a2bc2675674d740213cf9330b7bfae0"><td class="memItemLeft" align="right" valign="top">std::array&lt; std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a> &gt; &gt;, 2 *SpaceDim &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a2bc2675674d740213cf9330b7bfae0">m_domainFieldEmission</a></td></tr>
+<tr class="memdesc:a2a2bc2675674d740213cf9330b7bfae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field emission reactions on the domain faces.  <br /></td></tr>
 <tr class="memitem:a172eb992e97819f4534d69bf3276441d" id="r_a172eb992e97819f4534d69bf3276441d"><td class="memItemLeft" align="right" valign="top"><a id="a172eb992e97819f4534d69bf3276441d" name="a172eb992e97819f4534d69bf3276441d"></a>
 <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_alpha</b></td></tr>
 <tr class="memdesc:a172eb992e97819f4534d69bf3276441d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Townsend ionization coefficient. Defined during parseAlpha. <br /></td></tr>
@@ -798,6 +818,50 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ab3c3f4fa030cd37a710b03307648d73d" name="ab3c3f4fa030cd37a710b03307648d73d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3c3f4fa030cd37a710b03307648d73d">&#9670;&#160;</a></span>checkKeys()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::checkKeys </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;</td>          <td class="paramname"><span class="paramname"><em>a_object</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::set&lt; std::string &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_allowed</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_context</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Report every key in a JSON object that the parser does not read. </p>
+<p>Each unknown key goes through <a class="el" href="#a7f285ed2044cc1d8ba3120343c0ff017" title="Throw a parser error.">throwParserError()</a> or <a class="el" href="#a6f7b90327b6962d21b90f85ba3600ef4" title="Throw a parser warning.">throwParserWarning()</a>, as selected by ItoKMCJSON.unknown_keys. The report names the object, the key, the allowed key it most likely misspells (if any), and all the allowed keys. Values that are not JSON objects are not checked. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_object</td><td>JSON object to check. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allowed</td><td>Keys the parser reads from this object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_context</td><td>Path to the object in the chemistry file, used in the report. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a88f23cf28562ac3e053f506b1f302788" name="a88f23cf28562ac3e053f506b1f302788"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a88f23cf28562ac3e053f506b1f302788">&#9670;&#160;</a></span>checkMolarFraction()</h2>
 
@@ -1119,6 +1183,66 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="afec1b1121eeafd70dee8c186f1f5702c" name="afec1b1121eeafd70dee8c186f1f5702c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afec1b1121eeafd70dee8c186f1f5702c">&#9670;&#160;</a></span>emitsWithoutPrimariesDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCJSON::emitsWithoutPrimariesDomain </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if field emission is specified on any domain face. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if the domain emission pass must run even when no primaries left the domain. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a31d5465a2e8ff0addc5fc1d76f0194be">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a976b6b7053af969fcb939542894bfccc" name="a976b6b7053af969fcb939542894bfccc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a976b6b7053af969fcb939542894bfccc">&#9670;&#160;</a></span>emitsWithoutPrimariesEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCJSON::emitsWithoutPrimariesEB </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if field emission is specified on electrodes or dielectrics. </p>
+<p>Field emission is the only EB emission in this model that does not need a primary particle or photon. </p><dl class="section return"><dt>Returns</dt><dd>True if the EB emission pass must run even when no primaries reached the EB. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae205cd2b6ec870b929c3efffb00e6c37">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
 <a id="a6ebe78f5ec269d03d4a1d22eeae8dec8" name="a6ebe78f5ec269d03d4a1d22eeae8dec8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6ebe78f5ec269d03d4a1d22eeae8dec8">&#9670;&#160;</a></span>getNeutralDensity()</h2>
 
@@ -1354,6 +1478,40 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="ac752a5dad72d16b29e4e1a2ef3a8f393" name="ac752a5dad72d16b29e4e1a2ef3a8f393"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac752a5dad72d16b29e4e1a2ef3a8f393">&#9670;&#160;</a></span>getTableKeys()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::set&lt; std::string &gt; ItoKMCJSON::getTableKeys </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dataID</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the keys that <a class="el" href="#a4bd500f5b50a92554482ae5b38224d1b" title="Parse a table which is stored in E/N format.">parseTableEByN()</a> reads from a table entry. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataID</td><td>Data identifier passed to <a class="el" href="#a4bd500f5b50a92554482ae5b38224d1b" title="Parse a table which is stored in E/N format.">parseTableEByN()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Keys read by <a class="el" href="#a4bd500f5b50a92554482ae5b38224d1b" title="Parse a table which is stored in E/N format.">parseTableEByN()</a>, plus 'type'. </dd></dl>
+
+</div>
+</div>
 <a id="a1f819ab6ee73e6ab5c7465371ee576f5" name="a1f819ab6ee73e6ab5c7465371ee576f5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1f819ab6ee73e6ab5c7465371ee576f5">&#9670;&#160;</a></span>initializeAutomaticTownsend()</h2>
 
@@ -1413,7 +1571,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 <p>Initialize surface reactions. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>Surface type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>Surface type: 'dielectric', 'electrode', or 'domain'. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1696,6 +1854,45 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 <dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="#a4e3309066e93b4e53d7eacd98e2becfe" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aea4fc097ef2944cbc42c17b412d05817">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a272250646f21881f382513fd71527f08" name="a272250646f21881f382513fd71527f08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a272250646f21881f382513fd71527f08">&#9670;&#160;</a></span>parseDomainBoundaries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; int, Side::LoHiSide &gt; &gt; ItoKMCJSON::parseDomainBoundaries </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;</td>          <td class="paramname"><span class="paramname"><em>a_json</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_context</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse the 'boundaries' list of a domain emission entry. </p>
+<p>Each entry is a face name such as "x lo" or "y hi". Faces in a direction that this build does not have ("z lo" and "z hi" in 2D) are skipped, so that one chemistry file serves both 2D and 3D. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_json</td><td>JSON entry containing the 'boundaries' list. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_context</td><td>Path to the entry in the chemistry file, used in error messages. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The faces, as (direction, side) pairs. </dd></dl>
 
 </div>
 </div>
@@ -2041,6 +2238,142 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="a75cb7033ee09c432f58411a316d22c62" name="a75cb7033ee09c432f58411a316d22c62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75cb7033ee09c432f58411a316d22c62">&#9670;&#160;</a></span>sampleFieldEmission()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::sampleFieldEmission </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fieldEmission</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_position</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_areaFraction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sample field emission from a cathode surface. </p>
+<p>Shared by <a class="el" href="#a1e1ac5f15342141e838b766c610146d8" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a> and <a class="el" href="#a75ad153955d2bd7b938a11dd7340ca5f" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a>. Only negative species are emitted. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_secondaryParticles</td><td>Secondary particles; emitted particles are appended. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fieldEmission</td><td>Field emission reactions on this surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Physical position where emitted particles are released. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_areaFraction</td><td>Surface area, not multiplied by dx (2D) or dx^2 (3D). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2df2e9eed8f155d7a0d736f50eee3220" name="a2df2e9eed8f155d7a0d736f50eee3220"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2df2e9eed8f155d7a0d736f50eee3220">&#9670;&#160;</a></span>sampleSurfaceEmission()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::sampleSurfaceEmission </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_plasmaReactions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_photonReactions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; RealVect()&gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_releasePosition</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_isCathode</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sample the secondaries released by primaries that hit a surface. </p>
+<p>Shared by <a class="el" href="#a1e1ac5f15342141e838b766c610146d8" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a> and <a class="el" href="#a75ad153955d2bd7b938a11dd7340ca5f" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a>. Each primary species with a reaction on this surface triggers a multinomial draw over that species' reactions. Charged products are only released if the field pushes them away from the surface: negative products from a cathode, positive products from an anode. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_secondaryParticles</td><td>Secondary particles; products are appended. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_plasmaReactions</td><td>Surface reactions triggered by plasma species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_photonReactions</td><td>Surface reactions triggered by photon species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that hit the surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that hit the surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_releasePosition</td><td>Draws a release position for one group of products. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isCathode</td><td>Whether the surface is a cathode. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a3d95d4429aac465639f8c68f546167fc" name="a3d95d4429aac465639f8c68f546167fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d95d4429aac465639f8c68f546167fc">&#9670;&#160;</a></span>sanctifyPhotoReaction()</h2>
 
@@ -2126,6 +2459,118 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a75ad153955d2bd7b938a11dd7340ca5f" name="a75ad153955d2bd7b938a11dd7340ca5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75ad153955d2bd7b938a11dd7340ca5f">&#9670;&#160;</a></span>secondaryEmissionDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::secondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCenter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryNormal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide</td>          <td class="paramname"><span class="paramname"><em>a_side</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_faceArea</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resolve secondary emission on one face of the computational domain. </p>
+<p>Applies the 'domain emission' reactions and the 'domain' field emission specified for this face. Secondaries are released uniformly in the boundary cell, or in the gas part of it if the EB cuts the cell. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Outgoing plasma species particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryPhotons</td><td>Photons injected through the domain face. The stepper does not inject these. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that left the computational domain through this face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that left the computational domain through this face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field in the boundary cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCenter</td><td>Physical position of the cell center. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCentroid</td><td>Cell centroid relative to the cell center (not multiplied by dx). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid relative to the cell center (not multiplied by dx). Zero if the cell is not cut by the EB. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>EB normal, pointing into the gas. Zero if the cell is not cut by the EB. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction normal to the domain face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Low or high side of the domain in a_dir. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_faceArea</td><td>Area fraction of the cell's domain face that is open to the gas. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution on this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#acd2e7de6988b3e989f8d407a9c246831">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>
@@ -2430,6 +2875,31 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a5e937097b9341b9ba6543ee9a01a7dee" name="a5e937097b9341b9ba6543ee9a01a7dee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e937097b9341b9ba6543ee9a01a7dee">&#9670;&#160;</a></span>m_abortOnUnknownKeys</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Physics::ItoKMC::ItoKMCJSON::m_abortOnUnknownKeys</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Abort (true) or warn (false) when a JSON object contains a key that the parser does not read. </p>
+<p>Set by ItoKMCJSON.unknown_keys. </p>
+
+</div>
+</div>
 <a id="a53006b3536208a4079368aead4a67ad2" name="a53006b3536208a4079368aead4a67ad2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a53006b3536208a4079368aead4a67ad2">&#9670;&#160;</a></span>m_allSpecies</h2>
 
@@ -2502,6 +2972,31 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 <p>Plot background species or not. </p>
 <p>Built in initialization order but can look up arbitrary species name but using the maps. </p>
+
+</div>
+</div>
+<a id="a2a2bc2675674d740213cf9330b7bfae0" name="a2a2bc2675674d740213cf9330b7bfae0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a2bc2675674d740213cf9330b7bfae0">&#9670;&#160;</a></span>m_domainFieldEmission</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt;std::vector&lt;std::pair&lt;int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a>&gt; &gt;, 2 * SpaceDim&gt; Physics::ItoKMC::ItoKMCJSON::m_domainFieldEmission</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Field emission reactions on the domain faces. </p>
+<p>Indexed by 2*dir + side, with the low side first. </p>
 
 </div>
 </div>

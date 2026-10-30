@@ -250,6 +250,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> (
 <tr class="memdesc:a875be5d3149509f288985a60387c3bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign a pool into the valid holders: local appends + MPI scatter.  <br /></td></tr>
 <tr class="memitem:a17bf7a1b121571660081516bb3650c33" id="r_a17bf7a1b121571660081516bb3650c33"><td class="memItemLeft" align="right" valign="top">IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17bf7a1b121571660081516bb3650c33">cellIndex</a> (const int a_lvl, const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a17bf7a1b121571660081516bb3650c33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell index containing a position on a given level (floor((x - probLo)/dx)).  <br /></td></tr>
+<tr class="memitem:aa998da3d1894b9de7cc8e51453b8cdc0" id="r_aa998da3d1894b9de7cc8e51453b8cdc0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa998da3d1894b9de7cc8e51453b8cdc0">moveInsideDomain</a> (RealVect &amp;a_pos) const noexcept</td></tr>
+<tr class="memdesc:aa998da3d1894b9de7cc8e51453b8cdc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move a position that lies on, or within roundoff of, a domain face to just inside it.  <br /></td></tr>
 <tr class="memitem:ae5d2b7253a850abaa2752709ef603fb8" id="r_ae5d2b7253a850abaa2752709ef603fb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5d2b7253a850abaa2752709ef603fb8">inValidBox</a> (const int a_lvl, const Box &amp;a_box, const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:ae5d2b7253a850abaa2752709ef603fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a position's cell lies inside a (grid) box on a given level.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -273,6 +275,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTile
 <tr class="memitem:a9f11887700e788994fa15603aef2ecd7" id="r_a9f11887700e788994fa15603aef2ecd7"><td class="memItemLeft" align="right" valign="top"><a id="a9f11887700e788994fa15603aef2ecd7" name="a9f11887700e788994fa15603aef2ecd7"></a>
 RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td></tr>
 <tr class="memdesc:a9f11887700e788994fa15603aef2ecd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of the physical domain. <br /></td></tr>
+<tr class="memitem:a902fde5c3ed9fd8e30b8b3da2e93eebf" id="r_a902fde5c3ed9fd8e30b8b3da2e93eebf"><td class="memItemLeft" align="right" valign="top"><a id="a902fde5c3ed9fd8e30b8b3da2e93eebf" name="a902fde5c3ed9fd8e30b8b3da2e93eebf"></a>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_probHi</b></td></tr>
+<tr class="memdesc:a902fde5c3ed9fd8e30b8b3da2e93eebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper-right corner of the physical domain, computed from the coarsest domain box and grid spacing. <br /></td></tr>
 <tr class="memitem:a9938e618fd10b94b4876c419fa97abed" id="r_a9938e618fd10b94b4876c419fa97abed"><td class="memItemLeft" align="right" valign="top"><a id="a9938e618fd10b94b4876c419fa97abed" name="a9938e618fd10b94b4876c419fa97abed"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
 <tr class="memdesc:a9938e618fd10b94b4876c419fa97abed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid blocking factor (tile size). <br /></td></tr>
@@ -350,9 +355,9 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <div class="line">    }</div>
 <div class="line">  }</div>
 <div class="ttc" id="aclassParticleContainer_html_a436bc8a55380fbea2d491d02ba5b7466"><div class="ttname"><a href="#a436bc8a55380fbea2d491d02ba5b7466">ParticleContainer::ParticleContainer</a></div><div class="ttdeci">ParticleContainer()</div><div class="ttdoc">Construct an empty, undefined container. Call define() before use.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:143</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:193</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:260</div></div>
-<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:494</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:194</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:265</div></div>
+<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:502</div></div>
 <div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:655</div></div>
 <div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1195</div></div>
 <div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:882</div></div>
@@ -1499,6 +1504,42 @@ template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt
 
 </div>
 </div>
+<a id="aa998da3d1894b9de7cc8e51453b8cdc0" name="aa998da3d1894b9de7cc8e51453b8cdc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa998da3d1894b9de7cc8e51453b8cdc0">&#9670;&#160;</a></span>moveInsideDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::moveInsideDomain </td>
+          <td>(</td>
+          <td class="paramtype">RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_pos</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move a position that lies on, or within roundoff of, a domain face to just inside it. </p>
+<p>Cells are half-open, so a position exactly on the high face maps to the cell beyond the domain, and a position a roundoff distance outside either face maps to no cell. Each coordinate within 1E-6 of a finest-level cell of a domain face, but outside the half-open range [probLo, probHi), is set to 1E-6 of a finest-level cell inside that face. This is the same margin <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> uses for particles that hit the domain. Coordinates further out are left alone, so particles that left the domain stay outside it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pos</td><td>Position. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if any coordinate was moved. </dd></dl>
+
+</div>
+</div>
 <a id="a35ddd88eda595d55ae5a072c8dfa7a59" name="a35ddd88eda595d55ae5a072c8dfa7a59"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35ddd88eda595d55ae5a072c8dfa7a59">&#9670;&#160;</a></span>operator=()</h2>
 
@@ -1788,7 +1829,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Redistribute every valid particle to the patch/level/rank that owns its cell. </p>
-<p>Pool model: collect all valid particles, map each to its destination via the finest-level tile that contains it (<a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a>), append same-rank movers into the destination leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates any cell-sort. Particle ids are preserved; rankID is set to the new owning rank. </p>
+<p>Pool model: collect all valid particles, map each to its destination via the finest-level tile that contains it (<a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a>), append same-rank movers into the destination leaf and scatter cross-rank movers with MPI. A particle on, or within roundoff of, a domain face is first moved just inside the domain (see moveInsideDomain). Particles whose cell is not owned by any tile on any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates any cell-sort. Particle ids are preserved; rankID is set to the new owning rank. </p>
 
 </div>
 </div>

@@ -510,8 +510,9 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <span class="cm"> * @brief Redistribute every valid particle to the patch/level/rank that owns its cell.</span>
 <span class="cm"> * @details Pool model: collect all valid particles, map each to its destination via the</span>
 <span class="cm"> * finest-level tile that contains it (LevelTiles), append same-rank movers into the destination</span>
-<span class="cm"> * leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on</span>
-<span class="cm"> * any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates</span>
+<span class="cm"> * leaf and scatter cross-rank movers with MPI. A particle on, or within roundoff of, a domain face is</span>
+<span class="cm"> * first moved just inside the domain (see moveInsideDomain). Particles whose cell is not owned by any</span>
+<span class="cm"> * tile on any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates</span>
 <span class="cm"> * any cell-sort. Particle ids are preserved; rankID is set to the new owning rank.</span>
 <span class="cm"> */</span>
 <span class="kt">void</span>
@@ -532,7 +533,9 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <li><p>Scatter the particles that move to another rank with MPI.</p></li>
 <li><p>Assign the scattered particles on each receiving rank.</p></li>
 </ol>
-<p>Particles whose cell is owned by no patch on any level (off-domain) are dropped and counted.</p>
+<p>Cells are half-open, so a position exactly on a high domain face maps to a cell outside the domain.
+Before a particle is dropped, a position on a domain face, or within <span class="math notranslate nohighlight">\(10^{-6}\)</span> of a finest-level cell of one, is therefore moved <span class="math notranslate nohighlight">\(10^{-6}\)</span> of a finest-level cell inside the domain and mapped again.
+Particles whose cell is still owned by no patch on any level (off-domain) are dropped and counted.</p>
 <p>The point-to-patch mapping in step 2 maps the position to a <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> tile by integer division and looks it up in a per-level hash map.
 This is <span class="math notranslate nohighlight">\(\mathcal{O}(1)\)</span> and works also when the grids contain variable-sized (anisotropic) boxes (see <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a>), because every box is registered under each <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> tile it covers.
 The same mapping is exposed on the <code class="docutils literal notranslate"><span class="pre">Realm</span></code> class through <code class="docutils literal notranslate"><span class="pre">Realm::getLevelAndBox</span></code> (see <a class="reference internal" href="Realm.html#chap-realmhashgrid"><span class="std std-ref">Patch lookup (tile hash grid)</span></a>) for non-particle users; the container aliases the realm’s hash grid rather than building its own.</p>
@@ -749,6 +752,7 @@ See <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="
 <section id="domain-edges">
 <h3>Domain edges<a class="headerlink" href="#domain-edges" title="Permalink to this heading"></a></h3>
 <p>By default, the <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> remapping function will discard particles that fall outside of the domain.
+Particles on a domain face, or within roundoff of one, are kept and moved just inside the domain (see <a class="reference internal" href="#chap-particlecontainer"><span class="std std-ref">ParticleContainer</span></a>).
 The user can also check if this happens by checking if the particle position is outside the computational domain:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">leaf</span><span class="p">.</span><span class="n">position</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">probLo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getProbLo</span><span class="p">();</span>
@@ -790,6 +794,7 @@ Conversely, if the particle is close to the EB a small step will be used.</p>
 </div>
 <p>The container-owned position holds the trajectory end point, while the start point is read from the payload columns selected by the <code class="docutils literal notranslate"><span class="pre">OldPosition</span></code> member-pointer pack (<code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> members, one per component).
 The intersected particles are put into the EB-intersected particles (<code class="docutils literal notranslate"><span class="pre">a_ebParticles</span></code>) and domain-intersected particles (<code class="docutils literal notranslate"><span class="pre">a_domainParticles</span></code>).
+A domain-intersected particle is placed at the point where its trajectory crosses the domain side, moved <span class="math notranslate nohighlight">\(10^{-6}\)</span> of a cell inside the domain so that it stays in the boundary cell it left through.
 The user can choose whether or not to remove intersected particles from <code class="docutils literal notranslate"><span class="pre">a_activeParticles</span></code> by adjusting <code class="docutils literal notranslate"><span class="pre">a_deleteParticles</span></code>.
 The final argument lets the user supply a callback <code class="docutils literal notranslate"><span class="pre">(ParticleSoA&amp;,</span> <span class="pre">std::size_t)</span></code> that modifies particles that were intersected but not deleted (for example to flag the original particle via a payload column).</p>
 <p>Both the bisection and ray-casting algorithm have weaknesses.

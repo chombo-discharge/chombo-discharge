@@ -172,6 +172,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () const 
 <tr class="memdesc:aea4fc097ef2944cbc42c17b412d05817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the physics model requires species density gradients.  <br /></td></tr>
 <tr class="memitem:af7c82f336dfeb54adf62fbfa31740169" id="r_af7c82f336dfeb54adf62fbfa31740169"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7c82f336dfeb54adf62fbfa31740169">needGradient</a> (const int a_plasmaIndex) const noexcept</td></tr>
 <tr class="memdesc:af7c82f336dfeb54adf62fbfa31740169"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the physics model reads the density gradient of one particular plasma species.  <br /></td></tr>
+<tr class="memitem:ae205cd2b6ec870b929c3efffb00e6c37" id="r_ae205cd2b6ec870b929c3efffb00e6c37"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae205cd2b6ec870b929c3efffb00e6c37">emitsWithoutPrimariesEB</a> () const noexcept</td></tr>
+<tr class="memdesc:ae205cd2b6ec870b929c3efffb00e6c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if <a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a> can emit in a step where nothing reached the EB.  <br /></td></tr>
+<tr class="memitem:a31d5465a2e8ff0addc5fc1d76f0194be" id="r_a31d5465a2e8ff0addc5fc1d76f0194be"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31d5465a2e8ff0addc5fc1d76f0194be">emitsWithoutPrimariesDomain</a> () const noexcept</td></tr>
+<tr class="memdesc:a31d5465a2e8ff0addc5fc1d76f0194be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if <a class="el" href="#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a> can emit in a step where nothing reached the domain boundary.  <br /></td></tr>
 <tr class="memitem:a7dc34c72891621ccefa995ac84d1c673" id="r_a7dc34c72891621ccefa995ac84d1c673"><td class="memItemLeft" align="right" valign="top">const std::map&lt; int, std::pair&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731">SpeciesType</a>, int &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7dc34c72891621ccefa995ac84d1c673">getSpeciesMap</a> () const noexcept</td></tr>
 <tr class="memdesc:a7dc34c72891621ccefa995ac84d1c673"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the internal mapping from plasma-species index to solver type and solver index.  <br /></td></tr>
 <tr class="memitem:aa632c381a987a629a4432d40fa057406" id="r_aa632c381a987a629a4432d40fa057406"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa632c381a987a629a4432d40fa057406">parseRuntimeOptions</a> () noexcept</td></tr>
@@ -184,6 +188,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () const 
 <tr class="memdesc:ad1aed72f6a18742b38ff9ae254eca82e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
 <tr class="memitem:a3072257af3148ef72b6560f167e98a82" id="r_a3072257af3148ef72b6560f167e98a82"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3072257af3148ef72b6560f167e98a82">secondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; Real &gt; &amp;a_cdrFluxes, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; Real &gt; &amp;a_cdrFluxesExtrap, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_physicalCellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt, const bool a_isDielectric, const int a_matIndex) const noexcept=0</td></tr>
 <tr class="memdesc:a3072257af3148ef72b6560f167e98a82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:acd2e7de6988b3e989f8d407a9c246831" id="r_acd2e7de6988b3e989f8d407a9c246831"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd2e7de6988b3e989f8d407a9c246831">secondaryEmissionDomain</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const int a_dir, const Side::LoHiSide a_side, const Real a_faceArea, const Real a_dx, const Real a_dt) const noexcept=0</td></tr>
+<tr class="memdesc:acd2e7de6988b3e989f8d407a9c246831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission on one face of the computational domain.  <br /></td></tr>
 <tr class="memitem:a440228429ef26446e3aa2b4f8c680561" id="r_a440228429ef26446e3aa2b4f8c680561"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a440228429ef26446e3aa2b4f8c680561">advanceKMC</a> (Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_numParticles, Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_numNewPhotons, Real &amp;a_physicsDt, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const RealVect a_E, const RealVect a_pos, const Real a_dx, const Real a_kappa) const</td></tr>
 <tr class="memdesc:a440228429ef26446e3aa2b4f8c680561"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the reaction network using the KMC algorithm.  <br /></td></tr>
 <tr class="memitem:aa8bd2aecb157a010ba469670db21f1dd" id="r_aa8bd2aecb157a010ba469670db21f1dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8bd2aecb157a010ba469670db21f1dd">reconcileParticles</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_newNumParticles, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_oldNumParticles, const RealVect a_electricField, const RealVect a_cellPos, const RealVect a_centroidPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_bndryNormal, const Real a_dx, const Real a_kappa) const noexcept</td></tr>
@@ -358,7 +364,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers. </p>
-<p>Subclasses must implement <span class="tt"><a class="el" href="#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a></span>, <span class="tt"><a class="el" href="#a6accd05bace5e41d24d901720ea8a892" title="Compute the Ito solver mobilities.">computeMobilities()</a></span>, <span class="tt"><a class="el" href="#ad1aed72f6a18742b38ff9ae254eca82e" title="Compute the Ito solver diffusion coefficients.">computeDiffusionCoefficients()</a></span>, <span class="tt"><a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a></span>, <span class="tt"><a class="el" href="#a89ebbbdf2ff907a6672ca00668a82f7d" title="Compute Townsend ionization coefficient.">computeAlpha()</a></span>, <span class="tt"><a class="el" href="#a08f01b701bbd61de8eda7e8bb94ea7ea" title="Compute Townsend attachment coefficient.">computeEta()</a></span>, and <span class="tt"><a class="el" href="#a7fcb534d048627466793e3d8c8cf916b" title="Get the neutral density at a position in space.">getNeutralDensity()</a></span>. The reaction network is specified by populating <span class="tt"><a class="el" href="#aaf93dd374d062265d09611aa5ea6677e" title="List of reactions for the KMC solver.">m_kmcReactions</a></span> and (optionally) <span class="tt"><a class="el" href="#a50274f528c0ad5aa85a7161b8d67892e" title="List of photoionization reactions.">m_photoReactions</a></span> and <span class="tt"><a class="el" href="#ab40ef30340dd1038995d29bf86ccd369" title="Surface reactions.">m_surfaceReactions</a></span> in the subclass constructor. </p>
+<p>Subclasses must implement <span class="tt"><a class="el" href="#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a></span>, <span class="tt"><a class="el" href="#a6accd05bace5e41d24d901720ea8a892" title="Compute the Ito solver mobilities.">computeMobilities()</a></span>, <span class="tt"><a class="el" href="#ad1aed72f6a18742b38ff9ae254eca82e" title="Compute the Ito solver diffusion coefficients.">computeDiffusionCoefficients()</a></span>, <span class="tt"><a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a></span>, <span class="tt"><a class="el" href="#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a></span>, <span class="tt"><a class="el" href="#a89ebbbdf2ff907a6672ca00668a82f7d" title="Compute Townsend ionization coefficient.">computeAlpha()</a></span>, <span class="tt"><a class="el" href="#a08f01b701bbd61de8eda7e8bb94ea7ea" title="Compute Townsend attachment coefficient.">computeEta()</a></span>, and <span class="tt"><a class="el" href="#a7fcb534d048627466793e3d8c8cf916b" title="Get the neutral density at a position in space.">getNeutralDensity()</a></span>. The reaction network is specified by populating <span class="tt"><a class="el" href="#aaf93dd374d062265d09611aa5ea6677e" title="List of reactions for the KMC solver.">m_kmcReactions</a></span> and (optionally) <span class="tt"><a class="el" href="#a50274f528c0ad5aa85a7161b8d67892e" title="List of photoionization reactions.">m_photoReactions</a></span> and <span class="tt"><a class="el" href="#ab40ef30340dd1038995d29bf86ccd369" title="Surface reactions.">m_surfaceReactions</a></span> in the subclass constructor. </p>
 </div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Member Enumeration Documentation</h2>
 <a id="a988145ba22d311afbd51d4fa10d1cc6b" name="a988145ba22d311afbd51d4fa10d1cc6b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a988145ba22d311afbd51d4fa10d1cc6b">&#9670;&#160;</a></span>Algorithm</h2>
@@ -973,6 +979,66 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Physical position for the new particle. </dd></dl>
+
+</div>
+</div>
+<a id="a31d5465a2e8ff0addc5fc1d76f0194be" name="a31d5465a2e8ff0addc5fc1d76f0194be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31d5465a2e8ff0addc5fc1d76f0194be">&#9670;&#160;</a></span>emitsWithoutPrimariesDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCPhysics::emitsWithoutPrimariesDomain </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if <a class="el" href="#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a> can emit in a step where nothing reached the domain boundary. </p>
+<p>The domain counterpart of <a class="el" href="#ae205cd2b6ec870b929c3efffb00e6c37" title="Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.">emitsWithoutPrimariesEB()</a>, with the same conservative default. </p><dl class="section return"><dt>Returns</dt><dd>True if the domain emission pass must run even when no primaries left the domain. </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#afec1b1121eeafd70dee8c186f1f5702c">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+
+</div>
+</div>
+<a id="ae205cd2b6ec870b929c3efffb00e6c37" name="ae205cd2b6ec870b929c3efffb00e6c37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae205cd2b6ec870b929c3efffb00e6c37">&#9670;&#160;</a></span>emitsWithoutPrimariesEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCPhysics::emitsWithoutPrimariesEB </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if <a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a> can emit in a step where nothing reached the EB. </p>
+<p>The stepper skips the EB emission pass in a step where no particle or photon reached the EB and no CDR species is mobile, unless this returns true. Field emission is the typical case: it is driven by the electric field alone. The default is the conservative answer, so a model that does not override this has the emission pass run every step. </p><dl class="section return"><dt>Returns</dt><dd>True if the EB emission pass must run even when no primaries reached the EB. </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a976b6b7053af969fcb939542894bfccc">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -2068,6 +2134,118 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if a parent was drawn, false if there was nothing to draw from. </dd></dl>
+
+</div>
+</div>
+<a id="acd2e7de6988b3e989f8d407a9c246831" name="acd2e7de6988b3e989f8d407a9c246831"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd2e7de6988b3e989f8d407a9c246831">&#9670;&#160;</a></span>secondaryEmissionDomain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Physics::ItoKMC::ItoKMCPhysics::secondaryEmissionDomain </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCenter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryNormal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide</td>          <td class="paramname"><span class="paramname"><em>a_side</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_faceArea</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel pure-virtual">pure virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resolve secondary emission on one face of the computational domain. </p>
+<p>Called once per boundary cell and domain face. A cell on a corner or edge of the domain is called once per face it touches, and each primary is passed to the face it crossed. CDR species do not take part: their domain fluxes are set by the CDR solver's own boundary conditions. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Outgoing plasma species particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryPhotons</td><td>Photons injected through the domain face. The stepper does not inject these. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that left the computational domain through this face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that left the computational domain through this face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field in the boundary cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCenter</td><td>Physical position of the cell center. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCentroid</td><td>Cell centroid relative to the cell center (not multiplied by dx). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid relative to the cell center (not multiplied by dx). Zero if the cell is not cut by the EB. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>EB normal, pointing into the gas. Zero if the cell is not cut by the EB. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction normal to the domain face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Low or high side of the domain in a_dir. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_faceArea</td><td>Area fraction of the cell's domain face that is open to the gas. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution on this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a75ad153955d2bd7b938a11dd7340ca5f">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
