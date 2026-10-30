@@ -32,13 +32,7 @@ int
 main(int argc, char* argv[])
 {
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, nullptr, input_file.c_str());
+  ChomboDischarge::initialize(argc, argv);
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real      cfl       = 0.8;
@@ -65,7 +59,7 @@ main(int argc, char* argv[])
 
     // Run the simulation.
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
-    engine->setupAndRun(input_file);
+    engine->setupAndRun();
 
     // Can compute error if i > 0
     if (i > 0) {
@@ -73,16 +67,25 @@ main(int argc, char* argv[])
       DischargeIO::writeEBHDF5(error, "error.hdf5");
 
       // Computes max, L1, and L2 norms.
-      const Real Linf = DataOps::norm(*error[0], 0, *amr->getVofIterator("primal", phase::gas)[0]);
-      const Real L1   = DataOps::norm(*error[0], 1, *amr->getVofIterator("primal", phase::gas)[0]);
-      const Real L2   = DataOps::norm(*error[0], 2, *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real Linf = DataOps::norm(*error[0],
+                                      *amr->getRegularCells("primal", phase::gas)[0],
+                                      0,
+                                      *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L1   = DataOps::norm(*error[0],
+                                    *amr->getRegularCells("primal", phase::gas)[0],
+                                    1,
+                                    *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L2   = DataOps::norm(*error[0],
+                                    *amr->getRegularCells("primal", phase::gas)[0],
+                                    2,
+                                    *amr->getVofIterator("primal", phase::gas)[0]);
 
       norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
     }
 
     // Allocate storage for the fine/coarse solutions.
     amr->allocate(error, "primal", phase::gas, 1);
-    error.copy(solver->getPhi());
+    DataOps::copy(error, solver->getPhi());
 
     cfl *= 0.5;
   }
@@ -104,6 +107,7 @@ main(int argc, char* argv[])
     // clang-format on
 #ifdef CH_MPI
   }
-  MPI_Finalize();
 #endif
+
+  ChomboDischarge::finalize();
 }
