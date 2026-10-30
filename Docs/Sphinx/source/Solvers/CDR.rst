@@ -48,7 +48,7 @@ These approximations are encapsulated by the following functions:
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of functions responsible for calculating approximations to divergence operators.
    :language: c++
-   :lines: 164-235
+   :lines: 165-240
    :dedent: 2
 
 These functions are not implemented in ``CdrSolver``, but in subclasses.
@@ -60,7 +60,7 @@ The implicit advance methods for ``CdrSolver`` are encapsulated by the following
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of current implicit diffusion advance functions.
    :language: c++
-   :lines: 124-139,150-162
+   :lines: 125-140,151-163
    :dedent: 2
 
 .. _Chap:CdrDetails:   
@@ -102,7 +102,19 @@ The sum runs over all cell edges (faces in 3D) of the cell where :math:`G_f` is 
 
 However, taking :math:`[\nabla\cdot\mathbf{G}^k]` to be this sum leads to a time step constraint proportional to :math:`\kappa`, which can be arbitrarily small.
 This leads to an unacceptable time step constraint for :eq:`conservativeUpdate`.
-We use the Chombo approach and expand the range of influence of the cut cells in order to stabilize the discretization and allow the use of a normal time step constraint.
+The solvers therefore stabilize the update in the cut cells, which allows a normal time step constraint.
+The stabilization is selected with the solver option ``which_redistribution``:
+
+* ``volume``: the hybrid divergence with flux redistribution (the Chombo approach), described below.
+* ``state``: weighted state redistribution, see :ref:`Chap:StateRedistribution`.
+* ``none``: the hybrid divergence without redistributing the mass that it misses. This is not conservative.
+
+Both stabilizations turn the conservative divergence into the right-hand side :math:`R` of a stabilized update :math:`\phi^{k+1} = \phi^k - \Delta t R`.
+With state redistribution, :math:`R` depends on :math:`\phi^k` and on :math:`\Delta t`.
+The divergence functions therefore take the time step of the update, and the result must only be used with that time step.
+Divergences that enter the same update are added together before they are stabilized; ``computeDivJ`` does this for advection and diffusion, and ``redistributeDivergence`` stabilizes a sum of conservative divergences.
+
+The hybrid scheme expands the range of influence of the cut cells.
 First, we compute the conservative divergence
 
 .. math::
@@ -146,7 +158,7 @@ The user will need to call the function
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 237-248
+   :lines: 242-263
    :dedent: 2
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
@@ -159,6 +171,39 @@ These additional complications are taken care of inside ``a_divG``, but are not 
 .. caution::
    
    Mass redistribution has the effect of not being monotone and thus not TVD, and the discretization order is formally :math:`\mathcal{O}(\Delta x)`. 
+
+.. _Chap:StateRedistribution:
+
+State redistribution
+____________________
+
+With ``which_redistribution = state``, the solvers use weighted state redistribution :cite:`BergerGiuliani2021,Giuliani2022`, following the implementation in AMReX.
+The update starts from the provisional state :math:`U_{\mathbf{i}} = \phi_{\mathbf{i}}^k - \Delta t D_{\mathbf{i}}^c`, which is conservative but unstable in small cells.
+Each cut cell whose volume fraction is below a target :math:`\kappa_t` (``AmrMesh.srd_target_volfrac``, 0.5 by default) is merged with up to :math:`2^{\textrm{DIM}}-1` neighbors into a neighborhood whose volume reaches the target.
+A cell that is part of :math:`N_{\mathbf{r}}` neighborhoods (its own included) contributes the weight :math:`\alpha_1/N_{\mathbf{r}}` to each of the others, where :math:`\alpha_1` makes the neighborhood volume equal to the target, and :math:`\alpha_0` to its own.
+Each neighborhood has a weighted average :math:`\hat{U}` and centroid, and a limited linear reconstruction :math:`q` of the neighborhood averages (``AmrMesh.srd_order`` = 2; 0 uses the averages only).
+The new state of a cell is the weighted average of the reconstructions of the neighborhoods that contain it, evaluated at its centroid,
+
+.. math::
+
+   \phi_{\mathbf{r}}^{k+1} = \frac{1}{N_{\mathbf{r}}}\left(\alpha_0 N_{\mathbf{r}} q_{\mathbf{r}}(\mathbf{x}_{\mathbf{r}}) + \sum_{\mathbf{i}} \alpha_1 q_{\mathbf{i}}(\mathbf{x}_{\mathbf{r}})\right),
+
+and the right-hand side is :math:`R = (\phi^k - \phi^{k+1})/\Delta t`.
+The redistribution conserves mass in every neighborhood.
+Cells outside the merged neighborhoods keep the conservative update.
+
+On AMR hierarchies the redistribution follows :cite:`BarrioSanchez2023`.
+The neighborhoods are centered on the cells of a level that are not covered by a finer level, but they can contain cells that stand in for another level: cells covered by the finer level, and ghost cells that overlay the coarser level.
+The mass that the redistribution moves between a cell of the level and a stand-in is moved to the cells that the stand-in represents.
+Mass moved into a ghost cell goes to the coarse cell under it, which keeps the part :math:`\kappa` of it and redistributes the rest with flux redistribution, as in :cite:`BarrioSanchez2023`.
+Mass moved into a covered cell goes to the fine cells under it, as the same change of the state in each of them.
+This differs from :cite:`BarrioSanchez2023`, which gives it back to the coarse cell; that undoes the stabilization of a small coarse cell whose neighbors are all covered.
+
+.. note::
+
+   * State redistribution needs two ghost cells in the state and the divergence.
+   * The ``CdrPlasma`` ImExSdc time stepper does not support state redistribution.
+   * ``which_redistribution`` cannot be switched to or from ``state`` at runtime.
 
 .. _Chap:ExplicitAdvection:
 
@@ -174,7 +219,7 @@ In the simplest case, these fluxes are simply calculated using an upwind rule, p
 In more complex cases, we use both the normal and transverse slopes in a cell.
 The argument ``a_extrapDt`` is the time step that the face states are extrapolated over.
 It is not needed in a method-of-lines context (pass 0), but it is used in e.g. :ref:`Chap:CdrCTU` for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers).
-The argument ``a_dt`` is the time step of the update that the result is used in, which the flux correction in :ref:`Chap:CdrCTU` needs.
+The argument ``a_dt`` is the time step of the update that the result is used in, which the cut-cell stabilization needs. 
 
 For example, in order to perform an advective advance with the explicit Euler rule over a time step :math:`\Delta t`, one would perform the following:
 
@@ -203,8 +248,8 @@ For example, to use an explicit Euler update of a diffusion-only problem, we inc
 
    EBAMRCellData& phi  = solver->getPhi();            // Cell-centered state
    EBAMRCellData& divD = solver->getScratch();        // Scratch storage in solver
-   solver->computeDivD(divD, phi, false, true, true); // Computes divD including BCs
-   DataOps:incr(phi, divD, dt);                       // Makes phi -> phi + dt*divD
+   solver->computeDivD(divD, phi, dt, false, true, true); // Computes divD including BCs
+   DataOps:incr(phi, divD, dt);                           // Makes phi -> phi + dt*divD
 
 .. _Chap:ExplicitAdvectionDiffusion:
    
@@ -280,7 +325,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 338-349
+   :lines: 340-347
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
@@ -378,7 +423,7 @@ With ``CdrCTU.eb_inflow_state = true``, this enters the discretization in two pl
 * The fluid that crosses an outgoing face of a cut cell during a time step comes from the cell only until the flow has carried the EB (a plane through the EB centroid) to the face; after that it is fluid that entered through the EB.
   The face state is the time average over the step, which limits the outflow of a cut cell to its content when nothing flows in through the EB.
 
-Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell redistribution then has to absorb.
+Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell stabilization then has to absorb.
 
 Flux correction
 _______________
@@ -434,6 +479,7 @@ We do not discuss all options here, but note the following:
   In particular, ``gmg_reflux_free`` (default ``false``) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
   The two formulations are mathematically equivalent.
 * ``CdrCTU.plt_vars`` indicate which variables are added to plot files.
+* ``CdrCTU.which_redistribution`` selects the cut-cell stabilization, see :ref:`Chap:ExplicitDivergence`.
 * ``CdrCTU.eb_inflow_state`` and ``CdrCTU.flux_correction`` turn on the EB inflow state and the flux correction described above.
 * ``CdrCTU.bc.*`` set the domain boundary conditions.
   With ``outflow``, the flux through a boundary face is the computed (upwind) advective flux where it leaves the domain; nothing flows in, and there is no diffusive flux.
@@ -467,7 +513,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 633-701
+   :lines: 671-739
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
