@@ -2931,6 +2931,22 @@ AmrMesh::parseRedistributionRadius()
   if (m_redistributionRadius <= 0) {
     MayDay::Error("AmrMesh::parseRedistributionRadius -- you have specified non-positive redistribution radius");
   }
+
+  // Flux redistribution does not conserve mass across refinement boundaries for larger radii (issue #763).
+  if (m_redistributionRadius != 1) {
+    MayDay::Error("AmrMesh::parseRedistributionRadius -- redist_radius must be 1 (larger radii do not conserve mass "
+                  "across refinement boundaries, see chombo-discharge issue #763)");
+  }
+
+  pp.get("srd_order", m_srdOrder);
+  pp.get("srd_target_volfrac", m_srdTargetVolFrac);
+
+  if (m_srdOrder != 0 && m_srdOrder != 2) {
+    MayDay::Error("AmrMesh::parseRedistributionRadius -- srd_order must be 0 or 2");
+  }
+  if (!(m_srdTargetVolFrac > 0.0 && m_srdTargetVolFrac <= 1.0)) {
+    MayDay::Error("AmrMesh::parseRedistributionRadius -- srd_target_volfrac must be in (0, 1]");
+  }
 }
 
 void
@@ -3958,6 +3974,23 @@ AmrMesh::getFluxRegister(const std::string& a_realm, const phase::which_phase a_
   return m_realms[a_realm]->getFluxRegister(a_phase);
 }
 
+const RefCountedPtr<EBStateRedistribution>&
+AmrMesh::getStateRedistribution(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getStateRedistribution");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getStateRedistribution" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getStateRedistribution(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getStateRedistribution(a_phase);
+}
+
 Vector<RefCountedPtr<EBFluxRedistribution>>&
 AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -4126,6 +4159,8 @@ AmrMesh::defineRealms()
                      m_numGhostCells,
                      m_numLsfGhostCells,
                      m_redistributionRadius,
+                     m_srdOrder,
+                     m_srdTargetVolFrac,
                      m_multigridInterpOrder,
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
@@ -4185,6 +4220,8 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_numGhostCells,
                             m_numLsfGhostCells,
                             m_redistributionRadius,
+                            m_srdOrder,
+                            m_srdTargetVolFrac,
                             m_multigridInterpOrder,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,

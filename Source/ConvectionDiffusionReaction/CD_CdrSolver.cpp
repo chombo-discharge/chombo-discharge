@@ -22,6 +22,8 @@
 #include <CD_ParallelOps.H>
 #include <CD_DischargeIO.H>
 #include <CD_Random.H>
+#include <CD_EBHybridRedistribution.H>
+#include <CD_ParticleMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -31,6 +33,8 @@ CdrSolver::CdrSolver() : m_name("CdrSolver"), m_className("CdrSolver"), m_verbos
 {
 
   // Default options.
+  m_whichRedistribution = Redistribution::VolumeWeighted;
+  m_blendConservation   = true;
 
   this->setRealm(Realm::Primal);
   this->setDefaultDomainBC(); // Set default domain BCs (wall)
@@ -327,17 +331,38 @@ CdrSolver::allocate()
   m_amr->allocate(m_ebFlux, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_ebZero, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_domainFlux, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_massDifference, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_nonConservativeDivG, m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_ebFlux, 0.0);
   DataOps::setValue(m_ebZero, 0.0);
   DataOps::setValue(m_domainFlux, 0.0);
-  DataOps::setValue(m_massDifference, 0.0);
-  DataOps::setValue(m_nonConservativeDivG, 0.0);
+
+  // The cut-cell stabilization holds data on the grids, so it is rebuilt with them.
+  this->defineRedistribution();
 
   // Define interpolation stencils
   this->defineInterpolationStencils();
+}
+
+void
+CdrSolver::defineRedistribution()
+{
+  CH_TIME("CdrSolver::defineRedistribution()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::defineRedistribution()" << endl;
+  }
+
+  // The state redistribution is shared by the solvers of a realm and phase, and AmrMesh rebuilds it on regrids.
+  if (m_whichRedistribution == Redistribution::State) {
+    m_redistribution = m_amr->getStateRedistribution(m_realm, m_phase);
+  }
+  else {
+    m_redistribution = RefCountedPtr<EBRedistribution>(
+      new EBHybridRedistribution(m_amr,
+                                 m_realm,
+                                 m_phase,
+                                 m_blendConservation,
+                                 m_whichRedistribution != Redistribution::None));
+  }
 }
 
 void
@@ -357,6 +382,8 @@ CdrSolver::deallocate()
   m_cellCenteredDiffusionCoefficient.clear();
   m_faceCenteredDiffusionCoefficient.clear();
   m_ebCenteredDiffusionCoefficient.clear();
+
+  m_redistribution = RefCountedPtr<EBRedistribution>();
 }
 
 void
@@ -415,14 +442,16 @@ CdrSolver::preRegrid(const int /*a_lmin*/, const int /*a_oldFinestLevel*/)
 }
 
 void
-CdrSolver::computeDivG(EBAMRCellData&     a_divG,
-                       EBAMRFluxData&     a_G,
-                       const EBAMRIVData& a_ebFlux,
-                       const bool         a_conservativeOnly)
+CdrSolver::computeDivG(EBAMRCellData&       a_divG,
+                       EBAMRFluxData&       a_G,
+                       const EBAMRIVData&   a_ebFlux,
+                       const EBAMRCellData& a_phi,
+                       const Real           a_dt,
+                       const bool           a_conservativeOnly)
 {
-  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)");
+  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, EBAMRCellData, Real, bool)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)" << endl;
+    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, EBAMRCellData, Real, bool)" << endl;
   }
 
   CH_assert(a_divG[0]->nComp() == 1);
@@ -431,8 +460,8 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
 
   // clang-format off
   // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
-  //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
-  //       divergence is smooshed back in through through redistribution.
+  //       flux matching on refinement boundaries. Unless only the conservative divergence is asked for, the cut-cell stabilization turns it
+  //       into the right-hand side of the stabilized update.
   // clang-format on
 
   DataOps::setValue(a_divG, 0.0);
@@ -444,36 +473,28 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
   // Make the conservative divergence without kappa-division.
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);
 
-  // Compute hybrid divergence.
   if (!a_conservativeOnly) {
-    // Compute the non-conservative divergence
-    this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);
-
-    // a_divG becomes hybrid divergence. Mass diff computed.
-    this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG);
-
-    if (m_whichRedistribution != Redistribution::None) {
-
-      Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
-
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const Real     scale     = 1.0;
-        const Interval variables = Interval(0, 0);
-        const bool     hasCoar   = lvl > 0;
-        const bool     hasFine   = lvl < m_amr->getFinestLevel();
-
-        if (hasCoar) {
-          redistOps[lvl]->redistributeCoar(*a_divG[lvl - 1], *m_massDifference[lvl], scale, variables);
-        }
-
-        redistOps[lvl]->redistributeLevel(*a_divG[lvl], *m_massDifference[lvl], scale, variables);
-
-        if (hasFine) {
-          redistOps[lvl]->redistributeFine(*a_divG[lvl + 1], *m_massDifference[lvl], scale, variables);
-        }
-      }
-    }
+    this->redistributeDivergence(a_divG, a_phi, a_dt);
   }
+}
+
+bool
+CdrSolver::usesStateRedistribution() const noexcept
+{
+  return m_whichRedistribution == Redistribution::State;
+}
+
+void
+CdrSolver::redistributeDivergence(EBAMRCellData& a_divG, const EBAMRCellData& a_phi, const Real a_dt)
+{
+  CH_TIME("CdrSolver::redistributeDivergence");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::redistributeDivergence" << endl;
+  }
+
+  CH_assert(!m_redistribution.isNull());
+
+  m_redistribution->redistribute(a_divG, a_phi, a_dt);
 }
 
 void
@@ -487,27 +508,9 @@ CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const 
   CH_assert(a_phi.getRealm() == m_realm);
   CH_assert(a_delta.getRealm() == m_realm);
 
-  Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+  const ParticleMassRedistribution redistribution(m_amr->getRedistributionOp(m_realm, m_phase));
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real     scale     = 1.0;
-    const Interval variables = Interval(0, 0);
-    const bool     hasCoar   = lvl > 0;
-    const bool     hasFine   = lvl < m_amr->getFinestLevel();
-
-    CH_assert(a_phi[lvl]->nComp() == 1);
-    CH_assert(a_delta[lvl]->nComp() == 1);
-
-    if (hasCoar) {
-      redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *a_delta[lvl], scale, variables);
-    }
-
-    redistOps[lvl]->redistributeLevel(*a_phi[lvl], *a_delta[lvl], scale, variables);
-
-    if (hasFine) {
-      redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *a_delta[lvl], scale, variables);
-    }
-  }
+  redistribution.redistribute(a_phi, a_delta);
 }
 
 void
@@ -1330,80 +1333,6 @@ CdrSolver::initialDataParticles()
 }
 
 void
-CdrSolver::hybridDivergence(EBAMRCellData&     a_hybridDivergence,
-                            EBAMRIVData&       a_massDifference,
-                            const EBAMRIVData& a_nonConservativeDivergence)
-{
-  CH_TIME("CdrSolver::hybridDivergence(EBAMRCellData, EBAMRIVData, EBAMRIVData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::hybridDivergence(EBAMRCellData, EBAMRIVData, EBAMRIVData)" << endl;
-  }
-
-  CH_assert(a_hybridDivergence[0]->nComp() == 1);
-  CH_assert(a_massDifference[0]->nComp() == 1);
-  CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
-
-  // On input, a_hybridDivergence must contain kappa*div(F). We also have the non-conservative divergence computed, so
-  // we just compute the regular hybrid divergence and the mass loss/gain.
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->hybridDivergence(*a_hybridDivergence[lvl], *a_massDifference[lvl], *a_nonConservativeDivergence[lvl], lvl);
-  }
-}
-
-void
-CdrSolver::hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence,
-                            LevelData<BaseIVFAB<Real>>&       a_massDifference,
-                            const LevelData<BaseIVFAB<Real>>& a_nonConservativeDivergence,
-                            const int                         a_lvl)
-{
-  CH_TIME("CdrSolver::hybridDivergence(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, LD<BaseIVFAB<Real> >, int)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::hybridDivergence(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, LD<BaseIVFAB<Real> >, int)" << endl;
-  }
-
-  CH_assert(a_hybridDivergence.nComp() == 1);
-  CH_assert(a_massDifference.nComp() == 1);
-  CH_assert(a_nonConservativeDivergence.nComp() == 1);
-
-  // TLDR: We want to compute a stable approximation to the divergence using Dh = kappa*Dc + (1-kappa)*Dnc where
-  //       Dh is the hybrid divergence and Dc/Dnc are the conservative and non-conservative divergences. On the way in
-  //       we had a_hybridDivergence = kappa*Dc.
-
-  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
-  const DataIterator&      dit   = dbl.dataIterator();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    // On input, divH contains kappa*div(F) and divNC contains the non-conservative divergence
-    EBCellFAB&             divH   = a_hybridDivergence[din];
-    BaseIVFAB<Real>&       deltaM = a_massDifference[din];
-    const BaseIVFAB<Real>& divNC  = a_nonConservativeDivergence[din];
-
-    const EBISBox& ebisbox = ebisl[din];
-
-    VoFIterator& vofit  = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[din];
-    auto         kernel = [&](const VolIndex& vof) -> void {
-      const Real kappa = ebisbox.volFrac(vof);
-      const Real dc    = divH(vof, m_comp);
-      const Real dnc   = divNC(vof, m_comp);
-
-      // Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
-      // which it would be otherwise.
-      divH(vof, m_comp)   = dc + (1 - kappa) * dnc;           // On output, contains hybrid divergence
-      deltaM(vof, m_comp) = (1 - kappa) * (dc - kappa * dnc); // On output, contains mass loss/gain.
-    };
-
-    BoxLoops::loop(vofit, kernel);
-  }
-}
-
-void
 CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux)
 {
   CH_TIME("CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData)");
@@ -1482,30 +1411,6 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 }
 
 void
-CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG)
-{
-  CH_TIME("CdrSolver::nonConservativeDivergence(EBAMRIVData, EBAMRCellData)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::nonConservativeDivergence(EBAMRIVData, EBAMRCellData)" << endl;
-  }
-
-  CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
-  CH_assert(a_divG[0]->nComp() == 1);
-
-  // clang-format off
-  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done through
-  //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path.
-  // clang-format on
-
-  if (m_blendConservation) {
-    m_amr->nonConservativeDivergence(a_nonConservativeDivergence, a_divG, m_realm, m_phase);
-  }
-  else { // Mostly for debugging.
-    DataOps::setValue(a_nonConservativeDivergence, 0.0);
-  }
-}
-
-void
 CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("CdrSolver::regrid(int, int, int)");
@@ -1565,6 +1470,10 @@ CdrSolver::registerOperators()
   m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
   m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
+
+  if (m_whichRedistribution == Redistribution::State) {
+    m_amr->registerOperator(s_eb_state_redist, m_realm, m_phase);
+  }
 }
 
 void
@@ -2943,6 +2852,10 @@ CdrSolver::parseDivergenceComputation()
 
   ParmParse pp(m_className.c_str());
 
+  // The settings before parsing, for runtime changes.
+  const Redistribution previousRedistribution = m_whichRedistribution;
+  const bool           previousBlend          = m_blendConservation;
+
   std::string str;
 
   // Get redistribution type.
@@ -2950,15 +2863,30 @@ CdrSolver::parseDivergenceComputation()
   if (str == "volume") {
     m_whichRedistribution = Redistribution::VolumeWeighted;
   }
+  else if (str == "state") {
+    m_whichRedistribution = Redistribution::State;
+  }
   else if (str == "none") {
     m_whichRedistribution = Redistribution::None;
   }
   else {
-    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume' or 'none'");
+    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume', 'state' or 'none'");
   }
 
   // Blend conservation or not.
   pp.get("blend_conservation", m_blendConservation);
+
+  // A change at runtime rebuilds the stabilization. State redistribution needs an operator that is registered at setup,
+  // so it cannot be switched on or off at runtime.
+  if (!m_redistribution.isNull() &&
+      (m_whichRedistribution != previousRedistribution || m_blendConservation != previousBlend)) {
+    if ((m_whichRedistribution == Redistribution::State) != (previousRedistribution == Redistribution::State)) {
+      MayDay::Abort("CdrSolver::parseDivergenceComputation -- 'which_redistribution' cannot be changed to or from "
+                    "'state' at runtime");
+    }
+
+    this->defineRedistribution();
+  }
 }
 
 void
@@ -3005,11 +2933,11 @@ CdrSolver::parsePlotVariables()
 }
 
 void
-CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi)
+CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi, const Real a_dt)
 {
-  CH_TIME("CdrSolver::gwnDiffusionSource(EBAMRCellData, EBAMRCellData)");
+  CH_TIME("CdrSolver::gwnDiffusionSource(EBAMRCellData, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::gwnDiffusionSource(EBAMRCellData, EBAMRCellData)" << endl;
+    pout() << m_name + "::gwnDiffusionSource(EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
 
   CH_assert(a_noiseSource[0]->nComp() == 1);
@@ -3057,7 +2985,7 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     // approximation of the divergence
     this->fillGwn(scratchFluxTwo, 1.0);
     DataOps::multiply(scratchFluxOne, scratchFluxTwo);
-    this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, false);
+    this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, a_cellPhi, a_dt, false);
   }
   else {
     DataOps::setValue(a_noiseSource, 0.0);

@@ -25,13 +25,13 @@
 /**
  * @brief Class for redistribution ala Chombo's flux redistribution.
  * @details This uses the same algorithm as the core Chombo code, but includes much faster define functions and smaller
- * memory footprint. Because this class is used in a non-subcycling context, it has way fewer bells and whistles. Note
- * that this class permits redistribution outside of the domain, in which case some mass will (correctly) be lost.
+ * memory footprint. Because this class is used in a non-subcycling context, it has way fewer bells and whistles. The
+ * neighbourhoods only contain cells inside the domain, so no mass leaves through the domain boundary.
  *
  * The underlying stencils for in this class can be understood as follows: Assume that we have some quantity deltaM_i
- * that we want to redistribute from cell i to nearby cells. We fetch all cells that are within a radius of 1 around
- * this cell. If one of these cells lie on other side of the refinement boundary, we coarsen it and fetch the
- * corresponding coarse-grid cell. Likewise, if a neighborhood cell lies underneath the fine grid, we refine it and
+ * that we want to redistribute from cell i to nearby cells. We fetch all cells that are within the redistribution
+ * radius around this cell. If one of these cells lie on other side of the refinement boundary, we coarsen it and fetch
+ * the corresponding coarse-grid cell. Likewise, if a neighborhood cell lies underneath the fine grid, we refine it and
  * redistribute to the fine grid cells. In each cut-cell we thus compute the total volume of the surrounding
  * neighborhood as
  *
@@ -66,7 +66,7 @@ public:
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
-   * @param[in] a_redistributeOutside  Turn on/off redistribution outside domain.
+   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells.
    * @param[in] a_eblgRefined Eblg refined
    */
   EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
@@ -76,7 +76,7 @@ public:
                        const EBLevelGrid& a_eblgFine,
                        const int          a_refToCoar,
                        const int          a_refToFine,
-                       const bool         a_redistributeOutside) noexcept;
+                       const int          a_redistRadius) noexcept;
 
   /**
    * @brief Destructor (does nothing)
@@ -94,7 +94,7 @@ public:
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
-   * @param[in] a_redistributeOutside  Turn on/off redistribution outside domain.
+   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells.
    */
   virtual void
   define(const EBLevelGrid& a_eblgCoar,
@@ -104,30 +104,7 @@ public:
          const EBLevelGrid& a_eblgFine,
          const int          a_refToCoar,
          const int          a_refToFine,
-         const bool         a_redistributeOutside) noexcept;
-
-  /**
-   * @brief Redistribute the input quantity into the coarse level, this level, and the fine level.
-   * @details If calling this, pass in a_phiFine/a_phiCoar = nullptr if there is no finer/coarser level. The a_scaleCoar
-   * and a_scaleFine arguments do not matter if there is no coarser/finer level.
-   * @param[in,out] a_phiCoar   Data on coarse level
-   * @param[in,out] a_phi       Data on this level
-   * @param[in,out] a_phiFine   Data on finer level
-   * @param[in]    a_deltaM    Redistribution data on this level
-   * @param[in]    a_scaleCoar Scaling factor for redistribution into the coarse level
-   * @param[in]    a_scale     Scaling factor for redistribution into this level
-   * @param[in]    a_scaleFine Scaling factor for redistribution into the fine level
-   * @param[in]    a_variables Variables to redistribute
-   */
-  virtual void
-  redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
-                  LevelData<EBCellFAB>*             a_phi,
-                  LevelData<EBCellFAB>*             a_phiFine,
-                  const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                  const Real                        a_scaleCoar,
-                  const Real                        a_scale,
-                  const Real                        a_scaleFine,
-                  const Interval&                   a_variables) const noexcept;
+         const int          a_redistRadius) noexcept;
 
   /**
    * @brief Redistribute the input quantity to the coarse level.
@@ -175,11 +152,6 @@ protected:
   bool m_isDefined;
 
   /**
-   * @brief If true, redistribute to the outside. Otherwise, do interior redistribution.
-   */
-  bool m_redistributeOutside;
-
-  /**
    * @brief Has coarse level or not
    */
   bool m_hasCoar;
@@ -200,7 +172,7 @@ protected:
   int m_refToFine;
 
   /**
-   * @brief Redistribution radius. Always one.
+   * @brief Radius of the redistribution neighbourhood, in cells.
    */
   int m_redistRadius;
 

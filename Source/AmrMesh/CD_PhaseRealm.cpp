@@ -65,6 +65,8 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const int                             a_numGhost,
                    const int                             a_lsfGhost,
                    const int                             a_redistRad,
+                   const int                             a_srdOrder,
+                   const Real                            a_srdTargetVolFrac,
                    const int                             a_mgInterpOrder,
                    const int                             a_mgInterpRadius,
                    const int                             a_mgInterpWeight,
@@ -88,6 +90,8 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
   m_numGhostCells                 = a_numGhost;
   m_numLsfGhostCells              = a_lsfGhost;
   m_redistributionRadius          = a_redistRad;
+  m_srdOrder                      = a_srdOrder;
+  m_srdTargetVolFrac              = a_srdTargetVolFrac;
   m_mirrorBandRadius              = a_mirrorBandRadius;
   m_mirrorConditionTolerance      = a_mirrorCondTol;
   m_mirrorCreaseTolerance         = a_mirrorCreaseTol;
@@ -295,6 +299,9 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("EB redist");
     this->defineRedistOper(a_lmin, 1);
     timer.stopEvent("EB redist");
+    timer.startEvent("EB state redist");
+    this->defineStateRedistribution();
+    timer.stopEvent("EB state redist");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -390,9 +397,10 @@ PhaseRealm::registerOperator(const std::string& a_operator)
 
   // These are the supported operators - issue an error if we ask for something that is not supported.
   if (!(a_operator == s_eb_coar_ave || a_operator == s_eb_fill_patch || a_operator == s_eb_fine_interp ||
-        a_operator == s_eb_flux_reg || a_operator == s_eb_redist || a_operator == s_noncons_div ||
-        a_operator == s_eb_gradient || a_operator == s_particle_mesh || a_operator == s_eb_irreg_interp ||
-        a_operator == s_eb_multigrid || a_operator == s_levelset || a_operator == s_mirror_deposition)) {
+        a_operator == s_eb_flux_reg || a_operator == s_eb_redist || a_operator == s_eb_state_redist ||
+        a_operator == s_noncons_div || a_operator == s_eb_gradient || a_operator == s_particle_mesh ||
+        a_operator == s_eb_irreg_interp || a_operator == s_eb_multigrid || a_operator == s_levelset ||
+        a_operator == s_mirror_deposition)) {
 
     const std::string str = "PhaseRealm::registerOperator - unknown operator '" + a_operator + "' requested";
     MayDay::Error(str.c_str());
@@ -848,6 +856,32 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
 }
 
 void
+PhaseRealm::defineStateRedistribution()
+{
+  CH_TIME("PhaseRealm::defineStateRedistribution");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineStateRedistribution" << endl;
+  }
+
+  // The neighbourhoods depend on all levels, so the operator is rebuilt on every regrid.
+  m_stateRedistribution = RefCountedPtr<EBStateRedistribution>();
+
+  if (this->queryOperator(s_eb_state_redist)) {
+    if (m_finestLevel > 0 && !this->queryOperator(s_eb_redist)) {
+      MayDay::Abort("PhaseRealm::defineStateRedistribution -- state redistribution needs the flux redistribution "
+                    "operator on AMR hierarchies");
+    }
+
+    m_stateRedistribution = RefCountedPtr<EBStateRedistribution>(new EBStateRedistribution(m_eblg,
+                                                                                           m_refinementRatios,
+                                                                                           m_finestLevel,
+                                                                                           m_srdOrder,
+                                                                                           m_srdTargetVolFrac,
+                                                                                           m_redistributionOp));
+  }
+}
+
+void
 PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
 {
   CH_TIME("PhaseRealm::defineRedistOper");
@@ -892,8 +926,6 @@ PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
         refToFine = m_refinementRatios[lvl];
       }
 
-      const bool redistributeOutside = true;
-
       m_redistributionOp[lvl] = RefCountedPtr<EBFluxRedistribution>(new EBFluxRedistribution(eblgCoar,
                                                                                              eblgCoarsened,
                                                                                              eblg,
@@ -901,7 +933,7 @@ PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
                                                                                              eblgFine,
                                                                                              refToCoar,
                                                                                              refToFine,
-                                                                                             redistributeOutside));
+                                                                                             m_redistributionRadius));
     }
   }
 }
@@ -1842,6 +1874,16 @@ PhaseRealm::getFluxRegister() const
   }
 
   return m_ebReflux;
+}
+
+const RefCountedPtr<EBStateRedistribution>&
+PhaseRealm::getStateRedistribution() const
+{
+  if (!this->queryOperator(s_eb_state_redist)) {
+    MayDay::Error("PhaseRealm::getStateRedistribution - operator not registered!");
+  }
+
+  return m_stateRedistribution;
 }
 
 Vector<RefCountedPtr<EBFluxRedistribution>>&

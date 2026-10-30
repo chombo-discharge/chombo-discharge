@@ -1286,16 +1286,16 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
       else {
         if (m_diffusionOrder == 1) {
-          solver->computeDivD(scratch, phi, false, false, false);
+          solver->computeDivD(scratch, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, a_dt);
         }
         else if (m_diffusionOrder == 2) {
-          solver->computeDivD(scratch, phi, false, false, false);
+          solver->computeDivD(scratch, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, a_dt);
 
-          solver->computeDivD(scratch2, phi, false, false, false);
+          solver->computeDivD(scratch2, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, -0.5 * a_dt);
           DataOps::incr(phi, scratch2, 0.5 * a_dt);
@@ -1367,7 +1367,7 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
 
         EBAMRCellData& divDgradPhi = storage->getScratch();
 
-        solver->computeDivD(divDgradPhi, phi, false, false, false);
+        solver->computeDivD(divDgradPhi, phi, a_dt, false, false, false);
 
         DataOps::incr(m_semiImplicitRho, divDgradPhi, Z * a_dt * Units::Qe);
       }

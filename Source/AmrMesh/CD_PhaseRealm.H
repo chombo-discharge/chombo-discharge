@@ -39,6 +39,7 @@
 #include <CD_EBNonConservativeDivergence.H>
 #include <CD_CellCentroidInterpolation.H>
 #include <CD_EBCentroidInterpolation.H>
+#include <CD_EBStateRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operators that can be defined.
@@ -54,6 +55,7 @@ static const std::string s_eb_fill_patch       = "eb_fill_patch";       // For r
 static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For linearly filling ghost cells
 static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registration
 static const std::string s_eb_redist           = "eb_redist";           // For redistribution
+static const std::string s_eb_state_redist     = "eb_state_redist";     // For state redistribution
 static const std::string s_noncons_div         = "eb_non_cons_div";     // For computing non-conservative divergences
 static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
 static const std::string s_levelset            = "levelset";            // For putting level-set on mesh
@@ -121,6 +123,8 @@ public:
    * @param[in] a_numGhost         Number of ghost cells in data holders
    * @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
    * @param[in] a_redistRad        Redistribution radius
+   * @param[in] a_srdOrder         State redistribution: order of the reconstruction (0 or 2)
+   * @param[in] a_srdTargetVolFrac State redistribution: target volume fraction
    * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
    * @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
    * @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
@@ -143,6 +147,8 @@ public:
          const int                             a_numGhost,
          const int                             a_lsfGhost,
          const int                             a_redistRad,
+         const int                             a_srdOrder,
+         const Real                            a_srdTargetVolFrac,
          const int                             a_mgInterpOrder,
          const int                             a_mgInterpRadius,
          const int                             a_mgInterpWeight,
@@ -414,6 +420,13 @@ public:
   getRedistributionOp() const;
 
   /**
+   * @brief Get the state redistribution operator
+   * @return State redistribution on all levels
+   */
+  const RefCountedPtr<EBStateRedistribution>&
+  getStateRedistribution() const;
+
+  /**
    * @brief Get level-set function
    * @return Levelset
    */
@@ -523,6 +536,16 @@ protected:
    * @brief Redistribution radius
    */
   int m_redistributionRadius;
+
+  /**
+   * @brief State redistribution: order of the reconstruction
+   */
+  int m_srdOrder;
+
+  /**
+   * @brief State redistribution: target volume fraction
+   */
+  Real m_srdTargetVolFrac;
 
   /**
    * @brief Multigrid interpolator order
@@ -735,6 +758,11 @@ protected:
   mutable Vector<RefCountedPtr<EBFluxRedistribution>> m_redistributionOp;
 
   /**
+   * @brief State redistribution on all levels
+   */
+  RefCountedPtr<EBStateRedistribution> m_stateRedistribution;
+
+  /**
    * @brief Gradient operator
    */
   mutable Vector<RefCountedPtr<EBGradient>> m_gradientOp;
@@ -828,6 +856,12 @@ protected:
    */
   void
   defineRedistOper(const int a_lmin, const int a_regsize);
+
+  /**
+   * @brief Define the state redistribution, if the operator is registered.
+   */
+  void
+  defineStateRedistribution();
 
   /**
    * @brief Define operator redistribution utility
