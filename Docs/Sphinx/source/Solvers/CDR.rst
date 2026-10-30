@@ -370,7 +370,8 @@ where for the superbee slope we have :math:`\Delta_1 = \text{minmod}\left(\Delta
 Embedded boundaries
 ___________________
 
-Where the flow leaves the EB, the EB is an inflow boundary with the state :math:`\phi_{\textrm{EB}} = -F_{\textrm{EB}}/(\mathbf{v}\cdot\mathbf{n})`, where :math:`F_{\textrm{EB}}` is the EB flux (positive out of the fluid) and :math:`\mathbf{n}` the EB normal pointing into the fluid.
+Where the flow leaves the EB, the EB is an inflow boundary with the state :math:`\phi_{\textrm{EB}} = \max\left(0, -F_{\textrm{EB}}/(\mathbf{v}\cdot\mathbf{n})\right)`, where :math:`F_{\textrm{EB}}` is the EB flux (positive out of the fluid) and :math:`\mathbf{n}` the EB normal pointing into the fluid.
+An EB flux out of the fluid where the flow leaves the EB gives :math:`\phi_{\textrm{EB}} = 0`; the EB flux itself still enters the divergence.
 With ``CdrCTU.eb_inflow_state = true``, this enters the discretization in two places:
 
 * The slope of a cut cell on a side that the EB closes uses :math:`\phi_{\textrm{EB}}` as the neighbor, instead of the difference on the other side.
