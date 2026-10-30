@@ -2386,7 +2386,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
 
       // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
       // CDR solver is a CTU solver, we also add in the transverse terms.
-      solver->computeDivF(this->m_fluidScratch1, phi, a_dt, false, true, true);
+      solver->computeDivF(this->m_fluidScratch1, phi, a_dt, a_dt, false, true, true);
 
       DataOps::incr(phi, this->m_fluidScratch1, -a_dt);
     }

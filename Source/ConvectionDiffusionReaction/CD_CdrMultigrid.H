@@ -105,6 +105,7 @@ public:
    * @param[in]  a_phi              Cell-centered state.
    * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only
    * affects the advective term.
+   * @param[in]  a_dt               Time step of the update phi - a_dt*div(J) that the result is used in.
    * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J).
@@ -115,6 +116,7 @@ public:
   computeDivJ(EBAMRCellData& a_divJ,
               EBAMRCellData& a_phi,
               const Real     a_extrapDt,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) override final;
@@ -126,6 +128,7 @@ public:
    * @param[in]  a_phi              Cell-centered state.
    * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only
    * affects the advective term.
+   * @param[in]  a_dt               Time step of the update phi - a_dt*div(F) that the result is used in.
    * @param[in]  a_conservativeOnly If true, we compute div(F) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will be included in div(F).
@@ -137,6 +140,7 @@ public:
   computeDivF(EBAMRCellData& a_divF,
               EBAMRCellData& a_phi,
               const Real     a_extrapDt,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) override final;
@@ -336,9 +340,13 @@ protected:
    * @param[out] a_facePhi Face-centered states
    * @param[in] a_phi Cell-centered states
    * @param[in] a_extrapDt Extrapolating time step.
+   * @param[in] a_dt Time step of the update that the face states enter, or 0 if they enter no update.
    */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override = 0;
+  advectToFaces(EBAMRFluxData&       a_facePhi,
+                const EBAMRCellData& a_phi,
+                const Real           a_extrapDt,
+                const Real           a_dt) override = 0;
 
   /**
    * @brief Set up diffusion solver

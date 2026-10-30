@@ -950,24 +950,31 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
             break;
           }
           case CdrDomainBC::BcType::Outflow: {
-            flux(face, m_comp) = 0.0;
-
-            // Get the next interior face(s) and extrapolate from these.
             const VolIndex interiorVof = face.getVoF(flip(sit()));
 
-            const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
+            if (!ebisbox.isMultiValued(interiorVof.gridIndex())) {
+              // The computed (upwind) flux through the boundary face where it leaves the domain. Nothing flows in.
+              flux(face, m_comp) = sign(sit()) * std::max((Real)0.0, sign(sit()) * flux(face, m_comp));
+            }
+            else {
+              // No face states are computed on the domain faces of multi-valued cells. The flux is extrapolated from
+              // the next interior face(s) instead.
+              flux(face, m_comp) = 0.0;
 
-            if (!neighborFaces.empty()) {
-              Real sumArea = 0.0;
+              const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
 
-              for (const auto& f : neighborFaces) {
-                const Real areaFrac = ebisbox.areaFrac(f);
+              if (!neighborFaces.empty()) {
+                Real sumArea = 0.0;
 
-                sumArea += areaFrac;
-                flux(face, m_comp) += areaFrac * flux(f, m_comp);
+                for (const auto& f : neighborFaces) {
+                  const Real areaFrac = ebisbox.areaFrac(f);
+
+                  sumArea += areaFrac;
+                  flux(face, m_comp) += areaFrac * flux(f, m_comp);
+                }
+
+                flux(face, m_comp) = sign(sit()) * std::max((Real)0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
               }
-
-              flux(face, m_comp) = sign(sit()) * std::max((Real)0.0, sign(sit()) * flux(face, m_comp)) / sumArea;
             }
 
             break;
@@ -2408,7 +2415,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
 
     // Compute velocity on faces and EBs. The data is currently face-centered.
     this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0);
+    this->advectToFaces(m_faceStates, m_phi, 0.0, 0.0);
 
     DataOps::setValue(scratch, 0.0); // Used to store sum(alpha*v)
 

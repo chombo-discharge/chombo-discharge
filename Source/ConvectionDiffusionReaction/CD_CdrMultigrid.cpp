@@ -657,13 +657,14 @@ void
 CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
                           EBAMRCellData& a_phi,
                           const Real     a_extrapDt,
+                          const Real     a_dt,
                           const bool     a_conservativeOnly,
                           const bool     a_ebFlux,
                           const bool     a_domainFlux)
 {
-  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)");
+  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCellData, Real, Real, bool, bool, bool)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)" << endl;
+    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCellData, Real, Real, bool, bool, bool)" << endl;
   }
 
   if (m_isMobile || m_isDiffusive) {
@@ -681,7 +682,7 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
 
       // Update face velocity and advect to faces.
       this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
       this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
     }
     else if (!m_isMobile && m_isDiffusive) {
@@ -691,7 +692,7 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     else if (m_isMobile && m_isDiffusive) { //
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
       this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
 
       this->computeAdvectionDiffusionFlux(scratchFlux,
                                           a_phi,
@@ -720,13 +721,14 @@ void
 CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
                           EBAMRCellData& a_phi,
                           const Real     a_extrapDt,
+                          const Real     a_dt,
                           const bool     a_conservativeOnly,
                           const bool     a_ebFlux,
                           const bool     a_domainFlux)
 {
-  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)");
+  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, Real, bool, bool, bool)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)" << endl;
+    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, Real, bool, bool, bool)" << endl;
   }
 
   if (m_isMobile) {
@@ -741,7 +743,7 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     this->averageVelocityToFaces();
 
     // Face extrapolation to cell-centered faces
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
 
     // Compute face-centered fluxes
     this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);

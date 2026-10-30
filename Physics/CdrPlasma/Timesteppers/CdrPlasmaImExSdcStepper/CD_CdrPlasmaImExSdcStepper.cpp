@@ -932,8 +932,8 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real /*a_dt*/, const int a_m, 
     EBAMRCellData& phi_m   = storage->getPhi()[a_m];
 
     if (solver->isMobile()) {
-      const Real extrap_dt = m_extrapAdvect ? 2.0 * m_extrapDt * m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-      solver->computeDivF(scratch, phi_m, extrap_dt, false, true, true);           // scratch =  Div(v_m*phi_m^(k+1))
+      const Real extrap_dt = m_extrapAdvect ? 2.0 * m_extrapDt * m_dtm[a_m] : 0.0;   // Factor of 2 due to EBPatchAdvect
+      solver->computeDivF(scratch, phi_m, extrap_dt, m_dtm[a_m], false, true, true); // scratch =  Div(v_m*phi_m^(k+1))
 
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
@@ -1056,9 +1056,9 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
 
     if (solver->isMobile()) {
       const Real extrap_dt = m_extrapAdvect ? 2.0 * m_extrapDt * m_dtm[m_p - 1]
-                                            : 0.0;                     // Factor of 2 because of EBPatchAdvect
-      solver->computeDivF(FAR_p, phi_p, extrap_dt, false, true, true); // FAR_p =  Div(v_p*phi_p)
-      DataOps::scale(FAR_p, -1.0);                                     // FAR_p = -Div(v_p*phi_p)
+                                            : 0.0; // Factor of 2 because of EBPatchAdvect
+      solver->computeDivF(FAR_p, phi_p, extrap_dt, m_dtm[m_p - 1], false, true, true); // FAR_p =  Div(v_p*phi_p)
+      DataOps::scale(FAR_p, -1.0);                                                     // FAR_p = -Div(v_p*phi_p)
     }
     else {
       DataOps::setValue(FAR_p, 0.0);
@@ -1276,7 +1276,19 @@ CdrPlasmaImExSdcStepper::computeDt()
     Nref = Nref * m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
-  m_dtCFL                = m_cdr->computeAdvectionDt();
+
+  // Without extrapolation in time, the face states have no transverse terms and the advective time step is the
+  // unsplit bound dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns.
+  if (m_extrapAdvect) {
+    m_dtCFL = m_cdr->computeAdvectionDt();
+  }
+  else {
+    m_dtCFL = std::numeric_limits<Real>::max();
+
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      m_dtCFL = std::min(m_dtCFL, solverIt()->CdrSolver::computeAdvectionDt());
+    }
+  }
 
   Real dt_cfl = 2.0 * m_dtCFL / max_gl_dist;
 

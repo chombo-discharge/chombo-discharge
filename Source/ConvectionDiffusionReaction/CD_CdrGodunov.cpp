@@ -224,7 +224,10 @@ CdrGodunov::allocate()
 }
 
 void
-CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt)
+CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
+                          const EBAMRCellData& a_cellPhi,
+                          const Real           a_extrapDt,
+                          const Real /*a_dt*/)
 {
   CH_TIME("CdrGodunov::advectToFaces(EBAMRFluxDat, EBAMRCellData, Real)");
   if (m_verbosity > 5) {

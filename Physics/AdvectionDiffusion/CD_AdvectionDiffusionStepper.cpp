@@ -37,6 +37,8 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   pp.query("debug", m_debug);
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
+  pp.get("min_dt", m_minDt);
+  pp.get("max_dt", m_maxDt);
   pp.get("advection", m_mobile);
   pp.get("diffusion", m_diffusive);
 
@@ -327,7 +329,15 @@ AdvectionDiffusionStepper::computeDt()
 
   switch (m_integrator) {
   case Integrator::Heun: {
-    dt = cfl * m_solver->computeAdvectionDiffusionDt();
+    // Heun extrapolates to the faces without transverse terms, so its advective time step is the unsplit bound
+    // dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns. With diffusion,
+    // computeAdvectionDiffusionDt already uses the unsplit bound.
+    if (m_solver->isMobile() && !m_solver->isDiffusive()) {
+      dt = cfl * m_solver->CdrSolver::computeAdvectionDt();
+    }
+    else {
+      dt = cfl * m_solver->computeAdvectionDiffusionDt();
+    }
 
     break;
   }
@@ -379,12 +389,12 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     m_amr->allocate(k2, m_realm, m_phase, 1);
 
     // Compute k1 coefficient
-    m_solver->computeDivJ(k1, state, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
+    m_solver->computeDivJ(k1, state, 0.0, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
     DataOps::copy(yp, state);
     DataOps::incr(yp, k1, -a_dt);
 
     // Compute k2 coefficient and final state
-    m_solver->computeDivJ(k2, yp, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
+    m_solver->computeDivJ(k2, yp, 0.0, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
     DataOps::incr(state, k1, -0.5 * a_dt);
     DataOps::incr(state, k2, -0.5 * a_dt);
 
@@ -409,12 +419,12 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
       if (false) {
         const bool conservativeOnly = true;
 
-        m_solver->computeDivF(k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
+        m_solver->computeDivF(k1, state, a_dt, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       }
       else {
         const bool conservativeOnly = false;
 
-        m_solver->computeDivF(k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
+        m_solver->computeDivF(k1, state, a_dt, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       }
 
       DataOps::kappaScale(k1, m_amr->getVofIterator(m_realm, m_phase));
@@ -427,7 +437,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
       m_solver->advanceCrankNicholson(state, k2, k1, a_dt);
     }
     else { // Purely inviscid advance.
-      m_solver->computeDivF(k1, state, a_dt, false, addEbFlux, addDomainFlux);
+      m_solver->computeDivF(k1, state, a_dt, a_dt, false, addEbFlux, addDomainFlux);
 
       DataOps::incr(state, k1, -a_dt);
     }

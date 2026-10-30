@@ -343,8 +343,8 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
       dataCoFi[din].setVal(1.0);
     }
 
-    // Need a new Copier here.
-    Copier copier(dblCoFi, dbl);
+    // The copier fills the ghost cells too, since a ghost cell can be covered by the finer level.
+    Copier copier(dblCoFi, dbl, m_eblg.getDomain(), m_redistRadius * IntVect::Unit);
     dataCoFi.copyTo(Interval(0, 0), data, Interval(0, 0), copier);
 
     // Go through the coarse grid and set cells to false wherever we find data > 0.0

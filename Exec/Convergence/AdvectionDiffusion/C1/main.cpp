@@ -1,9 +1,22 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * @file   main.cpp
+ * @brief  Spatial convergence test for advection-diffusion on a uniform grid.
+ * @author Robert Marskar
+ */
+
 #include <CD_Driver.H>
 #include <CD_CdrCTU.H>
 #include <CD_RodDielectric.H>
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionTagger.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParallelOps.H>
 #include <ParmParse.H>
 
 using namespace ChomboDischarge;
@@ -21,13 +34,7 @@ int
 main(int argc, char* argv[])
 {
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+  ChomboDischarge::initialize(argc, argv);
 
   // These are the grid resolutions that we run this program for. For the 32^2 grid the "exact solution" is the
   // coarsened solution of the 64^2 grid etc.
@@ -61,6 +68,7 @@ main(int argc, char* argv[])
   EBISLayout fineEBISL;
 
   ProblemDomain coarDomain;
+  Real          coarDx = 0.0;
 
   bool notCoarsest = false;
 
@@ -84,7 +92,7 @@ main(int argc, char* argv[])
 
     // Set up the Driver and run it
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
-    engine->setupAndRun(input_file);
+    engine->setupAndRun();
 
     // Compute the solution errors if there is a coarser solution available.
     if (notCoarsest) {
@@ -99,10 +107,32 @@ main(int argc, char* argv[])
       // Compute the error average(phi_fine) - coar_phi
       DataOps::incr(finePhi, coarPhi, -1.0);
 
-      // Computes max, L1, and L2 norms.
-      const Real Linf = DataOps::norm(*finePhi[0], 0, *amr->getVofIterator("primal", phase::gas)[0]);
-      const Real L1   = DataOps::norm(*finePhi[0], 1, *amr->getVofIterator("primal", phase::gas)[0]);
-      const Real L2   = DataOps::norm(*finePhi[0], 2, *amr->getVofIterator("primal", phase::gas)[0]);
+      // Max, L1, and L2 norms of the error on the coarse grid, over all VoFs (cut cells included). L1 and L2 are
+      // weighted by the volume kappa*dx^D. The error lives on the coarse layout, so it is not iterated with the
+      // AmrMesh, which now holds the fine grids.
+      Real Linf = 0.0;
+      Real L1   = 0.0;
+      Real L2   = 0.0;
+
+      const Real dV = std::pow(coarDx, SpaceDim);
+
+      for (DataIterator dit = coarDBL.dataIterator(); dit.ok(); ++dit) {
+        const EBCellFAB& err     = (*finePhi[0])[dit()];
+        const EBISBox&   ebisbox = coarEBISL[dit()];
+
+        for (VoFIterator vofit(IntVectSet(coarDBL[dit()]), ebisbox.getEBGraph()); vofit.ok(); ++vofit) {
+          const Real e     = std::abs(err(vofit(), 0));
+          const Real kappa = ebisbox.volFrac(vofit());
+
+          Linf = std::max(Linf, e);
+          L1 += kappa * e * dV;
+          L2 += kappa * e * e * dV;
+        }
+      }
+
+      Linf = ParallelOps::max(Linf);
+      L1   = ParallelOps::sum(L1);
+      L2   = std::sqrt(ParallelOps::sum(L2));
 
       norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
     }
@@ -111,13 +141,14 @@ main(int argc, char* argv[])
     coarDBL    = amr->getGrids("primal")[0];
     coarDomain = amr->getDomains()[0];
     coarEBISL  = amr->getEBISLayout("primal", phase::gas)[0];
+    coarDx     = amr->getDx()[0];
 
     // Allocate storage for coarse solution and coarsened fine solution.
     amr->allocate(coarPhi, "primal", phase::gas, 1);
     amr->allocate(finePhi, "primal", phase::gas, 1);
 
     // Copy the current solution, it becomes the "coarse" solution for the next iteration.
-    coarPhi.copy(solver->getPhi());
+    DataOps::copy(coarPhi, solver->getPhi());
 
     notCoarsest = true;
   }
@@ -138,6 +169,7 @@ main(int argc, char* argv[])
     // clang-format on
 #ifdef CH_MPI
   }
-  MPI_Finalize();
 #endif
+
+  ChomboDischarge::finalize();
 }

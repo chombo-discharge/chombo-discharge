@@ -1529,14 +1529,22 @@ DischargeInceptionStepper<P, F, C>::computeDt()
     // Restrict by ion solver
     if (m_ionTransport) {
       Real ionDt = std::numeric_limits<Real>::infinity();
+
+      // Euler and Heun extrapolate to the faces without transverse terms, so their advective time step is the unsplit
+      // bound dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns. With diffusion,
+      // computeAdvectionDiffusionDt already uses the unsplit bound.
+      const Real unsplitDt = (m_ionSolver->isMobile() && !m_ionSolver->isDiffusive())
+                               ? m_ionSolver->CdrSolver::computeAdvectionDt()
+                               : m_ionSolver->computeAdvectionDiffusionDt();
+
       switch (m_transportAlgorithm) {
       case TransportAlgorithm::Euler: {
-        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+        ionDt = m_cfl * unsplitDt;
 
         break;
       }
       case TransportAlgorithm::Heun: {
-        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+        ionDt = m_cfl * unsplitDt;
 
         break;
       }
@@ -1732,7 +1740,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     EBAMRCellData divJ;
     m_amr->allocate(divJ, m_realm, m_phase, 1.0);
 
-    m_ionSolver->computeDivJ(divJ, phi, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(divJ, phi, 0.0, a_dt, false, true, false);
 
     DataOps::incr(phi, divJ, -a_dt);
 
@@ -1749,12 +1757,12 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     m_amr->allocate(k2, m_realm, m_phase, 1);
 
     // Compute k1 coefficient
-    m_ionSolver->computeDivJ(k1, phi, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(k1, phi, 0.0, a_dt, false, true, false);
     DataOps::copy(yp, phi);
     DataOps::incr(yp, k1, -a_dt);
 
     // Compute k2 coefficient and final state
-    m_ionSolver->computeDivJ(k2, yp, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(k2, yp, 0.0, a_dt, false, true, false);
     DataOps::incr(phi, k1, -0.5 * a_dt);
     DataOps::incr(phi, k2, -0.5 * a_dt);
 
@@ -1771,7 +1779,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     m_amr->allocate(k1, m_realm, m_phase, 1);
     m_amr->allocate(k2, m_realm, m_phase, 1);
 
-    m_ionSolver->computeDivF(k1, phi, a_dt, false, true, true);
+    m_ionSolver->computeDivF(k1, phi, a_dt, a_dt, false, true, true);
 
     DataOps::kappaScale(k1, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::scale(k1, -1.0);
