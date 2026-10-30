@@ -710,7 +710,7 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     else {
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divJ, scratchFlux, *ebflux, a_conservativeOnly);
+    this->computeDivG(a_divJ, scratchFlux, *ebflux, a_phi, a_dt, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divJ, 0.0);
@@ -757,7 +757,7 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     }
 
     // Compute div(F) -- this includes interpolation to centroids and redistribution.
-    this->computeDivG(a_divF, scratchFlux, *ebflux, a_conservativeOnly);
+    this->computeDivG(a_divF, scratchFlux, *ebflux, a_phi, a_dt, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divF, 0.0);
@@ -767,13 +767,14 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
 void
 CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
                           EBAMRCellData& a_phi,
+                          const Real     a_dt,
                           const bool     a_conservativeOnly,
                           const bool     a_ebFlux,
                           const bool     a_domainFlux)
 {
-  CH_TIME("CdrMultigrid::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
+  CH_TIME("CdrMultigrid::computeDivD(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)" << endl;
+    pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)" << endl;
   }
 
   if (m_isDiffusive) {
@@ -792,10 +793,9 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
     else {
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divD,
-                      scratchFlux,
-                      *ebflux,
-                      a_conservativeOnly); // General face-centered flux to divergence magic.
+    // The update is phi + a_dt*div(D*grad(phi)) = phi - (-a_dt)*div(D*grad(phi)), so the update time step that the
+    // stabilization sees is -a_dt.
+    this->computeDivG(a_divD, scratchFlux, *ebflux, a_phi, -a_dt, a_conservativeOnly);
 
     m_amr->conservativeAverage(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);

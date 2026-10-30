@@ -24,6 +24,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_CdrSpecies.H>
 #include <CD_CdrDomainBC.H>
+#include <CD_EBRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -171,7 +172,7 @@ public:
    * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
    * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
    * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divJ,
-   * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be
+   * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be
    * used with this time step.
    * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
@@ -199,7 +200,7 @@ public:
    * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
    * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
    * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divF,
-   * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be
+   * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be
    * used with this time step.
    * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
@@ -219,6 +220,9 @@ public:
   /**
    * @brief Compute div(D*grad(phi)) explicitly
    * @param[in]  a_phi              Cell-centered state
+   * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n + a_dt*divD,
+   * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be
+   * used with this time step.
    * @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)
@@ -230,6 +234,7 @@ public:
   virtual void
   computeDivD(EBAMRCellData& a_divD,
               EBAMRCellData& a_phi,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) = 0;
@@ -241,20 +246,53 @@ public:
    * @param[in,out] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid
    * fluxes on output.
    * @param[in]    a_ebFlux           Flux on the EB centroids
+   * @param[in]    a_phi              State that the update starts from, phi^{n+1} = phi^n - a_dt*div(G) with
+   * phi^n = a_phi.
+   * @param[in]    a_dt               Time step of the update that the result is used in, signed: the update is
+   * phi^{n+1} = phi^n - a_dt*div(G), so an update phi^n + dt*div(G) passes -dt. The cut-cell stabilization can depend
+   * on it and on a_phi (see EBRedistribution), so the result must only be used with this time step.
    * @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve
    * redistribution.
    */
   virtual void
-  computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly);
+  computeDivG(EBAMRCellData&       a_divG,
+              EBAMRFluxData&       a_G,
+              const EBAMRIVData&   a_ebFlux,
+              const EBAMRCellData& a_phi,
+              const Real           a_dt,
+              const bool           a_conservativeOnly);
+
+  /**
+   * @brief Turn a conservative divergence into the right-hand side of the stabilized update.
+   * @details On input, a_divG holds kappa*div(G), e.g. from computeDivG, computeDivF, computeDivD or computeDivJ with
+   * conservative-only divergence, or a sum of several of them. On output, it holds R for the update
+   * phi^{n+1} = phi^n - a_dt*R, from the cut-cell stabilization of this solver (see EBRedistribution). Divergences
+   * that enter the same update must be added together before this call, not after.
+   * @param[in,out] a_divG On input kappa*div(G), on output R.
+   * @param[in]     a_phi  State that the update starts from.
+   * @param[in]     a_dt   Time step of the update, signed as in computeDivG.
+   */
+  virtual void
+  redistributeDivergence(EBAMRCellData& a_divG, const EBAMRCellData& a_phi, const Real a_dt);
+
+  /**
+   * @brief Check if the cut-cell stabilization is state redistribution.
+   * @details With state redistribution, the stabilized divergences depend on the state and the time step, see
+   * EBRedistribution.
+   * @return True if this solver uses state redistribution.
+   */
+  bool
+  usesStateRedistribution() const noexcept;
 
   /**
    * @brief Compute a random gaussian white noise source term.
    * @param[out] a_noiseSource Source term
    * @param[in]  a_cellPhi     Cell-centered states
+   * @param[in]  a_dt          Time step of the update that the source is used in, see computeDivG.
    * @note Used e.g. for fluctuating hydrodynamics.
    */
   virtual void
-  gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi);
+  gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi, const Real a_dt);
 
   /**
    * @brief Average velocities to faces
@@ -733,6 +771,7 @@ protected:
   enum class Redistribution
   {
     VolumeWeighted,
+    State,
     None
   };
 
@@ -821,14 +860,9 @@ protected:
   EBAMRFluxData m_faceVelocity;
 
   /**
-   * @brief Scratch storage for the non-conservative divergence
+   * @brief Cut-cell stabilization of the explicit divergences. Rebuilt in allocate().
    */
-  EBAMRIVData m_nonConservativeDivG;
-
-  /**
-   * @brief Scratch storage for the mass difference
-   */
-  EBAMRIVData m_massDifference;
+  RefCountedPtr<EBRedistribution> m_redistribution;
 
   /**
    * @brief Scratch storage for the EB flux
@@ -1090,44 +1124,6 @@ protected:
                                         const EBAMRIVData& a_ebFlux);
 
   /**
-   * @brief Compute the non-conservative divergence
-   * @param[out] a_nonConservativeDivergence Non-conservative divergence.
-   * @param[in]  a_divG                      Conservative divergence.
-   * @note This will compute the non-conservative divergence as divNC(G) = sum(kappa*div(G))/sum(kappa) in the cut-cell
-   * neighborhood.
-   */
-  virtual void
-  nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
-
-  /**
-   * @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence.
-   * @param[in,out] a_hybridDivergence          On input, contains the conservative divergence (without kappa division).
-   * Contains hybrid divergence on output.
-   * @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true
-   * divergence
-   * @param[in]    a_nonConservativeDivergence Non-conservative divergence.
-   */
-  virtual void
-  hybridDivergence(EBAMRCellData&     a_hybridDivergence,
-                   EBAMRIVData&       a_massDifference,
-                   const EBAMRIVData& a_nonConservativeDivergence);
-
-  /**
-   * @brief Make the hybrid divergence. On the way in, a_hybridDivergence must hold the conservative divergence
-   * @param[in,out] a_hybridDivergence          On input, contains the conservative divergence (without kappa division).
-   * Contains hybrid divergence on output.
-   * @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true
-   * divergence
-   * @param[in]    a_nonConservativeDivergence Non-conservative divergence.
-   * @param[in]    a_lvl                       Grid level.
-   */
-  virtual void
-  hybridDivergence(LevelData<EBCellFAB>&             a_hybridDivergence,
-                   LevelData<BaseIVFAB<Real>>&       a_massDifference,
-                   const LevelData<BaseIVFAB<Real>>& a_nonConservativeDivergence,
-                   const int                         a_lvl);
-
-  /**
    * @brief Compute the conservative divergence over regular cells
    * @param[out] a_divJ Conservative divergence. Not kappa-divided.
    * @param[in]  a_flux Face-centered fluxes
@@ -1209,6 +1205,12 @@ protected:
    */
   virtual void
   parsePlotMode();
+
+  /**
+   * @brief Build the cut-cell stabilization (m_redistribution) from the current settings and grids.
+   */
+  virtual void
+  defineRedistribution();
 
   /**
    * @brief Parse the conservation

@@ -2174,6 +2174,15 @@ public:
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const;
 
+  /**
+   * @brief Get the state redistribution
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return State redistribution on all levels
+   */
+  const RefCountedPtr<EBStateRedistribution>&
+  getStateRedistribution(const std::string& a_realm, const phase::which_phase a_phase) const;
+
 #ifdef CH_USE_PETSC
   /**
    * @brief Get a PETSc grid object
@@ -2411,6 +2420,16 @@ protected:
   int m_redistributionRadius;
 
   /**
+   * @brief State redistribution: order of the reconstruction (0 or 2)
+   */
+  int m_srdOrder;
+
+  /**
+   * @brief State redistribution: target volume fraction
+   */
+  Real m_srdTargetVolFrac;
+
+  /**
    * @brief Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects.
    * @details Bounded on both sides: it must not exceed num_ghost (the exchange has to deliver the cut-cell data it
    * reads), and AmrMesh::sanityCheck separately requires num_ghost < min_block_size.
@@ -2616,7 +2635,7 @@ protected:
   parseMultigridInterpolator();
 
   /**
-   * @brief Parse the default redistribution radius
+   * @brief Parse the default redistribution radius, and the parameters of the state redistribution
    */
   void
   parseRedistributionRadius();

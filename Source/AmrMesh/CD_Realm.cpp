@@ -57,6 +57,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const int                                                  a_numGhost,
               const int                                                  a_lsfGhost,
               const int                                                  a_redistRad,
+              const int                                                  a_srdOrder,
+              const Real                                                 a_srdTargetVolFrac,
               const int                                                  a_mgInterpOrder,
               const int                                                  a_mgInterpRadius,
               const int                                                  a_mgInterpWeight,
@@ -97,6 +99,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                a_numGhost,
                                a_lsfGhost,
                                a_redistRad,
+                               a_srdOrder,
+                               a_srdTargetVolFrac,
                                a_mgInterpOrder,
                                a_mgInterpRadius,
                                a_mgInterpWeight,
@@ -118,6 +122,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                  a_numGhost,
                                  a_lsfGhost,
                                  a_redistRad,
+                                 a_srdOrder,
+                                 a_srdTargetVolFrac,
                                  a_mgInterpOrder,
                                  a_mgInterpRadius,
                                  a_mgInterpWeight,
@@ -1777,6 +1783,12 @@ Vector<RefCountedPtr<EBFluxRedistribution>>&
 Realm::getRedistributionOp(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getRedistributionOp();
+}
+
+const RefCountedPtr<EBStateRedistribution>&
+Realm::getStateRedistribution(const phase::which_phase a_phase)
+{
+  return m_realms[a_phase]->getStateRedistribution();
 }
 
 const EBAMRFAB&

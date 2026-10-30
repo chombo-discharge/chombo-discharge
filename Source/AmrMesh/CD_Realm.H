@@ -97,6 +97,8 @@ public:
    * @param[in] a_numGhost         Number of ghost cells in data holders
    * @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
    * @param[in] a_redistRad        Redistribution radius
+   * @param[in] a_srdOrder         State redistribution: order of the reconstruction (0 or 2)
+   * @param[in] a_srdTargetVolFrac State redistribution: target volume fraction
    * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
    * @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
    * @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
@@ -120,6 +122,8 @@ public:
          const int                                                  a_numGhost,
          const int                                                  a_lsfGhost,
          const int                                                  a_redistRad,
+         const int                                                  a_srdOrder,
+         const Real                                                 a_srdTargetVolFrac,
          const int                                                  a_mgInterpOrder,
          const int                                                  a_mgInterpRadius,
          const int                                                  a_mgInterpWeight,
@@ -438,6 +442,14 @@ public:
    */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const phase::which_phase a_phase);
+
+  /**
+   * @brief Get the state redistribution
+   * @param[in] a_phase Phase (gas or solid)
+   * @return State redistribution on all levels
+   */
+  const RefCountedPtr<EBStateRedistribution>&
+  getStateRedistribution(const phase::which_phase a_phase);
 
   /**
    * @brief Get level-set function

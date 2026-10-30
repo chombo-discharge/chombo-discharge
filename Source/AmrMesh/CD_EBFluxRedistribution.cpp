@@ -35,18 +35,12 @@ EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
                                            const EBLevelGrid& a_eblgFine,
                                            const int          a_refToCoar,
                                            const int          a_refToFine,
-                                           const bool         a_redistributeOutside) noexcept
+                                           const int          a_redistRadius) noexcept
 {
   CH_TIME("EBFluxRedistribution::EBFluxRedistribution(full)");
 
-  this->define(a_eblgCoar,
-               a_eblgCoarsened,
-               a_eblg,
-               a_eblgRefined,
-               a_eblgFine,
-               a_refToCoar,
-               a_refToFine,
-               a_redistributeOutside);
+  this
+    ->define(a_eblgCoar, a_eblgCoarsened, a_eblg, a_eblgRefined, a_eblgFine, a_refToCoar, a_refToFine, a_redistRadius);
 }
 
 EBFluxRedistribution::~EBFluxRedistribution() noexcept
@@ -62,18 +56,23 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
                              const EBLevelGrid& a_eblgFine,
                              const int          a_refToCoar,
                              const int          a_refToFine,
-                             const bool /*a_redistributeOutside*/) noexcept
+                             const int          a_redistRadius) noexcept
 {
   CH_TIME("EBFluxRedistribution::define");
 
   CH_assert(a_eblg.isDefined());
+  CH_assert(a_redistRadius >= 1);
 
-  m_redistRadius        = 1;
-  m_refToCoar           = -1;
-  m_refToFine           = -1;
-  m_hasCoar             = false;
-  m_hasFine             = false;
-  m_redistributeOutside = false; // a_redistributeOutside;
+  m_redistRadius = a_redistRadius;
+
+  // The redistribution buffers on this level are grown by the radius and need the geometry there.
+  if (m_redistRadius > a_eblg.getGhost()) {
+    MayDay::Abort("EBFluxRedistribution::define -- the redistribution radius exceeds the number of EB ghost cells");
+  }
+  m_refToCoar = -1;
+  m_refToFine = -1;
+  m_hasCoar   = false;
+  m_hasFine   = false;
 
   if (a_eblgCoar.isDefined()) {
     CH_assert(a_refToCoar >= 2);
@@ -101,11 +100,11 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
     // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
     // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
     // data in a larger radius than what is available in the input arguments.
-    if (m_refToFine > a_eblgRefined.getGhost()) {
+    if (m_refToFine * m_redistRadius > a_eblgRefined.getGhost()) {
       DisjointBoxLayout dblRefined;
 
       refine(dblRefined, m_eblg.getDBL(), m_refToFine);
-      m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine, m_eblg.getEBIS());
+      m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine * m_redistRadius, m_eblg.getEBIS());
     }
     else {
       CH_assert(a_eblgRefined.isDefined());
@@ -228,11 +227,6 @@ EBFluxRedistribution::defineStencils() noexcept
       for (int i = 0; i < neighborVoFs.size(); i++) {
         const VolIndex& curVoF = neighborVoFs[i];
         const IntVect&  curIV  = curVoF.gridIndex();
-
-        // If we only redistribute to cells inside the domain, skip this cell.
-        if (!(domain.contains(curIV)) && !m_redistributeOutside) {
-          continue;
-        }
 
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
@@ -440,36 +434,6 @@ EBFluxRedistribution::defineBuffers() noexcept
     const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
     m_fineCopier.ghostDefine(dblRefined, dblFine, domainFine, m_refToFine * m_redistRadius * IntVect::Unit);
-  }
-}
-
-void
-EBFluxRedistribution::redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
-                                      LevelData<EBCellFAB>*             a_phi,
-                                      LevelData<EBCellFAB>*             a_phiFine,
-                                      const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                      const Real                        a_scaleCoar,
-                                      const Real                        a_scale,
-                                      const Real                        a_scaleFine,
-                                      const Interval&                   a_variables) const noexcept
-{
-  CH_TIME("EBFluxRedistribution::redistributeAMR");
-
-  CH_assert(m_isDefined);
-  CH_assert(a_phi != nullptr);
-
-  if (m_hasCoar) {
-    CH_assert(a_phiCoar != nullptr);
-
-    this->redistributeCoar(*a_phiCoar, a_deltaM, a_scaleCoar, a_variables);
-  }
-
-  this->redistributeLevel(*a_phi, a_deltaM, a_scale, a_variables);
-
-  if (m_hasFine) {
-    CH_assert(a_phiFine != nullptr);
-
-    this->redistributeFine(*a_phiFine, a_deltaM, a_scaleFine, a_variables);
   }
 }
 
