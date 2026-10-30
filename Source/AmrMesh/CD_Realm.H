@@ -96,7 +96,6 @@ public:
    * @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
    * @param[in] a_numGhost         Number of ghost cells in data holders
    * @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
-   * @param[in] a_redistRad        Redistribution radius
    * @param[in] a_srdOrder         State redistribution: order of the reconstruction (0 or 2)
    * @param[in] a_srdTargetVolFrac State redistribution: target volume fraction
    * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
@@ -121,7 +120,6 @@ public:
          const int                                                  a_ebGhost,
          const int                                                  a_numGhost,
          const int                                                  a_lsfGhost,
-         const int                                                  a_redistRad,
          const int                                                  a_srdOrder,
          const Real                                                 a_srdTargetVolFrac,
          const int                                                  a_mgInterpOrder,

@@ -401,7 +401,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1871-1872
+   :lines: 1864-1865
    :language: c++
    :dedent: 2
 

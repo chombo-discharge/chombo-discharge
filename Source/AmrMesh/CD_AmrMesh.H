@@ -1748,13 +1748,6 @@ public:
   getNumberOfEbGhostCells() const;
 
   /**
-   * @brief Get default redistribution radius
-   * @return Redistribution radius
-   */
-  int
-  getRedistributionRadius() const;
-
-  /**
    * @brief Get resolution on the finest grid level.
    * @return Grid spacing on finest level
    */
@@ -2432,11 +2425,6 @@ protected:
   int m_multigridInterpWeight;
 
   /**
-   * @brief Redistribution radius
-   */
-  int m_redistributionRadius;
-
-  /**
    * @brief State redistribution: order of the reconstruction (0 or 2)
    */
   int m_srdOrder;
@@ -2652,10 +2640,10 @@ protected:
   parseMultigridInterpolator();
 
   /**
-   * @brief Parse the default redistribution radius, and the parameters of the state redistribution
+   * @brief Parse the parameters of the state redistribution
    */
   void
-  parseRedistributionRadius();
+  parseStateRedistribution();
 
   /**
    * @brief Parse the mirror-deposition band radius and fit/guard tolerances.

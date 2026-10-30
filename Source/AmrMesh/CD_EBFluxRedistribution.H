@@ -42,6 +42,9 @@
  * resolution is not made here; the user will have to ensure proper scaling of his/her variables when calling the actual
  * redistribution functions. The scaling factors depend on what is actually being redistributed, and the user will need
  * to work this out on paper.
+ *
+ * The code has only been verified and validated for a redistribution radius of 1, which is what chombo-discharge uses.
+ * Larger radii are accepted but untested; with radius 2, mass is known to be lost across a refinement ratio of 4.
  */
 class EBFluxRedistribution
 {
@@ -66,7 +69,8 @@ public:
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
-   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells.
+   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells. Only verified and validated
+   * for 1.
    * @param[in] a_eblgRefined Eblg refined
    */
   EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
@@ -94,7 +98,8 @@ public:
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
-   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells.
+   * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells. Only verified and validated
+   * for 1.
    */
   virtual void
   define(const EBLevelGrid& a_eblgCoar,

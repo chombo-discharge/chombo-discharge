@@ -114,10 +114,10 @@ Note that specifying ``AmrMesh.mg_interp_radius`` > ``AmrMesh.eb_ghost`` is sure
 Cut-cell redistribution
 -----------------------
 
-The cut-cell stabilization of explicit updates (see :ref:`Chap:ExplicitDivergence`) is configured through ``AmrMesh``:
+The cut-cell stabilization of explicit updates (see :ref:`Chap:ExplicitDivergence`) is configured through ``AmrMesh``.
+The flux redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
+The state redistribution is configured by:
 
-* ``AmrMesh.redist_radius`` is the radius of the flux redistribution neighborhoods.
-  It must currently be 1; larger radii do not conserve mass across refinement boundaries (chombo-discharge issue #763).
 * ``AmrMesh.srd_order`` is the reconstruction order of state redistribution, 0 (constant) or 2 (linear, limited).
 * ``AmrMesh.srd_target_volfrac`` is the target volume fraction of state redistribution: cut cells with smaller volume fractions are merged with neighbors.
 

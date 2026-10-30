@@ -969,7 +969,7 @@ AmrMesh::parseOptions()
   this->parseGridGeneration();
   this->parseBrBufferSize();
   this->parseBrFillRatio();
-  this->parseRedistributionRadius();
+  this->parseStateRedistribution();
   this->parseMirrorDeposition();
   ;
   this->parseNumGhostCells();
@@ -2917,35 +2917,23 @@ AmrMesh::parseMultigridInterpolator()
 }
 
 void
-AmrMesh::parseRedistributionRadius()
+AmrMesh::parseStateRedistribution()
 {
-  CH_TIME("AmrMesh::parseRedistributionRadius()");
+  CH_TIME("AmrMesh::parseStateRedistribution()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseRedistributionRadius()" << endl;
+    pout() << "AmrMesh::parseStateRedistribution()" << endl;
   }
 
   ParmParse pp("AmrMesh");
-
-  pp.get("redist_radius", m_redistributionRadius);
-
-  if (m_redistributionRadius <= 0) {
-    MayDay::Error("AmrMesh::parseRedistributionRadius -- you have specified non-positive redistribution radius");
-  }
-
-  // Flux redistribution does not conserve mass across refinement boundaries for larger radii (issue #763).
-  if (m_redistributionRadius != 1) {
-    MayDay::Error("AmrMesh::parseRedistributionRadius -- redist_radius must be 1 (larger radii do not conserve mass "
-                  "across refinement boundaries, see chombo-discharge issue #763)");
-  }
 
   pp.get("srd_order", m_srdOrder);
   pp.get("srd_target_volfrac", m_srdTargetVolFrac);
 
   if (m_srdOrder != 0 && m_srdOrder != 2) {
-    MayDay::Error("AmrMesh::parseRedistributionRadius -- srd_order must be 0 or 2");
+    MayDay::Error("AmrMesh::parseStateRedistribution -- srd_order must be 0 or 2");
   }
   if (!(m_srdTargetVolFrac > 0.0 && m_srdTargetVolFrac <= 1.0)) {
-    MayDay::Error("AmrMesh::parseRedistributionRadius -- srd_target_volfrac must be in (0, 1]");
+    MayDay::Error("AmrMesh::parseStateRedistribution -- srd_target_volfrac must be in (0, 1]");
   }
 }
 
@@ -3258,17 +3246,6 @@ AmrMesh::getNumberOfEbGhostCells() const
   }
 
   return m_numEbGhostsCells;
-}
-
-int
-AmrMesh::getRedistributionRadius() const
-{
-  CH_TIME("AmrMesh::getRedistributionRadius()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getRedistributionRadius()" << endl;
-  }
-
-  return m_redistributionRadius;
 }
 
 int
@@ -4195,7 +4172,6 @@ AmrMesh::defineRealms()
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
-                     m_redistributionRadius,
                      m_srdOrder,
                      m_srdTargetVolFrac,
                      m_multigridInterpOrder,
@@ -4256,7 +4232,6 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,
-                            m_redistributionRadius,
                             m_srdOrder,
                             m_srdTargetVolFrac,
                             m_multigridInterpOrder,

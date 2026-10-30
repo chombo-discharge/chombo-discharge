@@ -35,6 +35,8 @@
 #include <CD_MirrorDeposition.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int PhaseRealm::s_redistributionRadius;
+
 PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false), m_mirrorCurvatureCorrection(true)
 {
   CH_TIME("PhaseRealm::PhaseRealm");
@@ -64,7 +66,6 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const int                             a_ebGhost,
                    const int                             a_numGhost,
                    const int                             a_lsfGhost,
-                   const int                             a_redistRad,
                    const int                             a_srdOrder,
                    const Real                            a_srdTargetVolFrac,
                    const int                             a_mgInterpOrder,
@@ -89,7 +90,6 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
   m_numEbGhostsCells              = a_ebGhost;
   m_numGhostCells                 = a_numGhost;
   m_numLsfGhostCells              = a_lsfGhost;
-  m_redistributionRadius          = a_redistRad;
   m_srdOrder                      = a_srdOrder;
   m_srdTargetVolFrac              = a_srdTargetVolFrac;
   m_mirrorBandRadius              = a_mirrorBandRadius;
@@ -933,7 +933,7 @@ PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
                                                                                              eblgFine,
                                                                                              refToCoar,
                                                                                              refToFine,
-                                                                                             m_redistributionRadius));
+                                                                                             s_redistributionRadius));
     }
   }
 }
@@ -1691,7 +1691,7 @@ PhaseRealm::defineNonConservativeDivergence(const int /*a_lmin*/)
   if (doThisOperator) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       m_nonConservativeDivergence[lvl] = RefCountedPtr<EBNonConservativeDivergence>(
-        new EBNonConservativeDivergence(*m_eblg[lvl], m_redistributionRadius));
+        new EBNonConservativeDivergence(*m_eblg[lvl], s_redistributionRadius));
     }
   }
 }

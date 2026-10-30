@@ -65,6 +65,12 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
 
   m_redistRadius = a_redistRadius;
 
+  // Only a radius of 1 has been verified and validated.
+  if (m_redistRadius > 1) {
+    pout() << "EBFluxRedistribution::define -- warning: redistribution radius " << m_redistRadius
+           << " > 1 is not verified or validated, and is known to lose mass across a refinement ratio of 4" << endl;
+  }
+
   // The redistribution buffers on this level are grown by the radius and need the geometry there.
   if (m_redistRadius > a_eblg.getGhost()) {
     MayDay::Abort("EBFluxRedistribution::define -- the redistribution radius exceeds the number of EB ghost cells");
