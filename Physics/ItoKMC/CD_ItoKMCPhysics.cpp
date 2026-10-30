@@ -68,4 +68,20 @@ ItoKMCPhysics::needGradients() const noexcept
   return false;
 }
 
+bool
+ItoKMCPhysics::emitsWithoutPrimariesEB() const noexcept
+{
+  CH_TIME("ItoKMCPhysics::emitsWithoutPrimariesEB");
+
+  return true;
+}
+
+bool
+ItoKMCPhysics::emitsWithoutPrimariesDomain() const noexcept
+{
+  CH_TIME("ItoKMCPhysics::emitsWithoutPrimariesDomain");
+
+  return true;
+}
+
 #include <CD_NamespaceFooter.H>

@@ -928,8 +928,10 @@ AmrMesh::intersectParticlesRaycastIF(
   }
   }
 
-  // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
-  constexpr Real safety = 1.E-12;
+  // A particle on or past a domain face lies in no grid cell, and a margin along the path does not keep it off the face
+  // once it is below the floating-point resolution of the position. The intersection point is therefore put a fixed
+  // fraction of a cell inside the domain.
+  constexpr Real safety = 1.E-6;
 
   // Level loop -- go through each AMR level
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1016,8 +1018,12 @@ AmrMesh::intersectParticlesRaycastIF(
               }
             }
             else { // Crashed with domain "first".
-              const Real     sSafety         = std::max((Real)0.0, sDomain - safety);
-              const RealVect intersectionPos = oldPos + sSafety * path;
+              RealVect intersectionPos = oldPos + sDomain * path;
+
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                intersectionPos[dir] = std::max(intersectionPos[dir], m_probLo[dir] + safety * m_dx[lvl]);
+                intersectionPos[dir] = std::min(intersectionPos[dir], m_probHi[dir] - safety * m_dx[lvl]);
+              }
 
               active.setPosition(i, intersectionPos);
               domain.appendParticle(active, i);
@@ -1099,8 +1105,10 @@ AmrMesh::intersectParticlesBisectIF(
   }
   }
 
-  // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
-  constexpr Real safety = 1.E-12;
+  // A particle on or past a domain face lies in no grid cell, and a margin along the path does not keep it off the face
+  // once it is below the floating-point resolution of the position. The intersection point is therefore put a fixed
+  // fraction of a cell inside the domain.
+  constexpr Real safety = 1.E-6;
 
   // Level loop -- go through each AMR level
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1182,8 +1190,12 @@ AmrMesh::intersectParticlesBisectIF(
               }
             }
             else { // Crashed with domain "first".
-              const Real     sSafety         = std::max((Real)0.0, sDomain - safety);
-              const RealVect intersectionPos = oldPos + sSafety * path;
+              RealVect intersectionPos = oldPos + sDomain * path;
+
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                intersectionPos[dir] = std::max(intersectionPos[dir], m_probLo[dir] + safety * m_dx[lvl]);
+                intersectionPos[dir] = std::min(intersectionPos[dir], m_probHi[dir] - safety * m_dx[lvl]);
+              }
 
               active.setPosition(i, intersectionPos);
               domain.appendParticle(active, i);

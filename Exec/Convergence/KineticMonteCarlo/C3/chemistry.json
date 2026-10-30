@@ -1,11 +1,9 @@
 {
-    "//comment": [
-        "Minimal stiff two-group model. All rates are constants, so no data files are needed.",
-        "  e  -> el + el + M+   at 7.468e9  1/s     (fast species produced by a slow reaction)",
-        "  el -> e              at 1.741e11 1/s     (fast relaxation, 23x the ionization rate)",
-        "The electron total is e + el and grows at 6.900e9 1/s, the dominant eigenvalue of",
-        "  [ -nu_i  nu_r ; 2 nu_i  -nu_r ]."
-    ],
+    // Minimal stiff two-group model. All rates are constants, so no data files are needed.
+    //   e  -> el + el + M+   at 7.468e9  1/s     (fast species produced by a slow reaction)
+    //   el -> e              at 1.741e11 1/s     (fast relaxation, 23x the ionization rate)
+    // The electron total is e + el and grows at 6.900e9 1/s, the dominant eigenvalue of
+    //   [ -nu_i  nu_r ; 2 nu_i  -nu_r ].
     "gas": {
         "background species": [
             { "id": "M", "molar fraction": { "type": "constant", "value": 1.0 } }
@@ -16,7 +14,7 @@
             "ideal_gas": { "type": "ideal", "temperature": 300, "pressure": 0.233E5 }
         }
     },
-    "particle placement": { "method": "random", "species": "e" },
+    "particle placement": { "method": "random" },
     "alpha": { "type": "constant", "value": 0.0 },
     "eta":   { "type": "constant", "value": 0.0 },
     "plasma species": [

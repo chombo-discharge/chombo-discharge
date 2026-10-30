@@ -72,10 +72,10 @@
 		"mu*N column" : 1,                              
 		"min E/N" : 1,					
 		"max E/N" : 2E6,				
-		"points" : 1000,				
+		"num points" : 1000,				
 		"spacing" : "exponential",			
-		"E/N scale" : 1.0,				
-		"mu*N scale" : 1.0				
+		"scale E/N" : 1.0,				
+		"scale mu*N" : 1.0				
 	    },
 	    "diffusion" : {
 		"type" : "table vs E/N",
@@ -86,7 +86,7 @@
 		"min E/N" : 10,
 		"max E/N" : 2E6,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },
 	    "temperature": {
 		"type": "table vs E/N",
@@ -96,10 +96,10 @@
 		"eV column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 2E6,
-		"E/N scale": 1.0,
-		"eV scale": 1.0,
+		"scale E/N": 1.0,
+		"scale eV": 1.0,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },
 	    "initial particles" : [
 		{

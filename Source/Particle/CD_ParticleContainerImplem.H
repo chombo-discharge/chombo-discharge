@@ -61,8 +61,12 @@ ParticleContainer<P, Traits>::gatherToPool(AMRParticlesSoA<P, Traits>&      a_so
     unsigned long long outcast = 0;
 
     for (std::size_t i = 0; i < a_leaf.size(); i++) {
-      const RealVect pos = a_leaf.position(i);
-      const auto     dst = this->findDestination(pos);
+      RealVect pos = a_leaf.position(i);
+      auto     dst = this->findDestination(pos);
+
+      if (!dst.valid && this->moveInsideDomain(pos)) {
+        dst = this->findDestination(pos);
+      }
 
       if (!dst.valid) {
         outcast++;
@@ -171,7 +175,7 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
       std::size_t i = 0;
 
       while (i < a_leaf.size()) {
-        const RealVect pos = a_leaf.position(i);
+        RealVect pos = a_leaf.position(i);
         if (a_mask != nullptr) {
           const IntVect iv = this->cellIndex(lvl, pos);
 
@@ -190,7 +194,11 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
           }
         }
 
-        const auto dst = this->findDestination(pos); // mover: route it
+        auto dst = this->findDestination(pos); // mover: route it
+
+        if (!dst.valid && this->moveInsideDomain(pos)) {
+          dst = this->findDestination(pos);
+        }
 
         if (dst.valid) {
           Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];

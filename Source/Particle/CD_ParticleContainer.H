@@ -142,6 +142,7 @@ public:
    */
   ParticleContainer()
     : m_probLo(RealVect::Zero),
+      m_probHi(RealVect::Zero),
       m_minBlockSize(0),
       m_finestLevel(-1),
       m_numOutcastLocal(0),
@@ -222,6 +223,10 @@ public:
     m_dx.resize(a_finestLevel + 1);
     for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
       m_dx[lvl] = a_dx[lvl] * RealVect::Unit;
+    }
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      m_probHi[dir] = m_probLo[dir] + a_domains[0].domainBox().size(dir) * a_dx[0];
     }
 
     // Alias the Realm's per-level tile->box maps (the single source of truth); never build our own.
@@ -580,8 +585,9 @@ public:
    * @brief Redistribute every valid particle to the patch/level/rank that owns its cell.
    * @details Pool model: collect all valid particles, map each to its destination via the
    * finest-level tile that contains it (LevelTiles), append same-rank movers into the destination
-   * leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on
-   * any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates
+   * leaf and scatter cross-rank movers with MPI. A particle on, or within roundoff of, a domain face is
+   * first moved just inside the domain (see moveInsideDomain). Particles whose cell is not owned by any
+   * tile on any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates
    * any cell-sort. Particle ids are preserved; rankID is set to the new owning rank.
    */
   void
@@ -993,6 +999,11 @@ protected:
   RealVect m_probLo;
 
   /**
+   * @brief Upper-right corner of the physical domain, computed from the coarsest domain box and grid spacing.
+   */
+  RealVect m_probHi;
+
+  /**
    * @brief Grid blocking factor (tile size).
    */
   int m_minBlockSize;
@@ -1075,6 +1086,37 @@ protected:
       iv[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / m_dx[a_lvl][dir]));
     }
     return iv;
+  }
+
+  /**
+   * @brief Move a position that lies on, or within roundoff of, a domain face to just inside it.
+   * @details Cells are half-open, so a position exactly on the high face maps to the cell beyond the domain, and a
+   * position a roundoff distance outside either face maps to no cell. Each coordinate within 1E-6 of a finest-level
+   * cell of a domain face, but outside the half-open range [probLo, probHi), is set to 1E-6 of a finest-level cell
+   * inside that face. This is the same margin AmrMesh uses for particles that hit the domain. Coordinates further out
+   * are left alone, so particles that left the domain stay outside it.
+   * @param[in,out] a_pos Position.
+   * @return True if any coordinate was moved.
+   */
+  inline bool
+  moveInsideDomain(RealVect& a_pos) const noexcept
+  {
+    const Real margin = 1.E-6 * m_dx[m_finestLevel][0];
+
+    bool moved = false;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (a_pos[dir] < m_probLo[dir] && a_pos[dir] >= m_probLo[dir] - margin) {
+        a_pos[dir] = m_probLo[dir] + margin;
+        moved      = true;
+      }
+      else if (a_pos[dir] >= m_probHi[dir] - margin && a_pos[dir] <= m_probHi[dir] + margin) {
+        a_pos[dir] = m_probHi[dir] - margin;
+        moved      = true;
+      }
+    }
+
+    return moved;
   }
 
   /**

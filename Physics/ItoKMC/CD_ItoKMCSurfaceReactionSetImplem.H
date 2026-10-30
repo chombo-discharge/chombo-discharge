@@ -55,6 +55,28 @@ ItoKMCSurfaceReactionSet::add(const size_t                            a_speciesI
   }
 }
 
+inline void
+ItoKMCSurfaceReactionSet::addDomain(const size_t                            a_speciesIndex,
+                                    const ItoKMCSurfaceReaction&            a_reaction,
+                                    const int                               a_dir,
+                                    const Side::LoHiSide                    a_side,
+                                    const ItoKMCSurfaceReactionSet::Species a_speciesType) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
+  const int face = domainFaceIndex(a_dir, a_side);
+
+  if (a_speciesType == Species::Plasma) {
+    m_domainPlasmaReactions[face][a_speciesIndex].add(a_reaction);
+  }
+  else if (a_speciesType == Species::Photon) {
+    m_domainPhotonReactions[face][a_speciesIndex].add(a_reaction);
+  }
+  else {
+    MayDay::Error("ItoKMCSurfaceReaction::addDomain - logic bust");
+  }
+}
+
 inline const std::map<size_t, ItoKMCSurfaceReactions>&
 ItoKMCSurfaceReactionSet::getDielectricPlasmaReactions() const noexcept
 {
@@ -77,6 +99,28 @@ inline const std::map<size_t, ItoKMCSurfaceReactions>&
 ItoKMCSurfaceReactionSet::getElectrodePhotonReactions() const noexcept
 {
   return m_electrodePhotonReactions;
+}
+
+inline const std::map<size_t, ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getDomainPlasmaReactions(const int a_dir, const Side::LoHiSide a_side) const noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
+  return m_domainPlasmaReactions[domainFaceIndex(a_dir, a_side)];
+}
+
+inline const std::map<size_t, ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getDomainPhotonReactions(const int a_dir, const Side::LoHiSide a_side) const noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
+  return m_domainPhotonReactions[domainFaceIndex(a_dir, a_side)];
+}
+
+inline int
+ItoKMCSurfaceReactionSet::domainFaceIndex(const int a_dir, const Side::LoHiSide a_side) noexcept
+{
+  return 2 * a_dir + ((a_side == Side::Lo) ? 0 : 1);
 }
 
 #include <CD_NamespaceFooter.H>

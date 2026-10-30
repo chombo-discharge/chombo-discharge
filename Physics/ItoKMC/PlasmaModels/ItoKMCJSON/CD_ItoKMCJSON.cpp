@@ -26,7 +26,7 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false)
+ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnknownKeys(true)
 {
   CH_TIME("ItoKMCJSON::ItoKMCJSON");
 
@@ -65,6 +65,7 @@ ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false)
   this->initializePhotoReactions();
   this->initializeSurfaceEmission("dielectric");
   this->initializeSurfaceEmission("electrode");
+  this->initializeSurfaceEmission("domain");
   this->initializeFieldEmission();
 
   // Initialize the particle placement algorithm
@@ -149,6 +150,126 @@ ItoKMCJSON::throwParserWarning(const std::string& a_warning) const noexcept
   pout() << a_warning << endl;
 
   MayDay::Warning(a_warning.c_str());
+}
+
+void
+ItoKMCJSON::checkKeys(const nlohmann::json&        a_object,
+                      const std::set<std::string>& a_allowed,
+                      const std::string&           a_context) const noexcept
+{
+  CH_TIME("ItoKMCJSON::checkKeys");
+  if (m_verbose) {
+    pout() << m_className + "::checkKeys" << endl;
+  }
+
+  if (!(a_object.is_object())) {
+    return;
+  }
+
+  // Edit distance between two keys, used for suggesting the key that the user probably meant.
+  auto editDistance = [](const std::string& a, const std::string& b) -> size_t {
+    std::vector<size_t> prev(b.size() + 1);
+    std::vector<size_t> cur(b.size() + 1);
+
+    for (size_t j = 0; j <= b.size(); j++) {
+      prev[j] = j;
+    }
+
+    for (size_t i = 1; i <= a.size(); i++) {
+      cur[0] = i;
+
+      for (size_t j = 1; j <= b.size(); j++) {
+        const size_t substitution = prev[j - 1] + ((a[i - 1] == b[j - 1]) ? 0 : 1);
+
+        cur[j] = std::min({prev[j] + 1, cur[j - 1] + 1, substitution});
+      }
+
+      std::swap(prev, cur);
+    }
+
+    return prev[b.size()];
+  };
+
+  // The words of a key in sorted order, so that e.g. 'E/N scale' and 'scale E/N' compare equal.
+  auto sortedWords = [](const std::string& a_key) -> std::vector<std::string> {
+    std::stringstream        ss(a_key);
+    std::string              word;
+    std::vector<std::string> words;
+
+    while (ss >> word) {
+      words.push_back(word);
+    }
+
+    std::sort(words.begin(), words.end());
+
+    return words;
+  };
+
+  for (const auto& entry : a_object.items()) {
+    const std::string& key = entry.key();
+
+    if (a_allowed.count(key) == 0) {
+
+      // A key is a likely misspelling of an allowed key if it has the same words in a different order, if one
+      // contains the other, or if the two are a couple of edits apart.
+      std::string suggestion;
+      size_t      bestDistance = std::numeric_limits<size_t>::max();
+
+      for (const auto& allowed : a_allowed) {
+        const size_t distance = editDistance(key, allowed);
+
+        const bool sameWords = sortedWords(key) == sortedWords(allowed);
+        const bool contained = allowed.find(key) != std::string::npos || key.find(allowed) != std::string::npos;
+        const bool closeEdit = distance <= 2;
+
+        if ((sameWords || contained || closeEdit) && distance < bestDistance) {
+          bestDistance = distance;
+          suggestion   = allowed;
+        }
+      }
+
+      std::string message = m_className + "::checkKeys -- unknown key '" + key + "' in '" + a_context + "'.";
+
+      if (!(suggestion.empty())) {
+        message += " Did you mean '" + suggestion + "'?";
+      }
+
+      message += " Allowed keys are:";
+
+      for (const auto& allowed : a_allowed) {
+        message += " '" + allowed + "'";
+      }
+
+      if (m_abortOnUnknownKeys) {
+        this->throwParserError(message);
+      }
+      else {
+        this->throwParserWarning(message);
+      }
+    }
+  }
+}
+
+std::set<std::string>
+ItoKMCJSON::getTableKeys(const std::string& a_dataID) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getTableKeys");
+  if (m_verbose) {
+    pout() << m_className + "::getTableKeys" << endl;
+  }
+
+  return std::set<std::string>{"type",
+                               "file",
+                               "header",
+                               "E/N column",
+                               a_dataID + " column",
+                               "num points",
+                               "spacing",
+                               "scale E/N",
+                               "scale " + a_dataID,
+                               "min E/N",
+                               "max E/N",
+                               "dump"};
 }
 
 bool
@@ -282,6 +403,20 @@ ItoKMCJSON::parseJSON()
 
   pp.get("chemistry_file", m_jsonFile);
 
+  std::string unknownKeys;
+
+  pp.get("unknown_keys", unknownKeys);
+
+  if (unknownKeys == "abort") {
+    m_abortOnUnknownKeys = true;
+  }
+  else if (unknownKeys == "warn") {
+    m_abortOnUnknownKeys = false;
+  }
+  else {
+    this->throwParserError(baseError + " -- 'unknown_keys' must be 'warn' or 'abort'");
+  }
+
   if (!(this->doesFileExist(m_jsonFile))) {
     const std::string parseError = baseError + " -- file '" + m_jsonFile + "' does not exist";
 
@@ -296,6 +431,21 @@ ItoKMCJSON::parseJSON()
     constexpr auto ignoreComments  = true;
 
     m_json = nlohmann::json::parse(f, callback, allowExceptions, ignoreComments);
+
+    this->checkKeys(m_json,
+                    {"gas",
+                     "plasma species",
+                     "photon species",
+                     "alpha",
+                     "eta",
+                     "plasma reactions",
+                     "photoionization",
+                     "electrode emission",
+                     "dielectric emission",
+                     "domain emission",
+                     "field emission",
+                     "particle placement"},
+                    "(top level)");
 
     if (m_verbose) {
       pout() << m_className + "::parseJSON - done reading file!" << endl;
@@ -318,8 +468,23 @@ ItoKMCJSON::initializeGasLaw()
   //       routine is where you would do it.
   // clang-format on
 
+  this->checkKeys(m_json["gas"], {"law", "background species"}, "gas");
+
   if (!(m_json["gas"]["law"].contains("id"))) {
     this->throwParserError(baseError + " but field 'gas/law/id' is missing");
+  }
+
+  // Every entry in 'gas/law' other than 'id' and 'plot' is a named gas law. Only the law selected by 'id' is used,
+  // but all of them are checked.
+  for (const auto& law : m_json["gas"]["law"].items()) {
+    if (law.key() != "id" && law.key() != "plot") {
+      if (!(law.value().is_object())) {
+        this->throwParserError(
+          std::string{baseError}.append(" but 'gas/law/").append(law.key()).append("' is not a gas law"));
+      }
+
+      this->checkKeys(law.value(), {"type", "temperature", "pressure"}, "gas/law/" + law.key());
+    }
   }
 
   const std::string curLaw = this->trim(m_json["gas"]["law"]["id"].get<std::string>());
@@ -389,6 +554,9 @@ ItoKMCJSON::initializeBackgroundSpecies()
         this->throwParserError(baseError + "but 'id' field is not specified");
       }
       const std::string speciesName = species["id"].get<std::string>();
+      const std::string context     = "gas/background species/" + speciesName;
+
+      this->checkKeys(species, {"id", "plot", "molar fraction"}, context);
 
       if (this->containsWildcard(speciesName)) {
         this->throwParserError(std::string{baseError}
@@ -419,6 +587,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
       std::function<Real(const RealVect& x)> molarFraction;
 
       if (molFracType == "constant") {
+        this->checkKeys(species["molar fraction"], {"type", "value"}, context + "/molar fraction");
+
         if (!(species["molar fraction"].contains("value"))) {
           this->throwParserError(baseError + " and got constant molar fraction but field 'value' is missing");
         }
@@ -434,6 +604,21 @@ ItoKMCJSON::initializeBackgroundSpecies()
                                           .append("and got 'table vs height for species '")
                                           .append(speciesName)
                                           .append("'");
+
+        this->checkKeys(species["molar fraction"],
+                        {"type",
+                         "file",
+                         "axis",
+                         "height column",
+                         "molar fraction column",
+                         "num points",
+                         "height scale",
+                         "fraction scale",
+                         "min height",
+                         "max height",
+                         "spacing",
+                         "dump"},
+                        context + "/molar fraction");
 
         int    heightColumn   = 0;
         int    fractionColumn = 1;
@@ -595,6 +780,21 @@ ItoKMCJSON::initializePlasmaSpecies()
     const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = std::string{baseError}.append(" for species '").append(speciesID).append("'");
 
+    // The species entry is read across several initialize* functions; these are all the keys they read.
+    this->checkKeys(species,
+                    {"id",
+                     "Z",
+                     "solver",
+                     "mobile",
+                     "diffusive",
+                     "diffusion model",
+                     "initial particles",
+                     "initial density",
+                     "mobility",
+                     "diffusion",
+                     "temperature"},
+                    "plasma species/" + speciesID);
+
     if (this->containsWildcard(speciesID)) {
       this->throwParserError(std::string{baseErrorID}
                                .append(" but species name '")
@@ -734,7 +934,19 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
 
   const std::string type = m_json[a_coeff]["type"].get<std::string>();
 
+  // Keys read for every type -- the remaining ones depend on the type.
+  std::set<std::string> allowedKeys{"type",
+                                    "plot",
+                                    "preview",
+                                    "preview min E/N",
+                                    "preview max E/N",
+                                    "preview num points",
+                                    "preview spacing",
+                                    "preview pos"};
+
   if (type == "constant") {
+    allowedKeys.insert("value");
+
     if (!(m_json[a_coeff].contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' but missing the 'value' field");
     }
@@ -754,6 +966,10 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
 
     const nlohmann::json& jsonTable = m_json[a_coeff];
 
+    const std::set<std::string> tableKeys = this->getTableKeys(a_coeff + "/N");
+
+    allowedKeys.insert(tableKeys.begin(), tableKeys.end());
+
     if (!(jsonTable.contains("file"))) {
       this->throwParserError(baseErrorTable + "but 'file' is not specified");
     }
@@ -768,6 +984,8 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     };
   }
   else if (type == "auto") {
+    allowedKeys.insert("species");
+
     if (!(m_json[a_coeff].contains("species"))) {
       this->throwParserError(baseError + " and got 'auto' but 'species' field is missing!");
     }
@@ -789,6 +1007,8 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     this->throwParserError(
       std::string{baseError}.append(" but type specification '").append(type).append("' is not supported"));
   }
+
+  this->checkKeys(m_json[a_coeff], allowedKeys, a_coeff);
 
   // Check if we should plot the coefficient
   bool plotCoeff = false;
@@ -831,6 +1051,14 @@ ItoKMCJSON::initializeParticlePlacement()
     }
     else {
       const std::string method = m_json[field]["method"].get<std::string>();
+
+      // Only the downstream method reads a species.
+      if (method == "downstream") {
+        this->checkKeys(m_json[field], {"method", "species"}, field);
+      }
+      else {
+        this->checkKeys(m_json[field], {"method"}, field);
+      }
 
       if (method == "centroid") {
         m_particlePlacement = ParticlePlacement::Centroid;
@@ -1141,8 +1369,11 @@ ItoKMCJSON::initializeParticles()
         }
 
         const std::string whichField = (*obj.begin()).first;
+        const std::string context    = "plasma species/" + speciesID + "/initial particles/" + whichField;
 
         if (whichField == "single particle") {
+          this->checkKeys(initField["single particle"], {"position", "weight"}, context);
+
           unsigned long long weight   = 1ULL;
           RealVect           position = RealVect::Zero;
 
@@ -1168,6 +1399,8 @@ ItoKMCJSON::initializeParticles()
         }
         else if (whichField == "uniform distribution") {
           const nlohmann::json& jsonEntry = initField["uniform distribution"];
+
+          this->checkKeys(jsonEntry, {"low corner", "high corner", "num particles", "weight"}, context);
 
           if (!(jsonEntry.contains("low corner"))) {
             this->throwParserError(baseError + "but 'uniform distribution' does not contain 'low corner'");
@@ -1212,6 +1445,8 @@ ItoKMCJSON::initializeParticles()
         else if (whichField == "sphere distribution") {
           const nlohmann::json& jsonEntry = initField["sphere distribution"];
 
+          this->checkKeys(jsonEntry, {"center", "radius", "num particles", "weight"}, context);
+
           if (!(jsonEntry.contains("center"))) {
             this->throwParserError(baseError + "but 'sphere distribution' does not contain 'center'");
           }
@@ -1253,6 +1488,8 @@ ItoKMCJSON::initializeParticles()
         else if (whichField == "gaussian distribution") {
           const nlohmann::json& jsonEntry = initField["gaussian distribution"];
 
+          this->checkKeys(jsonEntry, {"center", "radius", "num particles", "weight"}, context);
+
           if (!(jsonEntry.contains("center"))) {
             this->throwParserError(baseError + "but 'gaussian distribution' does not contain 'center'");
           }
@@ -1293,6 +1530,8 @@ ItoKMCJSON::initializeParticles()
         }
         else if (whichField == "list") {
           const nlohmann::json& jsonEntry = initField["list"];
+
+          this->checkKeys(jsonEntry, {"file", "x column", "y column", "z column", "w column"}, context);
 
           if (!(jsonEntry.contains("file"))) {
             this->throwParserError(baseError + "but 'list' does not contain 'file'");
@@ -1456,7 +1695,15 @@ ItoKMCJSON::initializeMobilities()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = mobilityJSON["type"].get<std::string>();
+      const std::string type    = mobilityJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/mobility";
+
+      if (type == "constant" || type == "constant mu*N") {
+        this->checkKeys(mobilityJSON, {"type", "value"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(mobilityJSON, this->getTableKeys("mu*N"), context);
+      }
 
       if (type == "constant") {
         if (!(mobilityJSON.contains("value"))) {
@@ -1553,7 +1800,15 @@ ItoKMCJSON::initializeDiffusionCoefficients()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = diffusionJSON["type"].get<std::string>();
+      const std::string type    = diffusionJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/diffusion";
+
+      if (type == "constant" || type == "constant D*N") {
+        this->checkKeys(diffusionJSON, {"type", "value"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(diffusionJSON, this->getTableKeys("D*N"), context);
+      }
 
       if (type == "constant") {
         if (!(diffusionJSON.contains("value"))) {
@@ -1646,7 +1901,18 @@ ItoKMCJSON::initializeTemperatures()
         this->throwParserError(baseErrorID + " but 'type' specifier was not found");
       }
 
-      const std::string type = temperatureJSON["type"].get<std::string>();
+      const std::string type    = temperatureJSON["type"].get<std::string>();
+      const std::string context = "plasma species/" + speciesID + "/temperature";
+
+      if (type == "gas") {
+        this->checkKeys(temperatureJSON, {"type"}, context);
+      }
+      else if (type == "constant") {
+        this->checkKeys(temperatureJSON, {"type", "T"}, context);
+      }
+      else if (type == "table vs E/N") {
+        this->checkKeys(temperatureJSON, this->getTableKeys("eV"), context);
+      }
 
       if (type == "gas") {
         temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect& x) -> Real {
@@ -1747,7 +2013,21 @@ ItoKMCJSON::initializePhotonSpecies()
 
     const nlohmann::json& kappaJSON = species["kappa"];
 
-    const std::string type = this->trim(kappaJSON["type"].get<std::string>());
+    const std::string type    = this->trim(kappaJSON["type"].get<std::string>());
+    const std::string context = "photon species/" + speciesID;
+
+    this->checkKeys(species, {"id", "kappa"}, context);
+
+    if (type == "constant") {
+      this->checkKeys(kappaJSON, {"type", "value"}, context + "/kappa");
+    }
+    else if (type == "stochastic A") {
+      this->checkKeys(kappaJSON, {"type", "f1", "f2", "chi min", "chi max", "neutral"}, context + "/kappa");
+    }
+    else if (type == "stochastic B") {
+      this->checkKeys(kappaJSON, {"type", "chi min", "chi max", "neutral"}, context + "/kappa");
+    }
+
     if (type == "constant") {
       if (!(kappaJSON.contains("value"))) {
         this->throwParserError(baseErrorID + " and got constant kappa but 'value' field is not specified");
@@ -1893,6 +2173,57 @@ ItoKMCJSON::initializePlasmaReactions()
     }
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string type     = this->trim(reactionJSON["type"].get<std::string>());
+    const std::string context  = "plasma reactions/" + reaction;
+
+    // Keys read for every rate type, by parsePlasmaReactionRate() and the other parsePlasmaReaction* functions.
+    // The keys holding the rate itself depend on the type. Checked once per entry rather than once per wildcard
+    // expansion, so that an unknown key is reported once.
+    std::set<std::string> allowedKeys{"reaction",
+                                      "type",
+                                      "@",
+                                      "plot",
+                                      "description",
+                                      "gradient correction",
+                                      "include_dt_calc",
+                                      "scale",
+                                      "efficiency",
+                                      "efficiency vs E/N",
+                                      "efficiency vs E",
+                                      "quenching pressure",
+                                      "quenching rates",
+                                      "ppc threshold",
+                                      "limit max k*dt"};
+
+    if (type == "constant") {
+      allowedKeys.insert("value");
+    }
+    else if (type == "alpha*v" || type == "eta*v") {
+      allowedKeys.insert("species");
+    }
+    else if (type == "table vs E/N") {
+      const std::set<std::string> tableKeys = this->getTableKeys("rate/N");
+
+      allowedKeys.insert(tableKeys.begin(), tableKeys.end());
+    }
+    else if (type == "function T A") {
+      allowedKeys.insert({"T", "c1", "c2"});
+    }
+    else if (type == "function T1T2 A") {
+      allowedKeys.insert({"T1", "T2", "c1", "c2"});
+    }
+    else if (type == "function E/N exp A") {
+      allowedKeys.insert({"c1", "c2", "c3", "c4", "c5"});
+    }
+
+    this->checkKeys(reactionJSON, allowedKeys, context);
+
+    if (reactionJSON.contains("quenching rates")) {
+      this->checkKeys(reactionJSON["quenching rates"], {"kr", "kp", "kq/N"}, context + "/quenching rates");
+    }
+    if (reactionJSON.contains("ppc threshold")) {
+      this->checkKeys(reactionJSON["ppc threshold"], {"species", "ppc", "valid region"}, context + "/ppc threshold");
+    }
 
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
     // wildcard, in which case we also build the reaction superset;
@@ -1995,6 +2326,8 @@ ItoKMCJSON::initializePhotoReactions()
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
+    this->checkKeys(reactionJSON, {"reaction", "efficiency", "@"}, "photoionization/" + reaction);
+
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
     // wildcard, in which case we also build the reaction superset;
     std::vector<std::string> reactants;
@@ -2066,9 +2399,14 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
   else if (a_surface == "electrode") {
     reactionSpecifier = "electrode emission";
   }
+  else if (a_surface == "domain") {
+    reactionSpecifier = "domain emission";
+  }
   else {
     MayDay::Abort("ItoKMCJSON::initializeSurfaceEmission -- logic bust");
   }
+
+  const bool isDomain = (a_surface == "domain");
 
   for (const auto& reactionJSON : m_json[reactionSpecifier]) {
     if (!(reactionJSON.contains("reaction"))) {
@@ -2080,6 +2418,20 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
     const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
     const std::string baseErrorID = std::string{baseError}.append(" for reaction '").append(reaction).append("'");
+
+    const std::string context = reactionSpecifier + "/" + reaction;
+
+    // Domain reactions also say which faces of the domain they apply to.
+    std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+
+    if (isDomain) {
+      this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@", "boundaries"}, context);
+
+      domainFaces = this->parseDomainBoundaries(reactionJSON, context);
+    }
+    else {
+      this->checkKeys(reactionJSON, {"reaction", "efficiency", "efficiencies", "@"}, context);
+    }
 
     std::vector<std::string> reactants;
     std::vector<std::string> products;
@@ -2178,7 +2530,15 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
       reactions.add(reaction);
 
-      if (isPlasma && a_surface == "dielectric") {
+      if (isDomain) {
+        const ItoKMCSurfaceReactionSet::Species speciesType = isPlasma ? ItoKMCSurfaceReactionSet::Species::Plasma
+                                                                       : ItoKMCSurfaceReactionSet::Species::Photon;
+
+        for (const auto& face : domainFaces) {
+          m_surfaceReactions.addDomain(reactantIndex, reaction, face.first, face.second, speciesType);
+        }
+      }
+      else if (isPlasma && a_surface == "dielectric") {
         m_surfaceReactions.add(reactantIndex,
                                reaction,
                                ItoKMCSurfaceReactionSet::Surface::Dielectric,
@@ -2256,6 +2616,22 @@ ItoKMCJSON::initializeFieldEmission()
     const std::string species = this->trim(reactionJSON["species"].get<std::string>());
     const std::string surface = this->trim(reactionJSON["surface"].get<std::string>());
     const std::string type    = this->trim(reactionJSON["type"].get<std::string>());
+    const std::string context = "field emission/" + species;
+
+    // Domain field emission also says which faces of the domain it applies to.
+    std::set<std::string> allowedKeys{"species", "surface", "type"};
+
+    if (type == "fowler-nordheim") {
+      allowedKeys.insert({"work", "beta"});
+    }
+    else if (type == "schottky") {
+      allowedKeys.insert({"work", "beta", "temperature", "lambda"});
+    }
+    if (surface == "domain") {
+      allowedKeys.insert("boundaries");
+    }
+
+    this->checkKeys(reactionJSON, allowedKeys, context);
 
     if (!(this->isPlasmaSpecies(species))) {
       this->throwParserError(baseError + " but 'species' is not a plasma species");
@@ -2266,24 +2642,17 @@ ItoKMCJSON::initializeFieldEmission()
       }
     }
 
-    if (surface == "electrode") {
-      m_electrodeFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
-                                            [](const Real /*E*/, const Real /*N*/) -> Real {
-                                              return 0.0;
-                                            });
-    }
-    else if (surface == "dielectric") {
-      m_dielectricFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
-                                             [](const Real /*E*/, const Real /*N*/) -> Real {
-                                               return 0.0;
-                                             });
-    }
-    else {
-      this->throwParserError(baseError + " but 'surface' must be either 'dielectric' or 'electrode'");
+    if (!(surface == "electrode" || surface == "dielectric" || surface == "domain")) {
+      this->throwParserError(baseError + " but 'surface' must be 'dielectric', 'electrode', or 'domain'");
     }
 
-    FunctionEN& J = (surface == "electrode") ? m_electrodeFieldEmission.back().second
-                                             : m_dielectricFieldEmission.back().second;
+    std::vector<std::pair<int, Side::LoHiSide>> domainFaces;
+
+    if (surface == "domain") {
+      domainFaces = this->parseDomainBoundaries(reactionJSON, context);
+    }
+
+    FunctionEN J;
 
     if (type == "fowler-nordheim") {
       if (!(reactionJSON.contains("work"))) {
@@ -2347,7 +2716,92 @@ ItoKMCJSON::initializeFieldEmission()
       this->throwParserError(
         std::string{baseError}.append(" but 'type' specifier = '").append(type).append("' is not supported"));
     }
+
+    const int speciesIndex = m_itoSpeciesMap.at(species);
+
+    if (surface == "electrode") {
+      m_electrodeFieldEmission.emplace_back(speciesIndex, J);
+    }
+    else if (surface == "dielectric") {
+      m_dielectricFieldEmission.emplace_back(speciesIndex, J);
+    }
+    else {
+      for (const auto& face : domainFaces) {
+        const int faceIndex = 2 * face.first + ((face.second == Side::Lo) ? 0 : 1);
+
+        m_domainFieldEmission[faceIndex].emplace_back(speciesIndex, J);
+      }
+    }
   }
+}
+
+std::vector<std::pair<int, Side::LoHiSide>>
+ItoKMCJSON::parseDomainBoundaries(const nlohmann::json& a_json, const std::string& a_context) const
+{
+  CH_TIME("ItoKMCJSON::parseDomainBoundaries");
+  if (m_verbose) {
+    pout() << m_className + "::parseDomainBoundaries" << endl;
+  }
+
+  const std::string baseError = m_className + "::parseDomainBoundaries for '" + a_context + "'";
+
+  if (!(a_json.contains("boundaries"))) {
+    this->throwParserError(baseError + " but the field 'boundaries' is missing");
+  }
+
+  const std::vector<std::string> names = a_json["boundaries"].get<std::vector<std::string>>();
+
+  if (names.empty()) {
+    this->throwParserError(baseError + " but 'boundaries' is empty");
+  }
+
+  std::vector<std::pair<int, Side::LoHiSide>> faces;
+  std::set<std::string>                       seen;
+
+  for (const auto& n : names) {
+    const std::string name = this->trim(n);
+
+    if (seen.count(name) != 0) {
+      this->throwParserError(std::string{baseError}.append(" but boundary '").append(name).append("' is repeated"));
+    }
+
+    seen.insert(name);
+
+    // A face name is a direction and a side separated by whitespace, e.g. "x lo".
+    std::stringstream ss(name);
+    std::string       whichDir;
+    std::string       whichSide;
+    std::string       rest;
+
+    ss >> whichDir >> whichSide >> rest;
+
+    int dir = -1;
+
+    if (whichDir == "x") {
+      dir = 0;
+    }
+    else if (whichDir == "y") {
+      dir = 1;
+    }
+    else if (whichDir == "z") {
+      dir = 2;
+    }
+
+    const bool validSide = (whichSide == "lo" || whichSide == "hi");
+
+    if (dir < 0 || !validSide || !(rest.empty())) {
+      this->throwParserError(std::string{baseError}
+                               .append(" but boundary '")
+                               .append(name)
+                               .append("' is not one of 'x lo', 'x hi', 'y lo', 'y hi', 'z lo', 'z hi'"));
+    }
+
+    if (dir < SpaceDim) {
+      faces.emplace_back(dir, (whichSide == "lo") ? Side::Lo : Side::Hi);
+    }
+  }
+
+  return faces;
 }
 
 void
@@ -3555,7 +4009,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
   }
 
   const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
-  const bool isAnode   = !isCathode;
 
   RealVect lo = -0.5 * RealVect::Unit;
   RealVect hi = +0.5 * RealVect::Unit;
@@ -3567,7 +4020,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
     a_secondaryCDRFluxes[i] = std::max(a_primaryCDRFluxes[i], 0.0);
   }
 
-  // Go through all primary particles.
   const std::map<size_t, ItoKMCSurfaceReactions>&
     plasmaReactions = a_isDielectric ? m_surfaceReactions.getDielectricPlasmaReactions()
                                      : m_surfaceReactions.getElectrodePlasmaReactions();
@@ -3576,113 +4028,208 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
     photonReactions = a_isDielectric ? m_surfaceReactions.getDielectricPhotonReactions()
                                      : m_surfaceReactions.getElectrodePhotonReactions();
 
-  // Do secondary emission for each intersected particle if there's a corresponding surface reaction.
-  for (int i = 0; i < m_itoSpecies.size(); i++) {
-    if (plasmaReactions.count(i) > 0) {
+  // Secondaries are released in the gas part of the cut cell.
+  auto releasePosition = [&]() -> RealVect {
+    return Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+  };
 
-      // These are the products and distribution for this reaction.
-      const auto& reactions      = plasmaReactions.at(i);
-      const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
+  this->sampleSurfaceEmission(a_secondaryParticles,
+                              plasmaReactions,
+                              photonReactions,
+                              a_primaryParticles,
+                              a_primaryPhotons,
+                              releasePosition,
+                              isCathode);
 
-      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
-      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
-      size_t N = 0;
-      for (std::size_t j = 0; j < a_primaryParticles[i].size(); j++) {
-        const Real w = a_primaryParticles[i].weight(j);
-
-        CH_assert(w >= 0.0);
-
-        if (w > 0.0) {
-          N += (size_t)w;
-        }
-      }
-
-      const std::vector<size_t> X = this->multinomial(N, distribution);
-
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          const RealVect
-            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
-
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Do secondary emission for each intersected photon if there's a corresponding surface reaction.
-  for (int i = 0; i < m_rtSpecies.size(); i++) {
-    if (photonReactions.count(i) > 0) {
-
-      // These are the products and distribution for this reaction.
-      const auto& reactions      = photonReactions.at(i);
-      const auto& plasmaProducts = reactions.getProducts();
-      const auto& distribution   = reactions.getDistribution();
-
-      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
-      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
-      size_t N = 0;
-      for (std::size_t j = 0; j < a_primaryPhotons[i].size(); j++) {
-        const Real w = a_primaryPhotons[i].weight(j);
-
-        CH_assert(w >= 0.0);
-
-        if (w > 0.0) {
-          N += (size_t)w;
-        }
-      }
-
-      const std::vector<size_t> X = this->multinomial(N, distribution);
-
-      // Release the particles.
-      for (int i = 0; i < X.size(); i++) {
-        if (X[i] > 0) {
-          const RealVect
-            releasePosition = Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
-
-          for (const auto& p : plasmaProducts[i]) {
-            const int Z = m_itoSpecies[p]->getChargeNumber();
-
-            if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Field emission functions.
   if (isCathode) {
-    const auto& fieldEmissionFunctions = a_isDielectric ? m_dielectricFieldEmission : m_electrodeFieldEmission;
+    const auto& fieldEmission = a_isDielectric ? m_dielectricFieldEmission : m_electrodeFieldEmission;
 
-    for (const auto& fieldEmissionFunction : fieldEmissionFunctions) {
-      const auto& species = fieldEmissionFunction.first;
-      const auto& J       = fieldEmissionFunction.second;
+    this->sampleFieldEmission(a_secondaryParticles,
+                              fieldEmission,
+                              a_E,
+                              a_cellCenter + a_cellCentroid * a_dx,
+                              a_bndryArea,
+                              a_dx,
+                              a_dt);
+  }
+}
 
-      if (m_itoSpecies[species]->getChargeNumber() < 0) {
+void
+ItoKMCJSON::secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                                    Vector<ParticleSoA<Photon>>& /*a_secondaryPhotons*/,
+                                    const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                                    const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                                    const RealVect&                         a_E,
+                                    const RealVect&                         a_cellCenter,
+                                    const RealVect&                         a_cellCentroid,
+                                    const RealVect&                         a_bndryCentroid,
+                                    const RealVect&                         a_bndryNormal,
+                                    const int                               a_dir,
+                                    const Side::LoHiSide                    a_side,
+                                    const Real                              a_faceArea,
+                                    const Real                              a_dx,
+                                    const Real                              a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::secondaryEmissionDomain" << endl;
+  }
 
-        const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
-        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
+  // Normal of the domain face, pointing into the domain.
+  const RealVect faceNormal = -sign(a_side) * RealVect(BASISV(a_dir));
+  const bool     isCathode  = a_E.dotProduct(faceNormal) <= 0.0;
 
-        const auto numEmission = Random::getPoisson<long long>(JdAdt);
+  // Secondaries are released uniformly in the boundary cell, or in the gas part of it if the EB cuts the cell.
+  // The EB sampler cannot be used for a regular cell: with a zero normal, computeMinValidBox() shrinks the box
+  // to nothing.
+  const bool isCutCell = a_bndryNormal != RealVect::Zero;
 
-        if (numEmission > 0LL) {
-          const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
+  RealVect lo = -0.5 * RealVect::Unit;
+  RealVect hi = +0.5 * RealVect::Unit;
 
-          a_secondaryParticles[species].append(x, 1.0 * static_cast<double>(numEmission), ItoParticle{});
+  if (isCutCell) {
+    DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
+  }
+
+  auto releasePosition = [&]() -> RealVect {
+    if (isCutCell) {
+      return Random::randomPosition(a_cellCenter, lo, hi, a_bndryCentroid, a_bndryNormal, a_dx, 0.0);
+    }
+
+    return a_cellCenter + Random::randomPosition(lo, hi) * a_dx;
+  };
+
+  this->sampleSurfaceEmission(a_secondaryParticles,
+                              m_surfaceReactions.getDomainPlasmaReactions(a_dir, a_side),
+                              m_surfaceReactions.getDomainPhotonReactions(a_dir, a_side),
+                              a_primaryParticles,
+                              a_primaryPhotons,
+                              releasePosition,
+                              isCathode);
+
+  if (isCathode) {
+    const int faceIndex = 2 * a_dir + ((a_side == Side::Lo) ? 0 : 1);
+
+    this->sampleFieldEmission(a_secondaryParticles,
+                              m_domainFieldEmission[faceIndex],
+                              a_E,
+                              a_cellCenter + a_cellCentroid * a_dx,
+                              a_faceArea,
+                              a_dx,
+                              a_dt);
+  }
+}
+
+void
+ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&               a_secondaryParticles,
+                                  const std::map<size_t, ItoKMCSurfaceReactions>& a_plasmaReactions,
+                                  const std::map<size_t, ItoKMCSurfaceReactions>& a_photonReactions,
+                                  const Vector<ParticleSoA<ItoParticle>>&         a_primaryParticles,
+                                  const Vector<ParticleSoA<Photon>>&              a_primaryPhotons,
+                                  const std::function<RealVect()>&                a_releasePosition,
+                                  const bool                                      a_isCathode) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::sampleSurfaceEmission" << endl;
+  }
+
+  const bool isAnode = !a_isCathode;
+
+  // Do secondary emission for each primary species that has a reaction on this surface. Particles and photons
+  // differ only in the container type.
+  auto emit = [&](const std::map<size_t, ItoKMCSurfaceReactions>& a_reactions,
+                  const auto&                                     a_primaries,
+                  const size_t                                    a_numSpecies) -> void {
+    for (size_t i = 0; i < a_numSpecies; i++) {
+      if (a_reactions.count(i) > 0) {
+
+        // These are the products and distribution for this reaction.
+        const auto& reactions      = a_reactions.at(i);
+        const auto& plasmaProducts = reactions.getProducts();
+        const auto& distribution   = reactions.getDistribution();
+
+        // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
+        // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
+        size_t N = 0;
+        for (std::size_t j = 0; j < a_primaries[i].size(); j++) {
+          const Real w = a_primaries[i].weight(j);
+
+          CH_assert(w >= 0.0);
+
+          if (w > 0.0) {
+            N += (size_t)w;
+          }
+        }
+
+        const std::vector<size_t> X = this->multinomial(N, distribution);
+
+        // Release the particles.
+        for (int k = 0; k < X.size(); k++) {
+          if (X[k] > 0) {
+            const RealVect releasePosition = a_releasePosition();
+
+            for (const auto& p : plasmaProducts[k]) {
+              const int Z = m_itoSpecies[p]->getChargeNumber();
+
+              if ((Z < 0 && a_isCathode) || (Z > 0 && isAnode) || Z == 0) {
+                a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[k]), ItoParticle{});
+              }
+            }
+          }
         }
       }
     }
+  };
+
+  emit(a_plasmaReactions, a_primaryParticles, m_itoSpecies.size());
+  emit(a_photonReactions, a_primaryPhotons, m_rtSpecies.size());
+}
+
+void
+ItoKMCJSON::sampleFieldEmission(Vector<ParticleSoA<ItoParticle>>&              a_secondaryParticles,
+                                const std::vector<std::pair<int, FunctionEN>>& a_fieldEmission,
+                                const RealVect&                                a_E,
+                                const RealVect&                                a_position,
+                                const Real                                     a_areaFraction,
+                                const Real                                     a_dx,
+                                const Real                                     a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::sampleFieldEmission" << endl;
   }
+
+  for (const auto& fieldEmissionFunction : a_fieldEmission) {
+    const auto& species = fieldEmissionFunction.first;
+    const auto& J       = fieldEmissionFunction.second;
+
+    if (m_itoSpecies[species]->getChargeNumber() < 0) {
+
+      const Real N     = m_gasNumberDensity(a_position);
+      const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_areaFraction * a_dt;
+
+      const auto numEmission = Random::getPoisson<long long>(JdAdt);
+
+      if (numEmission > 0LL) {
+        a_secondaryParticles[species].append(a_position, 1.0 * static_cast<double>(numEmission), ItoParticle{});
+      }
+    }
+  }
+}
+
+bool
+ItoKMCJSON::emitsWithoutPrimariesDomain() const noexcept
+{
+  CH_TIME("ItoKMCJSON::emitsWithoutPrimariesDomain");
+  if (m_verbose) {
+    pout() << m_className + "::emitsWithoutPrimariesDomain" << endl;
+  }
+
+  for (const auto& fieldEmission : m_domainFieldEmission) {
+    if (!(fieldEmission.empty())) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 bool
@@ -3726,6 +4273,17 @@ ItoKMCJSON::needGradient(const int a_plasmaIndex) const noexcept
   }
 
   return false;
+}
+
+bool
+ItoKMCJSON::emitsWithoutPrimariesEB() const noexcept
+{
+  CH_TIME("ItoKMCJSON::emitsWithoutPrimariesEB");
+  if (m_verbose) {
+    pout() << m_className + "::emitsWithoutPrimariesEB" << endl;
+  }
+
+  return !(m_electrodeFieldEmission.empty()) || !(m_dielectricFieldEmission.empty());
 }
 
 int

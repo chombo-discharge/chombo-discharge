@@ -45,8 +45,7 @@
 	}
     },
     "particle placement": {     // Particle placement algorithm. 
-	"method": "random", // Method. Must be either 'centroid', 'random', or 'downstream'
-	"species": "e"		// Species. Must be one of the plasma species. 
+	"method": "random" // Method. Must be either 'centroid', 'random', or 'downstream'
     },    
     "alpha": {		// Specification of the Townsend ionization coefficient.
 	"type": "auto", // Automatic computation from reaction list.
@@ -78,10 +77,10 @@
 		"mu*N column" : 1,                            // Column containing mu*N
 		"min E/N" : 1,                                // Minimum E/N kept when resampling table
 		"max E/N" : 2E6,                              // Maximum E/N kept when resampling table
-		"points" : 1000,                              // Number of grid points kept when resampling the table
+		"num points" : 1000,                          // Number of grid points kept when resampling the table
 		"spacing" : "exponential",                    // Grid point spacing when resampling the table
-		"E/N scale" : 1.0,                            // Optional argument for scaling mobility coefficient
-		"mu*N scale" : 1.0                            // Optional argument for scaling the E/N column
+		"scale E/N" : 1.0,                            // Optional argument for scaling the E/N column
+		"scale mu*N" : 1.0                            // Optional argument for scaling the mobility column
 	    },
 	    "diffusion" : {
 		// Definition of the diffusion coefficient similar to mobility coefficient above.
@@ -94,7 +93,7 @@
 		"min E/N" : 10,
 		"max E/N" : 2E6,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },
 	    "temperature": {
 		// Definition of the temperature, similar to the mobility coefficient above.
@@ -106,10 +105,10 @@
 		"eV column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 2E6,
-		"E/N scale": 1.0,
-		"eV scale": 1.0,
+		"scale E/N": 1.0,
+		"scale eV": 1.0,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },
 	    "initial particles" : [
 		// Example of how to initialize particles using various methods (manual placement, distributions, reading

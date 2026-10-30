@@ -1,0 +1,105 @@
+{
+    // Chemistry for the domain emission regression test. All coefficients are constants, so no data files are
+    // needed. The rod is at a negative potential, so the grounded domain faces are anodes and the electrons drift
+    // into them. Electrons and photons that leave the domain turn into the neutral tracer species M.
+    "gas" : {
+	"law" : {
+	    "id" : "ideal_gas",
+	    "ideal_gas" : {
+		"type" : "ideal",
+		"temperature" : 300,
+		"pressure" : 1E5
+	    }
+	},
+	"background species" : [
+	    {
+		"id" : "N2",
+		"molar fraction" : { "type" : "constant", "value" : 0.8 }
+	    },
+	    {
+		"id" : "O2",
+		"molar fraction" : { "type" : "constant", "value" : 0.2 }
+	    }
+	]
+    },
+    "particle placement" : {
+	"method" : "random"
+    },
+    "alpha" : {
+	"type" : "constant",
+	"value" : 0.0
+    },
+    "eta" : {
+	"type" : "constant",
+	"value" : 0.0
+    },
+    "plasma species" : [
+	{
+	    "id" : "e",
+	    "Z" : -1,
+	    "solver" : "ito",
+	    "mobile" : true,
+	    "diffusive" : true,
+	    "mobility" : { "type" : "constant", "value" : 0.03 },
+	    "diffusion" : { "type" : "constant", "value" : 0.1 },
+	    "initial particles" : [
+		{
+		    "uniform distribution" : {
+			"low corner" : [ -4E-3, -4E-3, -4E-3 ],
+			"high corner" : [ 4E-3, 4E-3, 4E-3 ],
+			"num particles" : 400,
+			"weight" : 10
+		    }
+		}
+	    ]
+	},
+	{
+	    // Neutral tracer for the secondaries. Being neutral, it is released on anodes and cathodes alike.
+	    "id" : "M",
+	    "Z" : 0,
+	    "solver" : "ito",
+	    "mobile" : false,
+	    "diffusive" : false
+	}
+    ],
+    "photon species" : [
+	{
+	    "id" : "Y",
+	    "kappa" : { "type" : "constant", "value" : 1E3 }   // Absorption length of 1 mm, so many photons reach the domain faces
+	}
+    ],
+    "plasma reactions" : [
+	{
+	    "reaction" : "e -> e + Y",
+	    "type" : "constant",
+	    "value" : 1E8
+	}
+    ],
+    "domain emission" : [
+	{
+	    // Every electron that leaves the domain becomes an M.
+	    "reaction" : "e -> M",
+	    "efficiency" : 1.0,
+	    "boundaries" : [ "x lo", "x hi", "y lo", "y hi", "z lo", "z hi" ]
+	},
+	{
+	    // Half of the photons that leave the domain become an M.
+	    "reaction" : "Y -> @",
+	    "@" : [ "M", "(null)" ],
+	    "efficiencies" : [ 0.5, 0.5 ],
+	    "boundaries" : [ "x lo", "x hi", "y lo", "y hi", "z lo", "z hi" ]
+	}
+    ],
+    "field emission" : [
+	{
+	    // Field emission makes the domain emission pass run every step, whether or not anything left the domain.
+	    // The low y face is an anode here, so it emits nothing.
+	    "species" : "e",
+	    "surface" : "domain",
+	    "boundaries" : [ "y lo" ],
+	    "type" : "fowler-nordheim",
+	    "work" : 4.5,
+	    "beta" : 1.0
+	}
+    ]
+}

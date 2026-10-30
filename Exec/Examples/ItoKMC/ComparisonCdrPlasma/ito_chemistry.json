@@ -35,8 +35,7 @@
 	}
     },
     "particle placement" : {
-	"method" : "parent",
-	"species" : "e"
+	"method" : "parent"
     },
     // Townsend coefficients. ItoKMCJSON can compute these from the reaction list ("type" : "auto"), but the
     // tabulated BOLSIG+ coefficients are read directly instead so that they are the same functions of E/N as in
@@ -103,10 +102,10 @@
 		"eV column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 2E6,
-		"E/N scale" : 1.0,
-		"eV scale" : 1.0,
+		"scale E/N" : 1.0,
+		"scale eV" : 1.0,
 		"spacing" : "exponential",
-		"points" : 1000
+		"num points" : 1000
 	    },
 	    // Initial seed. This is the same specification that the CDR solver is given in cdr_chemistry.json.
 	    "initial particles" :

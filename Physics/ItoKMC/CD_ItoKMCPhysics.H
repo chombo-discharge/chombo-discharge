@@ -81,8 +81,8 @@ enum SpeciesType
 /**
  * @brief Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.
  * @details Subclasses must implement `updateReactionRates()`, `computeMobilities()`,
- * `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `computeAlpha()`, `computeEta()`,
- * and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and
+ * `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `secondaryEmissionDomain()`, `computeAlpha()`,
+ * `computeEta()`, and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and
  * (optionally) `m_photoReactions` and `m_surfaceReactions` in the subclass constructor.
  */
 class ItoKMCPhysics
@@ -248,6 +248,25 @@ public:
   needGradient(const int a_plasmaIndex) const noexcept;
 
   /**
+   * @brief Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.
+   * @details The stepper skips the EB emission pass in a step where no particle or photon reached the EB and
+   * no CDR species is mobile, unless this returns true. Field emission is the typical case: it is driven by
+   * the electric field alone. The default is the conservative answer, so a model that does not override this
+   * has the emission pass run every step.
+   * @return True if the EB emission pass must run even when no primaries reached the EB.
+   */
+  virtual bool
+  emitsWithoutPrimariesEB() const noexcept;
+
+  /**
+   * @brief Return true if secondaryEmissionDomain() can emit in a step where nothing reached the domain boundary.
+   * @details The domain counterpart of emitsWithoutPrimariesEB(), with the same conservative default.
+   * @return True if the domain emission pass must run even when no primaries left the domain.
+   */
+  virtual bool
+  emitsWithoutPrimariesDomain() const noexcept;
+
+  /**
    * @brief Get the internal mapping from plasma-species index to solver type and solver index.
    * @return Map from plasma species index to (SpeciesType, solver index) pair.
    */
@@ -340,6 +359,43 @@ public:
                       const Real                              a_dt,
                       const bool                              a_isDielectric,
                       const int                               a_matIndex) const noexcept = 0;
+
+  /**
+   * @brief Resolve secondary emission on one face of the computational domain.
+   * @details Called once per boundary cell and domain face. A cell on a corner or edge of the domain is
+   * called once per face it touches, and each primary is passed to the face it crossed. CDR species do not
+   * take part: their domain fluxes are set by the CDR solver's own boundary conditions.
+   * @param[out] a_secondaryParticles Outgoing plasma species particles.
+   * @param[out] a_secondaryPhotons   Photons injected through the domain face. The stepper does not inject these.
+   * @param[in]  a_primaryParticles   Particles that left the computational domain through this face.
+   * @param[in]  a_primaryPhotons     Photons that left the computational domain through this face.
+   * @param[in]  a_E                  Electric field in the boundary cell.
+   * @param[in]  a_cellCenter         Physical position of the cell center.
+   * @param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).
+   * @param[in]  a_bndryCentroid      EB centroid relative to the cell center (not multiplied by dx). Zero if the
+   *                                  cell is not cut by the EB.
+   * @param[in]  a_bndryNormal        EB normal, pointing into the gas. Zero if the cell is not cut by the EB.
+   * @param[in]  a_dir                Coordinate direction normal to the domain face.
+   * @param[in]  a_side               Low or high side of the domain in a_dir.
+   * @param[in]  a_faceArea           Area fraction of the cell's domain face that is open to the gas.
+   * @param[in]  a_dx                 Grid resolution on this level.
+   * @param[in]  a_dt                 Time step.
+   */
+  virtual void
+  secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                          Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                          const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                          const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                          const RealVect&                         a_E,
+                          const RealVect&                         a_cellCenter,
+                          const RealVect&                         a_cellCentroid,
+                          const RealVect&                         a_bndryCentroid,
+                          const RealVect&                         a_bndryNormal,
+                          const int                               a_dir,
+                          const Side::LoHiSide                    a_side,
+                          const Real                              a_faceArea,
+                          const Real                              a_dx,
+                          const Real                              a_dt) const noexcept = 0;
 
   /**
    * @brief Advance the reaction network using the KMC algorithm.

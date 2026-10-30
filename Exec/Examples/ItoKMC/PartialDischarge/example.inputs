@@ -294,6 +294,7 @@ ItoKMCGodunovStepper.reactive_E_centering                     = 0.5             
 ItoKMCJSON.verbose            = false             ## Turn on/off verbosity
 ItoKMCJSON.debug              = true              ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file
+ItoKMCJSON.unknown_keys       = abort             ## 'warn' or 'abort' on JSON keys that the parser does not read
 
 # Kinetic Monte Carlo solver settings.
 ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
