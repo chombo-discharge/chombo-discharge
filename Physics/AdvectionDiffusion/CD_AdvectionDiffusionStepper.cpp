@@ -37,6 +37,8 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   pp.query("debug", m_debug);
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
+  pp.get("min_dt", m_minDt);
+  pp.get("max_dt", m_maxDt);
   pp.get("advection", m_mobile);
   pp.get("diffusion", m_diffusive);
 
@@ -327,7 +329,15 @@ AdvectionDiffusionStepper::computeDt()
 
   switch (m_integrator) {
   case Integrator::Heun: {
-    dt = cfl * m_solver->computeAdvectionDiffusionDt();
+    // Heun extrapolates to the faces without transverse terms, so its advective time step is the unsplit bound
+    // dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns. With diffusion,
+    // computeAdvectionDiffusionDt already uses the unsplit bound.
+    if (m_solver->isMobile() && !m_solver->isDiffusive()) {
+      dt = cfl * m_solver->CdrSolver::computeAdvectionDt();
+    }
+    else {
+      dt = cfl * m_solver->computeAdvectionDiffusionDt();
+    }
 
     break;
   }

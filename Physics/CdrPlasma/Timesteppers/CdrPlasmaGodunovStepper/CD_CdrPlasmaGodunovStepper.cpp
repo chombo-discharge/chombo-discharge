@@ -1536,9 +1536,33 @@ CdrPlasmaGodunovStepper::computeDt()
 
   Real dt = std::numeric_limits<Real>::max();
 
+  // The Euler and RK2 advection algorithms extrapolate to the faces without transverse terms, so their advective time
+  // step is the unsplit bound dx/sum(|v_d|) of CdrSolver. MUSCL extrapolates in time with the transverse terms and can
+  // use the solver's own bound (CdrCTU returns the CTU bound dx/max(|v_d|)).
+  const bool unsplit = (m_advectionSolver != AdvectionSolver::MUSCL);
+
+  auto solverAdvectionDt = [&](const RefCountedPtr<CdrSolver>& a_solver) -> Real {
+    return unsplit ? a_solver->CdrSolver::computeAdvectionDt() : a_solver->computeAdvectionDt();
+  };
+
+  auto solverAdvectionDiffusionDt = [&](const RefCountedPtr<CdrSolver>& a_solver) -> Real {
+    return (a_solver->isMobile() && !a_solver->isDiffusive()) ? solverAdvectionDt(a_solver)
+                                                              : a_solver->computeAdvectionDiffusionDt();
+  };
+
+  auto advectionDtAllSolvers = [&]() -> Real {
+    Real minDt = std::numeric_limits<Real>::max();
+
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      minDt = std::min(minDt, solverAdvectionDt(solverIt()));
+    }
+
+    return minDt;
+  };
+
   // First, figure out what the transport time step must be for explicit and explicit-implicit methods.
   if (m_diffusionAlgorithm == DiffusionAlgorithm::Explicit) {
-    const Real advectionDt = m_cdr->computeAdvectionDt();
+    const Real advectionDt = advectionDtAllSolvers();
     const Real diffusionDt = m_cdr->computeDiffusionDt();
 
     m_dtCFL = std::min(advectionDt, diffusionDt);
@@ -1557,7 +1581,7 @@ CdrPlasmaGodunovStepper::computeDt()
     }
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Implicit) {
-    m_dtCFL    = m_cdr->computeAdvectionDt();
+    m_dtCFL    = advectionDtAllSolvers();
     m_timeCode = TimeCode::Advection;
 
     dt = m_cfl * m_dtCFL;
@@ -1581,9 +1605,9 @@ CdrPlasmaGodunovStepper::computeDt()
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       solverDt.emplace_back(std::numeric_limits<Real>::max());
 
-      advectionDt.emplace_back(solverIt()->computeAdvectionDt());
+      advectionDt.emplace_back(solverAdvectionDt(solverIt()));
       diffusionDt.emplace_back(solverIt()->computeDiffusionDt());
-      advectionDiffusionDt.emplace_back(solverIt()->computeAdvectionDiffusionDt());
+      advectionDiffusionDt.emplace_back(solverAdvectionDiffusionDt(solverIt()));
     }
 
     // Next, run through the CDR solvers and switch to implicit diffusion for the solvers that satisfy the threshold.

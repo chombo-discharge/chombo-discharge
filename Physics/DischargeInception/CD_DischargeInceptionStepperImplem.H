@@ -1529,14 +1529,22 @@ DischargeInceptionStepper<P, F, C>::computeDt()
     // Restrict by ion solver
     if (m_ionTransport) {
       Real ionDt = std::numeric_limits<Real>::infinity();
+
+      // Euler and Heun extrapolate to the faces without transverse terms, so their advective time step is the unsplit
+      // bound dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns. With diffusion,
+      // computeAdvectionDiffusionDt already uses the unsplit bound.
+      const Real unsplitDt = (m_ionSolver->isMobile() && !m_ionSolver->isDiffusive())
+                               ? m_ionSolver->CdrSolver::computeAdvectionDt()
+                               : m_ionSolver->computeAdvectionDiffusionDt();
+
       switch (m_transportAlgorithm) {
       case TransportAlgorithm::Euler: {
-        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+        ionDt = m_cfl * unsplitDt;
 
         break;
       }
       case TransportAlgorithm::Heun: {
-        ionDt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+        ionDt = m_cfl * unsplitDt;
 
         break;
       }
