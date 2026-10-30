@@ -111,6 +111,16 @@ Multigrid interpolation is done using least squares reconstruction, as discussed
 The user can set the order, radius, and least squares weighting for this interpolation by setting ``AmrMesh.mg_interp_order``, ``AmrMesh.mg_interp_radius``, and ``AmrMesh.mg_interp_weight``.
 Note that specifying ``AmrMesh.mg_interp_radius`` > ``AmrMesh.eb_ghost`` is sure to lead to a run-time error (possibly a segfault).
 
+Cut-cell redistribution
+-----------------------
+
+The cut-cell stabilization of explicit updates (see :ref:`Chap:ExplicitDivergence`) is configured through ``AmrMesh``:
+
+* ``AmrMesh.redist_radius`` is the radius of the flux redistribution neighborhoods.
+  It must currently be 1; larger radii do not conserve mass across refinement boundaries (chombo-discharge issue #763).
+* ``AmrMesh.srd_order`` is the reconstruction order of state redistribution, 0 (constant) or 2 (linear, limited).
+* ``AmrMesh.srd_target_volfrac`` is the target volume fraction of state redistribution: cut cells with smaller volume fractions are merged with neighbors.
+
 Interpolation near the EB
 -------------------------
 
