@@ -25,7 +25,6 @@ AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radi
 AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
 AmrMesh.srd_order               = 2              ## State redistribution: reconstruction order, 0 (constant) or 2 (linear, limited)
 AmrMesh.srd_target_volfrac      = 0.5            ## State redistribution: cut cells with smaller volume fractions are merged
 AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
@@ -94,7 +93,6 @@ FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: 'phi'
 FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
@@ -215,8 +213,8 @@ DischargeInceptionStepper.step_dK         = 1.0     ## Desired increase in K for
 DischargeInceptionStepper.limit_max_K     = 15.0    ## Limit the maximum K-value
 
 # Dynamic mode
-DischargeInceptionStepper.ion_tarnsport     = true    ## Turn on/off ion transport
-DischargeInceptionStepper.advection_alg     = heun    ## Advection algorithm. 'euler', 'heun' or 'imex'
+DischargeInceptionStepper.ion_transport     = true    ## Turn on/off ion transport
+DischargeInceptionStepper.transport_alg     = heun    ## Transport algorithm. 'euler', 'heun', or 'imex'
 DischargeInceptionStepper.cfl               = 0.8     ## CFL time step for dynamic mode
 DischargeInceptionStepper.min_dt            = 0.0     ## Minimum permitted time step
 DischargeInceptionStepper.max_dt            = 1E99    ## Maximum permitted time step

@@ -25,7 +25,6 @@ AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radi
 AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
 AmrMesh.srd_order               = 2              ## State redistribution: reconstruction order, 0 (constant) or 2 (linear, limited)
 AmrMesh.srd_target_volfrac      = 0.5            ## State redistribution: cut cells with smaller volume fractions are merged
 AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
@@ -72,7 +71,6 @@ Driver.refine_dielectrics           = 0                   ## Refine dielectric s
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-CdrGodunov.stochastic_diffusion     = false                     ## Stochastic advection. 'true' or 'false'
 CdrGodunov.seed                     = -1                        ## Seed. Random seed with seed < 0
 CdrGodunov.bc.x.lo                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.bc.x.hi                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
