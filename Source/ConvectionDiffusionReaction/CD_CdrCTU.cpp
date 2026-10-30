@@ -20,7 +20,8 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrCTU::CdrCTU() : m_limiter(Limiter::MonotonizedCentral), m_useCTU(true)
+CdrCTU::CdrCTU()
+  : m_limiter(Limiter::MonotonizedCentral), m_useCTU(true), m_ebInflowState(false), m_fluxCorrection(false)
 {
   CH_TIME("CdrCTU::CdrCTU()");
 
@@ -90,6 +91,7 @@ CdrCTU::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   CdrMultigrid::preRegrid(a_lbase, a_oldFinestLevel);
   m_grownVofIter.resize(0);
+  m_levelCells.resize(0);
 }
 
 void
@@ -115,6 +117,7 @@ CdrCTU::defineIterators()
   const int finest = m_amr->getFinestLevel();
 
   m_grownVofIter.resize(1 + finest);
+  m_levelCells.resize(1 + finest);
 
   for (int lvl = 0; lvl <= finest; lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -128,6 +131,16 @@ CdrCTU::defineIterators()
       const EBISBox& ebisbox  = ebisl[dit()];
       (*m_grownVofIter[lvl])[dit()].define(ebisbox.getIrregIVS(grownBox), ebisbox.getEBGraph());
     }
+
+    // 1 in the cells of this level's grids, ghost cells covered by other boxes included, and 0 elsewhere.
+    m_levelCells[lvl] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, IntVect::Unit));
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      (*m_levelCells[lvl])[dit()].setVal(0.0);
+      (*m_levelCells[lvl])[dit()].setVal(1.0, dbl[dit()], 0, 1);
+    }
+
+    m_levelCells[lvl]->exchange();
   }
 }
 
@@ -228,6 +241,8 @@ CdrCTU::parseSlopeLimiter()
   std::string slopeLimiter;
   pp.get("use_ctu", m_useCTU);
   pp.get("slope_limiter", slopeLimiter);
+  pp.get("eb_inflow_state", m_ebInflowState);
+  pp.get("flux_correction", m_fluxCorrection);
 
   if (slopeLimiter == "none") {
     m_limiter = Limiter::None;
@@ -247,11 +262,11 @@ CdrCTU::parseSlopeLimiter()
 }
 
 void
-CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt)
+CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt, const Real a_dt)
 {
-  CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)");
+  CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, Real, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, Real, Real)" << endl;
   }
 
   const int numberOfGhostCells = m_amr->getNumberOfGhostCells();
@@ -269,6 +284,22 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
 
   m_amr->conservativeAverage(phi, m_realm, m_phase);
   m_amr->interpGhostPwl(phi, m_realm, m_phase);
+
+  // The EB inflow state on the faces of the grids needs the EB flux in the ghost cells.
+  if (m_ebInflowState) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      m_ebFlux[lvl]->exchange();
+    }
+  }
+
+  // With flux correction, the first-order states (zero slopes) are kept for the correction.
+  const bool useFluxCorrection = m_fluxCorrection && a_dt > 0.0 && m_limiter != Limiter::None;
+
+  EBAMRFluxData facePhiLow;
+
+  if (useFluxCorrection) {
+    m_amr->allocate(facePhiLow, m_realm, m_phase, m_nComp);
+  }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -304,8 +335,33 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
         this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, din);
       }
 
-      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, din, a_dt);
+      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, din, a_extrapDt);
+
+      if (m_ebInflowState && a_dt > 0.0) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          this->ebInflowState(facePhi[dir], cellVel, faceVel[dir], cellBox, dir, lvl, din, a_dt);
+        }
+      }
+
+      if (useFluxCorrection) {
+        EBFluxFAB& facePhiFirst = (*facePhiLow[lvl])[din];
+        EBCellFAB  zeroSlopes(ebisbox, grownBox, SpaceDim);
+
+        zeroSlopes.setVal(0.0);
+
+        this->upwind(facePhiFirst, zeroSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, din, a_extrapDt);
+
+        if (m_ebInflowState) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            this->ebInflowState(facePhiFirst[dir], cellVel, faceVel[dir], cellBox, dir, lvl, din, a_dt);
+          }
+        }
+      }
     }
+  }
+
+  if (useFluxCorrection) {
+    this->fluxCorrection(a_facePhi, facePhiLow, phi, a_dt);
   }
 }
 
@@ -485,6 +541,24 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         dwr = dwl;
       }
 
+      // Where the flow leaves the EB, the neighbour on the side that the EB closes (no face, and not the domain
+      // boundary) is the EB inflow state, one cell away, instead of a copy of the difference on the other side.
+      const bool closedLeft = (ebisbox.numFaces(vof, dir, Side::Lo) == 0) && !onLoSide;
+      const bool closedRigh = (ebisbox.numFaces(vof, dir, Side::Hi) == 0) && !onHiSide;
+
+      if (m_ebInflowState && ((closedLeft && hasFacesRigh) || (closedRigh && hasFacesLeft))) {
+        Real phiEB = 0.0;
+
+        if (this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit)) {
+          if (closedLeft) {
+            dwl = a_cellPhi(vof, m_comp) - phiEB;
+          }
+          else {
+            dwr = phiEB - a_cellPhi(vof, m_comp);
+          }
+        }
+      }
+
       // Limit the slopes.
       switch (m_limiter) {
       case Limiter::None: {
@@ -584,6 +658,88 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     bndryFacesLo &= a_cellBox;
     bndryFacesHi &= a_cellBox;
 
+    // In 3D, the corner term of the corner transport upwind method,
+    //
+    //    (dt/dx)^2 * |v_t| * |v_s| * (phi - phi_t - phi_s + phi_ts)/3,
+    //
+    // with t and s the transverse directions and phi_t, phi_s, phi_ts the upwind neighbours in t, in s, and across the
+    // corner. Summed over the three face directions, it completes the update to the product of one-dimensional upwind
+    // updates. Without it the update is unstable for Courant numbers above 1/2 in all three directions.
+    auto regularCornerTerm = [&](const IntVect& a_cell) -> Real {
+      Real term = 0.0;
+
+#if CH_SPACEDIM == 3
+      const int  t  = (dir + 1) % 3;
+      const int  s  = (dir + 2) % 3;
+      const Real vt = regCellVel(a_cell, t);
+      const Real vs = regCellVel(a_cell, s);
+
+      if (vt != 0.0 && vs != 0.0) {
+        const IntVect et = (vt > 0.0) ? -BASISV(t) : BASISV(t);
+        const IntVect es = (vs > 0.0) ? -BASISV(s) : BASISV(s);
+
+        // Covered cells have no state, so the term is left out next to them.
+        if (ebisbox.isCovered(a_cell + et) || ebisbox.isCovered(a_cell + es) || ebisbox.isCovered(a_cell + et + es)) {
+          return term;
+        }
+
+        term = dtx * dtx * std::abs(vt) * std::abs(vs) *
+               (regStates(a_cell, m_comp) - regStates(a_cell + et, m_comp) - regStates(a_cell + es, m_comp) +
+                regStates(a_cell + et + es, m_comp)) /
+               3.0;
+      }
+#endif
+
+      return term;
+    };
+
+    // The upwind neighbour of a cut cell in a direction, if it is reached through a single face inside the domain.
+    auto upwindNeighbour =
+      [&](VolIndex& a_neighbour, const VolIndex& a_vof, const int a_dir, const Real a_vel) -> bool {
+      const Side::LoHiSide side = (a_vel > 0.0) ? Side::Lo : Side::Hi;
+      const IntVect        iv   = a_vof.gridIndex() + ((a_vel > 0.0) ? -BASISV(a_dir) : BASISV(a_dir));
+
+      if (!a_domain.contains(iv)) {
+        return false;
+      }
+
+      const Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, a_dir, side);
+
+      if (faces.size() != 1) {
+        return false;
+      }
+
+      a_neighbour = faces[0].getVoF(side);
+
+      return true;
+    };
+
+    // The corner term in cut cells. It is left out where the upwind neighbours cannot be reached.
+    auto irregularCornerTerm = [&](const VolIndex& a_vof) -> Real {
+      Real term = 0.0;
+
+#if CH_SPACEDIM == 3
+      const int  t  = (dir + 1) % 3;
+      const int  s  = (dir + 2) % 3;
+      const Real vt = a_cellVel(a_vof, t);
+      const Real vs = a_cellVel(a_vof, s);
+
+      VolIndex vofT;
+      VolIndex vofS;
+      VolIndex vofTS;
+
+      if (vt != 0.0 && vs != 0.0 && upwindNeighbour(vofT, a_vof, t, vt) && upwindNeighbour(vofS, a_vof, s, vs) &&
+          upwindNeighbour(vofTS, vofT, s, vs)) {
+        term = dtx * dtx * std::abs(vt) * std::abs(vs) *
+               (a_cellPhi(a_vof, m_comp) - a_cellPhi(vofT, m_comp) - a_cellPhi(vofS, m_comp) +
+                a_cellPhi(vofTS, m_comp)) /
+               3.0;
+      }
+#endif
+
+      return term;
+    };
+
     // Regular upwind kernel. This also includes the transverse terms; also not that we call this on the
     // face-centered box so for a grid face with index iv, the cell on the left side of the face has index
     // iv - BASISV(dir)
@@ -625,6 +781,9 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
         }
       }
 
+      primLeft += regularCornerTerm(cellLeft);
+      primRigh += regularCornerTerm(cellRigh);
+
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv, m_comp);
       const Real& faceVel = regFaceVel(iv, m_comp);
@@ -640,13 +799,35 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
       }
     };
 
+    // Transverse (CTU) terms of a cell, as in the regular kernel, added to an extrapolated state.
+    auto addTransverseTerms = [&](Real& a_prim, const IntVect& a_cell) -> void {
+      for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
+        if (transverseDir != dir) {
+          Real slope = 0.0;
+
+          if (regCellVel(a_cell, transverseDir) < 0.0) {
+            slope = regStates(a_cell + BASISV(transverseDir), m_comp) - regStates(a_cell, m_comp);
+          }
+          else if (regCellVel(a_cell, transverseDir) > 0.0) {
+            slope = regStates(a_cell, m_comp) - regStates(a_cell - BASISV(transverseDir), m_comp);
+          }
+
+          a_prim -= 0.5 * dtx * regCellVel(a_cell, transverseDir) * slope;
+        }
+      }
+
+      a_prim += regularCornerTerm(a_cell);
+    };
+
     // Kernel for cells abutting the boundaries on the low end. Note that the input box
     // to this kernel is a cell-centered box, so the input IntVect is the
     // both the face index and the cell index to the right of the face.
     auto boundaryKernelLo = [&](const IntVect& iv) -> void {
-      // Normal extrapolation
+      // Normal extrapolation from the cell to the right of the face, and the transverse terms.
       Real primLeft = 0.0;
-      Real primRigh = regStates(iv, m_comp) - 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
+      Real primRigh = regStates(iv, m_comp) - 0.5 * std::min(1.0, 1.0 + regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
+
+      addTransverseTerms(primRigh, iv);
 
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv, m_comp);
@@ -668,9 +849,11 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     // IntVect + BASISV(dir)
     // both the face index and the cell index to the right of the face.
     auto boundaryKernelHi = [&](const IntVect& iv) -> void {
-      // Normal extrapolation
+      // Normal extrapolation from the cell to the left of the face, and the transverse terms.
       Real primLeft = regStates(iv, m_comp) + 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
       Real primRigh = 0.0;
+
+      addTransverseTerms(primLeft, iv);
 
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv + BASISV(dir), m_comp);
@@ -788,6 +971,9 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
             }
           }
+
+          primLeft += irregularCornerTerm(vofLeft);
+          primRigh += irregularCornerTerm(vofRigh);
         }
 
         // Solve the Riemann problem.
@@ -821,6 +1007,269 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesHi, boundaryKernelHi);
     BoxLoops::loop(irregFaces, irregularKernel);
   }
+}
+
+void
+CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
+                       const EBAMRFluxData& a_facePhiLow,
+                       const EBAMRCellData& a_cellPhi,
+                       const Real           a_dt) noexcept
+{
+  CH_TIME("CdrCTU::fluxCorrection");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::fluxCorrection" << endl;
+  }
+
+  // Fraction R of the correction that may take mass from each cell. It is 1 where nothing is limited, also in ghost
+  // cells that no box owns.
+  EBAMRCellData fraction;
+  m_amr->allocate(fraction, m_realm, m_phase, 1, 1);
+  DataOps::setValue(fraction, 1.0);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const Real               dtx   = a_dt / m_amr->getDx()[lvl];
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        box     = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
+
+      EBCellFAB&             frac    = (*fraction[lvl])[din];
+      const EBCellFAB&       phi     = (*a_cellPhi[lvl])[din];
+      const EBFluxFAB&       phiHigh = (*a_facePhi[lvl])[din];
+      const EBFluxFAB&       phiLow  = (*a_facePhiLow[lvl])[din];
+      const EBFluxFAB&       faceVel = (*m_faceVelocity[lvl])[din];
+      const BaseIVFAB<Real>& ebFlux  = (*m_ebFlux[lvl])[din];
+
+      BaseFab<Real>&       fracReg = frac.getSingleValuedFAB();
+      const BaseFab<Real>& phiReg  = phi.getSingleValuedFAB();
+
+      // Regular cells: the first-order update, and the mass that the correction takes out of the cell. Cut cells are
+      // done again below with their volume and area fractions and the EB flux.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        Real netLow  = 0.0;
+        Real removed = 0.0;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const BaseFab<Real>& fh = phiHigh[dir].getSingleValuedFAB();
+          const BaseFab<Real>& fl = phiLow[dir].getSingleValuedFAB();
+          const BaseFab<Real>& fv = faceVel[dir].getSingleValuedFAB();
+
+          const IntVect hi = iv + BASISV(dir);
+
+          netLow += fv(hi, m_comp) * fl(hi, m_comp) - fv(iv, m_comp) * fl(iv, m_comp);
+          removed += std::max(0.0, fv(hi, m_comp) * (fh(hi, m_comp) - fl(hi, m_comp)));
+          removed += std::max(0.0, -fv(iv, m_comp) * (fh(iv, m_comp) - fl(iv, m_comp)));
+        }
+
+        const Real massLow = std::max(0.0, phiReg(iv, m_comp) - dtx * netLow);
+
+        removed *= dtx;
+
+        fracReg(iv, m_comp) = (removed > massLow) ? massLow / removed : 1.0;
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        Real netLow  = ebFlux(vof, m_comp) * ebisbox.bndryArea(vof);
+        Real removed = 0.0;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int               isign = sign(sit());
+            const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+
+            for (int iface = 0; iface < faces.size(); iface++) {
+              const FaceIndex& face = faces[iface];
+              const Real       area = ebisbox.areaFrac(face);
+              const Real       v    = faceVel[dir](face, m_comp);
+
+              netLow += isign * area * v * phiLow[dir](face, m_comp);
+              removed += std::max(0.0, isign * area * v * (phiHigh[dir](face, m_comp) - phiLow[dir](face, m_comp)));
+            }
+          }
+        }
+
+        const Real massLow = std::max(0.0, ebisbox.volFrac(vof) * phi(vof, m_comp) - dtx * netLow);
+
+        removed *= dtx;
+
+        frac(vof, m_comp) = (removed > massLow) ? massLow / removed : 1.0;
+      };
+
+      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+
+    fraction[lvl]->exchange();
+
+    // The corrected face states. The correction on a face takes mass from the cell on one side and is limited by the
+    // fraction of that cell.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        box     = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
+
+      const BaseFab<Real>& fracReg = (*fraction[lvl])[din].getSingleValuedFAB();
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        BaseFab<Real>&       fh = (*a_facePhi[lvl])[din][dir].getSingleValuedFAB();
+        const BaseFab<Real>& fl = (*a_facePhiLow[lvl])[din][dir].getSingleValuedFAB();
+        const BaseFab<Real>& fv = (*m_faceVelocity[lvl])[din][dir].getSingleValuedFAB();
+
+        auto faceKernel = [&](const IntVect& iv) -> void {
+          const IntVect left = iv - BASISV(dir);
+
+          if (ebisbox.isMultiValued(left) || ebisbox.isMultiValued(iv)) {
+            return;
+          }
+
+          const Real correction = fh(iv, m_comp) - fl(iv, m_comp);
+          const Real flux       = fv(iv, m_comp) * correction;
+
+          Real c = 1.0;
+
+          if (flux > 0.0) {
+            c = fracReg(left, m_comp);
+          }
+          else if (flux < 0.0) {
+            c = fracReg(iv, m_comp);
+          }
+
+          fh(iv, m_comp) = fl(iv, m_comp) + c * correction;
+        };
+
+        BoxLoops::loop(surroundingNodes(box, dir), faceKernel);
+      }
+    }
+  }
+}
+
+RealVect
+CdrCTU::getEbNormalIntoFluid(const VolIndex& a_vof, const EBISBox& a_ebisbox) const noexcept
+{
+  RealVect n = a_ebisbox.normal(a_vof);
+
+  // Orient the normal from the EB centroid towards the volume centroid.
+  if (n.dotProduct(a_ebisbox.centroid(a_vof) - a_ebisbox.bndryCentroid(a_vof)) < 0.0) {
+    n = -n;
+  }
+
+  return n;
+}
+
+bool
+CdrCTU::getEbInflowState(Real&            a_phiEB,
+                         const VolIndex&  a_vof,
+                         const EBISBox&   a_ebisbox,
+                         const int        a_level,
+                         const DataIndex& a_dit) const noexcept
+{
+  // The EB flux is only known in cells of this level's grids, not in ghost cells on refinement boundaries.
+  if (a_ebisbox.bndryArea(a_vof) <= 0.0 || (*m_levelCells[a_level])[a_dit](a_vof.gridIndex(), 0) <= 0.0) {
+    return false;
+  }
+
+  const RealVect   n       = this->getEbNormalIntoFluid(a_vof, a_ebisbox);
+  const EBCellFAB& cellVel = (*m_cellVelocity[a_level])[a_dit];
+
+  RealVect v;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    v[dir] = cellVel(a_vof, dir);
+  }
+
+  const Real vn = v.dotProduct(n);
+
+  if (vn <= 0.0) {
+    return false;
+  }
+
+  a_phiEB = -(*m_ebFlux[a_level])[a_dit](a_vof, m_comp) / vn;
+
+  return true;
+}
+
+void
+CdrCTU::ebInflowState(EBFaceFAB&       a_facePhi,
+                      const EBCellFAB& a_cellVel,
+                      const EBFaceFAB& a_faceVel,
+                      const Box&       a_cellBox,
+                      const int        a_dir,
+                      const int        a_level,
+                      const DataIndex& a_dit,
+                      const Real       a_dt) noexcept
+{
+  CH_TIME("CdrCTU::ebInflowState");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::ebInflowState" << endl;
+  }
+
+  const Real     dx      = m_amr->getDx()[a_level];
+  const EBISBox& ebisbox = a_cellVel.getEBISBox();
+  const Box      faceBox = surroundingNodes(a_cellBox, a_dir);
+
+  // The cut cells of the box and its first layer of ghost cells, which are upwind of the faces of the box.
+  VoFIterator& vofit = (*m_grownVofIter[a_level])[a_dit];
+
+  auto kernel = [&](const VolIndex& vof) -> void {
+    Real phiEB = 0.0;
+
+    // Only where the flow leaves the EB.
+    if (!this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit)) {
+      return;
+    }
+
+    const RealVect n = this->getEbNormalIntoFluid(vof, ebisbox);
+    RealVect       v;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      v[dir] = a_cellVel(vof, dir);
+    }
+
+    const Real vn = v.dotProduct(n);
+
+    for (SideIterator sit; sit.ok(); ++sit) {
+      const Side::LoHiSide side  = sit();
+      const int            isign = sign(side);
+
+      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, a_dir, side);
+
+      for (int iface = 0; iface < faces.size(); iface++) {
+        const FaceIndex& face = faces[iface];
+
+        if (face.isBoundary() || !faceBox.contains(face.gridIndex(Side::Hi))) {
+          continue;
+        }
+
+        // Outgoing faces only.
+        if (isign * a_faceVel(face, m_comp) <= 0.0) {
+          continue;
+        }
+
+        // Face centroid relative to the cell center, and its distance from the EB plane, in units of dx.
+        RealVect xf = ebisbox.centroid(face);
+
+        xf[a_dir] = 0.5 * isign;
+
+        const Real s   = std::max(0.0, (xf - ebisbox.bndryCentroid(vof)).dotProduct(n));
+        const Real tEB = s * dx / vn;
+        const Real f   = std::min(1.0, tEB / a_dt);
+
+        a_facePhi(face, m_comp) = f * a_facePhi(face, m_comp) + (1.0 - f) * phiEB;
+      }
+    }
+  };
+
+  BoxLoops::loop(vofit, kernel);
 }
 
 Real

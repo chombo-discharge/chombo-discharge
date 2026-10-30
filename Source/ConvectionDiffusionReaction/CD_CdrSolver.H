@@ -170,6 +170,9 @@ public:
    * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.
    * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
    * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
+   * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divJ,
+   * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be
+   * used with this time step.
    * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
@@ -180,6 +183,7 @@ public:
   computeDivJ(EBAMRCellData& a_divJ,
               EBAMRCellData& a_phi,
               const Real     a_extrapDt,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) = 0;
@@ -194,6 +198,9 @@ public:
    * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.
    * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
    * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
+   * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divF,
+   * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be
+   * used with this time step.
    * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
    * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)
@@ -204,6 +211,7 @@ public:
   computeDivF(EBAMRCellData& a_divF,
               EBAMRCellData& a_phi,
               const Real     a_extrapDt,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) = 0;
@@ -973,9 +981,10 @@ protected:
    * @param[out] a_facePhi  Phi on faces
    * @param[in]  a_phi      Phi on cell center
    * @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
+   * @param[in]  a_dt       Time step of the update that the face states enter, or 0 if they enter no update.
    */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt, const Real a_dt) = 0;
 
   /**
    * @brief Set up face-centered advection flux.

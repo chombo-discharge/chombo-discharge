@@ -2415,7 +2415,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
 
     // Compute velocity on faces and EBs. The data is currently face-centered.
     this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0);
+    this->advectToFaces(m_faceStates, m_phi, 0.0, 0.0);
 
     DataOps::setValue(scratch, 0.0); // Used to store sum(alpha*v)
 

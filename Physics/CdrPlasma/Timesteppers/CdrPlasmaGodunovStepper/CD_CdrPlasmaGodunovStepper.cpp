@@ -1226,7 +1226,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       switch (m_advectionSolver) {
       case AdvectionSolver::Euler: {
         // Advance is just phi^(k+1) = phi^k - dt*div(F)
-        solver->computeDivF(scratch, phi, 0.0, false, true, true);
+        solver->computeDivF(scratch, phi, 0.0, a_dt, false, true, true);
 
         DataOps::incr(phi, scratch, -a_dt);
 
@@ -1234,13 +1234,13 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
       case AdvectionSolver::RK2: {
         // Use Heun's method.
-        solver->computeDivF(scratch, phi, 0.0, false, true, true);
+        solver->computeDivF(scratch, phi, 0.0, a_dt, false, true, true);
 
         // Make phi = phi^k  - dt * div(F)
         DataOps::incr(phi, scratch, -a_dt);
 
         // Compute divF(phi)
-        solver->computeDivF(scratch2, phi, 0.0, false, true, true);
+        solver->computeDivF(scratch2, phi, 0.0, a_dt, false, true, true);
 
         // Make phi = phi^k + 0.5*dt * (scratch1 + scratch2)
         DataOps::incr(phi, scratch, 0.5 * a_dt);
@@ -1250,7 +1250,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
       case AdvectionSolver::MUSCL: {
         // Advance is phi^(k+1) = phi^k - dt*div(F). Almost like the Euler method except for the transverse slopes.
-        solver->computeDivF(scratch, phi, a_dt, false, true, true);
+        solver->computeDivF(scratch, phi, a_dt, a_dt, false, true, true);
 
         DataOps::incr(phi, scratch, -a_dt);
 

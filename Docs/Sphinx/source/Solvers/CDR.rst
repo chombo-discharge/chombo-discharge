@@ -48,7 +48,7 @@ These approximations are encapsulated by the following functions:
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of functions responsible for calculating approximations to divergence operators.
    :language: c++
-   :lines: 164-227
+   :lines: 164-235
    :dedent: 2
 
 These functions are not implemented in ``CdrSolver``, but in subclasses.
@@ -146,7 +146,7 @@ The user will need to call the function
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 229-240
+   :lines: 237-248
    :dedent: 2
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
@@ -172,8 +172,9 @@ The function signature for explicit advection (``computeDivF``) was given in :nu
 The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and the result is put in ``a_divF`` using the procedure outlined above.
 In the simplest case, these fluxes are simply calculated using an upwind rule, potentially extrapolated with slope-limiters from the cell-center.
 In more complex cases, we use both the normal and transverse slopes in a cell.
-The argument ``a_extrapDt`` is the time step size.
-It is not needed in a method-of-lines context, but it is used in e.g. :ref:`Chap:CdrCTU` for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers). 
+The argument ``a_extrapDt`` is the time step that the face states are extrapolated over.
+It is not needed in a method-of-lines context (pass 0), but it is used in e.g. :ref:`Chap:CdrCTU` for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers).
+The argument ``a_dt`` is the time step of the update that the result is used in, which the flux correction in :ref:`Chap:CdrCTU` needs.
 
 For example, in order to perform an advective advance with the explicit Euler rule over a time step :math:`\Delta t`, one would perform the following:
 
@@ -183,8 +184,8 @@ For example, in order to perform an advective advance with the explicit Euler ru
 
    EBAMRCellData& phi  = solver->getPhi();                 // Cell-centered state
    EBAMRCellData& divF = solver->getScratch();             // Scratch storage in solver
-   solver->computeDivF(divF, phi, 0.0, false, true, true); // Computes divF including BCs
-   DataOps:incr(phi, divF, -dt);                           // Makes phi -> phi - dt*divF
+   solver->computeDivF(divF, phi, 0.0, dt, false, true, true); // Computes divF including BCs
+   DataOps:incr(phi, divF, -dt);                               // Makes phi -> phi - dt*divF
 
 .. _Chap:ExplicitDiffusion:
    
@@ -224,8 +225,8 @@ For example, in order to perform an advection-diffusion advance over a time step
 
    EBAMRCellData& phi  = solver->getPhi();                 // Cell-centered state
    EBAMRCellData& divJ = solver->getScratch();             // Scratch storage in solver
-   solver->computeDivJ(divJ, phi, 0.0, false, true, true); // Computes divJ including BCs
-   DataOps:incr(phi, divJ, -dt);                           // makes phi -> phi - dt*divJ
+   solver->computeDivJ(divJ, phi, 0.0, dt, false, true, true); // Computes divJ including BCs
+   DataOps:incr(phi, divJ, -dt);                               // makes phi -> phi - dt*divJ
 
 Often, time integrators have the option of using implicit or explicit diffusion.
 If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``computeDivJ`` rather than separately calling ``computeDivF`` and ``computeDivD``.
@@ -279,7 +280,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 334-341
+   :lines: 338-349
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
@@ -330,6 +331,11 @@ The transverse slopes are given by
    \phi_{i,j}^n - \phi_{i,j-1}^n, & v_{i,j}^n > 0 \\   
    \end{cases}
 
+In 3D, each face state also includes the corner term :math:`\frac{1}{3}\left(\frac{\Delta t}{\Delta x}\right)^2|v_t||v_s|\left(\Delta^t\Delta^s\phi\right)`, where :math:`t` and :math:`s` are the two transverse directions and :math:`\Delta^t\Delta^s\phi` is the upwind mixed difference.
+For constant velocity, it completes the update to the product of the one-dimensional upwind updates, which is stable up to the CTU time step below.
+Without it, the 3D update is unstable for Courant numbers above 1/2 in all three directions.
+The term is left out next to covered cells.
+
 .. _Chap:CTUSlopes:
 
 Slopes
@@ -357,8 +363,31 @@ where for the superbee slope we have :math:`\Delta_1 = \text{minmod}\left(\Delta
 
 .. note::
 
-   When using transverse slopes, monotonicity is not guaranteed for the CTU discretization.
-   If transverse slopes are turned off, however, the scheme is guaranteed to be monotone. 
+   With slopes, the CTU update is not guaranteed to be monotone or positive.
+   For example, a cell with empty upwind neighbors on a diagonal flow becomes negative when the Courant number exceeds 1/2 in two directions, i.e. for CFL numbers above :math:`1/\sqrt{2}` in 2D with the CTU time step.
+   Flux correction (below) keeps the update non-negative.
+
+Embedded boundaries
+___________________
+
+Where the flow leaves the EB, the EB is an inflow boundary with the state :math:`\phi_{\textrm{EB}} = -F_{\textrm{EB}}/(\mathbf{v}\cdot\mathbf{n})`, where :math:`F_{\textrm{EB}}` is the EB flux (positive out of the fluid) and :math:`\mathbf{n}` the EB normal pointing into the fluid.
+With ``CdrCTU.eb_inflow_state = true``, this enters the discretization in two places:
+
+* The slope of a cut cell on a side that the EB closes uses :math:`\phi_{\textrm{EB}}` as the neighbor, instead of the difference on the other side.
+* The fluid that crosses an outgoing face of a cut cell during a time step comes from the cell only until the flow has carried the EB (a plane through the EB centroid) to the face; after that it is fluid that entered through the EB.
+  The face state is the time average over the step, which limits the outflow of a cut cell to its content when nothing flows in through the EB.
+
+Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell redistribution then has to absorb.
+
+Flux correction
+_______________
+
+With ``CdrCTU.flux_correction = true``, the face states are corrected so that the advective update stays non-negative (flux-corrected transport, limited to positivity).
+The first-order CTU states (no slopes) give a non-negative update.
+The difference between the second-order and the first-order states is a correction which can make the update negative.
+For each cell, the corrections that take mass out of it are added up and limited to the mass that the first-order update leaves in the cell.
+The correction on each face is scaled by the limiting factor of the cell that it takes mass from, so the update stays conservative.
+Ghost cells on refinement boundaries and multi-valued cells are not limited.
 
 .. _Chap:CTUStep:
 
@@ -374,6 +403,9 @@ The stability region for the donor-cell and corner transport upwind methods are:
    \text{CTU}: \Delta t \leq \frac{\Delta x}{\max\left(|v_x|,|v_y|,|v_z|\right)}
 
 Note that when the flow is diagonal to the grid, i.e., :math:`|v_x| = |v_y| = |v_z|`, the CTU can use a time step that is three times larger than for the donor-cell method.
+
+The CTU time step requires the transverse terms, which are only present when the face states are extrapolated in time (``a_extrapDt`` > 0).
+Integrators that do not extrapolate in time, such as the Heun method in ``AdvectionDiffusion`` or the Euler and RK2 advection algorithms in ``CdrPlasma``, use the donor-cell time step.
 
 Class options
 _____________
@@ -393,6 +425,9 @@ We do not discuss all options here, but note the following:
   In particular, ``gmg_reflux_free`` (default ``false``) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
   The two formulations are mathematically equivalent.
 * ``CdrCTU.plt_vars`` indicate which variables are added to plot files.
+* ``CdrCTU.eb_inflow_state`` and ``CdrCTU.flux_correction`` turn on the EB inflow state and the flux correction described above.
+* ``CdrCTU.bc.*`` set the domain boundary conditions.
+  With ``outflow``, the flux through a boundary face is the computed (upwind) advective flux where it leaves the domain; nothing flows in, and there is no diffusive flux.
 
 .. _Chap:CdrGodunov:
 
@@ -423,7 +458,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 625-693
+   :lines: 633-701
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
