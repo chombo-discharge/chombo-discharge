@@ -354,6 +354,13 @@ CdrSolver::defineRedistribution()
   // The state redistribution is shared by the solvers of a realm and phase, and AmrMesh rebuilds it on regrids.
   if (m_whichRedistribution == Redistribution::State) {
     m_redistribution = m_amr->getStateRedistribution(m_realm, m_phase);
+
+    // AmrMesh builds it in regridOperators, which must run before the solver allocates.
+    if (m_redistribution.isNull()) {
+      MayDay::Abort(
+        "CdrSolver::defineRedistribution -- the state redistribution is not built; AmrMesh::regridOperators "
+        "must run before CdrSolver::allocate");
+    }
   }
   else {
     m_redistribution = RefCountedPtr<EBRedistribution>(
@@ -492,7 +499,9 @@ CdrSolver::redistributeDivergence(EBAMRCellData& a_divG, const EBAMRCellData& a_
     pout() << m_name + "::redistributeDivergence" << endl;
   }
 
-  CH_assert(!m_redistribution.isNull());
+  if (m_redistribution.isNull()) {
+    MayDay::Abort("CdrSolver::redistributeDivergence -- the cut-cell stabilization is not defined");
+  }
 
   m_redistribution->redistribute(a_divG, a_phi, a_dt);
 }

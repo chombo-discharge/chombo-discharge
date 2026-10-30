@@ -226,8 +226,12 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
 
     LevelData<FArrayBox> fineCoverage(dblCoFi, 1, IntVect::Zero);
 
-    for (DataIterator ditCoFi = dblCoFi.dataIterator(); ditCoFi.ok(); ++ditCoFi) {
-      fineCoverage[ditCoFi()].setVal(1.0);
+    const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+    const int           nboxCoFi = ditCoFi.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+      fineCoverage[ditCoFi[mybox]].setVal(1.0);
     }
 
     fineCoverage.copyTo(coveredByFiner);

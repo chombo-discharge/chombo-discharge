@@ -2282,7 +2282,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(EBAMRCellData& a_semiI
     }
 
     // Update the space charge density arising from the update phi^dagger = phi^k + dt * div(D*grad(phi^k)), with the
-    // diffusive term stabilized on its own.
+    // diffusive term stabilized on its own. stepEulerMaruyamaCDR stabilizes the advective and diffusive terms together,
+    // which with state redistribution is not the same as stabilizing them separately: the diffusive part of the update
+    // differs from the one that the field solve sees by the difference of the stabilizations. Hybrid (volume)
+    // redistribution is linear, so there the two agree up to round-off.
     if (Z != 0) {
       DataOps::incr(a_semiImplicitRhoCDR, phi, 1.0 * Z);
       if (solver->isDiffusive()) {

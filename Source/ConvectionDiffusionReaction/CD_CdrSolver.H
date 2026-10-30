@@ -288,7 +288,8 @@ public:
    * @brief Compute a random gaussian white noise source term.
    * @param[out] a_noiseSource Source term
    * @param[in]  a_cellPhi     Cell-centered states
-   * @param[in]  a_dt          Time step of the update that the source is used in, see computeDivG.
+   * @param[in]  a_dt          Time step of the update that the source is used in, signed as in computeDivG: the
+   * result S is for the update phi - a_dt*S, so an update phi + dt*S passes -dt.
    * @note Used e.g. for fluctuating hydrodynamics.
    */
   virtual void

@@ -325,7 +325,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 340-347
+   :lines: 340-351
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
@@ -513,7 +513,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 671-739
+   :lines: 672-740
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
@@ -532,7 +532,7 @@ One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
    :language: c++
-   :lines: 1298-1314
+   :lines: 1414-1428
    :dedent: 2
 
 This would typically look something like this:
