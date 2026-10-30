@@ -48,8 +48,9 @@ var searchData=
   ['firstnongmg_45',['firstNonGmg',['../structEllipticSolverChain_1_1FallbackPolicy.html#abc7121adaa6364b33548cde4f8cc80f5',1,'EllipticSolverChain::FallbackPolicy']]],
   ['floor_46',['floor',['../classDataOps.html#a0d6fdc9968243ea2609ab9aa3479ab66',1,'DataOps::floor(EBAMRCellData &amp;a_lhs, const Real a_value, const Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;a_vofIter)'],['../classDataOps.html#af8a56feb2265ba07b04440c06f9b364b',1,'DataOps::floor(LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const Real a_value, LayoutData&lt; VoFIterator &gt; &amp;a_vofIter)'],['../classDataOps.html#a21d5f902898d00952d51181b3f08d80f',1,'DataOps::floor(EBAMRIVData &amp;a_lhs, const Real a_value, const Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;a_vofIter)'],['../classDataOps.html#ab4cc6cd639c7a769bca2c01c40a0277d',1,'DataOps::floor(LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_lhs, const Real a_value, LayoutData&lt; VoFIterator &gt; &amp;a_vofIter)']]],
   ['floormass_47',['floorMass',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a4a37fc3b1e41c797cb885083ab5d6faa',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper']]],
-  ['forcedt_48',['forceDt',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab4de1a40959a4745c1a62fb847e51ca1',1,'Physics::RadiativeTransfer::RadiativeTransferStepper']]],
-  ['forwardisotropicdiffusion_49',['forwardIsotropicDiffusion',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1f76f5b854241c5beeca90dff60a40be',1,'Physics::ItoKMC::ItoKMCPhysics']]],
-  ['fractionalfilereadascii_50',['fractionalFileReadASCII',['../namespaceDataParser.html#aa6a9db8ed9d53eb6d9bc4fe7698800ef',1,'DataParser']]],
-  ['freework_51',['freeWork',['../classEllipticSolverChain_1_1KrylovSolver.html#aff31d62ec51ac2f0ba3eaef59dd892d5',1,'EllipticSolverChain::KrylovSolver']]]
+  ['fluxcorrection_48',['fluxCorrection',['../classCdrCTU.html#a74bbf18900ea6af320e44de1b1bb63ee',1,'CdrCTU']]],
+  ['forcedt_49',['forceDt',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab4de1a40959a4745c1a62fb847e51ca1',1,'Physics::RadiativeTransfer::RadiativeTransferStepper']]],
+  ['forwardisotropicdiffusion_50',['forwardIsotropicDiffusion',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1f76f5b854241c5beeca90dff60a40be',1,'Physics::ItoKMC::ItoKMCPhysics']]],
+  ['fractionalfilereadascii_51',['fractionalFileReadASCII',['../namespaceDataParser.html#aa6a9db8ed9d53eb6d9bc4fe7698800ef',1,'DataParser']]],
+  ['freework_52',['freeWork',['../classEllipticSolverChain_1_1KrylovSolver.html#aff31d62ec51ac2f0ba3eaef59dd892d5',1,'EllipticSolverChain::KrylovSolver']]]
 ];

@@ -163,10 +163,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrMultigrid</b> 
 <tr class="memdesc:aac65554f8fac228c7bd492208f99346c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage.  <br /></td></tr>
 <tr class="memitem:a73ed7f3e655d15541fefdf6d621b8092" id="r_a73ed7f3e655d15541fefdf6d621b8092"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73ed7f3e655d15541fefdf6d621b8092">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel) override</td></tr>
 <tr class="memdesc:a73ed7f3e655d15541fefdf6d621b8092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <br /></td></tr>
-<tr class="memitem:ad87773680e2ab4d91afb8ef735a143eb" id="r_ad87773680e2ab4d91afb8ef735a143eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad87773680e2ab4d91afb8ef735a143eb">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad87773680e2ab4d91afb8ef735a143eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
-<tr class="memitem:ad192526154dfb1380b94fee1c032f828" id="r_ad192526154dfb1380b94fee1c032f828"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad192526154dfb1380b94fee1c032f828">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad192526154dfb1380b94fee1c032f828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
+<tr class="memitem:a95c953dc7200e7b04ed4cff83f7782d7" id="r_a95c953dc7200e7b04ed4cff83f7782d7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95c953dc7200e7b04ed4cff83f7782d7">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a95c953dc7200e7b04ed4cff83f7782d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
+<tr class="memitem:a4ed3e3980950c3cd694d64e3906123d1" id="r_a4ed3e3980950c3cd694d64e3906123d1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ed3e3980950c3cd694d64e3906123d1">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a4ed3e3980950c3cd694d64e3906123d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
 <tr class="memitem:a238d43f4b50efea9ab3438669d00fb51" id="r_a238d43f4b50efea9ab3438669d00fb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a238d43f4b50efea9ab3438669d00fb51">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
 <tr class="memdesc:a238d43f4b50efea9ab3438669d00fb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
 <tr class="memitem:a09626f2c30134864d8ef00a273b5bcd7" id="r_a09626f2c30134864d8ef00a273b5bcd7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09626f2c30134864d8ef00a273b5bcd7">advanceEuler</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt) override final</td></tr>
@@ -327,8 +327,8 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:ad8a65937e06b355f1dcf40c24eb2ccd0" id="r_ad8a65937e06b355f1dcf40c24eb2ccd0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8a65937e06b355f1dcf40c24eb2ccd0">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_phi, const Real a_extrapDt) override=0</td></tr>
-<tr class="memdesc:ad8a65937e06b355f1dcf40c24eb2ccd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces.  <br /></td></tr>
+<tr class="memitem:a02329e50bc61c6e42f27cc858e01bd37" id="r_a02329e50bc61c6e42f27cc858e01bd37"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02329e50bc61c6e42f27cc858e01bd37">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt) override=0</td></tr>
+<tr class="memdesc:a02329e50bc61c6e42f27cc858e01bd37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces.  <br /></td></tr>
 <tr class="memitem:ac775f2f88fcbc0375a0447d5f768d919" id="r_ac775f2f88fcbc0375a0447d5f768d919"><td class="memItemLeft" align="right" valign="top"><a id="ac775f2f88fcbc0375a0447d5f768d919" name="ac775f2f88fcbc0375a0447d5f768d919"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupDiffusionSolver</b> ()</td></tr>
 <tr class="memdesc:ac775f2f88fcbc0375a0447d5f768d919"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up diffusion solver. <br /></td></tr>
@@ -734,8 +734,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="ad8a65937e06b355f1dcf40c24eb2ccd0" name="ad8a65937e06b355f1dcf40c24eb2ccd0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8a65937e06b355f1dcf40c24eb2ccd0">&#9670;&#160;</a></span>advectToFaces()</h2>
+<a id="a02329e50bc61c6e42f27cc858e01bd37" name="a02329e50bc61c6e42f27cc858e01bd37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02329e50bc61c6e42f27cc858e01bd37">&#9670;&#160;</a></span>advectToFaces()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -756,7 +756,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>&#160;)</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -772,13 +777,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
     <tr><td class="paramdir">[out]</td><td class="paramname">a_facePhi</td><td>Face-centered states </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered states </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Extrapolating time step. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter, or 0 if they enter no update. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classCdrSolver.html#accc070166e374bec593cb6da68cf36b0">CdrSolver</a>.</p>
+<p>Implements <a class="el" href="classCdrSolver.html#a7e0a8d5b42eac787a3f3856e7536d1e6">CdrSolver</a>.</p>
 
-<p>Implemented in <a class="el" href="classCdrCTU.html#aa4437b38dd5063ea6a81ca7fc94afc9f">CdrCTU</a>, and <a class="el" href="classCdrGodunov.html#a5528964831faf60bded0c0c31e8947f8">CdrGodunov</a>.</p>
+<p>Implemented in <a class="el" href="classCdrCTU.html#af458c54dbeefd056ab7bf762d2dd59e2">CdrCTU</a>, and <a class="el" href="classCdrGodunov.html#a19eb3f4aea06bb549a354dfbac1340b8">CdrGodunov</a>.</p>
 
 </div>
 </div>
@@ -872,8 +878,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="ad192526154dfb1380b94fee1c032f828" name="ad192526154dfb1380b94fee1c032f828"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad192526154dfb1380b94fee1c032f828">&#9670;&#160;</a></span>computeDivF()</h2>
+<a id="a4ed3e3980950c3cd694d64e3906123d1" name="a4ed3e3980950c3cd694d64e3906123d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ed3e3980950c3cd694d64e3906123d1">&#9670;&#160;</a></span>computeDivF()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -895,6 +901,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -925,6 +936,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
     <tr><td class="paramdir">[out]</td><td class="paramname">a_divF</td><td>Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered state. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update phi - a_dt*div(F) that the result is used in. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_conservativeOnly</td><td>If true, we compute div(F) = 1/dx*sum(fluxes), which does not involve redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebFlux</td><td>If true, the embedded boundary flux will be included in div(F). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFlux</td><td>If true, domain boundary fluxes are included. </td></tr>
@@ -933,12 +945,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. </dd></dl>
 
-<p>Implements <a class="el" href="classCdrSolver.html#a06082d89e6896cafdfa12e4ac5b20c38">CdrSolver</a>.</p>
+<p>Implements <a class="el" href="classCdrSolver.html#a1e430dd0e7efd897ccfd66199689cf17">CdrSolver</a>.</p>
 
 </div>
 </div>
-<a id="ad87773680e2ab4d91afb8ef735a143eb" name="ad87773680e2ab4d91afb8ef735a143eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad87773680e2ab4d91afb8ef735a143eb">&#9670;&#160;</a></span>computeDivJ()</h2>
+<a id="a95c953dc7200e7b04ed4cff83f7782d7" name="a95c953dc7200e7b04ed4cff83f7782d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95c953dc7200e7b04ed4cff83f7782d7">&#9670;&#160;</a></span>computeDivJ()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -960,6 +972,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -990,6 +1007,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
     <tr><td class="paramdir">[out]</td><td class="paramname">a_divJ</td><td>Divergence term, i.e. finite volume approximation to div(J). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered state. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update phi - a_dt*div(J) that the result is used in. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_conservativeOnly</td><td>If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebFlux</td><td>If true, the embedded boundary flux will injected and included in div(J). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFlux</td><td>If true, domain boundary fluxes are included. </td></tr>
@@ -998,7 +1016,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_phi is non-const because ghost cells will be re-filled. </dd></dl>
 
-<p>Implements <a class="el" href="classCdrSolver.html#a5217d3b30e180a77515c9b18ac2bae96">CdrSolver</a>.</p>
+<p>Implements <a class="el" href="classCdrSolver.html#ad2f615675c72fb79f9f5de19a4c41e01">CdrSolver</a>.</p>
 
 </div>
 </div>

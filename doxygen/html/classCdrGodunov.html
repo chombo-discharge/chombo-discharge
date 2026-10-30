@@ -171,10 +171,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrMultigrid</b> 
 <tr class="memdesc:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operator.  <br /></td></tr>
 <tr class="memitem:a73ed7f3e655d15541fefdf6d621b8092 inherit pub_methods_classCdrMultigrid" id="r_a73ed7f3e655d15541fefdf6d621b8092"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel) override</td></tr>
 <tr class="memdesc:a73ed7f3e655d15541fefdf6d621b8092 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <br /></td></tr>
-<tr class="memitem:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid" id="r_ad87773680e2ab4d91afb8ef735a143eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
-<tr class="memitem:ad192526154dfb1380b94fee1c032f828 inherit pub_methods_classCdrMultigrid" id="r_ad192526154dfb1380b94fee1c032f828"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad192526154dfb1380b94fee1c032f828">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad192526154dfb1380b94fee1c032f828 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
+<tr class="memitem:a95c953dc7200e7b04ed4cff83f7782d7 inherit pub_methods_classCdrMultigrid" id="r_a95c953dc7200e7b04ed4cff83f7782d7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a95c953dc7200e7b04ed4cff83f7782d7">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a95c953dc7200e7b04ed4cff83f7782d7 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
+<tr class="memitem:a4ed3e3980950c3cd694d64e3906123d1 inherit pub_methods_classCdrMultigrid" id="r_a4ed3e3980950c3cd694d64e3906123d1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a4ed3e3980950c3cd694d64e3906123d1">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a4ed3e3980950c3cd694d64e3906123d1 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
 <tr class="memitem:a238d43f4b50efea9ab3438669d00fb51 inherit pub_methods_classCdrMultigrid" id="r_a238d43f4b50efea9ab3438669d00fb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a238d43f4b50efea9ab3438669d00fb51">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
 <tr class="memdesc:a238d43f4b50efea9ab3438669d00fb51 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
 <tr class="memitem:a09626f2c30134864d8ef00a273b5bcd7 inherit pub_methods_classCdrMultigrid" id="r_a09626f2c30134864d8ef00a273b5bcd7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a09626f2c30134864d8ef00a273b5bcd7">advanceEuler</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt) override final</td></tr>
@@ -320,8 +320,8 @@ Protected Member Functions</h2></td></tr>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseSlopeLimiter</b> ()</td></tr>
 <tr class="memdesc:a13307d302f51c8b16c647d44fcb27f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses slope limiter options. <br /></td></tr>
 <tr class="memitem:a455e3bafb0aaafdedfaad8c978cad5b2" id="r_a455e3bafb0aaafdedfaad8c978cad5b2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a455e3bafb0aaafdedfaad8c978cad5b2">parseExtrapolateSourceTerm</a> ()</td></tr>
-<tr class="memitem:a5528964831faf60bded0c0c31e8947f8" id="r_a5528964831faf60bded0c0c31e8947f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5528964831faf60bded0c0c31e8947f8">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_cellPhi, const Real a_extrapDt) override</td></tr>
-<tr class="memdesc:a5528964831faf60bded0c0c31e8947f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Godunov face extrapolation method for advection.  <br /></td></tr>
+<tr class="memitem:a19eb3f4aea06bb549a354dfbac1340b8" id="r_a19eb3f4aea06bb549a354dfbac1340b8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19eb3f4aea06bb549a354dfbac1340b8">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_cellPhi, const Real a_extrapDt, const Real a_dt) override</td></tr>
+<tr class="memdesc:a19eb3f4aea06bb549a354dfbac1340b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Godunov face extrapolation method for advection.  <br /></td></tr>
 <tr class="inherit_header pro_methods_classCdrMultigrid"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_classCdrMultigrid')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Member Functions inherited from <a class="el" href="classCdrMultigrid.html">CdrMultigrid</a></td></tr>
 <tr class="memitem:ac775f2f88fcbc0375a0447d5f768d919 inherit pro_methods_classCdrMultigrid" id="r_ac775f2f88fcbc0375a0447d5f768d919"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupDiffusionSolver</b> ()</td></tr>
@@ -650,8 +650,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <div class="textblock"><p>Godunov implementation for advection. </p>
 <p>The <a class="el" href="classCdrGodunov.html" title="Godunov implementation for advection.">CdrGodunov</a> class perform Godunov-type advection with time-extrapolated slope-limiting to faces. Note that this class implements <a class="el" href="classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di...">CdrMultigrid</a> which is the base class that implements second order diffusion (either explicit or implicit). The rationale for doing time-extrapolation ala Godunov is that one can use centered differencing phi^(k+1) = phi^k - dt*div[v^(k+1/2) * phi^(k+1/2)] for a second order accurate discretization in time. This class uses Chombo functionality from EBAdvectLevelIntegrator which uses the Graves/Trebotich discretization in "An adaptive finite volume method for the incompressible Navier–Stokes equations in complex geometries" (DOI: 10.2140/camcos.2015.10.43). Note that if source terms are involved the extrapolation is more involved. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a5528964831faf60bded0c0c31e8947f8" name="a5528964831faf60bded0c0c31e8947f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5528964831faf60bded0c0c31e8947f8">&#9670;&#160;</a></span>advectToFaces()</h2>
+<a id="a19eb3f4aea06bb549a354dfbac1340b8" name="a19eb3f4aea06bb549a354dfbac1340b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19eb3f4aea06bb549a354dfbac1340b8">&#9670;&#160;</a></span>advectToFaces()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -672,7 +672,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>&#160;)</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -687,13 +692,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_facePhi</td><td>Phi on face centers. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPhi</td><td>Phi on cell centers. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time centering (i.e. extrapolation) of the face-centered states.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time centering (i.e. extrapolation) of the face-centered states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter (not used).</td></tr>
   </table>
   </dd>
 </dl>
 <p>This functions calls Chombo code which implements the Graves/Trebotich discretization. </p>
 
-<p>Implements <a class="el" href="classCdrMultigrid.html#ad8a65937e06b355f1dcf40c24eb2ccd0">CdrMultigrid</a>.</p>
+<p>Implements <a class="el" href="classCdrMultigrid.html#a02329e50bc61c6e42f27cc858e01bd37">CdrMultigrid</a>.</p>
 
 </div>
 </div>

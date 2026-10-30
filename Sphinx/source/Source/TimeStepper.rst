@@ -61,7 +61,7 @@ To provide an example, the code snippet below shows the implementation of this r
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``setupSolvers`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 136-162
+   :lines: 138-164
 
 .. _Chap:RegisterOperators:
 
@@ -90,7 +90,7 @@ An example of this is given in :numref:`List:AdvectionDiffusionStepperRegister`,
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``registerOperators`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 175-185
+   :lines: 177-187
 
 allocate
 --------
@@ -103,7 +103,7 @@ Again using :ref:`Chap:AdvectionDiffusionModel` as an example,
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``allocate`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 187-196
+   :lines: 189-198
 
 In the above snippet, ``TimeStepper`` only calls the solver allocation function (solvers generally know how to allocate their own internal data).
 For more complex problems this routine will probably allocate additional data that only lives within ``TimeStepper`` (and not the solvers). 
@@ -120,7 +120,7 @@ A simpler example is again given by :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``initialData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 198-218
+   :lines: 200-220
 
 The above code defers the initialization of the density in the advection-diffusion-reaction solver to the actual solver implementation.
 Here, one could equally well have fetched the density directly from the solver and set it to something else by simply iterating through the grid cells (or setting it through other means).
@@ -165,7 +165,7 @@ Below we include the implementation of this routine for the :ref:`Chap:Advection
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``getNumberOfPlotVariables`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 265-275
+   :lines: 267-277
 
 getPlotVariableNames
 --------------------
@@ -178,7 +178,7 @@ Below we include the implementation of this routine for the :ref:`Chap:Advection
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``getPlotVariableNames`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 277-286
+   :lines: 279-288
 
 .. tip::
 
@@ -205,7 +205,7 @@ An example is given below for the :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``writePlotData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 288-303
+   :lines: 290-305
 
 writeCheckpointData
 -------------------
@@ -227,7 +227,7 @@ Below, we again include an example for the :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``writeCheckpointData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 221-230
+   :lines: 223-232
 
 When implementing the function, it is important to add any data that is required when restarting the simulation.
 It is also beneficial to *not* add data that is not required since this will just lead to larger files.
@@ -256,7 +256,7 @@ E.g., the example for the :ref:`Chap:AdvectionDiffusionModel` is
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``readCheckpointData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 234-243
+   :lines: 236-245
 
 Advance routines
 ================
@@ -278,7 +278,7 @@ For the :ref:`Chap:AdvectionDiffusionModel` the implementation is as follows:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``computeDt`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 305-350
+   :lines: 307-360
 
 In the code above, ``TimeStepper`` supports both fully explicit advection-diffusion advances as well as split-step advances with implicit diffusion.
 Depending on how the user chooses to run the code, the time step is therefore computed differently.
@@ -306,7 +306,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``advance`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 352-454
+   :lines: 362-464
 
 In the above code we have included the part of the ``advance`` routine that executes Heun's method for advancing the scalar.
 This code also includes allocation of temporaries for computing the coefficients, storage for the intermediate state, and enforcement of boundary conditions, all of which include AMR.
@@ -324,7 +324,7 @@ The implementation for :ref:`Chap:AdvectionDiffusionModel` is
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``synchronizeSolverTimes`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 456-469
+   :lines: 466-479
 
 printStepReport
 ---------------
@@ -368,7 +368,7 @@ Solvers usually know how to do this, and in some cases this function can be dece
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``preRegrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 471-480
+   :lines: 481-490
 
 Other implementations of ``TimeStepper`` may have substantially more complicated ``preRegrid`` routines.
 
@@ -383,7 +383,7 @@ Solvers are usually implemented with their own regrid routine, and if the only t
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``regrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 482-501
+   :lines: 492-511
 
 
 For other ``TimeStepper`` implementations this routine can become much more complex.

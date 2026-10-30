@@ -151,10 +151,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrSolver</b> ()<
 <tr class="memdesc:acd2c38c8ee8a9edd58dd0e3e605ea190"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit diffusion Crank-Nicholson advance without source term.  <br /></td></tr>
 <tr class="memitem:ab65a12aa88855ec2ff2d1e930ff52059" id="r_ab65a12aa88855ec2ff2d1e930ff52059"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab65a12aa88855ec2ff2d1e930ff52059">advanceCrankNicholson</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt)=0</td></tr>
 <tr class="memdesc:ab65a12aa88855ec2ff2d1e930ff52059"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit diffusion Crank-Nicholson advance with source term.  <br /></td></tr>
-<tr class="memitem:a5217d3b30e180a77515c9b18ac2bae96" id="r_a5217d3b30e180a77515c9b18ac2bae96"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5217d3b30e180a77515c9b18ac2bae96">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux)=0</td></tr>
-<tr class="memdesc:a5217d3b30e180a77515c9b18ac2bae96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
-<tr class="memitem:a06082d89e6896cafdfa12e4ac5b20c38" id="r_a06082d89e6896cafdfa12e4ac5b20c38"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06082d89e6896cafdfa12e4ac5b20c38">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux)=0</td></tr>
-<tr class="memdesc:a06082d89e6896cafdfa12e4ac5b20c38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
+<tr class="memitem:ad2f615675c72fb79f9f5de19a4c41e01" id="r_ad2f615675c72fb79f9f5de19a4c41e01"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad2f615675c72fb79f9f5de19a4c41e01">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux)=0</td></tr>
+<tr class="memdesc:ad2f615675c72fb79f9f5de19a4c41e01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
+<tr class="memitem:a1e430dd0e7efd897ccfd66199689cf17" id="r_a1e430dd0e7efd897ccfd66199689cf17"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e430dd0e7efd897ccfd66199689cf17">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux)=0</td></tr>
+<tr class="memdesc:a1e430dd0e7efd897ccfd66199689cf17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
 <tr class="memitem:afa54cb2fb84bb7cb85836da38e334bc8" id="r_afa54cb2fb84bb7cb85836da38e334bc8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa54cb2fb84bb7cb85836da38e334bc8">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux)=0</td></tr>
 <tr class="memdesc:afa54cb2fb84bb7cb85836da38e334bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
 <tr class="memitem:a631e0828ef3b9205ed08852fe867a1e9" id="r_a631e0828ef3b9205ed08852fe867a1e9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a631e0828ef3b9205ed08852fe867a1e9">computeDivG</a> (EBAMRCellData &amp;a_divG, EBAMRFluxData &amp;a_G, const EBAMRIVData &amp;a_ebFlux, const bool a_conservativeOnly)</td></tr>
@@ -285,8 +285,8 @@ Protected Types</h2></td></tr>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a2c2fc0117757f6198bfa24a8481a684b" id="r_a2c2fc0117757f6198bfa24a8481a684b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c2fc0117757f6198bfa24a8481a684b">averageVelocityToFaces</a> (EBAMRFluxData &amp;a_faceVelocity, const EBAMRCellData &amp;a_cellVelocity)</td></tr>
 <tr class="memdesc:a2c2fc0117757f6198bfa24a8481a684b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4" title="Various averaging methods.">Average</a> cell-centered velocities to face centers.  <br /></td></tr>
-<tr class="memitem:accc070166e374bec593cb6da68cf36b0" id="r_accc070166e374bec593cb6da68cf36b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#accc070166e374bec593cb6da68cf36b0">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_phi, const Real a_extrapDt)=0</td></tr>
-<tr class="memdesc:accc070166e374bec593cb6da68cf36b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces.  <br /></td></tr>
+<tr class="memitem:a7e0a8d5b42eac787a3f3856e7536d1e6" id="r_a7e0a8d5b42eac787a3f3856e7536d1e6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e0a8d5b42eac787a3f3856e7536d1e6">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt)=0</td></tr>
+<tr class="memdesc:a7e0a8d5b42eac787a3f3856e7536d1e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces.  <br /></td></tr>
 <tr class="memitem:aa2ebe315836c30c22c1c02b9bfb40ce8" id="r_aa2ebe315836c30c22c1c02b9bfb40ce8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2ebe315836c30c22c1c02b9bfb40ce8">computeAdvectionFlux</a> (EBAMRFluxData &amp;a_flux, const EBAMRFluxData &amp;a_facePhi, const EBAMRFluxData &amp;a_faceVelocity, const bool a_addDomainFlux=true)</td></tr>
 <tr class="memdesc:aa2ebe315836c30c22c1c02b9bfb40ce8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up face-centered advection flux.  <br /></td></tr>
 <tr class="memitem:a55ee682d52e18749e0997c0eb6d043a5" id="r_a55ee682d52e18749e0997c0eb6d043a5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55ee682d52e18749e0997c0eb6d043a5">computeAdvectionFlux</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const LevelData&lt; EBFluxFAB &gt; &amp;a_facePhi, const LevelData&lt; EBFluxFAB &gt; &amp;a_faceVelocity, const int a_lvl)</td></tr>
@@ -766,8 +766,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="accc070166e374bec593cb6da68cf36b0" name="accc070166e374bec593cb6da68cf36b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accc070166e374bec593cb6da68cf36b0">&#9670;&#160;</a></span>advectToFaces()</h2>
+<a id="a7e0a8d5b42eac787a3f3856e7536d1e6" name="a7e0a8d5b42eac787a3f3856e7536d1e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e0a8d5b42eac787a3f3856e7536d1e6">&#9670;&#160;</a></span>advectToFaces()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -788,7 +788,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>&#160;)</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -804,11 +809,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
     <tr><td class="paramdir">[out]</td><td class="paramname">a_facePhi</td><td>Phi on faces </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Phi on cell center </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time centering/extrapolation (if the advective integrator can do it) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter, or 0 if they enter no update. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classCdrCTU.html#aa4437b38dd5063ea6a81ca7fc94afc9f">CdrCTU</a>, <a class="el" href="classCdrGodunov.html#a5528964831faf60bded0c0c31e8947f8">CdrGodunov</a>, and <a class="el" href="classCdrMultigrid.html#ad8a65937e06b355f1dcf40c24eb2ccd0">CdrMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classCdrCTU.html#af458c54dbeefd056ab7bf762d2dd59e2">CdrCTU</a>, <a class="el" href="classCdrGodunov.html#a19eb3f4aea06bb549a354dfbac1340b8">CdrGodunov</a>, and <a class="el" href="classCdrMultigrid.html#a02329e50bc61c6e42f27cc858e01bd37">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -1407,8 +1413,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="a06082d89e6896cafdfa12e4ac5b20c38" name="a06082d89e6896cafdfa12e4ac5b20c38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a06082d89e6896cafdfa12e4ac5b20c38">&#9670;&#160;</a></span>computeDivF()</h2>
+<a id="a1e430dd0e7efd897ccfd66199689cf17" name="a1e430dd0e7efd897ccfd66199689cf17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e430dd0e7efd897ccfd66199689cf17">&#9670;&#160;</a></span>computeDivF()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1430,6 +1436,11 @@ Virtual because some solvers might want to do this differently. </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1460,6 +1471,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_divF</td><td>Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered state </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time step to extrapolate the face states over. Pass the full time step of the update: the face reconstruction is phi + 0.5*(1 - v*a_extrapDt/dx)*slope, so the argument enters as twice the time actually extrapolated over, and the full step is what centres the flux at the half step. Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want. Only affects the advective term; for <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a> it also scales the transverse (CTU) correction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divF, with phi^n = a_phi. <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a>'s flux correction uses it to keep the update non-negative, so the result must only be used with this time step. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_conservativeOnly</td><td>If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebFlux</td><td>If true, the embedded boundary flux will injected be included in div(F) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFlux</td><td>If true, the domain flux will injected and included in div(F) </td></tr>
@@ -1468,7 +1480,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. </dd></dl>
 
-<p>Implemented in <a class="el" href="classCdrMultigrid.html#ad192526154dfb1380b94fee1c032f828">CdrMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classCdrMultigrid.html#a4ed3e3980950c3cd694d64e3906123d1">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -1522,8 +1534,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 </div>
 </div>
-<a id="a5217d3b30e180a77515c9b18ac2bae96" name="a5217d3b30e180a77515c9b18ac2bae96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5217d3b30e180a77515c9b18ac2bae96">&#9670;&#160;</a></span>computeDivJ()</h2>
+<a id="ad2f615675c72fb79f9f5de19a4c41e01" name="ad2f615675c72fb79f9f5de19a4c41e01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2f615675c72fb79f9f5de19a4c41e01">&#9670;&#160;</a></span>computeDivJ()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1545,6 +1557,11 @@ Virtual because some solvers might want to do this differently. </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1575,6 +1592,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_divJ</td><td>Divergence term, i.e. finite volume approximation to </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered state </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time step to extrapolate the face states over. Pass the full time step of the update: the face reconstruction is phi + 0.5*(1 - v*a_extrapDt/dx)*slope, so the argument enters as twice the time actually extrapolated over, and the full step is what centres the flux at the half step. Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want. Only affects the advective term; for <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a> it also scales the transverse (CTU) correction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divJ, with phi^n = a_phi. <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a>'s flux correction uses it to keep the update non-negative, so the result must only be used with this time step. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_conservativeOnly</td><td>If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebFlux</td><td>If true, the embedded boundary flux will injected and included in div(J) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFlux</td><td>If true, the domain flux will injected and included in div(J) </td></tr>
@@ -1583,7 +1601,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_phi is non-const because ghost cells will be re-filled </dd></dl>
 
-<p>Implemented in <a class="el" href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">CdrMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classCdrMultigrid.html#a95c953dc7200e7b04ed4cff83f7782d7">CdrMultigrid</a>.</p>
 
 </div>
 </div>

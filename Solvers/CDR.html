@@ -92,6 +92,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#cdrctu">CdrCTU</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#face-extrapolation">Face extrapolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#slopes">Slopes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#embedded-boundaries">Embedded boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flux-correction">Flux correction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-step-limitation">Time step limitation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#class-options">Class options</a></li>
 </ul>
@@ -214,6 +216,9 @@ These approximations are encapsulated by the following functions:</p>
 <span class="cm"> * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.</span>
 <span class="cm"> * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.</span>
 <span class="cm"> * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.</span>
+<span class="cm"> * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divJ,</span>
+<span class="cm"> * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be</span>
+<span class="cm"> * used with this time step.</span>
 <span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve</span>
 <span class="cm"> * redistribution.</span>
 <span class="cm"> * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)</span>
@@ -224,6 +229,7 @@ These approximations are encapsulated by the following functions:</p>
 <span class="nf">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_extrapDt</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_conservativeOnly</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_ebFlux</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -238,6 +244,9 @@ These approximations are encapsulated by the following functions:</p>
 <span class="cm"> * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.</span>
 <span class="cm"> * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.</span>
 <span class="cm"> * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.</span>
+<span class="cm"> * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divF,</span>
+<span class="cm"> * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be</span>
+<span class="cm"> * used with this time step.</span>
 <span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.</span>
 <span class="cm"> * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)</span>
 <span class="cm"> * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)</span>
@@ -248,6 +257,7 @@ These approximations are encapsulated by the following functions:</p>
 <span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_extrapDt</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_conservativeOnly</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_ebFlux</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -393,15 +403,16 @@ The function signature for explicit advection (<code class="docutils literal not
 <p>The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and the result is put in <code class="docutils literal notranslate"><span class="pre">a_divF</span></code> using the procedure outlined above.
 In the simplest case, these fluxes are simply calculated using an upwind rule, potentially extrapolated with slope-limiters from the cell-center.
 In more complex cases, we use both the normal and transverse slopes in a cell.
-The argument <code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> is the time step size.
-It is not needed in a method-of-lines context, but it is used in e.g. <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers).</p>
+The argument <code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> is the time step that the face states are extrapolated over.
+It is not needed in a method-of-lines context (pass 0), but it is used in e.g. <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers).
+The argument <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> is the time step of the update that the result is used in, which the flux correction in <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> needs.</p>
 <p>For example, in order to perform an advective advance with the explicit Euler rule over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, one would perform the following:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">                 </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w">             </span><span class="c1">// Scratch storage in solver</span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divF including BCs</span>
-<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w">                           </span><span class="c1">// Makes phi -&gt; phi - dt*divF</span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divF including BCs</span>
+<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w">                               </span><span class="c1">// Makes phi -&gt; phi - dt*divF</span>
 </pre></div>
 </div>
 </section>
@@ -431,8 +442,8 @@ The function signature is given in <a class="reference internal" href="#cdr-div-
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">                 </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w">             </span><span class="c1">// Scratch storage in solver</span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">divJ</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divJ including BCs</span>
-<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divJ</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w">                           </span><span class="c1">// makes phi -&gt; phi - dt*divJ</span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">divJ</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divJ including BCs</span>
+<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divJ</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span><span class="w">                               </span><span class="c1">// makes phi -&gt; phi - dt*divJ</span>
 </pre></div>
 </div>
 <p>Often, time integrators have the option of using implicit or explicit diffusion.
@@ -479,9 +490,13 @@ It implements the pure functions required by <a class="reference internal" href=
 <span class="cm">   * @param[out] a_facePhi Face-centered states</span>
 <span class="cm">   * @param[in] a_phi Cell-centered states</span>
 <span class="cm">   * @param[in] a_extrapDt Extrapolating time step.</span>
+<span class="cm">   * @param[in] a_dt Time step of the update that the face states enter, or 0 if they enter no update.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">advectToFaces</span><span class="p">(</span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_facePhi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_extrapDt</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="nf">advectToFaces</span><span class="p">(</span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_facePhi</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_extrapDt</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
@@ -518,6 +533,10 @@ The transverse slopes are given by</p>
 \phi_{i,j+1}^n - \phi_{i,j}^n, &amp; v_{i,j}^n &lt; 0 \\
 \phi_{i,j}^n - \phi_{i,j-1}^n, &amp; v_{i,j}^n &gt; 0 \\
 \end{cases}\end{split}\]</div>
+<p>In 3D, each face state also includes the corner term <span class="math notranslate nohighlight">\(\frac{1}{3}\left(\frac{\Delta t}{\Delta x}\right)^2|v_t||v_s|\left(\Delta^t\Delta^s\phi\right)\)</span>, where <span class="math notranslate nohighlight">\(t\)</span> and <span class="math notranslate nohighlight">\(s\)</span> are the two transverse directions and <span class="math notranslate nohighlight">\(\Delta^t\Delta^s\phi\)</span> is the upwind mixed difference.
+For constant velocity, it completes the update to the product of the one-dimensional upwind updates, which is stable up to the CTU time step below.
+Without it, the 3D update is unstable for Courant numbers above 1/2 in all three directions.
+The term is left out next to covered cells.</p>
 </section>
 <section id="slopes">
 <span id="chap-ctuslopes"></span><h3>Slopes<a class="headerlink" href="#slopes" title="Permalink to this heading"></a></h3>
@@ -539,9 +558,39 @@ The slopes are given by:</p>
 <p>where for the superbee slope we have <span class="math notranslate nohighlight">\(\Delta_1 = \text{minmod}\left(\Delta_l, 2\Delta_r\right)\)</span> and <span class="math notranslate nohighlight">\(\Delta_2 = \text{minmod}\left(\Delta_r, 2\Delta_l\right)\)</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When using transverse slopes, monotonicity is not guaranteed for the CTU discretization.
-If transverse slopes are turned off, however, the scheme is guaranteed to be monotone.</p>
+<p>With slopes, the CTU update is not guaranteed to be monotone or positive.
+For example, a cell with empty upwind neighbors on a diagonal flow becomes negative when the Courant number exceeds 1/2 in two directions, i.e. for CFL numbers above <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span> in 2D with the CTU time step.
+Flux correction (below) keeps the update non-negative.</p>
 </div>
+</section>
+<section id="embedded-boundaries">
+<h3>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h3>
+<p>Where the flow leaves the EB, the EB is an inflow boundary with the state <span class="math notranslate nohighlight">\(\phi_{\textrm{EB}} = \max\left(0, -F_{\textrm{EB}}/(\mathbf{v}\cdot\mathbf{n})\right)\)</span>, where <span class="math notranslate nohighlight">\(F_{\textrm{EB}}\)</span> is the EB flux (positive out of the fluid) and <span class="math notranslate nohighlight">\(\mathbf{n}\)</span> the EB normal pointing into the fluid.
+An EB flux out of the fluid where the flow leaves the EB gives <span class="math notranslate nohighlight">\(\phi_{\textrm{EB}} = 0\)</span>; the EB flux itself still enters the divergence.
+With <code class="docutils literal notranslate"><span class="pre">CdrCTU.eb_inflow_state</span> <span class="pre">=</span> <span class="pre">true</span></code>, this enters the discretization in two places:</p>
+<ul class="simple">
+<li><p>The slope of a cut cell on a side that the EB closes uses <span class="math notranslate nohighlight">\(\phi_{\textrm{EB}}\)</span> as the neighbor, instead of the difference on the other side.</p></li>
+<li><p>The fluid that crosses an outgoing face of a cut cell during a time step comes from the cell only until the flow has carried the EB (a plane through the EB centroid) to the face; after that it is fluid that entered through the EB.
+The face state is the time average over the step, which limits the outflow of a cut cell to its content when nothing flows in through the EB.</p></li>
+</ul>
+<p>Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell redistribution then has to absorb.</p>
+</section>
+<section id="flux-correction">
+<h3>Flux correction<a class="headerlink" href="#flux-correction" title="Permalink to this heading"></a></h3>
+<p>With <code class="docutils literal notranslate"><span class="pre">CdrCTU.flux_correction</span> <span class="pre">=</span> <span class="pre">true</span></code>, the face states are corrected so that the advective update stays non-negative (flux-corrected transport, limited to positivity).
+The first-order CTU states (no slopes) give a non-negative update.
+The difference between the second-order and the first-order states is a correction which can make the update negative.
+For each cell, the corrections that take mass out of it are added up and limited to the mass that the first-order update leaves in the cell.
+The correction on each face is scaled by the limiting factor of the cell that it takes mass from, so the update stays conservative.
+Ghost cells on refinement boundaries and multi-valued cells are not limited.</p>
+<p>The guarantee is limited to what the correction sees:</p>
+<ul class="simple">
+<li><p>It holds for one update <span class="math notranslate nohighlight">\(\phi - \Delta t\nabla\cdot\mathbf{F}\)</span> with the time step <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> passed to <code class="docutils literal notranslate"><span class="pre">computeDivF</span></code>, provided the first-order update is non-negative. That requires <code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> to be either <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> (CTU) or 0 (donor cell), within the corresponding time step bound.
+Heun’s method is a convex combination of two such updates and stays non-negative. Spectral deferred corrections combine divergences in a quadrature and do not.</p></li>
+<li><p>The limiter uses the face fluxes before they are interpolated to face centroids and before the cut-cell redistribution, so cut cells are not covered.</p></li>
+<li><p>On a refinement boundary, the coarse flux is replaced by the sum of the fine fluxes when refluxing. These are limited by the fine cells, not by the coarse cell they take mass from.</p></li>
+<li><p>The EB flux and the computed fluxes on domain faces are counted whether or not they enter the divergence, which can only make the limiting stronger.</p></li>
+</ul>
 </section>
 <section id="time-step-limitation">
 <span id="chap-ctustep"></span><h3>Time step limitation<a class="headerlink" href="#time-step-limitation" title="Permalink to this heading"></a></h3>
@@ -549,6 +598,8 @@ If transverse slopes are turned off, however, the scheme is guaranteed to be mon
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\text{Donor-cell}: \Delta t \leq \frac{\Delta x}{|v_x| + |v_y| + |v_z|}\\\text{CTU}: \Delta t \leq \frac{\Delta x}{\max\left(|v_x|,|v_y|,|v_z|\right)}\end{aligned}\end{align} \]</div>
 <p>Note that when the flow is diagonal to the grid, i.e., <span class="math notranslate nohighlight">\(|v_x| = |v_y| = |v_z|\)</span>, the CTU can use a time step that is three times larger than for the donor-cell method.</p>
+<p>The CTU time step requires the transverse terms, which are only present when the face states are extrapolated in time (<code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> &gt; 0).
+Integrators that do not extrapolate in time, such as the Heun method in <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusion</span></code> or the Euler and RK2 advection algorithms in <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code>, use the donor-cell time step.</p>
 </section>
 <section id="class-options">
 <h3>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h3>
@@ -565,6 +616,8 @@ CdrCTU.bc.z.lo                  = wall                      ## 'data', 'function
 CdrCTU.bc.z.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.slope_limiter            = minmod                    ## Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
 CdrCTU.use_ctu                  = true                      ## If true, use CTU. Otherwise it's DTU.
+CdrCTU.eb_inflow_state          = true                      ## If true, the EB is an inflow boundary where the flow leaves it (slopes and outgoing face states of cut cells)
+CdrCTU.flux_correction          = true                      ## If true, flux-corrected transport keeps the update non-negative
 CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
@@ -602,6 +655,9 @@ If setting this to false, transverse terms are turned off the <code class="docut
 In particular, <code class="docutils literal notranslate"><span class="pre">gmg_reflux_free</span></code> (default <code class="docutils literal notranslate"><span class="pre">false</span></code>) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
 The two formulations are mathematically equivalent.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.plt_vars</span></code> indicate which variables are added to plot files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.eb_inflow_state</span></code> and <code class="docutils literal notranslate"><span class="pre">CdrCTU.flux_correction</span></code> turn on the EB inflow state and the flux correction described above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.bc.*</span></code> set the domain boundary conditions.
+With <code class="docutils literal notranslate"><span class="pre">outflow</span></code>, the flux through a boundary face is the computed (upwind) advective flux where it leaves the domain; nothing flows in, and there is no diffusive flux.</p></li>
 </ul>
 </section>
 </section>

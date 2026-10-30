@@ -158,8 +158,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrCTU</b> ()</td
 <tr class="memdesc:a232f29cb6fa748f4b5f1b68c7a4bdafa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options to put object in usable state.  <br /></td></tr>
 <tr class="memitem:a9be175856d5d635ac60be403bed99076" id="r_a9be175856d5d635ac60be403bed99076"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9be175856d5d635ac60be403bed99076">parseRuntimeOptions</a> () override</td></tr>
 <tr class="memdesc:a9be175856d5d635ac60be403bed99076"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options.  <br /></td></tr>
-<tr class="memitem:aa4437b38dd5063ea6a81ca7fc94afc9f" id="r_aa4437b38dd5063ea6a81ca7fc94afc9f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4437b38dd5063ea6a81ca7fc94afc9f">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_cellPhi, const Real a_dt) override</td></tr>
-<tr class="memdesc:aa4437b38dd5063ea6a81ca7fc94afc9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">MUSCL advection to faces.  <br /></td></tr>
+<tr class="memitem:af458c54dbeefd056ab7bf762d2dd59e2" id="r_af458c54dbeefd056ab7bf762d2dd59e2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af458c54dbeefd056ab7bf762d2dd59e2">advectToFaces</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRCellData &amp;a_cellPhi, const Real a_extrapDt, const Real a_dt) override</td></tr>
+<tr class="memdesc:af458c54dbeefd056ab7bf762d2dd59e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">MUSCL advection to faces.  <br /></td></tr>
 <tr class="memitem:a819e4dee2d5c7bf95d4c6d3b0ec29c95" id="r_a819e4dee2d5c7bf95d4c6d3b0ec29c95"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a819e4dee2d5c7bf95d4c6d3b0ec29c95">computeAdvectionDt</a> () override</td></tr>
 <tr class="memdesc:a819e4dee2d5c7bf95d4c6d3b0ec29c95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the largest possible advective time step (for explicit methods).  <br /></td></tr>
 <tr class="memitem:a48ef7deef4a29bb8d210b57ee9ec6f94" id="r_a48ef7deef4a29bb8d210b57ee9ec6f94"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48ef7deef4a29bb8d210b57ee9ec6f94">allocate</a> () override</td></tr>
@@ -177,10 +177,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrMultigrid</b> 
 <tr class="memdesc:af48b87304c719a985ba2b5e62a7cc9f4 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="memitem:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid" id="r_a0034a5ef2613e6f829834db1376f2685"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a0034a5ef2613e6f829834db1376f2685">registerOperators</a> () override</td></tr>
 <tr class="memdesc:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operator.  <br /></td></tr>
-<tr class="memitem:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid" id="r_ad87773680e2ab4d91afb8ef735a143eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
-<tr class="memitem:ad192526154dfb1380b94fee1c032f828 inherit pub_methods_classCdrMultigrid" id="r_ad192526154dfb1380b94fee1c032f828"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad192526154dfb1380b94fee1c032f828">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:ad192526154dfb1380b94fee1c032f828 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
+<tr class="memitem:a95c953dc7200e7b04ed4cff83f7782d7 inherit pub_methods_classCdrMultigrid" id="r_a95c953dc7200e7b04ed4cff83f7782d7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a95c953dc7200e7b04ed4cff83f7782d7">computeDivJ</a> (EBAMRCellData &amp;a_divJ, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a95c953dc7200e7b04ed4cff83f7782d7 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
+<tr class="memitem:a4ed3e3980950c3cd694d64e3906123d1 inherit pub_methods_classCdrMultigrid" id="r_a4ed3e3980950c3cd694d64e3906123d1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a4ed3e3980950c3cd694d64e3906123d1">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:a4ed3e3980950c3cd694d64e3906123d1 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
 <tr class="memitem:a238d43f4b50efea9ab3438669d00fb51 inherit pub_methods_classCdrMultigrid" id="r_a238d43f4b50efea9ab3438669d00fb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a238d43f4b50efea9ab3438669d00fb51">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
 <tr class="memdesc:a238d43f4b50efea9ab3438669d00fb51 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
 <tr class="memitem:a09626f2c30134864d8ef00a273b5bcd7 inherit pub_methods_classCdrMultigrid" id="r_a09626f2c30134864d8ef00a273b5bcd7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a09626f2c30134864d8ef00a273b5bcd7">advanceEuler</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt) override final</td></tr>
@@ -344,9 +344,17 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:ad3f93f071943b0abfc93f26c0e7dbb9f" id="r_ad3f93f071943b0abfc93f26c0e7dbb9f"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3f93f071943b0abfc93f26c0e7dbb9f">getEbNormalIntoFluid</a> (const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisbox) const noexcept</td></tr>
+<tr class="memdesc:ad3f93f071943b0abfc93f26c0e7dbb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EB normal of a cut cell, pointing into the fluid.  <br /></td></tr>
+<tr class="memitem:a59e905b2d13e4dfb45505d450c71088d" id="r_a59e905b2d13e4dfb45505d450c71088d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a59e905b2d13e4dfb45505d450c71088d">getEbInflowState</a> (Real &amp;a_phiEB, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisbox, const int a_level, const DataIndex &amp;a_dit) const noexcept</td></tr>
+<tr class="memdesc:a59e905b2d13e4dfb45505d450c71088d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state of the fluid that enters a cut cell through the EB.  <br /></td></tr>
+<tr class="memitem:a74bbf18900ea6af320e44de1b1bb63ee" id="r_a74bbf18900ea6af320e44de1b1bb63ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74bbf18900ea6af320e44de1b1bb63ee">fluxCorrection</a> (EBAMRFluxData &amp;a_facePhi, const EBAMRFluxData &amp;a_facePhiLow, const EBAMRCellData &amp;a_cellPhi, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a74bbf18900ea6af320e44de1b1bb63ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flux-corrected transport that keeps the update non-negative.  <br /></td></tr>
+<tr class="memitem:aa439dbdd0cb541ca06ad7a0459402291" id="r_aa439dbdd0cb541ca06ad7a0459402291"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa439dbdd0cb541ca06ad7a0459402291">ebInflowState</a> (EBFaceFAB &amp;a_facePhi, const EBCellFAB &amp;a_cellVel, const EBFaceFAB &amp;a_faceVel, const Box &amp;a_cellBox, const int a_dir, const int a_level, const DataIndex &amp;a_dit, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:aa439dbdd0cb541ca06ad7a0459402291"><td class="mdescLeft">&#160;</td><td class="mdescRight">Correct the states on the outgoing faces of cut cells for the fluid that enters through the EB.  <br /></td></tr>
 <tr class="memitem:a39aee712e523803402536c61e40db970" id="r_a39aee712e523803402536c61e40db970"><td class="memItemLeft" align="right" valign="top"><a id="a39aee712e523803402536c61e40db970" name="a39aee712e523803402536c61e40db970"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineIterators</b> ()</td></tr>
-<tr class="memdesc:a39aee712e523803402536c61e40db970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build m_grownVofIter for all AMR levels. <br /></td></tr>
+<tr class="memdesc:a39aee712e523803402536c61e40db970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build m_grownVofIter and m_levelCells for all AMR levels. <br /></td></tr>
 <tr class="memitem:a8669c8b4359fd4fb25ae7f37c03a47f7" id="r_a8669c8b4359fd4fb25ae7f37c03a47f7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8669c8b4359fd4fb25ae7f37c03a47f7">computeNormalSlopes</a> (EBCellFAB &amp;a_normalSlopes, const EBCellFAB &amp;a_cellPhi, const Box &amp;a_cellBox, const ProblemDomain &amp;a_domain, const int a_level, const DataIndex &amp;a_dit)</td></tr>
 <tr class="memdesc:a8669c8b4359fd4fb25ae7f37c03a47f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute slopes.  <br /></td></tr>
 <tr class="memitem:a0354dc596336d973c1abb8b2b326ad62" id="r_a0354dc596336d973c1abb8b2b326ad62"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0354dc596336d973c1abb8b2b326ad62">upwind</a> (EBFluxFAB &amp;a_facePhi, const EBCellFAB &amp;a_normalSlopes, const EBCellFAB &amp;a_cellPhi, const EBCellFAB &amp;a_cellVel, const EBFluxFAB &amp;a_faceVel, const ProblemDomain &amp;a_domain, const Box &amp;a_cellBox, const int &amp;a_level, const DataIndex &amp;a_dit, const Real &amp;a_dt)</td></tr>
@@ -452,12 +460,21 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a96f23cde04175313906aba9f3d9288eb" id="r_a96f23cde04175313906aba9f3d9288eb"><td class="memItemLeft" align="right" valign="top"><a id="a96f23cde04175313906aba9f3d9288eb" name="a96f23cde04175313906aba9f3d9288eb"></a>
 Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grownVofIter</b></td></tr>
 <tr class="memdesc:a96f23cde04175313906aba9f3d9288eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built VoFIterators over grow(validBox,1) for the irregular kernel in computeNormalSlopes. <br /></td></tr>
+<tr class="memitem:a8269bdb8dcbd63aa797b5a80cbd25bda" id="r_a8269bdb8dcbd63aa797b5a80cbd25bda"><td class="memItemLeft" align="right" valign="top"><a id="a8269bdb8dcbd63aa797b5a80cbd25bda" name="a8269bdb8dcbd63aa797b5a80cbd25bda"></a>
+Vector&lt; RefCountedPtr&lt; LevelData&lt; FArrayBox &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelCells</b></td></tr>
+<tr class="memdesc:a8269bdb8dcbd63aa797b5a80cbd25bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">1 in the cells of each level's grids (with one ghost cell, filled where other boxes cover it), 0 elsewhere. The EB inflow state is only used where the EB flux is known, which excludes ghost cells on refinement boundaries. <br /></td></tr>
 <tr class="memitem:ae0d198b254c963ff42852a3eb5bb98ff" id="r_ae0d198b254c963ff42852a3eb5bb98ff"><td class="memItemLeft" align="right" valign="top"><a id="ae0d198b254c963ff42852a3eb5bb98ff" name="ae0d198b254c963ff42852a3eb5bb98ff"></a>
 <a class="el" href="#a3d5082e026542171ce2a335d88418b9d">Limiter</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_limiter</b></td></tr>
 <tr class="memdesc:ae0d198b254c963ff42852a3eb5bb98ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, slopes are limited in the normal direction. <br /></td></tr>
 <tr class="memitem:add8d41ed8e182b9806380c63c9452e64" id="r_add8d41ed8e182b9806380c63c9452e64"><td class="memItemLeft" align="right" valign="top"><a id="add8d41ed8e182b9806380c63c9452e64" name="add8d41ed8e182b9806380c63c9452e64"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_useCTU</b></td></tr>
 <tr class="memdesc:add8d41ed8e182b9806380c63c9452e64"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the discretization uses CTU. Otherwise it's DCU (donor cell upwind). <br /></td></tr>
+<tr class="memitem:a8d4a05f0b2be030000119eadce01ec00" id="r_a8d4a05f0b2be030000119eadce01ec00"><td class="memItemLeft" align="right" valign="top"><a id="a8d4a05f0b2be030000119eadce01ec00" name="a8d4a05f0b2be030000119eadce01ec00"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebInflowState</b></td></tr>
+<tr class="memdesc:a8d4a05f0b2be030000119eadce01ec00"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the EB is an inflow boundary where the flow leaves it. The slope of a cut cell without a face on one side uses the EB inflow state as the neighbour on that side, and the state on an outgoing face of a cut cell accounts for the fluid that enters through the EB during the time step of the update. See <a class="el" href="#aa439dbdd0cb541ca06ad7a0459402291" title="Correct the states on the outgoing faces of cut cells for the fluid that enters through the EB.">CdrCTU::ebInflowState</a>. <br /></td></tr>
+<tr class="memitem:a0cad01ad166e022c8e84c90ae570d4b3" id="r_a0cad01ad166e022c8e84c90ae570d4b3"><td class="memItemLeft" align="right" valign="top"><a id="a0cad01ad166e022c8e84c90ae570d4b3" name="a0cad01ad166e022c8e84c90ae570d4b3"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluxCorrection</b></td></tr>
+<tr class="memdesc:a0cad01ad166e022c8e84c90ae570d4b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the second-order part of the face states is limited by flux-corrected transport so that the update stays non-negative. See fluxCorrection. <br /></td></tr>
 <tr class="inherit_header pro_attribs_classCdrMultigrid"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classCdrMultigrid')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classCdrMultigrid.html">CdrMultigrid</a></td></tr>
 <tr class="memitem:ad776cf80b76b2ff1f18d835f7e892da8 inherit pro_attribs_classCdrMultigrid" id="r_ad776cf80b76b2ff1f18d835f7e892da8"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">EBHelmholtzOp::Smoother</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_smoother</b></td></tr>
@@ -675,8 +692,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class that uses a slope limited method for advection, in combination with corner transport upwind (CTU). </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="aa4437b38dd5063ea6a81ca7fc94afc9f" name="aa4437b38dd5063ea6a81ca7fc94afc9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa4437b38dd5063ea6a81ca7fc94afc9f">&#9670;&#160;</a></span>advectToFaces()</h2>
+<a id="af458c54dbeefd056ab7bf762d2dd59e2" name="af458c54dbeefd056ab7bf762d2dd59e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af458c54dbeefd056ab7bf762d2dd59e2">&#9670;&#160;</a></span>advectToFaces()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -697,6 +714,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_extrapDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
@@ -712,12 +734,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_facePhi</td><td>Phi on face centers </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPhi</td><td>Phi on cell centers </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step (i.e. extrapolation) of the face-centered states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_extrapDt</td><td>Time step (i.e. extrapolation) of the face-centered states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter, or 0 if they enter no update. Used for the EB inflow state on outgoing faces of cut cells and for the flux correction.</td></tr>
   </table>
   </dd>
 </dl>
+<p>The flux correction keeps the update phi - a_dt*div(F) non-negative in single-valued cells away from refinement boundaries if the first-order update is, which needs a_extrapDt = a_dt (CTU) or a_extrapDt = 0 (donor cell). It counts the EB flux and the computed fluxes on domain faces, whether or not the caller adds them to the divergence, so it can limit more than needed but not less. </p>
 
-<p>Implements <a class="el" href="classCdrMultigrid.html#ad8a65937e06b355f1dcf40c24eb2ccd0">CdrMultigrid</a>.</p>
+<p>Implements <a class="el" href="classCdrMultigrid.html#a02329e50bc61c6e42f27cc858e01bd37">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -839,6 +863,228 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aa439dbdd0cb541ca06ad7a0459402291" name="aa439dbdd0cb541ca06ad7a0459402291"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa439dbdd0cb541ca06ad7a0459402291">&#9670;&#160;</a></span>ebInflowState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrCTU::ebInflowState </td>
+          <td>(</td>
+          <td class="paramtype">EBFaceFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_facePhi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellVel</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFaceFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_faceVel</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellBox</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Correct the states on the outgoing faces of cut cells for the fluid that enters through the EB. </p>
+<p>Where the flow leaves the EB, the fluid that crosses an outgoing face of a cut cell during the time step comes from the cell only until the flow has carried the EB (as a plane through the EB centroid) to the face. After that it is fluid that entered through the EB, whose state is phi_EB = -F_EB/(v.n), with n the EB normal pointing into the fluid and F_EB the EB flux (positive out of the fluid). With t_EB the time it takes the flow to reach the face from the EB plane, the face state becomes the time average over the step,</p>
+<p>f * phi_face + (1-f) * phi_EB, f = min(1, t_EB/dt).</p>
+<p>The correction only changes the face state, which is the same for the cells on both sides of the face, so the update stays conservative. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_facePhi</td><td>Face states in direction a_dir. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellVel</td><td>Cell-centered velocity. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_faceVel</td><td>Face-centered velocity in direction a_dir. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a74bbf18900ea6af320e44de1b1bb63ee" name="a74bbf18900ea6af320e44de1b1bb63ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74bbf18900ea6af320e44de1b1bb63ee">&#9670;&#160;</a></span>fluxCorrection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrCTU::fluxCorrection </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRFluxData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_facePhi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBAMRFluxData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_facePhiLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellPhi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Flux-corrected transport that keeps the update non-negative. </p>
+<p>The first-order states (CTU without slopes) give a non-negative update for Courant numbers up to 1 in regular cells. The difference between the second-order and the first-order states is a correction that can make the update negative. For each cell, the corrections that take mass out of it are summed, and limited to the mass that the first-order update leaves in the cell: the fraction R = min(1, mass/removed). The correction on a face is multiplied by R of the cell that it takes mass from. The fractions are exchanged so that faces on box boundaries are corrected the same way on both sides, and each face state stays single-valued, so the update is conservative. Ghost cells on refinement boundaries and faces of multi-valued cells are not limited. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_facePhi</td><td>On input the second-order face states, on output the corrected states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facePhiLow</td><td>First-order face states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPhi</td><td>Cell states. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update that the face states enter. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a59e905b2d13e4dfb45505d450c71088d" name="a59e905b2d13e4dfb45505d450c71088d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59e905b2d13e4dfb45505d450c71088d">&#9670;&#160;</a></span>getEbInflowState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CdrCTU::getEbInflowState </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phiEB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const VolIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_vof</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisbox</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dit</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the state of the fluid that enters a cut cell through the EB. </p>
+<p>Where the flow leaves the EB (v.n &gt; 0, with n the EB normal pointing into the fluid), the state is phi_EB = max(0, -F_EB/(v.n)), with F_EB the EB flux (positive out of the fluid) and v the cell velocity. An EB flux out of the fluid where the flow leaves the EB gives a zero inflow state. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_phiEB</td><td>The EB inflow state, if the flow leaves the EB. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vof</td><td>Cut cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBISBox of the grid box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the cell has an EB and the flow leaves it, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="ad3f93f071943b0abfc93f26c0e7dbb9f" name="ad3f93f071943b0abfc93f26c0e7dbb9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3f93f071943b0abfc93f26c0e7dbb9f">&#9670;&#160;</a></span>getEbNormalIntoFluid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RealVect CdrCTU::getEbNormalIntoFluid </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_vof</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisbox</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the EB normal of a cut cell, pointing into the fluid. </p>
+<p>This is EBISBox::normal, which points into the fluid. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vof</td><td>Cut cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBISBox of the grid box </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The unit normal. </dd></dl>
 
 </div>
 </div>
