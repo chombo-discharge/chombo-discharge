@@ -154,6 +154,12 @@ CdrPlasmaGodunovStepper::parseDiffusion()
     MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - unknown diffusion type requested");
   }
 
+  // With 'auto', a species uses implicit diffusion when dt_A/dt_AD exceeds this threshold.
+  pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
+  if (!(m_implicitDiffusionThreshold > 0.0)) {
+    MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - 'diffusion_thresh' must be positive");
+  }
+
   m_diffusionOrder = -1;
   pp.get("diffusion_order", m_diffusionOrder);
   if (!(m_diffusionOrder == 1 || m_diffusionOrder == 2)) {

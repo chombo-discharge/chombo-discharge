@@ -31,7 +31,7 @@ ElectrodeArray::ElectrodeArray()
   pp.get("live", live);
   pp.get("radius", r);
   pp.get("delta_x", dx);
-  pp.get("delta_x", dy);
+  pp.get("delta_y", dy);
   pp.get("num_x", nx);
   pp.get("num_y", ny);
 
