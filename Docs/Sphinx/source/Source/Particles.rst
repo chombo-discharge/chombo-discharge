@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 312-320
+   :lines: 317-325
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 579-588
+   :lines: 584-594
    :language: c++
    :dedent: 2
 
@@ -273,7 +273,9 @@ During remapping, the following steps are performed for each MPI rank:
 #. Scatter the particles that move to another rank with MPI.
 #. Assign the scattered particles on each receiving rank.
 
-Particles whose cell is owned by no patch on any level (off-domain) are dropped and counted.
+Cells are half-open, so a position exactly on a high domain face maps to a cell outside the domain.
+Before a particle is dropped, a position on a domain face, or within :math:`10^{-6}` of a finest-level cell of one, is therefore moved :math:`10^{-6}` of a finest-level cell inside the domain and mapped again.
+Particles whose cell is still owned by no patch on any level (off-domain) are dropped and counted.
 
 The point-to-patch mapping in step 2 maps the position to a ``min_block_size`` tile by integer division and looks it up in a per-level hash map.
 This is :math:`\mathcal{O}(1)` and works also when the grids contain variable-sized (anisotropic) boxes (see :ref:`Chap:MeshGeneration`), because every box is registered under each ``min_block_size`` tile it covers.
@@ -288,7 +290,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 590-597
+      :lines: 596-603
       :language: c++
       :dedent: 2
 
@@ -297,7 +299,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 599-622
+      :lines: 605-628
       :language: c++
       :dedent: 2
 
@@ -322,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 703-704
+   :lines: 709-710
    :language: c++
    :dedent: 2
 
@@ -330,7 +332,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 332-340
+   :lines: 337-345
    :language: c++
    :dedent: 2
 
@@ -338,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 733-737
+   :lines: 739-743
    :language: c++
    :dedent: 2
 
@@ -425,7 +427,7 @@ ______________
 With the three masks in hand, the ghost particles are filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 650-653
+   :lines: 656-659
    :language: c++
    :dedent: 2
 
@@ -445,7 +447,7 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 660-661
+   :lines: 666-667
    :language: c++
    :dedent: 2
 
@@ -491,6 +493,7 @@ Domain edges
 ____________
 
 By default, the ``ParticleContainer`` remapping function will discard particles that fall outside of the domain.
+Particles on a domain face, or within roundoff of one, are kept and moved just inside the domain (see :ref:`Chap:ParticleContainer`).
 The user can also check if this happens by checking if the particle position is outside the computational domain:
 
 .. code-block:: c++
@@ -532,6 +535,7 @@ The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and
 
 The container-owned position holds the trajectory end point, while the start point is read from the payload columns selected by the ``OldPosition`` member-pointer pack (``SpaceDim`` members, one per component).
 The intersected particles are put into the EB-intersected particles (``a_ebParticles``) and domain-intersected particles (``a_domainParticles``).
+A domain-intersected particle is placed at the point where its trajectory crosses the domain side, moved :math:`10^{-6}` of a cell inside the domain so that it stays in the boundary cell it left through.
 The user can choose whether or not to remove intersected particles from ``a_activeParticles`` by adjusting ``a_deleteParticles``.
 The final argument lets the user supply a callback ``(ParticleSoA&, std::size_t)`` that modifies particles that were intersected but not deleted (for example to flag the original particle via a payload column).
 
