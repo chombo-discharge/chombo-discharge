@@ -389,6 +389,14 @@ For each cell, the corrections that take mass out of it are added up and limited
 The correction on each face is scaled by the limiting factor of the cell that it takes mass from, so the update stays conservative.
 Ghost cells on refinement boundaries and multi-valued cells are not limited.
 
+The guarantee is limited to what the correction sees:
+
+* It holds for one update :math:`\phi - \Delta t\nabla\cdot\mathbf{F}` with the time step ``a_dt`` passed to ``computeDivF``, provided the first-order update is non-negative. That requires ``a_extrapDt`` to be either ``a_dt`` (CTU) or 0 (donor cell), within the corresponding time step bound.
+  Heun's method is a convex combination of two such updates and stays non-negative. Spectral deferred corrections combine divergences in a quadrature and do not.
+* The limiter uses the face fluxes before they are interpolated to face centroids and before the cut-cell redistribution, so cut cells are not covered.
+* On a refinement boundary, the coarse flux is replaced by the sum of the fine fluxes when refluxing. These are limited by the fine cells, not by the coarse cell they take mass from.
+* The EB flux and the computed fluxes on domain faces are counted whether or not they enter the divergence, which can only make the limiting stronger.
+
 .. _Chap:CTUStep:
 
 Time step limitation

@@ -1276,7 +1276,19 @@ CdrPlasmaImExSdcStepper::computeDt()
     Nref = Nref * m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
-  m_dtCFL                = m_cdr->computeAdvectionDt();
+
+  // Without extrapolation in time, the face states have no transverse terms and the advective time step is the
+  // unsplit bound dx/sum(|v_d|) of CdrSolver, not the CTU bound that CdrCTU::computeAdvectionDt returns.
+  if (m_extrapAdvect) {
+    m_dtCFL = m_cdr->computeAdvectionDt();
+  }
+  else {
+    m_dtCFL = std::numeric_limits<Real>::max();
+
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      m_dtCFL = std::min(m_dtCFL, solverIt()->CdrSolver::computeAdvectionDt());
+    }
+  }
 
   Real dt_cfl = 2.0 * m_dtCFL / max_gl_dist;
 

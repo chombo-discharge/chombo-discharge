@@ -292,7 +292,8 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
     }
   }
 
-  // With flux correction, the first-order states (zero slopes) are kept for the correction.
+  // With flux correction, the first-order states (zero slopes) are kept for the correction. Without slopes, the
+  // first-order and second-order states are the same and there is nothing to correct.
   const bool useFluxCorrection = m_fluxCorrection && a_dt > 0.0 && m_limiter != Limiter::None;
 
   EBAMRFluxData facePhiLow;
@@ -678,8 +679,10 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
         const IntVect et = (vt > 0.0) ? -BASISV(t) : BASISV(t);
         const IntVect es = (vs > 0.0) ? -BASISV(s) : BASISV(s);
 
-        // Covered cells have no state, so the term is left out next to them.
-        if (ebisbox.isCovered(a_cell + et) || ebisbox.isCovered(a_cell + es) || ebisbox.isCovered(a_cell + et + es)) {
+        // Covered cells have no state, and the cells outside the domain have no corner value, so the term is left out
+        // next to them.
+        if (!a_domain.contains(a_cell + et + es) || ebisbox.isCovered(a_cell + et) || ebisbox.isCovered(a_cell + es) ||
+            ebisbox.isCovered(a_cell + et + es)) {
           return term;
         }
 
@@ -1156,14 +1159,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
 RealVect
 CdrCTU::getEbNormalIntoFluid(const VolIndex& a_vof, const EBISBox& a_ebisbox) const noexcept
 {
-  RealVect n = a_ebisbox.normal(a_vof);
-
-  // Orient the normal from the EB centroid towards the volume centroid.
-  if (n.dotProduct(a_ebisbox.centroid(a_vof) - a_ebisbox.bndryCentroid(a_vof)) < 0.0) {
-    n = -n;
-  }
-
-  return n;
+  return a_ebisbox.normal(a_vof);
 }
 
 bool
@@ -1193,7 +1189,7 @@ CdrCTU::getEbInflowState(Real&            a_phiEB,
     return false;
   }
 
-  a_phiEB = -(*m_ebFlux[a_level])[a_dit](a_vof, m_comp) / vn;
+  a_phiEB = std::max(0.0, -(*m_ebFlux[a_level])[a_dit](a_vof, m_comp) / vn);
 
   return true;
 }

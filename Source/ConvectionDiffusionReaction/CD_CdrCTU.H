@@ -52,7 +52,11 @@ public:
    * @param[in]  a_cellPhi  Phi on cell centers
    * @param[in]  a_extrapDt Time step (i.e. extrapolation) of the face-centered states.
    * @param[in]  a_dt       Time step of the update that the face states enter, or 0 if they enter no update. Used for
-   * the EB inflow state on outgoing faces of cut cells.
+   * the EB inflow state on outgoing faces of cut cells and for the flux correction.
+   * @details The flux correction keeps the update phi - a_dt*div(F) non-negative in single-valued cells away from
+   * refinement boundaries if the first-order update is, which needs a_extrapDt = a_dt (CTU) or a_extrapDt = 0 (donor
+   * cell). It counts the EB flux and the computed fluxes on domain faces, whether or not the caller adds them to the
+   * divergence, so it can limit more than needed but not less.
    */
   virtual void
   advectToFaces(EBAMRFluxData&       a_facePhi,
@@ -105,6 +109,7 @@ protected:
 
   /**
    * @brief Get the EB normal of a cut cell, pointing into the fluid.
+   * @details This is EBISBox::normal, which points into the fluid.
    * @param[in] a_vof     Cut cell
    * @param[in] a_ebisbox EBISBox of the grid box
    * @return The unit normal.
@@ -115,7 +120,8 @@ protected:
   /**
    * @brief Get the state of the fluid that enters a cut cell through the EB.
    * @details Where the flow leaves the EB (v.n > 0, with n the EB normal pointing into the fluid), the state is
-   * phi_EB = -F_EB/(v.n), with F_EB the EB flux (positive out of the fluid) and v the cell velocity.
+   * phi_EB = max(0, -F_EB/(v.n)), with F_EB the EB flux (positive out of the fluid) and v the cell velocity. An EB flux
+   * out of the fluid where the flow leaves the EB gives a zero inflow state.
    * @param[out] a_phiEB   The EB inflow state, if the flow leaves the EB.
    * @param[in]  a_vof     Cut cell
    * @param[in]  a_ebisbox EBISBox of the grid box
