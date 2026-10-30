@@ -4008,6 +4008,43 @@ AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phas
   return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
 
+void
+AmrMesh::redistributeMass(EBAMRCellData&           a_phi,
+                          const EBAMRIVData&       a_deltaM,
+                          const std::string&       a_realm,
+                          const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::redistributeMass");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::redistributeMass" << endl;
+  }
+
+  CH_assert(a_phi.getRealm() == a_realm);
+  CH_assert(a_deltaM.getRealm() == a_realm);
+
+  const Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = this->getRedistributionOp(a_realm, a_phase);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const Real     scale     = 1.0;
+    const Interval variables = Interval(0, 0);
+    const bool     hasCoar   = lvl > 0;
+    const bool     hasFine   = lvl < m_finestLevel;
+
+    CH_assert(a_phi[lvl]->nComp() == 1);
+    CH_assert(a_deltaM[lvl]->nComp() == 1);
+
+    if (hasCoar) {
+      redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *a_deltaM[lvl], scale, variables);
+    }
+
+    redistOps[lvl]->redistributeLevel(*a_phi[lvl], *a_deltaM[lvl], scale, variables);
+
+    if (hasFine) {
+      redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *a_deltaM[lvl], scale, variables);
+    }
+  }
+}
+
 #ifdef CH_USE_PETSC
 const RefCountedPtr<PetscGrid>&
 AmrMesh::getPetscGrid(const std::string& a_realm) const noexcept

@@ -23,7 +23,6 @@
 #include <CD_DischargeIO.H>
 #include <CD_Random.H>
 #include <CD_EBHybridRedistribution.H>
-#include <CD_ParticleMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -517,9 +516,7 @@ CdrSolver::redistribute(EBAMRCellData& a_phi, const EBAMRIVData& a_delta) const 
   CH_assert(a_phi.getRealm() == m_realm);
   CH_assert(a_delta.getRealm() == m_realm);
 
-  const ParticleMassRedistribution redistribution(m_amr->getRedistributionOp(m_realm, m_phase));
-
-  redistribution.redistribute(a_phi, a_delta);
+  m_amr->redistributeMass(a_phi, a_delta, m_realm, m_phase);
 }
 
 void

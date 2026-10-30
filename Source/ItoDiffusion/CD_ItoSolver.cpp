@@ -36,7 +36,6 @@
 #include <CD_KDParticleMerge.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
-#include <CD_ParticleMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int ItoSolver::m_comp;
@@ -2263,9 +2262,7 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass difference
 
-    const ParticleMassRedistribution redistribution(m_amr->getRedistributionOp(m_realm, m_phase));
-
-    redistribution.redistribute(a_phi, m_massDiff);
+    m_amr->redistributeMass(a_phi, m_massDiff, m_realm, m_phase);
   }
 }
 

@@ -29,7 +29,6 @@
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_DischargeIO.H>
-#include <CD_ParticleMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 McPhoto::McPhoto() : m_dirtySampling(false)
@@ -1347,9 +1346,7 @@ McPhoto::depositHybridDivergence(EBAMRCellData& a_phi) const noexcept
   // Redistribute
   if (m_irregularDeposition == IrregularDeposition::Redistribute ||
       m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
-    const ParticleMassRedistribution redistribution(m_amr->getRedistributionOp(m_realm, m_phase));
-
-    redistribution.redistribute(a_phi, m_massDiff);
+    m_amr->redistributeMass(a_phi, m_massDiff, m_realm, m_phase);
   }
 
   // Average down and interpolate
