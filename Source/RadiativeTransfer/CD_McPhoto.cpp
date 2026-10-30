@@ -29,6 +29,7 @@
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParticleMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 McPhoto::McPhoto() : m_dirtySampling(false)
@@ -1346,23 +1347,9 @@ McPhoto::depositHybridDivergence(EBAMRCellData& a_phi) const noexcept
   // Redistribute
   if (m_irregularDeposition == IrregularDeposition::Redistribute ||
       m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
-    Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real     scale     = 1.0;
-      const Interval variables = Interval(0, 0);
-      const bool     hasCoar   = lvl > 0;
-      const bool     hasFine   = lvl < m_amr->getFinestLevel();
+    const ParticleMassRedistribution redistribution(m_amr->getRedistributionOp(m_realm, m_phase));
 
-      if (hasCoar) {
-        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
-      }
-
-      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
-
-      if (hasFine) {
-        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
-      }
-    }
+    redistribution.redistribute(a_phi, m_massDiff);
   }
 
   // Average down and interpolate
