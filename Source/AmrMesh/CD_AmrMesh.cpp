@@ -969,7 +969,7 @@ AmrMesh::parseOptions()
   this->parseGridGeneration();
   this->parseBrBufferSize();
   this->parseBrFillRatio();
-  this->parseRedistributionRadius();
+  this->parseStateRedistribution();
   this->parseMirrorDeposition();
   ;
   this->parseNumGhostCells();
@@ -2917,19 +2917,23 @@ AmrMesh::parseMultigridInterpolator()
 }
 
 void
-AmrMesh::parseRedistributionRadius()
+AmrMesh::parseStateRedistribution()
 {
-  CH_TIME("AmrMesh::parseRedistributionRadius()");
+  CH_TIME("AmrMesh::parseStateRedistribution()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseRedistributionRadius()" << endl;
+    pout() << "AmrMesh::parseStateRedistribution()" << endl;
   }
 
   ParmParse pp("AmrMesh");
 
-  pp.get("redist_radius", m_redistributionRadius);
+  pp.get("srd_order", m_srdOrder);
+  pp.get("srd_target_volfrac", m_srdTargetVolFrac);
 
-  if (m_redistributionRadius <= 0) {
-    MayDay::Error("AmrMesh::parseRedistributionRadius -- you have specified non-positive redistribution radius");
+  if (m_srdOrder != 0 && m_srdOrder != 2) {
+    MayDay::Error("AmrMesh::parseStateRedistribution -- srd_order must be 0 or 2");
+  }
+  if (!(m_srdTargetVolFrac > 0.0 && m_srdTargetVolFrac <= 1.0)) {
+    MayDay::Error("AmrMesh::parseStateRedistribution -- srd_target_volfrac must be in (0, 1]");
   }
 }
 
@@ -3242,17 +3246,6 @@ AmrMesh::getNumberOfEbGhostCells() const
   }
 
   return m_numEbGhostsCells;
-}
-
-int
-AmrMesh::getRedistributionRadius() const
-{
-  CH_TIME("AmrMesh::getRedistributionRadius()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getRedistributionRadius()" << endl;
-  }
-
-  return m_redistributionRadius;
 }
 
 int
@@ -3958,6 +3951,23 @@ AmrMesh::getFluxRegister(const std::string& a_realm, const phase::which_phase a_
   return m_realms[a_realm]->getFluxRegister(a_phase);
 }
 
+const RefCountedPtr<EBStateRedistribution>&
+AmrMesh::getStateRedistribution(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getStateRedistribution");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getStateRedistribution" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getStateRedistribution(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getStateRedistribution(a_phase);
+}
+
 Vector<RefCountedPtr<EBFluxRedistribution>>&
 AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -3973,6 +3983,45 @@ AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phas
   }
 
   return m_realms[a_realm]->getRedistributionOp(a_phase);
+}
+
+void
+AmrMesh::redistributeMass(EBAMRCellData&           a_phi,
+                          const EBAMRIVData&       a_deltaM,
+                          const std::string&       a_realm,
+                          const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::redistributeMass");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::redistributeMass" << endl;
+  }
+
+  CH_assert(a_phi.getRealm() == a_realm);
+  CH_assert(a_deltaM.getRealm() == a_realm);
+  CH_assert(a_phi.size() == m_finestLevel + 1);
+  CH_assert(a_deltaM.size() == m_finestLevel + 1);
+
+  const Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = this->getRedistributionOp(a_realm, a_phase);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const Real     scale     = 1.0;
+    const Interval variables = Interval(0, 0);
+    const bool     hasCoar   = lvl > 0;
+    const bool     hasFine   = lvl < m_finestLevel;
+
+    CH_assert(a_phi[lvl]->nComp() == 1);
+    CH_assert(a_deltaM[lvl]->nComp() == 1);
+
+    if (hasCoar) {
+      redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *a_deltaM[lvl], scale, variables);
+    }
+
+    redistOps[lvl]->redistributeLevel(*a_phi[lvl], *a_deltaM[lvl], scale, variables);
+
+    if (hasFine) {
+      redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *a_deltaM[lvl], scale, variables);
+    }
+  }
 }
 
 #ifdef CH_USE_PETSC
@@ -4125,7 +4174,8 @@ AmrMesh::defineRealms()
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
-                     m_redistributionRadius,
+                     m_srdOrder,
+                     m_srdTargetVolFrac,
                      m_multigridInterpOrder,
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
@@ -4184,7 +4234,8 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,
-                            m_redistributionRadius,
+                            m_srdOrder,
+                            m_srdTargetVolFrac,
                             m_multigridInterpOrder,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,

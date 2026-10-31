@@ -705,7 +705,12 @@ CdrPlasmaImExSdcStepper::computeFD0()
       EBAMRCellData& FD_0  = storage->getFD()[0];  // FD(phi_0)
 
       if (solver->isDiffusive()) {
-        solver->computeDivD(FD_0, phi_0, false, false, false); // Domain fluxes always come in through advection terms.
+        solver->computeDivD(FD_0,
+                            phi_0,
+                            m_dtm[0],
+                            false,
+                            false,
+                            false); // Domain fluxes always come in through advection terms.
 
         // Shouldn't be necessary
         m_amr->conservativeAverage(FD_0, m_realm, m_cdr->getPhase());
@@ -1368,6 +1373,15 @@ CdrPlasmaImExSdcStepper::allocateInternals()
   }
 
   m_cdrError.resize(m_physics->getNumCdrSpecies());
+
+  // The spectral deferred corrections combine divergences as slopes in the quadrature, which the state redistribution
+  // does not support: its stabilized divergences are only valid with the time step they were computed for.
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    if (solverIt()->usesStateRedistribution()) {
+      MayDay::Abort(
+        "CdrPlasmaImExSdcStepper -- state redistribution ('which_redistribution = state') is not supported");
+    }
+  }
 
   CdrPlasmaImExSdcStepper::allocateCdrStorage();
   CdrPlasmaImExSdcStepper::allocateFieldStorage();

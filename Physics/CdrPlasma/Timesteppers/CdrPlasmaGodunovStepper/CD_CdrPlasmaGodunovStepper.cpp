@@ -154,6 +154,12 @@ CdrPlasmaGodunovStepper::parseDiffusion()
     MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - unknown diffusion type requested");
   }
 
+  // With 'auto', a species uses implicit diffusion when dt_A/dt_AD exceeds this threshold.
+  pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
+  if (!(m_implicitDiffusionThreshold > 0.0)) {
+    MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - 'diffusion_thresh' must be positive");
+  }
+
   m_diffusionOrder = -1;
   pp.get("diffusion_order", m_diffusionOrder);
   if (!(m_diffusionOrder == 1 || m_diffusionOrder == 2)) {
@@ -1286,16 +1292,16 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
       else {
         if (m_diffusionOrder == 1) {
-          solver->computeDivD(scratch, phi, false, false, false);
+          solver->computeDivD(scratch, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, a_dt);
         }
         else if (m_diffusionOrder == 2) {
-          solver->computeDivD(scratch, phi, false, false, false);
+          solver->computeDivD(scratch, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, a_dt);
 
-          solver->computeDivD(scratch2, phi, false, false, false);
+          solver->computeDivD(scratch2, phi, a_dt, false, false, false);
 
           DataOps::incr(phi, scratch, -0.5 * a_dt);
           DataOps::incr(phi, scratch2, 0.5 * a_dt);
@@ -1367,7 +1373,7 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
 
         EBAMRCellData& divDgradPhi = storage->getScratch();
 
-        solver->computeDivD(divDgradPhi, phi, false, false, false);
+        solver->computeDivD(divDgradPhi, phi, a_dt, false, false, false);
 
         DataOps::incr(m_semiImplicitRho, divDgradPhi, Z * a_dt * Units::Qe);
       }

@@ -1,9 +1,8 @@
 ## Convergence/KineticMonteCarlo/C3
 
 This example compares Kinetic Monte Carlo solutions with the exact mean for a stiff two-group electron
-chemistry. It is the reproducer for
-[issue #728](https://github.com/chombo-discharge/chombo-discharge/issues/728), where the hybrid
-tau-leaping algorithms lost reactions when one reaction turned its reactant over faster than the step.
+chemistry. It tests the case where the hybrid tau-leaping algorithms used to lose reactions: one
+reaction turning its reactant over faster than the step.
 
 The model is two electron groups, a slow branching reaction feeding a fast one that relaxes back:
 

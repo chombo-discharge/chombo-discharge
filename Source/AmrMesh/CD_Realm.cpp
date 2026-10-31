@@ -56,7 +56,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const int                                                  a_ebGhost,
               const int                                                  a_numGhost,
               const int                                                  a_lsfGhost,
-              const int                                                  a_redistRad,
+              const int                                                  a_srdOrder,
+              const Real                                                 a_srdTargetVolFrac,
               const int                                                  a_mgInterpOrder,
               const int                                                  a_mgInterpRadius,
               const int                                                  a_mgInterpWeight,
@@ -96,7 +97,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                a_ebGhost,
                                a_numGhost,
                                a_lsfGhost,
-                               a_redistRad,
+                               a_srdOrder,
+                               a_srdTargetVolFrac,
                                a_mgInterpOrder,
                                a_mgInterpRadius,
                                a_mgInterpWeight,
@@ -117,7 +119,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                  a_ebGhost,
                                  a_numGhost,
                                  a_lsfGhost,
-                                 a_redistRad,
+                                 a_srdOrder,
+                                 a_srdTargetVolFrac,
                                  a_mgInterpOrder,
                                  a_mgInterpRadius,
                                  a_mgInterpWeight,
@@ -197,6 +200,18 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
+
+  // The state redistribution uses the cell masks, so it is defined after them.
+  for (auto& r : m_realms) {
+    if (r.second->queryOperator(s_eb_state_redist)) {
+      r.second->defineStateRedistribution(this->getMask(s_covered_by_finer, EBStateRedistribution::s_numGhost),
+                                          this->getMask(s_coarse_fine_ghost, EBStateRedistribution::s_numGhost));
+    }
+    else {
+      r.second->defineStateRedistribution(AMRMask(), AMRMask());
+    }
+  }
+
   this->defineParticleGhostMasks();
   this->definePetscGrid();
 }
@@ -215,6 +230,14 @@ Realm::defineMasks(const int a_lmin)
   this->registerMask(s_inner_cf_region, 1);
 #endif
 
+  // The state redistribution needs the masks of the covered cells and of the ghost cells outside the grids.
+  for (const auto& r : m_realms) {
+    if (r.second->queryOperator(s_eb_state_redist)) {
+      this->registerMask(s_covered_by_finer, EBStateRedistribution::s_numGhost);
+      this->registerMask(s_coarse_fine_ghost, EBStateRedistribution::s_numGhost);
+    }
+  }
+
   // Regrid all masks
   this->defineOuterHaloMask(a_lmin);
   this->defineInnerHaloMask(a_lmin);
@@ -223,6 +246,137 @@ Realm::defineMasks(const int a_lmin)
   this->defineInnerCFMask(a_lmin);
 
   this->defineCFIVS(a_lmin);
+
+  this->defineCoveredByFinerMask(a_lmin);
+  this->defineCoarseFineGhostMask(a_lmin);
+}
+
+void
+Realm::defineCoveredByFinerMask(const int /*a_lmin*/)
+{
+  CH_TIME("Realm::defineCoveredByFinerMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineCoveredByFinerMask" << endl;
+  }
+
+  for (auto& m : m_masks) {
+    const std::string which_mask = m.first.first;
+    const int         buffer     = m.first.second;
+
+    if (which_mask == s_covered_by_finer) {
+      AMRMask& mask = m.second;
+
+      mask.resize(1 + m_finestLevel);
+
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        const DisjointBoxLayout& dbl  = m_grids[lvl];
+        const DataIterator&      dit  = dbl.dataIterator();
+        const int                nbox = dit.size();
+
+        // The coverage as data that can be copied and exchanged.
+        LevelData<FArrayBox> covered(dbl, 1, buffer * IntVect::Unit);
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          covered[dit[mybox]].setVal(0.0);
+        }
+
+        if (lvl < m_finestLevel) {
+          DisjointBoxLayout dblCoFi;
+          coarsen(dblCoFi, m_grids[lvl + 1], m_refinementRatios[lvl]);
+
+          LevelData<FArrayBox> fineCoverage(dblCoFi, 1, IntVect::Zero);
+
+          const DataIterator& ditCoFi  = dblCoFi.dataIterator();
+          const int           nboxCoFi = ditCoFi.size();
+
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+            fineCoverage[ditCoFi[mybox]].setVal(1.0);
+          }
+
+          fineCoverage.copyTo(covered);
+        }
+
+        covered.exchange();
+
+        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(dbl, 1, buffer * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          const FArrayBox& coveredData = covered[din];
+          BaseFab<bool>&   boolMask    = (*mask[lvl])[din];
+
+          auto kernel = [&](const IntVect& iv) -> void {
+            boolMask(iv, 0) = coveredData(iv, 0) > 0.0;
+          };
+
+          BoxLoops::loop(boolMask.box(), kernel);
+        }
+      }
+    }
+  }
+}
+
+void
+Realm::defineCoarseFineGhostMask(const int /*a_lmin*/)
+{
+  CH_TIME("Realm::defineCoarseFineGhostMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineCoarseFineGhostMask" << endl;
+  }
+
+  for (auto& m : m_masks) {
+    const std::string which_mask = m.first.first;
+    const int         buffer     = m.first.second;
+
+    if (which_mask == s_coarse_fine_ghost) {
+      AMRMask& mask = m.second;
+
+      mask.resize(1 + m_finestLevel);
+
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        const DisjointBoxLayout& dbl    = m_grids[lvl];
+        const ProblemDomain&     domain = m_domains[lvl];
+        const DataIterator&      dit    = dbl.dataIterator();
+        const int                nbox   = dit.size();
+
+        // 1 in the ghost cells and 0 in the grids. After the exchange, the ghost cells that overlap other grid boxes
+        // are 0 too.
+        LevelData<FArrayBox> outside(dbl, 1, buffer * IntVect::Unit);
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          outside[din].setVal(1.0);
+          outside[din].setVal(0.0, dbl[din], 0);
+        }
+
+        outside.exchange();
+
+        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(dbl, 1, buffer * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          const FArrayBox& outsideData = outside[din];
+          BaseFab<bool>&   boolMask    = (*mask[lvl])[din];
+
+          auto kernel = [&](const IntVect& iv) -> void {
+            boolMask(iv, 0) = (lvl > 0) && domain.contains(iv) && outsideData(iv, 0) > 0.0;
+          };
+
+          BoxLoops::loop(boolMask.box(), kernel);
+        }
+      }
+    }
+  }
 }
 
 void
@@ -1777,6 +1931,12 @@ Vector<RefCountedPtr<EBFluxRedistribution>>&
 Realm::getRedistributionOp(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getRedistributionOp();
+}
+
+const RefCountedPtr<EBStateRedistribution>&
+Realm::getStateRedistribution(const phase::which_phase a_phase)
+{
+  return m_realms[a_phase]->getStateRedistribution();
 }
 
 const EBAMRFAB&

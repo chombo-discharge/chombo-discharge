@@ -7,7 +7,6 @@ AmrMesh.verbosity               = -1             ## Controls verbosity.
 AmrMesh.coarsest_domain         = 32 32 32       ## Number of cells on coarsest domain
 AmrMesh.max_amr_depth           = 1              ## Maximum amr depth
 AmrMesh.max_sim_depth           = 1              ## Maximum simulation depth
-AmrMesh.mg_coarsen              = 4              ## Pre-coarsening of MG levels, useful for deeper bottom solves
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
 AmrMesh.grid_algorithm          = tiled          ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
@@ -26,7 +25,8 @@ AmrMesh.mg_interp_radius        = 1              ## Multigrid interpolation radi
 AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
+AmrMesh.srd_order               = 2              ## State redistribution: reconstruction order, 0 (constant) or 2 (linear, limited)
+AmrMesh.srd_target_volfrac      = 0.5            ## State redistribution: cut cells with smaller volume fractions are merged
 AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
 AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigenvalue ratio of U^T U in the curvature fit.
 AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
