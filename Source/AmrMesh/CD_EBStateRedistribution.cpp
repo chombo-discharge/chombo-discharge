@@ -506,7 +506,7 @@ EBStateRedistribution::defineLevel(const int a_level) noexcept
           }
         }
 
-        if (track(iv, 0) > 0 || nrs(iv, 0) > 1.0) {
+        if (track(iv, 0) > 0 || nrs(iv, 0) > 1) {
           active = true;
         }
       }
@@ -1339,7 +1339,7 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
         const Real k = kappa(iv);
 
         if (k > 0.0) {
-          if (active && type(iv) == s_valid && (track(iv, 0) > 0 || nrs(iv, 0) > 1.0)) {
+          if (active && type(iv) == s_valid && (track(iv, 0) > 0 || nrs(iv, 0) > 1)) {
             const Real self = (track(iv, 0) > 0) ? reconstruct(iv, IntVect::Zero) : avg(iv, 0);
 
             Real sum = alp(iv, 0) * nrs(iv, 0) * self;

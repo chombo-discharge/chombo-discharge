@@ -328,6 +328,8 @@ protected:
 
   /**
    * @brief Get the type of a cell.
+   * @details The coarse-fine ghost mask takes precedence, then the domain, then the covered mask: the covered mask can
+   * also be set in ghost cells that overlap other grid boxes of the level.
    * @param[in] a_coveredByFiner  Cells covered by the finer level, around the grid box.
    * @param[in] a_coarseFineGhost Cells inside the domain but outside the grids of the level, around the grid box.
    * @param[in] a_domain          Domain of the level.

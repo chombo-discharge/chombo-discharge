@@ -844,7 +844,7 @@ protected:
    * @brief Define the masks of the cells that are covered by the finer level.
    * @details For each registered s_covered_by_finer mask, with the buffer as the number of ghost cells. The mask is
    * true in the cells of the grids that are covered by the grids of the finer level, also in the ghost cells that
-   * overlap other grid boxes of the level, and false elsewhere.
+   * overlap other grid boxes of the level, and false elsewhere. All levels are rebuilt, whatever a_lmin is.
    * @param[in] a_lmin Coarsest grid level that changed.
    */
   void
@@ -855,6 +855,7 @@ protected:
    * @details For each registered s_coarse_fine_ghost mask, with the buffer as the number of ghost cells. On levels
    * above the coarsest, the mask is true in the ghost cells that are inside the domain but outside the grids of the
    * level, which overlay valid cells of the coarser level. It is false elsewhere, and everywhere on the coarsest level.
+   * All levels are rebuilt, whatever a_lmin is.
    * @param[in] a_lmin Coarsest grid level that changed.
    */
   void
