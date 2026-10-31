@@ -421,8 +421,7 @@ EBFluxRedistribution::defineBuffers() noexcept
   const ProblemDomain&     domain = m_eblg.getDomain();
 
   // ghostDefine implies that we copy from valid+ghost to valid. Which is what we want since we
-  // also redistribute over patch boundaries (duh). Note that the ghost cells we define here MUST
-  // match the ghost cells in the buffers that are defined in the actual redistribution routines.
+  // also redistribute over patch boundaries (duh). The ghost cells of the copiers match those of the buffers.
 
   if (m_hasCoar) {
     const DisjointBoxLayout& dblCoar      = m_eblgCoar.getDBL();
@@ -430,9 +429,11 @@ EBFluxRedistribution::defineBuffers() noexcept
     const ProblemDomain&     domainCoar   = m_eblgCoar.getDomain();
 
     m_coarCopier.ghostDefine(dblCoarsened, dblCoar, domainCoar, m_redistRadius * IntVect::Unit);
+    m_coarBuffer.define(dblCoarsened, 1, m_redistRadius * IntVect::Unit, EBCellFactory(m_eblgCoarsened.getEBISL()));
   }
 
   m_levelCopier.ghostDefine(dbl, dbl, domain, m_redistRadius * IntVect::Unit);
+  m_levelBuffer.define(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(m_eblg.getEBISL()));
 
   if (m_hasFine) {
     const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
@@ -440,6 +441,10 @@ EBFluxRedistribution::defineBuffers() noexcept
     const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
     m_fineCopier.ghostDefine(dblRefined, dblFine, domainFine, m_refToFine * m_redistRadius * IntVect::Unit);
+    m_fineBuffer.define(dblRefined,
+                        1,
+                        m_refToFine * m_redistRadius * IntVect::Unit,
+                        EBCellFactory(m_eblgRefined.getEBISL()));
   }
 }
 
@@ -461,12 +466,11 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblCoar   = m_eblgCoarsened.getDBL();
-  const DataIterator&      ditCoar   = dblCoar.dataIterator();
-  const EBISLayout&        ebislCoar = m_eblgCoarsened.getEBISL();
-  const int                nbox      = ditCoar.size();
+  const DisjointBoxLayout& dblCoar = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar = dblCoar.dataIterator();
+  const int                nbox    = ditCoar.size();
 
-  LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
+  LevelData<EBCellFAB>& coarBuffer = m_coarBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
@@ -519,12 +523,11 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_phi.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
-  const DataIterator&      dit   = dbl.dataIterator();
-  const EBISLayout&        ebisl = m_eblg.getEBISL();
-  const int                nbox  = dit.size();
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
-  LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
+  LevelData<EBCellFAB>& levelBuffer = m_levelBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
@@ -579,12 +582,11 @@ EBFluxRedistribution::redistributeFine(LevelData<EBCellFAB>&             a_phiFi
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblFine   = m_eblgRefined.getDBL();
-  const DataIterator&      ditFine   = dblFine.dataIterator();
-  const EBISLayout&        ebislFine = m_eblgRefined.getEBISL();
-  const int                nbox      = ditFine.size();
+  const DisjointBoxLayout& dblFine = m_eblgRefined.getDBL();
+  const DataIterator&      ditFine = dblFine.dataIterator();
+  const int                nbox    = ditFine.size();
 
-  LevelData<EBCellFAB> fineBuffer(dblFine, 1, m_refToFine * m_redistRadius * IntVect::Unit, EBCellFactory(ebislFine));
+  LevelData<EBCellFAB>& fineBuffer = m_fineBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 #pragma omp parallel for schedule(runtime)

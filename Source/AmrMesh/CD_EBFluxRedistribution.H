@@ -245,13 +245,32 @@ protected:
   mutable LayoutData<VoFIterator> m_vofit;
 
   /**
+   * @brief Buffer for the mass redistributed to the coarser level, on the coarsening of the grids of this level, with
+   * the redistribution radius as ghost cells. Zeroed and filled by every call to redistributeCoar.
+   */
+  mutable LevelData<EBCellFAB> m_coarBuffer;
+
+  /**
+   * @brief Buffer for the mass redistributed on this level, with the redistribution radius as ghost cells. Zeroed and
+   * filled by every call to redistributeLevel.
+   */
+  mutable LevelData<EBCellFAB> m_levelBuffer;
+
+  /**
+   * @brief Buffer for the mass redistributed to the finer level, on the refinement of the grids of this level, with the
+   * refinement ratio times the redistribution radius as ghost cells. Zeroed and filled by every call to
+   * redistributeFine.
+   */
+  mutable LevelData<EBCellFAB> m_fineBuffer;
+
+  /**
    * @brief Define redistribution stencils
    */
   virtual void
   defineStencils() noexcept;
 
   /**
-   * @brief Define buffer storages
+   * @brief Define the copiers and the buffers of the coarse, level and fine redistribution.
    */
   virtual void
   defineBuffers() noexcept;
