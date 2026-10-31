@@ -3998,6 +3998,8 @@ AmrMesh::redistributeMass(EBAMRCellData&           a_phi,
 
   CH_assert(a_phi.getRealm() == a_realm);
   CH_assert(a_deltaM.getRealm() == a_realm);
+  CH_assert(a_phi.size() == m_finestLevel + 1);
+  CH_assert(a_deltaM.size() == m_finestLevel + 1);
 
   const Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = this->getRedistributionOp(a_realm, a_phase);
 
