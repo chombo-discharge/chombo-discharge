@@ -113,6 +113,7 @@ public:
 
   /**
    * @brief Redistribute the input quantity to the coarse level.
+   * @details Uses a buffer of the operator, so it must not be called concurrently on the same operator.
    * @param[in,out] a_phiCoar   Data on coarse level
    * @param[in]    a_deltaM    Redistribution data on this level
    * @param[in]    a_scaleCoar Scaling factor for redistribution into the coarse level
@@ -126,6 +127,7 @@ public:
 
   /**
    * @brief Redistribute the input quantity to this level.
+   * @details Uses a buffer of the operator, so it must not be called concurrently on the same operator.
    * @param[in,out] a_phi       Data on this level
    * @param[in]    a_deltaM    Redistribution data on this level
    * @param[in]    a_scale     Scaling factor for redistribution on this level
@@ -138,7 +140,8 @@ public:
                     const Interval&                   a_variables) const noexcept;
 
   /**
-   * @brief Redistribute the input quantity to the coarse level.
+   * @brief Redistribute the input quantity to the fine level.
+   * @details Uses a buffer of the operator, so it must not be called concurrently on the same operator.
    * @param[in]    a_deltaM    Redistribution data on this level
    * @param[in]    a_scaleFine Scaling factor for redistribution into the fine level
    * @param[in]    a_variables Variables to redistribute

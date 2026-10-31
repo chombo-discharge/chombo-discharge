@@ -420,6 +420,10 @@ EBFluxRedistribution::defineBuffers() noexcept
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
 
+  // Buffers of a previous definition are released, also when this level no longer has a coarser or finer level.
+  m_coarBuffer.clear();
+  m_fineBuffer.clear();
+
   // ghostDefine implies that we copy from valid+ghost to valid. Which is what we want since we
   // also redistribute over patch boundaries (duh). The ghost cells of the copiers match those of the buffers.
 
