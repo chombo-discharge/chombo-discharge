@@ -299,9 +299,6 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("EB redist");
     this->defineRedistOper(a_lmin, 1);
     timer.stopEvent("EB redist");
-    timer.startEvent("EB state redist");
-    this->defineStateRedistribution();
-    timer.stopEvent("EB state redist");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -856,7 +853,8 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
 }
 
 void
-PhaseRealm::defineStateRedistribution()
+PhaseRealm::defineStateRedistribution(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
+                                      const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost)
 {
   CH_TIME("PhaseRealm::defineStateRedistribution");
   if (m_verbose) {
@@ -873,11 +871,14 @@ PhaseRealm::defineStateRedistribution()
     }
 
     m_stateRedistribution = RefCountedPtr<EBStateRedistribution>(new EBStateRedistribution(m_eblg,
+                                                                                           m_eblgCoFi,
                                                                                            m_refinementRatios,
                                                                                            m_finestLevel,
                                                                                            m_srdOrder,
                                                                                            m_srdTargetVolFrac,
-                                                                                           m_redistributionOp));
+                                                                                           m_redistributionOp,
+                                                                                           a_coveredByFiner,
+                                                                                           a_coarseFineGhost));
   }
 }
 

@@ -87,21 +87,36 @@ public:
   EBStateRedistribution() = delete;
 
   /**
+   * @brief Number of ghost cells of the neighbourhood data and of the cell masks. Also the number of ghost cells needed
+   * in the state and the divergence.
+   */
+  static constexpr int s_numGhost = 2;
+
+  /**
    * @brief Constructor. Builds the neighbourhoods on all levels.
-   * @param[in] a_eblg           Grids on each level
+   * @param[in] a_eblg             Grids on each level
+   * @param[in] a_eblgCoFi         Coarsening of the grids of each level: entry l is the coarsening of the grids on
+   * level l + 1.
    * @param[in] a_refinementRatios Refinement ratios between levels
-   * @param[in] a_finestLevel    Finest grid level
-   * @param[in] a_order          Order of the reconstruction in the neighbourhoods: 0 (constant) or 2 (linear, limited)
-   * @param[in] a_targetVolFrac  Target volume fraction. Cut cells with a smaller volume fraction are merged.
+   * @param[in] a_finestLevel      Finest grid level
+   * @param[in] a_order            Order of the reconstruction in the neighbourhoods: 0 (constant) or 2 (linear,
+   * limited)
+   * @param[in] a_targetVolFrac    Target volume fraction. Cut cells with a smaller volume fraction are merged.
    * @param[in] a_fluxRedistribution Flux redistribution operators on each level, for the corrections on refinement
    * boundaries. Only used if there is more than one level.
+   * @param[in] a_coveredByFiner   Cells covered by the finer level, on each level, with s_numGhost ghost cells.
+   * @param[in] a_coarseFineGhost  Cells inside the domain but outside the grids of each level, with s_numGhost ghost
+   * cells. They overlay valid cells of the coarser level.
    */
-  EBStateRedistribution(const Vector<RefCountedPtr<EBLevelGrid>>&          a_eblg,
-                        const Vector<int>&                                 a_refinementRatios,
-                        const int                                          a_finestLevel,
-                        const int                                          a_order,
-                        const Real                                         a_targetVolFrac,
-                        const Vector<RefCountedPtr<EBFluxRedistribution>>& a_fluxRedistribution) noexcept;
+  EBStateRedistribution(const Vector<RefCountedPtr<EBLevelGrid>>&              a_eblg,
+                        const Vector<RefCountedPtr<EBLevelGrid>>&              a_eblgCoFi,
+                        const Vector<int>&                                     a_refinementRatios,
+                        const int                                              a_finestLevel,
+                        const int                                              a_order,
+                        const Real                                             a_targetVolFrac,
+                        const Vector<RefCountedPtr<EBFluxRedistribution>>&     a_fluxRedistribution,
+                        const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
+                        const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost) noexcept;
 
   /**
    * @brief Destructor.
@@ -119,12 +134,6 @@ public:
   redistribute(EBAMRCellData& a_divG, const EBAMRCellData& a_phi, const Real a_dt) noexcept override;
 
 protected:
-  /**
-   * @brief Number of ghost cells of the neighbourhood data. Also the number of ghost cells needed in the state and the
-   * divergence.
-   */
-  static constexpr int s_numGhost = 2;
-
   /**
    * @brief Number of cells in the 3^D block around a cell, which indexes the neighbour offsets.
    */
@@ -176,6 +185,21 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblg;
 
   /**
+   * @brief Coarsening of the grids: entry l is the coarsening of the grids on level l + 1.
+   */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
+
+  /**
+   * @brief Cells covered by the finer level, with s_numGhost ghost cells.
+   */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_coveredByFiner;
+
+  /**
+   * @brief Cells inside the domain but outside the grids of the level, with s_numGhost ghost cells.
+   */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_coarseFineGhost;
+
+  /**
    * @brief Refinement ratios between levels.
    */
   Vector<int> m_refinementRatios;
@@ -186,21 +210,6 @@ protected:
   Vector<RefCountedPtr<EBFluxRedistribution>> m_fluxRedistribution;
 
   /**
-   * @brief Type of each cell: s_outside, s_valid, s_covered or s_ghost.
-   */
-  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellType;
-
-  /**
-   * @brief Volume fraction. Zero in covered cells.
-   */
-  Vector<RefCountedPtr<LevelData<FArrayBox>>> m_volFrac;
-
-  /**
-   * @brief Cell centroid, as an offset from the cell centre in units of the cell size.
-   */
-  Vector<RefCountedPtr<LevelData<FArrayBox>>> m_centroid;
-
-  /**
    * @brief Neighbourhoods. Component 0 is the number of merged neighbours of the cell, components 1, 2, ... are their
    * offsets, as indices into the 3^D block around the cell (see offset()).
    */
@@ -209,7 +218,7 @@ protected:
   /**
    * @brief Number of neighbourhoods that each cell is in, its own included.
    */
-  Vector<RefCountedPtr<LevelData<FArrayBox>>> m_numNbhd;
+  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_numNbhd;
 
   /**
    * @brief Weights. Component 0 is alpha_0 of the cell, component 1 is alpha_1 of the neighbourhood of the cell.
@@ -297,28 +306,64 @@ protected:
   offsetIndex(const IntVect& a_offset) noexcept;
 
   /**
+   * @brief Get the volume fraction of a cell from the EB geometry.
+   * @param[in] a_ebisbox EB geometry of the grid box, defined at least s_numGhost cells around it.
+   * @param[in] a_domain  Domain of the level.
+   * @param[in] a_iv      Cell
+   * @return The volume fraction; 0 for cells covered by the EB and outside the domain, -1 for multi-valued cells.
+   */
+  static Real
+  volumeFraction(const EBISBox& a_ebisbox, const ProblemDomain& a_domain, const IntVect& a_iv) noexcept;
+
+  /**
+   * @brief Get the centroid of a cell from the EB geometry.
+   * @param[in] a_ebisbox EB geometry of the grid box, defined at least s_numGhost cells around it.
+   * @param[in] a_domain  Domain of the level.
+   * @param[in] a_iv      Cell
+   * @return The centroid as an offset from the cell centre in units of the cell size; zero except in single-valued cut
+   * cells.
+   */
+  static RealVect
+  cellCentroid(const EBISBox& a_ebisbox, const ProblemDomain& a_domain, const IntVect& a_iv) noexcept;
+
+  /**
+   * @brief Get the type of a cell.
+   * @param[in] a_coveredByFiner  Cells covered by the finer level, around the grid box.
+   * @param[in] a_coarseFineGhost Cells inside the domain but outside the grids of the level, around the grid box.
+   * @param[in] a_domain          Domain of the level.
+   * @param[in] a_iv              Cell
+   * @return s_ghost, s_outside, s_covered or s_valid.
+   */
+  static int
+  cellType(const BaseFab<bool>& a_coveredByFiner,
+           const BaseFab<bool>& a_coarseFineGhost,
+           const ProblemDomain& a_domain,
+           const IntVect&       a_iv) noexcept;
+
+  /**
    * @brief Build the neighbourhood data on one level.
    * @param[in] a_level           Grid level
-   * @param[in] a_refinementRatios Refinement ratios between levels
    */
   void
-  defineLevel(const int a_level, const Vector<int>& a_refinementRatios) noexcept;
+  defineLevel(const int a_level) noexcept;
 
   /**
    * @brief Find the neighbours that a small cut cell merges with.
    * @param[out] a_offsets   Offsets of the merged neighbours.
    * @param[in]  a_iv        Cell
    * @param[in]  a_normal    EB normal of the cell, pointing into the fluid.
-   * @param[in]  a_volFrac   Volume fractions around the cell.
-   * @param[in]  a_cellType  Cell types around the cell.
+   * @param[in]  a_ebisbox   EB geometry of the grid box.
+   * @param[in]  a_coveredByFiner  Cells covered by the finer level, around the grid box.
+   * @param[in]  a_coarseFineGhost Cells inside the domain but outside the grids of the level, around the grid box.
    * @param[in]  a_domain    Domain of the level.
    */
   void
   mergeNeighbours(std::vector<IntVect>& a_offsets,
                   const IntVect&        a_iv,
                   const RealVect&       a_normal,
-                  const FArrayBox&      a_volFrac,
-                  const BaseFab<int>&   a_cellType,
+                  const EBISBox&        a_ebisbox,
+                  const BaseFab<bool>&  a_coveredByFiner,
+                  const BaseFab<bool>&  a_coarseFineGhost,
                   const ProblemDomain&  a_domain) const noexcept;
 
   /**
@@ -326,18 +371,22 @@ protected:
    * @param[in] a_iv          Merged cell
    * @param[in] a_average     Neighbourhood averages
    * @param[in] a_centroid    Neighbourhood centroids
-   * @param[in] a_volFrac     Volume fractions
-   * @param[in] a_cellType    Cell types
+   * @param[in] a_ebisbox     EB geometry of the grid box.
+   * @param[in] a_coveredByFiner  Cells covered by the finer level, around the grid box.
+   * @param[in] a_coarseFineGhost Cells inside the domain but outside the grids of the level, around the grid box.
+   * @param[in] a_domain      Domain of the level.
    * @param[in] a_connected   Connected neighbours of the merged cell (bit mask over the 3^D block)
    * @return The slope, in units of the state per cell size.
    */
   RealVect
-  computeSlope(const IntVect&      a_iv,
-               const FArrayBox&    a_average,
-               const FArrayBox&    a_centroid,
-               const FArrayBox&    a_volFrac,
-               const BaseFab<int>& a_cellType,
-               const int           a_connected) const noexcept;
+  computeSlope(const IntVect&       a_iv,
+               const FArrayBox&     a_average,
+               const FArrayBox&     a_centroid,
+               const EBISBox&       a_ebisbox,
+               const BaseFab<bool>& a_coveredByFiner,
+               const BaseFab<bool>& a_coarseFineGhost,
+               const ProblemDomain& a_domain,
+               const int            a_connected) const noexcept;
 
   /**
    * @brief Add the corrections on refinement boundaries to the right-hand side.

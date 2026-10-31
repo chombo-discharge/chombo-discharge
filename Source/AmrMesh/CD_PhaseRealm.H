@@ -56,6 +56,8 @@ static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For l
 static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registration
 static const std::string s_eb_redist           = "eb_redist";           // For redistribution
 static const std::string s_eb_state_redist     = "eb_state_redist";     // For state redistribution
+static const std::string s_covered_by_finer    = "covered_by_finer";    // Cells covered by the finer level
+static const std::string s_coarse_fine_ghost   = "coarse_fine_ghost";   // Cells outside the grids, inside the domain
 static const std::string s_noncons_div         = "eb_non_cons_div";     // For computing non-conservative divergences
 static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
 static const std::string s_levelset            = "levelset";            // For putting level-set on mesh
@@ -188,6 +190,19 @@ public:
    */
   void
   regridOperators(const int a_lmin);
+
+  /**
+   * @brief Define the state redistribution, if the operator is registered.
+   * @details Called after regridOperators, with the cell masks of the realm. The neighbourhoods depend on all levels,
+   * so the operator is rebuilt on every regrid.
+   * @param[in] a_coveredByFiner  Cells covered by the finer level, with EBStateRedistribution::s_numGhost ghost cells.
+   * Not used if the operator is not registered.
+   * @param[in] a_coarseFineGhost Cells inside the domain but outside the grids of each level, with
+   * EBStateRedistribution::s_numGhost ghost cells. Not used if the operator is not registered.
+   */
+  void
+  defineStateRedistribution(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
+                            const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost);
 
   /**
    * @brief Register an AMR operator
@@ -857,12 +872,6 @@ protected:
    */
   void
   defineRedistOper(const int a_lmin, const int a_regsize);
-
-  /**
-   * @brief Define the state redistribution, if the operator is registered.
-   */
-  void
-  defineStateRedistribution();
 
   /**
    * @brief Define operator redistribution utility

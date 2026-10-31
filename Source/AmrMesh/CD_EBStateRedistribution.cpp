@@ -37,12 +37,15 @@ constexpr int EBStateRedistribution::s_covered;
 constexpr int EBStateRedistribution::s_ghost;
 
 EBStateRedistribution::EBStateRedistribution(
-  const Vector<RefCountedPtr<EBLevelGrid>>&          a_eblg,
-  const Vector<int>&                                 a_refinementRatios,
-  const int                                          a_finestLevel,
-  const int                                          a_order,
-  const Real                                         a_targetVolFrac,
-  const Vector<RefCountedPtr<EBFluxRedistribution>>& a_fluxRedistribution) noexcept
+  const Vector<RefCountedPtr<EBLevelGrid>>&              a_eblg,
+  const Vector<RefCountedPtr<EBLevelGrid>>&              a_eblgCoFi,
+  const Vector<int>&                                     a_refinementRatios,
+  const int                                              a_finestLevel,
+  const int                                              a_order,
+  const Real                                             a_targetVolFrac,
+  const Vector<RefCountedPtr<EBFluxRedistribution>>&     a_fluxRedistribution,
+  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
+  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost) noexcept
 {
   CH_TIME("EBStateRedistribution::EBStateRedistribution");
 
@@ -54,6 +57,9 @@ EBStateRedistribution::EBStateRedistribution(
   }
 
   m_eblg               = a_eblg;
+  m_eblgCoFi           = a_eblgCoFi;
+  m_coveredByFiner     = a_coveredByFiner;
+  m_coarseFineGhost    = a_coarseFineGhost;
   m_refinementRatios   = a_refinementRatios;
   m_fluxRedistribution = a_fluxRedistribution;
   m_finestLevel        = a_finestLevel;
@@ -72,9 +78,17 @@ EBStateRedistribution::EBStateRedistribution(
     }
   }
 
-  m_cellType.resize(1 + m_finestLevel);
-  m_volFrac.resize(1 + m_finestLevel);
-  m_centroid.resize(1 + m_finestLevel);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    if (m_coveredByFiner.size() <= lvl || m_coarseFineGhost.size() <= lvl || m_coveredByFiner[lvl].isNull() ||
+        m_coarseFineGhost[lvl].isNull()) {
+      MayDay::Abort("EBStateRedistribution -- the cell masks are needed on all levels");
+    }
+    if (!(m_coveredByFiner[lvl]->ghostVect() >= s_numGhost * IntVect::Unit) ||
+        !(m_coarseFineGhost[lvl]->ghostVect() >= s_numGhost * IntVect::Unit)) {
+      MayDay::Abort("EBStateRedistribution -- the cell masks need s_numGhost ghost cells");
+    }
+  }
+
   m_tracker.resize(1 + m_finestLevel);
   m_numNbhd.resize(1 + m_finestLevel);
   m_alpha.resize(1 + m_finestLevel);
@@ -92,7 +106,7 @@ EBStateRedistribution::EBStateRedistribution(
   m_massDiff.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    this->defineLevel(lvl, a_refinementRatios);
+    this->defineLevel(lvl);
   }
 }
 
@@ -118,6 +132,55 @@ EBStateRedistribution::offset(const int a_index) noexcept
   return ret;
 }
 
+Real
+EBStateRedistribution::volumeFraction(const EBISBox&       a_ebisbox,
+                                      const ProblemDomain& a_domain,
+                                      const IntVect&       a_iv) noexcept
+{
+  if (!a_domain.contains(a_iv)) {
+    return 0.0;
+  }
+  if (a_ebisbox.isRegular(a_iv)) {
+    return 1.0;
+  }
+  if (a_ebisbox.isMultiValued(a_iv)) {
+    return -1.0;
+  }
+  if (a_ebisbox.isIrregular(a_iv)) {
+    return a_ebisbox.volFrac(VolIndex(a_iv, 0));
+  }
+
+  return 0.0;
+}
+
+RealVect
+EBStateRedistribution::cellCentroid(const EBISBox&       a_ebisbox,
+                                    const ProblemDomain& a_domain,
+                                    const IntVect&       a_iv) noexcept
+{
+  if (a_domain.contains(a_iv) && a_ebisbox.isIrregular(a_iv) && !a_ebisbox.isMultiValued(a_iv)) {
+    return a_ebisbox.centroid(VolIndex(a_iv, 0));
+  }
+
+  return RealVect::Zero;
+}
+
+int
+EBStateRedistribution::cellType(const BaseFab<bool>& a_coveredByFiner,
+                                const BaseFab<bool>& a_coarseFineGhost,
+                                const ProblemDomain& a_domain,
+                                const IntVect&       a_iv) noexcept
+{
+  if (a_coarseFineGhost(a_iv, 0)) {
+    return s_ghost;
+  }
+  if (!a_domain.contains(a_iv)) {
+    return s_outside;
+  }
+
+  return a_coveredByFiner(a_iv, 0) ? s_covered : s_valid;
+}
+
 int
 EBStateRedistribution::offsetIndex(const IntVect& a_offset) noexcept
 {
@@ -135,7 +198,7 @@ EBStateRedistribution::offsetIndex(const IntVect& a_offset) noexcept
 }
 
 void
-EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refinementRatios) noexcept
+EBStateRedistribution::defineLevel(const int a_level) noexcept
 {
   CH_TIME("EBStateRedistribution::defineLevel");
 
@@ -160,13 +223,10 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
     }
   }
 
-  m_cellType[a_level] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, 1, ghost));
-  m_volFrac[a_level]  = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, ghost));
-  m_centroid[a_level] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, SpaceDim, ghost));
-  m_tracker[a_level]  = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, s_trackerComps, ghost));
-  m_numNbhd[a_level]  = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, ghost));
-  m_alpha[a_level]    = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 2, ghost));
-  m_nbhdVol[a_level]  = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, ghost));
+  m_tracker[a_level] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, s_trackerComps, ghost));
+  m_numNbhd[a_level] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, 1, ghost));
+  m_alpha[a_level]   = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 2, ghost));
+  m_nbhdVol[a_level] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, ghost));
   m_nbhdCentroid[a_level] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, SpaceDim, ghost));
   m_connected[a_level]    = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, 1, IntVect::Zero));
   m_activeBox[a_level]    = RefCountedPtr<LayoutData<bool>>(new LayoutData<bool>(dbl));
@@ -178,8 +238,7 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
   if (a_level > 0) {
     const EBLevelGrid& eblgCoar = *m_eblg[a_level - 1];
 
-    DisjointBoxLayout dblCoarsened;
-    coarsen(dblCoarsened, dbl, a_refinementRatios[a_level - 1]);
+    const DisjointBoxLayout& dblCoarsened = m_eblgCoFi[a_level - 1]->getDBL();
 
     m_ghostMass[a_level] = RefCountedPtr<LevelData<FArrayBox>>(
       new LevelData<FArrayBox>(dblCoarsened, 1, IntVect::Unit));
@@ -199,154 +258,13 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
   m_massDiff[a_level] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
     new LevelData<BaseIVFAB<Real>>(dbl, 1, IntVect::Zero, BaseIVFactory<Real>(ebisl, irregCells)));
 
-  LevelData<BaseFab<int>>& cellType     = *m_cellType[a_level];
-  LevelData<FArrayBox>&    volFrac      = *m_volFrac[a_level];
-  LevelData<FArrayBox>&    centroid     = *m_centroid[a_level];
   LevelData<BaseFab<int>>& tracker      = *m_tracker[a_level];
-  LevelData<FArrayBox>&    numNbhd      = *m_numNbhd[a_level];
+  LevelData<BaseFab<int>>& numNbhd      = *m_numNbhd[a_level];
   LevelData<FArrayBox>&    alpha        = *m_alpha[a_level];
   LevelData<FArrayBox>&    nbhdVol      = *m_nbhdVol[a_level];
   LevelData<FArrayBox>&    nbhdCentroid = *m_nbhdCentroid[a_level];
   LevelData<BaseFab<int>>& connected    = *m_connected[a_level];
   LayoutData<bool>&        activeBox    = *m_activeBox[a_level];
-
-  // Cells of this level that are covered by the finer level.
-  LevelData<FArrayBox> coveredByFiner(dbl, 1, IntVect::Zero);
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    coveredByFiner[din].setVal(0.0);
-  }
-
-  if (a_level < m_finestLevel) {
-    DisjointBoxLayout dblCoFi;
-    coarsen(dblCoFi, m_eblg[a_level + 1]->getDBL(), a_refinementRatios[a_level]);
-
-    LevelData<FArrayBox> fineCoverage(dblCoFi, 1, IntVect::Zero);
-
-    const DataIterator& ditCoFi  = dblCoFi.dataIterator();
-    const int           nboxCoFi = ditCoFi.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nboxCoFi; mybox++) {
-      fineCoverage[ditCoFi[mybox]].setVal(1.0);
-    }
-
-    fineCoverage.copyTo(coveredByFiner);
-  }
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    BaseFab<int>&    type    = cellType[din];
-    const FArrayBox& covered = coveredByFiner[din];
-
-    type.setVal(s_outside);
-
-    auto kernel = [&](const IntVect& iv) -> void {
-      type(iv, 0) = (covered(iv, 0) > 0.0) ? s_covered : s_valid;
-    };
-
-    BoxLoops::loop(dbl[din], kernel);
-  }
-
-  cellType.exchange();
-
-  // Cells inside the domain that are outside the grids of this level are ghost cells, which overlay valid cells of the
-  // coarser level.
-  if (a_level > 0) {
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      BaseFab<int>& type = cellType[din];
-
-      auto kernel = [&](const IntVect& iv) -> void {
-        if (type(iv, 0) == s_outside) {
-          type(iv, 0) = s_ghost;
-        }
-      };
-
-      BoxLoops::loop(grow(dbl[din], s_numGhost) & periodicDomain, kernel);
-    }
-  }
-
-  // Volume fractions and centroids. Multi-valued cells get a negative volume fraction so that they can be detected
-  // where they matter.
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din     = dit[mybox];
-    const EBISBox&   ebisbox = ebisl[din];
-
-    FArrayBox& kappa = volFrac[din];
-    FArrayBox& cent  = centroid[din];
-
-    kappa.setVal(0.0);
-    cent.setVal(0.0);
-
-    auto kernel = [&](const IntVect& iv) -> void {
-      if (ebisbox.isMultiValued(iv)) {
-        kappa(iv, 0) = -1.0;
-      }
-      else if (ebisbox.isRegular(iv)) {
-        kappa(iv, 0) = 1.0;
-      }
-      else if (ebisbox.isIrregular(iv)) {
-        const VolIndex vof(iv, 0);
-        const RealVect c = ebisbox.centroid(vof);
-
-        kappa(iv, 0) = ebisbox.volFrac(vof);
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cent(iv, dir) = c[dir];
-        }
-      }
-    };
-
-    BoxLoops::loop(dbl[din], kernel);
-  }
-
-  volFrac.exchange();
-  centroid.exchange();
-
-  // The geometry in the ghost cells, which the exchange does not fill. The EBISLayout has these cells.
-  if (a_level > 0) {
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din     = dit[mybox];
-      const EBISBox&   ebisbox = ebisl[din];
-
-      const BaseFab<int>& type  = cellType[din];
-      FArrayBox&          kappa = volFrac[din];
-      FArrayBox&          cent  = centroid[din];
-
-      auto kernel = [&](const IntVect& iv) -> void {
-        if (type(iv, 0) == s_ghost) {
-          if (ebisbox.isMultiValued(iv)) {
-            kappa(iv, 0) = -1.0;
-          }
-          else if (ebisbox.isRegular(iv)) {
-            kappa(iv, 0) = 1.0;
-          }
-          else if (ebisbox.isIrregular(iv)) {
-            const VolIndex vof(iv, 0);
-            const RealVect c = ebisbox.centroid(vof);
-
-            kappa(iv, 0) = ebisbox.volFrac(vof);
-
-            for (int dir = 0; dir < SpaceDim; dir++) {
-              cent(iv, dir) = c[dir];
-            }
-          }
-        }
-      };
-
-      BoxLoops::loop(grow(dbl[din], s_numGhost) & periodicDomain, kernel);
-    }
-  }
 
   // Find the neighbours that the small cells merge with.
 #pragma omp parallel for schedule(runtime)
@@ -354,8 +272,15 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
     const DataIndex& din     = dit[mybox];
     const EBISBox&   ebisbox = ebisl[din];
 
-    const BaseFab<int>& type  = cellType[din];
-    const FArrayBox&    kappa = volFrac[din];
+    const BaseFab<bool>& covered = (*m_coveredByFiner[a_level])[din];
+    const BaseFab<bool>& cfGhost = (*m_coarseFineGhost[a_level])[din];
+
+    auto kappa = [&](const IntVect& a_iv) -> Real {
+      return volumeFraction(ebisbox, domain, a_iv);
+    };
+    auto type = [&](const IntVect& a_iv) -> int {
+      return cellType(covered, cfGhost, domain, a_iv);
+    };
 
     BaseFab<int>& track = tracker[din];
 
@@ -364,9 +289,9 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
     std::vector<IntVect> offsets;
 
     auto kernel = [&](const IntVect& iv) -> void {
-      const Real k = kappa(iv, 0);
+      const Real k = kappa(iv);
 
-      if (type(iv, 0) == s_valid && k > 0.0 && k < m_targetVolFrac) {
+      if (type(iv) == s_valid && k > 0.0 && k < m_targetVolFrac) {
 
         // The neighbourhood reaches one cell and the slopes two cells. The cells that they use must be single-valued.
         const Box block = grow(Box(iv, iv), s_numGhost) & periodicDomain;
@@ -375,12 +300,12 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
           const IntVect& c    = bit();
           const bool     near = Box(iv - IntVect::Unit, iv + IntVect::Unit).contains(c);
 
-          if (kappa(c, 0) < 0.0 && (type(c, 0) == s_valid || (near && type(c, 0) != s_outside))) {
+          if (kappa(c) < 0.0 && (type(c) == s_valid || (near && type(c) != s_outside))) {
             MayDay::Abort("EBStateRedistribution -- a multi-valued cell lies within two cells of a small cell");
           }
         }
 
-        this->mergeNeighbours(offsets, iv, ebisbox.normal(VolIndex(iv, 0)), kappa, type, domain);
+        this->mergeNeighbours(offsets, iv, ebisbox.normal(VolIndex(iv, 0)), ebisbox, covered, cfGhost, domain);
 
         track(iv, 0) = offsets.size();
 
@@ -401,18 +326,27 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseFab<int>& type  = cellType[din];
-    const FArrayBox&    kappa = volFrac[din];
+    const EBISBox&       ebisbox = ebisl[din];
+    const BaseFab<bool>& covered = (*m_coveredByFiner[a_level])[din];
+    const BaseFab<bool>& cfGhost = (*m_coarseFineGhost[a_level])[din];
+
+    auto kappa = [&](const IntVect& a_iv) -> Real {
+      return volumeFraction(ebisbox, domain, a_iv);
+    };
+    auto type = [&](const IntVect& a_iv) -> int {
+      return cellType(covered, cfGhost, domain, a_iv);
+    };
+
     const BaseFab<int>& track = tracker[din];
 
-    FArrayBox& nrs = numNbhd[din];
-    FArrayBox& alp = alpha[din];
+    BaseFab<int>& nrs = numNbhd[din];
+    FArrayBox&    alp = alpha[din];
 
-    nrs.setVal(1.0);
+    nrs.setVal(1);
     alp.setVal(1.0);
 
     auto kernel = [&](const IntVect& iv) -> void {
-      if (type(iv, 0) == s_outside) {
+      if (type(iv) == s_outside) {
         return;
       }
 
@@ -423,7 +357,7 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
         if (o != IntVect::Zero) {
           for (int n = 1; n <= track(i, 0); n++) {
             if (offset(track(i, n)) == -o) {
-              nrs(iv, 0) += 1.0;
+              nrs(iv, 0) += 1;
             }
           }
         }
@@ -433,10 +367,10 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
         Real volOfNeighbours = 0.0;
 
         for (int n = 1; n <= track(iv, 0); n++) {
-          volOfNeighbours += kappa(iv + offset(track(iv, n)), 0);
+          volOfNeighbours += kappa(iv + offset(track(iv, n)));
         }
 
-        alp(iv, 1) = (m_targetVolFrac - kappa(iv, 0)) / volOfNeighbours;
+        alp(iv, 1) = (m_targetVolFrac - kappa(iv)) / volOfNeighbours;
       }
     };
 
@@ -449,16 +383,20 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
   // alpha_0 of each cell.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
+    const DataIndex& din     = dit[mybox];
+    const EBISBox&   ebisbox = ebisl[din];
 
-    const FArrayBox&    kappa = volFrac[din];
-    const FArrayBox&    nrs   = numNbhd[din];
+    auto kappa = [&](const IntVect& a_iv) -> Real {
+      return volumeFraction(ebisbox, domain, a_iv);
+    };
+
+    const BaseFab<int>& nrs   = numNbhd[din];
     const BaseFab<int>& track = tracker[din];
 
     FArrayBox& alp = alpha[din];
 
     auto kernel = [&](const IntVect& iv) -> void {
-      if (kappa(iv, 0) > 0.0) {
+      if (kappa(iv) > 0.0) {
         Real a0 = 1.0;
 
         for (int idx = 0; idx < s_numOffsets; idx++) {
@@ -493,10 +431,20 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
     const DataIndex& din     = dit[mybox];
     const EBISBox&   ebisbox = ebisl[din];
 
-    const BaseFab<int>& type  = cellType[din];
-    const FArrayBox&    kappa = volFrac[din];
-    const FArrayBox&    cent  = centroid[din];
-    const FArrayBox&    nrs   = numNbhd[din];
+    const BaseFab<bool>& covered = (*m_coveredByFiner[a_level])[din];
+    const BaseFab<bool>& cfGhost = (*m_coarseFineGhost[a_level])[din];
+
+    auto kappa = [&](const IntVect& a_iv) -> Real {
+      return volumeFraction(ebisbox, domain, a_iv);
+    };
+    auto cent = [&](const IntVect& a_iv) -> RealVect {
+      return cellCentroid(ebisbox, domain, a_iv);
+    };
+    auto type = [&](const IntVect& a_iv) -> int {
+      return cellType(covered, cfGhost, domain, a_iv);
+    };
+
+    const BaseFab<int>& nrs   = numNbhd[din];
     const FArrayBox&    alp   = alpha[din];
     const BaseFab<int>& track = tracker[din];
 
@@ -511,29 +459,29 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
     bool active = false;
 
     auto kernel = [&](const IntVect& iv) -> void {
-      if (kappa(iv, 0) > 0.0) {
-        vol(iv, 0) = alp(iv, 0) * kappa(iv, 0);
+      if (kappa(iv) > 0.0) {
+        vol(iv, 0) = alp(iv, 0) * kappa(iv);
 
         for (int dir = 0; dir < SpaceDim; dir++) {
-          centHat(iv, dir) = cent(iv, dir);
+          centHat(iv, dir) = cent(iv)[dir];
         }
 
         if (track(iv, 0) > 0) {
           RealVect c = RealVect::Zero;
 
           for (int dir = 0; dir < SpaceDim; dir++) {
-            c[dir] = cent(iv, dir) * alp(iv, 0) * kappa(iv, 0);
+            c[dir] = cent(iv)[dir] * alp(iv, 0) * kappa(iv);
           }
 
           for (int n = 1; n <= track(iv, 0); n++) {
             const IntVect o = offset(track(iv, n));
             const IntVect r = iv + o;
-            const Real    w = alp(iv, 1) * kappa(r, 0) / nrs(r, 0);
+            const Real    w = alp(iv, 1) * kappa(r) / nrs(r, 0);
 
             vol(iv, 0) += w;
 
             for (int dir = 0; dir < SpaceDim; dir++) {
-              c[dir] += (cent(r, dir) + o[dir]) * w;
+              c[dir] += (cent(r)[dir] + o[dir]) * w;
             }
           }
 
@@ -552,7 +500,7 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
           for (int i = 0; i < neighbours.size(); i++) {
             const IntVect& nb = neighbours[i].gridIndex();
 
-            if (type(nb, 0) != s_outside) {
+            if (type(nb) != s_outside) {
               conn(iv, 0) |= (1 << offsetIndex(nb - iv));
             }
           }
@@ -576,16 +524,24 @@ EBStateRedistribution::defineLevel(const int a_level, const Vector<int>& a_refin
   if (a_level > 0) {
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      const DataIndex&     din     = dit[mybox];
+      const EBISBox&       ebisbox = ebisl[din];
+      const BaseFab<bool>& covered = (*m_coveredByFiner[a_level])[din];
+      const BaseFab<bool>& cfGhost = (*m_coarseFineGhost[a_level])[din];
 
-      const BaseFab<int>& type    = cellType[din];
-      const FArrayBox&    cent    = centroid[din];
-      FArrayBox&          centHat = nbhdCentroid[din];
+      auto cent = [&](const IntVect& a_iv) -> RealVect {
+        return cellCentroid(ebisbox, domain, a_iv);
+      };
+      auto type = [&](const IntVect& a_iv) -> int {
+        return cellType(covered, cfGhost, domain, a_iv);
+      };
+
+      FArrayBox& centHat = nbhdCentroid[din];
 
       auto kernel = [&](const IntVect& iv) -> void {
-        if (type(iv, 0) == s_ghost) {
+        if (type(iv) == s_ghost) {
           for (int dir = 0; dir < SpaceDim; dir++) {
-            centHat(iv, dir) = cent(iv, dir);
+            centHat(iv, dir) = cent(iv)[dir];
           }
         }
       };
@@ -599,8 +555,9 @@ void
 EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
                                        const IntVect&        a_iv,
                                        const RealVect&       a_normal,
-                                       const FArrayBox&      a_volFrac,
-                                       const BaseFab<int>&   a_cellType,
+                                       const EBISBox&        a_ebisbox,
+                                       const BaseFab<bool>&  a_coveredByFiner,
+                                       const BaseFab<bool>&  a_coarseFineGhost,
                                        const ProblemDomain&  a_domain) const noexcept
 {
   // Two normal components are taken as equal within this tolerance, as in AMReX.
@@ -610,9 +567,13 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
 
   a_offsets.resize(0);
 
+  auto kappa = [&](const IntVect& a_cell) -> Real {
+    return volumeFraction(a_ebisbox, a_domain, a_cell);
+  };
+
   // Whether a cell can be in the neighbourhood: a valid cell, or a cell that stands in for another level.
   auto isUsable = [&](const IntVect& a_cell) -> bool {
-    return a_cellType(a_cell, 0) != s_outside;
+    return cellType(a_coveredByFiner, a_coarseFineGhost, a_domain, a_cell) != s_outside;
   };
 
   bool openLo[SpaceDim];
@@ -667,7 +628,7 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
   // decreasing volume fraction. The remaining directions follow in the order above.
   const IntVect firstOffset = mergeDirs[0].second * BASISV(mergeDirs[0].first);
 
-  if (a_volFrac(a_iv + firstOffset, 0) == 0.0) {
+  if (kappa(a_iv + firstOffset) == 0.0) {
     std::vector<std::pair<int, int>> byVolFrac;
     std::vector<Real>                bestVolFrac(SpaceDim, -1.0);
 
@@ -676,11 +637,11 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
 
       if (openHi[dir]) {
         side             = 1;
-        bestVolFrac[dir] = a_volFrac(a_iv + BASISV(dir), 0);
+        bestVolFrac[dir] = kappa(a_iv + BASISV(dir));
       }
-      if (openLo[dir] && a_volFrac(a_iv - BASISV(dir), 0) > bestVolFrac[dir]) {
+      if (openLo[dir] && kappa(a_iv - BASISV(dir)) > bestVolFrac[dir]) {
         side             = -1;
-        bestVolFrac[dir] = a_volFrac(a_iv - BASISV(dir), 0);
+        bestVolFrac[dir] = kappa(a_iv - BASISV(dir));
       }
 
       if (side != 0 && bestVolFrac[dir] > 0.0) {
@@ -715,7 +676,7 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
   // while the merged volume is below the target or the normal component of the next direction equals one already used
   // (merging in only one of two equal directions would break the symmetry). A direction is skipped if a cell that it
   // adds to the block is outside the domain.
-  Real sumVol = a_volFrac(a_iv, 0);
+  Real sumVol = kappa(a_iv);
 
   bool limited = false;
 
@@ -761,7 +722,7 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
       block.push_back(o);
       a_offsets.push_back(o);
 
-      sumVol += a_volFrac(a_iv + o, 0);
+      sumVol += kappa(a_iv + o);
     }
   }
 
@@ -778,12 +739,14 @@ EBStateRedistribution::mergeNeighbours(std::vector<IntVect>& a_offsets,
 }
 
 RealVect
-EBStateRedistribution::computeSlope(const IntVect&      a_iv,
-                                    const FArrayBox&    a_average,
-                                    const FArrayBox&    a_centroid,
-                                    const FArrayBox&    a_volFrac,
-                                    const BaseFab<int>& a_cellType,
-                                    const int           a_connected) const noexcept
+EBStateRedistribution::computeSlope(const IntVect&       a_iv,
+                                    const FArrayBox&     a_average,
+                                    const FArrayBox&     a_centroid,
+                                    const EBISBox&       a_ebisbox,
+                                    const BaseFab<bool>& a_coveredByFiner,
+                                    const BaseFab<bool>& a_coarseFineGhost,
+                                    const ProblemDomain& a_domain,
+                                    const int            a_connected) const noexcept
 {
   constexpr Real epsilon       = 1.E-12;
   constexpr Real minSpreadSize = 0.5;
@@ -852,7 +815,8 @@ EBStateRedistribution::computeSlope(const IntVect&      a_iv,
     }
 
     // The 3^D stencil uses the connected neighbours; the widened stencil the cells that are not covered by the EB.
-    const bool use = grown ? (a_cellType(a_iv + o, 0) != s_outside && a_volFrac(a_iv + o, 0) > 0.0)
+    const bool use = grown ? (cellType(a_coveredByFiner, a_coarseFineGhost, a_domain, a_iv + o) != s_outside &&
+                              volumeFraction(a_ebisbox, a_domain, a_iv + o) > 0.0)
                            : static_cast<bool>(a_connected & (1 << offsetIndex(o)));
 
     if (use) {
@@ -983,30 +947,32 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& phiEB   = (*a_phi[lvl])[din];
-      const EBCellFAB& divGEB  = (*a_divG[lvl])[din];
-      const FArrayBox& phi     = phiEB.getFArrayBox();
-      const FArrayBox& divG    = divGEB.getFArrayBox();
-      const FArrayBox& kappa   = (*m_volFrac[lvl])[din];
-      const EBISBox&   ebisbox = phiEB.getEBISBox();
+      const EBCellFAB&     phiEB    = (*a_phi[lvl])[din];
+      const EBCellFAB&     divGEB   = (*a_divG[lvl])[din];
+      const FArrayBox&     phi      = phiEB.getFArrayBox();
+      const FArrayBox&     divG     = divGEB.getFArrayBox();
+      const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+      const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
 
       FArrayBox& U = state[din];
 
       U.setVal(0.0);
 
       auto kernel = [&](const IntVect& iv) -> void {
-        if (kappa(iv, 0) > 0.0) {
-          U(iv, 0) = phi(iv, 0) - a_dt * divG(iv, 0) / kappa(iv, 0);
+        const Real kappa = volumeFraction(geometry, domain, iv);
+
+        if (kappa > 0.0) {
+          U(iv, 0) = phi(iv, 0) - a_dt * divG(iv, 0) / kappa;
         }
-        else if (kappa(iv, 0) < 0.0) {
+        else if (kappa < 0.0) {
           // Multi-valued cell, which can stand in for another level: the volume-weighted average of its VoFs.
-          const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+          const Vector<VolIndex> vofs = geometry.getVoFs(iv);
 
           Real mass   = 0.0;
           Real volume = 0.0;
 
           for (int i = 0; i < vofs.size(); i++) {
-            const Real k = ebisbox.volFrac(vofs[i]);
+            const Real k = geometry.volFrac(vofs[i]);
 
             mass += k * phiEB(vofs[i], 0) - a_dt * divGEB(vofs[i], 0);
             volume += k;
@@ -1032,14 +998,23 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const FArrayBox&    coarU = coarseState[din];
-        const FArrayBox&    kappa = (*m_volFrac[lvl])[din];
-        const BaseFab<int>& type  = (*m_cellType[lvl])[din];
+        const FArrayBox&     coarU    = coarseState[din];
+        const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+        const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+        const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl])[din];
+        const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl])[din];
+
+        auto kappa = [&](const IntVect& a_iv) -> Real {
+          return volumeFraction(geometry, domain, a_iv);
+        };
+        auto type = [&](const IntVect& a_iv) -> int {
+          return cellType(covered, cfGhost, domain, a_iv);
+        };
 
         FArrayBox& U = state[din];
 
         auto kernel = [&](const IntVect& iv) -> void {
-          if (type(iv, 0) == s_ghost && kappa(iv, 0) > 0.0) {
+          if (type(iv) == s_ghost && kappa(iv) > 0.0) {
             U(iv, 0) = coarU(coarsen(iv, refToCoar), 0);
           }
         };
@@ -1062,11 +1037,16 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const FArrayBox& U     = (*m_state[lvl])[din];
-      const FArrayBox& kappa = (*m_volFrac[lvl])[din];
+      const FArrayBox&     U        = (*m_state[lvl])[din];
+      const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+      const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+
+      auto kappa = [&](const IntVect& a_iv) -> Real {
+        return volumeFraction(geometry, domain, a_iv);
+      };
 
       const FArrayBox&    alp   = (*m_alpha[lvl])[din];
-      const FArrayBox&    nrs   = (*m_numNbhd[lvl])[din];
+      const BaseFab<int>& nrs   = (*m_numNbhd[lvl])[din];
       const FArrayBox&    vol   = (*m_nbhdVol[lvl])[din];
       const BaseFab<int>& track = (*m_tracker[lvl])[din];
 
@@ -1075,15 +1055,15 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
       avg.setVal(0.0);
 
       auto kernel = [&](const IntVect& iv) -> void {
-        if (kappa(iv, 0) > 0.0) {
+        if (kappa(iv) > 0.0) {
           if (track(iv, 0) > 0) {
-            Real q = U(iv, 0) * alp(iv, 0) * kappa(iv, 0);
+            Real q = U(iv, 0) * alp(iv, 0) * kappa(iv);
 
             for (int n = 1; n <= track(iv, 0); n++) {
               const IntVect r = iv + offset(track(iv, n));
 
-              if (kappa(r, 0) > 0.0) {
-                q += U(r, 0) * alp(iv, 1) * kappa(r, 0) / nrs(r, 0);
+              if (kappa(r) > 0.0) {
+                q += U(r, 0) * alp(iv, 1) * kappa(r) / nrs(r, 0);
               }
             }
 
@@ -1106,13 +1086,20 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const FArrayBox&    U    = (*m_state[lvl])[din];
-        const BaseFab<int>& type = (*m_cellType[lvl])[din];
+        const FArrayBox&     U        = (*m_state[lvl])[din];
+        const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+        const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+        const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl])[din];
+        const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl])[din];
+
+        auto type = [&](const IntVect& a_iv) -> int {
+          return cellType(covered, cfGhost, domain, a_iv);
+        };
 
         FArrayBox& avg = average[din];
 
         auto kernel = [&](const IntVect& iv) -> void {
-          if (type(iv, 0) == s_ghost) {
+          if (type(iv) == s_ghost) {
             avg(iv, 0) = U(iv, 0);
           }
         };
@@ -1131,16 +1118,18 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
       slope.setVal(0.0);
 
       if ((*m_activeBox[lvl])[din]) {
-        const FArrayBox&    avg     = average[din];
-        const FArrayBox&    centHat = (*m_nbhdCentroid[lvl])[din];
-        const FArrayBox&    kappa   = (*m_volFrac[lvl])[din];
-        const BaseFab<int>& type    = (*m_cellType[lvl])[din];
-        const BaseFab<int>& track   = (*m_tracker[lvl])[din];
-        const BaseFab<int>& conn    = (*m_connected[lvl])[din];
+        const FArrayBox&     avg      = average[din];
+        const FArrayBox&     centHat  = (*m_nbhdCentroid[lvl])[din];
+        const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+        const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+        const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl])[din];
+        const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl])[din];
+        const BaseFab<int>&  track    = (*m_tracker[lvl])[din];
+        const BaseFab<int>&  conn     = (*m_connected[lvl])[din];
 
         auto kernel = [&](const IntVect& iv) -> void {
           if (track(iv, 0) > 0) {
-            const RealVect s = this->computeSlope(iv, avg, centHat, kappa, type, conn(iv, 0));
+            const RealVect s = this->computeSlope(iv, avg, centHat, geometry, covered, cfGhost, domain, conn(iv, 0));
 
             for (int dir = 0; dir < SpaceDim; dir++) {
               slope(iv, dir) = s[dir];
@@ -1180,15 +1169,23 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
       if (m_finestLevel > 0 && (*m_activeBox[lvl])[din]) {
         const Box box = dbl[din];
 
-        const FArrayBox&    U     = (*m_state[lvl])[din];
-        const FArrayBox&    kappa = (*m_volFrac[lvl])[din];
-        const FArrayBox&    cent  = (*m_centroid[lvl])[din];
-        const FArrayBox&    alp   = (*m_alpha[lvl])[din];
-        const FArrayBox&    nrs   = (*m_numNbhd[lvl])[din];
-        const FArrayBox&    vol   = (*m_nbhdVol[lvl])[din];
-        const FArrayBox&    slope = slopes[din];
-        const BaseFab<int>& track = (*m_tracker[lvl])[din];
-        const BaseFab<int>& type  = (*m_cellType[lvl])[din];
+        const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+        const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+        const FArrayBox&     U        = (*m_state[lvl])[din];
+        const FArrayBox&     alp      = (*m_alpha[lvl])[din];
+        const BaseFab<int>&  nrs      = (*m_numNbhd[lvl])[din];
+        const FArrayBox&     vol      = (*m_nbhdVol[lvl])[din];
+        const FArrayBox&     slope    = slopes[din];
+        const BaseFab<int>&  track    = (*m_tracker[lvl])[din];
+        const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl])[din];
+        const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl])[din];
+
+        auto kappa = [&](const IntVect& a_iv) -> Real {
+          return volumeFraction(geometry, domain, a_iv);
+        };
+        auto type = [&](const IntVect& a_iv) -> int {
+          return cellType(covered, cfGhost, domain, a_iv);
+        };
 
         // Weight of the cell at offset a_o in the neighbourhood of a_i.
         auto weight = [&](const IntVect& a_i, const IntVect& a_o) -> Real {
@@ -1200,18 +1197,24 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
           const IntVect from = a_i + a_from;
           const IntVect to   = a_i + a_to;
 
+          const Real kappaFrom = kappa(from);
+          const Real kappaTo   = kappa(to);
+
           // Cells covered by the EB are in no neighbourhood.
-          if (kappa(from, 0) <= 0.0 || kappa(to, 0) <= 0.0) {
+          if (kappaFrom <= 0.0 || kappaTo <= 0.0) {
             return 0.0;
           }
+
+          const RealVect centFrom = cellCentroid(geometry, domain, from);
+          const RealVect centTo   = cellCentroid(geometry, domain, to);
 
           Real dq = U(from, 0) - U(to, 0);
 
           for (int dir = 0; dir < SpaceDim; dir++) {
-            dq += slope(a_i, dir) * (cent(to, dir) + a_to[dir] - cent(from, dir) - a_from[dir]);
+            dq += slope(a_i, dir) * (centTo[dir] + a_to[dir] - centFrom[dir] - a_from[dir]);
           }
 
-          return kappa(to, 0) * weight(a_i, a_to) * kappa(from, 0) * weight(a_i, a_from) * dq / vol(a_i, 0);
+          return kappaTo * weight(a_i, a_to) * kappaFrom * weight(a_i, a_from) * dq / vol(a_i, 0);
         };
 
         // Whether the cell at offset index a_idx from a_i is in the neighbourhood of a_i.
@@ -1227,7 +1230,7 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
 
         // Transfers from the valid cells to the covered cells of this box.
         auto coveredKernel = [&](const IntVect& iv) -> void {
-          if (type(iv, 0) == s_covered && kappa(iv, 0) > 0.0) {
+          if (type(iv) == s_covered && kappa(iv) > 0.0) {
             Real m = 0.0;
 
             for (int idx = 0; idx < s_numOffsets; idx++) {
@@ -1240,7 +1243,7 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
                 for (int n = 1; n <= track(i, 0); n++) {
                   const IntVect om = offset(track(i, n));
 
-                  if (type(i + om, 0) == s_valid) {
+                  if (type(i + om) == s_valid) {
                     m += transfer(i, om, o);
                   }
                 }
@@ -1259,7 +1262,7 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
           FArrayBox& ghostMass = (*m_ghostMass[lvl])[din];
 
           auto ghostKernel = [&](const IntVect& iv) -> void {
-            if (type(iv, 0) == s_ghost && kappa(iv, 0) > 0.0) {
+            if (type(iv) == s_ghost && kappa(iv) > 0.0) {
               Real m = 0.0;
 
               for (int idx = 0; idx < s_numOffsets; idx++) {
@@ -1272,7 +1275,7 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
                   for (int n = 1; n <= track(i, 0); n++) {
                     const IntVect om = offset(track(i, n));
 
-                    if (type(i + om, 0) == s_valid) {
+                    if (type(i + om) == s_valid) {
                       m += transfer(i, om, o);
                     }
                   }
@@ -1294,41 +1297,49 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const FArrayBox& phi   = (*a_phi[lvl])[din].getFArrayBox();
-      const FArrayBox& kappa = (*m_volFrac[lvl])[din];
+      const FArrayBox&     phi      = (*a_phi[lvl])[din].getFArrayBox();
+      const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+      const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
 
       EBCellFAB& divGEB = (*a_divG[lvl])[din];
       FArrayBox& divG   = divGEB.getFArrayBox();
 
-      const EBISBox& ebisbox = divGEB.getEBISBox();
-
       const bool active = (*m_activeBox[lvl])[din];
 
-      const FArrayBox&    avg     = average[din];
-      const FArrayBox&    slope   = slopes[din];
-      const FArrayBox&    cent    = (*m_centroid[lvl])[din];
-      const FArrayBox&    centHat = (*m_nbhdCentroid[lvl])[din];
-      const FArrayBox&    alp     = (*m_alpha[lvl])[din];
-      const FArrayBox&    nrs     = (*m_numNbhd[lvl])[din];
-      const BaseFab<int>& track   = (*m_tracker[lvl])[din];
-      const BaseFab<int>& type    = (*m_cellType[lvl])[din];
+      const FArrayBox&     avg     = average[din];
+      const FArrayBox&     slope   = slopes[din];
+      const FArrayBox&     centHat = (*m_nbhdCentroid[lvl])[din];
+      const FArrayBox&     alp     = (*m_alpha[lvl])[din];
+      const BaseFab<int>&  nrs     = (*m_numNbhd[lvl])[din];
+      const BaseFab<int>&  track   = (*m_tracker[lvl])[din];
+      const BaseFab<bool>& covered = (*m_coveredByFiner[lvl])[din];
+      const BaseFab<bool>& cfGhost = (*m_coarseFineGhost[lvl])[din];
+
+      auto kappa = [&](const IntVect& a_iv) -> Real {
+        return volumeFraction(geometry, domain, a_iv);
+      };
+      auto type = [&](const IntVect& a_iv) -> int {
+        return cellType(covered, cfGhost, domain, a_iv);
+      };
 
       // Value of the reconstruction of the neighbourhood of a_i at the centroid of the cell at offset a_o from a_i.
       auto reconstruct = [&](const IntVect& a_i, const IntVect& a_o) -> Real {
+        const RealVect c = cellCentroid(geometry, domain, a_i + a_o);
+
         Real value = avg(a_i, 0);
 
         for (int dir = 0; dir < SpaceDim; dir++) {
-          value += slope(a_i, dir) * (cent(a_i + a_o, dir) + a_o[dir] - centHat(a_i, dir));
+          value += slope(a_i, dir) * (c[dir] + a_o[dir] - centHat(a_i, dir));
         }
 
         return value;
       };
 
       auto kernel = [&](const IntVect& iv) -> void {
-        const Real k = kappa(iv, 0);
+        const Real k = kappa(iv);
 
         if (k > 0.0) {
-          if (active && type(iv, 0) == s_valid && (track(iv, 0) > 0 || nrs(iv, 0) > 1.0)) {
+          if (active && type(iv) == s_valid && (track(iv, 0) > 0 || nrs(iv, 0) > 1.0)) {
             const Real self = (track(iv, 0) > 0) ? reconstruct(iv, IntVect::Zero) : avg(iv, 0);
 
             Real sum = alp(iv, 0) * nrs(iv, 0) * self;
@@ -1356,10 +1367,10 @@ EBStateRedistribution::redistribute(EBAMRCellData& a_divG, const EBAMRCellData& 
         }
         else if (k < 0.0) {
           // Multi-valued cell, which is in no merged neighbourhood: R = D in each of its VoFs.
-          const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+          const Vector<VolIndex> vofs = geometry.getVoFs(iv);
 
           for (int i = 0; i < vofs.size(); i++) {
-            divGEB(vofs[i], 0) /= ebisbox.volFrac(vofs[i]);
+            divGEB(vofs[i], 0) /= geometry.volFrac(vofs[i]);
           }
         }
       };
@@ -1406,27 +1417,35 @@ EBStateRedistribution::synchronize(EBAMRCellData& a_divG, const Real a_dt) noexc
     for (int mybox = 0; mybox < nboxFine; mybox++) {
       const DataIndex& din = ditFine[mybox];
 
-      const FArrayBox&    mass  = coarseMass[din];
-      const FArrayBox&    kappa = (*m_volFrac[lvl + 1])[din];
-      const BaseFab<int>& type  = (*m_cellType[lvl + 1])[din];
+      const FArrayBox&     mass     = coarseMass[din];
+      const EBISBox&       geometry = m_eblg[lvl + 1]->getEBISL()[din];
+      const ProblemDomain& domain   = m_eblg[lvl + 1]->getDomain();
+      const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl + 1])[din];
+      const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl + 1])[din];
 
-      EBCellFAB&     divGEB  = (*a_divG[lvl + 1])[din];
-      FArrayBox&     divG    = divGEB.getFArrayBox();
-      FArrayBox&     sync    = (*m_syncMass[lvl + 1])[din];
-      const EBISBox& ebisbox = divGEB.getEBISBox();
+      auto kappa = [&](const IntVect& a_iv) -> Real {
+        return volumeFraction(geometry, domain, a_iv);
+      };
+      auto type = [&](const IntVect& a_iv) -> int {
+        return cellType(covered, cfGhost, domain, a_iv);
+      };
+
+      EBCellFAB& divGEB = (*a_divG[lvl + 1])[din];
+      FArrayBox& divG   = divGEB.getFArrayBox();
+      FArrayBox& sync   = (*m_syncMass[lvl + 1])[din];
 
       // Volume fraction of a fine cell, summed over the VoFs of a multi-valued cell.
       auto cellVolume = [&](const IntVect& a_iv) -> Real {
-        if (kappa(a_iv, 0) >= 0.0) {
-          return kappa(a_iv, 0);
+        if (kappa(a_iv) >= 0.0) {
+          return kappa(a_iv);
         }
 
-        const Vector<VolIndex> vofs = ebisbox.getVoFs(a_iv);
+        const Vector<VolIndex> vofs = geometry.getVoFs(a_iv);
 
         Real volume = 0.0;
 
         for (int i = 0; i < vofs.size(); i++) {
-          volume += ebisbox.volFrac(vofs[i]);
+          volume += geometry.volFrac(vofs[i]);
         }
 
         return volume;
@@ -1450,14 +1469,14 @@ EBStateRedistribution::synchronize(EBAMRCellData& a_divG, const Real a_dt) noexc
           for (BoxIterator bit(fineCells); bit.ok(); ++bit) {
             const IntVect& iv = bit();
 
-            if (type(iv, 0) == s_covered) {
+            if (type(iv) == s_covered) {
               sync(iv, 0) += cellVolume(iv) * dphi;
             }
-            else if (kappa(iv, 0) > 0.0) {
+            else if (kappa(iv) > 0.0) {
               divG(iv, 0) -= dphi / a_dt;
             }
-            else if (kappa(iv, 0) < 0.0) {
-              const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+            else if (kappa(iv) < 0.0) {
+              const Vector<VolIndex> vofs = geometry.getVoFs(iv);
 
               for (int i = 0; i < vofs.size(); i++) {
                 divGEB(vofs[i], 0) -= dphi / a_dt;
@@ -1482,31 +1501,39 @@ EBStateRedistribution::synchronize(EBAMRCellData& a_divG, const Real a_dt) noexc
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const FArrayBox&    sync  = (*m_syncMass[lvl])[din];
-      const FArrayBox&    kappa = (*m_volFrac[lvl])[din];
-      const BaseFab<int>& type  = (*m_cellType[lvl])[din];
+      const FArrayBox&     sync     = (*m_syncMass[lvl])[din];
+      const EBISBox&       geometry = m_eblg[lvl]->getEBISL()[din];
+      const ProblemDomain& domain   = m_eblg[lvl]->getDomain();
+      const BaseFab<bool>& covered  = (*m_coveredByFiner[lvl])[din];
+      const BaseFab<bool>& cfGhost  = (*m_coarseFineGhost[lvl])[din];
+
+      auto kappa = [&](const IntVect& a_iv) -> Real {
+        return volumeFraction(geometry, domain, a_iv);
+      };
+      auto type = [&](const IntVect& a_iv) -> int {
+        return cellType(covered, cfGhost, domain, a_iv);
+      };
 
       EBCellFAB&       divGEB   = (*a_divG[lvl])[din];
       FArrayBox&       divG     = divGEB.getFArrayBox();
       BaseIVFAB<Real>& massDiff = (*m_massDiff[lvl])[din];
-      const EBISBox&   ebisbox  = divGEB.getEBISBox();
 
       massDiff.setVal(0.0);
 
       auto kernel = [&](const IntVect& iv) -> void {
         const Real m = sync(iv, 0);
 
-        if (type(iv, 0) == s_valid && m != 0.0) {
-          const Real k = kappa(iv, 0);
+        if (type(iv) == s_valid && m != 0.0) {
+          const Real k = kappa(iv);
 
           // A multi-valued cell takes all of the correction, as the same change of the state in each VoF.
           if (k < 0.0) {
-            const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+            const Vector<VolIndex> vofs = geometry.getVoFs(iv);
 
             Real volume = 0.0;
 
             for (int i = 0; i < vofs.size(); i++) {
-              volume += ebisbox.volFrac(vofs[i]);
+              volume += geometry.volFrac(vofs[i]);
             }
 
             for (int i = 0; i < vofs.size(); i++) {
