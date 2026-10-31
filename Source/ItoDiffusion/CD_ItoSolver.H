@@ -420,7 +420,7 @@ public:
    * only this one, a cut cell therefore holds n rather than kappa*n.
    * @details Runs after the real deposit and adds to it. Images are built from the VALID holder only: the halo
    * coarse-fine cores copy particles into a mask holder, so building from that would produce a second image for the
-   * same particle -- the double count that issue #29 fell into. All three cores restore the valid holder before
+   * same particle and count it twice. All three cores restore the valid holder before
    * returning, so running afterwards is safe; the constraint is which holder, not when.
    * @param[in,out] a_phi                  Field to add the mirrored contribution to.
    * @param[in]     a_particles            Particles whose images are deposited.

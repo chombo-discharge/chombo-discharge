@@ -457,7 +457,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     return;
   }
 
-  // The algorithm, in the order it runs (the design record is kept with the roadmap, issue #733). One box
+  // The algorithm, in the order it runs. One box
   // hierarchy serves both phases; every box is classified by both implicit functions.
   //
   //   0. Start level: domainSplit the whole domain and classify every box in both phases (buildStartLevel,
