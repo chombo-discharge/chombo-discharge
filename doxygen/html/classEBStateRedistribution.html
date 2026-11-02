@@ -120,8 +120,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae1c9d64cbd2d985ac35f33464bef8d35" id="r_ae1c9d64cbd2d985ac35f33464bef8d35"><td class="memItemLeft" align="right" valign="top"><a id="ae1c9d64cbd2d985ac35f33464bef8d35" name="ae1c9d64cbd2d985ac35f33464bef8d35"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBStateRedistribution</b> ()=delete</td></tr>
 <tr class="memdesc:ae1c9d64cbd2d985ac35f33464bef8d35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed weak construction. <br /></td></tr>
-<tr class="memitem:ab8f314a87fe1c77d515cdc7803bd2d98" id="r_ab8f314a87fe1c77d515cdc7803bd2d98"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8f314a87fe1c77d515cdc7803bd2d98">EBStateRedistribution</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_eblg, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_eblgCoFi, const Vector&lt; int &gt; &amp;a_refinementRatios, const int a_finestLevel, const int a_order, const Real a_targetVolFrac, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;a_fluxRedistribution, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coveredByFiner, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coarseFineGhost) noexcept</td></tr>
-<tr class="memdesc:ab8f314a87fe1c77d515cdc7803bd2d98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Builds the neighbourhoods on all levels.  <br /></td></tr>
+<tr class="memitem:a1452e1cc7590afcec88a9554f5554720" id="r_a1452e1cc7590afcec88a9554f5554720"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1452e1cc7590afcec88a9554f5554720">EBStateRedistribution</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_eblg, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_eblgCoFi, const Vector&lt; int &gt; &amp;a_refinementRatios, const int a_finestLevel, const int a_order, const Real a_targetVolFrac, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp;a_massRedistribution, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coveredByFiner, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coarseFineGhost) noexcept</td></tr>
+<tr class="memdesc:a1452e1cc7590afcec88a9554f5554720"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Builds the neighbourhoods on all levels.  <br /></td></tr>
 <tr class="memitem:a7e978b322990cb7c055d6e2562c359af" id="r_a7e978b322990cb7c055d6e2562c359af"><td class="memItemLeft" align="right" valign="top"><a id="a7e978b322990cb7c055d6e2562c359af" name="a7e978b322990cb7c055d6e2562c359af"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBStateRedistribution</b> () noexcept</td></tr>
 <tr class="memdesc:a7e978b322990cb7c055d6e2562c359af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
@@ -199,9 +199,9 @@ Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt;&
 <tr class="memitem:af0183e510c80091ff6067be974895e6d" id="r_af0183e510c80091ff6067be974895e6d"><td class="memItemLeft" align="right" valign="top"><a id="af0183e510c80091ff6067be974895e6d" name="af0183e510c80091ff6067be974895e6d"></a>
 Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refinementRatios</b></td></tr>
 <tr class="memdesc:af0183e510c80091ff6067be974895e6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratios between levels. <br /></td></tr>
-<tr class="memitem:ad14780e19ed2b717f59e44d1b3e10dcf" id="r_ad14780e19ed2b717f59e44d1b3e10dcf"><td class="memItemLeft" align="right" valign="top"><a id="ad14780e19ed2b717f59e44d1b3e10dcf" name="ad14780e19ed2b717f59e44d1b3e10dcf"></a>
-Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluxRedistribution</b></td></tr>
-<tr class="memdesc:ad14780e19ed2b717f59e44d1b3e10dcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flux redistribution operators on each level, which redistribute the corrections on refinement boundaries. <br /></td></tr>
+<tr class="memitem:aacc63be75fab87318c40f72cb6dba53d" id="r_aacc63be75fab87318c40f72cb6dba53d"><td class="memItemLeft" align="right" valign="top"><a id="aacc63be75fab87318c40f72cb6dba53d" name="aacc63be75fab87318c40f72cb6dba53d"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_massRedistribution</b></td></tr>
+<tr class="memdesc:aacc63be75fab87318c40f72cb6dba53d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mass redistribution operators on each level, which redistribute the corrections on refinement boundaries. <br /></td></tr>
 <tr class="memitem:af12bd1c26ec7b83e7487f5dea6020f64" id="r_af12bd1c26ec7b83e7487f5dea6020f64"><td class="memItemLeft" align="right" valign="top"><a id="af12bd1c26ec7b83e7487f5dea6020f64" name="af12bd1c26ec7b83e7487f5dea6020f64"></a>
 Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; int &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_tracker</b></td></tr>
 <tr class="memdesc:af12bd1c26ec7b83e7487f5dea6020f64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neighbourhoods. Component 0 is the number of merged neighbours of the cell, components 1, 2, ... are their offsets, as indices into the 3^D block around the cell (see <a class="el" href="#a34e04470f6195d9632016e38e64d2819" title="Get the cell offset that an index into the 3^D block stands for.">offset()</a>). <br /></td></tr>
@@ -246,7 +246,7 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
 <tr class="memdesc:a74acb94580c9834fb3b1d6859bc29b22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copiers from the coarser level to m_ghostMass of a level, ghost cells included. <br /></td></tr>
 <tr class="memitem:aa000f384726109f18542a855804b4503" id="r_aa000f384726109f18542a855804b4503"><td class="memItemLeft" align="right" valign="top"><a id="aa000f384726109f18542a855804b4503" name="aa000f384726109f18542a855804b4503"></a>
 Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDiff</b></td></tr>
-<tr class="memdesc:aa000f384726109f18542a855804b4503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch: the parts of the corrections that are redistributed with the flux redistribution, as rates. <br /></td></tr>
+<tr class="memdesc:aa000f384726109f18542a855804b4503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch: the parts of the corrections that are redistributed with the mass redistribution, as rates. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -279,13 +279,13 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_gho
 <p>The neighbourhoods reach one cell, and the slopes up to two cells, so the state and the divergence must have two ghost cells, filled on refinement boundaries. Cells near small cells must be single-valued.</p>
 <p>On AMR hierarchies the redistribution follows Barrio Sanchez et al. (arXiv:2309.06372, 2023) and AMReX (ApplyMLRedistribution). Each level is redistributed separately. The neighbourhoods are centred on the valid cells of the level, those inside its grids and not covered by the finer level, but they can also contain cells that stand in for another level: cells covered by the finer level, and ghost cells outside the grids of the level, which overlay valid cells of the coarser level. The state of a ghost cell is that of the coarse cell under it. The stand-ins also enter the slopes and the limiter. The redistribution conserves mass in each neighbourhood. Its update is split into transfers between pairs of cells, the part from the slopes included, and the transfers between valid cells and stand-ins are moved to the cells that the stand-ins represent:</p>
 <ul>
-<li>a transfer to a ghost cell goes to the coarse cell under it. As in the paper, a coarse cell with volume fraction kappa takes the fraction kappa of it, and the rest is redistributed to its neighbours with the <a class="el" href="classEBFluxRedistribution.html" title="Class for redistribution ala Chombo&#39;s flux redistribution.">EBFluxRedistribution</a> operators.</li>
+<li>a transfer to a ghost cell goes to the coarse cell under it. As in the paper, a coarse cell with volume fraction kappa takes the fraction kappa of it, and the rest is redistributed to its neighbours with the <a class="el" href="classEBMassRedistribution.html" title="Redistribution of mass from cut cells to their neighbouring cells, as in Chombo&#39;s flux redistribution...">EBMassRedistribution</a> operators.</li>
 <li>a transfer to a covered cell goes to the fine cells under it, as the same change of the state in each of them. The paper instead gives it back to the valid coarse cell, which undoes the stabilization of a small coarse cell whose neighbours are all covered.</li>
 </ul>
 <p>The update is then conservative over the composite grid when the fluxes at refinement boundaries are consistent between the levels. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab8f314a87fe1c77d515cdc7803bd2d98" name="ab8f314a87fe1c77d515cdc7803bd2d98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8f314a87fe1c77d515cdc7803bd2d98">&#9670;&#160;</a></span>EBStateRedistribution()</h2>
+<a id="a1452e1cc7590afcec88a9554f5554720" name="a1452e1cc7590afcec88a9554f5554720"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1452e1cc7590afcec88a9554f5554720">&#9670;&#160;</a></span>EBStateRedistribution()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -326,7 +326,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_gho
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fluxRedistribution</em></span>, </td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_massRedistribution</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -355,7 +355,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_gho
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Order of the reconstruction in the neighbourhoods: 0 (constant) or 2 (linear, limited) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_targetVolFrac</td><td>Target volume fraction. Cut cells with a smaller volume fraction are merged. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fluxRedistribution</td><td>Flux redistribution operators on each level, for the corrections on refinement boundaries. Only used if there is more than one level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_massRedistribution</td><td>Mass redistribution operators on each level, for the corrections on refinement boundaries. Only used if there is more than one level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coveredByFiner</td><td>Cells covered by the finer level, on each level, with s_numGhost ghost cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineGhost</td><td>Cells inside the domain but outside the grids of each level, with s_numGhost ghost cells. They overlay valid cells of the coarser level. </td></tr>
   </table>

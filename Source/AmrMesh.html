@@ -289,7 +289,7 @@ Note that specifying <code class="docutils literal notranslate"><span class="pre
 <section id="cut-cell-redistribution">
 <h2>Cut-cell redistribution<a class="headerlink" href="#cut-cell-redistribution" title="Permalink to this heading"></a></h2>
 <p>The cut-cell stabilization of explicit updates (see <a class="reference internal" href="../Solvers/CDR.html#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>) is configured through <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>.
-The flux redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
+The mass redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
 The state redistribution is configured by:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.srd_order</span></code> is the reconstruction order of state redistribution, 0 (constant) or 2 (linear, limited).</p></li>

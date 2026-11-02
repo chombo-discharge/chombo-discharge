@@ -192,8 +192,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a039dce8556d380230a3b045cbcd21a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <br /></td></tr>
 <tr class="memitem:a3e4edb23dcc3d7d1320b7d8162f77c64" id="r_a3e4edb23dcc3d7d1320b7d8162f77c64"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e4edb23dcc3d7d1320b7d8162f77c64">getFluxRegister</a> () const</td></tr>
 <tr class="memdesc:a3e4edb23dcc3d7d1320b7d8162f77c64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <br /></td></tr>
-<tr class="memitem:a218e77ddbfe678c199eea1e7dedcdadc" id="r_a218e77ddbfe678c199eea1e7dedcdadc"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a218e77ddbfe678c199eea1e7dedcdadc">getRedistributionOp</a> () const</td></tr>
-<tr class="memdesc:a218e77ddbfe678c199eea1e7dedcdadc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
+<tr class="memitem:a93362ca1b90c9d3bac2d363f77bacbd8" id="r_a93362ca1b90c9d3bac2d363f77bacbd8"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a93362ca1b90c9d3bac2d363f77bacbd8">getMassRedistributionOp</a> () const</td></tr>
+<tr class="memdesc:a93362ca1b90c9d3bac2d363f77bacbd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
 <tr class="memitem:a2d3901208b6035a0f35b8c6f81804ad5" id="r_a2d3901208b6035a0f35b8c6f81804ad5"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d3901208b6035a0f35b8c6f81804ad5">getStateRedistribution</a> () const</td></tr>
 <tr class="memdesc:a2d3901208b6035a0f35b8c6f81804ad5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state redistribution operator.  <br /></td></tr>
 <tr class="memitem:a8bf343580e57da14c48794634a986d12" id="r_a8bf343580e57da14c48794634a986d12"><td class="memItemLeft" align="right" valign="top">const EBAMRFAB &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8bf343580e57da14c48794634a986d12">getLevelset</a> () const</td></tr>
@@ -229,8 +229,8 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a6c54dc8303bbeb482dd387737de0555c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define multigrid injection utility.  <br /></td></tr>
 <tr class="memitem:a6aa948d2a5860a7d94ae759c08bb270c" id="r_a6aa948d2a5860a7d94ae759c08bb270c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aa948d2a5860a7d94ae759c08bb270c">defineFluxReg</a> (const int a_lmin, const int a_regsize)</td></tr>
 <tr class="memdesc:a6aa948d2a5860a7d94ae759c08bb270c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define flux register utility.  <br /></td></tr>
-<tr class="memitem:a394c6bb1bcda8f0d38dda56f7228c257" id="r_a394c6bb1bcda8f0d38dda56f7228c257"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a394c6bb1bcda8f0d38dda56f7228c257">defineRedistOper</a> (const int a_lmin, const int a_regsize)</td></tr>
-<tr class="memdesc:a394c6bb1bcda8f0d38dda56f7228c257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define operator redistribution utility.  <br /></td></tr>
+<tr class="memitem:a46450eda4b3c311a839c0867e05b70e9" id="r_a46450eda4b3c311a839c0867e05b70e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46450eda4b3c311a839c0867e05b70e9">defineMassRedistOper</a> (const int a_lmin, const int a_regsize)</td></tr>
+<tr class="memdesc:a46450eda4b3c311a839c0867e05b70e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define operator redistribution utility.  <br /></td></tr>
 <tr class="memitem:ac55244613140327fe2e992090e39d144" id="r_ac55244613140327fe2e992090e39d144"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac55244613140327fe2e992090e39d144">defineFineToCoarRedistOper</a> (const int a_lmin, const int a_regsize)</td></tr>
 <tr class="memdesc:ac55244613140327fe2e992090e39d144"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define operator redistribution utility.  <br /></td></tr>
 <tr class="memitem:a2e130f88e0f4fec235b7a56562b3f612" id="r_a2e130f88e0f4fec235b7a56562b3f612"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e130f88e0f4fec235b7a56562b3f612">defineCoarToFineRedistOper</a> (const int a_lmin, const int a_regsize)</td></tr>
@@ -396,9 +396,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseToFineInterp.html"
 <tr class="memitem:aa66682e3fedb015def91b7ff08182761" id="r_aa66682e3fedb015def91b7ff08182761"><td class="memItemLeft" align="right" valign="top"><a id="aa66682e3fedb015def91b7ff08182761" name="aa66682e3fedb015def91b7ff08182761"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebReflux</b></td></tr>
 <tr class="memdesc:aa66682e3fedb015def91b7ff08182761"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flux register utility. <br /></td></tr>
-<tr class="memitem:a3f094480bfc7a660b02f0e7d0957b4bb" id="r_a3f094480bfc7a660b02f0e7d0957b4bb"><td class="memItemLeft" align="right" valign="top"><a id="a3f094480bfc7a660b02f0e7d0957b4bb" name="a3f094480bfc7a660b02f0e7d0957b4bb"></a>
-Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistributionOp</b></td></tr>
-<tr class="memdesc:a3f094480bfc7a660b02f0e7d0957b4bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution utilities. <br /></td></tr>
+<tr class="memitem:adc260f03329df6ef4ae3ff18b3ca4ede" id="r_adc260f03329df6ef4ae3ff18b3ca4ede"><td class="memItemLeft" align="right" valign="top"><a id="adc260f03329df6ef4ae3ff18b3ca4ede" name="adc260f03329df6ef4ae3ff18b3ca4ede"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_massRedistributionOp</b></td></tr>
+<tr class="memdesc:adc260f03329df6ef4ae3ff18b3ca4ede"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution utilities. <br /></td></tr>
 <tr class="memitem:a0b199ab8fedb6f937c833f40ae8b8644" id="r_a0b199ab8fedb6f937c833f40ae8b8644"><td class="memItemLeft" align="right" valign="top"><a id="a0b199ab8fedb6f937c833f40ae8b8644" name="a0b199ab8fedb6f937c833f40ae8b8644"></a>
 RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_stateRedistribution</b></td></tr>
 <tr class="memdesc:a0b199ab8fedb6f937c833f40ae8b8644"><td class="mdescLeft">&#160;</td><td class="mdescRight">State redistribution on all levels. <br /></td></tr>
@@ -424,7 +424,7 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBNonConservativeDivergenc
 <tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:a4dffdba8530c85ac3c995ff2d2a398f8" id="r_a4dffdba8530c85ac3c995ff2d2a398f8"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4dffdba8530c85ac3c995ff2d2a398f8">s_redistributionRadius</a> = 1</td></tr>
-<tr class="memdesc:a4dffdba8530c85ac3c995ff2d2a398f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radius of the flux redistribution and of the non-conservative divergence, in cells.  <br /></td></tr>
+<tr class="memdesc:a4dffdba8530c85ac3c995ff2d2a398f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radius of the mass redistribution and of the non-conservative divergence, in cells.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class that holds important things for doing AMR over a specific phase and processor distribution. </p>
@@ -1069,6 +1069,44 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a46450eda4b3c311a839c0867e05b70e9" name="a46450eda4b3c311a839c0867e05b70e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46450eda4b3c311a839c0867e05b70e9">&#9670;&#160;</a></span>defineMassRedistOper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineMassRedistOper </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_regsize</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define operator redistribution utility. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_regsize</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a88ab9a067563c7c6586f3dff5e3d7a54" name="a88ab9a067563c7c6586f3dff5e3d7a54"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a88ab9a067563c7c6586f3dff5e3d7a54">&#9670;&#160;</a></span>defineMirrorSurfaceData()</h2>
 
@@ -1165,44 +1203,6 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a394c6bb1bcda8f0d38dda56f7228c257" name="a394c6bb1bcda8f0d38dda56f7228c257"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a394c6bb1bcda8f0d38dda56f7228c257">&#9670;&#160;</a></span>defineRedistOper()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PhaseRealm::defineRedistOper </td>
-          <td>(</td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_regsize</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Define operator redistribution utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_regsize</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -1712,6 +1712,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a93362ca1b90c9d3bac2d363f77bacbd8" name="a93362ca1b90c9d3bac2d363f77bacbd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93362ca1b90c9d3bac2d363f77bacbd8">&#9670;&#160;</a></span>getMassRedistributionOp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp; PhaseRealm::getMassRedistributionOp </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the redistribution operators. </p>
+<dl class="section return"><dt>Returns</dt><dd>Redistribution operators on all levels </dd></dl>
+
+</div>
+</div>
 <a id="ad43d926b82b84ef340477dba513f4950" name="ad43d926b82b84ef340477dba513f4950"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad43d926b82b84ef340477dba513f4950">&#9670;&#160;</a></span>getMirrorHasCutCells()</h2>
 
@@ -1869,26 +1889,6 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Get particle-mesh operator. </p>
 <dl class="section return"><dt>Returns</dt><dd>Particle mesh </dd></dl>
-
-</div>
-</div>
-<a id="a218e77ddbfe678c199eea1e7dedcdadc" name="a218e77ddbfe678c199eea1e7dedcdadc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a218e77ddbfe678c199eea1e7dedcdadc">&#9670;&#160;</a></span>getRedistributionOp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp; PhaseRealm::getRedistributionOp </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the redistribution operators. </p>
-<dl class="section return"><dt>Returns</dt><dd>Redistribution operators on all levels </dd></dl>
 
 </div>
 </div>
@@ -2391,8 +2391,8 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </table>
 </div><div class="memdoc">
 
-<p>Radius of the flux redistribution and of the non-conservative divergence, in cells. </p>
-<p>Always 1. <a class="el" href="classEBFluxRedistribution.html" title="Class for redistribution ala Chombo&#39;s flux redistribution.">EBFluxRedistribution</a> and <a class="el" href="classEBNonConservativeDivergence.html" title="Class for computing a non-conservative by smooshing a conservative divergence.">EBNonConservativeDivergence</a> take a radius, but they have not been verified or validated for radii larger than 1 (flux redistribution is known to lose mass across refinement ratio 4 with radius 2). </p>
+<p>Radius of the mass redistribution and of the non-conservative divergence, in cells. </p>
+<p>Always 1. <a class="el" href="classEBMassRedistribution.html" title="Redistribution of mass from cut cells to their neighbouring cells, as in Chombo&#39;s flux redistribution...">EBMassRedistribution</a> and <a class="el" href="classEBNonConservativeDivergence.html" title="Class for computing a non-conservative by smooshing a conservative divergence.">EBNonConservativeDivergence</a> take a radius, but they have not been verified or validated for radii larger than 1 (mass redistribution is known to lose mass across refinement ratio 4 with radius 2). </p>
 
 </div>
 </div>

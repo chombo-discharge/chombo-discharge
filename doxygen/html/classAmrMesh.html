@@ -514,8 +514,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:ad79c6df55bc4ee0b55fca049098cdbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolator.  <br /></td></tr>
 <tr class="memitem:ad179f58ed68e7fb7ed5242474e03c7ed" id="r_ad179f58ed68e7fb7ed5242474e03c7ed"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad179f58ed68e7fb7ed5242474e03c7ed">getFluxRegister</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:ad179f58ed68e7fb7ed5242474e03c7ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <br /></td></tr>
-<tr class="memitem:a6911f33d98ee93014a118574582eb6df" id="r_a6911f33d98ee93014a118574582eb6df"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6911f33d98ee93014a118574582eb6df">getRedistributionOp</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
-<tr class="memdesc:a6911f33d98ee93014a118574582eb6df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
+<tr class="memitem:abde6f6b485d41e74f977a9f1d00df59e" id="r_abde6f6b485d41e74f977a9f1d00df59e"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abde6f6b485d41e74f977a9f1d00df59e">getMassRedistributionOp</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:abde6f6b485d41e74f977a9f1d00df59e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
 <tr class="memitem:a2d20eeabff7d7135b6d13e9ebf62bbba" id="r_a2d20eeabff7d7135b6d13e9ebf62bbba"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d20eeabff7d7135b6d13e9ebf62bbba">getStateRedistribution</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a2d20eeabff7d7135b6d13e9ebf62bbba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state redistribution.  <br /></td></tr>
 <tr class="memitem:a06c53d5186aeef26bf28d0d1662d8944" id="r_a06c53d5186aeef26bf28d0d1662d8944"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06c53d5186aeef26bf28d0d1662d8944">redistributeMass</a> (EBAMRCellData &amp;a_phi, const EBAMRIVData &amp;a_deltaM, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const noexcept</td></tr>
@@ -4200,6 +4200,37 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
+<a id="abde6f6b485d41e74f977a9f1d00df59e" name="abde6f6b485d41e74f977a9f1d00df59e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abde6f6b485d41e74f977a9f1d00df59e">&#9670;&#160;</a></span>getMassRedistributionOp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp; AmrMesh::getMassRedistributionOp </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the redistribution operators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Redistribution op </dd></dl>
+
+</div>
+</div>
 <a id="ae65edfcba2c19e22298dce39d524cfc5" name="ae65edfcba2c19e22298dce39d524cfc5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae65edfcba2c19e22298dce39d524cfc5">&#9670;&#160;</a></span>getMaxAmrDepth()</h2>
 
@@ -4887,37 +4918,6 @@ template&lt;typename P, typename Traits&gt; </div>
 
 <p>Get the name of all Realms. </p>
 <dl class="section return"><dt>Returns</dt><dd>Names of all Realms </dd></dl>
-
-</div>
-</div>
-<a id="a6911f33d98ee93014a118574582eb6df" name="a6911f33d98ee93014a118574582eb6df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6911f33d98ee93014a118574582eb6df">&#9670;&#160;</a></span>getRedistributionOp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp; AmrMesh::getRedistributionOp </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the redistribution operators. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Redistribution op </dd></dl>
 
 </div>
 </div>
@@ -7071,7 +7071,7 @@ template&lt;auto... OldPosition, typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Add the mass of each cut cell to its neighbouring cells. </p>
-<p>Used e.g. for the mass that a hybrid particle deposition does not keep in a cut cell. The mass of a cut cell on level l is added to cells on levels l-1, l and l+1, with the weights of the flux redistribution stencils (getRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Used e.g. for the mass that a hybrid particle deposition does not keep in a cut cell. The mass of a cut cell on level l is added to cells on levels l-1, l and l+1, with the weights of the mass redistribution stencils (getMassRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data that the mass is added to. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Mass per cut cell, divided by the volume of a regular cell on its level, i.e. in the units of a_phi. </td></tr>

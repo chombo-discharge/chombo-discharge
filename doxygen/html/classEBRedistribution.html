@@ -94,11 +94,11 @@ Inheritance diagram for EBRedistribution:</div>
 <div class="dyncontent">
 <div class="center"><img src="classEBRedistribution__inherit__graph.png" border="0" usemap="#aEBRedistribution_inherit__map" loading="lazy" alt="Inheritance graph"/></div>
 <map name="aEBRedistribution_inherit__map" id="aEBRedistribution_inherit__map">
-<area shape="rect" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="123,5,252,33"/>
-<area shape="rect" href="classEBHybridRedistribution.html" title="The hybrid divergence with flux redistribution, as an EBRedistribution." alt="" coords="5,81,178,109"/>
-<area shape="poly" title=" " alt="" coords="161,42,110,83,107,78,156,43"/>
-<area shape="rect" href="classEBStateRedistribution.html" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al...." alt="" coords="202,81,365,109"/>
-<area shape="poly" title=" " alt="" coords="218,40,269,81,264,80,216,45"/>
+<area shape="rect" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="111,5,241,33"/>
+<area shape="rect" href="classEBFluxRedistribution.html" title="Flux redistribution: the hybrid divergence with mass redistribution, as an EBRedistribution." alt="" coords="5,81,163,109"/>
+<area shape="poly" title=" " alt="" coords="151,42,102,83,99,78,145,43"/>
+<area shape="rect" href="classEBStateRedistribution.html" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al...." alt="" coords="186,81,350,109"/>
+<area shape="poly" title=" " alt="" coords="205,40,254,81,249,80,203,45"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -126,7 +126,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBRedistribution<
 <p>An explicit update phi^{n+1} = phi^n - dt*D with the conservative divergence D = 1/(kappa*dx) * sum(fluxes) is unstable in small cut cells at a time step set by the regular cells. An implementation of this class turns the conservative divergence into the right-hand side R of a stabilized update,</p>
 <p>phi^{n+1} = phi^n - dt * R,</p>
 <p>which is conservative. R is per unit volume, i.e. not weighted by the volume fraction.</p>
-<p>Depending on the implementation, R depends on phi^n and on dt. Callers must therefore pass the state that the update starts from and the time step of the update, use R only with that time step, and not add together right-hand sides that were computed separately. Several divergences that enter the same update are added together before they are passed to <a class="el" href="#a9c5c5ac266fb8e0ac2837c8d1857bcd6" title="Turn the conservative divergence into the right-hand side of the stabilized update.">redistribute()</a>. </p>
+<p>Depending on the implementation, R depends on phi^n and on dt. Callers must therefore pass the state that the update starts from and the time step of the update, use R only with that time step, and not add together right-hand sides that were computed separately. Several divergences that enter the same update are added together before they are passed to <a class="el" href="#a9c5c5ac266fb8e0ac2837c8d1857bcd6" title="Turn the conservative divergence into the right-hand side of the stabilized update.">redistribute()</a>.</p>
+<p>The implementations are <a class="el" href="classEBFluxRedistribution.html" title="Flux redistribution: the hybrid divergence with mass redistribution, as an EBRedistribution.">EBFluxRedistribution</a> (the hybrid divergence with mass redistribution) and <a class="el" href="classEBStateRedistribution.html" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al....">EBStateRedistribution</a> (weighted state redistribution). Both use <a class="el" href="classEBMassRedistribution.html" title="Redistribution of mass from cut cells to their neighbouring cells, as in Chombo&#39;s flux redistribution...">EBMassRedistribution</a> to move mass between cells. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a379443bf7a8627a68412efdb4408f760" name="a379443bf7a8627a68412efdb4408f760"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a379443bf7a8627a68412efdb4408f760">&#9670;&#160;</a></span>EBRedistribution() <span class="overload">[1/2]</span></h2>
@@ -305,7 +306,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBRedistribution<
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classEBHybridRedistribution.html#a25b84a01c305cd2a091e4340b3fcbd0d">EBHybridRedistribution</a>, and <a class="el" href="classEBStateRedistribution.html#a7cd0ffe1451bc4623ede9a7f09b13256">EBStateRedistribution</a>.</p>
+<p>Implemented in <a class="el" href="classEBFluxRedistribution.html#a079c6180dd89b2dfd2c0313a04c541a9">EBFluxRedistribution</a>, and <a class="el" href="classEBStateRedistribution.html#a7cd0ffe1451bc4623ede9a7f09b13256">EBStateRedistribution</a>.</p>
 
 </div>
 </div>

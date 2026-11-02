@@ -115,7 +115,7 @@ Cut-cell redistribution
 -----------------------
 
 The cut-cell stabilization of explicit updates (see :ref:`Chap:ExplicitDivergence`) is configured through ``AmrMesh``.
-The flux redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
+The mass redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
 The state redistribution is configured by:
 
 * ``AmrMesh.srd_order`` is the reconstruction order of state redistribution, 0 (constant) or 2 (linear, limited).

@@ -184,8 +184,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a18d2006aab8d36d78940aea3d102c7b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <br /></td></tr>
 <tr class="memitem:a0dd36c01178a96b46811b48b08a9a245" id="r_a0dd36c01178a96b46811b48b08a9a245"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0dd36c01178a96b46811b48b08a9a245">getFluxRegister</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
 <tr class="memdesc:a0dd36c01178a96b46811b48b08a9a245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <br /></td></tr>
-<tr class="memitem:a468281f352f52f1c41a8e10256d301cd" id="r_a468281f352f52f1c41a8e10256d301cd"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a468281f352f52f1c41a8e10256d301cd">getRedistributionOp</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
-<tr class="memdesc:a468281f352f52f1c41a8e10256d301cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
+<tr class="memitem:a815e72daec23019c8423a7ec69e26ddf" id="r_a815e72daec23019c8423a7ec69e26ddf"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a815e72daec23019c8423a7ec69e26ddf">getMassRedistributionOp</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
+<tr class="memdesc:a815e72daec23019c8423a7ec69e26ddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
 <tr class="memitem:aa8d32f7b447725cea7d77b2db81928d6" id="r_aa8d32f7b447725cea7d77b2db81928d6"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8d32f7b447725cea7d77b2db81928d6">getStateRedistribution</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
 <tr class="memdesc:aa8d32f7b447725cea7d77b2db81928d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state redistribution.  <br /></td></tr>
 <tr class="memitem:aef59f419df25c884be5dc0b9d29e367e" id="r_aef59f419df25c884be5dc0b9d29e367e"><td class="memItemLeft" align="right" valign="top">const EBAMRFAB &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef59f419df25c884be5dc0b9d29e367e">getLevelset</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
@@ -1880,6 +1880,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
+<a id="a815e72daec23019c8423a7ec69e26ddf" name="a815e72daec23019c8423a7ec69e26ddf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a815e72daec23019c8423a7ec69e26ddf">&#9670;&#160;</a></span>getMassRedistributionOp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &gt; &gt; &amp; Realm::getMassRedistributionOp </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the redistribution operators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Redistribution op </dd></dl>
+
+</div>
+</div>
 <a id="aa2e03f8a5ae496c254442ee837db69a2" name="aa2e03f8a5ae496c254442ee837db69a2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa2e03f8a5ae496c254442ee837db69a2">&#9670;&#160;</a></span>getMFLevelGrid()</h2>
 
@@ -2343,32 +2369,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> </dd></dl>
-
-</div>
-</div>
-<a id="a468281f352f52f1c41a8e10256d301cd" name="a468281f352f52f1c41a8e10256d301cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a468281f352f52f1c41a8e10256d301cd">&#9670;&#160;</a></span>getRedistributionOp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp; Realm::getRedistributionOp </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the redistribution operators. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Redistribution op </dd></dl>
 
 </div>
 </div>

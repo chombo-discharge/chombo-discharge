@@ -127,7 +127,7 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for computing a non-conservative by smooshing a conservative divergence. </p>
 <p>This class will compute a stencil s(phi) = sum(kappa * phi)/sum(kappa) where the stencil points consist of cells that can be reached through a monotone path.</p>
-<p>This is a per-level class without AMR functionality. On coarse-fine interfaces the user is responsible for filling the ghost cells and redistributing the mass correctly (see <a class="el" href="classEBFluxRedistribution.html" title="Class for redistribution ala Chombo&#39;s flux redistribution.">EBFluxRedistribution</a>)</p>
+<p>This is a per-level class without AMR functionality. On coarse-fine interfaces the user is responsible for filling the ghost cells and redistributing the mass correctly (see <a class="el" href="classEBMassRedistribution.html" title="Redistribution of mass from cut cells to their neighbouring cells, as in Chombo&#39;s flux redistribution...">EBMassRedistribution</a>)</p>
 <p>The code has only been verified and validated for a stencil radius of 1, which is what chombo-discharge uses. Larger radii are accepted but untested. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af3285613167a9691ac0a7cc0341b8f68" name="af3285613167a9691ac0a7cc0341b8f68"></a>
