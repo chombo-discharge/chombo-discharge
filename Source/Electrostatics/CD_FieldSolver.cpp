@@ -684,7 +684,7 @@ FieldSolver::parsePlotVariables()
       else if (str[i] == "rho") {
         m_plotRho = true;
       }
-      else if (str[i] == "resid") {
+      else if (str[i] == "res") {
         m_plotResidue = true;
       }
       else if (str[i] == "E") {
@@ -698,6 +698,12 @@ FieldSolver::parsePlotVariables()
       }
       else if (str[i] == "perm") {
         m_plotPermittivity = true;
+      }
+      else {
+        const std::string err = "FieldSolver::parsePlotVariables - unknown plot variable '" + str[i] +
+                                "' (valid: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol')";
+
+        MayDay::Error(err.c_str());
       }
     }
   }

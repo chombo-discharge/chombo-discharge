@@ -463,11 +463,14 @@ The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and 
 Adjusting output
 ________________
 
-The user may plot the potential, the space charge, the electric, and the GMG residue as follows:
+The user may plot the potential, the space charge, the electric field, and the residual as follows:
 
 .. code-block:: text
 
-   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+
+The remaining variables are the permittivity (``perm``), the surface charge (``sigma``), and the electric field in the solid phase (``Esol``).
+A name that is not in this list aborts the run.
 
 .. _Chap:PoissonDielectricBC:   
 

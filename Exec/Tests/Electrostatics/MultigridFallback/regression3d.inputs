@@ -71,19 +71,19 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 # ====================================================================================================
 # FieldSolverMG class options
 # ====================================================================================================
-FieldSolverMG.verbosity             = -1                 ## Class verbosity
-FieldSolverMG.jump_bc               = natural            ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMG.bc.x.lo               = neumann 0.0        ## Bc type (see docs)
-FieldSolverMG.bc.x.hi               = neumann 0.0        ## Bc type (see docs)
-FieldSolverMG.bc.y.lo               = neumann 0.0        ## Bc type (see docs)
-FieldSolverMG.bc.y.hi               = neumann 0.0        ## Bc type (see docs)
-FieldSolverMG.bc.z.lo               = dirichlet 0.0      ## Bc type (see docs)
-FieldSolverMG.bc.z.hi               = dirichlet 1.0      ## Bc type (see docs)
-FieldSolverMG.bc_order              = 2                  ## EB stencil order on electrodes and dielectric interfaces (GMG and AMG)
-FieldSolverMG.bc_weight             = 2                  ## EB stencil least-squares weight on electrodes and dielectric interfaces (GMG and AMG)
-FieldSolverMG.plt_vars              = phi rho E resid    ## Plot variables: 'phi', 'rho', 'E', 'resid', 'perm', 'sigma', 'Esol'
-FieldSolverMG.use_regrid_slopes     = true               ## Use slopes when regridding or not
-FieldSolverMG.kappa_source          = true               ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverMG.verbosity             = -1               ## Class verbosity
+FieldSolverMG.jump_bc               = natural          ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverMG.bc.x.lo               = neumann 0.0      ## Bc type (see docs)
+FieldSolverMG.bc.x.hi               = neumann 0.0      ## Bc type (see docs)
+FieldSolverMG.bc.y.lo               = neumann 0.0      ## Bc type (see docs)
+FieldSolverMG.bc.y.hi               = neumann 0.0      ## Bc type (see docs)
+FieldSolverMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.z.hi               = dirichlet 1.0    ## Bc type (see docs)
+FieldSolverMG.bc_order              = 2                ## EB stencil order on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.bc_weight             = 2                ## EB stencil least-squares weight on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.plt_vars              = phi rho E res    ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+FieldSolverMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 
 # Fallback to algebraic multigrid (PETSc builds only; ignored with a warning otherwise)
 FieldSolverMG.amg_fallback           = true    ## Fall back to PETSc AMG when the GMG solver chain fails
