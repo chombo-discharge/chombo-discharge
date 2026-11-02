@@ -25,7 +25,7 @@ namespace Electrostatics {
 /**
  * @brief TimeStepper for solving the electrostatic Poisson equation, optionally with surface charge.
  * @details This module solves the electrostatic problem on a static or adaptively refined AMR hierarchy.
- * The template parameter @p T is the concrete FieldSolver type (e.g. FieldSolverGMG).
+ * The template parameter @p T is the concrete FieldSolver type (e.g. FieldSolverMG).
  *
  * The solver decomposes the potential into contributions from the applied voltage and from space/surface
  * charges. On live electrodes the voltage defaults to 1 V; use setRho() and setSigma() before calling

@@ -51,7 +51,11 @@ FieldSolverAMG::~FieldSolverAMG()
 {
   CH_TIME("FieldSolverAMG::~FieldSolverAMG()");
 
-  this->destroySolver();
+  // A solver that outlives ChomboDischarge::finalize is destroyed after PETSc has released its objects, which must
+  // then not be destroyed again.
+  if (!PetscFinalizeCalled) {
+    this->destroySolver();
+  }
 }
 
 void

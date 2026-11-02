@@ -183,7 +183,7 @@ public:
   operator=(const PetscHelmholtzOp&& a_other) = delete;
 
   /**
-   * @brief Destructor. Destroys the matrix.
+   * @brief Destructor. Destroys the matrix, unless PETSc has already been finalized.
    */
   virtual ~PetscHelmholtzOp() noexcept;
 

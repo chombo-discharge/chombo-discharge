@@ -11,7 +11,7 @@ import app_inc
 parser = argparse.ArgumentParser();
 parser.add_argument('-discharge_home', type=str,  default=os.environ.get('DISCHARGE_HOME', os.getcwd()), help = "Source code base directory (default: %(default)s)")
 parser.add_argument('-base_dir',       type=str,  default="MyApplications",                              help="Base directory of mini-app (default: %(default)s")
-parser.add_argument('-field_solver',   type=str,  default="FieldSolverGMG",                              help="Poisson solver implementation (default: %(default)s)")
+parser.add_argument('-field_solver',   type=str,  default="FieldSolverMG",                              help="Poisson solver implementation (default: %(default)s)")
 parser.add_argument('-cdr_solver',     type=str,  default="CdrGodunov",                                  help="CDR solver implementation (default: %(default)s)")
 parser.add_argument('-rte_solver',     type=str,  default="EddingtonSP1",                                help="RTE solver implementation (default: %(default)s)")
 parser.add_argument('-physics',        type=str,  default="CdrPlasmaJSON",                               help="Plasma model (default: %(default)s)")

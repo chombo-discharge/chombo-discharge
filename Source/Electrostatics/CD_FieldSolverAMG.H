@@ -79,7 +79,7 @@ public:
   operator=(const FieldSolverAMG&& a_other) = delete;
 
   /**
-   * @brief Destructor.
+   * @brief Destructor. Destroys the PETSc solver, unless PETSc has already been finalized.
    */
   virtual ~FieldSolverAMG();
 

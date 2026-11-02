@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser();
 parser.add_argument('-discharge_home', type=str,  default=os.environ.get('DISCHARGE_HOME', os.getcwd()), help="Source code base directory (default: %(default)s)")
 parser.add_argument('-base_dir',       type=str,  default="MyApplications",                              help="Base directory of mini-app (default: %(default)s")
 parser.add_argument('-geometry',       type=str,  default="RegularGeometry",                             help="Geometry class (default: %(default)s)")
-parser.add_argument('-field_solver',   type=str,  default="FieldSolverGMG",                              help="Poisson solver implementation (default: %(default)s)")
+parser.add_argument('-field_solver',   type=str,  default="FieldSolverMG",                              help="Poisson solver implementation (default: %(default)s)")
 parser.add_argument('-ito_solver',     type=str,  default="ItoSolver",                                   help="Ito solver implementation (default: %(default)s)")
 parser.add_argument('-cdr_solver',     type=str,  default="CdrCTU",                                      help="CDR solver implementation (default: %(default)s)")
 parser.add_argument('-rte_solver',     type=str,  default="McPhoto",                                     help="RTE solver implementation (default: %(default)s)")

@@ -1,4 +1,5 @@
 #include <CD_Driver.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_WireWire.H>
 #include <CD_DischargeInceptionStepper.H>
 #include <CD_DischargeInceptionTagger.H>
@@ -6,6 +7,10 @@
 
 using namespace ChomboDischarge;
 using namespace Physics::DischargeInception;
+
+using P = DischargeInceptionParticle;
+using F = FieldSolverGMG;
+using C = CdrCTU;
 
 int
 main(int argc, char* argv[])
@@ -81,7 +86,7 @@ main(int argc, char* argv[])
   // clang-format off
   auto compgeom    = RefCountedPtr<ComputationalGeometry>(new WireWire());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-  auto timestepper = RefCountedPtr<DischargeInceptionStepper<>>(new DischargeInceptionStepper<>());
+  auto timestepper = RefCountedPtr<DischargeInceptionStepper<P, F, C>>(new DischargeInceptionStepper<P, F, C>());
   auto celltagger  = RefCountedPtr<DischargeInceptionTagger>(new DischargeInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
   auto engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
   // clang-format on

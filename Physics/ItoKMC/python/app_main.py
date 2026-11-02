@@ -53,7 +53,7 @@ def write_template(args):
     mainf.write("  auto compgeom    = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  auto amr         = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
     mainf.write("  auto physics     = RefCountedPtr<ItoKMCPhysics> (new " + args.physics + "());\n")
-    mainf.write("  auto timestepper = RefCountedPtr<ItoKMCStepper<I, C, R, F>> (new " + args.time_stepper + "<>(physics));\n")
+    mainf.write("  auto timestepper = RefCountedPtr<ItoKMCStepper<I, C, R, F>> (new " + args.time_stepper + "<I, C, R, F>(physics));\n")
     if args.cell_tagger != "none":
         mainf.write("  auto tagger      = RefCountedPtr<CellTagger> (new " + args.cell_tagger + "<ItoKMCStepper<I, C, R, F>>(physics, timestepper, amr));\n")
     else:

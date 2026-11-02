@@ -29,7 +29,7 @@
 #include <CD_FieldSolver.H>
 #include <CD_ItoSolver.H>
 #include <CD_CdrCTU.H>
-#include <CD_FieldSolverGMG.H>
+#include <CD_FieldSolverMG.H>
 #include <CD_SurfaceODESolver.H>
 #include <CD_NamespaceHeader.H>
 
@@ -61,14 +61,14 @@ enum class SpeciesSubset
  * ItoKMCPhysics interface. Subclasses must implement `advance()` to define the time-integration scheme.
  * The default template arguments use standard chombo-discharge solver implementations.
  */
-template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
+template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG>
 class ItoKMCStepper : public TimeStepper
 {
 public:
   static_assert(std::is_base_of<ItoSolver, I>::value, "I must derive from ItoSolver");
   static_assert(std::is_base_of<CdrSolver, C>::value, "C must derive from CdrSolver");
   static_assert(std::is_base_of<McPhoto, R>::value, "R must derive from McPhoto");
-  static_assert(std::is_base_of<FieldSolver, FieldSolverGMG>::value, "F must derive from FieldSolver");
+  static_assert(std::is_base_of<FieldSolver, F>::value, "F must derive from FieldSolver");
 
   /**
    * @brief Default constructor. Sets default options.

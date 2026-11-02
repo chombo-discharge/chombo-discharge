@@ -27,7 +27,7 @@ namespace ItoKMC {
  * @brief Implementation of ItoKMCStepper that uses a semi-implicit split-step formalism for advancing the
  * Ito-Poisson-KMC system.
  */
-template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
+template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG>
 class ItoKMCGodunovStepper : public ItoKMCStepper<I, C, R, F>
 {
 public:

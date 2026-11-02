@@ -11,6 +11,11 @@
 using namespace ChomboDischarge;
 using namespace Physics::ItoKMC;
 
+using I = ItoSolver;
+using C = CdrCTU;
+using R = McPhoto;
+using F = FieldSolverGMG;
+
 int
 main(int argc, char* argv[])
 {
@@ -21,9 +26,10 @@ main(int argc, char* argv[])
   auto geometry    = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
-  auto timestepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
-  auto tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, timestepper, amr));
-  auto engine      = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger));
+  auto timestepper = RefCountedPtr<ItoKMCStepper<I, C, R, F>>(new ItoKMCGodunovStepper<I, C, R, F>(physics));
+  auto tagger      = RefCountedPtr<CellTagger>(
+    new ItoKMCStreamerTagger<ItoKMCStepper<I, C, R, F>>(physics, timestepper, amr));
+  auto engine = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger));
 
   Real U0 = 1.0;
 
