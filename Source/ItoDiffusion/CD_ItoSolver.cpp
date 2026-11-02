@@ -646,7 +646,7 @@ ItoSolver::registerOperators() const
     m_amr->registerOperator(s_eb_gradient, m_realm, m_phase);
     if (m_irregularDeposition == IrregularDeposition::Redistribute ||
         m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
-      m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
+      m_amr->registerOperator(s_eb_mass_redist, m_realm, m_phase);
     }
 
     // Without this the realm never builds the surface data and the mirror pass would read an empty field.

@@ -2164,8 +2164,8 @@ public:
    * @param[in] a_phase Phase (gas or solid)
    * @return Redistribution op
    */
-  Vector<RefCountedPtr<EBFluxRedistribution>>&
-  getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBMassRedistribution>>&
+  getMassRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
    * @brief Get the state redistribution
@@ -2179,8 +2179,8 @@ public:
   /**
    * @brief Add the mass of each cut cell to its neighbouring cells.
    * @details Used e.g. for the mass that a hybrid particle deposition does not keep in a cut cell. The mass of a cut
-   * cell on level l is added to cells on levels l-1, l and l+1, with the weights of the flux redistribution stencils
-   * (getRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume.
+   * cell on level l is added to cells on levels l-1, l and l+1, with the weights of the mass redistribution stencils
+   * (getMassRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume.
    * @param[in,out] a_phi    Data that the mass is added to.
    * @param[in]     a_deltaM Mass per cut cell, divided by the volume of a regular cell on its level, i.e. in the units
    * of a_phi.

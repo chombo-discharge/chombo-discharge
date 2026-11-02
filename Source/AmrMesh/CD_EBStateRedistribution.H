@@ -30,7 +30,7 @@
 
 // Our includes
 #include <CD_EBRedistribution.H>
-#include <CD_EBFluxRedistribution.H>
+#include <CD_EBMassRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -70,7 +70,7 @@
  *
  *   - a transfer to a ghost cell goes to the coarse cell under it. As in the paper, a coarse cell with volume fraction
  *     kappa takes the fraction kappa of it, and the rest is redistributed to its neighbours with the
- *     EBFluxRedistribution operators.
+ *     EBMassRedistribution operators.
  *   - a transfer to a covered cell goes to the fine cells under it, as the same change of the state in each of them.
  *     The paper instead gives it back to the valid coarse cell, which undoes the stabilization of a small coarse cell
  *     whose neighbours are all covered.
@@ -102,7 +102,7 @@ public:
    * @param[in] a_order            Order of the reconstruction in the neighbourhoods: 0 (constant) or 2 (linear,
    * limited)
    * @param[in] a_targetVolFrac    Target volume fraction. Cut cells with a smaller volume fraction are merged.
-   * @param[in] a_fluxRedistribution Flux redistribution operators on each level, for the corrections on refinement
+   * @param[in] a_massRedistribution Mass redistribution operators on each level, for the corrections on refinement
    * boundaries. Only used if there is more than one level.
    * @param[in] a_coveredByFiner   Cells covered by the finer level, on each level, with s_numGhost ghost cells.
    * @param[in] a_coarseFineGhost  Cells inside the domain but outside the grids of each level, with s_numGhost ghost
@@ -114,7 +114,7 @@ public:
                         const int                                              a_finestLevel,
                         const int                                              a_order,
                         const Real                                             a_targetVolFrac,
-                        const Vector<RefCountedPtr<EBFluxRedistribution>>&     a_fluxRedistribution,
+                        const Vector<RefCountedPtr<EBMassRedistribution>>&     a_massRedistribution,
                         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
                         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost) noexcept;
 
@@ -205,9 +205,9 @@ protected:
   Vector<int> m_refinementRatios;
 
   /**
-   * @brief Flux redistribution operators on each level, which redistribute the corrections on refinement boundaries.
+   * @brief Mass redistribution operators on each level, which redistribute the corrections on refinement boundaries.
    */
-  Vector<RefCountedPtr<EBFluxRedistribution>> m_fluxRedistribution;
+  Vector<RefCountedPtr<EBMassRedistribution>> m_massRedistribution;
 
   /**
    * @brief Neighbourhoods. Component 0 is the number of merged neighbours of the cell, components 1, 2, ... are their
@@ -285,7 +285,7 @@ protected:
   Vector<Copier> m_coarseCopier;
 
   /**
-   * @brief Scratch: the parts of the corrections that are redistributed with the flux redistribution, as rates.
+   * @brief Scratch: the parts of the corrections that are redistributed with the mass redistribution, as rates.
    */
   Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>> m_massDiff;
 

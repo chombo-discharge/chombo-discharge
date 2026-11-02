@@ -22,7 +22,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_DischargeIO.H>
 #include <CD_Random.H>
-#include <CD_EBHybridRedistribution.H>
+#include <CD_EBFluxRedistribution.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -363,11 +363,11 @@ CdrSolver::defineRedistribution()
   }
   else {
     m_redistribution = RefCountedPtr<EBRedistribution>(
-      new EBHybridRedistribution(m_amr,
-                                 m_realm,
-                                 m_phase,
-                                 m_blendConservation,
-                                 m_whichRedistribution != Redistribution::None));
+      new EBFluxRedistribution(m_amr,
+                               m_realm,
+                               m_phase,
+                               m_blendConservation,
+                               m_whichRedistribution != Redistribution::None));
   }
 }
 
@@ -1473,7 +1473,7 @@ CdrSolver::registerOperators()
   m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
   m_amr->registerOperator(s_eb_fine_interp, m_realm, m_phase);
-  m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
+  m_amr->registerOperator(s_eb_mass_redist, m_realm, m_phase);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
   m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
 

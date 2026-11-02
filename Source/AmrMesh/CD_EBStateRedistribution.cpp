@@ -43,7 +43,7 @@ EBStateRedistribution::EBStateRedistribution(
   const int                                              a_finestLevel,
   const int                                              a_order,
   const Real                                             a_targetVolFrac,
-  const Vector<RefCountedPtr<EBFluxRedistribution>>&     a_fluxRedistribution,
+  const Vector<RefCountedPtr<EBMassRedistribution>>&     a_massRedistribution,
   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coveredByFiner,
   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarseFineGhost) noexcept
 {
@@ -61,19 +61,19 @@ EBStateRedistribution::EBStateRedistribution(
   m_coveredByFiner     = a_coveredByFiner;
   m_coarseFineGhost    = a_coarseFineGhost;
   m_refinementRatios   = a_refinementRatios;
-  m_fluxRedistribution = a_fluxRedistribution;
+  m_massRedistribution = a_massRedistribution;
   m_finestLevel        = a_finestLevel;
   m_order              = a_order;
   m_targetVolFrac      = a_targetVolFrac;
 
   if (m_finestLevel > 0) {
-    if (m_fluxRedistribution.size() < 1 + m_finestLevel) {
-      MayDay::Abort("EBStateRedistribution -- the flux redistribution operators are needed on all levels");
+    if (m_massRedistribution.size() < 1 + m_finestLevel) {
+      MayDay::Abort("EBStateRedistribution -- the mass redistribution operators are needed on all levels");
     }
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      if (m_fluxRedistribution[lvl].isNull()) {
-        MayDay::Abort("EBStateRedistribution -- the flux redistribution operators are needed on all levels");
+      if (m_massRedistribution[lvl].isNull()) {
+        MayDay::Abort("EBStateRedistribution -- the mass redistribution operators are needed on all levels");
       }
     }
   }
@@ -1560,13 +1560,13 @@ EBStateRedistribution::synchronize(EBAMRCellData& a_divG, const Real a_dt) noexc
     const Interval variables = Interval(0, 0);
 
     if (lvl > 0) {
-      m_fluxRedistribution[lvl]->redistributeCoar(*a_divG[lvl - 1], *m_massDiff[lvl], scale, variables);
+      m_massRedistribution[lvl]->redistributeCoar(*a_divG[lvl - 1], *m_massDiff[lvl], scale, variables);
     }
 
-    m_fluxRedistribution[lvl]->redistributeLevel(*a_divG[lvl], *m_massDiff[lvl], scale, variables);
+    m_massRedistribution[lvl]->redistributeLevel(*a_divG[lvl], *m_massDiff[lvl], scale, variables);
 
     if (lvl < m_finestLevel) {
-      m_fluxRedistribution[lvl]->redistributeFine(*a_divG[lvl + 1], *m_massDiff[lvl], scale, variables);
+      m_massRedistribution[lvl]->redistributeFine(*a_divG[lvl + 1], *m_massDiff[lvl], scale, variables);
     }
   }
 }

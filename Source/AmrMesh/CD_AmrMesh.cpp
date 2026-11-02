@@ -3968,21 +3968,21 @@ AmrMesh::getStateRedistribution(const std::string& a_realm, const phase::which_p
   return m_realms[a_realm]->getStateRedistribution(a_phase);
 }
 
-Vector<RefCountedPtr<EBFluxRedistribution>>&
-AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const
+Vector<RefCountedPtr<EBMassRedistribution>>&
+AmrMesh::getMassRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const
 {
-  CH_TIME("AmrMesh::getRedistributionOp");
+  CH_TIME("AmrMesh::getMassRedistributionOp");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getRedistributionOp" << endl;
+    pout() << "AmrMesh::getMassRedistributionOp" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getRedistributionOp(string, phase::which_phase) - could not find realm '" +
+    const std::string str = "AmrMesh::getMassRedistributionOp(string, phase::which_phase) - could not find realm '" +
                             a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getRedistributionOp(a_phase);
+  return m_realms[a_realm]->getMassRedistributionOp(a_phase);
 }
 
 void
@@ -4001,7 +4001,7 @@ AmrMesh::redistributeMass(EBAMRCellData&           a_phi,
   CH_assert(a_phi.size() == m_finestLevel + 1);
   CH_assert(a_deltaM.size() == m_finestLevel + 1);
 
-  const Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = this->getRedistributionOp(a_realm, a_phase);
+  const Vector<RefCountedPtr<EBMassRedistribution>>& redistOps = this->getMassRedistributionOp(a_realm, a_phase);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const Real     scale     = 1.0;
