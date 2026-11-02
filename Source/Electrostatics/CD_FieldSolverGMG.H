@@ -34,6 +34,12 @@
  */
 class FieldSolverGMG : public FieldSolver
 {
+  /**
+   * @brief FieldSolverMG owns a FieldSolverGMG as its geometric multigrid stage, and parses its settings and shares its
+   * own data with it.
+   */
+  friend class FieldSolverMG;
+
 public:
   /**
    * @brief Weak constructor.
@@ -190,6 +196,12 @@ public:
    */
   virtual Vector<long long>
   computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
+
+  /**
+   * @brief Release the multigrid solver and the operator factory. Multigrid is set up again before the next solve.
+   */
+  virtual void
+  invalidateSolver() override;
 
 protected:
   /**
@@ -430,10 +442,33 @@ protected:
   EllipticSolverChain::KrylovSolver<MFCellFAB> m_krylov;
 
   /**
-   * @brief Parse multigrid settings
+   * @brief Parse the multigrid cycle settings: smoothing, iterations, tolerances, smoother, bottom solver and cycle
+   * type.
    */
   virtual void
   parseMultigridSettings();
+
+  /**
+   * @brief Parse the order and the least-squares weight of the EB stencils (gmg_bc_order, gmg_bc_weight,
+   * gmg_jump_order, gmg_jump_weight).
+   */
+  virtual void
+  parseStencilSettings();
+
+  /**
+   * @brief Parse gmg_use_default_settings, and if it is true, replace the multigrid and stencil settings by the
+   * defaults.
+   */
+  virtual void
+  parseDefaultSettings();
+
+  /**
+   * @brief Parse the solver chain and the settings of the outer Krylov solvers.
+   * @details The keys are a_keyPrefix + "solver" and a_keyPrefix + "krylov_*", after the class name.
+   * @param[in] a_keyPrefix Prefix of the keys, after the class name
+   */
+  virtual void
+  parseKrylovSettings(const std::string& a_keyPrefix);
 
   /**
    * @brief Parse m_kappaSource

@@ -55,6 +55,9 @@ FieldSolverGMG::parseOptions()
   this->parseDomainBc();
   this->parsePlotVariables();
   this->parseMultigridSettings();
+  this->parseStencilSettings();
+  this->parseDefaultSettings();
+  this->parseKrylovSettings("");
   this->parseKappaSource();
   this->parseJumpBC();
   this->parseRegridSlopes();
@@ -70,6 +73,9 @@ FieldSolverGMG::parseRuntimeOptions()
 
   this->parseVerbosity();
   this->parseMultigridSettings();
+  this->parseStencilSettings();
+  this->parseDefaultSettings();
+  this->parseKrylovSettings("");
   this->parseKappaSource();
   this->parsePlotVariables();
   this->parseRegridSlopes();
@@ -102,7 +108,6 @@ FieldSolverGMG::parseMultigridSettings()
 
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
-  pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
   pp.get("gmg_pre_smooth", m_multigridPreSmooth);
   pp.get("gmg_post_smooth", m_multigridPostSmooth);
   pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
@@ -113,10 +118,6 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_exit_hang", m_multigridExitHang);
   pp.get("gmg_min_cells", m_minCellsBottom);
   pp.get("gmg_drop_order", m_domainDropOrder);
-  pp.get("gmg_bc_order", m_multigridBcOrder);
-  pp.get("gmg_bc_weight", m_multigridBcWeight);
-  pp.get("gmg_jump_order", m_multigridJumpOrder);
-  pp.get("gmg_jump_weight", m_multigridJumpWeight);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
   pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
@@ -216,6 +217,46 @@ FieldSolverGMG::parseMultigridSettings()
     m_minCellsBottom = 2;
   }
 
+  // Things won't run unless this is fulfilled.
+  CH_assert(m_minCellsBottom >= 2);
+  CH_assert(m_multigridPreSmooth >= 0);
+  CH_assert(m_multigridPostSmooth >= 0);
+  CH_assert(m_multigridBottomSmooth >= 0);
+}
+
+void
+FieldSolverGMG::parseStencilSettings()
+{
+  CH_TIME("FieldSolverGMG::parseStencilSettings()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverGMG::parseStencilSettings()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("gmg_bc_order", m_multigridBcOrder);
+  pp.get("gmg_bc_weight", m_multigridBcWeight);
+  pp.get("gmg_jump_order", m_multigridJumpOrder);
+  pp.get("gmg_jump_weight", m_multigridJumpWeight);
+
+  CH_assert(m_multigridBcOrder > 0);
+  CH_assert(m_multigridBcWeight >= 0);
+  CH_assert(m_multigridJumpOrder > 0);
+  CH_assert(m_multigridJumpWeight >= 0);
+}
+
+void
+FieldSolverGMG::parseDefaultSettings()
+{
+  CH_TIME("FieldSolverGMG::parseDefaultSettings()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverGMG::parseDefaultSettings()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
+
   // Switch for using safer solver settings.
   if (m_multigridUseDefaultSettings) {
     m_multigridBcOrder       = 1;
@@ -233,14 +274,30 @@ FieldSolverGMG::parseMultigridSettings()
     m_bottomSolverType       = BottomSolverType::Simple;
     m_mfsolver.setNumSmooths(40);
   }
+}
+
+void
+FieldSolverGMG::parseKrylovSettings(const std::string& a_keyPrefix)
+{
+  CH_TIME("FieldSolverGMG::parseKrylovSettings(std::string)");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverGMG::parseKrylovSettings(std::string)" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  const std::string solverKey = a_keyPrefix + "solver";
+  const std::string krylovKey = a_keyPrefix + "krylov_";
 
   // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
-  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // krylov_* settings. When the solver is not gmg, the multigrid settings configure the V-cycle that preconditions
   // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
-  const int numKrylovSolvers = pp.countval("solver");
+  const int numKrylovSolvers = pp.countval(solverKey.c_str());
   if (numKrylovSolvers < 1) {
-    MayDay::Error("FieldSolverGMG::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
-                  "'bicgstab'");
+    const std::string err = "FieldSolverGMG::parseKrylovSettings - '" + solverKey +
+                            "' must list at least one of 'gmg', 'gmres', 'bicgstab'";
+
+    MayDay::Error(err.c_str());
   }
 
   m_krylovSettings.solvers.resize(numKrylovSolvers);
@@ -248,33 +305,23 @@ FieldSolverGMG::parseMultigridSettings()
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
 
-    pp.get("solver", solverStr, i);
+    pp.get(solverKey.c_str(), solverStr, i);
     m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
 
-  pp.get("krylov_eps", m_krylovSettings.eps);
-  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
-  pp.get("krylov_restart", m_krylovSettings.restart);
-  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+  pp.get((krylovKey + "eps").c_str(), m_krylovSettings.eps);
+  pp.get((krylovKey + "max_iter").c_str(), m_krylovSettings.maxIter);
+  pp.get((krylovKey + "restart").c_str(), m_krylovSettings.restart);
+  pp.get((krylovKey + "vcycles").c_str(), m_krylovSettings.numVCycles);
 
   // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
   // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
-  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+  pp.get((krylovKey + "retry_interval").c_str(), m_fallbackPolicy.retryInterval);
 
   // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
   // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
-  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+  pp.get((krylovKey + "reprobe_iters").c_str(), m_fallbackPolicy.reprobeIters);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
-
-  // Things won't run unless this is fulfilled.
-  CH_assert(m_minCellsBottom >= 2);
-  CH_assert(m_multigridPreSmooth >= 0);
-  CH_assert(m_multigridPostSmooth >= 0);
-  CH_assert(m_multigridBottomSmooth >= 0);
-  CH_assert(m_multigridBcOrder > 0);
-  CH_assert(m_multigridBcWeight >= 0);
-  CH_assert(m_multigridJumpOrder > 0);
-  CH_assert(m_multigridJumpWeight >= 0);
 }
 
 void
@@ -514,8 +561,22 @@ FieldSolverGMG::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   FieldSolver::preRegrid(a_lbase, a_oldFinestLevel);
 
-  m_multigridSolver.freeMem();
-  m_helmholtzOpFactory.freeMem();
+  this->invalidateSolver();
+}
+
+void
+FieldSolverGMG::invalidateSolver()
+{
+  CH_TIME("FieldSolverGMG::invalidateSolver()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverGMG::invalidateSolver()" << endl;
+  }
+
+  // The multigrid solver holds the factory by reference, so it goes first.
+  m_multigridSolver    = RefCountedPtr<AMRMultiGrid<LevelData<MFCellFAB>>>();
+  m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>();
+
+  m_isSolverSetup = false;
 }
 
 void
@@ -528,7 +589,7 @@ FieldSolverGMG::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
 
   FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  m_isSolverSetup = false;
+  this->invalidateSolver();
 }
 
 void
