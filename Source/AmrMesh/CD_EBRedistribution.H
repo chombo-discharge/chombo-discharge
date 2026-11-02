@@ -34,6 +34,9 @@
  * starts from and the time step of the update, use R only with that time step, and not add together right-hand sides
  * that were computed separately. Several divergences that enter the same update are added together before they are
  * passed to redistribute().
+ *
+ * The implementations are EBFluxRedistribution (the hybrid divergence with mass redistribution) and
+ * EBStateRedistribution (weighted state redistribution). Both use EBMassRedistribution to move mass between cells.
  */
 class EBRedistribution
 {

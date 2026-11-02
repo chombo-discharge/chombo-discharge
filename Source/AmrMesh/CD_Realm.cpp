@@ -1927,10 +1927,10 @@ Realm::getFluxRegister(const phase::which_phase a_phase)
   return m_realms[a_phase]->getFluxRegister();
 }
 
-Vector<RefCountedPtr<EBFluxRedistribution>>&
-Realm::getRedistributionOp(const phase::which_phase a_phase)
+Vector<RefCountedPtr<EBMassRedistribution>>&
+Realm::getMassRedistributionOp(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getRedistributionOp();
+  return m_realms[a_phase]->getMassRedistributionOp();
 }
 
 const RefCountedPtr<EBStateRedistribution>&

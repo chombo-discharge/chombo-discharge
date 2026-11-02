@@ -31,7 +31,7 @@
  * the stencil points consist of cells that can be reached through a monotone path.
  *
  * This is a per-level class without AMR functionality. On coarse-fine interfaces the user
- * is responsible for filling the ghost cells and redistributing the mass correctly (see EBFluxRedistribution)
+ * is responsible for filling the ghost cells and redistributing the mass correctly (see EBMassRedistribution)
  *
  * The code has only been verified and validated for a stencil radius of 1, which is what chombo-discharge uses. Larger
  * radii are accepted but untested.

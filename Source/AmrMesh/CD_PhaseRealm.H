@@ -31,7 +31,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
-#include <CD_EBFluxRedistribution.H>
+#include <CD_EBMassRedistribution.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
@@ -54,7 +54,7 @@ static const std::string s_eb_coar_ave         = "eb_coar_ave";         // For c
 static const std::string s_eb_fill_patch       = "eb_fill_patch";       // For regridding data
 static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For linearly filling ghost cells
 static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registration
-static const std::string s_eb_redist           = "eb_redist";           // For redistribution
+static const std::string s_eb_mass_redist      = "eb_mass_redist";      // For mass redistribution
 static const std::string s_eb_state_redist     = "eb_state_redist";     // For state redistribution
 static const std::string s_covered_by_finer    = "covered_by_finer";    // Cells covered by the finer level
 static const std::string s_coarse_fine_ghost   = "coarse_fine_ghost";   // Cells outside the grids, inside the domain
@@ -429,8 +429,8 @@ public:
    * @brief Get the redistribution operators
    * @return Redistribution operators on all levels
    */
-  Vector<RefCountedPtr<EBFluxRedistribution>>&
-  getRedistributionOp() const;
+  Vector<RefCountedPtr<EBMassRedistribution>>&
+  getMassRedistributionOp() const;
 
   /**
    * @brief Get the state redistribution operator
@@ -546,9 +546,9 @@ protected:
   int m_numLsfGhostCells;
 
   /**
-   * @brief Radius of the flux redistribution and of the non-conservative divergence, in cells.
-   * @details Always 1. EBFluxRedistribution and EBNonConservativeDivergence take a radius, but they have not been
-   * verified or validated for radii larger than 1 (flux redistribution is known to lose mass across refinement ratio 4
+   * @brief Radius of the mass redistribution and of the non-conservative divergence, in cells.
+   * @details Always 1. EBMassRedistribution and EBNonConservativeDivergence take a radius, but they have not been
+   * verified or validated for radii larger than 1 (mass redistribution is known to lose mass across refinement ratio 4
    * with radius 2).
    */
   static constexpr int s_redistributionRadius = 1;
@@ -771,7 +771,7 @@ protected:
   /**
    * @brief Redistribution utilities
    */
-  mutable Vector<RefCountedPtr<EBFluxRedistribution>> m_redistributionOp;
+  mutable Vector<RefCountedPtr<EBMassRedistribution>> m_massRedistributionOp;
 
   /**
    * @brief State redistribution on all levels
@@ -871,7 +871,7 @@ protected:
    * @param[in] a_regsize Description
    */
   void
-  defineRedistOper(const int a_lmin, const int a_regsize);
+  defineMassRedistOper(const int a_lmin, const int a_regsize);
 
   /**
    * @brief Define operator redistribution utility

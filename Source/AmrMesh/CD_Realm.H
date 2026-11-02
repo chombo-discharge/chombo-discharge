@@ -438,8 +438,8 @@ public:
    * @param[in] a_phase Phase (gas or solid)
    * @return Redistribution op
    */
-  Vector<RefCountedPtr<EBFluxRedistribution>>&
-  getRedistributionOp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMassRedistribution>>&
+  getMassRedistributionOp(const phase::which_phase a_phase);
 
   /**
    * @brief Get the state redistribution

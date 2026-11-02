@@ -105,7 +105,7 @@ This leads to an unacceptable time step constraint for :eq:`conservativeUpdate`.
 The solvers therefore stabilize the update in the cut cells, which allows a normal time step constraint.
 The stabilization is selected with the solver option ``which_redistribution``:
 
-* ``volume``: the hybrid divergence with flux redistribution (the Chombo approach), described below.
+* ``volume``: flux redistribution (the Chombo approach): the hybrid divergence, with the mass it misses redistributed to the neighbouring cells, described below.
 * ``state``: weighted state redistribution, see :ref:`Chap:StateRedistribution`.
 * ``none``: the hybrid divergence without redistributing the mass that it misses. This is not conservative.
 
@@ -113,6 +113,10 @@ Both stabilizations turn the conservative divergence into the right-hand side :m
 With state redistribution, :math:`R` depends on :math:`\phi^k` and on :math:`\Delta t`.
 The divergence functions therefore take the time step of the update, and the result must only be used with that time step.
 Divergences that enter the same update are added together before they are stabilized; ``computeDivJ`` does this for advection and diffusion, and ``redistributeDivergence`` stabilizes a sum of conservative divergences.
+
+In the code, the stabilizations implement ``EBRedistribution``: ``EBFluxRedistribution`` for ``volume`` and ``none``, and ``EBStateRedistribution`` for ``state``.
+Both move mass between cells with ``EBMassRedistribution``, which spreads a mass given in each cut cell over its neighbouring cells, also across refinement boundaries.
+Flux redistribution uses it for the mass that the hybrid divergence misses, state redistribution for its corrections on refinement boundaries, and the particle solvers for the mass that a hybrid deposition does not keep in a cut cell.
 
 The hybrid scheme expands the range of influence of the cut cells.
 First, we compute the conservative divergence
@@ -195,7 +199,7 @@ Cells outside the merged neighborhoods keep the conservative update.
 On AMR hierarchies the redistribution follows :cite:`BarrioSanchez2023`.
 The neighborhoods are centered on the cells of a level that are not covered by a finer level, but they can contain cells that stand in for another level: cells covered by the finer level, and ghost cells that overlay the coarser level.
 The mass that the redistribution moves between a cell of the level and a stand-in is moved to the cells that the stand-in represents.
-Mass moved into a ghost cell goes to the coarse cell under it, which keeps the part :math:`\kappa` of it and redistributes the rest with flux redistribution, as in :cite:`BarrioSanchez2023`.
+Mass moved into a ghost cell goes to the coarse cell under it, which keeps the part :math:`\kappa` of it and redistributes the rest with mass redistribution, as in :cite:`BarrioSanchez2023`.
 Mass moved into a covered cell goes to the fine cells under it, as the same change of the state in each of them.
 This differs from :cite:`BarrioSanchez2023`, which gives it back to the coarse cell; that undoes the stabilization of a small coarse cell whose neighbors are all covered.
 
