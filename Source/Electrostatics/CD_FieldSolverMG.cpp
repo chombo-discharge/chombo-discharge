@@ -136,6 +136,12 @@ FieldSolverMG::parseSolverSettings()
 
     m_amg->m_ebOrder  = m_bcOrder;
     m_amg->m_ebWeight = m_bcWeight;
+
+    // When the fallback is switched on at run time, the solver data is already allocated, and the storage for the
+    // initial guess is allocated here. Otherwise allocate() allocates it.
+    if (m_phiStart.size() == 0 && m_potential.size() > 0) {
+      m_amr->allocate(m_phiStart, m_realm, m_nComp);
+    }
   }
   else {
     m_amg        = RefCountedPtr<FieldSolverAMG>();
