@@ -5600,9 +5600,10 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 
     DataOps::setValue(G, 0.0);
 
-    solver->computeDivG(divG, G, *a_cdrFluxes[idx], false);
-
     EBAMRCellData& phi = solver->getPhi();
+
+    solver->computeDivG(divG, G, *a_cdrFluxes[idx], phi, a_dt, false);
+
     DataOps::incr(phi, divG, -a_dt);
 
     m_amr->conservativeAverage(phi, m_fluidRealm, m_plasmaPhase);

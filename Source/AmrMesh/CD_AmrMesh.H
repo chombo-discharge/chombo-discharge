@@ -1748,13 +1748,6 @@ public:
   getNumberOfEbGhostCells() const;
 
   /**
-   * @brief Get default redistribution radius
-   * @return Redistribution radius
-   */
-  int
-  getRedistributionRadius() const;
-
-  /**
    * @brief Get resolution on the finest grid level.
    * @return Grid spacing on finest level
    */
@@ -2174,6 +2167,32 @@ public:
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const;
 
+  /**
+   * @brief Get the state redistribution
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return State redistribution on all levels
+   */
+  const RefCountedPtr<EBStateRedistribution>&
+  getStateRedistribution(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Add the mass of each cut cell to its neighbouring cells.
+   * @details Used e.g. for the mass that a hybrid particle deposition does not keep in a cut cell. The mass of a cut
+   * cell on level l is added to cells on levels l-1, l and l+1, with the weights of the flux redistribution stencils
+   * (getRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume.
+   * @param[in,out] a_phi    Data that the mass is added to.
+   * @param[in]     a_deltaM Mass per cut cell, divided by the volume of a regular cell on its level, i.e. in the units
+   * of a_phi.
+   * @param[in]     a_realm  Realm where the data lives.
+   * @param[in]     a_phase  Phase where the data lives.
+   */
+  void
+  redistributeMass(EBAMRCellData&           a_phi,
+                   const EBAMRIVData&       a_deltaM,
+                   const std::string&       a_realm,
+                   const phase::which_phase a_phase) const noexcept;
+
 #ifdef CH_USE_PETSC
   /**
    * @brief Get a PETSc grid object
@@ -2406,9 +2425,14 @@ protected:
   int m_multigridInterpWeight;
 
   /**
-   * @brief Redistribution radius
+   * @brief State redistribution: order of the reconstruction (0 or 2)
    */
-  int m_redistributionRadius;
+  int m_srdOrder;
+
+  /**
+   * @brief State redistribution: target volume fraction
+   */
+  Real m_srdTargetVolFrac;
 
   /**
    * @brief Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects.
@@ -2616,10 +2640,10 @@ protected:
   parseMultigridInterpolator();
 
   /**
-   * @brief Parse the default redistribution radius
+   * @brief Parse the parameters of the state redistribution
    */
   void
-  parseRedistributionRadius();
+  parseStateRedistribution();
 
   /**
    * @brief Parse the mirror-deposition band radius and fit/guard tolerances.

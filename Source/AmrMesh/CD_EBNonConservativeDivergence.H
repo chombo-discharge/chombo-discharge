@@ -32,6 +32,9 @@
  *
  * This is a per-level class without AMR functionality. On coarse-fine interfaces the user
  * is responsible for filling the ghost cells and redistributing the mass correctly (see EBFluxRedistribution)
+ *
+ * The code has only been verified and validated for a stencil radius of 1, which is what chombo-discharge uses. Larger
+ * radii are accepted but untested.
  */
 class EBNonConservativeDivergence
 {
@@ -49,7 +52,7 @@ public:
   /**
    * @brief Defining constructor. This calls the define function.
    * @param[in] a_eblg Grids
-   * @param[in] a_radius Stencil radius
+   * @param[in] a_radius Stencil radius. Only verified and validated for 1.
    */
   EBNonConservativeDivergence(const EBLevelGrid& a_eblg, const int a_radius) noexcept;
 
@@ -61,7 +64,7 @@ public:
   /**
    * @brief Define function. Puts object in usable state.
    * @param[in] a_eblg Grids
-   * @param[in] a_radius Stencil radius
+   * @param[in] a_radius Stencil radius. Only verified and validated for 1.
    */
   virtual void
   define(const EBLevelGrid& a_eblg, const int a_radius) noexcept;

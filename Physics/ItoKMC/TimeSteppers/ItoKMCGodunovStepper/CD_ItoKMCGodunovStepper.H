@@ -340,7 +340,7 @@ protected:
   EBAMRCellData m_scratchSemiImplicitConductivityCDR;
 
   /**
-   * @brief Storage for the finite-volume approximation of div(D*grad(phi)) for the CDR equations.
+   * @brief Storage for the conservative finite-volume approximation of kappa*div(D*grad(phi)) for the CDR equations.
    */
   Vector<EBAMRCellData> m_cdrDivD;
 

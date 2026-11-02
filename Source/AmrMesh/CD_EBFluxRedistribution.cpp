@@ -35,18 +35,12 @@ EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
                                            const EBLevelGrid& a_eblgFine,
                                            const int          a_refToCoar,
                                            const int          a_refToFine,
-                                           const bool         a_redistributeOutside) noexcept
+                                           const int          a_redistRadius) noexcept
 {
   CH_TIME("EBFluxRedistribution::EBFluxRedistribution(full)");
 
-  this->define(a_eblgCoar,
-               a_eblgCoarsened,
-               a_eblg,
-               a_eblgRefined,
-               a_eblgFine,
-               a_refToCoar,
-               a_refToFine,
-               a_redistributeOutside);
+  this
+    ->define(a_eblgCoar, a_eblgCoarsened, a_eblg, a_eblgRefined, a_eblgFine, a_refToCoar, a_refToFine, a_redistRadius);
 }
 
 EBFluxRedistribution::~EBFluxRedistribution() noexcept
@@ -62,18 +56,29 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
                              const EBLevelGrid& a_eblgFine,
                              const int          a_refToCoar,
                              const int          a_refToFine,
-                             const bool /*a_redistributeOutside*/) noexcept
+                             const int          a_redistRadius) noexcept
 {
   CH_TIME("EBFluxRedistribution::define");
 
   CH_assert(a_eblg.isDefined());
+  CH_assert(a_redistRadius >= 1);
 
-  m_redistRadius        = 1;
-  m_refToCoar           = -1;
-  m_refToFine           = -1;
-  m_hasCoar             = false;
-  m_hasFine             = false;
-  m_redistributeOutside = false; // a_redistributeOutside;
+  m_redistRadius = a_redistRadius;
+
+  // Only a radius of 1 has been verified and validated.
+  if (m_redistRadius > 1) {
+    pout() << "EBFluxRedistribution::define -- warning: redistribution radius " << m_redistRadius
+           << " > 1 is not verified or validated, and is known to lose mass across a refinement ratio of 4" << endl;
+  }
+
+  // The redistribution buffers on this level are grown by the radius and need the geometry there.
+  if (m_redistRadius > a_eblg.getGhost()) {
+    MayDay::Abort("EBFluxRedistribution::define -- the redistribution radius exceeds the number of EB ghost cells");
+  }
+  m_refToCoar = -1;
+  m_refToFine = -1;
+  m_hasCoar   = false;
+  m_hasFine   = false;
 
   if (a_eblgCoar.isDefined()) {
     CH_assert(a_refToCoar >= 2);
@@ -101,11 +106,11 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
     // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
     // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
     // data in a larger radius than what is available in the input arguments.
-    if (m_refToFine > a_eblgRefined.getGhost()) {
+    if (m_refToFine * m_redistRadius > a_eblgRefined.getGhost()) {
       DisjointBoxLayout dblRefined;
 
       refine(dblRefined, m_eblg.getDBL(), m_refToFine);
-      m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine, m_eblg.getEBIS());
+      m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine * m_redistRadius, m_eblg.getEBIS());
     }
     else {
       CH_assert(a_eblgRefined.isDefined());
@@ -228,11 +233,6 @@ EBFluxRedistribution::defineStencils() noexcept
       for (int i = 0; i < neighborVoFs.size(); i++) {
         const VolIndex& curVoF = neighborVoFs[i];
         const IntVect&  curIV  = curVoF.gridIndex();
-
-        // If we only redistribute to cells inside the domain, skip this cell.
-        if (!(domain.contains(curIV)) && !m_redistributeOutside) {
-          continue;
-        }
 
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
@@ -420,9 +420,12 @@ EBFluxRedistribution::defineBuffers() noexcept
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
 
+  // Buffers of a previous definition are released, also when this level no longer has a coarser or finer level.
+  m_coarBuffer.clear();
+  m_fineBuffer.clear();
+
   // ghostDefine implies that we copy from valid+ghost to valid. Which is what we want since we
-  // also redistribute over patch boundaries (duh). Note that the ghost cells we define here MUST
-  // match the ghost cells in the buffers that are defined in the actual redistribution routines.
+  // also redistribute over patch boundaries (duh). The ghost cells of the copiers match those of the buffers.
 
   if (m_hasCoar) {
     const DisjointBoxLayout& dblCoar      = m_eblgCoar.getDBL();
@@ -430,9 +433,11 @@ EBFluxRedistribution::defineBuffers() noexcept
     const ProblemDomain&     domainCoar   = m_eblgCoar.getDomain();
 
     m_coarCopier.ghostDefine(dblCoarsened, dblCoar, domainCoar, m_redistRadius * IntVect::Unit);
+    m_coarBuffer.define(dblCoarsened, 1, m_redistRadius * IntVect::Unit, EBCellFactory(m_eblgCoarsened.getEBISL()));
   }
 
   m_levelCopier.ghostDefine(dbl, dbl, domain, m_redistRadius * IntVect::Unit);
+  m_levelBuffer.define(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(m_eblg.getEBISL()));
 
   if (m_hasFine) {
     const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
@@ -440,36 +445,10 @@ EBFluxRedistribution::defineBuffers() noexcept
     const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
     m_fineCopier.ghostDefine(dblRefined, dblFine, domainFine, m_refToFine * m_redistRadius * IntVect::Unit);
-  }
-}
-
-void
-EBFluxRedistribution::redistributeAMR(LevelData<EBCellFAB>*             a_phiCoar,
-                                      LevelData<EBCellFAB>*             a_phi,
-                                      LevelData<EBCellFAB>*             a_phiFine,
-                                      const LevelData<BaseIVFAB<Real>>& a_deltaM,
-                                      const Real                        a_scaleCoar,
-                                      const Real                        a_scale,
-                                      const Real                        a_scaleFine,
-                                      const Interval&                   a_variables) const noexcept
-{
-  CH_TIME("EBFluxRedistribution::redistributeAMR");
-
-  CH_assert(m_isDefined);
-  CH_assert(a_phi != nullptr);
-
-  if (m_hasCoar) {
-    CH_assert(a_phiCoar != nullptr);
-
-    this->redistributeCoar(*a_phiCoar, a_deltaM, a_scaleCoar, a_variables);
-  }
-
-  this->redistributeLevel(*a_phi, a_deltaM, a_scale, a_variables);
-
-  if (m_hasFine) {
-    CH_assert(a_phiFine != nullptr);
-
-    this->redistributeFine(*a_phiFine, a_deltaM, a_scaleFine, a_variables);
+    m_fineBuffer.define(dblRefined,
+                        1,
+                        m_refToFine * m_redistRadius * IntVect::Unit,
+                        EBCellFactory(m_eblgRefined.getEBISL()));
   }
 }
 
@@ -491,12 +470,11 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblCoar   = m_eblgCoarsened.getDBL();
-  const DataIterator&      ditCoar   = dblCoar.dataIterator();
-  const EBISLayout&        ebislCoar = m_eblgCoarsened.getEBISL();
-  const int                nbox      = ditCoar.size();
+  const DisjointBoxLayout& dblCoar = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar = dblCoar.dataIterator();
+  const int                nbox    = ditCoar.size();
 
-  LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
+  LevelData<EBCellFAB>& coarBuffer = m_coarBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
@@ -549,12 +527,11 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_phi.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
-  const DataIterator&      dit   = dbl.dataIterator();
-  const EBISLayout&        ebisl = m_eblg.getEBISL();
-  const int                nbox  = dit.size();
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
-  LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
+  LevelData<EBCellFAB>& levelBuffer = m_levelBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
@@ -609,12 +586,11 @@ EBFluxRedistribution::redistributeFine(LevelData<EBCellFAB>&             a_phiFi
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblFine   = m_eblgRefined.getDBL();
-  const DataIterator&      ditFine   = dblFine.dataIterator();
-  const EBISLayout&        ebislFine = m_eblgRefined.getEBISL();
-  const int                nbox      = ditFine.size();
+  const DisjointBoxLayout& dblFine = m_eblgRefined.getDBL();
+  const DataIterator&      ditFine = dblFine.dataIterator();
+  const int                nbox    = ditFine.size();
 
-  LevelData<EBCellFAB> fineBuffer(dblFine, 1, m_refToFine * m_redistRadius * IntVect::Unit, EBCellFactory(ebislFine));
+  LevelData<EBCellFAB>& fineBuffer = m_fineBuffer;
 
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 #pragma omp parallel for schedule(runtime)

@@ -149,6 +149,7 @@ public:
    * @brief Compute div(D*grad(phi)) explicitly.
    * @param[out] a_divD             Divergence term, including redistribution.
    * @param[in]  a_phi              Cell-centered state.
+   * @param[in]  a_dt               Time step of the update phi + a_dt*div(D) that the result is used in.
    * @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will be included in div(D).
@@ -159,6 +160,7 @@ public:
   virtual void
   computeDivD(EBAMRCellData& a_divD,
               EBAMRCellData& a_phi,
+              const Real     a_dt,
               const bool     a_conservativeOnly,
               const bool     a_ebFlux,
               const bool     a_domainFlux) override final;

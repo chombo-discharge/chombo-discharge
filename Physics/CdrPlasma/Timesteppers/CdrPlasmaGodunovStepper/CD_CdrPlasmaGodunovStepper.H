@@ -274,6 +274,8 @@ protected:
 
   /**
    * @brief Diffusion threshold factor
+   * @details With automatic diffusion, a species uses implicit diffusion when dt_A/dt_AD exceeds this, where dt_A is
+   * its advective time step and dt_AD its explicit advection-diffusion time step.
    */
   Real m_implicitDiffusionThreshold;
 

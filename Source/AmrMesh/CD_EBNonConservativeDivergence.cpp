@@ -49,6 +49,12 @@ EBNonConservativeDivergence::define(const EBLevelGrid& a_eblg, const int a_radiu
   CH_assert(a_eblg.isDefined());
   CH_assert(a_radius >= 1);
 
+  // Only a radius of 1 has been verified and validated.
+  if (a_radius > 1) {
+    pout() << "EBNonConservativeDivergence::define -- warning: stencil radius " << a_radius
+           << " > 1 is not verified or validated" << endl;
+  }
+
   m_eblg = a_eblg;
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();

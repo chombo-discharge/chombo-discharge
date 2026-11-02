@@ -2262,23 +2262,7 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass difference
 
-    Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real     scale     = 1.0;
-      const Interval variables = Interval(0, 0);
-      const bool     hasCoar   = lvl > 0;
-      const bool     hasFine   = lvl < m_amr->getFinestLevel();
-
-      if (hasCoar) {
-        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
-      }
-
-      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
-
-      if (hasFine) {
-        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
-      }
-    }
+    m_amr->redistributeMass(a_phi, m_massDiff, m_realm, m_phase);
   }
 }
 

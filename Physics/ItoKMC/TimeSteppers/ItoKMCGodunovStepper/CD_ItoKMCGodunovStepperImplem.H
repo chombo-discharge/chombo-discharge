@@ -2275,16 +2275,25 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(EBAMRCellData& a_semiI
 
     const EBAMRCellData& phi = solver->getPhi();
 
-    // Compute finite-volume approximation to div(D*grad(phi))
+    // Compute the conservative finite-volume approximation to kappa*div(D*grad(phi)). It is stabilized together with
+    // the advective term in stepEulerMaruyamaCDR, since the two enter the same update.
     if (solver->isDiffusive()) {
-      solver->computeDivD(m_cdrDivD[index], solver->getPhi(), false, false, false);
+      solver->computeDivD(m_cdrDivD[index], solver->getPhi(), a_dt, true, false, false);
     }
 
-    // Update the space charge density arising from the update phi^dagger = phi^k + dt * div(D*grad(phi^k))
+    // Update the space charge density arising from the update phi^dagger = phi^k + dt * div(D*grad(phi^k)), with the
+    // diffusive term stabilized on its own. stepEulerMaruyamaCDR stabilizes the advective and diffusive terms together,
+    // which with state redistribution is not the same as stabilizing them separately: the diffusive part of the update
+    // differs from the one that the field solve sees by the difference of the stabilizations. Hybrid (volume)
+    // redistribution is linear, so there the two agree up to round-off.
     if (Z != 0) {
       DataOps::incr(a_semiImplicitRhoCDR, phi, 1.0 * Z);
       if (solver->isDiffusive()) {
-        DataOps::incr(a_semiImplicitRhoCDR, m_cdrDivD[index], 1.0 * Z * a_dt);
+        DataOps::copy(this->m_fluidScratch1, m_cdrDivD[index]);
+
+        solver->redistributeDivergence(this->m_fluidScratch1, phi, -a_dt);
+
+        DataOps::incr(a_semiImplicitRhoCDR, this->m_fluidScratch1, 1.0 * Z * a_dt);
       }
     }
   }
@@ -2380,20 +2389,28 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
       this->m_amr->interpGhostPwl(phi, this->m_fluidRealm, this->m_plasmaPhase);
     }
 
-    // Add in the advective term -- BC comes later.
-    if (solver->isMobile()) {
-      DataOps::setValue(solver->getEbFlux(), 0.0);
+    // The update is phi^(k+1) = phi^k - dt*(div(F) - div(D*grad(phi))). The advective and diffusive terms are added
+    // together as conservative divergences and then stabilized once, since the cut-cell stabilization of a sum is not
+    // the sum of the stabilizations (see EBRedistribution).
+    if (solver->isMobile() || solver->isDiffusive()) {
+      DataOps::setValue(this->m_fluidScratch1, 0.0);
 
-      // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
-      // CDR solver is a CTU solver, we also add in the transverse terms.
-      solver->computeDivF(this->m_fluidScratch1, phi, a_dt, a_dt, false, true, true);
+      // Compute the FV approximation to kappa*div(F). If the underlying CDR solver is a CTU solver, we also add in the
+      // transverse terms. The BC comes later.
+      if (solver->isMobile()) {
+        DataOps::setValue(solver->getEbFlux(), 0.0);
+
+        solver->computeDivF(this->m_fluidScratch1, phi, a_dt, a_dt, true, true, true);
+      }
+
+      // Subtract kappa*div(D*grad(phi)) from computeDiffusionTermCDR.
+      if (solver->isDiffusive()) {
+        DataOps::incr(this->m_fluidScratch1, this->m_cdrDivD[index], -1.0);
+      }
+
+      solver->redistributeDivergence(this->m_fluidScratch1, phi, a_dt);
 
       DataOps::incr(phi, this->m_fluidScratch1, -a_dt);
-    }
-
-    // Add in the diffusion term.
-    if (solver->isDiffusive()) {
-      DataOps::incr(phi, this->m_cdrDivD[index], a_dt);
     }
 
     DataOps::floor(phi, 0.0, this->m_amr->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
