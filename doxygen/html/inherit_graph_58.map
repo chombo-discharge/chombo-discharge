@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classEBReflux.html" title="Class which can do refluxing across a coarse&#45;fine interface." alt="" coords="5,5,85,33"/>
+<area shape="rect" id="Node000000" href="$classEBRedistribution.html" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="5,32,135,60"/>
+<area shape="rect" id="Node000001" href="$classEBHybridRedistribution.html" title="The hybrid divergence with flux redistribution, as an EBRedistribution." alt="" coords="183,5,355,33"/>
+<area shape="poly" id="edge98_Node000000_Node000001" title=" " alt="" coords="150,33,185,30,179,31,151,38"/>
+<area shape="rect" id="Node000002" href="$classEBStateRedistribution.html" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al...." alt="" coords="187,57,350,85"/>
+<area shape="poly" id="edge99_Node000000_Node000002" title=" " alt="" coords="150,53,189,60,184,61,150,59"/>
 </map>

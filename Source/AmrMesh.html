@@ -69,6 +69,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#domain-decomposition">Domain decomposition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ghost-cells">Ghost cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#multigrid-interpolation">Multigrid interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cut-cell-redistribution">Cut-cell redistribution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interpolation-near-the-eb">Interpolation near the EB</a></li>
 </ul>
 </li>
@@ -215,7 +216,8 @@ Below, we include the current template options file for the <code class="docutil
 </span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">mg_interp_weight</span>        <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## Multigrid interpolation weight (for least squares)</span>
 </span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">centroid_interp</span>         <span class="o">=</span> <span class="n">minmod</span>         <span class="c1">## Centroid interp stencils. linear, lsq, minmod, etc</span>
 </span><span class="n">AmrMesh</span><span class="o">.</span><span class="n">eb_interp</span>               <span class="o">=</span> <span class="n">minmod</span>         <span class="c1">## EB interp stencils. linear, taylor, minmod, etc</span>
-<span class="n">AmrMesh</span><span class="o">.</span><span class="n">redist_radius</span>           <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## Redistribution radius for hyperbolic conservation laws</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">srd_order</span>               <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## State redistribution: reconstruction order, 0 (constant) or 2 (linear, limited)</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">srd_target_volfrac</span>      <span class="o">=</span> <span class="mf">0.5</span>            <span class="c1">## State redistribution: cut cells with smaller volume fractions are merged</span>
 <span class="n">AmrMesh</span><span class="o">.</span><span class="n">mirror_band_radius</span>      <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Mirror deposition: band half-width in cells. Requires num_ghost &gt;= this.</span>
 <span class="n">AmrMesh</span><span class="o">.</span><span class="n">mirror_cond_tol</span>         <span class="o">=</span> <span class="mf">1.E-3</span>          <span class="c1">## Mirror deposition: min eigenvalue ratio of U^T U in the curvature fit.</span>
 <span class="n">AmrMesh</span><span class="o">.</span><span class="n">mirror_crease_tol</span>       <span class="o">=</span> <span class="mf">1.E-1</span>          <span class="c1">## Mirror deposition: max dimensionless fit residual before falling back to J = 1.</span>
@@ -283,6 +285,16 @@ It can be useful to include a larger ghost region in these data holders, which i
 <p>Multigrid interpolation is done using least squares reconstruction, as discussed in <a class="reference internal" href="LinearSolvers.html#chap-multigridinterpolation"><span class="std std-ref">Multigrid ghost cell interpolation</span></a>.
 The user can set the order, radius, and least squares weighting for this interpolation by setting <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_order</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code>, and <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_weight</span></code>.
 Note that specifying <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code> is sure to lead to a run-time error (possibly a segfault).</p>
+</section>
+<section id="cut-cell-redistribution">
+<h2>Cut-cell redistribution<a class="headerlink" href="#cut-cell-redistribution" title="Permalink to this heading"></a></h2>
+<p>The cut-cell stabilization of explicit updates (see <a class="reference internal" href="../Solvers/CDR.html#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>) is configured through <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>.
+The flux redistribution and the non-conservative divergence always use a radius of one cell; the operators accept larger radii, but these are not verified or validated.
+The state redistribution is configured by:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.srd_order</span></code> is the reconstruction order of state redistribution, 0 (constant) or 2 (linear, limited).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.srd_target_volfrac</span></code> is the target volume fraction of state redistribution: cut cells with smaller volume fractions are merged with neighbors.</p></li>
+</ul>
 </section>
 <section id="interpolation-near-the-eb">
 <h2>Interpolation near the EB<a class="headerlink" href="#interpolation-near-the-eb" title="Permalink to this heading"></a></h2>

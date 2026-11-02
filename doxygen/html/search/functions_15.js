@@ -12,6 +12,6 @@ var searchData=
   ['vessel_9',['Vessel',['../classVessel.html#a31aa5296ad9d5975a5624f316085d165',1,'Vessel']]],
   ['vofutils_10',['VofUtils',['../classVofUtils.html#ad4b8086d18d809bdc238eaf79446b5bd',1,'VofUtils']]],
   ['volumecentroid_11',['volumeCentroid',['../classPolyhedralEB_1_1CutCellBody.html#a7a721c78f54661dc00b7fa0f17d900bd',1,'PolyhedralEB::CutCellBody']]],
-  ['volumefraction_12',['volumeFraction',['../classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55',1,'PolyhedralEB::CutCellBody']]],
+  ['volumefraction_12',['volumeFraction',['../classEBStateRedistribution.html#aaf9a46008d4a95f5d90d398cab8cbe85',1,'EBStateRedistribution::volumeFraction()'],['../classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55',1,'PolyhedralEB::CutCellBody::volumeFraction()']]],
   ['volumescale_13',['volumeScale',['../classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de',1,'DataOps']]]
 ];

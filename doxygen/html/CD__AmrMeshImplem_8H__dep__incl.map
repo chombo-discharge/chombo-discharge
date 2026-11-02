@@ -1,139 +1,139 @@
 <map id="Source/AmrMesh/CD_AmrMeshImplem.H" name="Source/AmrMesh/CD_AmrMeshImplem.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_AmrMesh.H." alt="" coords="1939,5,2162,50"/>
-<area shape="rect" id="Node000002" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)." alt="" coords="1932,98,2169,126"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2043,63,2046,99,2042,96,2040,68"/>
-<area shape="poly" id="edge26_Node000002_Node000001" title=" " alt="" coords="2057,81,2057,53,2060,48,2061,84"/>
-<area shape="rect" id="Node000003" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionTagger class." alt="" coords="814,283,1044,328"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1914,119,1555,141,1376,156,1247,176,1169,199,1092,229,971,285,968,281,1090,224,1167,194,1246,171,1376,151,1555,135,1919,117"/>
-<area shape="rect" id="Node000005" href="$CD__BrownianWalkerTagger_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerTagger class." alt="" coords="1584,283,1797,328"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="1914,116,1837,123,1758,134,1692,151,1668,162,1651,175,1644,187,1641,200,1645,229,1659,257,1675,284,1670,282,1654,260,1640,230,1636,200,1639,185,1647,172,1665,158,1690,146,1757,129,1836,118,1919,115"/>
-<area shape="rect" id="Node000007" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaStepper, the abstract base class for CDR plasma time step..." alt="" coords="2250,376,2417,421"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="2047,139,2043,182,2043,232,2053,282,2064,305,2078,326,2105,344,2147,359,2252,385,2247,385,2146,365,2102,349,2074,330,2059,308,2048,284,2038,232,2038,182,2043,143"/>
-<area shape="rect" id="Node000015" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaGodunovStepper, a split&#45;step Godunov CDR plasma stepper." alt="" coords="216,469,453,530"/>
-<area shape="poly" id="edge21_Node000002_Node000015" title=" " alt="" coords="1914,115,1543,122,1077,133,671,150,536,162,495,169,473,176,440,205,412,241,389,281,372,323,350,405,339,469,335,467,344,404,367,321,385,279,407,238,436,202,471,171,493,164,535,157,670,145,1077,128,1543,117,1919,114"/>
-<area shape="rect" id="Node000017" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="60,578,297,640"/>
-<area shape="poly" id="edge22_Node000002_Node000017" title=" " alt="" coords="1914,115,1547,122,1080,133,654,151,500,162,410,176,326,194,252,209,223,222,201,240,186,267,181,305,181,400,181,578,176,577,176,400,176,304,181,265,197,237,220,217,251,204,325,188,409,171,500,157,654,145,1079,128,1547,117,1919,114"/>
-<area shape="rect" id="Node000019" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaImExSdcStepper." alt="" coords="684,469,921,530"/>
-<area shape="poly" id="edge23_Node000002_Node000019" title=" " alt="" coords="1914,115,1746,121,1533,131,1299,149,1066,176,991,183,923,183,805,181,752,187,702,203,653,234,605,285,597,302,598,322,604,343,614,365,638,401,653,419,686,445,724,468,719,468,683,450,649,423,634,404,609,367,599,345,592,322,592,301,600,282,650,230,700,198,751,181,805,175,923,178,991,178,1065,171,1299,143,1533,126,1746,116,1919,114"/>
-<area shape="rect" id="Node000021" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage inner classes for CdrPlasmaImExSdcStepper." alt="" coords="528,578,765,640"/>
-<area shape="poly" id="edge24_Node000002_Node000021" title=" " alt="" coords="1914,115,1596,121,1201,131,847,148,720,161,646,176,587,198,538,220,519,234,505,252,496,275,493,304,493,400,496,427,504,453,532,502,569,543,607,578,601,577,565,547,528,505,499,455,491,428,488,400,488,304,491,274,501,249,516,230,535,215,585,193,645,171,719,156,847,143,1201,125,1596,115,1919,113"/>
-<area shape="rect" id="Node000023" href="$CD__AmrMesh_8cpp.html" title="Implementation of CD_AmrMesh.H." alt="" coords="1662,191,1912,218"/>
-<area shape="poly" id="edge25_Node000002_Node000023" title=" " alt="" coords="2000,130,1826,193,1824,188,1995,132"/>
-<area shape="rect" id="Node000024" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="1258,182,1419,227"/>
-<area shape="poly" id="edge27_Node000002_Node000024" title=" " alt="" coords="1929,129,1420,196,1419,190,1934,127"/>
-<area shape="rect" id="Node000034" href="$CD__RefinementBoxTagger_8H.html" title="Declaration of a cell tagger that refines user&#45;specified boxes." alt="" coords="1376,283,1560,328"/>
-<area shape="poly" id="edge38_Node000002_Node000034" title=" " alt="" coords="2019,133,1970,176,1957,192,1950,208,1942,223,1925,238,1877,262,1834,276,1794,282,1756,283,1674,279,1626,280,1572,286,1561,288,1560,283,1572,281,1626,274,1674,274,1756,277,1794,277,1833,271,1875,257,1923,233,1938,220,1946,206,1953,190,1966,172,2014,136"/>
-<area shape="rect" id="Node000036" href="$CD__Driver_8H.html" title="Declaration of the simulation driver class for chombo&#45;discharge." alt="" coords="1821,292,2014,320"/>
-<area shape="poly" id="edge49_Node000002_Node000036" title=" " alt="" coords="2036,137,1970,237,1929,293,1926,289,1966,234,2032,140"/>
-<area shape="rect" id="Node000038" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2314,182,2515,227"/>
-<area shape="poly" id="edge39_Node000002_Node000038" title=" " alt="" coords="2118,127,2330,181,2324,182,2118,133"/>
-<area shape="rect" id="Node000060" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="3714,191,3950,218"/>
-<area shape="poly" id="edge50_Node000002_Node000060" title=" " alt="" coords="2185,112,2524,118,2962,129,3390,146,3568,158,3703,171,3787,190,3782,190,3702,176,3567,163,3390,152,2961,134,2524,123,2185,117"/>
-<area shape="rect" id="Node000075" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3533,182,3691,227"/>
-<area shape="poly" id="edge65_Node000002_Node000075" title=" " alt="" coords="2185,117,2633,139,3194,171,3536,197,3530,197,3193,176,2632,145,2185,122"/>
-<area shape="rect" id="Node000084" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2657,182,2802,227"/>
-<area shape="poly" id="edge70_Node000002_Node000084" title=" " alt="" coords="2173,126,2527,171,2659,192,2654,192,2526,176,2174,131"/>
-<area shape="rect" id="Node000091" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="5076,182,5249,227"/>
-<area shape="poly" id="edge74_Node000002_Node000091" title=" " alt="" coords="2185,112,3532,129,4330,146,4664,158,4916,171,5078,191,5073,191,4916,176,4663,163,4330,152,3532,134,2185,117"/>
-<area shape="rect" id="Node000093" href="$CD__KDParticleMerge_8H.html" title="Declaration of distributed, MPI&#45;safe whole&#45;patch kd&#45;tree super&#45;particle merge algorithms." alt="" coords="3974,182,4124,227"/>
-<area shape="poly" id="edge77_Node000002_Node000093" title=" " alt="" coords="2185,110,2573,110,3086,117,3349,124,3593,135,3803,151,3962,171,3996,182,3990,182,3961,176,3802,156,3592,141,3348,130,3086,122,2573,115,2185,115"/>
-<area shape="rect" id="Node000096" href="$CD__NearestNeighborParticleMergeImplem_8H.html" title="Implementation of CD_NearestNeighborParticleMerge.H." alt="" coords="4149,174,4376,235"/>
-<area shape="poly" id="edge78_Node000002_Node000096" title=" " alt="" coords="2185,111,2605,114,3168,123,3727,141,3960,154,4136,171,4151,175,4146,175,4136,176,3959,160,3727,146,3168,128,2605,119,2185,116"/>
-<area shape="rect" id="Node000098" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="4720,182,4904,227"/>
-<area shape="poly" id="edge79_Node000002_Node000098" title=" " alt="" coords="2185,112,2688,117,3387,128,4089,146,4382,157,4604,171,4723,188,4717,188,4604,176,4382,163,4089,151,3387,133,2688,122,2185,117"/>
-<area shape="rect" id="Node000108" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="2994,182,3182,227"/>
-<area shape="poly" id="edge81_Node000002_Node000108" title=" " alt="" coords="2184,120,2474,142,2814,171,2997,192,2991,193,2813,176,2473,147,2185,125"/>
-<area shape="rect" id="Node000110" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="4400,182,4592,227"/>
-<area shape="poly" id="edge85_Node000002_Node000110" title=" " alt="" coords="2184,110,2650,110,3287,116,3616,123,3923,134,4188,150,4388,171,4429,182,4424,182,4388,176,4187,155,3923,140,3615,129,3287,121,2650,115,2185,115"/>
-<area shape="rect" id="Node000004" href="$CD__AdvectionDiffusionTagger_8cpp.html" title="Implementation of CD_AdvectionDiffusionTagger.H." alt="" coords="808,376,1051,421"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="931,341,932,377,927,374,928,346"/>
-<area shape="rect" id="Node000006" href="$CD__BrownianWalkerTagger_8cpp.html" title="Implementation of CD_BrownianWalkerTagger.H." alt="" coords="1598,376,1823,421"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1700,341,1708,377,1704,374,1697,345"/>
-<area shape="rect" id="Node000008" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="2246,477,2420,522"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="2335,434,2335,479,2331,475,2332,438"/>
-<area shape="rect" id="Node000009" href="$CD__CdrPlasmaTagger_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaTagger abstract class." alt="" coords="1568,477,1736,522"/>
-<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="2231,414,1736,489,1736,483,2237,414"/>
-<area shape="poly" id="edge9_Node000007_Node000015" title=" " alt="" coords="2232,409,2065,423,1674,440,1369,446,1064,453,672,471,455,489,453,484,672,466,1064,448,1369,441,1674,435,2065,418,2237,408"/>
-<area shape="poly" id="edge15_Node000007_Node000019" title=" " alt="" coords="2232,408,2066,423,1420,465,922,494,922,489,1420,460,2065,418,2237,408"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_AmrMesh.H." alt="" coords="2338,5,2561,50"/>
+<area shape="rect" id="Node000002" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)." alt="" coords="2331,98,2568,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2442,63,2445,99,2440,96,2439,68"/>
+<area shape="poly" id="edge26_Node000002_Node000001" title=" " alt="" coords="2456,81,2456,53,2459,48,2460,84"/>
+<area shape="rect" id="Node000003" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionTagger class." alt="" coords="2188,283,2418,328"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2432,137,2320,285,2317,281,2428,140"/>
+<area shape="rect" id="Node000005" href="$CD__BrownianWalkerTagger_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerTagger class." alt="" coords="1640,283,1853,328"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="2313,115,2145,122,1962,132,1808,150,1756,162,1728,176,1721,187,1717,200,1717,228,1725,257,1736,284,1732,282,1720,259,1712,229,1712,199,1716,185,1725,172,1754,157,1807,145,1961,127,2145,117,2318,114"/>
+<area shape="rect" id="Node000007" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaStepper, the abstract base class for CDR plasma time step..." alt="" coords="2655,376,2822,421"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="2312,117,1903,136,1648,153,1394,176,1268,184,1129,184,989,182,861,183,758,194,719,204,692,218,677,236,676,259,690,289,720,326,732,332,752,338,819,349,1036,363,1332,371,1669,373,2308,371,2533,371,2643,373,2657,378,2652,378,2642,379,2533,376,2308,377,1669,379,1332,376,1036,369,818,354,751,344,729,337,717,330,685,292,671,260,672,234,689,214,717,199,757,189,861,178,989,177,1129,178,1268,178,1393,171,1648,148,1902,131,2318,116"/>
+<area shape="rect" id="Node000015" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaGodunovStepper, a split&#45;step Godunov CDR plasma stepper." alt="" coords="317,469,555,530"/>
+<area shape="poly" id="edge21_Node000002_Node000015" title=" " alt="" coords="2312,114,1877,119,1314,129,1046,136,817,146,652,160,601,168,575,176,541,205,513,241,491,281,473,323,451,405,441,470,436,467,446,403,468,321,486,279,508,238,537,202,572,171,599,162,651,154,817,141,1046,131,1314,123,1877,114,2318,113"/>
+<area shape="rect" id="Node000017" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="161,578,399,640"/>
+<area shape="poly" id="edge22_Node000002_Node000017" title=" " alt="" coords="2313,114,1884,120,1323,129,1048,136,807,147,620,160,554,168,510,176,426,194,353,209,324,222,302,241,288,267,283,305,283,400,283,578,277,577,277,400,277,304,283,266,298,237,321,218,352,204,425,188,509,171,553,162,619,155,806,141,1048,131,1323,123,1884,114,2318,113"/>
+<area shape="rect" id="Node000019" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaImExSdcStepper." alt="" coords="633,469,871,530"/>
+<area shape="poly" id="edge23_Node000002_Node000019" title=" " alt="" coords="2312,113,1896,116,1363,124,1110,131,896,142,743,157,696,166,674,176,652,209,644,246,646,286,656,327,672,368,692,406,732,469,727,468,688,409,668,370,651,329,640,287,638,245,647,206,670,172,695,161,742,151,896,137,1110,126,1363,118,1896,111,2318,112"/>
+<area shape="rect" id="Node000021" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage inner classes for CdrPlasmaImExSdcStepper." alt="" coords="633,578,871,640"/>
+<area shape="poly" id="edge24_Node000002_Node000021" title=" " alt="" coords="2313,114,1890,119,1349,128,1090,136,871,146,712,160,663,167,639,176,612,202,599,230,595,263,595,304,595,400,596,469,604,497,623,529,649,555,681,578,675,577,645,559,619,532,600,499,591,470,589,400,589,304,589,263,594,229,607,199,636,171,662,162,712,154,870,141,1090,131,1348,123,1890,114,2318,113"/>
+<area shape="rect" id="Node000023" href="$CD__AmrMesh_8cpp.html" title="Implementation of CD_AmrMesh.H." alt="" coords="1739,191,1989,218"/>
+<area shape="poly" id="edge25_Node000002_Node000023" title=" " alt="" coords="2316,129,2166,151,2002,176,1921,193,1920,187,2001,171,2166,145,2321,128"/>
+<area shape="rect" id="Node000024" href="$CD__EBHybridRedistribution_8H.html" title="Declaration of the hybrid divergence with flux redistribution as an EBRedistribution." alt="" coords="1405,182,1627,227"/>
+<area shape="poly" id="edge27_Node000002_Node000024" title=" " alt="" coords="2313,120,2024,142,1853,157,1683,176,1628,185,1626,179,1682,171,1853,152,2024,137,2318,119"/>
+<area shape="rect" id="Node000027" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="2013,182,2174,227"/>
+<area shape="poly" id="edge30_Node000002_Node000027" title=" " alt="" coords="2380,131,2175,185,2173,180,2385,129"/>
+<area shape="rect" id="Node000037" href="$CD__RefinementBoxTagger_8H.html" title="Declaration of a cell tagger that refines user&#45;specified boxes." alt="" coords="1978,283,2163,328"/>
+<area shape="poly" id="edge41_Node000002_Node000037" title=" " alt="" coords="2412,132,2114,285,2112,280,2407,134"/>
+<area shape="rect" id="Node000039" href="$CD__Driver_8H.html" title="Declaration of the simulation driver class for chombo&#45;discharge." alt="" coords="2442,292,2635,320"/>
+<area shape="poly" id="edge52_Node000002_Node000039" title=" " alt="" coords="2463,138,2535,293,2530,291,2460,142"/>
+<area shape="rect" id="Node000041" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2660,182,2860,227"/>
+<area shape="poly" id="edge42_Node000002_Node000041" title=" " alt="" coords="2509,128,2688,182,2683,182,2509,133"/>
+<area shape="rect" id="Node000062" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="3804,191,4039,218"/>
+<area shape="poly" id="edge53_Node000002_Node000062" title=" " alt="" coords="2583,114,3210,133,3545,150,3684,160,3790,171,3875,190,3870,190,3789,176,3683,165,3545,155,3209,139,2584,119"/>
+<area shape="rect" id="Node000077" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3620,182,3777,227"/>
+<area shape="poly" id="edge66_Node000002_Node000077" title=" " alt="" coords="2583,113,3002,130,3261,147,3520,171,3622,188,3617,188,3520,176,3260,152,3002,136,2584,119"/>
+<area shape="rect" id="Node000086" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2972,182,3116,227"/>
+<area shape="poly" id="edge71_Node000002_Node000086" title=" " alt="" coords="2561,126,2872,171,2974,190,2969,190,2872,176,2561,131"/>
+<area shape="rect" id="Node000093" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4925,182,5099,227"/>
+<area shape="poly" id="edge75_Node000002_Node000093" title=" " alt="" coords="2583,112,3117,118,3841,130,4518,147,4765,158,4911,171,4950,182,4944,181,4910,176,4764,164,4518,153,3841,135,3117,123,2584,117"/>
+<area shape="rect" id="Node000095" href="$CD__KDParticleMerge_8H.html" title="Declaration of distributed, MPI&#45;safe whole&#45;patch kd&#45;tree super&#45;particle merge algorithms." alt="" coords="4064,182,4214,227"/>
+<area shape="poly" id="edge78_Node000002_Node000095" title=" " alt="" coords="2583,111,2913,113,3337,122,3750,140,3921,154,4051,171,4085,182,4079,181,4050,176,3921,159,3750,145,3336,127,2913,119,2583,116"/>
+<area shape="rect" id="Node000098" href="$CD__NearestNeighborParticleMergeImplem_8H.html" title="Implementation of CD_NearestNeighborParticleMerge.H." alt="" coords="4238,174,4466,235"/>
+<area shape="poly" id="edge79_Node000002_Node000098" title=" " alt="" coords="2583,112,2946,117,3419,127,3885,145,4079,157,4226,171,4241,176,4235,176,4225,176,4078,162,3885,150,3419,132,2946,122,2584,117"/>
+<area shape="rect" id="Node000100" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="4499,182,4682,227"/>
+<area shape="poly" id="edge80_Node000002_Node000100" title=" " alt="" coords="2583,111,2993,113,3540,121,4082,140,4307,153,4478,171,4520,182,4515,181,4477,176,4306,159,4081,145,3540,127,2993,118,2584,116"/>
+<area shape="rect" id="Node000110" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="4712,182,4899,227"/>
+<area shape="poly" id="edge82_Node000002_Node000110" title=" " alt="" coords="2583,110,3033,111,3642,118,3957,125,4251,136,4503,151,4695,171,4737,182,4732,182,4694,176,4503,157,4250,142,3957,131,3642,123,3033,116,2584,115"/>
+<area shape="rect" id="Node000112" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3316,182,3508,227"/>
+<area shape="poly" id="edge86_Node000002_Node000112" title=" " alt="" coords="2583,122,3128,171,3318,193,3313,193,3128,176,2583,127"/>
+<area shape="rect" id="Node000004" href="$CD__AdvectionDiffusionTagger_8cpp.html" title="Implementation of CD_AdvectionDiffusionTagger.H." alt="" coords="2158,376,2402,421"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2296,341,2287,378,2284,374,2292,345"/>
+<area shape="rect" id="Node000006" href="$CD__BrownianWalkerTagger_8cpp.html" title="Implementation of CD_BrownianWalkerTagger.H." alt="" coords="1627,376,1853,421"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1746,342,1744,378,1740,374,1742,346"/>
+<area shape="rect" id="Node000008" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="2652,477,2826,522"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="2740,434,2741,479,2737,475,2737,438"/>
+<area shape="rect" id="Node000009" href="$CD__CdrPlasmaTagger_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaTagger abstract class." alt="" coords="2139,477,2306,522"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="2642,421,2307,486,2306,481,2637,422"/>
+<area shape="poly" id="edge9_Node000007_Node000015" title=" " alt="" coords="2637,421,2333,452,2073,464,1844,464,1630,457,1416,448,1187,445,927,450,622,471,556,479,554,474,621,466,927,445,1187,439,1416,443,1630,451,1844,458,2073,459,2333,447,2642,421"/>
+<area shape="poly" id="edge15_Node000007_Node000019" title=" " alt="" coords="2637,421,2472,439,2257,453,1749,475,1245,490,871,499,871,493,1244,485,1749,470,2256,448,2471,434,2642,421"/>
 <area shape="rect" id="Node000016" href="$CD__CdrPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStepper.H." alt="" coords="267,688,504,750"/>
-<area shape="poly" id="edge10_Node000015_Node000016" title=" " alt="" coords="347,544,356,578,381,688,376,687,351,579,344,548"/>
-<area shape="poly" id="edge11_Node000015_Node000017" title=" " alt="" coords="276,541,224,580,221,576,280,538"/>
+<area shape="poly" id="edge10_Node000015_Node000016" title=" " alt="" coords="431,544,413,641,398,689,394,686,408,639,427,548"/>
+<area shape="poly" id="edge11_Node000015_Node000017" title=" " alt="" coords="382,538,325,580,322,576,377,541"/>
 <area shape="rect" id="Node000018" href="$CD__CdrPlasmaGodunovStorage_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStorage.H." alt="" coords="5,688,243,750"/>
-<area shape="poly" id="edge14_Node000015_Node000018" title=" " alt="" coords="339,544,333,595,325,620,311,642,281,670,244,691,242,686,278,666,307,638,320,617,328,594,335,548"/>
-<area shape="poly" id="edge12_Node000017_Node000016" title=" " alt="" coords="251,645,330,687,325,688,250,650"/>
-<area shape="poly" id="edge13_Node000017_Node000018" title=" " alt="" coords="159,652,141,689,137,686,155,655"/>
+<area shape="poly" id="edge14_Node000015_Node000018" title=" " alt="" coords="300,524,211,549,175,564,151,580,136,605,127,633,123,688,118,687,122,632,131,602,147,576,172,559,209,544,304,521"/>
+<area shape="poly" id="edge12_Node000017_Node000016" title=" " alt="" coords="321,649,358,688,353,687,319,654"/>
+<area shape="poly" id="edge13_Node000017_Node000018" title=" " alt="" coords="226,648,169,690,166,685,221,650"/>
 <area shape="rect" id="Node000020" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="528,688,765,750"/>
-<area shape="poly" id="edge16_Node000019_Node000020" title=" " alt="" coords="806,544,800,594,792,619,779,642,754,669,723,690,721,685,750,665,775,638,787,617,795,593,802,548"/>
-<area shape="poly" id="edge17_Node000019_Node000021" title=" " alt="" coords="749,538,691,580,689,576,744,541"/>
+<area shape="poly" id="edge16_Node000019_Node000020" title=" " alt="" coords="662,538,640,558,624,580,615,606,616,634,623,662,633,689,628,687,618,664,611,635,610,605,619,577,636,555,657,540"/>
+<area shape="poly" id="edge17_Node000019_Node000021" title=" " alt="" coords="754,544,754,579,750,576,750,548"/>
 <area shape="rect" id="Node000022" href="$CD__CdrPlasmaImExSdcStorage_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStorage.H." alt="" coords="789,688,1027,750"/>
-<area shape="poly" id="edge20_Node000019_Node000022" title=" " alt="" coords="825,542,896,689,891,687,822,547"/>
-<area shape="poly" id="edge18_Node000021_Node000020" title=" " alt="" coords="649,654,649,689,645,686,645,657"/>
-<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="735,644,837,688,832,687,734,649"/>
-<area shape="poly" id="edge28_Node000024_Node000003" title=" " alt="" coords="1241,230,1020,285,1018,280,1246,228"/>
-<area shape="poly" id="edge29_Node000024_Node000005" title=" " alt="" coords="1430,229,1616,283,1611,283,1430,234"/>
-<area shape="poly" id="edge30_Node000024_Node000009" title=" " alt="" coords="1333,240,1331,283,1332,330,1342,378,1352,399,1366,419,1379,430,1398,440,1449,458,1571,486,1565,486,1447,463,1395,445,1376,434,1362,422,1348,402,1337,379,1327,331,1325,283,1330,244"/>
-<area shape="rect" id="Node000025" href="$CD__DischargeInceptionTagger_8H.html" title="Declaration of the Physics::DischargeInception::DischargeInceptionTagger cell tagger." alt="" coords="1069,283,1302,328"/>
-<area shape="poly" id="edge31_Node000024_Node000025" title=" " alt="" coords="1295,234,1220,285,1218,280,1290,237"/>
-<area shape="rect" id="Node000027" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="2789,486,3043,513"/>
-<area shape="poly" id="edge32_Node000024_Node000027" title=" " alt="" coords="1240,210,1072,220,876,235,707,256,649,270,630,277,619,285,613,295,611,305,620,327,646,363,678,392,716,414,763,430,818,442,885,449,1055,454,1583,448,1962,451,2432,466,2791,489,2786,489,2432,471,1962,456,1583,454,1055,459,885,454,818,447,761,436,714,419,675,396,642,367,615,329,606,305,608,293,615,281,628,273,648,265,706,251,875,229,1072,215,1245,208"/>
-<area shape="rect" id="Node000033" href="$CD__CellTagger_8cpp.html" title="Implementation of CD_CellTagger.H." alt="" coords="629,283,790,328"/>
-<area shape="poly" id="edge33_Node000024_Node000033" title=" " alt="" coords="1241,218,1041,247,803,286,791,288,789,283,802,281,1040,242,1246,216"/>
-<area shape="poly" id="edge34_Node000024_Node000034" title=" " alt="" coords="1379,234,1443,283,1437,283,1378,239"/>
-<area shape="poly" id="edge36_Node000024_Node000036" title=" " alt="" coords="1434,218,1810,281,1854,291,1849,291,1809,286,1434,223"/>
-<area shape="rect" id="Node000035" href="$CD__RefinementBoxTagger_8cpp.html" title="Implementation of CD_RefinementBoxTagger.H." alt="" coords="1376,376,1573,421"/>
-<area shape="poly" id="edge35_Node000034_Node000035" title=" " alt="" coords="1472,341,1475,377,1471,374,1469,346"/>
-<area shape="rect" id="Node000037" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="1848,384,2053,412"/>
-<area shape="poly" id="edge37_Node000036_Node000037" title=" " alt="" coords="1929,332,1948,385,1944,383,1926,337"/>
-<area shape="poly" id="edge41_Node000038_Node000003" title=" " alt="" coords="2297,213,1924,238,1680,249,1490,255,1301,264,1058,286,1046,287,1044,282,1057,281,1300,259,1490,249,1680,244,1924,233,2302,212"/>
-<area shape="rect" id="Node000039" href="$CD__AdvectionDiffusionStepper_8H.html" title="Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionStepper class." alt="" coords="2763,283,3000,328"/>
-<area shape="poly" id="edge40_Node000038_Node000039" title=" " alt="" coords="2530,228,2781,283,2776,283,2530,233"/>
-<area shape="rect" id="Node000041" href="$CD__DischargeInceptionStepper_8H.html" title="Declaration of the Physics::DischargeInception::DischargeInceptionStepper TimeStepper." alt="" coords="3707,283,3946,328"/>
-<area shape="poly" id="edge42_Node000038_Node000041" title=" " alt="" coords="2530,220,2646,233,2912,252,3119,260,3327,266,3594,281,3710,293,3704,293,3593,286,3327,271,3119,265,2911,257,2645,238,2530,225"/>
-<area shape="rect" id="Node000043" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2538,283,2739,328"/>
-<area shape="poly" id="edge43_Node000038_Node000043" title=" " alt="" coords="2478,231,2592,283,2587,283,2477,236"/>
-<area shape="rect" id="Node000053" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2088,283,2290,328"/>
-<area shape="poly" id="edge47_Node000038_Node000053" title=" " alt="" coords="2354,233,2240,285,2238,280,2349,234"/>
-<area shape="rect" id="Node000059" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="2314,283,2515,328"/>
-<area shape="poly" id="edge48_Node000038_Node000059" title=" " alt="" coords="2416,240,2417,285,2413,281,2413,244"/>
-<area shape="poly" id="edge44_Node000043_Node000007" title=" " alt="" coords="2554,332,2407,378,2406,373,2548,333"/>
-<area shape="rect" id="Node000044" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="2983,384,3244,412"/>
-<area shape="poly" id="edge45_Node000043_Node000044" title=" " alt="" coords="2754,326,3047,384,3041,384,2754,332"/>
-<area shape="poly" id="edge46_Node000044_Node000027" title=" " alt="" coords="3076,419,2943,488,2942,482,3071,420"/>
-<area shape="poly" id="edge53_Node000060_Node000007" title=" " alt="" coords="3878,222,3917,244,3952,269,3964,284,3971,299,3970,315,3960,330,3902,337,3759,345,3308,365,2418,397,2417,392,3307,360,3759,340,3902,332,3957,326,3965,313,3965,300,3959,287,3948,273,3914,248,3877,228"/>
-<area shape="poly" id="edge63_Node000060_Node000036" title=" " alt="" coords="3773,222,3703,238,3457,264,3247,276,3063,278,2891,274,2718,269,2533,267,2324,271,2076,286,2005,294,2004,289,2076,281,2323,266,2533,261,2718,264,2891,269,3063,273,3247,271,3456,259,3702,233,3768,223"/>
-<area shape="poly" id="edge51_Node000060_Node000039" title=" " alt="" coords="3770,222,3703,238,3406,266,3001,298,3000,293,3405,260,3702,233,3765,223"/>
-<area shape="poly" id="edge54_Node000060_Node000041" title=" " alt="" coords="3832,232,3830,285,3826,281,3829,236"/>
-<area shape="poly" id="edge57_Node000060_Node000044" title=" " alt="" coords="3898,220,3963,233,4060,238,4222,244,4381,257,4438,267,4458,274,4470,281,4478,293,4481,306,4478,318,4470,330,4452,338,4418,346,4306,359,4150,370,3965,379,3570,391,3245,398,3244,392,3570,386,3965,373,4150,364,4306,354,4417,341,4450,333,4466,326,4473,316,4475,306,4473,296,4466,285,4456,278,4437,272,4381,262,4222,250,4060,243,3962,238,3898,225"/>
-<area shape="rect" id="Node000061" href="$CD__BrownianWalkerStepper_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerStepper class." alt="" coords="3176,283,3395,328"/>
-<area shape="poly" id="edge52_Node000060_Node000061" title=" " alt="" coords="3766,222,3703,238,3555,263,3407,286,3396,288,3395,283,3406,281,3554,258,3702,233,3761,223"/>
-<area shape="rect" id="Node000063" href="$CD__FieldStepper_8H.html" title="Declaration of the Physics::Electrostatics::FieldStepper TimeStepper." alt="" coords="3419,283,3581,328"/>
-<area shape="poly" id="edge55_Node000060_Node000063" title=" " alt="" coords="3776,223,3573,285,3572,280,3771,224"/>
-<area shape="rect" id="Node000066" href="$CD__GeometryStepper_8H.html" title="Declaration of the Physics::Geometry::GeometryStepper TimeStepper." alt="" coords="4294,283,4456,328"/>
-<area shape="poly" id="edge56_Node000060_Node000066" title=" " alt="" coords="3901,220,3963,233,4122,257,4282,281,4296,286,4291,286,4281,286,4122,262,3962,238,3901,225"/>
-<area shape="rect" id="Node000068" href="$CD__MeshODEStepper_8H.html" title="Declaration of the Physics::MeshODE::MeshODEStepper TimeStepper." alt="" coords="5082,376,5243,421"/>
-<area shape="poly" id="edge58_Node000060_Node000068" title=" " alt="" coords="3897,220,3963,233,4043,242,4112,246,4230,244,4287,244,4347,249,4415,260,4493,281,4516,291,4533,303,4549,315,4572,325,4639,345,4709,360,4849,381,4978,392,5085,398,5079,398,4978,397,4849,387,4708,366,4638,350,4570,331,4546,320,4530,308,4514,296,4491,286,4414,265,4347,254,4287,249,4230,249,4112,251,4043,248,3962,238,3897,225"/>
-<area shape="rect" id="Node000069" href="$CD__MeshODEStepperImplem_8H.html" title="Implementation of CD_MeshODEStepper.H." alt="" coords="5060,283,5265,328"/>
-<area shape="poly" id="edge59_Node000060_Node000069" title=" " alt="" coords="3896,220,3963,233,4127,251,4267,260,4390,262,4505,260,4743,259,4883,266,5048,281,5062,285,5057,285,5048,286,4883,271,4743,265,4505,266,4390,267,4267,265,4127,256,3962,238,3895,225"/>
-<area shape="rect" id="Node000070" href="$CD__RadiativeTransferStepper_8H.html" title="Declaration of the Physics::RadiativeTransfer::RadiativeTransferStepper TimeStepper." alt="" coords="4807,283,5036,328"/>
-<area shape="poly" id="edge61_Node000060_Node000070" title=" " alt="" coords="3896,220,3963,233,4089,248,4196,256,4379,261,4562,263,4670,269,4796,281,4809,285,4804,285,4796,286,4669,274,4562,268,4379,266,4196,261,4089,253,3962,238,3896,225"/>
-<area shape="rect" id="Node000072" href="$CD__TracerParticleStepper_8H.html" title="Declaration of the Physics::TracerParticle::TracerParticleStepper TimeStepper." alt="" coords="4582,283,4783,328"/>
-<area shape="poly" id="edge62_Node000060_Node000072" title=" " alt="" coords="3897,220,3963,233,4131,252,4262,259,4394,265,4563,281,4585,286,4579,286,4562,286,4394,270,4262,264,4130,258,3962,238,3897,225"/>
-<area shape="rect" id="Node000074" href="$CD__TimeStepper_8cpp.html" title="Implementation of CD_TimeStepper.H." alt="" coords="4021,292,4270,320"/>
-<area shape="poly" id="edge64_Node000060_Node000074" title=" " alt="" coords="3888,221,4106,291,4101,291,3888,226"/>
-<area shape="poly" id="edge60_Node000069_Node000068" title=" " alt="" coords="5164,342,5165,378,5161,374,5161,346"/>
-<area shape="poly" id="edge66_Node000075_Node000007" title=" " alt="" coords="3619,240,3617,288,3610,311,3595,330,3548,339,3440,348,3102,367,2417,396,2417,391,3101,362,3439,342,3548,333,3592,326,3605,308,3612,287,3616,244"/>
-<area shape="poly" id="edge67_Node000075_Node000041" title=" " alt="" coords="3673,231,3782,283,3777,282,3672,236"/>
-<area shape="poly" id="edge69_Node000075_Node000044" title=" " alt="" coords="3635,238,3645,261,3651,285,3650,309,3639,330,3620,341,3586,351,3487,368,3364,381,3245,391,3244,386,3364,376,3486,363,3585,346,3618,336,3635,326,3645,307,3646,286,3640,263,3632,243"/>
-<area shape="poly" id="edge68_Node000075_Node000063" title=" " alt="" coords="3579,236,3525,285,3523,281,3574,238"/>
-<area shape="poly" id="edge72_Node000084_Node000005" title=" " alt="" coords="2639,221,2527,238,2325,254,2168,260,2011,267,1810,286,1798,288,1797,282,1809,281,2010,262,2168,255,2325,249,2526,233,2645,220"/>
-<area shape="poly" id="edge73_Node000084_Node000044" title=" " alt="" coords="2817,214,2915,237,2966,256,3013,281,3044,305,3071,333,3108,385,3103,383,3067,336,3041,309,3011,286,2964,261,2913,243,2817,219"/>
-<area shape="poly" id="edge71_Node000084_Node000061" title=" " alt="" coords="2817,219,3178,285,3173,285,2817,224"/>
-<area shape="poly" id="edge75_Node000091_Node000068" title=" " alt="" coords="5229,232,5258,254,5280,282,5287,306,5280,329,5255,358,5224,378,5222,373,5252,354,5275,327,5282,306,5275,285,5254,258,5227,237"/>
-<area shape="poly" id="edge76_Node000091_Node000069" title=" " alt="" coords="5164,240,5165,285,5161,281,5161,244"/>
-<area shape="poly" id="edge80_Node000098_Node000070" title=" " alt="" coords="4848,235,4900,284,4895,282,4846,240"/>
-<area shape="poly" id="edge82_Node000108_Node000007" title=" " alt="" coords="3078,240,3054,290,3036,312,3013,330,2966,351,2901,367,2824,379,2738,388,2564,398,2418,400,2417,395,2564,392,2738,383,2823,374,2900,362,2964,346,3011,326,3032,308,3049,287,3074,243"/>
-<area shape="poly" id="edge84_Node000108_Node000044" title=" " alt="" coords="3100,240,3109,283,3115,339,3115,386,3111,382,3109,339,3104,284,3097,244"/>
-<area shape="poly" id="edge83_Node000108_Node000063" title=" " alt="" coords="3193,228,3421,285,3416,285,3193,234"/>
-<area shape="poly" id="edge86_Node000110_Node000041" title=" " alt="" coords="4411,231,4388,238,4209,262,3947,293,3946,288,4208,257,4388,233,4405,231"/>
-<area shape="poly" id="edge87_Node000110_Node000072" title=" " alt="" coords="4551,232,4644,283,4639,282,4550,237"/>
+<area shape="poly" id="edge20_Node000019_Node000022" title=" " alt="" coords="840,536,865,555,885,577,899,604,907,633,912,689,907,686,902,634,894,606,880,580,861,558,839,541"/>
+<area shape="poly" id="edge18_Node000021_Node000020" title=" " alt="" coords="714,650,677,690,675,685,710,652"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="809,647,867,688,862,687,808,652"/>
+<area shape="rect" id="Node000025" href="$CD__EBHybridRedistribution_8cpp.html" title="Implementation of CD_EBHybridRedistribution.H." alt="" coords="731,283,952,328"/>
+<area shape="poly" id="edge28_Node000024_Node000025" title=" " alt="" coords="1387,223,964,286,953,288,952,283,964,281,1392,221"/>
+<area shape="rect" id="Node000026" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="1416,283,1616,328"/>
+<area shape="poly" id="edge29_Node000024_Node000026" title=" " alt="" coords="1518,240,1518,285,1514,281,1514,244"/>
+<area shape="poly" id="edge31_Node000027_Node000003" title=" " alt="" coords="2153,231,2259,283,2254,283,2153,237"/>
+<area shape="poly" id="edge32_Node000027_Node000005" title=" " alt="" coords="2015,231,2002,238,1831,285,1829,280,2001,233,2010,233"/>
+<area shape="poly" id="edge33_Node000027_Node000009" title=" " alt="" coords="2016,232,1959,260,1938,272,1925,285,1918,310,1914,349,1917,390,1928,419,1940,430,1960,441,2013,460,2077,474,2141,488,2136,488,2076,479,2012,465,1958,446,1937,435,1923,422,1912,391,1909,349,1912,309,1920,282,1934,268,1956,255,2011,233"/>
+<area shape="rect" id="Node000028" href="$CD__DischargeInceptionTagger_8H.html" title="Declaration of the Physics::DischargeInception::DischargeInceptionTagger cell tagger." alt="" coords="976,283,1208,328"/>
+<area shape="poly" id="edge34_Node000027_Node000028" title=" " alt="" coords="2016,232,2002,238,1884,257,1784,267,1695,271,1612,272,1440,271,1339,275,1220,286,1209,287,1208,282,1220,281,1339,270,1440,266,1612,266,1695,266,1783,262,1883,252,2001,233,2022,231"/>
+<area shape="rect" id="Node000030" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="3058,486,3312,513"/>
+<area shape="poly" id="edge35_Node000027_Node000030" title=" " alt="" coords="2033,233,1998,257,1971,279,1963,291,1959,303,1961,314,1969,326,1987,337,2020,347,2117,360,2246,366,2390,369,2668,368,2773,369,2835,373,2930,397,3021,427,3159,485,3154,485,3019,432,2928,402,2834,379,2773,374,2668,373,2390,374,2245,372,2117,365,2019,352,1985,342,1965,330,1956,316,1954,302,1958,289,1967,276,1995,252,2028,235"/>
+<area shape="rect" id="Node000036" href="$CD__CellTagger_8cpp.html" title="Implementation of CD_CellTagger.H." alt="" coords="1232,283,1392,328"/>
+<area shape="poly" id="edge36_Node000027_Node000036" title=" " alt="" coords="2016,232,2002,238,1912,253,1835,262,1703,266,1572,269,1495,274,1404,286,1393,288,1392,283,1404,281,1494,269,1572,263,1703,261,1835,256,1911,248,2001,233,2021,231"/>
+<area shape="poly" id="edge37_Node000027_Node000037" title=" " alt="" coords="2087,240,2077,285,2074,281,2083,244"/>
+<area shape="poly" id="edge39_Node000027_Node000039" title=" " alt="" coords="2189,224,2482,291,2477,291,2189,230"/>
+<area shape="rect" id="Node000038" href="$CD__RefinementBoxTagger_8cpp.html" title="Implementation of CD_RefinementBoxTagger.H." alt="" coords="1937,376,2135,421"/>
+<area shape="poly" id="edge38_Node000037_Node000038" title=" " alt="" coords="2059,341,2046,378,2042,374,2055,344"/>
+<area shape="rect" id="Node000040" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="2425,384,2631,412"/>
+<area shape="poly" id="edge40_Node000039_Node000040" title=" " alt="" coords="2537,333,2531,386,2528,382,2533,337"/>
+<area shape="poly" id="edge44_Node000041_Node000003" title=" " alt="" coords="2648,230,2404,285,2403,280,2642,231"/>
+<area shape="poly" id="edge51_Node000041_Node000026" title=" " alt="" coords="2642,212,2116,246,1834,266,1628,286,1617,287,1616,282,1628,281,1834,261,2116,241,2647,212"/>
+<area shape="rect" id="Node000042" href="$CD__AdvectionDiffusionStepper_8H.html" title="Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionStepper class." alt="" coords="3109,283,3347,328"/>
+<area shape="poly" id="edge43_Node000041_Node000042" title=" " alt="" coords="2876,227,3128,283,3123,283,2875,233"/>
+<area shape="rect" id="Node000044" href="$CD__DischargeInceptionStepper_8H.html" title="Declaration of the Physics::DischargeInception::DischargeInceptionStepper TimeStepper." alt="" coords="3422,283,3661,328"/>
+<area shape="poly" id="edge45_Node000041_Node000044" title=" " alt="" coords="2876,221,2960,233,3424,290,3419,291,2960,238,2876,226"/>
+<area shape="rect" id="Node000046" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2885,283,3086,328"/>
+<area shape="poly" id="edge46_Node000041_Node000046" title=" " alt="" coords="2824,231,2939,283,2933,282,2823,236"/>
+<area shape="rect" id="Node000056" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2659,283,2861,328"/>
+<area shape="poly" id="edge50_Node000041_Node000056" title=" " alt="" coords="2762,240,2762,285,2758,281,2758,244"/>
+<area shape="poly" id="edge47_Node000046_Node000007" title=" " alt="" coords="2915,333,2798,378,2797,373,2910,334"/>
+<area shape="rect" id="Node000047" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="3436,384,3697,412"/>
+<area shape="poly" id="edge48_Node000046_Node000047" title=" " alt="" coords="3101,326,3472,384,3467,384,3101,331"/>
+<area shape="poly" id="edge49_Node000047_Node000030" title=" " alt="" coords="3504,416,3237,488,3236,482,3499,417"/>
+<area shape="poly" id="edge56_Node000062_Node000007" title=" " alt="" coords="3990,220,4126,255,4180,270,4206,281,4213,294,4216,306,4214,318,4205,330,4151,340,4022,350,3620,370,2823,397,2823,392,3620,365,4021,345,4150,335,4203,326,4209,316,4211,306,4209,296,4202,285,4178,275,4124,260,3990,225"/>
+<area shape="poly" id="edge65_Node000062_Node000039" title=" " alt="" coords="3861,222,3790,238,3616,257,3469,265,3339,267,3218,265,3097,262,2967,263,2820,270,2647,286,2598,294,2597,289,2646,281,2820,264,2967,257,3097,257,3218,259,3339,261,3469,260,3616,251,3789,233,3856,223"/>
+<area shape="poly" id="edge54_Node000062_Node000042" title=" " alt="" coords="3856,222,3790,238,3347,293,3347,288,3789,233,3851,223"/>
+<area shape="poly" id="edge57_Node000062_Node000044" title=" " alt="" coords="3859,222,3625,285,3624,280,3854,223"/>
+<area shape="poly" id="edge60_Node000062_Node000047" title=" " alt="" coords="3988,220,4052,233,4124,240,4204,242,4358,241,4418,247,4441,252,4458,261,4468,273,4469,288,4461,307,4443,330,4429,340,4405,349,4337,363,4246,375,4138,384,3905,395,3698,399,3698,394,3905,389,4138,378,4245,370,4336,358,4404,344,4426,335,4440,326,4456,304,4464,287,4463,275,4454,265,4439,257,4417,252,4358,247,4204,247,4124,245,4052,238,3988,225"/>
+<area shape="rect" id="Node000063" href="$CD__BrownianWalkerStepper_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerStepper class." alt="" coords="3786,283,4006,328"/>
+<area shape="poly" id="edge55_Node000062_Node000063" title=" " alt="" coords="3916,232,3903,285,3900,281,3912,235"/>
+<area shape="rect" id="Node000065" href="$CD__FieldStepper_8H.html" title="Declaration of the Physics::Electrostatics::FieldStepper TimeStepper." alt="" coords="4030,283,4192,328"/>
+<area shape="poly" id="edge58_Node000062_Node000065" title=" " alt="" coords="3961,223,4072,283,4066,282,3960,229"/>
+<area shape="rect" id="Node000068" href="$CD__GeometryStepper_8H.html" title="Declaration of the Physics::Geometry::GeometryStepper TimeStepper." alt="" coords="4267,283,4429,328"/>
+<area shape="poly" id="edge59_Node000062_Node000068" title=" " alt="" coords="3993,220,4269,286,4264,285,3992,225"/>
+<area shape="rect" id="Node000070" href="$CD__MeshODEStepper_8H.html" title="Declaration of the Physics::MeshODE::MeshODEStepper TimeStepper." alt="" coords="4932,376,5092,421"/>
+<area shape="poly" id="edge61_Node000062_Node000070" title=" " alt="" coords="3988,220,4052,233,4116,241,4171,245,4266,245,4311,246,4359,251,4413,262,4474,281,4495,291,4510,303,4524,315,4544,326,4646,356,4750,376,4849,387,4934,395,4929,395,4848,393,4750,381,4644,361,4542,330,4521,320,4506,308,4492,296,4472,286,4411,267,4358,256,4311,251,4266,250,4171,250,4116,246,4052,238,3988,225"/>
+<area shape="rect" id="Node000071" href="$CD__MeshODEStepperImplem_8H.html" title="Implementation of CD_MeshODEStepper.H." alt="" coords="4909,283,5115,328"/>
+<area shape="poly" id="edge62_Node000062_Node000071" title=" " alt="" coords="3986,220,4052,233,4260,256,4423,264,4587,269,4796,281,4911,294,4906,294,4796,286,4586,274,4423,270,4260,262,4052,238,3985,225"/>
+<area shape="rect" id="Node000072" href="$CD__RadiativeTransferStepper_8H.html" title="Declaration of the Physics::RadiativeTransfer::RadiativeTransferStepper TimeStepper." alt="" coords="4555,283,4784,328"/>
+<area shape="poly" id="edge64_Node000062_Node000072" title=" " alt="" coords="3987,220,4052,233,4188,251,4294,259,4400,266,4536,281,4558,286,4552,286,4536,286,4400,272,4293,265,4187,256,4052,238,3987,225"/>
+<area shape="poly" id="edge63_Node000071_Node000070" title=" " alt="" coords="5014,342,5014,378,5010,374,5010,346"/>
+<area shape="poly" id="edge67_Node000077_Node000007" title=" " alt="" coords="3704,241,3699,288,3690,311,3675,330,3657,340,3628,349,3545,364,3434,376,3306,385,3039,395,2823,399,2823,394,3039,390,3306,380,3434,371,3544,359,3627,344,3655,335,3672,326,3686,308,3694,287,3700,244"/>
+<area shape="poly" id="edge68_Node000077_Node000044" title=" " alt="" coords="3654,235,3577,285,3575,280,3649,236"/>
+<area shape="poly" id="edge70_Node000077_Node000047" title=" " alt="" coords="3718,239,3729,284,3728,308,3720,329,3703,350,3681,365,3634,386,3633,381,3679,361,3699,346,3715,327,3723,307,3724,285,3715,243"/>
+<area shape="poly" id="edge69_Node000077_Node000065" title=" " alt="" coords="3779,229,3793,233,3905,258,4018,281,4032,286,4027,286,4017,286,3904,264,3791,238,3778,234"/>
+<area shape="poly" id="edge73_Node000086_Node000005" title=" " alt="" coords="2954,223,2872,238,2618,260,2420,268,2221,272,1967,286,1854,296,1853,291,1966,281,2221,267,2420,262,2618,255,2872,233,2959,222"/>
+<area shape="poly" id="edge74_Node000086_Node000047" title=" " alt="" coords="3131,213,3243,237,3303,256,3360,281,3376,292,3386,303,3396,314,3411,326,3472,358,3531,384,3525,384,3469,363,3408,330,3393,318,3383,307,3373,296,3357,286,3301,261,3242,242,3131,218"/>
+<area shape="poly" id="edge72_Node000086_Node000063" title=" " alt="" coords="3132,213,3789,291,3783,292,3132,219"/>
+<area shape="poly" id="edge76_Node000093_Node000070" title=" " alt="" coords="5078,232,5107,254,5129,282,5136,306,5129,329,5105,358,5073,378,5071,373,5101,354,5124,327,5131,306,5124,285,5103,258,5076,237"/>
+<area shape="poly" id="edge77_Node000093_Node000071" title=" " alt="" coords="5014,240,5014,285,5010,281,5010,244"/>
+<area shape="poly" id="edge81_Node000100_Node000072" title=" " alt="" coords="4618,236,4655,284,4650,282,4616,241"/>
+<area shape="poly" id="edge83_Node000110_Node000007" title=" " alt="" coords="4816,240,4818,288,4811,311,4797,330,3953,361,2823,397,2823,392,3953,356,4795,326,4806,308,4812,287,4812,244"/>
+<area shape="poly" id="edge85_Node000110_Node000047" title=" " alt="" coords="4832,238,4845,261,4853,285,4853,309,4842,330,4825,338,4793,345,4690,358,4373,377,4004,390,3698,397,3697,392,4004,385,4373,372,4689,352,4792,340,4823,333,4838,326,4848,307,4847,286,4840,263,4829,242"/>
+<area shape="poly" id="edge84_Node000110_Node000065" title=" " alt="" coords="4719,230,4695,238,4572,257,4476,266,4379,273,4255,286,4193,295,4192,289,4254,281,4378,268,4475,261,4571,252,4694,233,4713,231"/>
+<area shape="poly" id="edge87_Node000112_Node000044" title=" " alt="" coords="3453,234,3516,284,3511,282,3451,239"/>
 </map>

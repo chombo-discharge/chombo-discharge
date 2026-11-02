@@ -1,0 +1,5 @@
+<map id="EBHybridRedistribution" name="EBHybridRedistribution">
+<area shape="rect" id="Node000001" title="The hybrid divergence with flux redistribution, as an EBRedistribution." alt="" coords="5,81,178,109"/>
+<area shape="rect" id="Node000002" href="$classEBRedistribution.html" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="27,5,156,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,47,94,82,89,80,90,51"/>
+</map>

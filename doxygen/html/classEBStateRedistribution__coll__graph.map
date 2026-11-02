@@ -1,0 +1,5 @@
+<map id="EBStateRedistribution" name="EBStateRedistribution">
+<area shape="rect" id="Node000001" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al...." alt="" coords="5,81,169,109"/>
+<area shape="rect" id="Node000002" href="$classEBRedistribution.html" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="22,5,152,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,47,89,82,85,80,85,51"/>
+</map>

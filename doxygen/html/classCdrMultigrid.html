@@ -167,8 +167,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrMultigrid</b> 
 <tr class="memdesc:a95c953dc7200e7b04ed4cff83f7782d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
 <tr class="memitem:a4ed3e3980950c3cd694d64e3906123d1" id="r_a4ed3e3980950c3cd694d64e3906123d1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ed3e3980950c3cd694d64e3906123d1">computeDivF</a> (EBAMRCellData &amp;a_divF, EBAMRCellData &amp;a_phi, const Real a_extrapDt, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
 <tr class="memdesc:a4ed3e3980950c3cd694d64e3906123d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(v*phi) explicitly.  <br /></td></tr>
-<tr class="memitem:a238d43f4b50efea9ab3438669d00fb51" id="r_a238d43f4b50efea9ab3438669d00fb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a238d43f4b50efea9ab3438669d00fb51">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
-<tr class="memdesc:a238d43f4b50efea9ab3438669d00fb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
+<tr class="memitem:ad185729a7b9443b462b50c038e0903e9" id="r_ad185729a7b9443b462b50c038e0903e9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad185729a7b9443b462b50c038e0903e9">computeDivD</a> (EBAMRCellData &amp;a_divD, EBAMRCellData &amp;a_phi, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) override final</td></tr>
+<tr class="memdesc:ad185729a7b9443b462b50c038e0903e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(D*grad(phi)) explicitly.  <br /></td></tr>
 <tr class="memitem:a09626f2c30134864d8ef00a273b5bcd7" id="r_a09626f2c30134864d8ef00a273b5bcd7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09626f2c30134864d8ef00a273b5bcd7">advanceEuler</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt) override final</td></tr>
 <tr class="memdesc:a09626f2c30134864d8ef00a273b5bcd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit diffusion Euler advance with source term.  <br /></td></tr>
 <tr class="memitem:aff120a11bcefdabecc667693aeb70cdd" id="r_aff120a11bcefdabecc667693aeb70cdd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff120a11bcefdabecc667693aeb70cdd">advanceCrankNicholson</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const EBAMRCellData &amp;a_source, const Real a_dt) override final</td></tr>
@@ -197,10 +197,14 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrSolver</b> ()<
 <tr class="memdesc:a5f137bc464c9241b0ab868f0dcdd4c28 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit diffusion Euler advance without source term.  <br /></td></tr>
 <tr class="memitem:acd2c38c8ee8a9edd58dd0e3e605ea190 inherit pub_methods_classCdrSolver" id="r_acd2c38c8ee8a9edd58dd0e3e605ea190"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#acd2c38c8ee8a9edd58dd0e3e605ea190">advanceCrankNicholson</a> (EBAMRCellData &amp;a_newPhi, const EBAMRCellData &amp;a_oldPhi, const Real a_dt)</td></tr>
 <tr class="memdesc:acd2c38c8ee8a9edd58dd0e3e605ea190 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit diffusion Crank-Nicholson advance without source term.  <br /></td></tr>
-<tr class="memitem:a631e0828ef3b9205ed08852fe867a1e9 inherit pub_methods_classCdrSolver" id="r_a631e0828ef3b9205ed08852fe867a1e9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a631e0828ef3b9205ed08852fe867a1e9">computeDivG</a> (EBAMRCellData &amp;a_divG, EBAMRFluxData &amp;a_G, const EBAMRIVData &amp;a_ebFlux, const bool a_conservativeOnly)</td></tr>
-<tr class="memdesc:a631e0828ef3b9205ed08852fe867a1e9 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass redistribution.  <br /></td></tr>
-<tr class="memitem:a01f1bf755d1ea4024c9ef25afd0f74af inherit pub_methods_classCdrSolver" id="r_a01f1bf755d1ea4024c9ef25afd0f74af"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a01f1bf755d1ea4024c9ef25afd0f74af">gwnDiffusionSource</a> (EBAMRCellData &amp;a_noiseSource, const EBAMRCellData &amp;a_cellPhi)</td></tr>
-<tr class="memdesc:a01f1bf755d1ea4024c9ef25afd0f74af inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a random gaussian white noise source term.  <br /></td></tr>
+<tr class="memitem:a474420711038bb44ae0f8dfbe1fd03c2 inherit pub_methods_classCdrSolver" id="r_a474420711038bb44ae0f8dfbe1fd03c2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a474420711038bb44ae0f8dfbe1fd03c2">computeDivG</a> (EBAMRCellData &amp;a_divG, EBAMRFluxData &amp;a_G, const EBAMRIVData &amp;a_ebFlux, const EBAMRCellData &amp;a_phi, const Real a_dt, const bool a_conservativeOnly)</td></tr>
+<tr class="memdesc:a474420711038bb44ae0f8dfbe1fd03c2 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass redistribution.  <br /></td></tr>
+<tr class="memitem:a7f9f472e928b355d563bd5334483920d inherit pub_methods_classCdrSolver" id="r_a7f9f472e928b355d563bd5334483920d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a7f9f472e928b355d563bd5334483920d">redistributeDivergence</a> (EBAMRCellData &amp;a_divG, const EBAMRCellData &amp;a_phi, const Real a_dt)</td></tr>
+<tr class="memdesc:a7f9f472e928b355d563bd5334483920d inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a conservative divergence into the right-hand side of the stabilized update.  <br /></td></tr>
+<tr class="memitem:a90fde02557cc02a5c34b2250dba82379 inherit pub_methods_classCdrSolver" id="r_a90fde02557cc02a5c34b2250dba82379"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a90fde02557cc02a5c34b2250dba82379">usesStateRedistribution</a> () const noexcept</td></tr>
+<tr class="memdesc:a90fde02557cc02a5c34b2250dba82379 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the cut-cell stabilization is state redistribution.  <br /></td></tr>
+<tr class="memitem:a9c63e54375c3f6f20c2dc12f124d9ed7 inherit pub_methods_classCdrSolver" id="r_a9c63e54375c3f6f20c2dc12f124d9ed7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9c63e54375c3f6f20c2dc12f124d9ed7">gwnDiffusionSource</a> (EBAMRCellData &amp;a_noiseSource, const EBAMRCellData &amp;a_cellPhi, const Real a_dt)</td></tr>
+<tr class="memdesc:a9c63e54375c3f6f20c2dc12f124d9ed7 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a random gaussian white noise source term.  <br /></td></tr>
 <tr class="memitem:a8b1a72b74fb507ecc86b6977d259645b inherit pub_methods_classCdrSolver" id="r_a8b1a72b74fb507ecc86b6977d259645b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8b1a72b74fb507ecc86b6977d259645b">averageVelocityToFaces</a> ()</td></tr>
 <tr class="memdesc:a8b1a72b74fb507ecc86b6977d259645b inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4" title="Various averaging methods.">Average</a> velocities to faces.  <br /></td></tr>
 <tr class="memitem:a9393d5d9ccd070b555b7bff640ee6d8e inherit pub_methods_classCdrSolver" id="r_a9393d5d9ccd070b555b7bff640ee6d8e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9393d5d9ccd070b555b7bff640ee6d8e">deallocate</a> ()</td></tr>
@@ -321,6 +325,7 @@ Protected Types</h2></td></tr>
 <tr class="memdesc:a004b5dca8c7ba07c58383012460132b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for multigrid cycle types. <br /></td></tr>
 <tr class="inherit_header pro_types_classCdrSolver"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_types_classCdrSolver')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Types inherited from <a class="el" href="classCdrSolver.html">CdrSolver</a></td></tr>
 <tr class="memitem:a6c2cfa627dd07e57cb07c4ae896e3090 inherit pro_types_classCdrSolver" id="r_a6c2cfa627dd07e57cb07c4ae896e3090"><td class="memItemLeft" align="right" valign="top"><a id="a6c2cfa627dd07e57cb07c4ae896e3090" name="a6c2cfa627dd07e57cb07c4ae896e3090"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6c2cfa627dd07e57cb07c4ae896e3090">Redistribution</a> { <b>VolumeWeighted</b>
+, <b>State</b>
 , <b>None</b>
  }</td></tr>
 <tr class="memdesc:a6c2cfa627dd07e57cb07c4ae896e3090"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCdrSolver.html#a6c2cfa627dd07e57cb07c4ae896e3090" title="Redistribution method.">Redistribution</a> method. <br /></td></tr>
@@ -368,12 +373,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMultigri
 <tr class="memdesc:ad7c90f17f553d8bb2e67540deb7258af inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux.  <br /></td></tr>
 <tr class="memitem:a7bb06d2d9cb8acb7cc9456820b18c3ce inherit pro_methods_classCdrSolver" id="r_a7bb06d2d9cb8acb7cc9456820b18c3ce"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a7bb06d2d9cb8acb7cc9456820b18c3ce">conservativeDivergenceNoKappaDivision</a> (EBAMRCellData &amp;a_conservativeDivergence, EBAMRFluxData &amp;a_flux, const EBAMRIVData &amp;a_ebFlux)</td></tr>
 <tr class="memdesc:a7bb06d2d9cb8acb7cc9456820b18c3ce inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute conservative divergence from fluxes.  <br /></td></tr>
-<tr class="memitem:a08cd6079923bd82e433df7961288d129 inherit pro_methods_classCdrSolver" id="r_a08cd6079923bd82e433df7961288d129"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a08cd6079923bd82e433df7961288d129">nonConservativeDivergence</a> (EBAMRIVData &amp;a_nonConservativeDivergence, const EBAMRCellData &amp;a_divG)</td></tr>
-<tr class="memdesc:a08cd6079923bd82e433df7961288d129 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the non-conservative divergence.  <br /></td></tr>
-<tr class="memitem:a3fa32de02a211aabf541a09bf4e59d51 inherit pro_methods_classCdrSolver" id="r_a3fa32de02a211aabf541a09bf4e59d51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a3fa32de02a211aabf541a09bf4e59d51">hybridDivergence</a> (EBAMRCellData &amp;a_hybridDivergence, EBAMRIVData &amp;a_massDifference, const EBAMRIVData &amp;a_nonConservativeDivergence)</td></tr>
-<tr class="memdesc:a3fa32de02a211aabf541a09bf4e59d51 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence.  <br /></td></tr>
-<tr class="memitem:a387c9c764a5c7896fae07a93159cb459 inherit pro_methods_classCdrSolver" id="r_a387c9c764a5c7896fae07a93159cb459"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a387c9c764a5c7896fae07a93159cb459">hybridDivergence</a> (LevelData&lt; EBCellFAB &gt; &amp;a_hybridDivergence, LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_massDifference, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_nonConservativeDivergence, const int a_lvl)</td></tr>
-<tr class="memdesc:a387c9c764a5c7896fae07a93159cb459 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the hybrid divergence. On the way in, a_hybridDivergence must hold the conservative divergence.  <br /></td></tr>
 <tr class="memitem:ae720d11ad0145b4c92bddb2c4a7f9786 inherit pro_methods_classCdrSolver" id="r_ae720d11ad0145b4c92bddb2c4a7f9786"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ae720d11ad0145b4c92bddb2c4a7f9786">conservativeDivergenceRegular</a> (LevelData&lt; EBCellFAB &gt; &amp;a_divJ, const LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const int a_lvl)</td></tr>
 <tr class="memdesc:ae720d11ad0145b4c92bddb2c4a7f9786 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the conservative divergence over regular cells.  <br /></td></tr>
 <tr class="memitem:ac4752844cda9533c1a03a9c7119fc5fa inherit pro_methods_classCdrSolver" id="r_ac4752844cda9533c1a03a9c7119fc5fa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ac4752844cda9533c1a03a9c7119fc5fa">interpolateFluxToFaceCentroids</a> (EBAMRFluxData &amp;a_flux)</td></tr>
@@ -397,6 +396,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVari
 <tr class="memitem:a28f03d5d75d29053461ce5414d298916 inherit pro_methods_classCdrSolver" id="r_a28f03d5d75d29053461ce5414d298916"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotMode</b> ()</td></tr>
 <tr class="memdesc:a28f03d5d75d29053461ce5414d298916 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot mode. <br /></td></tr>
+<tr class="memitem:a8b6e31af87ba6ec1462b476ead59e807 inherit pro_methods_classCdrSolver" id="r_a8b6e31af87ba6ec1462b476ead59e807"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineRedistribution</b> ()</td></tr>
+<tr class="memdesc:a8b6e31af87ba6ec1462b476ead59e807 inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the cut-cell stabilization (m_redistribution) from the current settings and grids. <br /></td></tr>
 <tr class="memitem:ab2f12d0796c3ab55419476d4fe471e6a inherit pro_methods_classCdrSolver" id="r_ab2f12d0796c3ab55419476d4fe471e6a"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDivergenceComputation</b> ()</td></tr>
 <tr class="memdesc:ab2f12d0796c3ab55419476d4fe471e6a inherit pro_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the conservation. <br /></td></tr>
@@ -537,12 +539,9 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_source</b>
 <tr class="memdesc:a689092a6402573991df81b7ad3821a6a inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holder for face centered states.  <br /></td></tr>
 <tr class="memitem:acfb689a4b309c028ae33c39feb261f88 inherit pro_attribs_classCdrSolver" id="r_acfb689a4b309c028ae33c39feb261f88"><td class="memItemLeft" align="right" valign="top">EBAMRFluxData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#acfb689a4b309c028ae33c39feb261f88">m_faceVelocity</a></td></tr>
 <tr class="memdesc:acfb689a4b309c028ae33c39feb261f88 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-centered velocities (only normal components).  <br /></td></tr>
-<tr class="memitem:a5228df358369ae320bd65349bb4beee8 inherit pro_attribs_classCdrSolver" id="r_a5228df358369ae320bd65349bb4beee8"><td class="memItemLeft" align="right" valign="top">
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_nonConservativeDivG</b></td></tr>
-<tr class="memdesc:a5228df358369ae320bd65349bb4beee8 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for the non-conservative divergence. <br /></td></tr>
-<tr class="memitem:a33f71250c8b1ef93999310c109e765c4 inherit pro_attribs_classCdrSolver" id="r_a33f71250c8b1ef93999310c109e765c4"><td class="memItemLeft" align="right" valign="top">
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDifference</b></td></tr>
-<tr class="memdesc:a33f71250c8b1ef93999310c109e765c4 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for the mass difference. <br /></td></tr>
+<tr class="memitem:a12a6ae78759686a39e4e48262a5b3890 inherit pro_attribs_classCdrSolver" id="r_a12a6ae78759686a39e4e48262a5b3890"><td class="memItemLeft" align="right" valign="top">
+RefCountedPtr&lt; <a class="el" href="classEBRedistribution.html">EBRedistribution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistribution</b></td></tr>
+<tr class="memdesc:a12a6ae78759686a39e4e48262a5b3890 inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell stabilization of the explicit divergences. Rebuilt in <a class="el" href="classCdrSolver.html#a3b70fb8fe36c6cb24ada15621cdab508" title="Allocate internal storage.">allocate()</a>. <br /></td></tr>
 <tr class="memitem:abba08059a9220cd8742e62c86b3e116e inherit pro_attribs_classCdrSolver" id="r_abba08059a9220cd8742e62c86b3e116e"><td class="memItemLeft" align="right" valign="top">
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebZero</b></td></tr>
 <tr class="memdesc:abba08059a9220cd8742e62c86b3e116e inherit pro_attribs_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for the EB flux. <br /></td></tr>
@@ -819,8 +818,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="a238d43f4b50efea9ab3438669d00fb51" name="a238d43f4b50efea9ab3438669d00fb51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a238d43f4b50efea9ab3438669d00fb51">&#9670;&#160;</a></span>computeDivD()</h2>
+<a id="ad185729a7b9443b462b50c038e0903e9" name="ad185729a7b9443b462b50c038e0903e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad185729a7b9443b462b50c038e0903e9">&#9670;&#160;</a></span>computeDivD()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -837,6 +836,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -866,6 +870,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_divD</td><td>Divergence term, including redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered state. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step of the update phi + a_dt*div(D) that the result is used in. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_conservativeOnly</td><td>If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve redistribution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebFlux</td><td>If true, the embedded boundary flux will be included in div(D). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFlux</td><td>If true, domain boundary fluxes are included. </td></tr>
@@ -874,7 +879,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. </dd></dl>
 
-<p>Implements <a class="el" href="classCdrSolver.html#afa54cb2fb84bb7cb85836da38e334bc8">CdrSolver</a>.</p>
+<p>Implements <a class="el" href="classCdrSolver.html#a7da22370ab9ae4faa230caf33b415882">CdrSolver</a>.</p>
 
 </div>
 </div>

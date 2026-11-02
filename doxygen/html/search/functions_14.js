@@ -13,5 +13,6 @@ var searchData=
   ['usechomboshop_10',['useChomboShop',['../classComputationalGeometry.html#a39698e3e356d6c6546253998e68112e3',1,'ComputationalGeometry']]],
   ['usepolyhedralshop_11',['usePolyhedralShop',['../classComputationalGeometry.html#a41425a7b9a260e4aa0899120021e29ca',1,'ComputationalGeometry']]],
   ['usescanshop_12',['useScanShop',['../classComputationalGeometry.html#a36b52e3f1ca2a169bfcb92af1ad98b5e',1,'ComputationalGeometry']]],
-  ['useskrylov_13',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]]
+  ['useskrylov_13',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]],
+  ['usesstateredistribution_14',['usesStateRedistribution',['../classCdrSolver.html#a90fde02557cc02a5c34b2250dba82379',1,'CdrSolver']]]
 ];

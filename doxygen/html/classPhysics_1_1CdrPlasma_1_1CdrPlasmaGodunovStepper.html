@@ -631,9 +631,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_regridSlopes</b></t
 <tr class="memitem:a65ea065c52fe42c13e6fdf47a0197930" id="r_a65ea065c52fe42c13e6fdf47a0197930"><td class="memItemLeft" align="right" valign="top"><a id="a65ea065c52fe42c13e6fdf47a0197930" name="a65ea065c52fe42c13e6fdf47a0197930"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_filterCompensate</b></td></tr>
 <tr class="memdesc:a65ea065c52fe42c13e6fdf47a0197930"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use compensation step in filter or not. <br /></td></tr>
-<tr class="memitem:a45d960d93fc8a89529be7d6e7071b365" id="r_a45d960d93fc8a89529be7d6e7071b365"><td class="memItemLeft" align="right" valign="top"><a id="a45d960d93fc8a89529be7d6e7071b365" name="a45d960d93fc8a89529be7d6e7071b365"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_implicitDiffusionThreshold</b></td></tr>
-<tr class="memdesc:a45d960d93fc8a89529be7d6e7071b365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion threshold factor. <br /></td></tr>
+<tr class="memitem:a45d960d93fc8a89529be7d6e7071b365" id="r_a45d960d93fc8a89529be7d6e7071b365"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45d960d93fc8a89529be7d6e7071b365">m_implicitDiffusionThreshold</a></td></tr>
+<tr class="memdesc:a45d960d93fc8a89529be7d6e7071b365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion threshold factor.  <br /></td></tr>
 <tr class="memitem:a36b242bf5d9a3ef99296113ba7c0a8d4" id="r_a36b242bf5d9a3ef99296113ba7c0a8d4"><td class="memItemLeft" align="right" valign="top"><a id="a36b242bf5d9a3ef99296113ba7c0a8d4" name="a36b242bf5d9a3ef99296113ba7c0a8d4"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_diffusionOrder</b></td></tr>
 <tr class="memdesc:a36b242bf5d9a3ef99296113ba7c0a8d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration order for diffusion equations. <br /></td></tr>
@@ -1826,6 +1825,31 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a45d960d93fc8a89529be7d6e7071b365" name="a45d960d93fc8a89529be7d6e7071b365"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45d960d93fc8a89529be7d6e7071b365">&#9670;&#160;</a></span>m_implicitDiffusionThreshold</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real Physics::CdrPlasma::CdrPlasmaGodunovStepper::m_implicitDiffusionThreshold</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diffusion threshold factor. </p>
+<p>With automatic diffusion, a species uses implicit diffusion when dt_A/dt_AD exceeds this, where dt_A is its advective time step and dt_AD its explicit advection-diffusion time step. </p>
+
+</div>
+</div>
 <a id="aedf8f6ac2e3828b7d7aee10bfb1f0f08" name="aedf8f6ac2e3828b7d7aee10bfb1f0f08"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aedf8f6ac2e3828b7d7aee10bfb1f0f08">&#9670;&#160;</a></span>m_semiImplicitRho</h2>
 

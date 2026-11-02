@@ -4041,7 +4041,7 @@ template&lt;typename P, typename Traits, typename Strength&gt; </div>
 
 <p>Add the mirrored contribution of the band particles to an already-deposited field. </p>
 <p>Deposition divides by dx^D and never by kappa, so a cut cell holds kappa*n where the fluid solvers hold n. This pass removes that by additionally depositing the cloud of each band particle's image, reflected across the embedded boundary &ndash; a kernel density estimate of the even extension of the density. Under this option, and only this one, a cut cell therefore holds n rather than kappa*n.</p>
-<p>Runs after the real deposit and adds to it. Images are built from the VALID holder only: the halo coarse-fine cores copy particles into a mask holder, so building from that would produce a second image for the same particle &ndash; the double count that issue #29 fell into. All three cores restore the valid holder before returning, so running afterwards is safe; the constraint is which holder, not when. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Runs after the real deposit and adds to it. Images are built from the VALID holder only: the halo coarse-fine cores copy particles into a mask holder, so building from that would produce a second image for the same particle and count it twice. All three cores restore the valid holder before returning, so running afterwards is safe; the constraint is which holder, not when. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Field to add the mirrored contribution to. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles whose images are deposited. </td></tr>

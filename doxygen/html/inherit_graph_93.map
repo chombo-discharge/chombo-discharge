@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classLinearStencil.html" title="Class which computes a bi/tri&#45;linear stencil in cut&#45;cells. This class makes appropriate modifications..." alt="" coords="5,5,111,33"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,83,85,111"/>
+<area shape="rect" id="Node000001" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,5,321,50"/>
+<area shape="poly" id="edge109_Node000000_Node000001" title=" " alt="" coords="94,75,132,60,168,49,163,52,134,65,96,79"/>
+<area shape="rect" id="Node000002" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,75,321,119"/>
+<area shape="poly" id="edge110_Node000000_Node000002" title=" " alt="" coords="100,94,154,96,149,98,101,100"/>
+<area shape="rect" id="Node000003" href="$classAMRMultigridKrylovOp.html" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="133,143,340,171"/>
+<area shape="poly" id="edge111_Node000000_Node000003" title=" " alt="" coords="93,114,133,129,173,142,168,143,132,134,93,120"/>
 </map>

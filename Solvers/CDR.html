@@ -82,6 +82,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#cdrsolver">CdrSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discretization-details">Discretization details</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#explicit-divergences-and-redistribution">Explicit divergences and redistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#state-redistribution">State redistribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#explicit-advection">Explicit advection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#explicit-diffusion">Explicit diffusion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#explicit-advection-diffusion">Explicit advection-diffusion</a></li>
@@ -205,8 +206,8 @@ This includes both explicit and implicit discretizations, where the implicit dis
 The C++ API for these classes can be obtained from <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html</a> and references therein.</p>
 <p>Explicit advance methods for <a class="reference internal" href="#equation-cdr-equation">Eq. 5</a> only require an approximation to the right-hand side of the equation.
 These approximations are encapsulated by the following functions:</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<span id="cdr-div-functions"></span><div class="code-block-caption"><span class="caption-number">Listing 24 </span><span class="caption-text">List of functions responsible for calculating approximations to divergence operators.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<span id="cdr-div-functions"></span><div class="code-block-caption"><span class="caption-number">Listing 24 </span><span class="caption-text">List of functions responsible for calculating approximations to divergence operators.</span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Compute div(J) explicitly, where J = nV - D*grad(n)</span>
 <span class="cm"> * @param[out] a_divJ             Divergence term, i.e. finite volume approximation to</span>
@@ -217,7 +218,7 @@ These approximations are encapsulated by the following functions:</p>
 <span class="cm"> * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.</span>
 <span class="cm"> * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.</span>
 <span class="cm"> * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divJ,</span>
-<span class="cm"> * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be</span>
+<span class="cm"> * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be</span>
 <span class="cm"> * used with this time step.</span>
 <span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve</span>
 <span class="cm"> * redistribution.</span>
@@ -245,7 +246,7 @@ These approximations are encapsulated by the following functions:</p>
 <span class="cm"> * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.</span>
 <span class="cm"> * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.</span>
 <span class="cm"> * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n - a_dt*divF,</span>
-<span class="cm"> * with phi^n = a_phi. CdrCTU's flux correction uses it to keep the update non-negative, so the result must only be</span>
+<span class="cm"> * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be</span>
 <span class="cm"> * used with this time step.</span>
 <span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.</span>
 <span class="cm"> * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)</span>
@@ -265,6 +266,9 @@ These approximations are encapsulated by the following functions:</p>
 <span class="cm">/**</span>
 <span class="cm"> * @brief Compute div(D*grad(phi)) explicitly</span>
 <span class="cm"> * @param[in]  a_phi              Cell-centered state</span>
+<span class="cm"> * @param[in]  a_dt               Time step of the update that the result is used in, phi^{n+1} = phi^n + a_dt*divD,</span>
+<span class="cm"> * with phi^n = a_phi. The cut-cell stabilization can depend on it (see EBRedistribution), so the result must only be</span>
+<span class="cm"> * used with this time step.</span>
 <span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve</span>
 <span class="cm"> * redistribution.</span>
 <span class="cm"> * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)</span>
@@ -276,6 +280,7 @@ These approximations are encapsulated by the following functions:</p>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divD</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_conservativeOnly</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_ebFlux</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -285,8 +290,8 @@ These approximations are encapsulated by the following functions:</p>
 <p>These functions are not implemented in <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, but in subclasses.
 In the current structure, <a class="reference internal" href="#chap-cdrmultigrid"><span class="std std-ref">CdrMultigrid</span></a> supplies the diffusive discretization and <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> supplies the advective discretization.</p>
 <p>The implicit advance methods for <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> are encapsulated by the following functions:</p>
-<div class="literal-block-wrapper docutils container" id="id2">
-<span id="cdr-implicit-diffusion"></span><div class="code-block-caption"><span class="caption-number">Listing 25 </span><span class="caption-text">List of current implicit diffusion advance functions.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<span id="cdr-implicit-diffusion"></span><div class="code-block-caption"><span class="caption-number">Listing 25 </span><span class="caption-text">List of current implicit diffusion advance functions.</span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Implicit diffusion Euler advance with source term.</span>
 <span class="cm"> * @param[in,out] a_newPhi Solution at time t + dt</span>
@@ -336,15 +341,26 @@ In general, we seek a method-of-lines update <span class="math notranslate nohig
 <div class="math notranslate nohighlight">
 \[\int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.\]</div>
 <p>The sum runs over all cell edges (faces in 3D) of the cell where <span class="math notranslate nohighlight">\(G_f\)</span> is the flux on the edge centroid and <span class="math notranslate nohighlight">\(\alpha_f\)</span> is the edge (face) aperture.</p>
-<figure class="align-center" id="id3">
+<figure class="align-center" id="id7">
 <a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 23 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 23 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>However, taking <span class="math notranslate nohighlight">\([\nabla\cdot\mathbf{G}^k]\)</span> to be this sum leads to a time step constraint proportional to <span class="math notranslate nohighlight">\(\kappa\)</span>, which can be arbitrarily small.
 This leads to an unacceptable time step constraint for <a class="reference internal" href="#equation-conservativeupdate">Eq. 6</a>.
-We use the Chombo approach and expand the range of influence of the cut cells in order to stabilize the discretization and allow the use of a normal time step constraint.
+The solvers therefore stabilize the update in the cut cells, which allows a normal time step constraint.
+The stabilization is selected with the solver option <code class="docutils literal notranslate"><span class="pre">which_redistribution</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">volume</span></code>: the hybrid divergence with flux redistribution (the Chombo approach), described below.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span></code>: weighted state redistribution, see <a class="reference internal" href="#chap-stateredistribution"><span class="std std-ref">State redistribution</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: the hybrid divergence without redistributing the mass that it misses. This is not conservative.</p></li>
+</ul>
+<p>Both stabilizations turn the conservative divergence into the right-hand side <span class="math notranslate nohighlight">\(R\)</span> of a stabilized update <span class="math notranslate nohighlight">\(\phi^{k+1} = \phi^k - \Delta t R\)</span>.
+With state redistribution, <span class="math notranslate nohighlight">\(R\)</span> depends on <span class="math notranslate nohighlight">\(\phi^k\)</span> and on <span class="math notranslate nohighlight">\(\Delta t\)</span>.
+The divergence functions therefore take the time step of the update, and the result must only be used with that time step.
+Divergences that enter the same update are added together before they are stabilized; <code class="docutils literal notranslate"><span class="pre">computeDivJ</span></code> does this for advection and diffusion, and <code class="docutils literal notranslate"><span class="pre">redistributeDivergence</span></code> stabilizes a sum of conservative divergences.</p>
+<p>The hybrid scheme expands the range of influence of the cut cells.
 First, we compute the conservative divergence</p>
 <div class="math notranslate nohighlight">
 \[\kappa_{\mathbf{i}} D_\mathbf{i}^c =  \sum_f G_f\alpha_f\Delta x^{\textrm{DIM} -1},\]</div>
@@ -378,11 +394,21 @@ The user will need to call the function</p>
 <span class="cm"> * @param[in,out] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid</span>
 <span class="cm"> * fluxes on output.</span>
 <span class="cm"> * @param[in]    a_ebFlux           Flux on the EB centroids</span>
+<span class="cm"> * @param[in]    a_phi              State that the update starts from, phi^{n+1} = phi^n - a_dt*div(G) with</span>
+<span class="cm"> * phi^n = a_phi.</span>
+<span class="cm"> * @param[in]    a_dt               Time step of the update that the result is used in, signed: the update is</span>
+<span class="cm"> * phi^{n+1} = phi^n - a_dt*div(G), so an update phi^n + dt*div(G) passes -dt. The cut-cell stabilization can depend</span>
+<span class="cm"> * on it and on a_phi (see EBRedistribution), so the result must only be used with this time step.</span>
 <span class="cm"> * @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve</span>
 <span class="cm"> * redistribution.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">computeDivG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divG</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_G</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">);</span>
+<span class="nf">computeDivG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_divG</span><span class="p">,</span>
+<span class="w">            </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_G</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_ebFlux</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">           </span><span class="n">a_conservativeOnly</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_G</span></code> is the numerical representation of <span class="math notranslate nohighlight">\(\mathbf{G}\)</span> over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and <code class="docutils literal notranslate"><span class="pre">a_ebFlux</span></code> is the flux through the embedded boundary.
@@ -395,6 +421,34 @@ These additional complications are taken care of inside <code class="docutils li
 <p>Mass redistribution has the effect of not being monotone and thus not TVD, and the discretization order is formally <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x)\)</span>.</p>
 </div>
 </section>
+<section id="state-redistribution">
+<span id="chap-stateredistribution"></span><h3>State redistribution<a class="headerlink" href="#state-redistribution" title="Permalink to this heading"></a></h3>
+<p>With <code class="docutils literal notranslate"><span class="pre">which_redistribution</span> <span class="pre">=</span> <span class="pre">state</span></code>, the solvers use weighted state redistribution <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id168" title="Marsha Berger and Andrew Giuliani. A state redistribution algorithm for finite volume schemes on cut cell meshes. Journal of Computational Physics, 2021.">Berger and Giuliani, 2021</a>, <a class="reference internal" href="../ZZReferences.html#id169" title="Andrew Giuliani and others. A weighted state redistribution algorithm for embedded boundary grids. Journal of Computational Physics, 2022. arXiv:2112.12360.">Giuliani and others, 2022</a>]</span>, following the implementation in AMReX.
+The update starts from the provisional state <span class="math notranslate nohighlight">\(U_{\mathbf{i}} = \phi_{\mathbf{i}}^k - \Delta t D_{\mathbf{i}}^c\)</span>, which is conservative but unstable in small cells.
+Each cut cell whose volume fraction is below a target <span class="math notranslate nohighlight">\(\kappa_t\)</span> (<code class="docutils literal notranslate"><span class="pre">AmrMesh.srd_target_volfrac</span></code>, 0.5 by default) is merged with up to <span class="math notranslate nohighlight">\(2^{\textrm{DIM}}-1\)</span> neighbors into a neighborhood whose volume reaches the target.
+A cell that is part of <span class="math notranslate nohighlight">\(N_{\mathbf{r}}\)</span> neighborhoods (its own included) contributes the weight <span class="math notranslate nohighlight">\(\alpha_1/N_{\mathbf{r}}\)</span> to each of the others, where <span class="math notranslate nohighlight">\(\alpha_1\)</span> makes the neighborhood volume equal to the target, and <span class="math notranslate nohighlight">\(\alpha_0\)</span> to its own.
+Each neighborhood has a weighted average <span class="math notranslate nohighlight">\(\hat{U}\)</span> and centroid, and a limited linear reconstruction <span class="math notranslate nohighlight">\(q\)</span> of the neighborhood averages (<code class="docutils literal notranslate"><span class="pre">AmrMesh.srd_order</span></code> = 2; 0 uses the averages only).
+The new state of a cell is the weighted average of the reconstructions of the neighborhoods that contain it, evaluated at its centroid,</p>
+<div class="math notranslate nohighlight">
+\[\phi_{\mathbf{r}}^{k+1} = \frac{1}{N_{\mathbf{r}}}\left(\alpha_0 N_{\mathbf{r}} q_{\mathbf{r}}(\mathbf{x}_{\mathbf{r}}) + \sum_{\mathbf{i}} \alpha_1 q_{\mathbf{i}}(\mathbf{x}_{\mathbf{r}})\right),\]</div>
+<p>and the right-hand side is <span class="math notranslate nohighlight">\(R = (\phi^k - \phi^{k+1})/\Delta t\)</span>.
+The redistribution conserves mass in every neighborhood.
+Cells outside the merged neighborhoods keep the conservative update.</p>
+<p>On AMR hierarchies the redistribution follows <span id="id2">[<a class="reference internal" href="../ZZReferences.html#id170" title="I. Barrio Sanchez, A. S. Almgren, J. B. Bell, M. T. Henry de Frahan, and W. Zhang. A new re-redistribution scheme for weighted state redistribution with adaptive mesh refinement. 2023. arXiv:2309.06372.">Barrio Sanchez <em>et al.</em>, 2023</a>]</span>.
+The neighborhoods are centered on the cells of a level that are not covered by a finer level, but they can contain cells that stand in for another level: cells covered by the finer level, and ghost cells that overlay the coarser level.
+The mass that the redistribution moves between a cell of the level and a stand-in is moved to the cells that the stand-in represents.
+Mass moved into a ghost cell goes to the coarse cell under it, which keeps the part <span class="math notranslate nohighlight">\(\kappa\)</span> of it and redistributes the rest with flux redistribution, as in <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id170" title="I. Barrio Sanchez, A. S. Almgren, J. B. Bell, M. T. Henry de Frahan, and W. Zhang. A new re-redistribution scheme for weighted state redistribution with adaptive mesh refinement. 2023. arXiv:2309.06372.">Barrio Sanchez <em>et al.</em>, 2023</a>]</span>.
+Mass moved into a covered cell goes to the fine cells under it, as the same change of the state in each of them.
+This differs from <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id170" title="I. Barrio Sanchez, A. S. Almgren, J. B. Bell, M. T. Henry de Frahan, and W. Zhang. A new re-redistribution scheme for weighted state redistribution with adaptive mesh refinement. 2023. arXiv:2309.06372.">Barrio Sanchez <em>et al.</em>, 2023</a>]</span>, which gives it back to the coarse cell; that undoes the stabilization of a small coarse cell whose neighbors are all covered.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>State redistribution needs two ghost cells in the state and the divergence.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> ImExSdc time stepper does not support state redistribution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">which_redistribution</span></code> cannot be switched to or from <code class="docutils literal notranslate"><span class="pre">state</span></code> at runtime.</p></li>
+</ul>
+</div>
+</section>
 <section id="explicit-advection">
 <span id="chap-explicitadvection"></span><h3>Explicit advection<a class="headerlink" href="#explicit-advection" title="Permalink to this heading"></a></h3>
 <p>Scalar advection updates follow the computation of the explicit divergence discussed in <a class="reference internal" href="#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>.
@@ -405,7 +459,7 @@ In the simplest case, these fluxes are simply calculated using an upwind rule, p
 In more complex cases, we use both the normal and transverse slopes in a cell.
 The argument <code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> is the time step that the face states are extrapolated over.
 It is not needed in a method-of-lines context (pass 0), but it is used in e.g. <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers).
-The argument <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> is the time step of the update that the result is used in, which the flux correction in <a class="reference internal" href="#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> needs.</p>
+The argument <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> is the time step of the update that the result is used in, which the cut-cell stabilization needs.</p>
 <p>For example, in order to perform an advective advance with the explicit Euler rule over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, one would perform the following:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
 
@@ -425,8 +479,8 @@ The function signature for explicit diffusion (<code class="docutils literal not
 
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span><span class="w">            </span><span class="c1">// Cell-centered state</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">divD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="o">-&gt;</span><span class="n">getScratch</span><span class="p">();</span><span class="w">        </span><span class="c1">// Scratch storage in solver</span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivD</span><span class="p">(</span><span class="n">divD</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divD including BCs</span>
-<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divD</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span><span class="w">                       </span><span class="c1">// Makes phi -&gt; phi + dt*divD</span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivD</span><span class="p">(</span><span class="n">divD</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"> </span><span class="c1">// Computes divD including BCs</span>
+<span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divD</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">);</span><span class="w">                           </span><span class="c1">// Makes phi -&gt; phi + dt*divD</span>
 </pre></div>
 </div>
 </section>
@@ -573,7 +627,7 @@ With <code class="docutils literal notranslate"><span class="pre">CdrCTU.eb_infl
 <li><p>The fluid that crosses an outgoing face of a cut cell during a time step comes from the cell only until the flow has carried the EB (a plane through the EB centroid) to the face; after that it is fluid that entered through the EB.
 The face state is the time average over the step, which limits the outflow of a cut cell to its content when nothing flows in through the EB.</p></li>
 </ul>
-<p>Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell redistribution then has to absorb.</p>
+<p>Without this, a small cut cell where the flow leaves the EB can lose much more mass in one step than it contains, which the cut-cell stabilization then has to absorb.</p>
 </section>
 <section id="flux-correction">
 <h3>Flux correction<a class="headerlink" href="#flux-correction" title="Permalink to this heading"></a></h3>
@@ -621,7 +675,7 @@ CdrCTU.flux_correction          = true                      ## If true, flux-cor
 CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrCTU.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
+CdrCTU.which_redistribution     = volume                    ## Redistribution type. 'volume', 'state' or 'none' (turned off)
 CdrCTU.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 
 CdrCTU.solver                    = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
@@ -655,6 +709,7 @@ If setting this to false, transverse terms are turned off the <code class="docut
 In particular, <code class="docutils literal notranslate"><span class="pre">gmg_reflux_free</span></code> (default <code class="docutils literal notranslate"><span class="pre">false</span></code>) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
 The two formulations are mathematically equivalent.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.plt_vars</span></code> indicate which variables are added to plot files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.which_redistribution</span></code> selects the cut-cell stabilization, see <a class="reference internal" href="#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.eb_inflow_state</span></code> and <code class="docutils literal notranslate"><span class="pre">CdrCTU.flux_correction</span></code> turn on the EB inflow state and the flux correction described above.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CdrCTU.bc.*</span></code> set the domain boundary conditions.
 With <code class="docutils literal notranslate"><span class="pre">outflow</span></code>, the flux through a boundary face is the computed (upwind) advective flux where it leaves the domain; nothing flows in, and there is no diffusive flux.</p></li>
@@ -762,23 +817,21 @@ Interpolation to face-centered transport fluxes are done by <code class="docutil
 </div>
 <p>Then, <code class="docutils literal notranslate"><span class="pre">veloCell</span></code> can be filled with the cell-centered velocity.
 One can use <code class="docutils literal notranslate"><span class="pre">DataOps</span></code> functions to fill the data directly using a C++ lambda:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">setValue</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">MFCellFAB</span><span class="o">&gt;&amp;</span><span class="w">                         </span><span class="n">a_lhs</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w">    </span><span class="n">a_function</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                                </span><span class="n">a_probLo</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                    </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                     </span><span class="n">a_comp</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">VoFIterator</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_vofIterPhase0</span><span class="p">,</span>
-<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">VoFIterator</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_vofIterPhase1</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified</span>
-<span class="cm"> * component from that function.</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Polymorphic set value function. Assumes that a_lhs has SpaceDim components and sets all those components</span>
+<span class="cm"> * from the input function.</span>
 <span class="cm"> * @param[out] a_lhs      Data to set.</span>
 <span class="cm"> * @param[in]  a_function Function to use for setting the value.</span>
 <span class="cm"> * @param[in]  a_probLo   Lower-left corner of physical domain.</span>
 <span class="cm"> * @param[in]  a_dx       Grid resolutions.</span>
-<span class="cm"> * @param[in]  a_comp     Component to set.</span>
 <span class="cm"> * @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setValue</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                                        </span><span class="n">a_lhs</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w">        </span><span class="n">a_function</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                                       </span><span class="n">a_probLo</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                                   </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">VoFIterator</span><span class="o">&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_vofIter</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This would typically look something like this:</p>

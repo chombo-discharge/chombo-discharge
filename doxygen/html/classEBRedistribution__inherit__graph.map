@@ -1,0 +1,7 @@
+<map id="EBRedistribution" name="EBRedistribution">
+<area shape="rect" id="Node000001" title="Abstract interface for the cut&#45;cell stabilization of explicit finite&#45;volume updates." alt="" coords="123,5,252,33"/>
+<area shape="rect" id="Node000002" href="$classEBHybridRedistribution.html" title="The hybrid divergence with flux redistribution, as an EBRedistribution." alt="" coords="5,81,178,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,42,110,83,107,78,156,43"/>
+<area shape="rect" id="Node000003" href="$classEBStateRedistribution.html" title="Weighted state redistribution (Berger and Giuliani, J. Comput. Phys. 428, 2021; Giuliani et al...." alt="" coords="202,81,365,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,40,269,81,264,80,216,45"/>
+</map>

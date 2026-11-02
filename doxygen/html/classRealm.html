@@ -109,8 +109,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af3274ecbfed41f903f8cfecd1233d56e" id="r_af3274ecbfed41f903f8cfecd1233d56e"><td class="memItemLeft" align="right" valign="top"><a id="af3274ecbfed41f903f8cfecd1233d56e" name="af3274ecbfed41f903f8cfecd1233d56e"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~Realm</b> ()</td></tr>
 <tr class="memdesc:af3274ecbfed41f903f8cfecd1233d56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
-<tr class="memitem:a16557c5152157a590d313cbaae66706f" id="r_a16557c5152157a590d313cbaae66706f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a16557c5152157a590d313cbaae66706f">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
-<tr class="memdesc:a16557c5152157a590d313cbaae66706f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
+<tr class="memitem:a4c7ee8a6af1156aab32259a5ce0311d8" id="r_a4c7ee8a6af1156aab32259a5ce0311d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c7ee8a6af1156aab32259a5ce0311d8">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_srdOrder, const Real a_srdTargetVolFrac, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
+<tr class="memdesc:a4c7ee8a6af1156aab32259a5ce0311d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
 <tr class="memitem:ad3caaf4a8867b472534db7698306b671" id="r_ad3caaf4a8867b472534db7698306b671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3caaf4a8867b472534db7698306b671">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ad3caaf4a8867b472534db7698306b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <br /></td></tr>
 <tr class="memitem:aed9086405be6381b7c82e4b0800614a3" id="r_aed9086405be6381b7c82e4b0800614a3"><td class="memItemLeft" align="right" valign="top"><a id="aed9086405be6381b7c82e4b0800614a3" name="aed9086405be6381b7c82e4b0800614a3"></a>
@@ -186,6 +186,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a0dd36c01178a96b46811b48b08a9a245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <br /></td></tr>
 <tr class="memitem:a468281f352f52f1c41a8e10256d301cd" id="r_a468281f352f52f1c41a8e10256d301cd"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a468281f352f52f1c41a8e10256d301cd">getRedistributionOp</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
 <tr class="memdesc:a468281f352f52f1c41a8e10256d301cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
+<tr class="memitem:aa8d32f7b447725cea7d77b2db81928d6" id="r_aa8d32f7b447725cea7d77b2db81928d6"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8d32f7b447725cea7d77b2db81928d6">getStateRedistribution</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
+<tr class="memdesc:aa8d32f7b447725cea7d77b2db81928d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state redistribution.  <br /></td></tr>
 <tr class="memitem:aef59f419df25c884be5dc0b9d29e367e" id="r_aef59f419df25c884be5dc0b9d29e367e"><td class="memItemLeft" align="right" valign="top">const EBAMRFAB &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef59f419df25c884be5dc0b9d29e367e">getLevelset</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:aef59f419df25c884be5dc0b9d29e367e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get level-set function.  <br /></td></tr>
 <tr class="memitem:ad97570c40a2f76be778f34d69ce0c0a1" id="r_ad97570c40a2f76be778f34d69ce0c0a1"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad97570c40a2f76be778f34d69ce0c0a1">getRegularCells</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
@@ -252,6 +254,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a7f3a61dca9a5151182b90d86cc1a92ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a mask which is true on the inside (i.e., fine side) of the refinement boundary.  <br /></td></tr>
 <tr class="memitem:adf0a3c54b5efbe18e25fe1831c131c6c" id="r_adf0a3c54b5efbe18e25fe1831c131c6c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf0a3c54b5efbe18e25fe1831c131c6c">defineCFIVS</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:adf0a3c54b5efbe18e25fe1831c131c6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the coarse-fine interface.  <br /></td></tr>
+<tr class="memitem:a118864d9a61ff527d80819a73bbc8e1a" id="r_a118864d9a61ff527d80819a73bbc8e1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a118864d9a61ff527d80819a73bbc8e1a">defineCoveredByFinerMask</a> (const int a_lmin)</td></tr>
+<tr class="memdesc:a118864d9a61ff527d80819a73bbc8e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the masks of the cells that are covered by the finer level.  <br /></td></tr>
+<tr class="memitem:a1230ebb152ad7795eebdc62a42ec1d04" id="r_a1230ebb152ad7795eebdc62a42ec1d04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1230ebb152ad7795eebdc62a42ec1d04">defineCoarseFineGhostMask</a> (const int a_lmin)</td></tr>
+<tr class="memdesc:a1230ebb152ad7795eebdc62a42ec1d04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the masks of the ghost cells that lie outside the grids of a level.  <br /></td></tr>
 <tr class="memitem:a5f2289a6d36fe1f903b4a05dde660e04" id="r_a5f2289a6d36fe1f903b4a05dde660e04"><td class="memItemLeft" align="right" valign="top"><a id="a5f2289a6d36fe1f903b4a05dde660e04" name="a5f2289a6d36fe1f903b4a05dde660e04"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineValidCells</b> ()</td></tr>
 <tr class="memdesc:a5f2289a6d36fe1f903b4a05dde660e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid cell region mask. <br /></td></tr>
@@ -420,8 +426,8 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a16557c5152157a590d313cbaae66706f" name="a16557c5152157a590d313cbaae66706f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16557c5152157a590d313cbaae66706f">&#9670;&#160;</a></span>define()</h2>
+<a id="a4c7ee8a6af1156aab32259a5ce0311d8" name="a4c7ee8a6af1156aab32259a5ce0311d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c7ee8a6af1156aab32259a5ce0311d8">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -479,7 +485,12 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_redistRad</em></span>, </td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_srdOrder</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_srdTargetVolFrac</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -547,7 +558,8 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGhost</td><td>Number of ghost cells used for geometric information when making operators </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells in data holders </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lsfGhost</td><td>Number of ghost cells used when computing the level set on the mesh </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_redistRad</td><td>Redistribution radius </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_srdOrder</td><td>State redistribution: order of the reconstruction (0 or 2) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_srdTargetVolFrac</td><td>State redistribution: target volume fraction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpOrder</td><td>Multigrid ghost cell interpolation order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpRadius</td><td>Multigrid ghost cell interpolation radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpWeight</td><td>Multigrid ghost cell interpolation weight (for least squares) </td></tr>
@@ -591,6 +603,72 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 <p>This is a mask which is true on the immediate outside of a refinement boundary. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1230ebb152ad7795eebdc62a42ec1d04" name="a1230ebb152ad7795eebdc62a42ec1d04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1230ebb152ad7795eebdc62a42ec1d04">&#9670;&#160;</a></span>defineCoarseFineGhostMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineCoarseFineGhostMask </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the masks of the ghost cells that lie outside the grids of a level. </p>
+<p>For each registered s_coarse_fine_ghost mask, with the buffer as the number of ghost cells. On levels above the coarsest, the mask is true in the ghost cells that are inside the domain but outside the grids of the level, which overlay valid cells of the coarser level. It is false elsewhere, and everywhere on the coarsest level. All levels are rebuilt, whatever a_lmin is. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changed. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a118864d9a61ff527d80819a73bbc8e1a" name="a118864d9a61ff527d80819a73bbc8e1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a118864d9a61ff527d80819a73bbc8e1a">&#9670;&#160;</a></span>defineCoveredByFinerMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineCoveredByFinerMask </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the masks of the cells that are covered by the finer level. </p>
+<p>For each registered s_covered_by_finer mask, with the buffer as the number of ghost cells. The mask is true in the cells of the grids that are covered by the grids of the finer level, also in the ghost cells that overlap other grid boxes of the level, and false elsewhere. All levels are rebuilt, whatever a_lmin is. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changed. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2337,6 +2415,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Regular-cell mask </dd></dl>
+
+</div>
+</div>
+<a id="aa8d32f7b447725cea7d77b2db81928d6" name="aa8d32f7b447725cea7d77b2db81928d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8d32f7b447725cea7d77b2db81928d6">&#9670;&#160;</a></span>getStateRedistribution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp; Realm::getStateRedistribution </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the state redistribution. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>State redistribution on all levels </dd></dl>
 
 </div>
 </div>

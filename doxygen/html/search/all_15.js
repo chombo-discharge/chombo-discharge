@@ -29,7 +29,7 @@ var searchData=
   ['void_26',['Void',['../CD__ParticleSoA_8H.html#adfb6de5bfc42480e0cf30b914bffd716',1,'detail']]],
   ['voltagecurve_27',['VoltageCurve',['../CD__DischargeInceptionStepper_8H.html#a250fdbc8cfdeaaece8e08940af8afe44adb3bf134f3d92d034bcad91ba85f147a',1,'Physics::DischargeInception']]],
   ['volumecentroid_28',['volumeCentroid',['../classPolyhedralEB_1_1CutCellBody.html#a7a721c78f54661dc00b7fa0f17d900bd',1,'PolyhedralEB::CutCellBody']]],
-  ['volumefraction_29',['volumeFraction',['../classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55',1,'PolyhedralEB::CutCellBody']]],
+  ['volumefraction_29',['volumeFraction',['../classEBStateRedistribution.html#aaf9a46008d4a95f5d90d398cab8cbe85',1,'EBStateRedistribution::volumeFraction()'],['../classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55',1,'PolyhedralEB::CutCellBody::volumeFraction()']]],
   ['volumescale_30',['volumeScale',['../classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de',1,'DataOps']]],
   ['vx_31',['vx',['../structItoParticle.html#aac76b006b52e47bbe54ceec005f7a98b',1,'ItoParticle']]],
   ['vy_32',['vy',['../structItoParticle.html#a325ca2011475b0d447b6ea82abbfc342',1,'ItoParticle']]],

@@ -424,8 +424,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:a9644428ada5f48e3fcdb512898cc1e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the default number of ghost cells.  <br /></td></tr>
 <tr class="memitem:af6a363c78f0c85f9c8d0a66da2b40d37" id="r_af6a363c78f0c85f9c8d0a66da2b40d37"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6a363c78f0c85f9c8d0a66da2b40d37">getNumberOfEbGhostCells</a> () const</td></tr>
 <tr class="memdesc:af6a363c78f0c85f9c8d0a66da2b40d37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of ghost cells used for EB grid generation.  <br /></td></tr>
-<tr class="memitem:af0797ec9054cf1b463a3202f99409651" id="r_af0797ec9054cf1b463a3202f99409651"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af0797ec9054cf1b463a3202f99409651">getRedistributionRadius</a> () const</td></tr>
-<tr class="memdesc:af0797ec9054cf1b463a3202f99409651"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get default redistribution radius.  <br /></td></tr>
 <tr class="memitem:a13dad5645ed0341ada0681607da1d600" id="r_a13dad5645ed0341ada0681607da1d600"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a13dad5645ed0341ada0681607da1d600">getFinestDx</a> () const</td></tr>
 <tr class="memdesc:a13dad5645ed0341ada0681607da1d600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get resolution on the finest grid level.  <br /></td></tr>
 <tr class="memitem:a7e22af33b0bc2737eb911562b2796ee4" id="r_a7e22af33b0bc2737eb911562b2796ee4"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e22af33b0bc2737eb911562b2796ee4">getProbLo</a> () const</td></tr>
@@ -518,6 +516,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:ad179f58ed68e7fb7ed5242474e03c7ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <br /></td></tr>
 <tr class="memitem:a6911f33d98ee93014a118574582eb6df" id="r_a6911f33d98ee93014a118574582eb6df"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6911f33d98ee93014a118574582eb6df">getRedistributionOp</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a6911f33d98ee93014a118574582eb6df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
+<tr class="memitem:a2d20eeabff7d7135b6d13e9ebf62bbba" id="r_a2d20eeabff7d7135b6d13e9ebf62bbba"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d20eeabff7d7135b6d13e9ebf62bbba">getStateRedistribution</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a2d20eeabff7d7135b6d13e9ebf62bbba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state redistribution.  <br /></td></tr>
+<tr class="memitem:a06c53d5186aeef26bf28d0d1662d8944" id="r_a06c53d5186aeef26bf28d0d1662d8944"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06c53d5186aeef26bf28d0d1662d8944">redistributeMass</a> (EBAMRCellData &amp;a_phi, const EBAMRIVData &amp;a_deltaM, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const noexcept</td></tr>
+<tr class="memdesc:a06c53d5186aeef26bf28d0d1662d8944"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the mass of each cut cell to its neighbouring cells.  <br /></td></tr>
 <tr class="memitem:a2b1de7588c980cf5519c3a52a5406979" id="r_a2b1de7588c980cf5519c3a52a5406979"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b1de7588c980cf5519c3a52a5406979">getPetscGrid</a> (const std::string &amp;a_realm) const noexcept</td></tr>
 <tr class="memdesc:a2b1de7588c980cf5519c3a52a5406979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a PETSc grid object.  <br /></td></tr>
 <tr class="memitem:a10aa1580b30fe66ec3e313435c44d1f1" id="r_a10aa1580b30fe66ec3e313435c44d1f1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10aa1580b30fe66ec3e313435c44d1f1">getRealms</a> () const</td></tr>
@@ -594,9 +596,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseNumGhostCells</b
 <tr class="memitem:ab035e11d56e0978fc386769706f5f40b" id="r_ab035e11d56e0978fc386769706f5f40b"><td class="memItemLeft" align="right" valign="top"><a id="ab035e11d56e0978fc386769706f5f40b" name="ab035e11d56e0978fc386769706f5f40b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMultigridInterpolator</b> ()</td></tr>
 <tr class="memdesc:ab035e11d56e0978fc386769706f5f40b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse settings for the multigrid interpolator. <br /></td></tr>
-<tr class="memitem:a9e931207fee7ef2897c99de6d8c5e819" id="r_a9e931207fee7ef2897c99de6d8c5e819"><td class="memItemLeft" align="right" valign="top"><a id="a9e931207fee7ef2897c99de6d8c5e819" name="a9e931207fee7ef2897c99de6d8c5e819"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistributionRadius</b> ()</td></tr>
-<tr class="memdesc:a9e931207fee7ef2897c99de6d8c5e819"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the default redistribution radius. <br /></td></tr>
+<tr class="memitem:ab637d4af977e3f6038e9268468f91bc3" id="r_ab637d4af977e3f6038e9268468f91bc3"><td class="memItemLeft" align="right" valign="top"><a id="ab637d4af977e3f6038e9268468f91bc3" name="ab637d4af977e3f6038e9268468f91bc3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>parseStateRedistribution</b> ()</td></tr>
+<tr class="memdesc:ab637d4af977e3f6038e9268468f91bc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the parameters of the state redistribution. <br /></td></tr>
 <tr class="memitem:af488a755c0931cb2967d9d6d33674a5d" id="r_af488a755c0931cb2967d9d6d33674a5d"><td class="memItemLeft" align="right" valign="top"><a id="af488a755c0931cb2967d9d6d33674a5d" name="af488a755c0931cb2967d9d6d33674a5d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMirrorDeposition</b> ()</td></tr>
 <tr class="memdesc:af488a755c0931cb2967d9d6d33674a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the mirror-deposition band radius and fit/guard tolerances. <br /></td></tr>
@@ -713,9 +715,12 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridInterpRadiu
 <tr class="memitem:ac7d601f57b4a712db238cd5301636ff3" id="r_ac7d601f57b4a712db238cd5301636ff3"><td class="memItemLeft" align="right" valign="top"><a id="ac7d601f57b4a712db238cd5301636ff3" name="ac7d601f57b4a712db238cd5301636ff3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridInterpWeight</b></td></tr>
 <tr class="memdesc:ac7d601f57b4a712db238cd5301636ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid interpolation weights. <br /></td></tr>
-<tr class="memitem:aff4be2723b347e649654ab7cb8f84b6f" id="r_aff4be2723b347e649654ab7cb8f84b6f"><td class="memItemLeft" align="right" valign="top"><a id="aff4be2723b347e649654ab7cb8f84b6f" name="aff4be2723b347e649654ab7cb8f84b6f"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistributionRadius</b></td></tr>
-<tr class="memdesc:aff4be2723b347e649654ab7cb8f84b6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution radius. <br /></td></tr>
+<tr class="memitem:a43e8622d986dcf378c38b3d3e0ad8eb0" id="r_a43e8622d986dcf378c38b3d3e0ad8eb0"><td class="memItemLeft" align="right" valign="top"><a id="a43e8622d986dcf378c38b3d3e0ad8eb0" name="a43e8622d986dcf378c38b3d3e0ad8eb0"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_srdOrder</b></td></tr>
+<tr class="memdesc:a43e8622d986dcf378c38b3d3e0ad8eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">State redistribution: order of the reconstruction (0 or 2). <br /></td></tr>
+<tr class="memitem:ac8328d661a380d9b577132a6b68e7709" id="r_ac8328d661a380d9b577132a6b68e7709"><td class="memItemLeft" align="right" valign="top"><a id="ac8328d661a380d9b577132a6b68e7709" name="ac8328d661a380d9b577132a6b68e7709"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_srdTargetVolFrac</b></td></tr>
+<tr class="memdesc:ac8328d661a380d9b577132a6b68e7709"><td class="mdescLeft">&#160;</td><td class="mdescRight">State redistribution: target volume fraction. <br /></td></tr>
 <tr class="memitem:a3304207da2d870898124450354565510" id="r_a3304207da2d870898124450354565510"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3304207da2d870898124450354565510">m_mirrorBandRadius</a></td></tr>
 <tr class="memdesc:a3304207da2d870898124450354565510"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects.  <br /></td></tr>
 <tr class="memitem:a77d5e536082f0e0b427c7756a474d295" id="r_a77d5e536082f0e0b427c7756a474d295"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77d5e536082f0e0b427c7756a474d295">m_mirrorConditionTolerance</a></td></tr>
@@ -4916,26 +4921,6 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="af0797ec9054cf1b463a3202f99409651" name="af0797ec9054cf1b463a3202f99409651"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af0797ec9054cf1b463a3202f99409651">&#9670;&#160;</a></span>getRedistributionRadius()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int AmrMesh::getRedistributionRadius </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get default redistribution radius. </p>
-<dl class="section return"><dt>Returns</dt><dd>Redistribution radius </dd></dl>
-
-</div>
-</div>
 <a id="ab7a316dd3977e3f60c27c0e2f71cf4fc" name="ab7a316dd3977e3f60c27c0e2f71cf4fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab7a316dd3977e3f60c27c0e2f71cf4fc">&#9670;&#160;</a></span>getRefinementRatio()</h2>
 
@@ -5015,6 +5000,37 @@ template&lt;typename P, typename Traits&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Regular-cell mask </dd></dl>
+
+</div>
+</div>
+<a id="a2d20eeabff7d7135b6d13e9ebf62bbba" name="a2d20eeabff7d7135b6d13e9ebf62bbba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d20eeabff7d7135b6d13e9ebf62bbba">&#9670;&#160;</a></span>getStateRedistribution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; <a class="el" href="classEBStateRedistribution.html">EBStateRedistribution</a> &gt; &amp; AmrMesh::getStateRedistribution </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the state redistribution. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>State redistribution on all levels </dd></dl>
 
 </div>
 </div>
@@ -7014,6 +7030,56 @@ template&lt;auto... OldPosition, typename P, typename Traits&gt; </div>
   </dd>
 </dl>
 <p>This will reallocate data for all grid levels lvl &gt;= a_lmin. </p>
+
+</div>
+</div>
+<a id="a06c53d5186aeef26bf28d0d1662d8944" name="a06c53d5186aeef26bf28d0d1662d8944"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06c53d5186aeef26bf28d0d1662d8944">&#9670;&#160;</a></span>redistributeMass()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::redistributeMass </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBAMRIVData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_deltaM</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add the mass of each cut cell to its neighbouring cells. </p>
+<p>Used e.g. for the mass that a hybrid particle deposition does not keep in a cut cell. The mass of a cut cell on level l is added to cells on levels l-1, l and l+1, with the weights of the flux redistribution stencils (getRedistributionOp). a_phi is a density, so the mass is added as mass per unit volume. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data that the mass is added to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Mass per cut cell, divided by the volume of a regular cell on its level, i.e. in the units of a_phi. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where the data lives. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where the data lives. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

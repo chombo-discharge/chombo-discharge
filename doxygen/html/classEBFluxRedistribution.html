@@ -100,21 +100,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad93f877f6f7ffaff267a3fada06b1b54" id="r_ad93f877f6f7ffaff267a3fada06b1b54"><td class="memItemLeft" align="right" valign="top"><a id="ad93f877f6f7ffaff267a3fada06b1b54" name="ad93f877f6f7ffaff267a3fada06b1b54"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBFluxRedistribution</b> (const <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:ad93f877f6f7ffaff267a3fada06b1b54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor is not allowed. <br /></td></tr>
-<tr class="memitem:a6596aa155e8bce89a7cd2ad7a5205d27" id="r_a6596aa155e8bce89a7cd2ad7a5205d27"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6596aa155e8bce89a7cd2ad7a5205d27">EBFluxRedistribution</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const bool a_redistributeOutside) noexcept</td></tr>
-<tr class="memdesc:a6596aa155e8bce89a7cd2ad7a5205d27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function and puts object in usable state.  <br /></td></tr>
+<tr class="memitem:a18b49165dc513ff59692101caaef9a40" id="r_a18b49165dc513ff59692101caaef9a40"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18b49165dc513ff59692101caaef9a40">EBFluxRedistribution</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
+<tr class="memdesc:a18b49165dc513ff59692101caaef9a40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function and puts object in usable state.  <br /></td></tr>
 <tr class="memitem:a753ca7e5d0639c3cff5666f496245337" id="r_a753ca7e5d0639c3cff5666f496245337"><td class="memItemLeft" align="right" valign="top"><a id="a753ca7e5d0639c3cff5666f496245337" name="a753ca7e5d0639c3cff5666f496245337"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBFluxRedistribution</b> () noexcept</td></tr>
 <tr class="memdesc:a753ca7e5d0639c3cff5666f496245337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="memitem:aa30412043e2853160c7a4c015ad499fd" id="r_aa30412043e2853160c7a4c015ad499fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa30412043e2853160c7a4c015ad499fd">define</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const bool a_redistributeOutside) noexcept</td></tr>
-<tr class="memdesc:aa30412043e2853160c7a4c015ad499fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
-<tr class="memitem:ad25a79c807720102006677ada3c874eb" id="r_ad25a79c807720102006677ada3c874eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad25a79c807720102006677ada3c874eb">redistributeAMR</a> (LevelData&lt; EBCellFAB &gt; *a_phiCoar, LevelData&lt; EBCellFAB &gt; *a_phi, LevelData&lt; EBCellFAB &gt; *a_phiFine, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real a_scaleCoar, const Real a_scale, const Real a_scaleFine, const Interval &amp;a_variables) const noexcept</td></tr>
-<tr class="memdesc:ad25a79c807720102006677ada3c874eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity into the coarse level, this level, and the fine level.  <br /></td></tr>
+<tr class="memitem:ac0277eafdc75ede2e040b6af9ea89674" id="r_ac0277eafdc75ede2e040b6af9ea89674"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac0277eafdc75ede2e040b6af9ea89674">define</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
+<tr class="memdesc:ac0277eafdc75ede2e040b6af9ea89674"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:afbfb1f2e24ecd42cebbdbc0ad756982e" id="r_afbfb1f2e24ecd42cebbdbc0ad756982e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afbfb1f2e24ecd42cebbdbc0ad756982e">redistributeCoar</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real &amp;a_scaleCoar, const Interval &amp;a_variables) const noexcept</td></tr>
 <tr class="memdesc:afbfb1f2e24ecd42cebbdbc0ad756982e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity to the coarse level.  <br /></td></tr>
 <tr class="memitem:aa55ba6164453c0caa73600042008c215" id="r_aa55ba6164453c0caa73600042008c215"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa55ba6164453c0caa73600042008c215">redistributeLevel</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real &amp;a_scale, const Interval &amp;a_variables) const noexcept</td></tr>
 <tr class="memdesc:aa55ba6164453c0caa73600042008c215"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity to this level.  <br /></td></tr>
 <tr class="memitem:a00b9f3a44b268991e2f33d02a75a338d" id="r_a00b9f3a44b268991e2f33d02a75a338d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00b9f3a44b268991e2f33d02a75a338d">redistributeFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real &amp;a_scaleFine, const Interval &amp;a_variables) const noexcept</td></tr>
-<tr class="memdesc:a00b9f3a44b268991e2f33d02a75a338d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity to the coarse level.  <br /></td></tr>
+<tr class="memdesc:a00b9f3a44b268991e2f33d02a75a338d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity to the fine level.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -123,7 +121,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencil
 <tr class="memdesc:a7403d9ac8edccb12449df7b1078ac811"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define redistribution stencils. <br /></td></tr>
 <tr class="memitem:a557bfa095e8b4b16bc57c6104152827a" id="r_a557bfa095e8b4b16bc57c6104152827a"><td class="memItemLeft" align="right" valign="top"><a id="a557bfa095e8b4b16bc57c6104152827a" name="a557bfa095e8b4b16bc57c6104152827a"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineBuffers</b> () noexcept</td></tr>
-<tr class="memdesc:a557bfa095e8b4b16bc57c6104152827a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffer storages. <br /></td></tr>
+<tr class="memdesc:a557bfa095e8b4b16bc57c6104152827a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the copiers and the buffers of the coarse, level and fine redistribution. <br /></td></tr>
 <tr class="memitem:a5ba6a16ce6c9e9e18a7c91cf32bebbc1" id="r_a5ba6a16ce6c9e9e18a7c91cf32bebbc1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ba6a16ce6c9e9e18a7c91cf32bebbc1">defineValidCells</a> (LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_validCells) const noexcept</td></tr>
 <tr class="memdesc:a5ba6a16ce6c9e9e18a7c91cf32bebbc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid region of this level.  <br /></td></tr>
 <tr class="memitem:a5f08ff595b3937b9c282ae47f7293a2d" id="r_a5f08ff595b3937b9c282ae47f7293a2d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f08ff595b3937b9c282ae47f7293a2d">defineInterfaceCells</a> (LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_interfaceCells) const noexcept</td></tr>
@@ -134,9 +132,6 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a93efadbe876c1922b145d7a34869a98a" id="r_a93efadbe876c1922b145d7a34869a98a"><td class="memItemLeft" align="right" valign="top"><a id="a93efadbe876c1922b145d7a34869a98a" name="a93efadbe876c1922b145d7a34869a98a"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:a93efadbe876c1922b145d7a34869a98a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
-<tr class="memitem:a4f6776db5e6cfa828602a8998c13ff0d" id="r_a4f6776db5e6cfa828602a8998c13ff0d"><td class="memItemLeft" align="right" valign="top"><a id="a4f6776db5e6cfa828602a8998c13ff0d" name="a4f6776db5e6cfa828602a8998c13ff0d"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistributeOutside</b></td></tr>
-<tr class="memdesc:a4f6776db5e6cfa828602a8998c13ff0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, redistribute to the outside. Otherwise, do interior redistribution. <br /></td></tr>
 <tr class="memitem:a1495354bbe786cd202b72495c4d80ec3" id="r_a1495354bbe786cd202b72495c4d80ec3"><td class="memItemLeft" align="right" valign="top"><a id="a1495354bbe786cd202b72495c4d80ec3" name="a1495354bbe786cd202b72495c4d80ec3"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_hasCoar</b></td></tr>
 <tr class="memdesc:a1495354bbe786cd202b72495c4d80ec3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Has coarse level or not. <br /></td></tr>
@@ -151,7 +146,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_refToFine</b></td></
 <tr class="memdesc:a272b5b3554a220dd91b0afdfd577a0c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement factor between this level and the fine level. <br /></td></tr>
 <tr class="memitem:a8b372ee0056acb80a7e213dc592aa52c" id="r_a8b372ee0056acb80a7e213dc592aa52c"><td class="memItemLeft" align="right" valign="top"><a id="a8b372ee0056acb80a7e213dc592aa52c" name="a8b372ee0056acb80a7e213dc592aa52c"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistRadius</b></td></tr>
-<tr class="memdesc:a8b372ee0056acb80a7e213dc592aa52c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution radius. Always one. <br /></td></tr>
+<tr class="memdesc:a8b372ee0056acb80a7e213dc592aa52c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radius of the redistribution neighbourhood, in cells. <br /></td></tr>
 <tr class="memitem:aa3e50f3be537eaf1e21e7ae5e0ae4885" id="r_aa3e50f3be537eaf1e21e7ae5e0ae4885"><td class="memItemLeft" align="right" valign="top"><a id="aa3e50f3be537eaf1e21e7ae5e0ae4885" name="aa3e50f3be537eaf1e21e7ae5e0ae4885"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b></td></tr>
 <tr class="memdesc:aa3e50f3be537eaf1e21e7ae5e0ae4885"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids on coarser level. <br /></td></tr>
@@ -185,16 +180,26 @@ Copier&#160;</td><td class="memItemRight" valign="bottom"><b>m_fineCopier</b></t
 <tr class="memitem:aaafb1429a4e90c4776400b2b199a0a2b" id="r_aaafb1429a4e90c4776400b2b199a0a2b"><td class="memItemLeft" align="right" valign="top"><a id="aaafb1429a4e90c4776400b2b199a0a2b" name="aaafb1429a4e90c4776400b2b199a0a2b"></a>
 LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofit</b></td></tr>
 <tr class="memdesc:aaafb1429a4e90c4776400b2b199a0a2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for going through all cells on this level that we redistribute from. <br /></td></tr>
+<tr class="memitem:a55c5ad7722fb7610002937287c4b83ff" id="r_a55c5ad7722fb7610002937287c4b83ff"><td class="memItemLeft" align="right" valign="top"><a id="a55c5ad7722fb7610002937287c4b83ff" name="a55c5ad7722fb7610002937287c4b83ff"></a>
+LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarBuffer</b></td></tr>
+<tr class="memdesc:a55c5ad7722fb7610002937287c4b83ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for the mass redistributed to the coarser level, on the coarsening of the grids of this level, with the redistribution radius as ghost cells. Zeroed and filled by every call to redistributeCoar. <br /></td></tr>
+<tr class="memitem:aadcee6bedf5f8a83c3c8f1cf185a696a" id="r_aadcee6bedf5f8a83c3c8f1cf185a696a"><td class="memItemLeft" align="right" valign="top"><a id="aadcee6bedf5f8a83c3c8f1cf185a696a" name="aadcee6bedf5f8a83c3c8f1cf185a696a"></a>
+LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelBuffer</b></td></tr>
+<tr class="memdesc:aadcee6bedf5f8a83c3c8f1cf185a696a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for the mass redistributed on this level, with the redistribution radius as ghost cells. Zeroed and filled by every call to redistributeLevel. <br /></td></tr>
+<tr class="memitem:ab138baabdbcface43cb5a446e1bc5b3d" id="r_ab138baabdbcface43cb5a446e1bc5b3d"><td class="memItemLeft" align="right" valign="top"><a id="ab138baabdbcface43cb5a446e1bc5b3d" name="ab138baabdbcface43cb5a446e1bc5b3d"></a>
+LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fineBuffer</b></td></tr>
+<tr class="memdesc:ab138baabdbcface43cb5a446e1bc5b3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for the mass redistributed to the finer level, on the refinement of the grids of this level, with the refinement ratio times the redistribution radius as ghost cells. Zeroed and filled by every call to redistributeFine. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for redistribution ala Chombo's flux redistribution. </p>
-<p>This uses the same algorithm as the core Chombo code, but includes much faster define functions and smaller memory footprint. Because this class is used in a non-subcycling context, it has way fewer bells and whistles. Note that this class permits redistribution outside of the domain, in which case some mass will (correctly) be lost.</p>
-<p>The underlying stencils for in this class can be understood as follows: Assume that we have some quantity deltaM_i that we want to redistribute from cell i to nearby cells. We fetch all cells that are within a radius of 1 around this cell. If one of these cells lie on other side of the refinement boundary, we coarsen it and fetch the corresponding coarse-grid cell. Likewise, if a neighborhood cell lies underneath the fine grid, we refine it and redistribute to the fine grid cells. In each cut-cell we thus compute the total volume of the surrounding neighborhood as</p>
+<p>This uses the same algorithm as the core Chombo code, but includes much faster define functions and smaller memory footprint. Because this class is used in a non-subcycling context, it has way fewer bells and whistles. The neighbourhoods only contain cells inside the domain, so no mass leaves through the domain boundary.</p>
+<p>The underlying stencils for in this class can be understood as follows: Assume that we have some quantity deltaM_i that we want to redistribute from cell i to nearby cells. We fetch all cells that are within the redistribution radius around this cell. If one of these cells lie on other side of the refinement boundary, we coarsen it and fetch the corresponding coarse-grid cell. Likewise, if a neighborhood cell lies underneath the fine grid, we refine it and redistribute to the fine grid cells. In each cut-cell we thus compute the total volume of the surrounding neighborhood as</p>
 <p>totalVolume = sum_(level_cells) kappa_j + 1/NrefToFine^D * sum_(fine_cells) kappa_j + Nref*ToCoar^D * sum(coar_cells) kappa_j.</p>
-<p>Every cell in the neighborhood of cell i gets a weight 1/totalVolume. Note that proper division by the grid resolution is not made here; the user will have to ensure proper scaling of his/her variables when calling the actual redistribution functions. The scaling factors depend on what is actually being redistributed, and the user will need to work this out on paper. </p>
+<p>Every cell in the neighborhood of cell i gets a weight 1/totalVolume. Note that proper division by the grid resolution is not made here; the user will have to ensure proper scaling of his/her variables when calling the actual redistribution functions. The scaling factors depend on what is actually being redistributed, and the user will need to work this out on paper.</p>
+<p>The code has only been verified and validated for a redistribution radius of 1, which is what chombo-discharge uses. Larger radii are accepted but untested; with radius 2, mass is known to be lost across a refinement ratio of 4. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a6596aa155e8bce89a7cd2ad7a5205d27" name="a6596aa155e8bce89a7cd2ad7a5205d27"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6596aa155e8bce89a7cd2ad7a5205d27">&#9670;&#160;</a></span>EBFluxRedistribution()</h2>
+<a id="a18b49165dc513ff59692101caaef9a40" name="a18b49165dc513ff59692101caaef9a40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18b49165dc513ff59692101caaef9a40">&#9670;&#160;</a></span>EBFluxRedistribution()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -240,7 +245,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_redistributeOutside</em></span>&#160;)</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_redistRadius</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -259,7 +264,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement factor between this level and the coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement factor between this level and the fine level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_redistributeOutside</td><td>Turn on/off redistribution outside domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_redistRadius</td><td>Radius of the redistribution neighbourhood, in cells. Only verified and validated for 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgRefined</td><td>Eblg refined </td></tr>
   </table>
   </dd>
@@ -268,8 +273,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="aa30412043e2853160c7a4c015ad499fd" name="aa30412043e2853160c7a4c015ad499fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa30412043e2853160c7a4c015ad499fd">&#9670;&#160;</a></span>define()</h2>
+<a id="ac0277eafdc75ede2e040b6af9ea89674" name="ac0277eafdc75ede2e040b6af9ea89674"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0277eafdc75ede2e040b6af9ea89674">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -315,7 +320,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_redistributeOutside</em></span>&#160;)</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_redistRadius</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -335,7 +340,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement factor between this level and the coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement factor between this level and the fine level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_redistributeOutside</td><td>Turn on/off redistribution outside domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_redistRadius</td><td>Radius of the redistribution neighbourhood, in cells. Only verified and validated for 1. </td></tr>
   </table>
   </dd>
 </dl>
@@ -408,80 +413,6 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 
 </div>
 </div>
-<a id="ad25a79c807720102006677ada3c874eb" name="ad25a79c807720102006677ada3c874eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad25a79c807720102006677ada3c874eb">&#9670;&#160;</a></span>redistributeAMR()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBFluxRedistribution::redistributeAMR </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; *</td>          <td class="paramname"><span class="paramname"><em>a_phiCoar</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; *</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; *</td>          <td class="paramname"><span class="paramname"><em>a_phiFine</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_deltaM</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_scaleCoar</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_scale</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_scaleFine</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Interval &amp;</td>          <td class="paramname"><span class="paramname"><em>a_variables</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Redistribute the input quantity into the coarse level, this level, and the fine level. </p>
-<p>If calling this, pass in a_phiFine/a_phiCoar = nullptr if there is no finer/coarser level. The a_scaleCoar and a_scaleFine arguments do not matter if there is no coarser/finer level. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phiCoar</td><td>Data on coarse level </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data on this level </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phiFine</td><td>Data on finer level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Redistribution data on this level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scaleCoar</td><td>Scaling factor for redistribution into the coarse level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Scaling factor for redistribution into this level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scaleFine</td><td>Scaling factor for redistribution into the fine level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to redistribute </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="afbfb1f2e24ecd42cebbdbc0ad756982e" name="afbfb1f2e24ecd42cebbdbc0ad756982e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afbfb1f2e24ecd42cebbdbc0ad756982e">&#9670;&#160;</a></span>redistributeCoar()</h2>
 
@@ -520,7 +451,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 </div><div class="memdoc">
 
 <p>Redistribute the input quantity to the coarse level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Uses a buffer of the operator, so it must not be called concurrently on the same operator. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phiCoar</td><td>Data on coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Redistribution data on this level </td></tr>
@@ -569,8 +500,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 </table>
 </div><div class="memdoc">
 
-<p>Redistribute the input quantity to the coarse level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Redistribute the input quantity to the fine level. </p>
+<p>Uses a buffer of the operator, so it must not be called concurrently on the same operator. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Redistribution data on this level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scaleFine</td><td>Scaling factor for redistribution into the fine level </td></tr>
@@ -620,7 +551,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 </div><div class="memdoc">
 
 <p>Redistribute the input quantity to this level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Uses a buffer of the operator, so it must not be called concurrently on the same operator. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Data on this level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deltaM</td><td>Redistribution data on this level </td></tr>
