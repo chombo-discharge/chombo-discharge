@@ -107,7 +107,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4ee4c5f6281d5f1476d94ed950ab1e2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignment operator.  <br /></td></tr>
 <tr class="memitem:a52c9bf643574607b03ad67d22faa3c5f" id="r_a52c9bf643574607b03ad67d22faa3c5f"><td class="memItemLeft" align="right" valign="top"><a id="a52c9bf643574607b03ad67d22faa3c5f" name="a52c9bf643574607b03ad67d22faa3c5f"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscHelmholtzOp</b> () noexcept</td></tr>
-<tr class="memdesc:a52c9bf643574607b03ad67d22faa3c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Destroys the matrix. <br /></td></tr>
+<tr class="memdesc:a52c9bf643574607b03ad67d22faa3c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Destroys the matrix, unless PETSc has already been finalized. <br /></td></tr>
 <tr class="memitem:a4d96462bf9295d03f691bbd6ca36e104" id="r_a4d96462bf9295d03f691bbd6ca36e104"><td class="memItemLeft" align="right" valign="top"><a id="a4d96462bf9295d03f691bbd6ca36e104" name="a4d96462bf9295d03f691bbd6ca36e104"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept</td></tr>
 <tr class="memdesc:a4d96462bf9295d03f691bbd6ca36e104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release the matrix, the boundary conditions, the coefficients and all per-level data, so that the operator can be defined again, e.g. after a regrid. <br /></td></tr>

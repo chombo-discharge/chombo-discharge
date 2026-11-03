@@ -84,6 +84,7 @@ $(function() {
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classFieldSolverGMG-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">FieldSolverGMG Class Reference</div></div>
 </div><!--header-->
@@ -185,6 +186,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolverGMG</b
 <tr class="memdesc:add5e2de507c3c032e14a0a97fd31891d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set new permittivities for the multigrid solver.  <br /></td></tr>
 <tr class="memitem:a9b50d8b8bed89e0c35e2d5f117137540" id="r_a9b50d8b8bed89e0c35e2d5f117137540"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b50d8b8bed89e0c35e2d5f117137540">computeLoads</a> (const DisjointBoxLayout &amp;a_dbl, const int a_level) override</td></tr>
 <tr class="memdesc:a9b50d8b8bed89e0c35e2d5f117137540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute grid loads.  <br /></td></tr>
+<tr class="memitem:a8c6f8992d1af03fb098ff5c830027f45" id="r_a8c6f8992d1af03fb098ff5c830027f45"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c6f8992d1af03fb098ff5c830027f45">invalidateSolver</a> () override</td></tr>
+<tr class="memdesc:a8c6f8992d1af03fb098ff5c830027f45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release the multigrid solver and the operator factory. Multigrid is set up again before the next solve.  <br /></td></tr>
 <tr class="inherit_header pub_methods_classFieldSolver"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classFieldSolver')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classFieldSolver.html">FieldSolver</a></td></tr>
 <tr class="memitem:a5d3bfee325ccfbe1f0951c9c3840c6cf inherit pub_methods_classFieldSolver" id="r_a5d3bfee325ccfbe1f0951c9c3840c6cf"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>FieldSolver</b> ()</td></tr>
@@ -206,14 +209,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolver</b> (
 <tr class="memdesc:a2b53fc8b0226475cdf358bb0d8908f01 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve Poisson equation onto a_phi using m_rho, and m_sigma as right-hand sides.  <br /></td></tr>
 <tr class="memitem:ab7dc8ec1c7cb543b5c8b465e8a1c7200 inherit pub_methods_classFieldSolver" id="r_ab7dc8ec1c7cb543b5c8b465e8a1c7200"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ab7dc8ec1c7cb543b5c8b465e8a1c7200">computeElectricField</a> ()</td></tr>
 <tr class="memdesc:ab7dc8ec1c7cb543b5c8b465e8a1c7200 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered electric field.  <br /></td></tr>
-<tr class="memitem:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver" id="r_a88261a81363faa8bc73a3579cf186f13"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> ()</td></tr>
-<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. <br /></td></tr>
+<tr class="memitem:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver" id="r_a88261a81363faa8bc73a3579cf186f13"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a88261a81363faa8bc73a3579cf186f13">allocate</a> ()</td></tr>
+<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite.  <br /></td></tr>
 <tr class="memitem:a8791d9db454d7c84ecf65d44db8bcfe3 inherit pub_methods_classFieldSolver" id="r_a8791d9db454d7c84ecf65d44db8bcfe3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a8791d9db454d7c84ecf65d44db8bcfe3">computeDisplacementField</a> (MFAMRCellData &amp;a_displacementField, const MFAMRCellData &amp;a_electricField)</td></tr>
 <tr class="memdesc:a8791d9db454d7c84ecf65d44db8bcfe3 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute displacement field from the electric field.  <br /></td></tr>
-<tr class="memitem:a5aa41113ebe05f15294c7899d3adc707 inherit pub_methods_classFieldSolver" id="r_a5aa41113ebe05f15294c7899d3adc707"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate</b> ()</td></tr>
-<tr class="memdesc:a5aa41113ebe05f15294c7899d3adc707 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
+<tr class="memitem:a5aa41113ebe05f15294c7899d3adc707 inherit pub_methods_classFieldSolver" id="r_a5aa41113ebe05f15294c7899d3adc707"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a5aa41113ebe05f15294c7899d3adc707">deallocate</a> ()</td></tr>
+<tr class="memdesc:a5aa41113ebe05f15294c7899d3adc707 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <br /></td></tr>
 <tr class="memitem:acf5544606955990573ed039682d6a03f inherit pub_methods_classFieldSolver" id="r_acf5544606955990573ed039682d6a03f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#acf5544606955990573ed039682d6a03f">setRho</a> (const Real a_rho)</td></tr>
 <tr class="memdesc:acf5544606955990573ed039682d6a03f inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set space charge to constant value everywhere.  <br /></td></tr>
 <tr class="memitem:ac015bd7988d034a68a3f73c5f00b7f4e inherit pub_methods_classFieldSolver" id="r_ac015bd7988d034a68a3f73c5f00b7f4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ac015bd7988d034a68a3f73c5f00b7f4e">setRho</a> (const std::function&lt; Real(const RealVect)&gt; &amp;a_rho)</td></tr>
@@ -307,7 +308,15 @@ Protected Types</h2></td></tr>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a38512c829432dfb496232006f95aa81d" id="r_a38512c829432dfb496232006f95aa81d"><td class="memItemLeft" align="right" valign="top"><a id="a38512c829432dfb496232006f95aa81d" name="a38512c829432dfb496232006f95aa81d"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMultigridSettings</b> ()</td></tr>
-<tr class="memdesc:a38512c829432dfb496232006f95aa81d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse multigrid settings. <br /></td></tr>
+<tr class="memdesc:a38512c829432dfb496232006f95aa81d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the multigrid cycle settings: smoothing, iterations, tolerances, smoother, bottom solver and cycle type. <br /></td></tr>
+<tr class="memitem:a2dda2c97e3ad368143118154cd4d552b" id="r_a2dda2c97e3ad368143118154cd4d552b"><td class="memItemLeft" align="right" valign="top"><a id="a2dda2c97e3ad368143118154cd4d552b" name="a2dda2c97e3ad368143118154cd4d552b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseStencilSettings</b> ()</td></tr>
+<tr class="memdesc:a2dda2c97e3ad368143118154cd4d552b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the order and the least-squares weight of the EB stencils (gmg_bc_order, gmg_bc_weight, gmg_jump_order, gmg_jump_weight). <br /></td></tr>
+<tr class="memitem:a824aa2627610b22485a7c17bbf36dbac" id="r_a824aa2627610b22485a7c17bbf36dbac"><td class="memItemLeft" align="right" valign="top"><a id="a824aa2627610b22485a7c17bbf36dbac" name="a824aa2627610b22485a7c17bbf36dbac"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDefaultSettings</b> ()</td></tr>
+<tr class="memdesc:a824aa2627610b22485a7c17bbf36dbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse gmg_use_default_settings, and if it is true, replace the multigrid and stencil settings by the defaults. <br /></td></tr>
+<tr class="memitem:aab631d7bfcea7d98b25cf71c6cdc484a" id="r_aab631d7bfcea7d98b25cf71c6cdc484a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab631d7bfcea7d98b25cf71c6cdc484a">parseKrylovSettings</a> (const std::string &amp;a_keyPrefix)</td></tr>
+<tr class="memdesc:aab631d7bfcea7d98b25cf71c6cdc484a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the solver chain and the settings of the outer Krylov solvers.  <br /></td></tr>
 <tr class="memitem:af708e4208eab397bc4518ab8521292d1" id="r_af708e4208eab397bc4518ab8521292d1"><td class="memItemLeft" align="right" valign="top"><a id="af708e4208eab397bc4518ab8521292d1" name="af708e4208eab397bc4518ab8521292d1"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseKappaSource</b> ()</td></tr>
 <tr class="memdesc:af708e4208eab397bc4518ab8521292d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse m_kappaSource. <br /></td></tr>
@@ -324,9 +333,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupMultigri
 <tr class="memitem:aac28785ddcb454fd55a7107c575964d1 inherit pro_methods_classFieldSolver" id="r_aac28785ddcb454fd55a7107c575964d1"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbosity</b> ()</td></tr>
 <tr class="memdesc:aac28785ddcb454fd55a7107c575964d1 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse solver class verbosity. <br /></td></tr>
-<tr class="memitem:a727b290c2e9bf1bc0e12a96fd63871bc inherit pro_methods_classFieldSolver" id="r_a727b290c2e9bf1bc0e12a96fd63871bc"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> ()</td></tr>
-<tr class="memdesc:a727b290c2e9bf1bc0e12a96fd63871bc inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which parses which plot variables to write to plot files. <br /></td></tr>
+<tr class="memitem:a727b290c2e9bf1bc0e12a96fd63871bc inherit pro_methods_classFieldSolver" id="r_a727b290c2e9bf1bc0e12a96fd63871bc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a727b290c2e9bf1bc0e12a96fd63871bc">parsePlotVariables</a> ()</td></tr>
+<tr class="memdesc:a727b290c2e9bf1bc0e12a96fd63871bc inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which parses which plot variables to write to plot files.  <br /></td></tr>
 <tr class="memitem:ace32482becbb3915bd97d566d4314dfa inherit pro_methods_classFieldSolver" id="r_ace32482becbb3915bd97d566d4314dfa"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDomainBc</b> ()</td></tr>
 <tr class="memdesc:ace32482becbb3915bd97d566d4314dfa inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse domain boundary conditions. <br /></td></tr>
@@ -352,6 +360,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefaultDom
 <tr class="memdesc:ad56bad582bead0d15a607c18c712558a inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut for making a boundary condition string.  <br /></td></tr>
 <tr class="memitem:a13fd859a86309a25f10cbee4b610fb42 inherit pro_methods_classFieldSolver" id="r_a13fd859a86309a25f10cbee4b610fb42"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a13fd859a86309a25f10cbee4b610fb42">fillCoveredPotential</a> (MFAMRCellData &amp;a_phi) const noexcept</td></tr>
 <tr class="memdesc:a13fd859a86309a25f10cbee4b610fb42 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility routine that fills the gas-side covered cells by the potential from the closest electrode.  <br /></td></tr>
+<tr class="memitem:ae633c961b3c66ada00abe1577f3f21b4 inherit pro_methods_classFieldSolver" id="r_ae633c961b3c66ada00abe1577f3f21b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ae633c961b3c66ada00abe1577f3f21b4">aliasState</a> (const <a class="el" href="classFieldSolver.html">FieldSolver</a> &amp;a_owner)</td></tr>
+<tr class="memdesc:ae633c961b3c66ada00abe1577f3f21b4 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Share the data and the configuration of another solver.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -591,6 +601,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 <tr class="memitem:aa4c4a4a607efb62bfa70a3d17d9afb59 inherit pro_static_attribs_classFieldSolver" id="r_aa4c4a4a607efb62bfa70a3d17d9afb59"><td class="memItemLeft" align="right" valign="top">
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nComp</b> = 1</td></tr>
 <tr class="memdesc:aa4c4a4a607efb62bfa70a3d17d9afb59 inherit pro_static_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of components in data holders. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-friends" class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:ac73530b2b3d401450f2c9ab47d582eb1" id="r_ac73530b2b3d401450f2c9ab47d582eb1"><td class="memItemLeft" align="right" valign="top"><a id="ac73530b2b3d401450f2c9ab47d582eb1" name="ac73530b2b3d401450f2c9ab47d582eb1"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac73530b2b3d401450f2c9ab47d582eb1">FieldSolverMG</a></td></tr>
+<tr class="memdesc:ac73530b2b3d401450f2c9ab47d582eb1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classFieldSolverMG.html" title="Field solver that solves with geometric multigrid, and falls back to algebraic multigrid when that fa...">FieldSolverMG</a> owns a <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> as its geometric multigrid stage, and parses its settings and shares its own data with it. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implementation of <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a> which uses multigrid. </p>
@@ -896,6 +912,35 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
+<a id="a8c6f8992d1af03fb098ff5c830027f45" name="a8c6f8992d1af03fb098ff5c830027f45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c6f8992d1af03fb098ff5c830027f45">&#9670;&#160;</a></span>invalidateSolver()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolverGMG::invalidateSolver </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Release the multigrid solver and the operator factory. Multigrid is set up again before the next solve. </p>
+
+<p>Implements <a class="el" href="classFieldSolver.html#a5270f8be79c83a0f4544f274f50be73f">FieldSolver</a>.</p>
+
+</div>
+</div>
 <a id="ac7075d9774ad179686cf11f538b99d54" name="ac7075d9774ad179686cf11f538b99d54"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac7075d9774ad179686cf11f538b99d54">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
 
@@ -956,6 +1001,39 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other solver </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aab631d7bfcea7d98b25cf71c6cdc484a" name="aab631d7bfcea7d98b25cf71c6cdc484a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab631d7bfcea7d98b25cf71c6cdc484a">&#9670;&#160;</a></span>parseKrylovSettings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolverGMG::parseKrylovSettings </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_keyPrefix</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse the solver chain and the settings of the outer Krylov solvers. </p>
+<p>The keys are a_keyPrefix + "solver" and a_keyPrefix + "krylov_*", after the class name. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_keyPrefix</td><td>Prefix of the keys, after the class name </td></tr>
   </table>
   </dd>
 </dl>

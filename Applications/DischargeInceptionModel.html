@@ -245,7 +245,7 @@ This mode can also be used to evaluate the inception probability for a given vol
 <span class="cm"> * - @p P: SoA tracer payload type (default DischargeInceptionParticle). The container-owned weight</span>
 <span class="cm"> * carries the inception integral K; the payload carries velocity + integrator state (snapshots,</span>
 <span class="cm"> * grad(alpha), cached alphaEff/dt).</span>
-<span class="cm"> * - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric</span>
+<span class="cm"> * - @p F: Field solver type (default FieldSolverMG). Solves the Poisson equation for the electric</span>
 <span class="cm"> * potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous</span>
 <span class="cm"> * (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.</span>
 <span class="cm"> * - @p C: CDR solver type (default CdrCTU). Advances the negative ion density in transient mode.</span>
@@ -255,7 +255,7 @@ This mode can also be used to evaluate the inception probability for a given vol
 <span class="cm"> * critical volume/area. In transient mode the voltage follows a user-supplied curve and the</span>
 <span class="cm"> * inception probability is accumulated over time together with ion transport.</span>
 <span class="cm"> */</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DischargeInceptionParticle</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldSolverGMG</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdrCTU</span><span class="o">&gt;</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DischargeInceptionParticle</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldSolverMG</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdrCTU</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DischargeInceptionStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
 </pre></div>
 </div>

@@ -33,20 +33,20 @@
 <area shape="poly" id="edge53_Node000002_Node000062" title=" " alt="" coords="2569,114,3195,133,3530,150,3669,160,3775,171,3860,190,3855,190,3774,176,3669,165,3530,155,3195,139,2569,119"/>
 <area shape="rect" id="Node000077" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="3605,182,3763,227"/>
 <area shape="poly" id="edge66_Node000002_Node000077" title=" " alt="" coords="2569,113,2987,130,3246,147,3506,171,3608,188,3602,188,3505,176,3246,152,2987,136,2569,119"/>
-<area shape="rect" id="Node000086" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2957,182,3102,227"/>
-<area shape="poly" id="edge71_Node000002_Node000086" title=" " alt="" coords="2547,126,2858,171,2959,190,2954,190,2857,176,2547,131"/>
-<area shape="rect" id="Node000093" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4911,182,5084,227"/>
-<area shape="poly" id="edge75_Node000002_Node000093" title=" " alt="" coords="2569,112,3103,118,3826,130,4503,147,4750,158,4896,171,4935,182,4930,181,4896,176,4750,164,4503,153,3826,135,3103,123,2569,117"/>
-<area shape="rect" id="Node000095" href="$CD__KDParticleMerge_8H.html" title="Declaration of distributed, MPI&#45;safe whole&#45;patch kd&#45;tree super&#45;particle merge algorithms." alt="" coords="4049,182,4199,227"/>
-<area shape="poly" id="edge78_Node000002_Node000095" title=" " alt="" coords="2568,111,2899,113,3322,122,3735,140,3906,154,4037,171,4070,182,4065,181,4035,176,3906,159,3735,145,3322,127,2899,119,2569,116"/>
-<area shape="rect" id="Node000098" href="$CD__NearestNeighborParticleMergeImplem_8H.html" title="Implementation of CD_NearestNeighborParticleMerge.H." alt="" coords="4224,174,4451,235"/>
-<area shape="poly" id="edge79_Node000002_Node000098" title=" " alt="" coords="2569,112,2931,117,3405,127,3871,145,4064,157,4211,171,4226,176,4221,176,4210,176,4064,162,3870,150,3405,132,2931,122,2569,117"/>
-<area shape="rect" id="Node000100" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="4484,182,4668,227"/>
-<area shape="poly" id="edge80_Node000002_Node000100" title=" " alt="" coords="2569,111,2978,113,3525,121,4067,140,4292,153,4463,171,4505,182,4500,181,4462,176,4292,159,4067,145,3525,127,2978,118,2569,116"/>
-<area shape="rect" id="Node000110" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="4697,182,4884,227"/>
-<area shape="poly" id="edge82_Node000002_Node000110" title=" " alt="" coords="2569,110,3018,111,3628,118,3942,125,4236,136,4489,151,4680,171,4722,182,4717,182,4680,176,4488,157,4236,142,3942,131,3628,123,3018,116,2569,115"/>
-<area shape="rect" id="Node000112" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3301,182,3494,227"/>
-<area shape="poly" id="edge86_Node000002_Node000112" title=" " alt="" coords="2569,122,3114,171,3303,193,3298,193,3113,176,2569,127"/>
+<area shape="rect" id="Node000088" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2957,182,3102,227"/>
+<area shape="poly" id="edge71_Node000002_Node000088" title=" " alt="" coords="2547,126,2858,171,2959,190,2954,190,2857,176,2547,131"/>
+<area shape="rect" id="Node000095" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4911,182,5084,227"/>
+<area shape="poly" id="edge75_Node000002_Node000095" title=" " alt="" coords="2569,112,3103,118,3826,130,4503,147,4750,158,4896,171,4935,182,4930,181,4896,176,4750,164,4503,153,3826,135,3103,123,2569,117"/>
+<area shape="rect" id="Node000097" href="$CD__KDParticleMerge_8H.html" title="Declaration of distributed, MPI&#45;safe whole&#45;patch kd&#45;tree super&#45;particle merge algorithms." alt="" coords="4049,182,4199,227"/>
+<area shape="poly" id="edge78_Node000002_Node000097" title=" " alt="" coords="2568,111,2899,113,3322,122,3735,140,3906,154,4037,171,4070,182,4065,181,4035,176,3906,159,3735,145,3322,127,2899,119,2569,116"/>
+<area shape="rect" id="Node000100" href="$CD__NearestNeighborParticleMergeImplem_8H.html" title="Implementation of CD_NearestNeighborParticleMerge.H." alt="" coords="4224,174,4451,235"/>
+<area shape="poly" id="edge79_Node000002_Node000100" title=" " alt="" coords="2569,112,2931,117,3405,127,3871,145,4064,157,4211,171,4226,176,4221,176,4210,176,4064,162,3870,150,3405,132,2931,122,2569,117"/>
+<area shape="rect" id="Node000102" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="4484,182,4668,227"/>
+<area shape="poly" id="edge80_Node000002_Node000102" title=" " alt="" coords="2569,111,2978,113,3525,121,4067,140,4292,153,4463,171,4505,182,4500,181,4462,176,4292,159,4067,145,3525,127,2978,118,2569,116"/>
+<area shape="rect" id="Node000112" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="4697,182,4884,227"/>
+<area shape="poly" id="edge82_Node000002_Node000112" title=" " alt="" coords="2569,110,3018,111,3628,118,3942,125,4236,136,4489,151,4680,171,4722,182,4717,182,4680,176,4488,157,4236,142,3942,131,3628,123,3018,116,2569,115"/>
+<area shape="rect" id="Node000114" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3301,182,3494,227"/>
+<area shape="poly" id="edge86_Node000002_Node000114" title=" " alt="" coords="2569,122,3114,171,3303,193,3298,193,3113,176,2569,127"/>
 <area shape="rect" id="Node000004" href="$CD__AdvectionDiffusionTagger_8cpp.html" title="Implementation of CD_AdvectionDiffusionTagger.H." alt="" coords="2144,376,2387,421"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2281,341,2272,378,2269,374,2277,345"/>
 <area shape="rect" id="Node000006" href="$CD__BrownianWalkerTagger_8cpp.html" title="Implementation of CD_BrownianWalkerTagger.H." alt="" coords="1613,376,1838,421"/>
@@ -126,14 +126,14 @@
 <area shape="poly" id="edge68_Node000077_Node000044" title=" " alt="" coords="3639,235,3562,285,3560,280,3634,236"/>
 <area shape="poly" id="edge70_Node000077_Node000047" title=" " alt="" coords="3703,239,3715,284,3713,308,3705,329,3688,350,3667,365,3619,386,3618,381,3664,361,3684,346,3700,327,3708,307,3709,285,3700,243"/>
 <area shape="poly" id="edge69_Node000077_Node000065" title=" " alt="" coords="3764,229,3778,233,3890,258,4003,281,4017,286,4012,286,4002,286,3889,264,3777,238,3764,234"/>
-<area shape="poly" id="edge73_Node000086_Node000005" title=" " alt="" coords="2939,223,2858,238,2604,260,2405,268,2207,272,1952,286,1839,296,1838,291,1952,281,2207,267,2405,262,2603,255,2857,233,2944,222"/>
-<area shape="poly" id="edge74_Node000086_Node000047" title=" " alt="" coords="3116,213,3229,237,3288,256,3345,281,3361,292,3372,303,3382,314,3396,326,3457,358,3516,384,3511,384,3455,363,3393,330,3378,318,3368,307,3358,296,3343,286,3286,261,3227,242,3116,218"/>
-<area shape="poly" id="edge72_Node000086_Node000063" title=" " alt="" coords="3117,213,3774,291,3769,292,3117,219"/>
-<area shape="poly" id="edge76_Node000093_Node000070" title=" " alt="" coords="5063,232,5092,254,5114,282,5122,306,5114,329,5090,358,5058,378,5057,373,5086,354,5110,327,5116,306,5110,285,5089,258,5062,237"/>
-<area shape="poly" id="edge77_Node000093_Node000071" title=" " alt="" coords="4999,240,4999,285,4995,281,4996,244"/>
-<area shape="poly" id="edge81_Node000100_Node000072" title=" " alt="" coords="4603,236,4640,284,4635,282,4601,241"/>
-<area shape="poly" id="edge83_Node000110_Node000007" title=" " alt="" coords="4801,240,4803,288,4797,311,4783,330,3938,361,2808,397,2808,392,3938,356,4780,326,4792,308,4798,287,4798,244"/>
-<area shape="poly" id="edge85_Node000110_Node000047" title=" " alt="" coords="4817,238,4830,261,4838,285,4838,309,4827,330,4810,338,4779,345,4675,358,4359,377,3990,390,3683,397,3683,392,3990,385,4358,372,4675,352,4778,340,4809,333,4823,326,4833,307,4833,286,4825,263,4815,242"/>
-<area shape="poly" id="edge84_Node000110_Node000065" title=" " alt="" coords="4704,230,4680,238,4557,257,4461,266,4364,273,4240,286,4178,295,4177,289,4240,281,4364,268,4460,261,4557,252,4680,233,4699,231"/>
-<area shape="poly" id="edge87_Node000112_Node000044" title=" " alt="" coords="3438,234,3501,284,3496,282,3437,239"/>
+<area shape="poly" id="edge73_Node000088_Node000005" title=" " alt="" coords="2939,223,2858,238,2604,260,2405,268,2207,272,1952,286,1839,296,1838,291,1952,281,2207,267,2405,262,2603,255,2857,233,2944,222"/>
+<area shape="poly" id="edge74_Node000088_Node000047" title=" " alt="" coords="3116,213,3229,237,3288,256,3345,281,3361,292,3372,303,3382,314,3396,326,3457,358,3516,384,3511,384,3455,363,3393,330,3378,318,3368,307,3358,296,3343,286,3286,261,3227,242,3116,218"/>
+<area shape="poly" id="edge72_Node000088_Node000063" title=" " alt="" coords="3117,213,3774,291,3769,292,3117,219"/>
+<area shape="poly" id="edge76_Node000095_Node000070" title=" " alt="" coords="5063,232,5092,254,5114,282,5122,306,5114,329,5090,358,5058,378,5057,373,5086,354,5110,327,5116,306,5110,285,5089,258,5062,237"/>
+<area shape="poly" id="edge77_Node000095_Node000071" title=" " alt="" coords="4999,240,4999,285,4995,281,4996,244"/>
+<area shape="poly" id="edge81_Node000102_Node000072" title=" " alt="" coords="4603,236,4640,284,4635,282,4601,241"/>
+<area shape="poly" id="edge83_Node000112_Node000007" title=" " alt="" coords="4801,240,4803,288,4797,311,4783,330,3938,361,2808,397,2808,392,3938,356,4780,326,4792,308,4798,287,4798,244"/>
+<area shape="poly" id="edge85_Node000112_Node000047" title=" " alt="" coords="4817,238,4830,261,4838,285,4838,309,4827,330,4810,338,4779,345,4675,358,4359,377,3990,390,3683,397,3683,392,3990,385,4358,372,4675,352,4778,340,4809,333,4823,326,4833,307,4833,286,4825,263,4815,242"/>
+<area shape="poly" id="edge84_Node000112_Node000065" title=" " alt="" coords="4704,230,4680,238,4557,257,4461,266,4364,273,4240,286,4178,295,4177,289,4240,281,4364,268,4460,261,4557,252,4680,233,4699,231"/>
+<area shape="poly" id="edge87_Node000114_Node000044" title=" " alt="" coords="3438,234,3501,284,3496,282,3437,239"/>
 </map>

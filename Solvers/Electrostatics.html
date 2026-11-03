@@ -116,12 +116,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#fieldsolvermg">FieldSolverMG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Solver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Limitations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#frequency-dependent-permittivity">Frequency dependent permittivity</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#convolution-approach">Convolution approach</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auxiliary-differential-equation">Auxiliary differential equation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id2">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Limitations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-application-s">Example application(s)</a></li>
 </ul>
 </li>
@@ -206,7 +212,9 @@ The code for the electrostatics solver is given in <code class="file docutils li
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
 <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
 <p>Note that in order to separate the electrostatic solver interface from the implementation, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is a pure class without knowledge of numerical discretizations.
-There are two subclasses, which discretize the problem in the same way but solve it differently: <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a> solves it with geometric multigrid, and <a class="reference internal" href="#chap-fieldsolveramg"><span class="std std-ref">FieldSolverAMG</span></a> assembles it as a matrix and solves it with algebraic multigrid from PETSc.</p>
+There are two subclasses, which discretize the problem in the same way but solve it differently: <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a> solves it with geometric multigrid, and <a class="reference internal" href="#chap-fieldsolveramg"><span class="std std-ref">FieldSolverAMG</span></a> assembles it as a matrix and solves it with algebraic multigrid from PETSc.
+<a class="reference internal" href="#chap-fieldsolvermg"><span class="std std-ref">FieldSolverMG</span></a> combines the two: it solves with geometric multigrid, and falls back to algebraic multigrid when that fails.
+It is the default field solver of the time steppers in <code class="file docutils literal notranslate"><span class="pre">/Physics</span></code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classFieldSolver.html">FieldSolver C++ API</a> for the complete interface.</p>
@@ -539,8 +547,8 @@ For further details on the spatial discretization, see <a class="reference inter
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
 # FieldSolverGMG class options
 # ====================================================================================================
@@ -617,10 +625,12 @@ If this flag is set to <code class="docutils literal notranslate"><span class="p
 </section>
 <section id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
-<p>The user may plot the potential, the space charge, the electric, and the GMG residue as follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+<p>The user may plot the potential, the space charge, the electric field, and the residual as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 </pre></div>
 </div>
+<p>The remaining variables are the permittivity (<code class="docutils literal notranslate"><span class="pre">perm</span></code>), the surface charge (<code class="docutils literal notranslate"><span class="pre">sigma</span></code>), and the electric field in the solid phase (<code class="docutils literal notranslate"><span class="pre">Esol</span></code>).
+A name that is not in this list aborts the run.</p>
 </section>
 <section id="saturation-charge-bc">
 <span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading"></a></h3>
@@ -662,8 +672,8 @@ The matrix is still not symmetric: the coarse-fine interpolation stencils and th
 </section>
 <section id="id1">
 <h3>Solver configuration<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-number">Listing 27 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> class.</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-number">Listing 27 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> class.</span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
 # FieldSolverAMG class options
 # ====================================================================================================
@@ -738,6 +748,119 @@ Options without a value, e.g. <code class="docutils literal notranslate"><span c
 </ul>
 </section>
 </section>
+<section id="fieldsolvermg">
+<span id="chap-fieldsolvermg"></span><h2>FieldSolverMG<a class="headerlink" href="#fieldsolvermg" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> solves <a class="reference internal" href="#equation-poisson">Eq. 7</a> with geometric multigrid, as <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> does, and repeats the solve with algebraic multigrid, as <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> does, when geometric multigrid fails to converge.
+It is used like any other <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>, e.g. as <code class="docutils literal notranslate"><span class="pre">FieldStepper&lt;FieldSolverMG&gt;</span></code>, and is the default field solver of the <code class="docutils literal notranslate"><span class="pre">ItoKMC</span></code> and <code class="docutils literal notranslate"><span class="pre">DischargeInception</span></code> time steppers, and of the application setup scripts in <code class="file docutils literal notranslate"><span class="pre">/Physics</span></code>.
+The algebraic multigrid fallback requires a build with <code class="docutils literal notranslate"><span class="pre">USE_PETSC</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> (see <a class="reference internal" href="../Base/Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>).
+Without PETSc, <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> solves with geometric multigrid only.</p>
+<section id="how-it-works">
+<h3>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> holds a <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> and, in PETSc builds, a <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code>.
+The two solvers share the data of <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> (the potential, the space and surface charge, the electric field, the residue and the permittivities), and they read their options from the <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> block of the input file.
+The boundary conditions, the interface condition, the plot variables and the embedded-boundary stencils are therefore given once, and agree in the two solvers.</p>
+<p>Each solve goes through the geometric multigrid solver chain first (<code class="docutils literal notranslate"><span class="pre">gmg_solver</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">bicgstab</span></code>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridtuning"><span class="std std-ref">Tuning multigrid performance</span></a>).
+If the chain does not converge, the potential is reset to the initial guess of the solve, and the solve is repeated with algebraic multigrid.
+The algebraic multigrid solver is only set up the first time it is needed after a regrid, so a simulation in which geometric multigrid always converges does not pay for it.
+Permittivities that were given with <code class="docutils literal notranslate"><span class="pre">setSolverPermittivities</span></code>, e.g. by a semi-implicit time stepper, are passed on to it when it is set up.</p>
+<p>Once algebraic multigrid has rescued a solve, the following solves go straight to it, and geometric multigrid is tried again every <code class="docutils literal notranslate"><span class="pre">amg_retry_interval</span></code> solves.
+If geometric multigrid then converges, <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> returns to it.
+The switches are printed to the <code class="docutils literal notranslate"><span class="pre">pout</span></code> files, e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMG::solve -- geometric multigrid did not converge; falling back to algebraic multigrid
+FieldSolverMG::solve -- geometric multigrid converged again
+</pre></div>
+</div>
+<p>Geometric and algebraic multigrid assemble the operator differently, so a solve that falls back gives a slightly different discrete solution, within the solver tolerances.</p>
+</section>
+<section id="id2">
+<h3>Solver configuration<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-number">Listing 28 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> class.</span><a class="headerlink" href="#id7" title="Permalink to this code"></a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# FieldSolverMG class options
+# ====================================================================================================
+FieldSolverMG.verbosity             = -1               ## Class verbosity
+FieldSolverMG.jump_bc               = natural          ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverMG.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc_order              = 2                ## EB stencil order on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.bc_weight             = 2                ## EB stencil least-squares weight on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+FieldSolverMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
+
+# Fallback to algebraic multigrid (PETSc builds only; ignored with a warning otherwise)
+FieldSolverMG.amg_fallback           = true    ## Fall back to PETSc AMG when the GMG solver chain fails
+FieldSolverMG.amg_retry_interval     = 10      ## While latched to AMG, re-try GMG every N solves (1 = always try GMG first)
+
+# Geometric multigrid stage (always active)
+FieldSolverMG.gmg_solver                    = gmg bicgstab    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverMG.gmg_krylov_eps                = 1.E-10          ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverMG.gmg_krylov_max_iter           = 50              ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverMG.gmg_krylov_restart            = 30              ## GMRES restart length (gmres only)
+FieldSolverMG.gmg_krylov_vcycles            = 1               ## V-cycles per Krylov preconditioner application
+FieldSolverMG.gmg_krylov_retry_interval     = 10              ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+FieldSolverMG.gmg_krylov_reprobe_iters      = 0               ## Re-probe GMG early when the Krylov fallback converges in &lt;= this many iterations (0 = disabled)
+FieldSolverMG.gmg_verbosity                 = -1              ## GMG verbosity (also used by the Krylov solvers)
+FieldSolverMG.gmg_cycle                     = vcycle          ## Cycle type. 'vcycle' or 'wcycle'
+FieldSolverMG.gmg_smoother                  = ras 4           ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev &lt;order&gt; &lt;eig_ratio&gt;', or 'ras &lt;inner_sweeps&gt;'
+FieldSolverMG.gmg_relax_factor              = 1.0             ## Adjustable SOR factor
+FieldSolverMG.gmg_pre_smooth                = 3               ## Number of relaxations in downsweep (each is &lt;inner_sweeps&gt; sweeps for 'ras')
+FieldSolverMG.gmg_post_smooth               = 3               ## Number of relaxations in upsweep (each is &lt;inner_sweeps&gt; sweeps for 'ras')
+FieldSolverMG.gmg_bott_smooth               = 0               ## Number of relaxations on the bottom level before the bottom solver
+FieldSolverMG.gmg_precond_smooth            = 4               ## Relaxations in the bottom Krylov solver's preconditioner (bicgstab/gmres bottom only)
+FieldSolverMG.gmg_min_iter                  = 5               ## Minimum number of iterations
+FieldSolverMG.gmg_max_iter                  = 50              ## Maximum number of iterations
+FieldSolverMG.gmg_exit_tol                  = 1.E-10          ## Residue tolerance
+FieldSolverMG.gmg_exit_hang                 = 0.2             ## Solver hang
+FieldSolverMG.gmg_min_cells                 = 16              ## Bottom drop
+FieldSolverMG.gmg_drop_order                = 0               ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMG.gmg_reduce_order              = true            ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverMG.gmg_bottom_solver             = simple 16       ## Bottom solver type. 'simple &lt;relaxations&gt;', 'bicgstab', or 'gmres'
+FieldSolverMG.gmg_bottom_verbosity          = -1              ## Bottom solver verbosity.
+FieldSolverMG.gmg_reflux_free               = false           ## If true, use reflux-free AMR operator
+
+# Algebraic multigrid stage (PETSc builds only; built on the first fallback)
+FieldSolverMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'
+FieldSolverMG.ksp_gmres_restart              = 30           ## Restart length of GMRES and FGMRES
+FieldSolverMG.pc_type                        = gamg         ## PETSc preconditioner, e.g. 'gamg', 'hypre'
+FieldSolverMG.amg_smoother_ksp               = chebyshev    ## Multigrid level smoother: PETSc KSP type, e.g. 'chebyshev', 'richardson'
+FieldSolverMG.amg_smoother_pc                = sor          ## Multigrid level smoother: PETSc PC type, e.g. 'sor', 'jacobi'
+FieldSolverMG.amg_smoother_its               = 2            ## Multigrid level smoother: number of smoothing steps
+FieldSolverMG.gamg_threshold                 = 0.02         ## GAMG graph threshold for dropping weak connections (negative keeps all)
+FieldSolverMG.gamg_aggressive_coarsening     = 1            ## GAMG: number of levels coarsened aggressively (0 = none)
+FieldSolverMG.ksp_rtol                       = 1.E-10       ## Relative residual tolerance, in the KSP's norm (preconditioned for left-preconditioned KSPs)
+FieldSolverMG.ksp_atol                       = 1.E-50       ## Absolute residual tolerance
+FieldSolverMG.ksp_max_iter                   = 200          ## Maximum number of Krylov iterations
+FieldSolverMG.petsc_verbosity                = -1           ## PETSc solve verbosity: residual per iteration (1), true residual (2), solver view (3)
+</pre></div>
+</div>
+</div>
+<p>The domain boundary conditions (<code class="docutils literal notranslate"><span class="pre">bc.coord.side</span></code>), <code class="docutils literal notranslate"><span class="pre">jump_bc</span></code>, <code class="docutils literal notranslate"><span class="pre">kappa_source</span></code>, <code class="docutils literal notranslate"><span class="pre">plt_vars</span></code> and <code class="docutils literal notranslate"><span class="pre">use_regrid_slopes</span></code> are as for <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>.
+The remaining options are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bc_order</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_weight</span></code> are the order and the least-squares weight of the embedded-boundary stencils on electrodes and on dielectric interfaces, in both solvers. They replace <code class="docutils literal notranslate"><span class="pre">gmg_bc_order</span></code>, <code class="docutils literal notranslate"><span class="pre">gmg_bc_weight</span></code>, <code class="docutils literal notranslate"><span class="pre">gmg_jump_order</span></code> and <code class="docutils literal notranslate"><span class="pre">gmg_jump_weight</span></code> of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, and <code class="docutils literal notranslate"><span class="pre">eb_order</span></code> and <code class="docutils literal notranslate"><span class="pre">eb_weight</span></code> of <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amg_fallback</span></code> turns the algebraic multigrid fallback on or off. It is ignored, with a message in the <code class="docutils literal notranslate"><span class="pre">pout</span></code> files, in builds without PETSc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amg_retry_interval</span></code> is the number of solves between each time geometric multigrid is tried again, after algebraic multigrid rescued a solve. With 1, every solve tries geometric multigrid first.</p></li>
+<li><p>The options that start with <code class="docutils literal notranslate"><span class="pre">gmg_</span></code> configure geometric multigrid. They are the options of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, where <code class="docutils literal notranslate"><span class="pre">solver</span></code> and <code class="docutils literal notranslate"><span class="pre">krylov_*</span></code> are named <code class="docutils literal notranslate"><span class="pre">gmg_solver</span></code> and <code class="docutils literal notranslate"><span class="pre">gmg_krylov_*</span></code>. See <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridtuning"><span class="std std-ref">Tuning multigrid performance</span></a>. <code class="docutils literal notranslate"><span class="pre">gmg_use_default_settings</span></code> is not available, since it would replace the stencil and smoother settings.</p></li>
+<li><p>The other options configure algebraic multigrid, and are those of <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> (see <a class="reference internal" href="#chap-fieldsolveramg"><span class="std std-ref">FieldSolverAMG</span></a>).</p></li>
+</ul>
+<p>The defaults are chosen for robustness rather than speed on simple geometries: second-order embedded-boundary stencils, the <code class="docutils literal notranslate"><span class="pre">ras</span> <span class="pre">4</span></code> smoother, a GMG-preconditioned BiCGStab solver after the plain multigrid solver, and order-1 stencils on the coarsened multigrid levels (<code class="docutils literal notranslate"><span class="pre">gmg_reduce_order</span></code>).</p>
+</section>
+<section id="id3">
+<h3>Limitations<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<p>The fallback is skipped, with a message in the <code class="docutils literal notranslate"><span class="pre">pout</span></code> files when geometric multigrid fails, when algebraic multigrid does not support the problem:</p>
+<ul class="simple">
+<li><p>when the domain is periodic, or</p></li>
+<li><p>when <code class="docutils literal notranslate"><span class="pre">bc_order</span></code> exceeds the coarse-fine interpolation radius (<code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code>).</p></li>
+</ul>
+<p>In PETSc builds, a grid with multi-valued cells aborts when the PETSc row map is set up, whichever field solver is used.</p>
+</section>
+</section>
 <section id="frequency-dependent-permittivity">
 <h2>Frequency dependent permittivity<a class="headerlink" href="#frequency-dependent-permittivity" title="Permalink to this heading"></a></h2>
 <p>Frequency-dependent permittivities are fundamentally supported by the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> elliptic discretization but none of the solvers implement it.
@@ -792,8 +915,8 @@ This depends both on the order of the ADE, as well as its discretization.
 Normally, the ADE is a low-order PDE and a few terms are sufficient.</p>
 </section>
 </section>
-<section id="id2">
-<h2>Limitations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<section id="id4">
+<h2>Limitations<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>There is currently a bug where having a dielectric interface align <em>completely</em> with a grid face will cause the cell to be identified as an electrode EB.

@@ -190,7 +190,8 @@ var menudata={children:[
 {text:"t",url:"functions_enum.html#index_t"},
 {text:"u",url:"functions_enum.html#index_u"},
 {text:"w",url:"functions_enum.html#index_w"}]},
-{text:"Enumerator",url:"functions_eval.html"}]}]},
+{text:"Enumerator",url:"functions_eval.html"},
+{text:"Related Symbols",url:"functions_rela.html"}]}]},
 {text:"Files",url:"files.html",children:[
 {text:"File List",url:"files.html"},
 {text:"File Members",url:"globals.html",children:[

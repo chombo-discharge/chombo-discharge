@@ -22,16 +22,16 @@
 <area shape="poly" id="edge52_Node000001_Node000023" title=" " alt="" coords="3520,30,3352,36,3121,47,2860,67,2727,82,2597,101,2495,119,2416,137,2240,193,2078,254,1947,311,1946,306,2076,249,2238,188,2415,132,2494,114,2596,95,2726,77,2859,62,3121,41,3351,31,3525,29"/>
 <area shape="rect" id="Node000025" href="$CD__MFHelmholtzJumpBC_8H.html" title="Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code..." alt="" coords="742,98,923,143"/>
 <area shape="poly" id="edge25_Node000001_Node000025" title=" " alt="" coords="3522,34,923,119,923,113,3523,29"/>
-<area shape="rect" id="Node000072" href="$CD__MFHelmholtzJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzJumpBC.H." alt="" coords="2440,199,2633,244"/>
-<area shape="poly" id="edge51_Node000001_Node000072" title=" " alt="" coords="3520,35,3280,58,3133,77,2986,101,2881,124,2776,150,2604,201,2603,196,2775,145,2879,118,2985,95,3132,71,3280,53,3525,34"/>
-<area shape="rect" id="Node000076" href="$CD__PetscHelmholtzEBStencils_8H.html" title="Declaration of the shared EB face stencils for the EB and jump boundary conditions of PetscHelmholtzO..." alt="" coords="3386,98,3599,143"/>
-<area shape="poly" id="edge53_Node000001_Node000076" title=" " alt="" coords="3573,59,3522,100,3520,95,3568,60"/>
-<area shape="rect" id="Node000096" href="$CD__DataOps_8cpp.html" title="Implementation of CD_DataOps.H." alt="" coords="5104,98,5247,143"/>
-<area shape="poly" id="edge57_Node000001_Node000096" title=" " alt="" coords="3697,28,3993,36,4395,49,4798,69,4965,81,5092,95,5106,100,5100,100,5091,101,4964,87,4797,74,4395,54,3992,41,3697,33"/>
-<area shape="rect" id="Node000097" href="$CD__LeastSquares_8H.html" title="Agglomeration of various routines that use least squares computations." alt="" coords="3220,98,3363,143"/>
-<area shape="poly" id="edge58_Node000001_Node000097" title=" " alt="" coords="3526,53,3364,101,3363,96,3520,54"/>
-<area shape="rect" id="Node000102" href="$CD__VofUtils_8cpp.html" title="Implementation of CD_VofUtils.H." alt="" coords="5272,98,5415,143"/>
-<area shape="poly" id="edge71_Node000001_Node000102" title=" " alt="" coords="3697,28,4023,34,4474,47,4928,67,5117,80,5260,95,5274,100,5268,100,5259,101,5116,85,4927,72,4474,52,4023,39,3697,33"/>
+<area shape="rect" id="Node000074" href="$CD__MFHelmholtzJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzJumpBC.H." alt="" coords="2440,199,2633,244"/>
+<area shape="poly" id="edge51_Node000001_Node000074" title=" " alt="" coords="3520,35,3280,58,3133,77,2986,101,2881,124,2776,150,2604,201,2603,196,2775,145,2879,118,2985,95,3132,71,3280,53,3525,34"/>
+<area shape="rect" id="Node000078" href="$CD__PetscHelmholtzEBStencils_8H.html" title="Declaration of the shared EB face stencils for the EB and jump boundary conditions of PetscHelmholtzO..." alt="" coords="3386,98,3599,143"/>
+<area shape="poly" id="edge53_Node000001_Node000078" title=" " alt="" coords="3573,59,3522,100,3520,95,3568,60"/>
+<area shape="rect" id="Node000098" href="$CD__DataOps_8cpp.html" title="Implementation of CD_DataOps.H." alt="" coords="5104,98,5247,143"/>
+<area shape="poly" id="edge57_Node000001_Node000098" title=" " alt="" coords="3697,28,3993,36,4395,49,4798,69,4965,81,5092,95,5106,100,5100,100,5091,101,4964,87,4797,74,4395,54,3992,41,3697,33"/>
+<area shape="rect" id="Node000099" href="$CD__LeastSquares_8H.html" title="Agglomeration of various routines that use least squares computations." alt="" coords="3220,98,3363,143"/>
+<area shape="poly" id="edge58_Node000001_Node000099" title=" " alt="" coords="3526,53,3364,101,3363,96,3520,54"/>
+<area shape="rect" id="Node000104" href="$CD__VofUtils_8cpp.html" title="Implementation of CD_VofUtils.H." alt="" coords="5272,98,5415,143"/>
+<area shape="poly" id="edge71_Node000001_Node000104" title=" " alt="" coords="3697,28,4023,34,4474,47,4928,67,5117,80,5260,95,5274,100,5268,100,5259,101,5116,85,4927,72,4474,52,4023,39,3697,33"/>
 <area shape="rect" id="Node000010" href="$CD__EBHelmholtzLarsenEBBCFactory_8cpp.html" title="Implementation of CD_EBHelmholtzLarsenEBBCFactory.H." alt="" coords="4920,199,5206,244"/>
 <area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="5009,152,5048,200,5043,198,5007,157"/>
 <area shape="rect" id="Node000012" href="$CD__MFHelmholtzElectrostaticEBBC_8H.html" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="2276,300,2496,362"/>
@@ -67,11 +67,11 @@
 <area shape="poly" id="edge29_Node000025_Node000028" title=" " alt="" coords="834,156,835,200,830,197,831,160"/>
 <area shape="rect" id="Node000034" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="244,309,392,354"/>
 <area shape="poly" id="edge50_Node000025_Node000034" title=" " alt="" coords="766,151,372,311,370,306,765,146"/>
-<area shape="poly" id="edge43_Node000025_Node000072" title=" " alt="" coords="938,121,1261,127,1691,139,2117,159,2295,172,2429,188,2469,199,2463,198,2428,193,2294,178,2117,164,1691,144,1260,132,938,126"/>
-<area shape="rect" id="Node000073" href="$CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="260,199,485,244"/>
-<area shape="poly" id="edge44_Node000025_Node000073" title=" " alt="" coords="725,145,474,201,473,196,730,143"/>
-<area shape="rect" id="Node000075" href="$CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="5,199,236,244"/>
-<area shape="poly" id="edge48_Node000025_Node000075" title=" " alt="" coords="725,131,501,156,368,173,236,193,197,201,194,196,235,188,367,167,500,150,730,129"/>
+<area shape="poly" id="edge43_Node000025_Node000074" title=" " alt="" coords="938,121,1261,127,1691,139,2117,159,2295,172,2429,188,2469,199,2463,198,2428,193,2294,178,2117,164,1691,144,1260,132,938,126"/>
+<area shape="rect" id="Node000075" href="$CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="260,199,485,244"/>
+<area shape="poly" id="edge44_Node000025_Node000075" title=" " alt="" coords="725,145,474,201,473,196,730,143"/>
+<area shape="rect" id="Node000077" href="$CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="5,199,236,244"/>
+<area shape="poly" id="edge48_Node000025_Node000077" title=" " alt="" coords="725,131,501,156,368,173,236,193,197,201,194,196,235,188,367,167,500,150,730,129"/>
 <area shape="rect" id="Node000027" href="$CD__MFHelmholtzSaturationChargeJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H." alt="" coords="1523,300,1774,362"/>
 <area shape="poly" id="edge27_Node000026_Node000027" title=" " alt="" coords="1462,256,1573,300,1567,300,1461,261"/>
 <area shape="rect" id="Node000029" href="$CD__MFHelmholtzElectrostaticEBBCFactory_8H.html" title="Declaration of an electrostatic boundary condition factory class for MFHelmholtzOp." alt="" coords="466,300,685,362"/>
@@ -83,41 +83,41 @@
 <area shape="rect" id="Node000033" href="$CD__MFHelmholtzNeumannEBBCFactory_8H.html" title="Declaration of a Neumann boundary condition factory class for MFHelmholtzOp." alt="" coords="1227,309,1499,354"/>
 <area shape="poly" id="edge36_Node000028_Node000033" title=" " alt="" coords="952,244,1258,308,1253,308,952,250"/>
 <area shape="poly" id="edge38_Node000028_Node000034" title=" " alt="" coords="710,241,568,269,410,303,382,311,381,306,409,298,567,263,715,240"/>
-<area shape="rect" id="Node000068" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="222,418,414,463"/>
-<area shape="poly" id="edge40_Node000028_Node000068" title=" " alt="" coords="710,239,565,268,500,284,455,303,438,316,429,330,419,346,405,364,345,420,342,416,401,360,415,343,424,327,435,312,452,298,498,279,564,262,715,238"/>
-<area shape="rect" id="Node000071" href="$CD__MFHelmholtzRobinEBBCFactory_8H.html" title="Declaration of a Robin boundary condition factory class for MFHelmholtzOp." alt="" coords="709,309,956,354"/>
-<area shape="poly" id="edge41_Node000028_Node000071" title=" " alt="" coords="834,258,835,310,830,307,831,262"/>
+<area shape="rect" id="Node000070" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="222,418,414,463"/>
+<area shape="poly" id="edge40_Node000028_Node000070" title=" " alt="" coords="710,239,565,268,500,284,455,303,438,316,429,330,419,346,405,364,345,420,342,416,401,360,415,343,424,327,435,312,452,298,498,279,564,262,715,238"/>
+<area shape="rect" id="Node000073" href="$CD__MFHelmholtzRobinEBBCFactory_8H.html" title="Declaration of a Robin boundary condition factory class for MFHelmholtzOp." alt="" coords="709,309,956,354"/>
+<area shape="poly" id="edge41_Node000028_Node000073" title=" " alt="" coords="834,258,835,310,830,307,831,262"/>
 <area shape="poly" id="edge32_Node000029_Node000014" title=" " alt="" coords="700,360,868,386,1033,407,1108,422,1102,421,1032,413,867,391,700,365"/>
 <area shape="rect" id="Node000030" href="$CD__FieldSolverGMG_8cpp.html" title="Implementation of FieldSolverGMG.H." alt="" coords="461,418,644,463"/>
 <area shape="poly" id="edge31_Node000029_Node000030" title=" " alt="" coords="568,375,559,420,555,416,564,379"/>
 <area shape="poly" id="edge34_Node000031_Node000018" title=" " alt="" coords="2718,357,2862,418,2857,417,2717,362"/>
 <area shape="poly" id="edge37_Node000033_Node000022" title=" " alt="" coords="1452,356,1656,418,1651,418,1451,361"/>
-<area shape="poly" id="edge39_Node000034_Node000068" title=" " alt="" coords="320,367,320,419,316,416,316,371"/>
-<area shape="poly" id="edge42_Node000071_Node000024" title=" " alt="" coords="853,365,882,419,877,417,850,370"/>
-<area shape="poly" id="edge45_Node000073_Node000030" title=" " alt="" coords="286,253,259,274,235,302,227,318,224,332,226,346,234,360,463,416,459,420,231,364,221,348,218,332,222,316,230,299,255,270,291,249"/>
-<area shape="poly" id="edge46_Node000073_Node000034" title=" " alt="" coords="356,256,331,310,327,306,352,260"/>
-<area shape="poly" id="edge47_Node000073_Node000068" title=" " alt="" coords="283,251,227,276,204,289,191,302,183,317,180,331,183,345,191,361,203,378,219,393,258,418,252,418,216,397,199,382,186,363,178,346,175,331,178,315,186,299,201,285,225,271,288,248"/>
-<area shape="poly" id="edge49_Node000075_Node000025" title=" " alt="" coords="233,193,259,188,390,168,521,151,744,129,739,131,522,156,391,173,260,193,235,198"/>
-<area shape="rect" id="Node000077" href="$CD__PetscHelmholtzEBBC_8H.html" title="Declaration of a base class for electrode (EB) boundary conditions of PetscHelmholtzOp." alt="" coords="4498,199,4677,244"/>
-<area shape="poly" id="edge54_Node000076_Node000077" title=" " alt="" coords="3614,140,3747,152,3860,157,4052,156,4145,156,4244,159,4356,169,4486,188,4524,199,4519,198,4485,193,4355,174,4244,165,4145,161,4052,161,3860,162,3747,157,3614,146"/>
-<area shape="rect" id="Node000089" href="$CD__PetscHelmholtzEBStencils_8cpp.html" title="Implementation of CD_PetscHelmholtzEBStencils.H." alt="" coords="4248,199,4473,244"/>
-<area shape="poly" id="edge55_Node000076_Node000089" title=" " alt="" coords="3614,140,3789,156,3926,161,4063,168,4236,188,4279,199,4274,198,4235,193,4062,173,3926,166,3789,162,3614,146"/>
-<area shape="rect" id="Node000090" href="$CD__PetscHelmholtzJumpBC_8H.html" title="Declaration of a base class for the interface (jump) conditions of PetscHelmholtzOp." alt="" coords="4702,199,4897,244"/>
-<area shape="poly" id="edge56_Node000076_Node000090" title=" " alt="" coords="3614,140,3778,154,3917,159,4154,156,4268,155,4390,157,4527,167,4689,188,4730,199,4724,198,4688,193,4527,173,4389,163,4268,160,4154,162,3917,165,3778,159,3614,146"/>
-<area shape="poly" id="edge61_Node000097_Node000002" title=" " alt="" coords="3207,138,2933,193,2852,210,2852,204,2932,188,3201,138"/>
-<area shape="poly" id="edge62_Node000097_Node000003" title=" " alt="" coords="3229,149,3112,201,3110,196,3224,150"/>
-<area shape="poly" id="edge63_Node000097_Node000013" title=" " alt="" coords="3291,156,3276,273,3262,328,3253,349,3242,364,3224,376,3202,386,3147,400,3082,407,3011,409,2870,408,2810,408,2762,413,2747,415,2746,410,2761,407,2809,403,2870,402,3011,404,3082,401,3147,395,3201,381,3222,372,3239,360,3249,347,3257,326,3271,272,3287,160"/>
-<area shape="poly" id="edge64_Node000097_Node000017" title=" " alt="" coords="3296,156,3298,251,3295,307,3287,363,3278,393,3266,421,3263,416,3273,391,3282,361,3290,307,3293,251,3292,160"/>
-<area shape="poly" id="edge65_Node000097_Node000019" title=" " alt="" coords="3269,154,3156,311,3153,306,3264,156"/>
-<area shape="poly" id="edge66_Node000097_Node000072" title=" " alt="" coords="3201,127,2953,150,2799,169,2646,193,2611,201,2610,196,2645,188,2799,164,2952,145,3207,126"/>
-<area shape="poly" id="edge67_Node000097_Node000089" title=" " alt="" coords="3378,140,3508,156,3619,164,3808,165,3996,166,4106,173,4236,188,4280,199,4275,198,4235,193,4106,178,3996,171,3808,170,3618,169,3507,162,3378,146"/>
-<area shape="rect" id="Node000098" href="$CD__CellCentroidInterpolation_8cpp.html" title="Implementation of CD_CellCentroidInterpolation.H." alt="" coords="3354,199,3596,244"/>
-<area shape="poly" id="edge59_Node000097_Node000098" title=" " alt="" coords="3345,148,3438,199,3432,198,3344,153"/>
-<area shape="rect" id="Node000099" href="$CD__EBCentroidInterpolation_8cpp.html" title="Implementation of CD_EBCentroidInterpolation.H." alt="" coords="3620,199,3853,244"/>
-<area shape="poly" id="edge60_Node000097_Node000099" title=" " alt="" coords="3378,141,3609,188,3647,199,3641,198,3608,193,3378,146"/>
-<area shape="rect" id="Node000100" href="$CD__LeastSquares_8cpp.html" title="Implementation of CD_LeastSquares.H." alt="" coords="3877,199,4020,244"/>
-<area shape="poly" id="edge68_Node000097_Node000100" title=" " alt="" coords="3378,141,3453,151,3516,156,3624,160,3732,166,3794,174,3866,188,3897,199,3891,198,3865,193,3793,179,3731,171,3624,165,3515,162,3452,156,3378,146"/>
-<area shape="rect" id="Node000101" href="$CD__LeastSquaresImplem_8H.html" title="Implementation of CD_LeastSquares.H." alt="" coords="4044,199,4224,244"/>
-<area shape="poly" id="edge69_Node000097_Node000101" title=" " alt="" coords="3378,143,3474,155,3555,160,3697,162,3840,165,3923,173,4021,188,4058,199,4053,198,4020,193,3923,178,3839,171,3697,167,3555,166,3473,160,3378,148"/>
-<area shape="poly" id="edge70_Node000101_Node000097" title=" " alt="" coords="4062,195,4044,193,3945,178,3860,171,3715,167,3570,165,3485,159,3385,145,3363,141,3363,136,3386,140,3486,153,3570,160,3716,162,3861,165,3945,173,4045,188,4067,195"/>
+<area shape="poly" id="edge39_Node000034_Node000070" title=" " alt="" coords="320,367,320,419,316,416,316,371"/>
+<area shape="poly" id="edge42_Node000073_Node000024" title=" " alt="" coords="853,365,882,419,877,417,850,370"/>
+<area shape="poly" id="edge45_Node000075_Node000030" title=" " alt="" coords="286,253,259,274,235,302,227,318,224,332,226,346,234,360,463,416,459,420,231,364,221,348,218,332,222,316,230,299,255,270,291,249"/>
+<area shape="poly" id="edge46_Node000075_Node000034" title=" " alt="" coords="356,256,331,310,327,306,352,260"/>
+<area shape="poly" id="edge47_Node000075_Node000070" title=" " alt="" coords="283,251,227,276,204,289,191,302,183,317,180,331,183,345,191,361,203,378,219,393,258,418,252,418,216,397,199,382,186,363,178,346,175,331,178,315,186,299,201,285,225,271,288,248"/>
+<area shape="poly" id="edge49_Node000077_Node000025" title=" " alt="" coords="233,193,259,188,390,168,521,151,744,129,739,131,522,156,391,173,260,193,235,198"/>
+<area shape="rect" id="Node000079" href="$CD__PetscHelmholtzEBBC_8H.html" title="Declaration of a base class for electrode (EB) boundary conditions of PetscHelmholtzOp." alt="" coords="4498,199,4677,244"/>
+<area shape="poly" id="edge54_Node000078_Node000079" title=" " alt="" coords="3614,140,3747,152,3860,157,4052,156,4145,156,4244,159,4356,169,4486,188,4524,199,4519,198,4485,193,4355,174,4244,165,4145,161,4052,161,3860,162,3747,157,3614,146"/>
+<area shape="rect" id="Node000091" href="$CD__PetscHelmholtzEBStencils_8cpp.html" title="Implementation of CD_PetscHelmholtzEBStencils.H." alt="" coords="4248,199,4473,244"/>
+<area shape="poly" id="edge55_Node000078_Node000091" title=" " alt="" coords="3614,140,3789,156,3926,161,4063,168,4236,188,4279,199,4274,198,4235,193,4062,173,3926,166,3789,162,3614,146"/>
+<area shape="rect" id="Node000092" href="$CD__PetscHelmholtzJumpBC_8H.html" title="Declaration of a base class for the interface (jump) conditions of PetscHelmholtzOp." alt="" coords="4702,199,4897,244"/>
+<area shape="poly" id="edge56_Node000078_Node000092" title=" " alt="" coords="3614,140,3778,154,3917,159,4154,156,4268,155,4390,157,4527,167,4689,188,4730,199,4724,198,4688,193,4527,173,4389,163,4268,160,4154,162,3917,165,3778,159,3614,146"/>
+<area shape="poly" id="edge61_Node000099_Node000002" title=" " alt="" coords="3207,138,2933,193,2852,210,2852,204,2932,188,3201,138"/>
+<area shape="poly" id="edge62_Node000099_Node000003" title=" " alt="" coords="3229,149,3112,201,3110,196,3224,150"/>
+<area shape="poly" id="edge63_Node000099_Node000013" title=" " alt="" coords="3291,156,3276,273,3262,328,3253,349,3242,364,3224,376,3202,386,3147,400,3082,407,3011,409,2870,408,2810,408,2762,413,2747,415,2746,410,2761,407,2809,403,2870,402,3011,404,3082,401,3147,395,3201,381,3222,372,3239,360,3249,347,3257,326,3271,272,3287,160"/>
+<area shape="poly" id="edge64_Node000099_Node000017" title=" " alt="" coords="3296,156,3298,251,3295,307,3287,363,3278,393,3266,421,3263,416,3273,391,3282,361,3290,307,3293,251,3292,160"/>
+<area shape="poly" id="edge65_Node000099_Node000019" title=" " alt="" coords="3269,154,3156,311,3153,306,3264,156"/>
+<area shape="poly" id="edge66_Node000099_Node000074" title=" " alt="" coords="3201,127,2953,150,2799,169,2646,193,2611,201,2610,196,2645,188,2799,164,2952,145,3207,126"/>
+<area shape="poly" id="edge67_Node000099_Node000091" title=" " alt="" coords="3378,140,3508,156,3619,164,3808,165,3996,166,4106,173,4236,188,4280,199,4275,198,4235,193,4106,178,3996,171,3808,170,3618,169,3507,162,3378,146"/>
+<area shape="rect" id="Node000100" href="$CD__CellCentroidInterpolation_8cpp.html" title="Implementation of CD_CellCentroidInterpolation.H." alt="" coords="3354,199,3596,244"/>
+<area shape="poly" id="edge59_Node000099_Node000100" title=" " alt="" coords="3345,148,3438,199,3432,198,3344,153"/>
+<area shape="rect" id="Node000101" href="$CD__EBCentroidInterpolation_8cpp.html" title="Implementation of CD_EBCentroidInterpolation.H." alt="" coords="3620,199,3853,244"/>
+<area shape="poly" id="edge60_Node000099_Node000101" title=" " alt="" coords="3378,141,3609,188,3647,199,3641,198,3608,193,3378,146"/>
+<area shape="rect" id="Node000102" href="$CD__LeastSquares_8cpp.html" title="Implementation of CD_LeastSquares.H." alt="" coords="3877,199,4020,244"/>
+<area shape="poly" id="edge68_Node000099_Node000102" title=" " alt="" coords="3378,141,3453,151,3516,156,3624,160,3732,166,3794,174,3866,188,3897,199,3891,198,3865,193,3793,179,3731,171,3624,165,3515,162,3452,156,3378,146"/>
+<area shape="rect" id="Node000103" href="$CD__LeastSquaresImplem_8H.html" title="Implementation of CD_LeastSquares.H." alt="" coords="4044,199,4224,244"/>
+<area shape="poly" id="edge69_Node000099_Node000103" title=" " alt="" coords="3378,143,3474,155,3555,160,3697,162,3840,165,3923,173,4021,188,4058,199,4053,198,4020,193,3923,178,3839,171,3697,167,3555,166,3473,160,3378,148"/>
+<area shape="poly" id="edge70_Node000103_Node000099" title=" " alt="" coords="4062,195,4044,193,3945,178,3860,171,3715,167,3570,165,3485,159,3385,145,3363,141,3363,136,3386,140,3486,153,3570,160,3716,162,3861,165,3945,173,4045,188,4067,195"/>
 </map>

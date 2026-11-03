@@ -104,7 +104,7 @@ $(function() {
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="code" href="CD__FieldSolver_8H.html">CD_FieldSolver.H</a>&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;<a class="code" href="CD__ItoSolver_8H.html">CD_ItoSolver.H</a>&gt;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="code" href="CD__CdrCTU_8H.html">CD_CdrCTU.H</a>&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="code" href="CD__FieldSolverGMG_8H.html">CD_FieldSolverGMG.H</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="code" href="CD__FieldSolverMG_8H.html">CD_FieldSolverMG.H</a>&gt;</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="code" href="CD__SurfaceODESolver_8H.html">CD_SurfaceODESolver.H</a>&gt;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
@@ -128,7 +128,7 @@ $(function() {
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
 </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> I = ItoSolver, <span class="keyword">typename</span> C = CdrCTU, <span class="keyword">typename</span> R = McPhoto, <span class="keyword">typename</span> F = FieldSolverGMG&gt;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> I = ItoSolver, <span class="keyword">typename</span> C = CdrCTU, <span class="keyword">typename</span> R = McPhoto, <span class="keyword">typename</span> F = FieldSolverMG&gt;</div>
 <div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">   65</a></span><span class="keyword">class </span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a62a5890fbc4a9f0b60838f595dc3565f">ItoKMCStepper</a> : <span class="keyword">public</span> <a class="code hl_function" href="classTimeStepper.html#a88c17d2b22882ca947e83c25e903be1d">TimeStepper</a></div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
@@ -136,7 +136,7 @@ $(function() {
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keyword">static_assert</span>(std::is_base_of&lt;ItoSolver, I&gt;::value, <span class="stringliteral">&quot;I must derive from ItoSolver&quot;</span>);</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="keyword">static_assert</span>(std::is_base_of&lt;CdrSolver, C&gt;::value, <span class="stringliteral">&quot;C must derive from CdrSolver&quot;</span>);</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="keyword">static_assert</span>(std::is_base_of&lt;McPhoto, R&gt;::value, <span class="stringliteral">&quot;R must derive from McPhoto&quot;</span>);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keyword">static_assert</span>(std::is_base_of&lt;FieldSolver, FieldSolverGMG&gt;::value, <span class="stringliteral">&quot;F must derive from FieldSolver&quot;</span>);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keyword">static_assert</span>(std::is_base_of&lt;FieldSolver, F&gt;::value, <span class="stringliteral">&quot;F must derive from FieldSolver&quot;</span>);</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span></div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a62a5890fbc4a9f0b60838f595dc3565f">ItoKMCStepper</a>() <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span></div>
@@ -911,7 +911,7 @@ $(function() {
 <div class="ttc" id="aCD__CdrCTU_8H_html"><div class="ttname"><a href="CD__CdrCTU_8H.html">CD_CdrCTU.H</a></div><div class="ttdoc">Declaration of a class which implements CdrMultigrid using MUSCL for advection.</div></div>
 <div class="ttc" id="aCD__CdrLayout_8H_html"><div class="ttname"><a href="CD__CdrLayout_8H.html">CD_CdrLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of CdrSolvers (to cut down on typing).</div></div>
 <div class="ttc" id="aCD__EBRepresentation_8H_html_ac839237a887a079963372760880f908f"><div class="ttname"><a href="CD__EBRepresentation_8H.html#ac839237a887a079963372760880f908f">EBRepresentation</a></div><div class="ttdeci">EBRepresentation</div><div class="ttdoc">Enum for putting some logic into how we think about EBs. This is just a simply supporting class for v...</div><div class="ttdef"><b>Definition</b> CD_EBRepresentation.H:23</div></div>
-<div class="ttc" id="aCD__FieldSolverGMG_8H_html"><div class="ttname"><a href="CD__FieldSolverGMG_8H.html">CD_FieldSolverGMG.H</a></div><div class="ttdoc">Declaration of FieldSolverGMG.</div></div>
+<div class="ttc" id="aCD__FieldSolverMG_8H_html"><div class="ttname"><a href="CD__FieldSolverMG_8H.html">CD_FieldSolverMG.H</a></div><div class="ttdoc">Declaration of FieldSolverMG.</div></div>
 <div class="ttc" id="aCD__FieldSolver_8H_html"><div class="ttname"><a href="CD__FieldSolver_8H.html">CD_FieldSolver.H</a></div><div class="ttdoc">Contains declaration of a base electrostatics solver class.</div></div>
 <div class="ttc" id="aCD__ItoKMCPhysics_8H_html"><div class="ttname"><a href="CD__ItoKMCPhysics_8H.html">CD_ItoKMCPhysics.H</a></div><div class="ttdoc">Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class.</div></div>
 <div class="ttc" id="aCD__ItoKMCStepperImplem_8H_html"><div class="ttname"><a href="CD__ItoKMCStepperImplem_8H.html">CD_ItoKMCStepperImplem.H</a></div><div class="ttdoc">Implementation of CD_ItoKMCStepper.H.</div></div>

@@ -29,6 +29,8 @@ FieldSolver
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
 There are two subclasses, which discretize the problem in the same way but solve it differently: :ref:`Chap:FieldSolverGMG` solves it with geometric multigrid, and :ref:`Chap:FieldSolverAMG` assembles it as a matrix and solves it with algebraic multigrid from PETSc.
+:ref:`Chap:FieldSolverMG` combines the two: it solves with geometric multigrid, and falls back to algebraic multigrid when that fails.
+It is the default field solver of the time steppers in :file:`/Physics`.
 
 .. tip::
    
@@ -461,11 +463,14 @@ The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and 
 Adjusting output
 ________________
 
-The user may plot the potential, the space charge, the electric, and the GMG residue as follows:
+The user may plot the potential, the space charge, the electric field, and the residual as follows:
 
 .. code-block:: text
 
-   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+
+The remaining variables are the permittivity (``perm``), the surface charge (``sigma``), and the electric field in the solid phase (``Esol``).
+A name that is not in this list aborts the run.
 
 .. _Chap:PoissonDielectricBC:   
 
@@ -569,6 +574,67 @@ ___________
 * With the saturation charge condition, the AMG solve can converge slowly on complex geometries.
 * As in ``FieldSolverGMG``, a cut cell where no least-squares fit is accepted (see :ref:`Chap:LinearSolverDirichletBC`) has no flux through its EB face, and its potential is determined by its other faces only. With ``verbosity`` above 0, ``FieldSolverAMG`` prints the number of such cells, counted per phase, when it sets up the solver.
 * With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.
+
+.. _Chap:FieldSolverMG:
+
+FieldSolverMG
+-------------
+
+``FieldSolverMG`` solves :eq:`Poisson` with geometric multigrid, as ``FieldSolverGMG`` does, and repeats the solve with algebraic multigrid, as ``FieldSolverAMG`` does, when geometric multigrid fails to converge.
+It is used like any other ``FieldSolver``, e.g. as ``FieldStepper<FieldSolverMG>``, and is the default field solver of the ``ItoKMC`` and ``DischargeInception`` time steppers, and of the application setup scripts in :file:`/Physics`.
+The algebraic multigrid fallback requires a build with ``USE_PETSC = TRUE`` (see :ref:`Chap:Installation`).
+Without PETSc, ``FieldSolverMG`` solves with geometric multigrid only.
+
+How it works
+____________
+
+``FieldSolverMG`` holds a ``FieldSolverGMG`` and, in PETSc builds, a ``FieldSolverAMG``.
+The two solvers share the data of ``FieldSolverMG`` (the potential, the space and surface charge, the electric field, the residue and the permittivities), and they read their options from the ``FieldSolverMG`` block of the input file.
+The boundary conditions, the interface condition, the plot variables and the embedded-boundary stencils are therefore given once, and agree in the two solvers.
+
+Each solve goes through the geometric multigrid solver chain first (``gmg_solver``, e.g. ``gmg bicgstab``, see :ref:`Chap:MultigridTuning`).
+If the chain does not converge, the potential is reset to the initial guess of the solve, and the solve is repeated with algebraic multigrid.
+The algebraic multigrid solver is only set up the first time it is needed after a regrid, so a simulation in which geometric multigrid always converges does not pay for it.
+Permittivities that were given with ``setSolverPermittivities``, e.g. by a semi-implicit time stepper, are passed on to it when it is set up.
+
+Once algebraic multigrid has rescued a solve, the following solves go straight to it, and geometric multigrid is tried again every ``amg_retry_interval`` solves.
+If geometric multigrid then converges, ``FieldSolverMG`` returns to it.
+The switches are printed to the ``pout`` files, e.g.
+
+.. code-block:: text
+
+   FieldSolverMG::solve -- geometric multigrid did not converge; falling back to algebraic multigrid
+   FieldSolverMG::solve -- geometric multigrid converged again
+
+Geometric and algebraic multigrid assemble the operator differently, so a solve that falls back gives a slightly different discrete solution, within the solver tolerances.
+
+Solver configuration
+____________________
+
+.. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverMG.options
+   :language: text
+   :caption: Input options for the ``FieldSolverMG`` class.
+
+The domain boundary conditions (``bc.coord.side``), ``jump_bc``, ``kappa_source``, ``plt_vars`` and ``use_regrid_slopes`` are as for ``FieldSolverGMG``.
+The remaining options are:
+
+* ``bc_order`` and ``bc_weight`` are the order and the least-squares weight of the embedded-boundary stencils on electrodes and on dielectric interfaces, in both solvers. They replace ``gmg_bc_order``, ``gmg_bc_weight``, ``gmg_jump_order`` and ``gmg_jump_weight`` of ``FieldSolverGMG``, and ``eb_order`` and ``eb_weight`` of ``FieldSolverAMG``.
+* ``amg_fallback`` turns the algebraic multigrid fallback on or off. It is ignored, with a message in the ``pout`` files, in builds without PETSc.
+* ``amg_retry_interval`` is the number of solves between each time geometric multigrid is tried again, after algebraic multigrid rescued a solve. With 1, every solve tries geometric multigrid first.
+* The options that start with ``gmg_`` configure geometric multigrid. They are the options of ``FieldSolverGMG``, where ``solver`` and ``krylov_*`` are named ``gmg_solver`` and ``gmg_krylov_*``. See :ref:`Chap:MultigridTuning`. ``gmg_use_default_settings`` is not available, since it would replace the stencil and smoother settings.
+* The other options configure algebraic multigrid, and are those of ``FieldSolverAMG`` (see :ref:`Chap:FieldSolverAMG`).
+
+The defaults are chosen for robustness rather than speed on simple geometries: second-order embedded-boundary stencils, the ``ras 4`` smoother, a GMG-preconditioned BiCGStab solver after the plain multigrid solver, and order-1 stencils on the coarsened multigrid levels (``gmg_reduce_order``).
+
+Limitations
+___________
+
+The fallback is skipped, with a message in the ``pout`` files when geometric multigrid fails, when algebraic multigrid does not support the problem:
+
+* when the domain is periodic, or
+* when ``bc_order`` exceeds the coarse-fine interpolation radius (``AmrMesh.mg_interp_radius``).
+
+In PETSc builds, a grid with multi-valued cells aborts when the PETSc row map is set up, whichever field solver is used.
 
 Frequency dependent permittivity
 --------------------------------

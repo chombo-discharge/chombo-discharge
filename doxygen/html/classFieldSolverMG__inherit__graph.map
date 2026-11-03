@@ -1,0 +1,5 @@
+<map id="FieldSolverMG" name="FieldSolverMG">
+<area shape="rect" id="Node000001" title="Field solver that solves with geometric multigrid, and falls back to algebraic multigrid when that fa..." alt="" coords="5,81,121,109"/>
+<area shape="rect" id="Node000002" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="16,5,110,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,47,66,81,60,80,61,51"/>
+</map>

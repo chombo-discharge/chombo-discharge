@@ -97,11 +97,13 @@ Inheritance diagram for FieldSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFieldSolver__inherit__graph.png" border="0" usemap="#aFieldSolver_inherit__map" loading="lazy" alt="Inheritance graph"/></div>
 <map name="aFieldSolver_inherit__map" id="aFieldSolver_inherit__map">
-<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="96,5,189,33"/>
+<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="170,5,264,33"/>
 <area shape="rect" href="classFieldSolverAMG.html" title="Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc K..." alt="" coords="5,81,130,109"/>
-<area shape="poly" title=" " alt="" coords="120,44,82,83,79,78,115,45"/>
+<area shape="poly" title=" " alt="" coords="179,41,95,83,93,78,174,39"/>
 <area shape="rect" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="154,81,280,109"/>
-<area shape="poly" title=" " alt="" coords="168,42,206,81,201,80,165,47"/>
+<area shape="poly" title=" " alt="" coords="219,47,219,82,215,79,215,51"/>
+<area shape="rect" href="classFieldSolverMG.html" title="Field solver that solves with geometric multigrid, and falls back to algebraic multigrid when that fa..." alt="" coords="303,81,418,109"/>
+<area shape="poly" title=" " alt="" coords="257,38,338,80,333,81,255,43"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -157,16 +159,14 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolver</b> (
 <tr class="memdesc:a80d6d8f7e16b620f9145ba541a1c86e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse options (for derived class).  <br /></td></tr>
 <tr class="memitem:a258c337b852ae717725dba8d1f47d6cc" id="r_a258c337b852ae717725dba8d1f47d6cc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a258c337b852ae717725dba8d1f47d6cc">parseRuntimeOptions</a> ()=0</td></tr>
 <tr class="memdesc:a258c337b852ae717725dba8d1f47d6cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options (for derived class).  <br /></td></tr>
-<tr class="memitem:a88261a81363faa8bc73a3579cf186f13" id="r_a88261a81363faa8bc73a3579cf186f13"><td class="memItemLeft" align="right" valign="top"><a id="a88261a81363faa8bc73a3579cf186f13" name="a88261a81363faa8bc73a3579cf186f13"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> ()</td></tr>
-<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. <br /></td></tr>
+<tr class="memitem:a88261a81363faa8bc73a3579cf186f13" id="r_a88261a81363faa8bc73a3579cf186f13"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88261a81363faa8bc73a3579cf186f13">allocate</a> ()</td></tr>
+<tr class="memdesc:a88261a81363faa8bc73a3579cf186f13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite.  <br /></td></tr>
 <tr class="memitem:ae194783b6c35a2f5c647bf9af6e7fefc" id="r_ae194783b6c35a2f5c647bf9af6e7fefc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae194783b6c35a2f5c647bf9af6e7fefc">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
 <tr class="memdesc:ae194783b6c35a2f5c647bf9af6e7fefc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <br /></td></tr>
 <tr class="memitem:a8791d9db454d7c84ecf65d44db8bcfe3" id="r_a8791d9db454d7c84ecf65d44db8bcfe3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8791d9db454d7c84ecf65d44db8bcfe3">computeDisplacementField</a> (MFAMRCellData &amp;a_displacementField, const MFAMRCellData &amp;a_electricField)</td></tr>
 <tr class="memdesc:a8791d9db454d7c84ecf65d44db8bcfe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute displacement field from the electric field.  <br /></td></tr>
-<tr class="memitem:a5aa41113ebe05f15294c7899d3adc707" id="r_a5aa41113ebe05f15294c7899d3adc707"><td class="memItemLeft" align="right" valign="top"><a id="a5aa41113ebe05f15294c7899d3adc707" name="a5aa41113ebe05f15294c7899d3adc707"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate</b> ()</td></tr>
-<tr class="memdesc:a5aa41113ebe05f15294c7899d3adc707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage. <br /></td></tr>
+<tr class="memitem:a5aa41113ebe05f15294c7899d3adc707" id="r_a5aa41113ebe05f15294c7899d3adc707"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5aa41113ebe05f15294c7899d3adc707">deallocate</a> ()</td></tr>
+<tr class="memdesc:a5aa41113ebe05f15294c7899d3adc707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <br /></td></tr>
 <tr class="memitem:a3dc5a56250e5391f959a67e55e854b97" id="r_a3dc5a56250e5391f959a67e55e854b97"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3dc5a56250e5391f959a67e55e854b97">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</td></tr>
 <tr class="memdesc:a3dc5a56250e5391f959a67e55e854b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method.  <br /></td></tr>
 <tr class="memitem:a0194a8aa174a8bdc2ccb834603351e1d" id="r_a0194a8aa174a8bdc2ccb834603351e1d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0194a8aa174a8bdc2ccb834603351e1d">registerOperators</a> ()=0</td></tr>
@@ -245,15 +245,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate</b
 <tr class="memdesc:a721be6c028252f1f18e5f369a5b795f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get m_sigma.  <br /></td></tr>
 <tr class="memitem:a37f560df4bb28e832891a74893bd115c" id="r_a37f560df4bb28e832891a74893bd115c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37f560df4bb28e832891a74893bd115c">getDataLocation</a> () const</td></tr>
 <tr class="memdesc:a37f560df4bb28e832891a74893bd115c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get data location.  <br /></td></tr>
+<tr class="memitem:a5270f8be79c83a0f4544f274f50be73f" id="r_a5270f8be79c83a0f4544f274f50be73f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5270f8be79c83a0f4544f274f50be73f">invalidateSolver</a> ()=0</td></tr>
+<tr class="memdesc:a5270f8be79c83a0f4544f274f50be73f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discard the discretization and the solver hierarchy, without touching the data.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:aac28785ddcb454fd55a7107c575964d1" id="r_aac28785ddcb454fd55a7107c575964d1"><td class="memItemLeft" align="right" valign="top"><a id="aac28785ddcb454fd55a7107c575964d1" name="aac28785ddcb454fd55a7107c575964d1"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbosity</b> ()</td></tr>
 <tr class="memdesc:aac28785ddcb454fd55a7107c575964d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse solver class verbosity. <br /></td></tr>
-<tr class="memitem:a727b290c2e9bf1bc0e12a96fd63871bc" id="r_a727b290c2e9bf1bc0e12a96fd63871bc"><td class="memItemLeft" align="right" valign="top"><a id="a727b290c2e9bf1bc0e12a96fd63871bc" name="a727b290c2e9bf1bc0e12a96fd63871bc"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> ()</td></tr>
-<tr class="memdesc:a727b290c2e9bf1bc0e12a96fd63871bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which parses which plot variables to write to plot files. <br /></td></tr>
+<tr class="memitem:a727b290c2e9bf1bc0e12a96fd63871bc" id="r_a727b290c2e9bf1bc0e12a96fd63871bc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a727b290c2e9bf1bc0e12a96fd63871bc">parsePlotVariables</a> ()</td></tr>
+<tr class="memdesc:a727b290c2e9bf1bc0e12a96fd63871bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which parses which plot variables to write to plot files.  <br /></td></tr>
 <tr class="memitem:ace32482becbb3915bd97d566d4314dfa" id="r_ace32482becbb3915bd97d566d4314dfa"><td class="memItemLeft" align="right" valign="top"><a id="ace32482becbb3915bd97d566d4314dfa" name="ace32482becbb3915bd97d566d4314dfa"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDomainBc</b> ()</td></tr>
 <tr class="memdesc:ace32482becbb3915bd97d566d4314dfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse domain boundary conditions. <br /></td></tr>
@@ -279,6 +280,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefaultDom
 <tr class="memdesc:ad56bad582bead0d15a607c18c712558a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut for making a boundary condition string.  <br /></td></tr>
 <tr class="memitem:a13fd859a86309a25f10cbee4b610fb42" id="r_a13fd859a86309a25f10cbee4b610fb42"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a13fd859a86309a25f10cbee4b610fb42">fillCoveredPotential</a> (MFAMRCellData &amp;a_phi) const noexcept</td></tr>
 <tr class="memdesc:a13fd859a86309a25f10cbee4b610fb42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility routine that fills the gas-side covered cells by the potential from the closest electrode.  <br /></td></tr>
+<tr class="memitem:ae633c961b3c66ada00abe1577f3f21b4" id="r_ae633c961b3c66ada00abe1577f3f21b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae633c961b3c66ada00abe1577f3f21b4">aliasState</a> (const <a class="el" href="classFieldSolver.html">FieldSolver</a> &amp;a_owner)</td></tr>
+<tr class="memdesc:ae633c961b3c66ada00abe1577f3f21b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Share the data and the configuration of another solver.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -467,6 +470,68 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ae633c961b3c66ada00abe1577f3f21b4" name="ae633c961b3c66ada00abe1577f3f21b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae633c961b3c66ada00abe1577f3f21b4">&#9670;&#160;</a></span>aliasState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolver::aliasState </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classFieldSolver.html">FieldSolver</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_owner</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Share the data and the configuration of another solver. </p>
+<p>The data holders (potential, electric field, space and surface charge, residue, permittivities) are copied by handle, so this solver reads and writes the storage of a_owner. The mesh, realm, geometry, data location, boundary conditions, voltage, time and verbosity are copied by value. The class name, the plot variables and the regrid cache are not copied. Since the data are shared by handle, this must be called again whenever a_owner reallocates its data, e.g. after a regrid. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_owner</td><td>Solver whose data and configuration are shared </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a88261a81363faa8bc73a3579cf186f13" name="a88261a81363faa8bc73a3579cf186f13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88261a81363faa8bc73a3579cf186f13">&#9670;&#160;</a></span>allocate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolver::allocate </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Allocates internal storage for <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>. Derived classes may want to overwrite. </p>
+
+<p>Reimplemented in <a class="el" href="classFieldSolverMG.html#a45f9f2b306509c2e0b3709a53d9273b1">FieldSolverMG</a>.</p>
+
+</div>
+</div>
 <a id="a7dc60f3667e950c9797301f0bbe401e3" name="a7dc60f3667e950c9797301f0bbe401e3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7dc60f3667e950c9797301f0bbe401e3">&#9670;&#160;</a></span>computeCapacitance()</h2>
 
@@ -596,7 +661,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a34240c37dab7846d77b5e9c1f174832b">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a1614a34e51f0d94c6dc98b7eb927d97f">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a34240c37dab7846d77b5e9c1f174832b">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a1614a34e51f0d94c6dc98b7eb927d97f">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#aa4c44618d4da4733b541c34eac48101c">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -642,7 +707,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ff1521fd361feb59b6065bdb4f3d8b9">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#aa4b70fcdb2f2e5075766a687eafc9277">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ff1521fd361feb59b6065bdb4f3d8b9">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#aa4b70fcdb2f2e5075766a687eafc9277">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#ac20da2b4db7daa61c8ff3f3a839fd8e6">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -682,7 +747,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ab75c686f1043989ec9da1aa7f6207196">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a6f75085eb025109e892c01c611e744bf">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ab75c686f1043989ec9da1aa7f6207196">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a6f75085eb025109e892c01c611e744bf">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a6ad654dcdbb89037c2042f5ced40f77f">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -722,7 +787,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#aa99ed5958cb5c239b51362759f941005">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a8b34ca0bf9096a34718b58a073b6f87a">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#aa99ed5958cb5c239b51362759f941005">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a8b34ca0bf9096a34718b58a073b6f87a">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a08438cfe9bcdb9c4efbc055108e277f7">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -790,7 +855,36 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a9b50d8b8bed89e0c35e2d5f117137540">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a9b50d8b8bed89e0c35e2d5f117137540">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a0a13bf0bdaedd1e2ce12392ba40a395a">FieldSolverMG</a>.</p>
+
+</div>
+</div>
+<a id="a5aa41113ebe05f15294c7899d3adc707" name="a5aa41113ebe05f15294c7899d3adc707"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aa41113ebe05f15294c7899d3adc707">&#9670;&#160;</a></span>deallocate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolver::deallocate </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deallocate internal storage. </p>
+
+<p>Reimplemented in <a class="el" href="classFieldSolverMG.html#a6ec91c5ad7bb372e178a23237a7c0377">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -1178,6 +1272,36 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
+<a id="a5270f8be79c83a0f4544f274f50be73f" name="a5270f8be79c83a0f4544f274f50be73f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5270f8be79c83a0f4544f274f50be73f">&#9670;&#160;</a></span>invalidateSolver()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void FieldSolver::invalidateSolver </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel pure-virtual">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Discard the discretization and the solver hierarchy, without touching the data. </p>
+<p>The solver is set up again before the next solve. This is called after regrids, and by solvers that own other solvers. </p>
+
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a6b8227aa98ad65c708dbea513d3e0d53">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a8c6f8992d1af03fb098ff5c830027f45">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a0e755edbbdf60076cc12011467cba08f">FieldSolverMG</a>.</p>
+
+</div>
+</div>
 <a id="ad56bad582bead0d15a607c18c712558a" name="ad56bad582bead0d15a607c18c712558a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad56bad582bead0d15a607c18c712558a">&#9670;&#160;</a></span>makeBcString()</h2>
 
@@ -1342,7 +1466,35 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Parse options (for derived class). </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a180a0bd646036a146641948c760c77f0">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a84846bcabd7ab2560df9d1d9e2cb72ac">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a180a0bd646036a146641948c760c77f0">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a84846bcabd7ab2560df9d1d9e2cb72ac">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a315461d4a108b4213120ccfbce1f8245">FieldSolverMG</a>.</p>
+
+</div>
+</div>
+<a id="a727b290c2e9bf1bc0e12a96fd63871bc" name="a727b290c2e9bf1bc0e12a96fd63871bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a727b290c2e9bf1bc0e12a96fd63871bc">&#9670;&#160;</a></span>parsePlotVariables()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolver::parsePlotVariables </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function which parses which plot variables to write to plot files. </p>
+<p>Valid names are 'phi', 'rho', 'E', 'res', 'perm', 'sigma' and 'Esol'. An unknown name aborts the run. </p>
 
 </div>
 </div>
@@ -1371,7 +1523,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Parse runtime options (for derived class). </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ec08a68a0ea0330a6a8884c4323e1a8">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a4b8b1e553af21fc7798c4f28470964ab">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ec08a68a0ea0330a6a8884c4323e1a8">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a4b8b1e553af21fc7798c4f28470964ab">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a0dcf8f951286b6c6355b605e9b419938">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -1440,7 +1592,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <p>This allocates m_cache which gets a copy of m_potential </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a55a6dbca16271c9372bdb287d6a2df6c">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a55a6dbca16271c9372bdb287d6a2df6c">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a84e06c7f5de5c98407713d07fba238a9">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -1469,7 +1621,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Register operators for AMR. Derived classes have to implement these. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a45b722860c2ea0578395570c35bc9454">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a416f8cbbf19f2e2cae601ec3b6192a00">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a45b722860c2ea0578395570c35bc9454">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a416f8cbbf19f2e2cae601ec3b6192a00">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a2ce05139ae9fb483c700995c4db4ded4">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -1516,7 +1668,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <p>This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a5111f1244668a91ee5740ec735b1af21">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#ae41d752e9d02e7b498d9fcfae8d2d0cd">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a5111f1244668a91ee5740ec735b1af21">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#ae41d752e9d02e7b498d9fcfae8d2d0cd">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a35ae3ed61121b28d7e812497e54c7c25">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -2089,7 +2241,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> to change permittivities/conductivities under the hood of the multigrid solver. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a8939b933db60c46495f82b2a86b4ddc4">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#add5e2de507c3c032e14a0a97fd31891d">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a8939b933db60c46495f82b2a86b4ddc4">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#add5e2de507c3c032e14a0a97fd31891d">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#af0f1d2e483e1fef8732729d890cef61d">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -2155,7 +2307,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Set up solver routines. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a75d298d461fae4d61f14bc9a3318a831">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a77474e5dd5e6782ae07696be3c7d2924">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a75d298d461fae4d61f14bc9a3318a831">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a77474e5dd5e6782ae07696be3c7d2924">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#a7376bf54f0d54c648dac19d4d57e94ae">FieldSolverMG</a>.</p>
 
 </div>
 </div>
@@ -2308,7 +2460,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ac149df691d89b46ff62ffdacd81b1c97">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a4e7785defa75405a937b346a494adc27">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ac149df691d89b46ff62ffdacd81b1c97">FieldSolverAMG</a>, <a class="el" href="classFieldSolverGMG.html#a4e7785defa75405a937b346a494adc27">FieldSolverGMG</a>, and <a class="el" href="classFieldSolverMG.html#af9974be675f546667f35237e16937465">FieldSolverMG</a>.</p>
 
 </div>
 </div>
