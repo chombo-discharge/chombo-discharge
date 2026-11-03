@@ -113,15 +113,19 @@ $(function() {
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>     <span class="keyword">const</span> Box&amp;             a_regionTo,</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>     <span class="keyword">const</span> BaseIVFAB&lt;Real&gt;&amp; a_src,</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>     <span class="keyword">const</span> Interval&amp;        a_srcVars) <span class="keyword">const override</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keyword">virtual</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <a class="code hl_function" href="classIrregAddOp.html#aa9dacf5d70fb0d7bce5d81099c9a1601">threadSafe</a>() <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>};</div>
 </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassIrregAddOp_html_a00e93640c7a04e19ef07ffb116ae8726"><div class="ttname"><a href="classIrregAddOp.html#a00e93640c7a04e19ef07ffb116ae8726">IrregAddOp::IrregAddOp</a></div><div class="ttdeci">IrregAddOp() noexcept</div><div class="ttdoc">Constructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_IrregAddOp.cpp:21</div></div>
 <div class="ttc" id="aclassIrregAddOp_html_a74b8d314cc7b399a6eb0e93639d7ebf0"><div class="ttname"><a href="classIrregAddOp.html#a74b8d314cc7b399a6eb0e93639d7ebf0">IrregAddOp::op</a></div><div class="ttdeci">virtual void op(BaseIVFAB&lt; Real &gt; &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const BaseIVFAB&lt; Real &gt; &amp;a_src, const Interval &amp;a_srcVars) const override</div><div class="ttdoc">Operator function. Increments data with source.</div><div class="ttdef"><b>Definition</b> CD_IrregAddOp.cpp:57</div></div>
 <div class="ttc" id="aclassIrregAddOp_html_a8952e263448887f656eefba3e3c5d932"><div class="ttname"><a href="classIrregAddOp.html#a8952e263448887f656eefba3e3c5d932">IrregAddOp::~IrregAddOp</a></div><div class="ttdeci">virtual ~IrregAddOp() noexcept</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_IrregAddOp.cpp:26</div></div>
+<div class="ttc" id="aclassIrregAddOp_html_aa9dacf5d70fb0d7bce5d81099c9a1601"><div class="ttname"><a href="classIrregAddOp.html#aa9dacf5d70fb0d7bce5d81099c9a1601">IrregAddOp::threadSafe</a></div><div class="ttdeci">virtual bool threadSafe() const override</div><div class="ttdoc">Report that op() and linearIn() are not thread safe.</div><div class="ttdef"><b>Definition</b> CD_IrregAddOp.cpp:87</div></div>
 <div class="ttc" id="aclassIrregAddOp_html_ac078e53da121ed9b9822cdbeab9c7caf"><div class="ttname"><a href="classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf">IrregAddOp::linearIn</a></div><div class="ttdeci">virtual void linearIn(BaseIVFAB&lt; Real &gt; &amp;a_data, void *a_buffer, const Box &amp;a_region, const Interval &amp;a_comps) const override</div><div class="ttdoc">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we n...</div><div class="ttdef"><b>Definition</b> CD_IrregAddOp.cpp:32</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

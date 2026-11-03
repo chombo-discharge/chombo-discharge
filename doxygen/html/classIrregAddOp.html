@@ -122,6 +122,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~IrregAddOp</b> ()
 <tr class="memdesc:ac078e53da121ed9b9822cdbeab9c7caf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.  <br /></td></tr>
 <tr class="memitem:a74b8d314cc7b399a6eb0e93639d7ebf0" id="r_a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74b8d314cc7b399a6eb0e93639d7ebf0">op</a> (BaseIVFAB&lt; Real &gt; &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const BaseIVFAB&lt; Real &gt; &amp;a_src, const Interval &amp;a_srcVars) const override</td></tr>
 <tr class="memdesc:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <br /></td></tr>
+<tr class="memitem:aa9dacf5d70fb0d7bce5d81099c9a1601" id="r_aa9dacf5d70fb0d7bce5d81099c9a1601"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9dacf5d70fb0d7bce5d81099c9a1601">threadSafe</a> () const override</td></tr>
+<tr class="memdesc:aa9dacf5d70fb0d7bce5d81099c9a1601"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report that <a class="el" href="#a74b8d314cc7b399a6eb0e93639d7ebf0" title="Operator function. Increments data with source.">op()</a> and <a class="el" href="#ac078e53da121ed9b9822cdbeab9c7caf" title="Linearization function. We linearize the buffer onto arg, but since this is an addition operator we n...">linearIn()</a> are not thread safe.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A Copier class for making copying between LevelData&lt;BaseIVFAB&lt;Real&gt;&gt; easier. This is an incrementation operator. </p>
@@ -235,6 +237,34 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~IrregAddOp</b> ()
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aa9dacf5d70fb0d7bce5d81099c9a1601" name="aa9dacf5d70fb0d7bce5d81099c9a1601"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9dacf5d70fb0d7bce5d81099c9a1601">&#9670;&#160;</a></span>threadSafe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool IrregAddOp::threadSafe </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Report that <a class="el" href="#a74b8d314cc7b399a6eb0e93639d7ebf0" title="Operator function. Increments data with source.">op()</a> and <a class="el" href="#ac078e53da121ed9b9822cdbeab9c7caf" title="Linearization function. We linearize the buffer onto arg, but since this is an addition operator we n...">linearIn()</a> are not thread safe. </p>
+<p>Both functions increment the destination. Several copies can target the same destination box, and Chombo runs the copies of a copyTo() or exchange() in parallel unless the operator reports that it is not thread safe. Concurrent increments of the same box would lose updates. </p><dl class="section return"><dt>Returns</dt><dd>false </dd></dl>
 
 </div>
 </div>

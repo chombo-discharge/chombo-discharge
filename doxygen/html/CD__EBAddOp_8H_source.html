@@ -113,14 +113,18 @@ $(function() {
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>     <span class="keyword">const</span> Box&amp;       a_regionTo,</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>     <span class="keyword">const</span> EBCellFAB&amp; a_src,</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>     <span class="keyword">const</span> Interval&amp;  a_srcVars) <span class="keyword">const override</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keyword">virtual</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <a class="code hl_function" href="classEBAddOp.html#ab73d71807c9dae1225399ecc5a828186">threadSafe</a>() <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>};</div>
 </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassEBAddOp_html_a6ba448668f2b4d3dae9fa754bdbe356f"><div class="ttname"><a href="classEBAddOp.html#a6ba448668f2b4d3dae9fa754bdbe356f">EBAddOp::op</a></div><div class="ttdeci">virtual void op(EBCellFAB &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const EBCellFAB &amp;a_src, const Interval &amp;a_srcVars) const override</div><div class="ttdoc">Operator function. Increments data with source.</div><div class="ttdef"><b>Definition</b> CD_EBAddOp.cpp:50</div></div>
 <div class="ttc" id="aclassEBAddOp_html_aa8da21a5b1de6523e62f722401c70a4d"><div class="ttname"><a href="classEBAddOp.html#aa8da21a5b1de6523e62f722401c70a4d">EBAddOp::linearIn</a></div><div class="ttdeci">virtual void linearIn(EBCellFAB &amp;a_data, void *a_buffer, const Box &amp;a_region, const Interval &amp;a_comps) const override</div><div class="ttdoc">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we n...</div><div class="ttdef"><b>Definition</b> CD_EBAddOp.cpp:31</div></div>
+<div class="ttc" id="aclassEBAddOp_html_ab73d71807c9dae1225399ecc5a828186"><div class="ttname"><a href="classEBAddOp.html#ab73d71807c9dae1225399ecc5a828186">EBAddOp::threadSafe</a></div><div class="ttdeci">virtual bool threadSafe() const override</div><div class="ttdoc">Report that op() and linearIn() are not thread safe.</div><div class="ttdef"><b>Definition</b> CD_EBAddOp.cpp:73</div></div>
 <div class="ttc" id="aclassEBAddOp_html_ac1d55bab2081c213b2ad61042a74fa9e"><div class="ttname"><a href="classEBAddOp.html#ac1d55bab2081c213b2ad61042a74fa9e">EBAddOp::EBAddOp</a></div><div class="ttdeci">EBAddOp()</div><div class="ttdoc">Constructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_EBAddOp.cpp:20</div></div>
 <div class="ttc" id="aclassEBAddOp_html_aeeb622fd7e667af5af95e9c7a6883583"><div class="ttname"><a href="classEBAddOp.html#aeeb622fd7e667af5af95e9c7a6883583">EBAddOp::~EBAddOp</a></div><div class="ttdeci">virtual ~EBAddOp()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_EBAddOp.cpp:25</div></div>
 </div><!-- fragment --></div><!-- contents -->
