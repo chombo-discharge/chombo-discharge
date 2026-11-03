@@ -69,4 +69,10 @@ EBAddOp::op(EBCellFAB& a_dst,
   a_dst.plus(a_src, a_regionTo, isrc, idst, inco);
 }
 
+bool
+EBAddOp::threadSafe() const
+{
+  return false;
+}
+
 #include <CD_NamespaceFooter.H>

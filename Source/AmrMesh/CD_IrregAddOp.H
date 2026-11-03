@@ -64,6 +64,16 @@ public:
      const Box&             a_regionTo,
      const BaseIVFAB<Real>& a_src,
      const Interval&        a_srcVars) const override;
+
+  /**
+   * @brief Report that op() and linearIn() are not thread safe.
+   * @details Both functions increment the destination. Several copies can target the same destination box, and Chombo
+   * runs the copies of a copyTo() or exchange() in parallel unless the operator reports that it is not thread safe.
+   * Concurrent increments of the same box would lose updates.
+   * @return false
+   */
+  virtual bool
+  threadSafe() const override;
 };
 
 #include <CD_NamespaceFooter.H>

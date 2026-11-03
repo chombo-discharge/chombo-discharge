@@ -83,4 +83,10 @@ IrregAddOp::op(BaseIVFAB<Real>& a_dst,
   }
 }
 
+bool
+IrregAddOp::threadSafe() const
+{
+  return false;
+}
+
 #include <CD_NamespaceFooter.H>
