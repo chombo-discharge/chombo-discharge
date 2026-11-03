@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser();
 parser.add_argument('-discharge_home',  type=str,  help="Source code base directory (default: %(default)s)", default=os.environ.get('DISCHARGE_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of application (default: %(default)s)", default="MyApplications")
 parser.add_argument('-app_name',        type=str,  help="Application name (default: %(default)s)", default="MyElectrostaticProblem")
-parser.add_argument('-field_solver',    type=str,  help="FieldSolver implementation (default: %(default)s)", default="FieldSolverGMG")
+parser.add_argument('-field_solver',    type=str,  help="FieldSolver implementation (default: %(default)s)", default="FieldSolverMG")
 parser.add_argument('-geometry',        type=str,  help="Geometry class (default: %(default)s)", default="RegularGeometry")
 
 args = parser.parse_args()

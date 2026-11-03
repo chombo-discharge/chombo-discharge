@@ -50,7 +50,11 @@ PetscHelmholtzOp::~PetscHelmholtzOp() noexcept
     pout() << "PetscHelmholtzOp::~PetscHelmholtzOp" << endl;
   }
 
-  this->clear();
+  // An operator that outlives ChomboDischarge::finalize is destroyed after PETSc has released its matrix, which must
+  // then not be destroyed again.
+  if (!PetscFinalizeCalled) {
+    this->clear();
+  }
 }
 
 void

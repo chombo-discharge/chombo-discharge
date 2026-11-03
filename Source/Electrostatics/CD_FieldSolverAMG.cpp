@@ -51,7 +51,11 @@ FieldSolverAMG::~FieldSolverAMG()
 {
   CH_TIME("FieldSolverAMG::~FieldSolverAMG()");
 
-  this->destroySolver();
+  // A solver that outlives ChomboDischarge::finalize is destroyed after PETSc has released its objects, which must
+  // then not be destroyed again.
+  if (!PetscFinalizeCalled) {
+    this->destroySolver();
+  }
 }
 
 void
@@ -66,6 +70,7 @@ FieldSolverAMG::parseOptions()
   this->parseDomainBc();
   this->parsePlotVariables();
   this->parseSolverSettings();
+  this->parseStencilSettings();
   this->parseRegridSlopes();
 }
 
@@ -119,11 +124,8 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("petsc_verbosity", m_petscVerbosity);
   pp.get("kappa_source", m_kappaSource);
 
-  // EB face stencils, for the electrodes and the interface between the gas and the dielectrics.
   std::string jumpBc;
 
-  pp.get("eb_order", m_ebOrder);
-  pp.get("eb_weight", m_ebWeight);
   pp.get("jump_bc", jumpBc);
 
   if (jumpBc == "natural") {
@@ -135,6 +137,21 @@ FieldSolverAMG::parseSolverSettings()
   else {
     MayDay::Abort("FieldSolverAMG::parseSolverSettings -- 'jump_bc' must be 'natural' or 'saturation_charge'");
   }
+}
+
+void
+FieldSolverAMG::parseStencilSettings()
+{
+  CH_TIME("FieldSolverAMG::parseStencilSettings()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverAMG::parseStencilSettings()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  // EB face stencils, for the electrodes and the interface between the gas and the dielectrics.
+  pp.get("eb_order", m_ebOrder);
+  pp.get("eb_weight", m_ebWeight);
 }
 
 bool
@@ -599,6 +616,17 @@ FieldSolverAMG::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
   }
 
   FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  this->invalidateSolver();
+}
+
+void
+FieldSolverAMG::invalidateSolver()
+{
+  CH_TIME("FieldSolverAMG::invalidateSolver()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverAMG::invalidateSolver()" << endl;
+  }
 
   this->destroySolver();
 }

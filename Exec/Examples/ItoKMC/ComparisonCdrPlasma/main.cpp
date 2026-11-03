@@ -72,15 +72,20 @@ main(int argc, char* argv[])
   else if (model == "ito_kmc") {
     using namespace Physics::ItoKMC;
 
+    using I = ItoSolver;
+    using C = CdrCTU;
+    using R = McPhoto;
+    using F = FieldSolverGMG;
+
     auto physics    = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
-    auto itoStepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
+    auto itoStepper = RefCountedPtr<ItoKMCStepper<I, C, R, F>>(new ItoKMCGodunovStepper<I, C, R, F>(physics));
 
     itoStepper->setVoltage([potential](const Real t) -> Real {
       return potential;
     });
 
     timestepper = itoStepper;
-    tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, itoStepper, amr));
+    tagger = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<I, C, R, F>>(physics, itoStepper, amr));
   }
   else {
     MayDay::Abort("Comparison.model must be either 'cdr_plasma' or 'ito_kmc'");

@@ -22,7 +22,7 @@
 #include <CD_TracerParticleSolver.H>
 #include <CD_DischargeInceptionParticle.H>
 #include <CD_FieldSolver.H>
-#include <CD_FieldSolverGMG.H>
+#include <CD_FieldSolverMG.H>
 #include <CD_CdrSolver.H>
 #include <CD_CdrCTU.H>
 #include <CD_NamespaceHeader.H>
@@ -80,7 +80,7 @@ enum class TimeStepRestriction
  * - @p P: SoA tracer payload type (default DischargeInceptionParticle). The container-owned weight
  * carries the inception integral K; the payload carries velocity + integrator state (snapshots,
  * grad(alpha), cached alphaEff/dt).
- * - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric
+ * - @p F: Field solver type (default FieldSolverMG). Solves the Poisson equation for the electric
  * potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous
  * (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.
  * - @p C: CDR solver type (default CdrCTU). Advances the negative ion density in transient mode.
@@ -90,7 +90,7 @@ enum class TimeStepRestriction
  * critical volume/area. In transient mode the voltage follows a user-supplied curve and the
  * inception probability is accumulated over time together with ion transport.
  */
-template <typename P = DischargeInceptionParticle, typename F = FieldSolverGMG, typename C = CdrCTU>
+template <typename P = DischargeInceptionParticle, typename F = FieldSolverMG, typename C = CdrCTU>
 class DischargeInceptionStepper : public TimeStepper
 {
 public:

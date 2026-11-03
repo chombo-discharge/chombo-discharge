@@ -38,6 +38,12 @@
  */
 class FieldSolverAMG : public FieldSolver
 {
+  /**
+   * @brief FieldSolverMG owns a FieldSolverAMG as its algebraic multigrid stage, and parses its settings and shares its
+   * own data with it.
+   */
+  friend class FieldSolverMG;
+
 public:
   /**
    * @brief Default constructor.
@@ -73,7 +79,7 @@ public:
   operator=(const FieldSolverAMG&& a_other) = delete;
 
   /**
-   * @brief Destructor.
+   * @brief Destructor. Destroys the PETSc solver, unless PETSc has already been finalized.
    */
   virtual ~FieldSolverAMG();
 
@@ -175,6 +181,12 @@ public:
   setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
                           const MFAMRFluxData& a_permittivityFace,
                           const MFAMRIVData&   a_permittivityEB) override;
+
+  /**
+   * @brief Destroy the PETSc solver and the operator. They are set up again before the next solve.
+   */
+  virtual void
+  invalidateSolver() override;
 
 protected:
   /**
@@ -324,6 +336,12 @@ protected:
    */
   virtual void
   parseSolverSettings();
+
+  /**
+   * @brief Parse the order and the least-squares weight of the EB face stencils (eb_order, eb_weight).
+   */
+  virtual void
+  parseStencilSettings();
 
   /**
    * @brief KSP monitor that prints the residual at every iteration, as the Krylov solvers of FieldSolverGMG do.

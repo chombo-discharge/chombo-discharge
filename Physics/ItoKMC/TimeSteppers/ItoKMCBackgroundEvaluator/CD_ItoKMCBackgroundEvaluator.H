@@ -23,7 +23,7 @@ namespace ItoKMC {
 /**
  * @brief Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time step.
  */
-template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
+template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG>
 class ItoKMCBackgroundEvaluator : public ItoKMCGodunovStepper<I, C, R, F>
 {
 public:

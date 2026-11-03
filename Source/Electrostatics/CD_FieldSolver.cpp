@@ -32,7 +32,14 @@ constexpr int FieldSolver::m_comp;
 constexpr int FieldSolver::m_nComp;
 
 FieldSolver::FieldSolver()
-  : m_realm(Realm::Primal), m_className("FieldSolver"), m_isVoltageSet(false), m_regridSlopes(true), m_verbosity(-1)
+  : m_realm(Realm::Primal),
+    m_className("FieldSolver"),
+    m_isVoltageSet(false),
+    m_regridSlopes(true),
+    m_verbosity(-1),
+    m_timeStep(0),
+    m_dt(0.0),
+    m_time(0.0)
 {
   CH_TIME("FieldSolver::FieldSolver()");
 
@@ -677,7 +684,7 @@ FieldSolver::parsePlotVariables()
       else if (str[i] == "rho") {
         m_plotRho = true;
       }
-      else if (str[i] == "resid") {
+      else if (str[i] == "res") {
         m_plotResidue = true;
       }
       else if (str[i] == "E") {
@@ -691,6 +698,12 @@ FieldSolver::parsePlotVariables()
       }
       else if (str[i] == "perm") {
         m_plotPermittivity = true;
+      }
+      else {
+        const std::string err = "FieldSolver::parsePlotVariables - unknown plot variable '" + str[i] +
+                                "' (valid: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol')";
+
+        MayDay::Error(err.c_str());
       }
     }
   }
@@ -2106,6 +2119,43 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
       }
     }
   }
+}
+
+void
+FieldSolver::aliasState(const FieldSolver& a_owner)
+{
+  CH_TIME("FieldSolver::aliasState");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::aliasState" << endl;
+  }
+
+  // The data holders are vectors of reference-counted pointers to the level data, so copying them shares the storage.
+  m_potential        = a_owner.m_potential;
+  m_electricField    = a_owner.m_electricField;
+  m_rho              = a_owner.m_rho;
+  m_sigma            = a_owner.m_sigma;
+  m_residue          = a_owner.m_residue;
+  m_permittivityCell = a_owner.m_permittivityCell;
+  m_permittivityFace = a_owner.m_permittivityFace;
+  m_permittivityEB   = a_owner.m_permittivityEB;
+
+  m_dataLocation          = a_owner.m_dataLocation;
+  m_faceLocation          = a_owner.m_faceLocation;
+  m_realm                 = a_owner.m_realm;
+  m_multifluidIndexSpace  = a_owner.m_multifluidIndexSpace;
+  m_computationalGeometry = a_owner.m_computationalGeometry;
+  m_amr                   = a_owner.m_amr;
+  m_isVoltageSet          = a_owner.m_isVoltageSet;
+  m_regridSlopes          = a_owner.m_regridSlopes;
+  m_verbosity             = a_owner.m_verbosity;
+  m_timeStep              = a_owner.m_timeStep;
+  m_dt                    = a_owner.m_dt;
+  m_time                  = a_owner.m_time;
+  m_domainBc              = a_owner.m_domainBc;
+  m_ebBc                  = a_owner.m_ebBc;
+  m_domainBcFunctions     = a_owner.m_domainBcFunctions;
+  m_electrodeBcFunctions  = a_owner.m_electrodeBcFunctions;
+  m_voltage               = a_owner.m_voltage;
 }
 
 #include <CD_NamespaceFooter.H>

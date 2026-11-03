@@ -1,0 +1,61 @@
+# ====================================================================================================
+# FieldSolverMG class options
+# ====================================================================================================
+FieldSolverMG.verbosity             = -1               ## Class verbosity
+FieldSolverMG.jump_bc               = natural          ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverMG.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverMG.bc_order              = 2                ## EB stencil order on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.bc_weight             = 2                ## EB stencil least-squares weight on electrodes and dielectric interfaces (GMG and AMG)
+FieldSolverMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+FieldSolverMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
+
+# Fallback to algebraic multigrid (PETSc builds only; ignored with a warning otherwise)
+FieldSolverMG.amg_fallback           = true    ## Fall back to PETSc AMG when the GMG solver chain fails
+FieldSolverMG.amg_retry_interval     = 10      ## While latched to AMG, re-try GMG every N solves (1 = always try GMG first)
+
+# Geometric multigrid stage (always active)
+FieldSolverMG.gmg_solver                    = gmg bicgstab    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverMG.gmg_krylov_eps                = 1.E-10          ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverMG.gmg_krylov_max_iter           = 50              ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverMG.gmg_krylov_restart            = 30              ## GMRES restart length (gmres only)
+FieldSolverMG.gmg_krylov_vcycles            = 1               ## V-cycles per Krylov preconditioner application
+FieldSolverMG.gmg_krylov_retry_interval     = 10              ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+FieldSolverMG.gmg_krylov_reprobe_iters      = 0               ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
+FieldSolverMG.gmg_verbosity                 = -1              ## GMG verbosity (also used by the Krylov solvers)
+FieldSolverMG.gmg_cycle                     = vcycle          ## Cycle type. 'vcycle' or 'wcycle'
+FieldSolverMG.gmg_smoother                  = ras 4           ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
+FieldSolverMG.gmg_relax_factor              = 1.0             ## Adjustable SOR factor
+FieldSolverMG.gmg_pre_smooth                = 3               ## Number of relaxations in downsweep (each is <inner_sweeps> sweeps for 'ras')
+FieldSolverMG.gmg_post_smooth               = 3               ## Number of relaxations in upsweep (each is <inner_sweeps> sweeps for 'ras')
+FieldSolverMG.gmg_bott_smooth               = 0               ## Number of relaxations on the bottom level before the bottom solver
+FieldSolverMG.gmg_precond_smooth            = 4               ## Relaxations in the bottom Krylov solver's preconditioner (bicgstab/gmres bottom only)
+FieldSolverMG.gmg_min_iter                  = 5               ## Minimum number of iterations
+FieldSolverMG.gmg_max_iter                  = 50              ## Maximum number of iterations
+FieldSolverMG.gmg_exit_tol                  = 1.E-10          ## Residue tolerance
+FieldSolverMG.gmg_exit_hang                 = 0.2             ## Solver hang
+FieldSolverMG.gmg_min_cells                 = 16              ## Bottom drop
+FieldSolverMG.gmg_drop_order                = 0               ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMG.gmg_reduce_order              = true            ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverMG.gmg_bottom_solver             = simple 16       ## Bottom solver type. 'simple <relaxations>', 'bicgstab', or 'gmres'
+FieldSolverMG.gmg_bottom_verbosity          = -1              ## Bottom solver verbosity.
+FieldSolverMG.gmg_reflux_free               = false           ## If true, use reflux-free AMR operator
+
+# Algebraic multigrid stage (PETSc builds only; built on the first fallback)
+FieldSolverMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'
+FieldSolverMG.ksp_gmres_restart              = 30           ## Restart length of GMRES and FGMRES
+FieldSolverMG.pc_type                        = gamg         ## PETSc preconditioner, e.g. 'gamg', 'hypre'
+FieldSolverMG.amg_smoother_ksp               = chebyshev    ## Multigrid level smoother: PETSc KSP type, e.g. 'chebyshev', 'richardson'
+FieldSolverMG.amg_smoother_pc                = sor          ## Multigrid level smoother: PETSc PC type, e.g. 'sor', 'jacobi'
+FieldSolverMG.amg_smoother_its               = 2            ## Multigrid level smoother: number of smoothing steps
+FieldSolverMG.gamg_threshold                 = 0.02         ## GAMG graph threshold for dropping weak connections (negative keeps all)
+FieldSolverMG.gamg_aggressive_coarsening     = 1            ## GAMG: number of levels coarsened aggressively (0 = none)
+FieldSolverMG.ksp_rtol                       = 1.E-10       ## Relative residual tolerance, in the KSP's norm (preconditioned for left-preconditioned KSPs)
+FieldSolverMG.ksp_atol                       = 1.E-50       ## Absolute residual tolerance
+FieldSolverMG.ksp_max_iter                   = 200          ## Maximum number of Krylov iterations
+FieldSolverMG.petsc_verbosity                = -1           ## PETSc solve verbosity: residual per iteration (1), true residual (2), solver view (3)

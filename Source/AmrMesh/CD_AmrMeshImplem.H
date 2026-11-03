@@ -122,17 +122,18 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
       CH_assert(a_src.ghostVect() == m_numGhostCells * IntVect::Unit);
     }
 
-    // Point at the cached Copier rather than copy-assigning it: Copier::operator= pool-allocates a fresh
-    // MotionItem for every entry in all three motion plans, which on this (very hot, generic) path is a
-    // per-level allocation loop paid on every cross-realm copy. copyTo() only ever reads it.
-    const Copier* copier = nullptr;
+    // Copy the cached Copier rather than using it in place. copyTo() stores the size of every message in the
+    // Copier's buffers and reuses them on the next call with the same number of components, but these Copiers
+    // serve every data type and phase copied between the two realms, and the message sizes of EB data depend on
+    // both. A copy starts with empty buffers, so copyTo() computes the sizes for the data actually being copied.
+    Copier copier;
 
     if (a_fromRegion == CopyStrategy::Valid) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copier = &m_validToValidRealmCopiers.at(id)[a_level];
+        copier = m_validToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copier = &m_validToValidGhostRealmCopiers.at(id)[a_level];
+        copier = m_validToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 1");
@@ -140,10 +141,10 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
     }
     else if (a_fromRegion == CopyStrategy::ValidGhost) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copier = &m_validGhostToValidRealmCopiers.at(id)[a_level];
+        copier = m_validGhostToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copier = &m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
+        copier = m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 2");
@@ -153,7 +154,7 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
       MayDay::Abort("AmrMesh::copyData - logic bust 3");
     }
 
-    a_src.copyTo(a_srcComps, a_dst, a_dstComps, *copier);
+    a_src.copyTo(a_srcComps, a_dst, a_dstComps, copier);
   }
   else {
     a_src.localCopyTo(a_srcComps, a_dst, a_dstComps);

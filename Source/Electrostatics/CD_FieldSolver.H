@@ -561,6 +561,14 @@ public:
   Location::Cell
   getDataLocation() const;
 
+  /**
+   * @brief Discard the discretization and the solver hierarchy, without touching the data.
+   * @details The solver is set up again before the next solve. This is called after regrids, and by solvers that own
+   * other solvers.
+   */
+  virtual void
+  invalidateSolver() = 0;
+
 protected:
   /**
    * @brief Component number where data is stored
@@ -757,6 +765,7 @@ protected:
 
   /**
    * @brief Function which parses which plot variables to write to plot files
+   * @details Valid names are 'phi', 'rho', 'E', 'res', 'perm', 'sigma' and 'Esol'. An unknown name aborts the run.
    */
   virtual void
   parsePlotVariables();
@@ -875,6 +884,18 @@ protected:
    */
   virtual void
   fillCoveredPotential(MFAMRCellData& a_phi) const noexcept;
+
+  /**
+   * @brief Share the data and the configuration of another solver.
+   * @details The data holders (potential, electric field, space and surface charge, residue, permittivities) are copied
+   * by handle, so this solver reads and writes the storage of a_owner. The mesh, realm, geometry, data location,
+   * boundary conditions, voltage, time and verbosity are copied by value. The class name, the plot variables and the
+   * regrid cache are not copied. Since the data are shared by handle, this must be called again whenever a_owner
+   * reallocates its data, e.g. after a regrid.
+   * @param[in] a_owner Solver whose data and configuration are shared
+   */
+  void
+  aliasState(const FieldSolver& a_owner);
 };
 
 #include <CD_NamespaceFooter.H>
