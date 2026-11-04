@@ -211,23 +211,6 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
 {
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
-
-  if (a_level < static_cast<int>(m_cellStates.size()) && !m_cellStates[a_level].isNull()) {
-    const BaseFab<signed char>& states = (*m_cellStates[a_level])[a_dit];
-
-    if (states.box().contains(a_cell)) {
-      return states(a_cell, 0);
-    }
-  }
-
-  return this->computeState(a_level, a_dit, a_cell);
-}
-
-int
-AMRPolyhedralEBGraph::computeState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const
-{
-  CH_assert(m_isDefined);
-  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
   CH_assert(m_classify);
 
   const int geometryLevel = m_geometryLevels[a_level];
@@ -235,6 +218,9 @@ AMRPolyhedralEBGraph::computeState(const int a_level, const DataIndex& a_dit, co
   bool anyRegular = false;
   bool anyCovered = false;
   bool anyCut     = false;
+
+  // whether a piece of the cell's own level or a coarser one holds the cell, all of it
+  bool whole = false;
 
   const auto take = [&](const int a_state) {
     anyRegular = anyRegular || a_state == PolyhedralEBGraph::s_regular;
@@ -249,11 +235,12 @@ AMRPolyhedralEBGraph::computeState(const int a_level, const DataIndex& a_dit, co
       continue;
     }
 
-    if (lvl == geometryLevel) {
-      take(this->getSourceState(a_level, a_dit, lvl, a_cell));
-    }
-    else if (lvl < geometryLevel) {
-      take(this->getSourceState(a_level, a_dit, lvl, coarsen(a_cell, 1 << (geometryLevel - lvl))));
+    if (lvl <= geometryLevel) {
+      const int state = this->getSourceState(a_level, a_dit, lvl, coarsen(a_cell, 1 << (geometryLevel - lvl)));
+
+      whole = whole || state != s_unowned;
+
+      take(state);
     }
     else {
       const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - geometryLevel));
@@ -277,8 +264,9 @@ AMRPolyhedralEBGraph::computeState(const int a_level, const DataIndex& a_dit, co
   }
 
   // The part of the cell no piece holds, read from the geometry's boxes at the finest level holding any of it. The box
-  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered.
-  if (!anyCut && this->holds(a_level, a_dit, a_cell)) {
+  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered. A
+  // cell a piece of its own level or a coarser one holds leaves no such part.
+  if (!anyCut && !whole && this->holds(a_level, a_dit, a_cell)) {
     int finest = geometryLevel;
 
     for (int lvl = geometryLevel + 1; lvl < m_numSourceLevels; lvl++) {
@@ -621,115 +609,6 @@ AMRPolyhedralEBGraph::finish()
           for (BoxIterator bit(coarsen(pieces[p], binSize)); bit.ok(); ++bit) {
             binPieces[fill[binBox.index(bit())]++] = static_cast<int>(p);
           }
-        }
-      }
-    }
-  }
-
-  this->resolveStates();
-}
-
-void
-AMRPolyhedralEBGraph::resolveStates()
-{
-  CH_TIME("AMRPolyhedralEBGraph::resolveStates");
-
-  CH_assert(m_isDefined);
-
-  constexpr signed char anyRegular = 1;
-  constexpr signed char anyCovered = 2;
-  constexpr signed char anyCut     = 4;
-
-  const auto bitOf = [](const int a_state) -> signed char {
-    if (a_state == PolyhedralEBGraph::s_regular) {
-      return anyRegular;
-    }
-
-    if (a_state == PolyhedralEBGraph::s_covered) {
-      return anyCovered;
-    }
-
-    if (a_state == PolyhedralEBGraph::s_cut) {
-      return anyCut;
-    }
-
-    return 0;
-  };
-
-  m_cellStates.resize(m_grids.size());
-
-  for (std::size_t i = 0; i < m_grids.size(); i++) {
-    m_cellStates[i] = RefCountedPtr<LayoutData<BaseFab<signed char>>>(new LayoutData<BaseFab<signed char>>(m_grids[i]));
-
-    const int geometryLevel = m_geometryLevels[i];
-
-    for (DataIterator dit(m_grids[i]); dit.ok(); ++dit) {
-      const Box region = grow(m_grids[i][dit()], m_ghost) & m_domains[i].domainBox();
-
-      BaseFab<signed char> bits(region, 1);
-      BaseFab<bool>        whole(region, 1);
-
-      bits.setVal(0);
-      whole.setVal(false);
-
-      for (int lvl = 0; lvl < m_numSourceLevels; lvl++) {
-        const std::vector<Box>&         pieces  = this->getPieces(static_cast<int>(i), dit(), lvl);
-        const std::vector<int>&         offsets = (*m_pieceOffsets[i][lvl])[dit()];
-        const std::vector<signed char>& states  = (*m_states[i][lvl])[dit()];
-
-        for (std::size_t p = 0; p < pieces.size(); p++) {
-          const Box& piece = pieces[p];
-
-          if (lvl <= geometryLevel) {
-            // a piece of this level or a coarser one holds whole every destination cell it reaches
-            const int ratio   = 1 << (geometryLevel - lvl);
-            const Box reached = refine(piece, ratio) & region;
-
-            for (BoxIterator bit(reached); bit.ok(); ++bit) {
-              const IntVect source = coarsen(bit(), ratio);
-
-              bits(bit(), 0) |= bitOf(states[offsets[p] + piece.index(source)]);
-              whole(bit(), 0) = true;
-            }
-          }
-          else {
-            // a piece of a finer level adds its children's states to the cells they lie in
-            const int ratio = 1 << (lvl - geometryLevel);
-            const Box under = piece & refine(region, ratio);
-
-            for (BoxIterator bit(under); bit.ok(); ++bit) {
-              bits(coarsen(bit(), ratio), 0) |= bitOf(states[offsets[p] + piece.index(bit())]);
-            }
-          }
-        }
-      }
-
-      BaseFab<signed char>& cellStates = (*m_cellStates[i])[dit()];
-
-      cellStates.define(region, 1);
-
-      for (BoxIterator bit(region); bit.ok(); ++bit) {
-        const IntVect cell = bit();
-
-        if (!whole(cell, 0)) {
-          cellStates(cell, 0) = static_cast<signed char>(this->computeState(static_cast<int>(i), dit(), cell));
-
-          continue;
-        }
-
-        const signed char b = bits(cell, 0);
-
-        if ((b & anyCut) != 0 || ((b & anyRegular) != 0 && (b & anyCovered) != 0)) {
-          cellStates(cell, 0) = static_cast<signed char>(PolyhedralEBGraph::s_cut);
-        }
-        else if ((b & anyRegular) != 0) {
-          cellStates(cell, 0) = static_cast<signed char>(PolyhedralEBGraph::s_regular);
-        }
-        else if ((b & anyCovered) != 0) {
-          cellStates(cell, 0) = static_cast<signed char>(PolyhedralEBGraph::s_covered);
-        }
-        else {
-          cellStates(cell, 0) = static_cast<signed char>(s_unowned);
         }
       }
     }

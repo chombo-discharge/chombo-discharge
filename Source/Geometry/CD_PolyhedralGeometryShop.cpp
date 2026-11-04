@@ -766,7 +766,9 @@ PolyhedralGeometryShop::buildMoments()
 
   const int numLevels = m_compGeom->getNumGridLevels();
 
-  // The geometry's own grids, every box of every level, balanced by cell count.
+  // The geometry's own grids, every box of every level. As ScanShop does, the boxes holding this phase's cut cells and
+  // the regular or covered ones are distributed separately, a box at a time, so that every rank gets its share of the
+  // cut cells, where nearly all the work is.
   std::vector<DisjointBoxLayout> grids(numLevels);
   std::vector<ProblemDomain>     domains(numLevels);
 
@@ -775,17 +777,41 @@ PolyhedralGeometryShop::buildMoments()
 
     const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
 
-    Vector<long> loads(boxes.size());
+    Vector<Box> cutBoxes;
+    Vector<Box> wholeBoxes;
 
     for (int i = 0; i < boxes.size(); i++) {
-      loads[i] = boxes[i].numPts();
+      if (m_compGeom->classify(boxes[i], lvl, m_phase) == GeometryService::Irregular) {
+        cutBoxes.push_back(boxes[i]);
+      }
+      else {
+        wholeBoxes.push_back(boxes[i]);
+      }
     }
 
-    Vector<int> ranks;
+    LoadBalancing::sort(cutBoxes, m_boxSorting);
+    LoadBalancing::sort(wholeBoxes, m_boxSorting);
 
-    LoadBalancing::makeBalance(ranks, loads, boxes);
+    Vector<int> cutRanks;
+    Vector<int> wholeRanks;
 
-    grids[lvl].define(boxes, ranks, domains[lvl]);
+    if (cutBoxes.size() > 0) {
+      LoadBalancing::makeBalance(cutRanks, Vector<long>(cutBoxes.size(), 1L), cutBoxes);
+    }
+
+    if (wholeBoxes.size() > 0) {
+      LoadBalancing::makeBalance(wholeRanks, Vector<long>(wholeBoxes.size(), 1L), wholeBoxes);
+    }
+
+    Vector<Box> allBoxes;
+    Vector<int> allRanks;
+
+    allBoxes.append(cutBoxes);
+    allBoxes.append(wholeBoxes);
+    allRanks.append(cutRanks);
+    allRanks.append(wholeRanks);
+
+    grids[lvl].define(allBoxes, allRanks, domains[lvl]);
   }
 
   // The graph, copied onto those grids with the ring the coarsening reads.
@@ -1538,6 +1564,25 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
   for (DataIterator dit(a_grids[lvl]); dit.ok(); ++dit) {
     const Box box    = a_grids[lvl][dit()];
     const Box region = grow(box, 1) & domain.domainBox();
+
+    // A box the geometry calls regular or covered, ghost cell included, holds no cut cell: the graph holds nothing of
+    // it, and its cells are set whole.
+    const GeometryService::InOut type = m_compGeom->classify(region, lvl, m_phase);
+
+    if (type != GeometryService::Irregular) {
+      EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
+
+      if (type == GeometryService::Regular) {
+        graph.setToAllRegular();
+      }
+      else {
+        graph.setToAllCovered();
+      }
+
+      (*m_ebData[lvl])[dit()].define(graph, Vector<IrregNode>(), box);
+
+      continue;
+    }
 
     BaseFab<int>      flags;
     Vector<IrregNode> nodes;

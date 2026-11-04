@@ -230,7 +230,9 @@ public:
   /**
    * @brief Compute the index-space data on the geometry's own grids, from the graph and nothing else.
    * @details One LevelData<EBGraph> and one LevelData<EBData> per level, over every box the geometry built on it, as
-   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids
+   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. As in ScanShop, the boxes holding the
+   * phase's cut cells and the regular or covered ones are distributed over the ranks separately, a box at a time. The
+   * graph is copied onto the grids
    * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
    * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
    * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). The graph
@@ -603,10 +605,11 @@ public:
 
   /**
    * @brief Build a level of the index space from its own cells and the cells coarsened from the next finer level.
-   * @details The level's own cells take what the copied graph says. Its cells under the next finer level take the
-   * coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which
-   * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
-   * cell, since a regular cell connects to one VoF only; this changes no moment.
+   * @details A box the geometry calls regular or covered, with its ghost cell, is set whole, and nothing of the graph
+   * is read for it. Otherwise, the level's own cells take what the copied graph says. Its cells under the next finer
+   * level take the coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side,
+   * which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is
+   * written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment.
    *
    * A coarsened cell carries its links to the next finer level, the pieces coarsenLevel gave it, and a regular cell
    * made cut all of its children. An own cut cell, which no finer box lies over, has no links to the finer level. When
