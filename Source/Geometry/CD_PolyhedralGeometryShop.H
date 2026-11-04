@@ -234,7 +234,7 @@ public:
    * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
    * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
    * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). The graph
-   * holds every VoF's links to the next coarser and finer levels, as assembleLevel describes. Under
+   * holds the links between levels that assembleLevel describes. Under
    * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
    * Requires buildGraphs.
    */
@@ -261,7 +261,7 @@ public:
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
    * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
    * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. The graph carries the
-   * links to the next coarser and finer levels, as fillLevel describes. Nothing evaluates the implicit function. This
+   * links between levels that fillLevel describes. Nothing evaluates the implicit function. This
    * is the shape of EBISLayout::Filler. Collective. Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
@@ -536,10 +536,12 @@ public:
   /**
    * @brief Check the links between every two neighbouring levels of the geometry, filled onto the coarser level's boxes
    * in octants with the ranks shuffled and onto the same boxes refined.
-   * @details For every coarse cell: the pieces coarsePieces finds among its children in the finer layout must be its
-   * VoFs' links to the finer level, in number and in order; every fine VoF's link to the coarser level must name a VoF
-   * of the coarse cell whose links list it, and every VoF a coarse VoF lists must link back to it; and each coarse cut
-   * VoF's volume fraction and apertures must be the scaled sums over the fine VoFs it lists, to round-off. Collective.
+   * @details For every coarse cell the finer level's boxes lie over, the pieces coarsePieces finds among its children
+   * in the finer layout must be its VoFs' links to the finer level, in number and in order. A coarse cut cell outside
+   * them is a leaf: it must be one VoF, it has no links to the finer level, and the VoFs of its children stand in for
+   * them below. Every fine VoF's link to the coarser level must name a VoF of the coarse cell whose links list it, and
+   * every VoF a coarse VoF lists must link back to it; and each coarse cut VoF's volume fraction and apertures must be
+   * the scaled sums over the fine VoFs it lists, to round-off. Collective.
    * Switched by PolyhedralGeometryShop.test_copy.
    */
   void
@@ -555,8 +557,7 @@ public:
    *
    * The graph carries the links to the next coarser level when the domain coarsens by two: a stored cell's from the
    * stored graph, and a cell cut from an ancestor into the ancestor's only VoF. It carries the links to the next finer
-   * level for every stored cut cell, and for a cut cell cut from an ancestor when the level is coarser than the finest
-   * stored one, from cutting its body once more.
+   * level for the stored cells coarsened from it, and for a regular cell made cut; no cell is cut further for them.
    * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
    * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
@@ -607,10 +608,10 @@ public:
    * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
    * cell, since a regular cell connects to one VoF only; this changes no moment.
    *
-   * Every cut cell carries its links to the next finer level: a coarsened cell the pieces coarsenLevel gave it, an own
-   * cut cell, which no finer box lies over, the children its body is cut into once more, and a regular cell made cut
-   * all of its children. When the domain coarsens by two, every VoF of the boxes is linked to the next coarser level by
-   * writeCoarserLinks, from this level's own graph, before that level is built.
+   * A coarsened cell carries its links to the next finer level, the pieces coarsenLevel gave it, and a regular cell
+   * made cut all of its children. An own cut cell, which no finer box lies over, has no links to the finer level. When
+   * the domain coarsens by two, every VoF of the boxes is linked to the next coarser level by writeCoarserLinks, from
+   * this level's own graph, before that level is built.
    * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
    * @param[in]  a_copy            The graph copied onto the geometry's grids.
    * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.

@@ -886,18 +886,7 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
     m_ebData[geom]->copyTo(interv, storedData, interv);
   }
 
-  // whether buildMoments made a cell, in one of the geometry's boxes on the level
-  const auto storedHas = [&](const IntVect& a_cell) -> bool {
-    if (!haveStored) {
-      return false;
-    }
-
-    Vector<int> hits;
-
-    m_ebGraphs[geom]->disjointBoxLayout().intersecting(Box(a_cell, a_cell), hits);
-
-    return hits.size() > 0;
-  };
+  const bool haveFinerStored = geom + 1 < static_cast<int>(m_ebGraphs.size()) && !m_ebGraphs[geom + 1].isNull();
 
   long long numCollapsed = 0;
   long long numFiner     = 0;
@@ -905,14 +894,66 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
 
   // The links to the next coarser level exist when the domain coarsens by two. A stored cell reads its links from the
   // stored graph. A cell cut from an ancestor lies in the ancestor's only VoF, since a multi-valued cell is coarsened
-  // from children that are all stored, and its links to the next finer level are needed only below the finest stored
-  // level, where they come from cutting its body once more.
+  // from children that are all stored. Only stored cells coarsened from the next finer level carry links to it.
   const bool hasCoarser = refine(coarsen(domain.domainBox(), 2), 2) == domain.domainBox();
-  const bool cutFiner   = geom + 1 < static_cast<int>(m_ebGraphs.size());
 
   for (DataIterator dit(grids); dit.ok(); ++dit) {
     const Box graphRegion = grow(grids[dit()], a_graphGhost) & domain.domainBox();
     const Box dataRegion  = grow(grids[dit()], a_dataGhost) & domain.domainBox();
+
+    const Box copyRegion = grow(grids[dit()], a_copy.getGhost()) & domain.domainBox();
+
+    // The cells buildMoments made, in the geometry's boxes on the level, and those of them it coarsened from the next
+    // finer level, which carry links to it.
+    BaseFab<bool> storedCell(copyRegion, 1);
+    BaseFab<bool> coarsenedCell(copyRegion, 1);
+
+    storedCell.setVal(false);
+    coarsenedCell.setVal(false);
+
+    if (haveStored) {
+      const DisjointBoxLayout& storedGrids = m_ebGraphs[geom]->disjointBoxLayout();
+
+      Vector<int> hits;
+
+      storedGrids.intersecting(copyRegion, hits);
+
+      for (int h = 0; h < hits.size(); h++) {
+        storedCell.setVal(true, storedGrids.boxArray()[hits[h]] & copyRegion, 0);
+      }
+    }
+
+    if (haveFinerStored) {
+      const DisjointBoxLayout& finerGrids = m_ebGraphs[geom + 1]->disjointBoxLayout();
+
+      Vector<int> hits;
+
+      finerGrids.intersecting(refine(copyRegion, 2), hits);
+
+      for (int h = 0; h < hits.size(); h++) {
+        coarsenedCell.setVal(true, coarsen(finerGrids.boxArray()[hits[h]], 2) & copyRegion, 0);
+      }
+    }
+
+    // The copy fills the cells buildMoments did not make, and the cells across their faces, whose bodies give the faces
+    // between them; a stored cell with no such neighbour is taken from the stored graph alone.
+    BaseFab<bool> compute(copyRegion, 1);
+
+    for (BoxIterator bit(copyRegion); bit.ok(); ++bit) {
+      const IntVect cell = bit();
+
+      bool needed = !storedCell(cell, 0);
+
+      for (int dir = 0; dir < SpaceDim && !needed; dir++) {
+        for (SideIterator sit; sit.ok() && !needed; ++sit) {
+          const IntVect across = cell + sign(sit()) * BASISV(dir);
+
+          needed = copyRegion.contains(across) && !storedCell(across, 0);
+        }
+      }
+
+      compute(cell, 0) = needed;
+    }
 
     BaseFab<int>      flags;
     Vector<IrregNode> fromCopy;
@@ -920,14 +961,12 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
 
     withNode.setVal(false);
 
-    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit(), [&](const IntVect& a_cell) -> bool {
-      return cutFiner && !storedHas(a_cell);
-    });
+    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit(), compute);
 
     Vector<IrregNode> nodes;
 
     for (int n = 0; n < fromCopy.size(); n++) {
-      if (graphRegion.contains(fromCopy[n].m_cell) && !storedHas(fromCopy[n].m_cell)) {
+      if (graphRegion.contains(fromCopy[n].m_cell) && !storedCell(fromCopy[n].m_cell, 0)) {
         nodes.push_back(fromCopy[n]);
 
         nodes.back().m_coarserNode = hasCoarser ? 0 : -1;
@@ -940,7 +979,7 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
       const IntVect cell = bit();
 
       // a cut cell the copy could not fill -- one a finer level owns -- is one buildMoments made
-      if (!storedHas(cell)) {
+      if (!storedCell(cell, 0)) {
         numUnfilled += (flags(cell, 0) == 0 && !withNode(cell, 0)) ? 1 : 0;
 
         continue;
@@ -963,7 +1002,7 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
                                             cell,
                                             dataRegion.contains(cell),
                                             hasCoarser,
-                                            true);
+                                            coarsenedCell(cell, 0));
       }
     }
 
@@ -976,7 +1015,7 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
       for (int n = numBefore; n < nodes.size(); n++) {
         const IntVect cell = nodes[n].m_cell;
 
-        nodes[n].m_coarserNode = storedHas(cell) ? stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex() : 0;
+        nodes[n].m_coarserNode = storedCell(cell, 0) ? stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex() : 0;
       }
 
       // A stored regular cell in a piece of its coarser cell other than the first gets a node marked regular that
@@ -984,7 +1023,7 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
       for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
         const IntVect cell = bit();
 
-        if (flags(cell, 0) != 1 || !storedHas(cell)) {
+        if (flags(cell, 0) != 1 || !storedCell(cell, 0)) {
           continue;
         }
 
@@ -1503,11 +1542,11 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     BaseFab<int>      flags;
     Vector<IrregNode> nodes;
 
-    // every cut cell the copy fills is a leaf: no finer level's boxes lie over it, so its links to the finer level come
-    // from cutting its body once more
-    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit(), [](const IntVect&) -> bool {
-      return true;
-    });
+    BaseFab<bool> all(grow(a_copy.getGrids(lvl)[dit()], a_copy.getGhost()) & a_copy.getDomain(lvl).domainBox(), 1);
+
+    all.setVal(true);
+
+    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit(), all);
 
     Vector<IrregNode> held;
 
@@ -4552,9 +4591,11 @@ PolyhedralGeometryShop::testCopyBodies() const
         BaseFab<int>      flags;
         Vector<IrregNode> nodes;
 
-        dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, dit(), [](const IntVect&) -> bool {
-          return false;
-        });
+        BaseFab<bool> all(grow(dest.getGrids(i)[dit()], dest.getGhost()) & dest.getDomain(i).domainBox(), 1);
+
+        all.setVal(true);
+
+        dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, dit(), all);
 
         for (BoxIterator bit(flags.box()); bit.ok(); ++bit) {
           const int state = dest.getState(i, dit(), bit());
@@ -4820,9 +4861,11 @@ PolyhedralGeometryShop::testMoments() const
       BaseFab<int>      flags;
       Vector<IrregNode> nodes;
 
-      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit(), [](const IntVect&) -> bool {
-        return false;
-      });
+      BaseFab<bool> all(grow(copy.getGrids(lvl)[dit()], copy.getGhost()) & copy.getDomain(lvl).domainBox(), 1);
+
+      all.setVal(true);
+
+      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit(), all);
 
       const EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
       const EBData&  data  = (*m_ebData[lvl])[dit()];
@@ -5340,7 +5383,14 @@ PolyhedralGeometryShop::testFill() const
               same = same && ebisBox.coarsen(vofs[v]) == graph[dit()].coarsen(vofs[v]);
             }
 
+            // only a cell coarsened from the finer level has links to it
+            Vector<int> hits;
+
             if (hasFiner) {
+              m_ebGraphs[lvl + 1]->disjointBoxLayout().intersecting(refine(Box(bit(), bit()), 2), hits);
+            }
+
+            if (hits.size() > 0) {
               same = same && ebisBox.refine(vofs[v]).constStdVector() == graph[dit()].refine(vofs[v]).constStdVector();
             }
 
@@ -5444,21 +5494,49 @@ PolyhedralGeometryShop::testLinks() const
 
         numCells++;
 
-        PolyhedralGeometryShop::coarsePieces(found, fine, cell);
-
         const Vector<VolIndex> coarseVoFs = coarse.getVoFs(cell);
 
         numMulti += (coarseVoFs.size() > 1) ? 1 : 0;
 
-        // The numbering contract: the pieces among the children are the coarse VoFs, in order.
-        bool contract = found.size() == coarseVoFs.size();
+        // A cell the finer level's boxes lie over was coarsened from it and lists its finer VoFs. A cut cell outside
+        // them is a leaf, one VoF with no links to the finer level, and the VoFs under it are those of its children.
+        Vector<int> hits;
 
-        for (int p = 0; p < coarseVoFs.size() && contract; p++) {
-          contract = coarseVoFs[p].cellIndex() == p &&
-                     coarse.refine(coarseVoFs[p]).constStdVector() == found[p].constStdVector();
+        m_ebGraphs[k + 1]->disjointBoxLayout().intersecting(refine(Box(cell, cell), 2), hits);
+
+        const bool coarsened = hits.size() > 0;
+        const bool leaf      = !coarsened && coarse.isIrregular(cell);
+
+        const auto finerOf = [&](const VolIndex& a_vof) -> Vector<VolIndex> {
+          if (!leaf) {
+            return coarse.refine(a_vof);
+          }
+
+          Vector<VolIndex> under;
+
+          for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+            under.append(fine.getVoFs(cit()));
+          }
+
+          return under;
+        };
+
+        // The numbering contract: the pieces among the children of a coarsened cell are its VoFs, in order.
+        if (coarsened) {
+          PolyhedralGeometryShop::coarsePieces(found, fine, cell);
+
+          bool contract = found.size() == coarseVoFs.size();
+
+          for (int p = 0; p < coarseVoFs.size() && contract; p++) {
+            contract = coarseVoFs[p].cellIndex() == p &&
+                       coarse.refine(coarseVoFs[p]).constStdVector() == found[p].constStdVector();
+          }
+
+          numContract += contract ? 0 : 1;
         }
-
-        numContract += contract ? 0 : 1;
+        else {
+          numContract += (leaf && coarseVoFs.size() != 1) ? 1 : 0;
+        }
 
         // Every fine VoF names a coarse VoF that lists it, and every VoF a coarse VoF lists names it back.
         for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
@@ -5470,7 +5548,7 @@ PolyhedralGeometryShop::testLinks() const
             bool listed = up.gridIndex() == cell && up.cellIndex() >= 0 && up.cellIndex() < coarseVoFs.size();
 
             if (listed) {
-              const Vector<VolIndex>       down  = coarse.refine(up);
+              const Vector<VolIndex>       down  = finerOf(up);
               const std::vector<VolIndex>& below = down.constStdVector();
 
               listed = std::find(below.begin(), below.end(), fineVoFs[v]) != below.end();
@@ -5482,7 +5560,7 @@ PolyhedralGeometryShop::testLinks() const
 
         for (int c = 0; c < coarseVoFs.size(); c++) {
           const VolIndex&        vof  = coarseVoFs[c];
-          const Vector<VolIndex> down = coarse.refine(vof);
+          const Vector<VolIndex> down = finerOf(vof);
 
           numVoFs++;
 

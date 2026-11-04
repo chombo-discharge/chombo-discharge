@@ -157,7 +157,8 @@ public:
    * regular and covered fluid, regular or covered if all of it is, and s_unowned if the box holds nothing of it.
    * @details The graph holds only cut tiles. A part of the cell no tile holds is regular or covered whole, as the
    * geometry's own boxes say (ComputationalGeometry::classify), and is read from them at the finest level holding any
-   * of the cell.
+   * of the cell. finish resolves every cell of the box and its ghost cells once, and this reads the answer; a cell
+   * outside them is resolved here.
    * @param[in] a_level Destination level.
    * @param[in] a_dit   Destination box.
    * @param[in] a_cell  The cell, on the destination level.
@@ -199,19 +200,18 @@ public:
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.
    * @param[in]  a_dit             Destination box.
-   * @param[in]  a_withFinerNodes  Whether a cell's node gets its links to the next finer level: its body is subdivided
-   * once more, and m_finerNodes lists the children that CutCellBody::childState does not call covered, each at cell
-   * index 0, in quadrant order. A subdivision here that fails with every child in one piece stops the run, as above.
-   * The other links are left unset.
+   * @param[in]  a_compute         The cells to fill, over at least the box grown by the ghost width within the domain.
+   * A cell left out is marked irregular, gets no node and builds no body, so a cell filled beside it does not read its
+   * faces from it: a caller that keeps a node must fill every cell across its faces too.
    */
   void
-  fillNodes(BaseFab<int>&                              a_regIrregCovered,
-            Vector<IrregNode>&                         a_nodes,
-            long long&                                 a_numCollapsed,
-            long long&                                 a_numFiner,
-            const int                                  a_level,
-            const DataIndex&                           a_dit,
-            const std::function<bool(const IntVect&)>& a_withFinerNodes) const;
+  fillNodes(BaseFab<int>&        a_regIrregCovered,
+            Vector<IrregNode>&   a_nodes,
+            long long&           a_numCollapsed,
+            long long&           a_numFiner,
+            const int            a_level,
+            const DataIndex&     a_dit,
+            const BaseFab<bool>& a_compute) const;
 
   /**
    * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.
@@ -405,6 +405,31 @@ protected:
    * @brief The pieces that reach each bin, one bin after another.
    */
   std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<int>>>>> m_binPieces;
+
+  /**
+   * @brief Every cell's state, per destination level, over each box grown by the ghost width within the domain.
+   */
+  std::vector<RefCountedPtr<LayoutData<BaseFab<signed char>>>> m_cellStates;
+
+  /**
+   * @brief What a cell of a destination box is, from the pieces over it, as getState describes.
+   * @details Cell by cell: every piece over the cell is read, and the part of the cell no piece holds is classified.
+   * @param[in] a_level Destination level.
+   * @param[in] a_dit   Destination box.
+   * @param[in] a_cell  The cell, on the destination level.
+   * @return PolyhedralEBGraph::s_cut, s_regular or s_covered, or s_unowned.
+   */
+  int
+  computeState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
+
+  /**
+   * @brief Resolve the state of every cell of every destination box and its ghost cells into m_cellStates.
+   * @details Piece by piece: a cell lying whole in a piece of its own geometry level or a coarser one takes the states
+   * of the pieces over it, every piece of a finer level adding its children's, and leaves nothing to classify. A cell
+   * no such piece holds whole is resolved by computeState. Requires the pieces' bins.
+   */
+  void
+  resolveStates();
 
   /**
    * @brief The pieces of a box that may meet a region: those of the bins the region reaches, each once.
