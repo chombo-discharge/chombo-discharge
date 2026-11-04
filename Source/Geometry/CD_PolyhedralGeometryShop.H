@@ -610,24 +610,6 @@ public:
   static DisjointBoxLayout
   shuffledLayout(const Vector<Box>& a_boxes, const ProblemDomain& a_domain);
 
-  /**
-   * @brief Write a cut cell's node from its body.
-   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
-   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come
-   * from the body. Reads nothing of the shop, so the copied graph writes its nodes with it too.
-   * @param[out] a_node             The node to fill
-   * @param[in]  a_body             The cell's assembled polyhedron
-   * @param[in]  a_regIrregCovered  Regular/Covered/Irregular cells
-   * @param[in]  a_cell             The cell
-   * @param[in]  a_domain           Domain
-   */
-  static void
-  fillNode(IrregNode&                       a_node,
-           const PolyhedralEB::CutCellBody& a_body,
-           const BaseFab<int>&              a_regIrregCovered,
-           const IntVect&                   a_cell,
-           const ProblemDomain&             a_domain);
-
 protected:
   /**
    * @brief Vertices of one element of the written surface: a triangle in three dimensions, a segment in two.

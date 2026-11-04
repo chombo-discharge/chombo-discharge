@@ -23,7 +23,6 @@
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
-#include <CD_PolyhedralGeometryShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
@@ -791,7 +790,7 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
 
     IrregNode node;
 
-    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cell, domain);
+    cutBodies[n].fillNode(node, a_regIrregCovered, cell, domain);
 
     // A face is the regular cell's if one side is regular, open over all of it, and otherwise the low cell's: both
     // sides write it from the same cell, where they would otherwise compute it each over its own polygon and to
