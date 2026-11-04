@@ -1721,8 +1721,11 @@ PolyhedralGeometryShop::verifySurface() const
     this->testCopyBodies();
     timer.stopEvent("Copy bodies");
 
+    if (m_ebGraphs.size() == 0) {
+      MayDay::Error("PolyhedralGeometryShop::verifySurface - the tests need buildMoments to have run");
+    }
+
     timer.startEvent("Moments");
-    const_cast<PolyhedralGeometryShop*>(this)->buildMoments();
     this->testMoments();
     timer.stopEvent("Moments");
 

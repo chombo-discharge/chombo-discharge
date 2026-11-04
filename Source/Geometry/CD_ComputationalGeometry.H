@@ -37,6 +37,8 @@
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
+class PolyhedralGeometryShop;
+
 /**
  * @brief Abstract base class for geometries
  * @details This class encapsulates computational geometries in chombo-discharge. If you construct this object as-is,
@@ -345,7 +347,8 @@ public:
 
   /**
    * @brief The cut cells of a phase on a domain that this rank holds.
-   * @details Read from the phase's index space. Empty when the phase has none.
+   * @details Read from the polyhedral generator's stored level when it built the phase, and from the phase's index
+   * space otherwise. Empty when the phase has none.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The cut cells in the boxes this rank holds.
@@ -355,7 +358,8 @@ public:
 
   /**
    * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
-   * @details Read from the phase's index space. The phase must have one.
+   * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
+   * irregular grids otherwise. The phase must have an index space.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The layout.
@@ -421,6 +425,12 @@ protected:
    * @brief Generator selected by the user.
    */
   Generator m_generator;
+
+  /**
+   * @brief The polyhedral generator of each phase, indexed by phase::which_phase, kept for the run: the index spaces
+   * fill every layout from it. Null unless the polyhedral generator built the phase.
+   */
+  RefCountedPtr<PolyhedralGeometryShop> m_polyhedralShops[2];
 
   /**
    * @brief Multifluid index spaces

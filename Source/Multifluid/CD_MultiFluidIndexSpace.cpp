@@ -61,6 +61,32 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
   }
 }
 
+void
+MultiFluidIndexSpace::define(const Vector<ProblemDomain>&      a_domains,
+                             const RealVect&                   a_origin,
+                             const Real                        a_finestDx,
+                             const Vector<EBISLayout::Filler>& a_fillers)
+{
+  CH_TIME("MultiFluidIndexSpace::define(filler)");
+
+  CH_assert(a_fillers.size() == 2);
+
+  if (!a_fillers[phase::gas]) {
+    MayDay::Error("MultiFluidIndexSpace::define - the gas phase needs a filler");
+  }
+
+  for (const phase::which_phase curPhase : {phase::gas, phase::solid}) {
+    if (a_fillers[curPhase]) {
+      m_ebis[curPhase] = RefCountedPtr<EBIndexSpace>(new EBIndexSpace());
+
+      m_ebis[curPhase]->define(a_domains, a_origin, a_finestDx, a_fillers[curPhase]);
+    }
+    else {
+      m_ebis[curPhase] = RefCountedPtr<EBIndexSpace>(nullptr);
+    }
+  }
+}
+
 const RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase) const
 {

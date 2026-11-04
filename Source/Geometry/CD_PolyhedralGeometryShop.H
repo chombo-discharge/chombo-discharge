@@ -284,8 +284,9 @@ public:
    * carries are skipped, and a face shared with such a cell is restricted to the finer chords and the
    * interface closed. The interface triangles of every level are then checked by sanityCheck when
    * PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh
-   * when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes
-   * and writes its own share of the mesh. Requires setGrids.
+   * when PolyhedralGeometryShop.write_surface is set. Under PolyhedralGeometryShop.test_copy the copy, moment, fill
+   * and link tests run. Collective; every rank reconstructs its share of the boxes and writes its own share of the
+   * mesh. Requires setGrids, and buildMoments under PolyhedralGeometryShop.test_copy.
    */
   void
   verifySurface() const;

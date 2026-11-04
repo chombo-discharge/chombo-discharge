@@ -60,6 +60,21 @@ public:
   virtual ~MultiFluidIndexSpace();
 
   /**
+   * @brief Define the index spaces in filler mode: each phase's EBIndexSpace fills every layout through its filler and
+   * holds no level of its own.
+   * @details See EBIndexSpace::define. A phase whose filler is empty has no index space.
+   * @param[in] a_domains  The domains, finest first, each a coarsening by two of the one before.
+   * @param[in] a_origin   Lower-left corner.
+   * @param[in] a_finestDx Resolution on the finest domain.
+   * @param[in] a_fillers  One filler per phase, indexed by phase::which_phase. The gas phase's must not be empty.
+   */
+  void
+  define(const Vector<ProblemDomain>&      a_domains,
+         const RealVect&                   a_origin,
+         const Real                        a_finestDx,
+         const Vector<EBISLayout::Filler>& a_fillers);
+
+  /**
    * @brief Define function
    * @param[in] a_domain          Finest domain
    * @param[in] a_origin          Lower-left corner
