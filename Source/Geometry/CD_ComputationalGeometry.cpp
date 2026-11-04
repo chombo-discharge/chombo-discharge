@@ -933,6 +933,40 @@ ComputationalGeometry::getDomain(const int a_level) const noexcept
   return m_domains[a_level];
 }
 
+IntVectSet
+ComputationalGeometry::irregCells(const phase::which_phase a_phase, const ProblemDomain& a_domain) const
+{
+  CH_TIME("ComputationalGeometry::irregCells");
+
+  const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(a_phase);
+
+  if (ebis.isNull()) {
+    return IntVectSet();
+  }
+
+  const int level = ebis->getLevel(a_domain);
+
+  if (level < 0) {
+    MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the index space's");
+  }
+
+  return ebis->irregCells(level);
+}
+
+DisjointBoxLayout
+ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const ProblemDomain& a_domain) const
+{
+  CH_TIME("ComputationalGeometry::irregGrids");
+
+  const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(a_phase);
+
+  if (ebis.isNull()) {
+    MayDay::Error("ComputationalGeometry::irregGrids - the phase has no index space");
+  }
+
+  return ebis->getIrregGrids(a_domain);
+}
+
 Real
 ComputationalGeometry::getDx(const int a_level) const noexcept
 {

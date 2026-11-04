@@ -113,13 +113,15 @@ public:
   getEBIndexSpace(const int a_phase);
 
   /**
-   * @brief Get the interface region. This is defined as the intersection between the irregular cells of the
-   * gas phase and the other phases.
-   * @param[in] a_domain Domain
+   * @brief Get the interface region: the cells cut in both phases.
+   * @details Each rank passes the cut cells it holds of each phase; they are gathered on rank 0, intersected there and
+   * broadcast, so every rank returns the whole region. Collective.
+   * @param[in] a_gasCutCells   The cut cells of the gas phase this rank holds.
+   * @param[in] a_solidCutCells The cut cells of the solid phase this rank holds.
    * @return Interface region as an IntVectSet.
    */
   IntVectSet
-  interfaceRegion(const ProblemDomain& a_domain) const;
+  interfaceRegion(const IntVectSet& a_gasCutCells, const IntVectSet& a_solidCutCells) const;
 
   /**
    * @brief Get number of phases

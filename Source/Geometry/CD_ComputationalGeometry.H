@@ -344,6 +344,26 @@ public:
   getDomain(const int a_level) const noexcept;
 
   /**
+   * @brief The cut cells of a phase on a domain that this rank holds.
+   * @details Read from the phase's index space. Empty when the phase has none.
+   * @param[in] a_phase  Phase.
+   * @param[in] a_domain Domain, one of the index space's.
+   * @return The cut cells in the boxes this rank holds.
+   */
+  IntVectSet
+  irregCells(const phase::which_phase a_phase, const ProblemDomain& a_domain) const;
+
+  /**
+   * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
+   * @details Read from the phase's index space. The phase must have one.
+   * @param[in] a_phase  Phase.
+   * @param[in] a_domain Domain, one of the index space's.
+   * @return The layout.
+   */
+  DisjointBoxLayout
+  irregGrids(const phase::which_phase a_phase, const ProblemDomain& a_domain) const;
+
+  /**
    * @brief Grid spacing of a level.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The spacing.
