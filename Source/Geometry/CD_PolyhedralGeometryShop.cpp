@@ -901,6 +901,13 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
   long long numFiner     = 0;
   long long numUnfilled  = 0;
 
+  // The links to the next coarser level exist when the domain coarsens by two. A stored cell reads its links from the
+  // stored graph. A cell cut from an ancestor lies in the ancestor's only VoF, since a multi-valued cell is coarsened
+  // from children that are all stored, and its links to the next finer level are needed only below the finest stored
+  // level, where they come from cutting its body once more.
+  const bool hasCoarser = refine(coarsen(domain.domainBox(), 2), 2) == domain.domainBox();
+  const bool cutFiner   = geom + 1 < static_cast<int>(m_ebGraphs.size());
+
   for (DataIterator dit(grids); dit.ok(); ++dit) {
     const Box graphRegion = grow(grids[dit()], a_graphGhost) & domain.domainBox();
     const Box dataRegion  = grow(grids[dit()], a_dataGhost) & domain.domainBox();
@@ -911,8 +918,8 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
 
     withNode.setVal(false);
 
-    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit(), [](const IntVect&) -> bool {
-      return false;
+    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit(), [&](const IntVect& a_cell) -> bool {
+      return cutFiner && !storedHas(a_cell);
     });
 
     Vector<IrregNode> nodes;
@@ -920,6 +927,8 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
     for (int n = 0; n < fromCopy.size(); n++) {
       if (graphRegion.contains(fromCopy[n].m_cell) && !storedHas(fromCopy[n].m_cell)) {
         nodes.push_back(fromCopy[n]);
+
+        nodes.back().m_coarserNode = hasCoarser ? 0 : -1;
 
         withNode(fromCopy[n].m_cell, 0) = true;
       }
@@ -951,12 +960,46 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
                                             storedData[dit()],
                                             cell,
                                             dataRegion.contains(cell),
-                                            false,
-                                            false);
+                                            hasCoarser,
+                                            true);
       }
     }
 
+    const int numBefore = nodes.size();
+
     PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, nodes, graphRegion, grids[dit()], domain);
+
+    // A regular cell made cut lies in the coarser VoF the stored graph says, or in the ancestor's only one.
+    if (hasCoarser) {
+      for (int n = numBefore; n < nodes.size(); n++) {
+        const IntVect cell = nodes[n].m_cell;
+
+        nodes[n].m_coarserNode = storedHas(cell) ? stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex() : 0;
+      }
+
+      // A stored regular cell in a piece of its coarser cell other than the first gets a node marked regular that
+      // records the piece.
+      for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        if (flags(cell, 0) != 1 || !storedHas(cell)) {
+          continue;
+        }
+
+        const int piece = stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex();
+
+        if (piece > 0) {
+          IrregNode node;
+
+          node.m_cell        = cell;
+          node.m_cellIndex   = 0;
+          node.m_isRegular   = true;
+          node.m_coarserNode = piece;
+
+          nodes.push_back(node);
+        }
+      }
+    }
 
     a_graph[dit()].buildGraph(flags, nodes, graphRegion, domain);
     a_data[dit()].define(a_graph[dit()], nodes, dataRegion);

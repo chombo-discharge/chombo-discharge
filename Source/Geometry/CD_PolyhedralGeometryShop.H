@@ -260,8 +260,9 @@ public:
   /**
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
    * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
-   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. Nothing evaluates the
-   * implicit function. Collective. Requires buildMoments.
+   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. The graph carries the
+   * links to the next coarser and finer levels, as fillLevel describes. Nothing evaluates the implicit function. This
+   * is the shape of EBISLayout::Filler. Collective. Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
    * @param[in]  a_grids      The layout.
@@ -536,6 +537,11 @@ public:
    * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
    * copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns
    * outside the geometry's boxes on the level stops the run. Collective.
+   *
+   * The graph carries the links to the next coarser level when the domain coarsens by two: a stored cell's from the
+   * stored graph, and a cell cut from an ancestor into the ancestor's only VoF. It carries the links to the next finer
+   * level for every stored cut cell, and for a cut cell cut from an ancestor when the level is coarser than the finest
+   * stored one, from cutting its body once more.
    * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
    * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
