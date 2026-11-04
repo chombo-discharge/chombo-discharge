@@ -38,6 +38,8 @@
 #include <EBDataFactory.H>
 #include <EBGraphFactory.H>
 #include <EBISBox.H>
+#include <EBISLayout.H>
+#include <EBIndexSpace.H>
 #include <IntVectSet.H>
 #include <LoHiSide.H>
 #include <MayDay.H>
@@ -1727,6 +1729,10 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Fill layouts");
     this->testFill();
     timer.stopEvent("Fill layouts");
+
+    timer.startEvent("Links");
+    this->testLinks();
+    timer.stopEvent("Links");
   }
 
   // The surface: triangles in three dimensions, the chords of the cut cells in two.
@@ -5234,6 +5240,316 @@ PolyhedralGeometryShop::testFill() const
             PolyhedralGeometryShop::shuffledLayout(octants(boxes), domain),
             domain,
             lvl);
+    }
+  }
+
+  // The same fills through an EBIndexSpace with fillLayout as its filler, finest level first.
+  bool allBuilt = numLevels > 0;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    allBuilt = allBuilt && !m_ebGraphs[lvl].isNull();
+  }
+
+  if (!allBuilt) {
+    return;
+  }
+
+  Vector<ProblemDomain> domains(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains[numLevels - 1 - lvl] = m_compGeom->getDomain(lvl);
+  }
+
+  const EBISLayout::Filler filler = [this](LevelData<EBGraph>&      a_graph,
+                                           LevelData<EBData>&       a_data,
+                                           const DisjointBoxLayout& a_grids,
+                                           const ProblemDomain&     a_domain,
+                                           const int                a_graphGhost,
+                                           const int                a_dataGhost) -> void {
+    this->fillLayout(a_graph, a_data, a_grids, a_domain, a_graphGhost, a_dataGhost);
+  };
+
+  EBIndexSpace ebis;
+
+  ebis.define(domains, m_probLo, m_compGeom->getDx(numLevels - 1), filler);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const ProblemDomain&    domain = m_compGeom->getDomain(lvl);
+    const DisjointBoxLayout grids  = PolyhedralGeometryShop::shuffledLayout(octants(m_compGeom->getBoxes(lvl)), domain);
+
+    LevelData<EBGraph> graph;
+    LevelData<EBData>  data;
+
+    this->fillLayout(graph, data, grids, domain, dataGhost + 1, dataGhost);
+
+    LevelData<FArrayBox> direct;
+
+    signature(direct, graph, data, domain, dataGhost);
+
+    const bool hasCoarser = lvl > 0;
+    const bool hasFiner   = lvl + 1 < numLevels;
+
+    long long numCells = 0;
+    long long numOff   = 0;
+    long long numLinks = 0;
+
+    for (int pass = 0; pass < 2; pass++) {
+      EBISLayout ebisl;
+
+      ebis.fillEBISLayout(ebisl, grids, domain, dataGhost);
+
+      for (DataIterator dit(grids); dit.ok(); ++dit) {
+        const EBISBox& ebisBox = ebisl[dit()];
+        const Box      region  = grow(grids[dit()], dataGhost) & domain.domainBox();
+
+        FArrayBox through(region, numComps);
+
+        through.setVal(unwritten);
+
+        PolyhedralGeometryShop::cellSignature(through, ebisBox.getEBGraph(), ebisBox.getEBData(), region);
+
+        for (BoxIterator bit(region); bit.ok(); ++bit) {
+          numCells++;
+
+          for (int comp = 0; comp < numComps; comp++) {
+            if (through(bit(), comp) != direct[dit()](bit(), comp)) {
+              numOff++;
+
+              break;
+            }
+          }
+        }
+
+        // the links of the valid VoFs, as Chombo reads them through the EBISBox
+        for (BoxIterator bit(grids[dit()]); bit.ok(); ++bit) {
+          if (!graph[dit()].isIrregular(bit())) {
+            continue;
+          }
+
+          const Vector<VolIndex> vofs = graph[dit()].getVoFs(bit());
+
+          for (int v = 0; v < vofs.size(); v++) {
+            numLinks++;
+
+            bool same = true;
+
+            if (hasCoarser) {
+              same = same && ebisBox.coarsen(vofs[v]) == graph[dit()].coarsen(vofs[v]);
+            }
+
+            if (hasFiner) {
+              same = same && ebisBox.refine(vofs[v]).constStdVector() == graph[dit()].refine(vofs[v]).constStdVector();
+            }
+
+            numOff += same ? 0 : 1;
+          }
+        }
+      }
+    }
+
+    numCells = ParallelOps::sum(numCells);
+    numOff   = ParallelOps::sum(numOff);
+    numLinks = ParallelOps::sum(numLinks);
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testFill - level " << lvl << " through an EBIndexSpace, twice: " << numOff
+             << " of " << numCells << " cells and " << numLinks << " linked VoFs differ from fillLayout" << endl;
+    }
+
+    if (numOff > 0) {
+      MayDay::Error("PolyhedralGeometryShop::testFill - an EBIndexSpace fills a layout otherwise than fillLayout");
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::testLinks() const
+{
+  CH_TIME("PolyhedralGeometryShop::testLinks");
+
+  CH_assert(m_compGeom != nullptr);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testLinks" << endl;
+  }
+
+  const int numLevels = m_ebGraphs.size();
+
+  constexpr Real tolerance = 1.0E-12;
+
+  const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
+  const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
+
+  for (int k = 0; k + 1 < numLevels; k++) {
+    if (m_ebGraphs[k].isNull() || m_ebGraphs[k + 1].isNull()) {
+      continue;
+    }
+
+    const ProblemDomain& coarseDomain = m_compGeom->getDomain(k);
+    const ProblemDomain& fineDomain   = m_compGeom->getDomain(k + 1);
+
+    // the coarse level's boxes in octants, and the same boxes refined, so that each coarse box holds every child
+    Vector<Box> pieces;
+
+    const Vector<Box>& coarseBoxes = m_compGeom->getBoxes(k);
+
+    for (int i = 0; i < coarseBoxes.size(); i++) {
+      const Box&  box = coarseBoxes[i];
+      Vector<Box> children;
+
+      domainSplit(box, children, std::max(1, box.shortside() / 2), 1);
+
+      pieces.append(children);
+    }
+
+    const DisjointBoxLayout coarseGrids = PolyhedralGeometryShop::shuffledLayout(pieces, coarseDomain);
+
+    DisjointBoxLayout fineGrids;
+
+    refine(fineGrids, coarseGrids, 2);
+
+    LevelData<EBGraph> coarseGraph;
+    LevelData<EBData>  coarseData;
+    LevelData<EBGraph> fineGraph;
+    LevelData<EBData>  fineData;
+
+    this->fillLayout(coarseGraph, coarseData, coarseGrids, coarseDomain, 1, 0);
+    this->fillLayout(fineGraph, fineData, fineGrids, fineDomain, 1, 0);
+
+    long long numCells    = 0;
+    long long numVoFs     = 0;
+    long long numContract = 0;
+    long long numInverse  = 0;
+    long long numInexact  = 0;
+    long long numMulti    = 0;
+
+    Vector<Vector<VolIndex>> found;
+
+    for (DataIterator dit(coarseGrids); dit.ok(); ++dit) {
+      const EBGraph& coarse = coarseGraph[dit()];
+      const EBGraph& fine   = fineGraph[dit()];
+
+      // EBISBoxes answer the regular cells too
+      EBISBox coarseBox;
+      EBISBox fineBox;
+
+      coarseBox.define(coarse, coarseData[dit()], dit());
+      fineBox.define(fine, fineData[dit()], dit());
+
+      for (BoxIterator bit(coarseGrids[dit()]); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        numCells++;
+
+        PolyhedralGeometryShop::coarsePieces(found, fine, cell);
+
+        const Vector<VolIndex> coarseVoFs = coarse.getVoFs(cell);
+
+        numMulti += (coarseVoFs.size() > 1) ? 1 : 0;
+
+        // The numbering contract: the pieces among the children are the coarse VoFs, in order.
+        bool contract = found.size() == coarseVoFs.size();
+
+        for (int p = 0; p < coarseVoFs.size() && contract; p++) {
+          contract = coarseVoFs[p].cellIndex() == p &&
+                     coarse.refine(coarseVoFs[p]).constStdVector() == found[p].constStdVector();
+        }
+
+        numContract += contract ? 0 : 1;
+
+        // Every fine VoF names a coarse VoF that lists it, and every VoF a coarse VoF lists names it back.
+        for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+          const Vector<VolIndex> fineVoFs = fine.getVoFs(cit());
+
+          for (int v = 0; v < fineVoFs.size(); v++) {
+            const VolIndex up = fine.coarsen(fineVoFs[v]);
+
+            bool listed = up.gridIndex() == cell && up.cellIndex() >= 0 && up.cellIndex() < coarseVoFs.size();
+
+            if (listed) {
+              const Vector<VolIndex>       down  = coarse.refine(up);
+              const std::vector<VolIndex>& below = down.constStdVector();
+
+              listed = std::find(below.begin(), below.end(), fineVoFs[v]) != below.end();
+            }
+
+            numInverse += listed ? 0 : 1;
+          }
+        }
+
+        for (int c = 0; c < coarseVoFs.size(); c++) {
+          const VolIndex&        vof  = coarseVoFs[c];
+          const Vector<VolIndex> down = coarse.refine(vof);
+
+          numVoFs++;
+
+          for (int f = 0; f < down.size(); f++) {
+            numInverse += (fine.coarsen(down[f]) == vof) ? 0 : 1;
+          }
+
+          if (!coarse.isIrregular(cell)) {
+            continue;
+          }
+
+          // The coarse VoF against the sums over the fine VoFs it lists.
+          Real volume = 0.0;
+
+          for (int f = 0; f < down.size(); f++) {
+            volume += volumeScale * fineBox.volFrac(down[f]);
+          }
+
+          bool exact = std::abs(volume - coarseBox.volFrac(vof)) <= tolerance;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            for (SideIterator sit; sit.ok(); ++sit) {
+              const int plane = (sit() == Side::Lo) ? 2 * cell[dir] : 2 * cell[dir] + 1;
+
+              Real coarseAperture = 0.0;
+              Real fineAperture   = 0.0;
+
+              const Vector<FaceIndex> coarseFaces = coarseBox.getFaces(vof, dir, sit());
+
+              for (int i = 0; i < coarseFaces.size(); i++) {
+                coarseAperture += coarseBox.areaFrac(coarseFaces[i]);
+              }
+
+              for (int f = 0; f < down.size(); f++) {
+                if (down[f].gridIndex()[dir] != plane) {
+                  continue;
+                }
+
+                const Vector<FaceIndex> fineFaces = fineBox.getFaces(down[f], dir, sit());
+
+                for (int i = 0; i < fineFaces.size(); i++) {
+                  fineAperture += faceScale * fineBox.areaFrac(fineFaces[i]);
+                }
+              }
+
+              exact = exact && std::abs(coarseAperture - fineAperture) <= tolerance;
+            }
+          }
+
+          numInexact += exact ? 0 : 1;
+        }
+      }
+    }
+
+    numCells    = ParallelOps::sum(numCells);
+    numVoFs     = ParallelOps::sum(numVoFs);
+    numContract = ParallelOps::sum(numContract);
+    numInverse  = ParallelOps::sum(numInverse);
+    numInexact  = ParallelOps::sum(numInexact);
+    numMulti    = ParallelOps::sum(numMulti);
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testLinks - level " << k + 1 << " onto " << k << ": " << numCells
+             << " coarse cells, " << numMulti << " multi-valued, " << numVoFs << " VoFs; " << numContract
+             << " cells whose children's pieces are not their VoFs, " << numInverse << " links not returned, "
+             << numInexact << " cut VoFs not the sums of the VoFs they list" << endl;
+    }
+
+    if (numContract > 0 || numInverse > 0 || numInexact > 0) {
+      MayDay::Error("PolyhedralGeometryShop::testLinks - the links between two levels do not agree");
     }
   }
 }

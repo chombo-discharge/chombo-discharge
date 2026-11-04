@@ -524,11 +524,25 @@ public:
    * and onto the boxes of the level below refined.
    * @details The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own
    * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level
-   * below must be the sum of the cells it holds, to round-off. Collective. Switched by
-   * PolyhedralGeometryShop.test_copy.
+   * below must be the sum of the cells it holds, to round-off. Then an EBIndexSpace is defined over the geometry's
+   * domains with fillLayout as its filler, and on every level the EBISLayout it fills onto the level's boxes in
+   * octants, twice so that the second comes from its cache, must hold the graph, the moments and the links fillLayout
+   * gives, bit for bit. Collective. Switched by PolyhedralGeometryShop.test_copy.
    */
   void
   testFill() const;
+
+  /**
+   * @brief Check the links between every two neighbouring levels of the geometry, filled onto the coarser level's boxes
+   * in octants with the ranks shuffled and onto the same boxes refined.
+   * @details For every coarse cell: the pieces coarsePieces finds among its children in the finer layout must be its
+   * VoFs' links to the finer level, in number and in order; every fine VoF's link to the coarser level must name a VoF
+   * of the coarse cell whose links list it, and every VoF a coarse VoF lists must link back to it; and each coarse cut
+   * VoF's volume fraction and apertures must be the scaled sums over the fine VoFs it lists, to round-off. Collective.
+   * Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testLinks() const;
 
   /**
    * @brief Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells
