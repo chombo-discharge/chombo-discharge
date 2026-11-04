@@ -500,6 +500,17 @@ public:
   fingerprint() const noexcept;
 
   /**
+   * @brief What the cell this body describes is: covered if it holds no fluid, regular if it is all fluid with no
+   * interface, and cut otherwise.
+   * @details The classification of a body subdivided from a cut ancestor. AMRPolyhedralEBGraph::fillNodes flags a cell
+   * by it, and the links of a cut cell to its children list the children it does not call covered, so the two cannot
+   * disagree about which children hold fluid.
+   * @return 1 for regular, 0 for cut and -1 for covered, the flags GeometryService::fillGraph uses.
+   */
+  int
+  childState() const noexcept;
+
+  /**
    * @brief Write a cut cell's node from this body.
    * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
    * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come from the

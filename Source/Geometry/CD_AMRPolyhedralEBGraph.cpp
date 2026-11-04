@@ -651,12 +651,13 @@ AMRPolyhedralEBGraph::describe(std::vector<PolyhedralEB::CutCellDescription>& a_
 }
 
 void
-AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
-                                Vector<IrregNode>& a_nodes,
-                                long long&         a_numCollapsed,
-                                long long&         a_numFiner,
-                                const int          a_level,
-                                const DataIndex&   a_dit) const
+AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&                              a_regIrregCovered,
+                                Vector<IrregNode>&                         a_nodes,
+                                long long&                                 a_numCollapsed,
+                                long long&                                 a_numFiner,
+                                const int                                  a_level,
+                                const DataIndex&                           a_dit,
+                                const std::function<bool(const IntVect&)>& a_withFinerNodes) const
 {
   CH_TIME("AMRPolyhedralEBGraph::fillNodes");
 
@@ -767,13 +768,9 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
       MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
     }
 
-    if (body.numPolygons() == 0 || body.volumeFraction() <= 0.0) {
-      a_regIrregCovered(iv, 0) = -1;
-    }
-    else if (body.volumeFraction() >= 1.0 && body.boundaryArea() <= 0.0) {
-      a_regIrregCovered(iv, 0) = 1;
-    }
-    else {
+    a_regIrregCovered(iv, 0) = body.childState();
+
+    if (a_regIrregCovered(iv, 0) == 0) {
       bodyIndex(iv, 0) = cutBodies.size();
 
       cutCells.push_back(iv);
@@ -823,6 +820,37 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
             node.m_faceCentroid[index].resize(0);
           }
         }
+      }
+    }
+
+    // the children of the cell, as a fill one level finer cuts them from this body
+    if (a_withFinerNodes(cell)) {
+      if (!cutBodies[n].subdivide(children)) {
+        bool inPieces = false;
+
+        for (int c = 0; c < (1 << SpaceDim); c++) {
+          inPieces = inPieces || !children[c].isConnected();
+        }
+
+        if (!inPieces) {
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+        }
+      }
+
+      node.m_finerNodes.resize(0);
+
+      for (int c = 0; c < (1 << SpaceDim); c++) {
+        if (children[c].childState() < 0) {
+          continue;
+        }
+
+        IntVect child = 2 * cell;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          child[d] += (c >> d) & 1;
+        }
+
+        node.m_finerNodes.push_back(VolIndex(child, 0));
       }
     }
 

@@ -233,7 +233,8 @@ public:
    * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids
    * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
    * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
-   * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). Under
+   * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). The graph
+   * holds every VoF's links to the next coarser and finer levels, as assembleLevel describes. Under
    * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
    * Requires buildGraphs.
    */
@@ -554,8 +555,9 @@ public:
    * @brief Coarsen a level of the index space onto its coarsened layout.
    * @details Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which
    * are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the
-   * fine faces between sibling cells, and each carries the sums of its fine VoFs' volumes and first moments, and its
-   * boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces
+   * fine faces between sibling cells, numbered by coarsePieces, and each lists those fine VoFs as its links to the
+   * finer level and carries the sums of their volumes and first moments, and its boundary centroid weighted by their
+   * boundary areas. A coarse face is split by the VoF across that its fine faces
    * lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns,
    * or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their
    * aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with
@@ -578,11 +580,16 @@ public:
                const int                             a_fineLevel) const;
 
   /**
-   * @brief Build a level of the index space from its own cells and the cells coarsened from the level above.
+   * @brief Build a level of the index space from its own cells and the cells coarsened from the next finer level.
    * @details The level's own cells take what the copied graph says. Its cells under the next finer level take the
    * coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which
    * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
    * cell, since a regular cell connects to one VoF only; this changes no moment.
+   *
+   * Every cut cell carries its links to the next finer level: a coarsened cell the pieces coarsenLevel gave it, an own
+   * cut cell, which no finer box lies over, the children its body is cut into once more, and a regular cell made cut
+   * all of its children. When the domain coarsens by two, every VoF of the boxes is linked to the next coarser level by
+   * writeCoarserLinks, from this level's own graph, before that level is built.
    * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
    * @param[in]  a_copy            The graph copied onto the geometry's grids.
    * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.
@@ -1104,13 +1111,48 @@ private:
    * @param[in]     a_data  Moments over some part of the graph's region.
    * @param[in]     a_cell  The cell, irregular in the graph.
    * @param[in]     a_withMoments Whether the moments hold data for the cell.
+   * @param[in]     a_withCoarser Whether to read each VoF's link to the next coarser level from the graph, which must
+   * hold it; otherwise it is left unset.
+   * @param[in]     a_withFiner   Whether to read each VoF's links to the next finer level from the graph, which must
+   * hold them; otherwise they are left unset.
    */
   static void
   appendNodes(Vector<IrregNode>& a_nodes,
               const EBGraph&     a_graph,
               const EBData&      a_data,
               const IntVect&     a_cell,
-              const bool         a_withMoments);
+              const bool         a_withMoments,
+              const bool         a_withCoarser,
+              const bool         a_withFiner);
+
+  /**
+   * @brief The pieces a coarse cell's children fall into, which are the coarse cell's VoFs: the numbering contract
+   * between two levels.
+   * @details The VoFs of the 2^SpaceDim children are taken in the order a BoxIterator meets the children, and each
+   * child's in order of cell index. Two are one piece if a face between sibling cells joins them. Pieces are numbered
+   * in the order their first VoF is met, and each lists its VoFs in that same order. A covered child has no VoFs, and a
+   * regular one has one, at cell index 0. Nothing but the children's graph enters, so any layout holding the children
+   * numbers the coarse cell the same.
+   * @param[out] a_pieces     The pieces, each the VoFs in it.
+   * @param[in]  a_fineGraph  Graph holding every child of the coarse cell.
+   * @param[in]  a_coarseCell The coarse cell.
+   */
+  static void
+  coarsePieces(Vector<Vector<VolIndex>>& a_pieces, const EBGraph& a_fineGraph, const IntVect& a_coarseCell);
+
+  /**
+   * @brief Write the link of each node of a box to the next coarser level: the piece of its coarse cell it lies in,
+   * as coarsePieces numbers them.
+   * @details A regular cell lying in a piece other than the first is given a node marked regular that records the
+   * piece; one in the first piece needs none, since the index space reads a regular cell's coarser VoF as the first.
+   * Nodes outside the box are left as they are.
+   * @param[in,out] a_nodes Nodes of the region's cut cells, each cell's contiguous and in order of cell index. The
+   * regular nodes are appended.
+   * @param[in]     a_graph Graph built from the nodes, over a region holding the box.
+   * @param[in]     a_box   The box, a whole number of coarse cells.
+   */
+  static void
+  writeCoarserLinks(Vector<IrregNode>& a_nodes, const EBGraph& a_graph, const Box& a_box);
 
   /**
    * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
@@ -1118,7 +1160,8 @@ private:
    * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
    * makes such cells full cut cells and divides the face evenly among the VoFs across; here each face into a VoF across
    * is the face that VoF holds toward the cell, with its aperture and centroid. The nodes of a cell must be contiguous,
-   * and a cell at the region's edge sees only the neighbours inside it.
+   * and a cell at the region's edge sees only the neighbours inside it. A cell made cut is linked to all of its
+   * children, at cell index 0, as a regular cell is; its link to the coarser level is left unset.
    * @param[in,out] a_flags  Regular (1), cut (0) or covered (-1) for the region's cells. The cells made cut are set to
    * 0.
    * @param[in,out] a_nodes  Nodes of the region's cut cells. A node is appended for each cell made cut.

@@ -199,14 +199,19 @@ public:
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.
    * @param[in]  a_dit             Destination box.
+   * @param[in]  a_withFinerNodes  Whether a cell's node gets its links to the next finer level: its body is subdivided
+   * once more, and m_finerNodes lists the children that CutCellBody::childState does not call covered, each at cell
+   * index 0, in quadrant order. A subdivision here that fails with every child in one piece stops the run, as above.
+   * The other links are left unset.
    */
   void
-  fillNodes(BaseFab<int>&      a_regIrregCovered,
-            Vector<IrregNode>& a_nodes,
-            long long&         a_numCollapsed,
-            long long&         a_numFiner,
-            const int          a_level,
-            const DataIndex&   a_dit) const;
+  fillNodes(BaseFab<int>&                              a_regIrregCovered,
+            Vector<IrregNode>&                         a_nodes,
+            long long&                                 a_numCollapsed,
+            long long&                                 a_numFiner,
+            const int                                  a_level,
+            const DataIndex&                           a_dit,
+            const std::function<bool(const IntVect&)>& a_withFinerNodes) const;
 
   /**
    * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.

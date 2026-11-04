@@ -2651,6 +2651,20 @@ CutCellBody::fingerprint() const noexcept
   return hash;
 }
 
+int
+CutCellBody::childState() const noexcept
+{
+  if (this->numPolygons() == 0 || this->volumeFraction() <= 0.0) {
+    return -1;
+  }
+
+  if (this->volumeFraction() >= 1.0 && this->boundaryArea() <= 0.0) {
+    return 1;
+  }
+
+  return 0;
+}
+
 void
 CutCellBody::fillNode(IrregNode&           a_node,
                       const BaseFab<int>&  a_regIrregCovered,
