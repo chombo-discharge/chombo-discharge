@@ -90,8 +90,14 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
 
   for (std::size_t i = 0; i < a_grids.size(); i++) {
     for (int lvl = 0; lvl < a_numSourceLevels; lvl++) {
-      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
-        (*m_pieceOffsets[i][lvl])[dit()].assign(1, 0);
+      const DataIterator& dit  = a_grids[i].dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        (*m_pieceOffsets[i][lvl])[din].assign(1, 0);
       }
     }
   }
@@ -533,9 +539,15 @@ AMRPolyhedralEBGraph::finish()
 
   for (std::size_t i = 0; i < m_grids.size(); i++) {
     for (int lvl = 0; lvl < m_numSourceLevels; lvl++) {
-      for (DataIterator dit(m_grids[i]); dit.ok(); ++dit) {
-        std::vector<IntVect>&        cells    = (*m_surfaceCells[i][lvl])[dit()];
-        std::vector<CutCellSurface>& surfaces = (*m_surfaces[i][lvl])[dit()];
+      const DataIterator& dit  = m_grids[i].dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        std::vector<IntVect>&        cells    = (*m_surfaceCells[i][lvl])[din];
+        std::vector<CutCellSurface>& surfaces = (*m_surfaces[i][lvl])[din];
 
         std::vector<std::size_t> order(cells.size());
 
@@ -557,13 +569,13 @@ AMRPolyhedralEBGraph::finish()
         surfaces.swap(sortedSurfaces);
 
         // the pieces' index: bins as wide as the widest piece, so a piece reaches at most two bins a direction
-        const std::vector<Box>& pieces = (*m_pieces[i][lvl])[dit()];
+        const std::vector<Box>& pieces = (*m_pieces[i][lvl])[din];
 
-        int& binSize = (*m_binSize[i][lvl])[dit()];
-        Box& binBox  = (*m_binBox[i][lvl])[dit()];
+        int& binSize = (*m_binSize[i][lvl])[din];
+        Box& binBox  = (*m_binBox[i][lvl])[din];
 
-        std::vector<int>& binOffsets = (*m_binOffsets[i][lvl])[dit()];
-        std::vector<int>& binPieces  = (*m_binPieces[i][lvl])[dit()];
+        std::vector<int>& binOffsets = (*m_binOffsets[i][lvl])[din];
+        std::vector<int>& binPieces  = (*m_binPieces[i][lvl])[din];
 
         binSize = 1;
         binBox  = Box();

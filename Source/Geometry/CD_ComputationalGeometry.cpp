@@ -1009,8 +1009,23 @@ ComputationalGeometry::irregCells(const phase::which_phase a_phase, const Proble
 
     IntVectSet cutCells;
 
-    for (DataIterator dit(grids); dit.ok(); ++dit) {
-      cutCells |= graph[dit()].getIrregCells(grids[dit()]);
+    const DataIterator& dit  = grids.dataIterator();
+    const int           nbox = dit.size();
+
+    // each thread gathers its boxes' cut cells, and the threads' sets are joined one at a time
+#pragma omp parallel
+    {
+      IntVectSet threadCells;
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        threadCells |= graph[din].getIrregCells(grids[din]);
+      }
+
+#pragma omp critical(ComputationalGeometry_irregCells)
+      cutCells |= threadCells;
     }
 
     return cutCells;
