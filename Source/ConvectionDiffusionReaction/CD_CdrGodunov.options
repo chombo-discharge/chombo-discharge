@@ -13,7 +13,7 @@ CdrGodunov.plt_vars                 = phi vel src dco ebflux    ## Plot variable
 CdrGodunov.extrap_source            = false                     ## Flag for including source term for time-extrapolation
 CdrGodunov.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrGodunov.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrGodunov.which_redistribution     = state                     ## Redistribution type. 'volume', 'state' or 'none' (turned off)
+CdrGodunov.which_redistribution     = state                     ## Redistribution type. 'volume', 'state' or 'none' (turned off). 'state' cannot be switched to or from at runtime
 CdrGodunov.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 
 CdrGodunov.solver                    = bicgstab gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
@@ -32,7 +32,7 @@ CdrGodunov.gmg_max_iter              = 32                ## Maximum number of it
 CdrGodunov.gmg_exit_tol              = 1.E-10            ## Residue tolerance
 CdrGodunov.gmg_exit_hang             = 0.2               ## Solver hang
 CdrGodunov.gmg_min_cells             = 8                 ## Bottom drop
-CdrGodunov.gmg_bottom_solver         = simple 16         ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrGodunov.gmg_bottom_solver         = simple 16         ## Bottom solver type. 'simple <relaxations>', 'bicgstab', or 'gmres'
 CdrGodunov.gmg_cycle                 = vcycle            ## Cycle type. 'vcycle' or 'wcycle'
 CdrGodunov.gmg_smoother              = red_black         ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
 CdrGodunov.gmg_reflux_free           = false             ## If true, use reflux-free AMR operator

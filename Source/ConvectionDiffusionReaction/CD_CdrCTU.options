@@ -14,7 +14,7 @@ CdrCTU.flux_correction          = true                      ## If true, flux-cor
 CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrCTU.which_redistribution     = state                     ## Redistribution type. 'volume', 'state' or 'none' (turned off)
+CdrCTU.which_redistribution     = state                     ## Redistribution type. 'volume', 'state' or 'none' (turned off). 'state' cannot be switched to or from at runtime
 CdrCTU.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 
 CdrCTU.solver                    = bicgstab gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
@@ -33,7 +33,7 @@ CdrCTU.gmg_max_iter              = 32                ## Maximum number of iterat
 CdrCTU.gmg_exit_tol              = 1.E-10            ## Residue tolerance
 CdrCTU.gmg_exit_hang             = 0.2               ## Solver hang
 CdrCTU.gmg_min_cells             = 8                 ## Bottom drop
-CdrCTU.gmg_bottom_solver         = simple 16         ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrCTU.gmg_bottom_solver         = simple 16         ## Bottom solver type. 'simple <relaxations>', 'bicgstab', or 'gmres'
 CdrCTU.gmg_cycle                 = vcycle            ## Cycle type. 'vcycle' or 'wcycle'
 CdrCTU.gmg_smoother              = red_black         ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
 CdrCTU.gmg_reflux_free           = false             ## If true, use reflux-free AMR operator
