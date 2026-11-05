@@ -263,12 +263,12 @@ public:
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
    * @details A cell in the geometry's boxes on the level takes what buildMoments made there. The cells outside them,
    * which lie under a leaf of a coarser level or above the finest stored one, are cut from their ancestors on tiles of
-   * their own (extensionTiles), balanced over the ranks by the work of cutting them (extensionLoads, or one unit per
-   * tile under PolyhedralGeometryShop.extension_load = constant), and computed there (extendLevel). The stored level
-   * and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the links to the
-   * coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's only VoF and
-   * to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler. Collective.
-   * Requires buildMoments.
+   * their own (extensionTiles), balanced over the ranks with one unit of load per tile, or by the work of cutting them
+   * (extensionLoads) under PolyhedralGeometryShop.extension_cut_cell_loads, and computed there (extendLevel). The
+   * stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the
+   * links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's
+   * only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler.
+   * Collective. Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
    * @param[in]  a_grids      The layout.
@@ -606,7 +606,7 @@ public:
   /**
    * @brief Count the cut cells of every tile on every level, for extensionLoads.
    * @details Each rank counts the cells with a surface in its own graph boxes, and the counts are summed over the
-   * ranks. Collective. Requires buildGraphs.
+   * ranks. Run by buildMoments under PolyhedralGeometryShop.extension_cut_cell_loads. Collective. Requires buildGraphs.
    */
   void
   countTileCutCells();
@@ -825,7 +825,7 @@ protected:
 
   /**
    * @brief Whether the extension tiles are balanced by the cut cells they are cut from (true) or carry one unit of
-   * load each (false). PolyhedralGeometryShop.extension_load, cut_cells by default, or constant.
+   * load each (false). PolyhedralGeometryShop.extension_cut_cell_loads, off by default.
    */
   bool m_extensionLoadByCutCells;
 

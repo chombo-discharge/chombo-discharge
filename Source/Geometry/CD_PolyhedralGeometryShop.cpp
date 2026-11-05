@@ -552,7 +552,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_maxRefinement           = 1;
   m_unresolvedAction        = UnresolvedAction::Warn;
   m_fillSplitFluid          = true;
-  m_extensionLoadByCutCells = true;
+  m_extensionLoadByCutCells = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -610,19 +610,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
     MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - fill_split_fluid must be always or majority");
   }
 
-  std::string extensionLoad = "cut_cells";
-
-  pp.query("extension_load", extensionLoad);
-
-  if (extensionLoad == "cut_cells") {
-    m_extensionLoadByCutCells = true;
-  }
-  else if (extensionLoad == "constant") {
-    m_extensionLoadByCutCells = false;
-  }
-  else {
-    MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - extension_load must be cut_cells or constant");
-  }
+  pp.query("extension_cut_cell_loads", m_extensionLoadByCutCells);
 
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::PolyhedralGeometryShop()" << endl;
@@ -785,7 +773,9 @@ PolyhedralGeometryShop::buildMoments()
     MayDay::Error("PolyhedralGeometryShop::buildMoments - the geometry's boxes were classified with no EB ghost cell");
   }
 
-  this->countTileCutCells();
+  if (m_extensionLoadByCutCells) {
+    this->countTileCutCells();
+  }
 
   const int numLevels = m_compGeom->getNumGridLevels();
 
