@@ -291,6 +291,14 @@ public:
   getMaxGhostEB() const noexcept;
 
   /**
+   * @brief The edge of a tile, in cells of its own level.
+   * @details Every cut tile is a whole number of such blocks, and so is every hole a leaf leaves in a finer level.
+   * @return The tile edge.
+   */
+  int
+  getMinBlockSize() const noexcept;
+
+  /**
    * @brief Level of a domain among the levels makeGrids built.
    * @param[in] a_domain Domain to look up.
    * @return Its level, 0 being the coarsest, or -1 if there is no such level.

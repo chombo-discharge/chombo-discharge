@@ -901,6 +901,12 @@ ComputationalGeometry::getMaxGhostEB() const noexcept
 }
 
 int
+ComputationalGeometry::getMinBlockSize() const noexcept
+{
+  return m_minBlockSize;
+}
+
+int
 ComputationalGeometry::getLevel(const ProblemDomain& a_domain) const noexcept
 {
   int level = -1;

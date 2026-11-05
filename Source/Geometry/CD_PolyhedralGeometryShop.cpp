@@ -546,12 +546,13 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
 #else
   m_sanityCheck = false;
 #endif
-  m_profile          = false;
-  m_testCopy         = false;
-  m_verbose          = false;
-  m_maxRefinement    = 1;
-  m_unresolvedAction = UnresolvedAction::Warn;
-  m_fillSplitFluid   = true;
+  m_profile                 = false;
+  m_testCopy                = false;
+  m_verbose                 = false;
+  m_maxRefinement           = 1;
+  m_unresolvedAction        = UnresolvedAction::Warn;
+  m_fillSplitFluid          = true;
+  m_extensionLoadByCutCells = true;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -607,6 +608,20 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   }
   else {
     MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - fill_split_fluid must be always or majority");
+  }
+
+  std::string extensionLoad = "cut_cells";
+
+  pp.query("extension_load", extensionLoad);
+
+  if (extensionLoad == "cut_cells") {
+    m_extensionLoadByCutCells = true;
+  }
+  else if (extensionLoad == "constant") {
+    m_extensionLoadByCutCells = false;
+  }
+  else {
+    MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - extension_load must be cut_cells or constant");
   }
 
   if (m_verbose) {
@@ -770,6 +785,8 @@ PolyhedralGeometryShop::buildMoments()
     MayDay::Error("PolyhedralGeometryShop::buildMoments - the geometry's boxes were classified with no EB ghost cell");
   }
 
+  this->countTileCutCells();
+
   const int numLevels = m_compGeom->getNumGridLevels();
 
   // The geometry's own grids, every box of every level. As ScanShop does, the boxes holding this phase's cut cells and
@@ -873,237 +890,279 @@ PolyhedralGeometryShop::buildMoments()
 }
 
 void
-PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
-                                  LevelData<EBData>&          a_data,
-                                  const AMRPolyhedralEBGraph& a_copy,
-                                  const int                   a_level,
-                                  const int                   a_graphGhost,
-                                  const int                   a_dataGhost) const
+PolyhedralGeometryShop::extensionTiles(Vector<Box>&             a_tiles,
+                                       const DisjointBoxLayout& a_grids,
+                                       const ProblemDomain&     a_domain,
+                                       const int                a_graphGhost) const
 {
-  CH_TIME("PolyhedralGeometryShop::fillLevel");
+  CH_TIME("PolyhedralGeometryShop::extensionTiles");
 
-  CH_assert(a_graphGhost > a_dataGhost);
-  CH_assert(a_graphGhost < a_copy.getGhost());
+  CH_assert(m_compGeom != nullptr);
 
-  const DisjointBoxLayout& grids  = a_copy.getGrids(a_level);
-  const ProblemDomain&     domain = a_copy.getDomain(a_level);
-  const int                geom   = a_copy.getGeometryLevel(a_level);
-
-  const Interval interv(0, 0);
-
-  EBGraphFactory graphFactory(domain);
-  EBDataFactory  dataFactory;
-
-  a_graph.define(grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
-  a_data.define(grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
-
-  // The level as buildMoments made it, where it made one, brought onto the boxes and their ghost cells in a fresh
-  // graph: Chombo's copy adds the VoFs it receives to those a cell already holds, so it is never copied into a graph
-  // already built.
+  const int  tile       = m_compGeom->getMinBlockSize();
+  const int  geom       = this->destinationLevel(a_domain);
   const bool haveStored = geom < m_ebGraphs.size() && !m_ebGraphs[geom].isNull();
 
-  LevelData<EBGraph> stored(grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
-  LevelData<EBData>  storedData(grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
+  // This rank's tiles, as single cells in tile coordinates. Neighbouring boxes reach into the same tiles, so the list
+  // repeats them until it is made unique.
+  Vector<Box> mine;
 
-  if (haveStored) {
-    m_ebGraphs[geom]->copyTo(interv, stored, interv);
+  for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+    const Box region = grow(a_grids[dit()], a_graphGhost) & a_domain.domainBox();
 
-    for (DataIterator dit(grids); dit.ok(); ++dit) {
-      const Box region = grow(grids[dit()], a_dataGhost) & domain.domainBox();
-
-      storedData[dit()].defineVoFData(stored[dit()], region);
-      storedData[dit()].defineFaceData(stored[dit()], region);
-    }
-
-    m_ebData[geom]->copyTo(interv, storedData, interv);
-  }
-
-  const bool haveFinerStored = geom + 1 < static_cast<int>(m_ebGraphs.size()) && !m_ebGraphs[geom + 1].isNull();
-
-  long long numCollapsed = 0;
-  long long numFiner     = 0;
-  long long numUnfilled  = 0;
-
-  // The links to the next coarser level exist when the domain coarsens by two. A stored cell reads its links from the
-  // stored graph. A cell cut from an ancestor lies in the ancestor's only VoF, since a multi-valued cell is coarsened
-  // from children that are all stored. Only stored cells coarsened from the next finer level carry links to it.
-  const bool hasCoarser = refine(coarsen(domain.domainBox(), 2), 2) == domain.domainBox();
-
-  for (DataIterator dit(grids); dit.ok(); ++dit) {
-    const Box graphRegion = grow(grids[dit()], a_graphGhost) & domain.domainBox();
-    const Box dataRegion  = grow(grids[dit()], a_dataGhost) & domain.domainBox();
-
-    const Box copyRegion = grow(grids[dit()], a_copy.getGhost()) & domain.domainBox();
-
-    // A box whose region, out to the copy's ghost width, lies wholly in the geometry's boxes on the level needs nothing
-    // computed: it is what buildMoments made, and takes the stored graph and moments as they are. The stored boxes are
-    // disjoint, so the region lies in them when their overlaps with it add up to it.
-    if (haveStored) {
-      const DisjointBoxLayout& storedGrids = m_ebGraphs[geom]->disjointBoxLayout();
-
-      Vector<int> hits;
-
-      storedGrids.intersecting(copyRegion, hits);
+    for (BoxIterator bit(coarsen(region, tile)); bit.ok(); ++bit) {
+      const Box tileBox = refine(Box(bit(), bit()), tile) & a_domain.domainBox();
 
       long long numStored = 0;
 
-      for (int h = 0; h < hits.size(); h++) {
-        numStored += (storedGrids.boxArray()[hits[h]] & copyRegion).numPts();
-      }
+      if (haveStored) {
+        const DisjointBoxLayout& storedGrids = m_ebGraphs[geom]->disjointBoxLayout();
 
-      if (numStored == copyRegion.numPts()) {
-        a_graph[dit()] = stored[dit()];
-        a_data[dit()]  = storedData[dit()];
+        Vector<int> hits;
 
-        continue;
-      }
-    }
+        storedGrids.intersecting(tileBox, hits);
 
-    // The cells buildMoments made, in the geometry's boxes on the level, and those of them it coarsened from the next
-    // finer level, which carry links to it.
-    BaseFab<bool> storedCell(copyRegion, 1);
-    BaseFab<bool> coarsenedCell(copyRegion, 1);
-
-    storedCell.setVal(false);
-    coarsenedCell.setVal(false);
-
-    if (haveStored) {
-      const DisjointBoxLayout& storedGrids = m_ebGraphs[geom]->disjointBoxLayout();
-
-      Vector<int> hits;
-
-      storedGrids.intersecting(copyRegion, hits);
-
-      for (int h = 0; h < hits.size(); h++) {
-        storedCell.setVal(true, storedGrids.boxArray()[hits[h]] & copyRegion, 0);
-      }
-    }
-
-    if (haveFinerStored) {
-      const DisjointBoxLayout& finerGrids = m_ebGraphs[geom + 1]->disjointBoxLayout();
-
-      Vector<int> hits;
-
-      finerGrids.intersecting(refine(copyRegion, 2), hits);
-
-      for (int h = 0; h < hits.size(); h++) {
-        coarsenedCell.setVal(true, coarsen(finerGrids.boxArray()[hits[h]], 2) & copyRegion, 0);
-      }
-    }
-
-    // The copy fills the cells buildMoments did not make, and the cells across their faces, whose bodies give the faces
-    // between them; a stored cell with no such neighbour is taken from the stored graph alone.
-    BaseFab<bool> compute(copyRegion, 1);
-
-    for (BoxIterator bit(copyRegion); bit.ok(); ++bit) {
-      const IntVect cell = bit();
-
-      bool needed = !storedCell(cell, 0);
-
-      for (int dir = 0; dir < SpaceDim && !needed; dir++) {
-        for (SideIterator sit; sit.ok() && !needed; ++sit) {
-          const IntVect across = cell + sign(sit()) * BASISV(dir);
-
-          needed = copyRegion.contains(across) && !storedCell(across, 0);
+        for (int h = 0; h < hits.size(); h++) {
+          numStored += (storedGrids.boxArray()[hits[h]] & tileBox).numPts();
         }
       }
 
-      compute(cell, 0) = needed;
+      if (numStored == tileBox.numPts()) {
+        continue;
+      }
+
+      if (numStored > 0) {
+        MayDay::Error("PolyhedralGeometryShop::extensionTiles - a tile is held in part by the geometry's boxes");
+      }
+
+      mine.push_back(Box(bit(), bit()));
+    }
+  }
+
+  const auto lessThan = [](const Box& a_a, const Box& a_b) -> bool {
+    return a_a.smallEnd().lexLT(a_b.smallEnd());
+  };
+
+  const auto unique = [&lessThan](Vector<Box>& a_boxes) -> void {
+    std::vector<Box>& boxes = a_boxes.stdVector();
+
+    std::sort(boxes.begin(), boxes.end(), lessThan);
+
+    boxes.erase(std::unique(boxes.begin(), boxes.end()), boxes.end());
+  };
+
+  unique(mine);
+
+  // The tiles of every rank, made unique on one rank and handed to all, so that every rank balances the same list.
+  constexpr int root = 0;
+
+  Vector<Vector<Box>> all;
+
+  gather(all, mine, root);
+
+  Vector<Box> tiles;
+
+  if (procID() == root) {
+    for (int r = 0; r < all.size(); r++) {
+      tiles.append(all[r]);
+    }
+
+    unique(tiles);
+  }
+
+  broadcast(tiles, root);
+
+  a_tiles.resize(tiles.size());
+
+  for (int i = 0; i < tiles.size(); i++) {
+    a_tiles[i] = refine(tiles[i], tile) & a_domain.domainBox();
+  }
+}
+
+void
+PolyhedralGeometryShop::extensionLoads(Vector<long>& a_loads, const Vector<Box>& a_tiles, const int a_level) const
+{
+  CH_TIME("PolyhedralGeometryShop::extensionLoads");
+
+  CH_assert(m_compGeom != nullptr);
+
+  const int numTiles = a_tiles.size();
+  const int numRanks = numProc();
+  const int myRank   = procID();
+
+  std::vector<long long> loads(numTiles, 0);
+
+  // Each rank weighs every numRanks-th tile; the others contribute zero to it in the sum.
+  for (int i = myRank; i < numTiles; i += numRanks) {
+    std::vector<std::vector<std::pair<int, Box>>> owned;
+
+    m_compGeom->ownedPieces(owned, a_tiles[i], a_level);
+
+    double load = 1.0;
+
+    for (int lvl = 0; lvl < static_cast<int>(owned.size()); lvl++) {
+      if (owned[lvl].empty()) {
+        continue;
+      }
+
+      const Vector<Box>& tiles = m_compGeom->getCutTiles(lvl);
+
+      // a cut cell has about 2^(SpaceDim - 1) cut children per level it is subdivided
+      const int    depth  = std::max(0, a_level - lvl);
+      const double growth = std::pow(2.0, (SpaceDim - 1) * depth);
+
+      for (const std::pair<int, Box>& piece : owned[lvl]) {
+        const double share = static_cast<double>(piece.second.numPts()) /
+                             static_cast<double>(tiles[piece.first].numPts());
+
+        load += growth * share * static_cast<double>(m_tileCutCells[lvl][piece.first]);
+      }
+    }
+
+    loads[i] = std::llround(load);
+  }
+
+#ifdef CH_MPI
+  MPI_Allreduce(MPI_IN_PLACE, loads.data(), numTiles, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+  a_loads.resize(numTiles);
+
+  for (int i = 0; i < numTiles; i++) {
+    a_loads[i] = static_cast<long>(loads[i]);
+  }
+}
+
+void
+PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
+                                    LevelData<EBData>&       a_data,
+                                    const DisjointBoxLayout& a_tiles,
+                                    const ProblemDomain&     a_domain) const
+{
+  CH_TIME("PolyhedralGeometryShop::extendLevel");
+
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy, std::vector<DisjointBoxLayout>{a_tiles}, std::vector<ProblemDomain>{a_domain}, s_momentRing);
+
+  EBGraphFactory graphFactory(a_domain);
+  EBDataFactory  dataFactory;
+
+  a_graph.define(a_tiles, 1, IntVect::Unit, graphFactory);
+  a_data.define(a_tiles, 1, IntVect::Zero, dataFactory);
+
+  // a level whose domain does not coarsen by two has no coarser level to link to
+  const bool hasCoarser = refine(coarsen(a_domain.domainBox(), 2), 2) == a_domain.domainBox();
+
+  long long numCollapsed = 0;
+  long long numFiner     = 0;
+
+  for (DataIterator dit(a_tiles); dit.ok(); ++dit) {
+    const Box box    = a_tiles[dit()];
+    const Box region = grow(box, 1) & a_domain.domainBox();
+
+    EBGraph& graph = a_graph[dit()];
+    EBData&  data  = a_data[dit()];
+
+    const GeometryService::InOut type = m_compGeom->classify(region, a_domain, m_phase);
+
+    if (type != GeometryService::Irregular) {
+      if (type == GeometryService::Regular) {
+        graph.setToAllRegular();
+      }
+      else {
+        graph.setToAllCovered();
+      }
+
+      data.define(graph, Vector<IrregNode>(), box);
+
+      continue;
     }
 
     BaseFab<int>      flags;
-    Vector<IrregNode> fromCopy;
-    BaseFab<bool>     withNode(graphRegion, 1);
-
-    withNode.setVal(false);
-
-    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit(), compute);
-
     Vector<IrregNode> nodes;
 
-    for (int n = 0; n < fromCopy.size(); n++) {
-      if (graphRegion.contains(fromCopy[n].m_cell) && !storedCell(fromCopy[n].m_cell, 0)) {
-        nodes.push_back(fromCopy[n]);
+    BaseFab<bool> all(grow(copy.getGrids(0)[dit()], copy.getGhost()) & a_domain.domainBox(), 1);
 
-        nodes.back().m_coarserNode = hasCoarser ? 0 : -1;
+    all.setVal(true);
 
-        withNode(fromCopy[n].m_cell, 0) = true;
+    copy.fillNodes(flags, nodes, numCollapsed, numFiner, 0, dit(), all);
+
+    Vector<IrregNode> held;
+
+    for (int n = 0; n < nodes.size(); n++) {
+      if (region.contains(nodes[n].m_cell)) {
+        held.push_back(nodes[n]);
       }
     }
 
-    for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
-      const IntVect cell = bit();
+    PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, held, region, box, a_domain);
 
-      // a cut cell the copy could not fill -- one a finer level owns -- is one buildMoments made
-      if (!storedCell(cell, 0)) {
-        numUnfilled += (flags(cell, 0) == 0 && !withNode(cell, 0)) ? 1 : 0;
-
-        continue;
-      }
-
-      const EBGraph& graph = stored[dit()];
-
-      if (graph.isRegular(cell)) {
-        flags(cell, 0) = 1;
-      }
-      else if (graph.isCovered(cell)) {
-        flags(cell, 0) = -1;
-      }
-      else {
-        flags(cell, 0) = 0;
-
-        PolyhedralGeometryShop::appendNodes(nodes,
-                                            graph,
-                                            storedData[dit()],
-                                            cell,
-                                            dataRegion.contains(cell),
-                                            hasCoarser,
-                                            coarsenedCell(cell, 0));
-      }
+    // Every cell is cut from an ancestor, which is one VoF: a multi-valued cell is coarsened from children that are all
+    // stored, so it has no extension below it.
+    for (int n = 0; n < held.size(); n++) {
+      held[n].m_coarserNode = hasCoarser ? 0 : -1;
     }
 
-    const int numBefore = nodes.size();
+    graph.buildGraph(flags, held, region, a_domain);
 
-    PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, nodes, graphRegion, grids[dit()], domain);
-
-    // A regular cell made cut lies in the coarser VoF the stored graph says, or in the ancestor's only one.
-    if (hasCoarser) {
-      for (int n = numBefore; n < nodes.size(); n++) {
-        const IntVect cell = nodes[n].m_cell;
-
-        nodes[n].m_coarserNode = storedCell(cell, 0) ? stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex() : 0;
-      }
-
-      // A stored regular cell in a piece of its coarser cell other than the first gets a node marked regular that
-      // records the piece.
-      for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
-        const IntVect cell = bit();
-
-        if (flags(cell, 0) != 1 || !storedCell(cell, 0)) {
-          continue;
-        }
-
-        const int piece = stored[dit()].coarsen(VolIndex(cell, 0)).cellIndex();
-
-        if (piece > 0) {
-          IrregNode node;
-
-          node.m_cell        = cell;
-          node.m_cellIndex   = 0;
-          node.m_isRegular   = true;
-          node.m_coarserNode = piece;
-
-          nodes.push_back(node);
-        }
-      }
-    }
-
-    a_graph[dit()].buildGraph(flags, nodes, graphRegion, domain);
-    a_data[dit()].define(a_graph[dit()], nodes, dataRegion);
+    data.define(graph, held, box);
   }
 
-  if (ParallelOps::sum(numUnfilled) > 0) {
-    MayDay::Error("PolyhedralGeometryShop::fillLevel - a cell a finer level owns lies outside that level's boxes");
+  if (ParallelOps::sum(numFiner) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::extendLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+}
+
+void
+PolyhedralGeometryShop::countTileCutCells()
+{
+  CH_TIME("PolyhedralGeometryShop::countTileCutCells");
+
+  CH_assert(m_compGeom != nullptr);
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  m_tileCutCells.resize(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const Vector<Box>& tiles = m_compGeom->getCutTiles(lvl);
+
+    std::vector<long long> counts(tiles.size(), 0);
+
+    if (lvl < m_graphs.size() && !m_graphs[lvl].isNull() && m_graphs[lvl]->isDefined()) {
+      const DisjointBoxLayout& layout = m_graphs[lvl]->getGrids();
+      const Vector<Box>        boxes  = layout.boxArray();
+
+      // the tiles are the layout's boxes, one for one, though not in the same order
+      std::vector<int> boxTile(boxes.size(), -1);
+
+      for (int t = 0; t < tiles.size(); t++) {
+        Vector<int> hits;
+
+        layout.intersecting(tiles[t], hits);
+
+        for (int h = 0; h < hits.size(); h++) {
+          if (boxes[hits[h]] == tiles[t]) {
+            boxTile[hits[h]] = t;
+          }
+        }
+      }
+
+      for (DataIterator dit(layout); dit.ok(); ++dit) {
+        const int t = boxTile[layout.index(dit())];
+
+        CH_assert(t >= 0);
+
+        counts[t] = m_graphs[lvl]->getSurfaceCells()[dit()].numPts();
+      }
+    }
+
+#ifdef CH_MPI
+    MPI_Allreduce(MPI_IN_PLACE, counts.data(), counts.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+    m_tileCutCells[lvl] = Vector<long long>(counts);
   }
 }
 
@@ -1781,15 +1840,73 @@ PolyhedralGeometryShop::fillLayout(LevelData<EBGraph>&      a_graph,
     MayDay::Error("PolyhedralGeometryShop::fillLayout - the graph needs more ghost cells than the moments");
   }
 
-  // the copy one cell wider than the graph, so that every face of a node has the cell across it in hand
-  AMRPolyhedralEBGraph copy;
+  const int  geom       = this->destinationLevel(a_domain);
+  const bool haveStored = geom < m_ebGraphs.size() && !m_ebGraphs[geom].isNull();
 
-  this->copyGraphs(copy,
-                   std::vector<DisjointBoxLayout>{a_grids},
-                   std::vector<ProblemDomain>{a_domain},
-                   a_graphGhost + 1);
+  // The cells the stored level does not hold are cut from their ancestors on tiles of their own, balanced over the
+  // ranks by the work of cutting them.
+  Vector<Box> tiles;
 
-  this->fillLevel(a_graph, a_data, copy, 0, a_graphGhost, a_dataGhost);
+  this->extensionTiles(tiles, a_grids, a_domain, a_graphGhost);
+
+  const bool haveExtension = tiles.size() > 0;
+
+  LevelData<EBGraph> extensionGraph;
+  LevelData<EBData>  extensionData;
+
+  if (haveExtension) {
+    LoadBalancing::sort(tiles, m_boxSorting);
+
+    Vector<long> loads;
+
+    if (m_extensionLoadByCutCells) {
+      this->extensionLoads(loads, tiles, geom);
+    }
+    else {
+      loads.resize(tiles.size(), 1L);
+    }
+
+    Vector<int> ranks;
+
+    LoadBalancing::makeBalance(ranks, loads, tiles);
+
+    const DisjointBoxLayout extensionGrids(tiles, ranks, a_domain);
+
+    this->extendLevel(extensionGraph, extensionData, extensionGrids, a_domain);
+  }
+
+  // The stored level and the extension hold disjoint cells, and a copy overwrites the cells it reaches, so both are
+  // copied into the fresh graph, and the moments into data defined on it.
+  const Interval interv(0, 0);
+
+  EBGraphFactory graphFactory(a_domain);
+  EBDataFactory  dataFactory;
+
+  a_graph.define(a_grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
+  a_data.define(a_grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
+
+  if (haveStored) {
+    m_ebGraphs[geom]->copyTo(interv, a_graph, interv);
+  }
+
+  if (haveExtension) {
+    extensionGraph.copyTo(interv, a_graph, interv);
+  }
+
+  for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+    const Box region = grow(a_grids[dit()], a_dataGhost) & a_domain.domainBox();
+
+    a_data[dit()].defineVoFData(a_graph[dit()], region);
+    a_data[dit()].defineFaceData(a_graph[dit()], region);
+  }
+
+  if (haveStored) {
+    m_ebData[geom]->copyTo(interv, a_data, interv);
+  }
+
+  if (haveExtension) {
+    extensionData.copyTo(interv, a_data, interv);
+  }
 }
 
 const PolyhedralEBGraph&

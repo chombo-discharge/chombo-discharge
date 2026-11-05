@@ -261,10 +261,14 @@ public:
 
   /**
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
-   * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
-   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. The graph carries the
-   * links between levels that fillLevel describes. Nothing evaluates the implicit function. This
-   * is the shape of EBISLayout::Filler. Collective. Requires buildMoments.
+   * @details A cell in the geometry's boxes on the level takes what buildMoments made there. The cells outside them,
+   * which lie under a leaf of a coarser level or above the finest stored one, are cut from their ancestors on tiles of
+   * their own (extensionTiles), balanced over the ranks by the work of cutting them (extensionLoads, or one unit per
+   * tile under PolyhedralGeometryShop.extension_load = constant), and computed there (extendLevel). The stored level
+   * and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the links to the
+   * coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's only VoF and
+   * to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler. Collective.
+   * Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
    * @param[in]  a_grids      The layout.
@@ -550,32 +554,62 @@ public:
   testLinks() const;
 
   /**
-   * @brief Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells
-   * included.
-   * @details A cell in the geometry's boxes on the level takes what buildMoments made there -- its own body, or the
-   * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
-   * copied graph. A box lying wholly in the geometry's boxes out to the copy's ghost width takes the stored graph and
-   * moments as they are; only a box with cells outside them is built from nodes. A regular cell beside a multi-valued
-   * one is written as a full cut cell. A cut cell a finer level owns outside the geometry's boxes on the level stops
-   * the run. Collective.
-   *
-   * The graph carries the links to the next coarser level when the domain coarsens by two: a stored cell's from the
-   * stored graph, and a cell cut from an ancestor into the ancestor's only VoF. It carries the links to the next finer
-   * level for the stored cells coarsened from it, and for a regular cell made cut; no cell is cut further for them.
-   * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
-   * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
-   * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
-   * @param[in]  a_level      Destination level to fill.
-   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
-   * @param[in]  a_dataGhost  Ghost width of the moments.
+   * @brief The tiles of a destination level that the stored level does not hold.
+   * @details A destination box needs every cell out to its graph's ghost width. Those the geometry's boxes on the
+   * matching level do not hold lie under a leaf of a coarser level, or above the finest stored level, and are cut
+   * from their coarser ancestors. They are gathered from every rank as whole tiles of the geometry, so that the list
+   * is the same everywhere and holds each tile once. A tile is held whole or not at all, since a leaf refines to whole
+   * tiles; one held in part stops the run. Collective.
+   * @param[out] a_tiles      The tiles, on the destination level, clipped to its domain.
+   * @param[in]  a_grids      The destination layout.
+   * @param[in]  a_domain     Its domain.
+   * @param[in]  a_graphGhost Ghost width of the destination graph.
    */
   void
-  fillLevel(LevelData<EBGraph>&         a_graph,
-            LevelData<EBData>&          a_data,
-            const AMRPolyhedralEBGraph& a_copy,
-            const int                   a_level,
-            const int                   a_graphGhost,
-            const int                   a_dataGhost) const;
+  extensionTiles(Vector<Box>&             a_tiles,
+                 const DisjointBoxLayout& a_grids,
+                 const ProblemDomain&     a_domain,
+                 const int                a_graphGhost) const;
+
+  /**
+   * @brief The work of cutting each extension tile from its ancestors.
+   * @details A tile is cut from the tiles of the coarser levels that own its cells
+   * (ComputationalGeometry::ownedPieces). Each owning piece contributes its share of its tile's cut cells, multiplied
+   * by the 2^(SpaceDim - 1) cut children a cut cell has per level of subdivision, and every tile carries one unit
+   * besides. Each rank works out a share of the tiles and the loads are summed over the ranks. Collective.
+   * @param[out] a_loads The load of each tile.
+   * @param[in]  a_tiles The extension tiles, on the destination level, the same on every rank.
+   * @param[in]  a_level The geometry level of the destination level.
+   */
+  void
+  extensionLoads(Vector<long>& a_loads, const Vector<Box>& a_tiles, const int a_level) const;
+
+  /**
+   * @brief Cut the extension tiles from their ancestors, on a layout balanced for it.
+   * @details The polyhedral graph is copied onto the tiles with a ring of s_momentRing cells, so that every face of a
+   * tile and of its one ghost cell has the cell across it in hand. A tile the geometry calls regular or covered with
+   * its ghost cell is set whole. Every other tile is cut from its ancestors (AMRPolyhedralEBGraph::fillNodes) and a
+   * regular cell beside a multi-valued one is written as a full cut cell. Each VoF is linked to the only VoF of its
+   * coarser cell when the domain coarsens by two, and to no finer cell. A cut cell a finer level owns stops the run.
+   * Collective.
+   * @param[out] a_graph The graph, defined here over the tiles with one ghost cell.
+   * @param[out] a_data  The moments, defined here over the tiles.
+   * @param[in]  a_tiles The tiles, balanced over the ranks.
+   * @param[in]  a_domain Their domain.
+   */
+  void
+  extendLevel(LevelData<EBGraph>&      a_graph,
+              LevelData<EBData>&       a_data,
+              const DisjointBoxLayout& a_tiles,
+              const ProblemDomain&     a_domain) const;
+
+  /**
+   * @brief Count the cut cells of every tile on every level, for extensionLoads.
+   * @details Each rank counts the cells with a surface in its own graph boxes, and the counts are summed over the
+   * ranks. Collective. Requires buildGraphs.
+   */
+  void
+  countTileCutCells();
 
   /**
    * @brief Coarsen a level of the index space onto its coarsened layout.
@@ -788,6 +822,18 @@ protected:
    * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
    */
   bool m_testCopy;
+
+  /**
+   * @brief Whether the extension tiles are balanced by the cut cells they are cut from (true) or carry one unit of
+   * load each (false). PolyhedralGeometryShop.extension_load, cut_cells by default, or constant.
+   */
+  bool m_extensionLoadByCutCells;
+
+  /**
+   * @brief The number of cut cells of every tile, indexed [level][tile] as ComputationalGeometry::getCutTiles lists
+   * them. The same on every rank. Set by countTileCutCells.
+   */
+  Vector<Vector<long long>> m_tileCutCells;
 
   /**
    * @brief Whether the member functions that run once per level or per phase announce themselves in pout.
