@@ -25,5 +25,5 @@ FieldSolverAMG.ksp_max_iter                   = 200          ## Maximum number o
 FieldSolverAMG.petsc_verbosity                = -1           ## PETSc solve verbosity: residual per iteration (1), true residual (2), solver view (3)
 FieldSolverAMG.kappa_source                   = true         ## Volume weighted space charge density or not (depends on algorithm)
 FieldSolverAMG.eb_order                       = 1            ## Highest order of the EB face stencils (electrodes and interfaces)
-FieldSolverAMG.eb_weight                      = 4            ## Least-squares weighting of the EB face stencils
+FieldSolverAMG.eb_weight                      = 2            ## Least-squares weighting of the EB face stencils
 FieldSolverAMG.jump_bc                        = natural      ## Interface condition: 'natural' or 'saturation_charge'

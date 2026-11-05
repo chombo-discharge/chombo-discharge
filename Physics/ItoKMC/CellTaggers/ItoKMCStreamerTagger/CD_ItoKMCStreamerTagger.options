@@ -10,6 +10,6 @@ ItoKMCStreamerTagger.buffer            = 0              ## Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature      = 10.0    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 10.0    ## Curvature coarsening
-ItoKMCStreamerTagger.refine_alpha          = 2.0     ## Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha         = 0.1     ## Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.refine_alpha          = 1.0     ## Set alpha refinement. Lower  => More mesh
+ItoKMCStreamerTagger.coarsen_alpha         = 0.25    ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 0       ## Set max coarsening depth
