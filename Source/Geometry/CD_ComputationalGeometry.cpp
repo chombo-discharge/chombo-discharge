@@ -895,6 +895,12 @@ ComputationalGeometry::getStartLevel() const noexcept
 }
 
 int
+ComputationalGeometry::getMaxGhostEB() const noexcept
+{
+  return m_maxGhostEB;
+}
+
+int
 ComputationalGeometry::getLevel(const ProblemDomain& a_domain) const noexcept
 {
   int level = -1;

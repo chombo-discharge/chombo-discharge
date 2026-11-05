@@ -605,11 +605,13 @@ public:
 
   /**
    * @brief Build a level of the index space from its own cells and the cells coarsened from the next finer level.
-   * @details A box the geometry calls regular or covered, with its ghost cell, is set whole, and nothing of the graph
-   * is read for it. Otherwise, the level's own cells take what the copied graph says. Its cells under the next finer
-   * level take the coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side,
-   * which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is
-   * written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment.
+   * @details A box the geometry calls regular or covered is set whole with its ghost cell, and nothing of the graph is
+   * read for it. The geometry classifies its boxes grown by its EB ghost width, at least one cell, so the ghost cell
+   * holds no cut cell; under PolyhedralGeometryShop.test_copy every cell of the box and its ghost cell is checked
+   * against the copied graph. Otherwise, the level's own cells take what the copied graph says. Its cells under the
+   * next finer level take the coarsened VoFs, and an own cell beside one takes the faces between them from the
+   * coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than
+   * one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment.
    *
    * A coarsened cell carries its links to the next finer level, the pieces coarsenLevel gave it, and a regular cell
    * made cut all of its children. An own cut cell, which no finer box lies over, has no links to the finer level. When

@@ -764,6 +764,12 @@ PolyhedralGeometryShop::buildMoments()
 
   CH_assert(m_compGeom != nullptr);
 
+  // A box whose type is regular or covered is set whole together with its ghost cell, which holds no cut cell only if
+  // the box was classified with at least that cell around it.
+  if (m_compGeom->getMaxGhostEB() < 1) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - the geometry's boxes were classified with no EB ghost cell");
+  }
+
   const int numLevels = m_compGeom->getNumGridLevels();
 
   // The geometry's own grids, every box of every level. As ScanShop does, the boxes holding this phase's cut cells and
@@ -1557,6 +1563,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
   long long numCollapsed = 0;
   long long numFiner     = 0;
+  long long numNotWhole  = 0;
 
   // a level whose domain does not coarsen by two has no coarser level to link to
   const bool coarsenable = refine(coarsen(domain.domainBox(), 2), 2) == domain.domainBox();
@@ -1565,11 +1572,23 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     const Box box    = a_grids[lvl][dit()];
     const Box region = grow(box, 1) & domain.domainBox();
 
-    // A box the geometry calls regular or covered, ghost cell included, holds no cut cell: the graph holds nothing of
-    // it, and its cells are set whole.
-    const GeometryService::InOut type = m_compGeom->classify(region, lvl, m_phase);
+    // A box is one of the geometry's own, and the geometry classified it grown by its EB ghost width, so a box it calls
+    // regular or covered has no cut cell in its ghost cell either: its cells are set whole. Classifying the grown
+    // region instead would meet the neighbouring boxes, and call the box irregular beside any cut one.
+    const GeometryService::InOut type = m_compGeom->classify(box, lvl, m_phase);
 
     if (type != GeometryService::Irregular) {
+      if (m_testCopy) {
+        const int whole = (type == GeometryService::Regular) ? PolyhedralEBGraph::s_regular
+                                                             : PolyhedralEBGraph::s_covered;
+
+        for (BoxIterator bit(region); bit.ok(); ++bit) {
+          const int state = a_copy.getState(lvl, dit(), bit());
+
+          numNotWhole += (state != whole && state != AMRPolyhedralEBGraph::s_unowned) ? 1 : 0;
+        }
+      }
+
       EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
 
       if (type == GeometryService::Regular) {
@@ -1689,6 +1708,10 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
   if (ParallelOps::sum(numFiner) > 0) {
     MayDay::Error("PolyhedralGeometryShop::assembleLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+
+  if (ParallelOps::sum(numNotWhole) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::assembleLevel - a box set whole holds a cell of another state");
   }
 }
 

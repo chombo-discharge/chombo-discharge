@@ -283,6 +283,14 @@ public:
   getStartLevel() const noexcept;
 
   /**
+   * @brief The width, in cells, by which every box is grown before it is classified.
+   * @details A box classified regular or covered has no cut cell within this many cells of it.
+   * @return The EB ghost width given to makeGrids or buildGeometries.
+   */
+  int
+  getMaxGhostEB() const noexcept;
+
+  /**
    * @brief Level of a domain among the levels makeGrids built.
    * @param[in] a_domain Domain to look up.
    * @return Its level, 0 being the coarsest, or -1 if there is no such level.
