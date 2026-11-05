@@ -879,10 +879,13 @@ ComputationalGeometry::checkOwnedPieces(const Box& a_box, const int a_level) con
       const int expected = (held && !refined) ? 1 : 0;
 
       if (count(iv, 0) != expected) {
-        pout() << "ComputationalGeometry::checkOwnedPieces - level " << lvl << " cell " << iv << " is in "
-               << count(iv, 0) << " pieces, and should be in " << expected << endl;
+#pragma omp critical(ComputationalGeometry_fatal)
+        {
+          pout() << "ComputationalGeometry::checkOwnedPieces - level " << lvl << " cell " << iv << " is in "
+                 << count(iv, 0) << " pieces, and should be in " << expected << endl;
 
-        MayDay::Error("ComputationalGeometry::checkOwnedPieces - the pieces do not partition the owned cells");
+          MayDay::Error("ComputationalGeometry::checkOwnedPieces - the pieces do not partition the owned cells");
+        }
       }
     }
   }
