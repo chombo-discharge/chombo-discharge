@@ -490,7 +490,9 @@ Controls the multigrid verbosity; a value <span class="math notranslate nohighli
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bottom_verbosity</span></code>.
 Controls the bottom-solver verbosity; a value <span class="math notranslate nohighlight">\(&gt; 0\)</span> prints bottom-solver convergence information (the detail depends on the bottom solver in use).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_use_default_settings</span></code>.
-Use a known-robust set of default multigrid settings.</p>
+Use a known-robust set of default multigrid settings.
+These replace the stencil orders and weights, the relaxation factor, the numbers of smoothings, the smoother, the cycle and the bottom solver given in the input.
+It is <code class="docutils literal notranslate"><span class="pre">false</span></code> in the options files, which set these options themselves.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Enabling this tends to make most problems converge, but potentially at suboptimal convergence rates.</p>

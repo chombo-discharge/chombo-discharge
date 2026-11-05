@@ -425,6 +425,8 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   Controls the bottom-solver verbosity; a value :math:`> 0` prints bottom-solver convergence information (the detail depends on the bottom solver in use).
 * ``<Solver>.gmg_use_default_settings``.
   Use a known-robust set of default multigrid settings.
+  These replace the stencil orders and weights, the relaxation factor, the numbers of smoothings, the smoother, the cycle and the bottom solver given in the input.
+  It is ``false`` in the options files, which set these options themselves.
 
   .. tip::
 

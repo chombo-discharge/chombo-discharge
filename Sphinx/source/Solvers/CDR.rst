@@ -109,6 +109,8 @@ The stabilization is selected with the solver option ``which_redistribution``:
 * ``state``: weighted state redistribution, see :ref:`Chap:StateRedistribution`.
 * ``none``: the hybrid divergence without redistributing the mass that it misses. This is not conservative.
 
+``which_redistribution`` can be changed at runtime between ``volume`` and ``none``, but not to or from ``state``: state redistribution needs an operator that is registered when the solver is set up.
+
 Both stabilizations turn the conservative divergence into the right-hand side :math:`R` of a stabilized update :math:`\phi^{k+1} = \phi^k - \Delta t R`.
 With state redistribution, :math:`R` depends on :math:`\phi^k` and on :math:`\Delta t`.
 The divergence functions therefore take the time step of the update, and the result must only be used with that time step.

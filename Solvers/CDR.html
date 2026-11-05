@@ -356,6 +356,7 @@ The stabilization is selected with the solver option <code class="docutils liter
 <li><p><code class="docutils literal notranslate"><span class="pre">state</span></code>: weighted state redistribution, see <a class="reference internal" href="#chap-stateredistribution"><span class="std std-ref">State redistribution</span></a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: the hybrid divergence without redistributing the mass that it misses. This is not conservative.</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">which_redistribution</span></code> can be changed at runtime between <code class="docutils literal notranslate"><span class="pre">volume</span></code> and <code class="docutils literal notranslate"><span class="pre">none</span></code>, but not to or from <code class="docutils literal notranslate"><span class="pre">state</span></code>: state redistribution needs an operator that is registered when the solver is set up.</p>
 <p>Both stabilizations turn the conservative divergence into the right-hand side <span class="math notranslate nohighlight">\(R\)</span> of a stabilized update <span class="math notranslate nohighlight">\(\phi^{k+1} = \phi^k - \Delta t R\)</span>.
 With state redistribution, <span class="math notranslate nohighlight">\(R\)</span> depends on <span class="math notranslate nohighlight">\(\phi^k\)</span> and on <span class="math notranslate nohighlight">\(\Delta t\)</span>.
 The divergence functions therefore take the time step of the update, and the result must only be used with that time step.
@@ -678,29 +679,29 @@ CdrCTU.flux_correction          = true                      ## If true, flux-cor
 CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrCTU.which_redistribution     = volume                    ## Redistribution type. 'volume', 'state' or 'none' (turned off)
+CdrCTU.which_redistribution     = state                     ## Redistribution type. 'volume', 'state' or 'none' (turned off). 'state' cannot be switched to or from at runtime
 CdrCTU.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 
-CdrCTU.solver                    = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-CdrCTU.krylov_eps                = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-CdrCTU.krylov_max_iter           = 50           ## Outer Krylov max iterations (gmres/bicgstab)
-CdrCTU.krylov_restart            = 30           ## GMRES restart length (gmres only)
-CdrCTU.krylov_vcycles            = 1            ## V-cycles per Krylov preconditioner application
-CdrCTU.krylov_retry_interval     = 1            ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
-CdrCTU.krylov_reprobe_iters      = 0            ## Re-probe GMG early when the Krylov fallback converges in &lt;= this many iterations (0 = disabled)
-CdrCTU.gmg_verbosity             = -1           ## GMG verbosity
-CdrCTU.gmg_pre_smooth            = 12           ## Number of relaxations in GMG downsweep
-CdrCTU.gmg_post_smooth           = 12           ## Number of relaxations in upsweep
-CdrCTU.gmg_bott_smooth           = 12           ## NUmber of relaxations before dropping to bottom solver
-CdrCTU.gmg_min_iter              = 5            ## Minimum number of iterations
-CdrCTU.gmg_max_iter              = 32           ## Maximum number of iterations
-CdrCTU.gmg_exit_tol              = 1.E-10       ## Residue tolerance
-CdrCTU.gmg_exit_hang             = 0.2          ## Solver hang
-CdrCTU.gmg_min_cells             = 16           ## Bottom drop
-CdrCTU.gmg_bottom_solver         = bicgstab     ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrCTU.gmg_cycle                 = vcycle       ## Cycle type. 'vcycle' or 'wcycle'
-CdrCTU.gmg_smoother              = red_black    ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev &lt;order&gt; &lt;eig_ratio&gt;', or 'ras &lt;inner_sweeps&gt;'
-CdrCTU.gmg_reflux_free           = false        ## If true, use reflux-free AMR operator
+CdrCTU.solver                    = bicgstab gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+CdrCTU.krylov_eps                = 1.E-10            ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+CdrCTU.krylov_max_iter           = 50                ## Outer Krylov max iterations (gmres/bicgstab)
+CdrCTU.krylov_restart            = 30                ## GMRES restart length (gmres only)
+CdrCTU.krylov_vcycles            = 1                 ## V-cycles per Krylov preconditioner application
+CdrCTU.krylov_retry_interval     = 1                 ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+CdrCTU.krylov_reprobe_iters      = 0                 ## Re-probe GMG early when the Krylov fallback converges in &lt;= this many iterations (0 = disabled)
+CdrCTU.gmg_verbosity             = -1                ## GMG verbosity
+CdrCTU.gmg_pre_smooth            = 8                 ## Number of relaxations in GMG downsweep
+CdrCTU.gmg_post_smooth           = 8                 ## Number of relaxations in upsweep
+CdrCTU.gmg_bott_smooth           = 8                 ## NUmber of relaxations before dropping to bottom solver
+CdrCTU.gmg_min_iter              = 5                 ## Minimum number of iterations
+CdrCTU.gmg_max_iter              = 32                ## Maximum number of iterations
+CdrCTU.gmg_exit_tol              = 1.E-10            ## Residue tolerance
+CdrCTU.gmg_exit_hang             = 0.2               ## Solver hang
+CdrCTU.gmg_min_cells             = 8                 ## Bottom drop
+CdrCTU.gmg_bottom_solver         = simple 16         ## Bottom solver type. 'simple &lt;relaxations&gt;', 'bicgstab', or 'gmres'
+CdrCTU.gmg_cycle                 = vcycle            ## Cycle type. 'vcycle' or 'wcycle'
+CdrCTU.gmg_smoother              = red_black         ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev &lt;order&gt; &lt;eig_ratio&gt;', or 'ras &lt;inner_sweeps&gt;'
+CdrCTU.gmg_reflux_free           = false             ## If true, use reflux-free AMR operator
 </pre></div>
 </div>
 <p>We do not discuss all options here, but note the following:</p>
