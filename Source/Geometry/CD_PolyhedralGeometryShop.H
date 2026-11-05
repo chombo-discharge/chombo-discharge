@@ -268,7 +268,8 @@ public:
    * stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the
    * links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's
    * only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler.
-   * Collective. Requires buildMoments.
+   * Collective: every rank calls it for the same layouts in the same order, since the tiles are gathered and balanced
+   * over all ranks. Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
    * @param[in]  a_grids      The layout.

@@ -921,6 +921,8 @@ PolyhedralGeometryShop::extensionTiles(Vector<Box>&             a_tiles,
         continue;
       }
 
+      // makeGrids builds the tiled levels from whole tiles and covers the levels coarser than the start domain with
+      // boxes, so a tile is either held whole or not at all.
       if (numStored > 0) {
         MayDay::Error("PolyhedralGeometryShop::extensionTiles - a tile is held in part by the geometry's boxes");
       }
