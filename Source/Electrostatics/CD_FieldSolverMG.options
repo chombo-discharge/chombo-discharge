@@ -20,7 +20,7 @@ FieldSolverMG.amg_fallback           = true    ## Fall back to PETSc AMG when th
 FieldSolverMG.amg_retry_interval     = 10      ## While latched to AMG, re-try GMG every N solves (1 = always try GMG first)
 
 # Geometric multigrid stage (always active)
-FieldSolverMG.gmg_solver                    = bicgstab gmres  ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverMG.gmg_solver                    = bicgstab  ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverMG.gmg_krylov_eps                = 1.E-10          ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 FieldSolverMG.gmg_krylov_max_iter           = 50              ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverMG.gmg_krylov_restart            = 30              ## GMRES restart length (gmres only)
@@ -31,8 +31,8 @@ FieldSolverMG.gmg_verbosity                 = -1              ## GMG verbosity (
 FieldSolverMG.gmg_cycle                     = vcycle          ## Cycle type. 'vcycle' or 'wcycle'
 FieldSolverMG.gmg_smoother                  = ras 4           ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
 FieldSolverMG.gmg_relax_factor              = 1.0             ## Adjustable SOR factor
-FieldSolverMG.gmg_pre_smooth                = 3               ## Number of relaxations in downsweep (each is <inner_sweeps> sweeps for 'ras')
-FieldSolverMG.gmg_post_smooth               = 3               ## Number of relaxations in upsweep (each is <inner_sweeps> sweeps for 'ras')
+FieldSolverMG.gmg_pre_smooth                = 4               ## Number of relaxations in downsweep (each is <inner_sweeps> sweeps for 'ras')
+FieldSolverMG.gmg_post_smooth               = 4               ## Number of relaxations in upsweep (each is <inner_sweeps> sweeps for 'ras')
 FieldSolverMG.gmg_bott_smooth               = 0               ## Number of relaxations on the bottom level before the bottom solver
 FieldSolverMG.gmg_precond_smooth            = 4               ## Relaxations in the bottom Krylov solver's preconditioner (bicgstab/gmres bottom only)
 FieldSolverMG.gmg_min_iter                  = 5               ## Minimum number of iterations
