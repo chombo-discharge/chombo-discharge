@@ -9,7 +9,7 @@ FieldSolverGMG.bc.y.lo               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.y.hi               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.z.lo               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.z.hi               = dirichlet 0.0     ## Bc type (see docs)
-FieldSolverGMG.plt_vars              = phi rho E Esol    ## Plot variables: 'phi', 'rho', 'E', 'resid', 'perm', 'sigma', 'Esol'
+FieldSolverGMG.plt_vars              = phi rho E Esol    ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverGMG.use_regrid_slopes     = true              ## Use slopes when regridding or not
 FieldSolverGMG.kappa_source          = true              ## Volume weighted space charge density or not (depends on algorithm)
 
