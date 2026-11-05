@@ -624,7 +624,7 @@ The remaining options are:
 * The options that start with ``gmg_`` configure geometric multigrid. They are the options of ``FieldSolverGMG``, where ``solver`` and ``krylov_*`` are named ``gmg_solver`` and ``gmg_krylov_*``. See :ref:`Chap:MultigridTuning`. ``gmg_use_default_settings`` is not available, since it would replace the stencil and smoother settings.
 * The other options configure algebraic multigrid, and are those of ``FieldSolverAMG`` (see :ref:`Chap:FieldSolverAMG`).
 
-The defaults are chosen for robustness rather than speed on simple geometries: second-order embedded-boundary stencils, the ``ras 4`` smoother, a GMG-preconditioned BiCGStab solver after the plain multigrid solver, and order-1 stencils on the coarsened multigrid levels (``gmg_reduce_order``).
+The defaults are chosen for robustness rather than speed on simple geometries: second-order embedded-boundary stencils, the ``ras 4`` smoother, a BiCGStab solver preconditioned by geometric multigrid, with algebraic multigrid as its fallback, and order-1 stencils on the coarsened multigrid levels (``gmg_reduce_order``).
 
 Limitations
 ___________
