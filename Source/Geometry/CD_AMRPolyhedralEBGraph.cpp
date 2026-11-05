@@ -23,7 +23,6 @@
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
-#include <CD_PolyhedralGeometryShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
@@ -91,8 +90,14 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
 
   for (std::size_t i = 0; i < a_grids.size(); i++) {
     for (int lvl = 0; lvl < a_numSourceLevels; lvl++) {
-      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
-        (*m_pieceOffsets[i][lvl])[dit()].assign(1, 0);
+      const DataIterator& dit  = a_grids[i].dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        (*m_pieceOffsets[i][lvl])[din].assign(1, 0);
       }
     }
   }
@@ -220,6 +225,9 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
   bool anyCovered = false;
   bool anyCut     = false;
 
+  // whether a piece of the cell's own level or a coarser one holds the cell, all of it
+  bool whole = false;
+
   const auto take = [&](const int a_state) {
     anyRegular = anyRegular || a_state == PolyhedralEBGraph::s_regular;
     anyCovered = anyCovered || a_state == PolyhedralEBGraph::s_covered;
@@ -233,11 +241,12 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
       continue;
     }
 
-    if (lvl == geometryLevel) {
-      take(this->getSourceState(a_level, a_dit, lvl, a_cell));
-    }
-    else if (lvl < geometryLevel) {
-      take(this->getSourceState(a_level, a_dit, lvl, coarsen(a_cell, 1 << (geometryLevel - lvl))));
+    if (lvl <= geometryLevel) {
+      const int state = this->getSourceState(a_level, a_dit, lvl, coarsen(a_cell, 1 << (geometryLevel - lvl)));
+
+      whole = whole || state != s_unowned;
+
+      take(state);
     }
     else {
       const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - geometryLevel));
@@ -261,8 +270,9 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
   }
 
   // The part of the cell no piece holds, read from the geometry's boxes at the finest level holding any of it. The box
-  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered.
-  if (!anyCut && this->holds(a_level, a_dit, a_cell)) {
+  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered. A
+  // cell a piece of its own level or a coarser one holds leaves no such part.
+  if (!anyCut && !whole && this->holds(a_level, a_dit, a_cell)) {
     int finest = geometryLevel;
 
     for (int lvl = geometryLevel + 1; lvl < m_numSourceLevels; lvl++) {
@@ -529,9 +539,15 @@ AMRPolyhedralEBGraph::finish()
 
   for (std::size_t i = 0; i < m_grids.size(); i++) {
     for (int lvl = 0; lvl < m_numSourceLevels; lvl++) {
-      for (DataIterator dit(m_grids[i]); dit.ok(); ++dit) {
-        std::vector<IntVect>&        cells    = (*m_surfaceCells[i][lvl])[dit()];
-        std::vector<CutCellSurface>& surfaces = (*m_surfaces[i][lvl])[dit()];
+      const DataIterator& dit  = m_grids[i].dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        std::vector<IntVect>&        cells    = (*m_surfaceCells[i][lvl])[din];
+        std::vector<CutCellSurface>& surfaces = (*m_surfaces[i][lvl])[din];
 
         std::vector<std::size_t> order(cells.size());
 
@@ -553,13 +569,13 @@ AMRPolyhedralEBGraph::finish()
         surfaces.swap(sortedSurfaces);
 
         // the pieces' index: bins as wide as the widest piece, so a piece reaches at most two bins a direction
-        const std::vector<Box>& pieces = (*m_pieces[i][lvl])[dit()];
+        const std::vector<Box>& pieces = (*m_pieces[i][lvl])[din];
 
-        int& binSize = (*m_binSize[i][lvl])[dit()];
-        Box& binBox  = (*m_binBox[i][lvl])[dit()];
+        int& binSize = (*m_binSize[i][lvl])[din];
+        Box& binBox  = (*m_binBox[i][lvl])[din];
 
-        std::vector<int>& binOffsets = (*m_binOffsets[i][lvl])[dit()];
-        std::vector<int>& binPieces  = (*m_binPieces[i][lvl])[dit()];
+        std::vector<int>& binOffsets = (*m_binOffsets[i][lvl])[din];
+        std::vector<int>& binPieces  = (*m_binPieces[i][lvl])[din];
 
         binSize = 1;
         binBox  = Box();
@@ -652,12 +668,13 @@ AMRPolyhedralEBGraph::describe(std::vector<PolyhedralEB::CutCellDescription>& a_
 }
 
 void
-AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
-                                Vector<IrregNode>& a_nodes,
-                                long long&         a_numCollapsed,
-                                long long&         a_numFiner,
-                                const int          a_level,
-                                const DataIndex&   a_dit) const
+AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
+                                Vector<IrregNode>&   a_nodes,
+                                long long&           a_numCollapsed,
+                                long long&           a_numFiner,
+                                const int            a_level,
+                                const DataIndex&     a_dit,
+                                const BaseFab<bool>& a_compute) const
 {
   CH_TIME("AMRPolyhedralEBGraph::fillNodes");
 
@@ -671,6 +688,8 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
   const Box            box           = this->getGrids(a_level)[a_dit];
   const Box            region        = grow(box, this->getGhost()) & domain.domainBox();
   const Box            nodeRegion    = grow(box, this->getGhost() - 1) & domain.domainBox();
+
+  CH_assert(a_compute.box().contains(region));
 
   a_regIrregCovered.define(region, 1);
   a_nodes.resize(0);
@@ -691,6 +710,12 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
 
   for (BoxIterator bit(region); bit.ok(); ++bit) {
     const IntVect iv = bit();
+
+    if (!a_compute(iv, 0)) {
+      a_regIrregCovered(iv, 0) = 0;
+
+      continue;
+    }
 
     const int state = this->getState(a_level, a_dit, iv);
 
@@ -768,13 +793,9 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
       MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
     }
 
-    if (body.numPolygons() == 0 || body.volumeFraction() <= 0.0) {
-      a_regIrregCovered(iv, 0) = -1;
-    }
-    else if (body.volumeFraction() >= 1.0 && body.boundaryArea() <= 0.0) {
-      a_regIrregCovered(iv, 0) = 1;
-    }
-    else {
+    a_regIrregCovered(iv, 0) = body.childState();
+
+    if (a_regIrregCovered(iv, 0) == 0) {
       bodyIndex(iv, 0) = cutBodies.size();
 
       cutCells.push_back(iv);
@@ -791,7 +812,7 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
 
     IrregNode node;
 
-    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cell, domain);
+    cutBodies[n].fillNode(node, a_regIrregCovered, cell, domain);
 
     // A face is the regular cell's if one side is regular, open over all of it, and otherwise the low cell's: both
     // sides write it from the same cell, where they would otherwise compute it each over its own polygon and to

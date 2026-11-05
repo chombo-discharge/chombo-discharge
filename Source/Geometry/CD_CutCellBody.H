@@ -17,8 +17,11 @@
 #include <cstdint>
 
 // Chombo includes
-#include <RealVect.H>
+#include <BaseFab.H>
+#include <IrregNode.H>
 #include <LoHiSide.H>
+#include <ProblemDomain.H>
+#include <RealVect.H>
 
 // Our includes
 #include <CD_CutCellFaceOverrides.H>
@@ -495,6 +498,35 @@ public:
    */
   std::uint64_t
   fingerprint() const noexcept;
+
+  /**
+   * @brief What the cell this body describes is: covered if it holds no fluid, regular if it is all fluid with no
+   * interface, and cut otherwise.
+   * @details The classification of a body subdivided from a cut ancestor. AMRPolyhedralEBGraph::fillNodes flags a cell
+   * by it, and the links of a cut cell to its children list the children it does not call covered, so the two cannot
+   * disagree about which children hold fluid.
+   * @return 1 for regular, 0 for cut and -1 for covered, the flags GeometryService::fillGraph uses.
+   */
+  int
+  childState() const noexcept;
+
+  /**
+   * @brief Write a cut cell's node from this body.
+   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
+   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come from the
+   * body, with roundings just outside [0,1] clamped. The node is the cell's only VoF, at cell index 0; its links to
+   * the coarser and finer levels are left unset.
+   * @param[out] a_node            The node to fill.
+   * @param[in]  a_regIrregCovered Regular (1), irregular (0) and covered (-1) cells, over the cell and its neighbours
+   * inside the domain.
+   * @param[in]  a_cell            The cell, flagged irregular.
+   * @param[in]  a_domain          Domain.
+   */
+  void
+  fillNode(IrregNode&           a_node,
+           const BaseFab<int>&  a_regIrregCovered,
+           const IntVect&       a_cell,
+           const ProblemDomain& a_domain) const;
 
 protected:
   /**

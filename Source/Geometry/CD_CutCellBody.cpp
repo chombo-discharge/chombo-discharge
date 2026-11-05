@@ -2651,6 +2651,103 @@ CutCellBody::fingerprint() const noexcept
   return hash;
 }
 
+int
+CutCellBody::childState() const noexcept
+{
+  if (this->numPolygons() == 0 || this->volumeFraction() <= 0.0) {
+    return -1;
+  }
+
+  if (this->volumeFraction() >= 1.0 && this->boundaryArea() <= 0.0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+void
+CutCellBody::fillNode(IrregNode&           a_node,
+                      const BaseFab<int>&  a_regIrregCovered,
+                      const IntVect&       a_cell,
+                      const ProblemDomain& a_domain) const
+{
+  CH_assert(a_regIrregCovered.box().contains(a_cell));
+  CH_assert(a_regIrregCovered(a_cell, 0) == 0);
+
+  // A moment summed over the polyhedron's tetrahedra and polygons lands a rounding outside [0,1] where the cell
+  // is nearly full or nearly empty -- one unit in the last place over, on a nearly full cell -- and CutCellBody
+  // accepts that, because a sum of terms of either sign cannot be exact. The index space's contract is [0,1]
+  // exactly, and PolyGeom asserts on it, so this is where the rounding is taken out. The clamp absorbs a
+  // rounding and nothing more: a body genuinely outside the range stops the run here rather than being quietly
+  // brought inside it. Clamping is a function of the value alone, so two cells sharing a face, which compute
+  // that face's aperture from the same crossings, still agree on it exactly.
+  constexpr Real slack = 1.0E-12;
+
+  const auto clamp = [](const Real a_moment) -> Real {
+    return std::min(1.0, std::max(0.0, a_moment));
+  };
+
+  CH_assert(this->volumeFraction() >= -slack && this->volumeFraction() <= 1.0 + slack);
+
+  a_node.m_cell          = a_cell;
+  a_node.m_cellIndex     = 0;
+  a_node.m_volFrac       = clamp(this->volumeFraction());
+  a_node.m_volCentroid   = this->volumeCentroid();
+  a_node.m_bndryCentroid = this->boundaryCentroid();
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (SideIterator sit; sit.ok(); ++sit) {
+      const IntVect shifted   = a_cell + sign(sit()) * BASISV(dir);
+      const int     nodeIndex = a_node.index(dir, sit());
+
+      Vector<int>      arc;
+      Vector<Real>     areaFrac;
+      Vector<RealVect> faceCentroid;
+
+      // a neighbour inside the domain is inside the ghost region the flags were built on
+      CH_assert(!a_domain.contains(shifted) || a_regIrregCovered.box().contains(shifted));
+
+      // the face polygons are oriented outward before their areas are summed, so a net
+      // aperture is never negative
+      CH_assert(this->areaFraction(dir, sit()) >= -slack);
+      CH_assert(this->areaFraction(dir, sit()) <= 1.0 + slack);
+
+      // the arcs are topology: they follow the covered set and the domain, not the moments, so
+      // the graph is the one GeometryShop would have built
+      if (!a_domain.contains(shifted)) {
+        arc.resize(1, -1);
+      }
+      else if (a_regIrregCovered(shifted, 0) < 0) {
+        arc.resize(0);
+      }
+      else {
+        arc.resize(1, 0);
+      }
+
+      // A face with no area open to flux carries no arc either. The aperture is forced to an
+      // exact zero rather than a small number, and two cut cells sharing a face compute it from
+      // the same crossings, so they cannot disagree about whether the face is there. The one
+      // exception is a regular neighbour, which is full and whose faces are open by definition:
+      // withholding the arc on that side leaves the two cells disagreeing about the face and
+      // EBGraph stops.
+      const bool neighbourIsRegular = a_domain.contains(shifted) && a_regIrregCovered(shifted, 0) > 0;
+      const bool faceIsOpen         = neighbourIsRegular || this->areaFraction(dir, sit()) > 0.0;
+
+      if (arc.size() > 0 && faceIsOpen) {
+        areaFrac.resize(1, clamp(this->areaFraction(dir, sit())));
+        faceCentroid.resize(1, this->faceCentroid(dir, sit()));
+      }
+      else {
+        arc.resize(0);
+      }
+
+      a_node.m_arc[nodeIndex]          = arc;
+      a_node.m_areaFrac[nodeIndex]     = areaFrac;
+      a_node.m_faceCentroid[nodeIndex] = faceCentroid;
+    }
+  }
+}
+
 } // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>

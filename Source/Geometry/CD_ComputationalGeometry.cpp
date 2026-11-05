@@ -264,21 +264,62 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // Build the composite implicit functions and then the GeometryService* objects which can be passed to Chombo.
   this->buildImplicitFunctions();
 
+  m_polyhedralShops[phase::gas]   = RefCountedPtr<PolyhedralGeometryShop>(nullptr);
+  m_polyhedralShops[phase::solid] = RefCountedPtr<PolyhedralGeometryShop>(nullptr);
+
   Vector<GeometryService*> geoServices(2, nullptr);
 
   this->buildGasGeometry(geoServices[phase::gas], a_finestDomain, a_probLo, a_finestDx);
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
-  // Define the multifluid index space.
-  const bool useDistributedData = (m_generator != Generator::GeometryShop);
+  if (m_generator == Generator::PolyhedralShop) {
+    // The index spaces fill every layout from the shops, over the geometry's domains, finest first. The shops stay with
+    // this object, and the fillers refer to them.
+    const int numLevels = m_domains.size();
 
-  m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
-                                 a_probLo,
-                                 a_finestDx,
-                                 geoServices,
-                                 useDistributedData,
-                                 a_nCellMax,
-                                 a_maxCoarsen);
+    if (numLevels == 0 || m_domains[numLevels - 1].domainBox() != a_finestDomain.domainBox()) {
+      MayDay::Error("ComputationalGeometry::buildGeometries - the geometry's finest domain is not the finest domain");
+    }
+
+    Vector<ProblemDomain> domains(numLevels);
+
+    for (int lvl = 0; lvl < numLevels; lvl++) {
+      domains[numLevels - 1 - lvl] = m_domains[lvl];
+    }
+
+    Vector<EBISLayout::Filler> fillers(2);
+
+    for (const phase::which_phase curPhase : {phase::gas, phase::solid}) {
+      if (m_polyhedralShops[curPhase].isNull()) {
+        continue;
+      }
+
+      const PolyhedralGeometryShop* shop = &(*m_polyhedralShops[curPhase]);
+
+      fillers[curPhase] = [shop](LevelData<EBGraph>&      a_graph,
+                                 LevelData<EBData>&       a_data,
+                                 const DisjointBoxLayout& a_grids,
+                                 const ProblemDomain&     a_domain,
+                                 const int                a_graphGhost,
+                                 const int                a_dataGhost) -> void {
+        shop->fillLayout(a_graph, a_data, a_grids, a_domain, a_graphGhost, a_dataGhost);
+      };
+    }
+
+    m_multifluidIndexSpace->define(domains, a_probLo, a_finestDx, fillers);
+  }
+  else {
+    // Define the multifluid index space.
+    const bool useDistributedData = (m_generator != Generator::GeometryShop);
+
+    m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
+                                   a_probLo,
+                                   a_finestDx,
+                                   geoServices,
+                                   useDistributedData,
+                                   a_nCellMax,
+                                   a_maxCoarsen);
+  }
 
   // Delete temps.
   for (int i = 0; i < 2; i++) {
@@ -838,10 +879,13 @@ ComputationalGeometry::checkOwnedPieces(const Box& a_box, const int a_level) con
       const int expected = (held && !refined) ? 1 : 0;
 
       if (count(iv, 0) != expected) {
-        pout() << "ComputationalGeometry::checkOwnedPieces - level " << lvl << " cell " << iv << " is in "
-               << count(iv, 0) << " pieces, and should be in " << expected << endl;
+#pragma omp critical(ComputationalGeometry_fatal)
+        {
+          pout() << "ComputationalGeometry::checkOwnedPieces - level " << lvl << " cell " << iv << " is in "
+                 << count(iv, 0) << " pieces, and should be in " << expected << endl;
 
-        MayDay::Error("ComputationalGeometry::checkOwnedPieces - the pieces do not partition the owned cells");
+          MayDay::Error("ComputationalGeometry::checkOwnedPieces - the pieces do not partition the owned cells");
+        }
       }
     }
   }
@@ -851,6 +895,18 @@ int
 ComputationalGeometry::getStartLevel() const noexcept
 {
   return m_startLevel;
+}
+
+int
+ComputationalGeometry::getMaxGhostEB() const noexcept
+{
+  return m_maxGhostEB;
+}
+
+int
+ComputationalGeometry::getMinBlockSize() const noexcept
+{
+  return m_minBlockSize;
 }
 
 int
@@ -931,6 +987,84 @@ ComputationalGeometry::getDomain(const int a_level) const noexcept
   CH_assert(a_level >= 0 && a_level < m_domains.size());
 
   return m_domains[a_level];
+}
+
+IntVectSet
+ComputationalGeometry::irregCells(const phase::which_phase a_phase, const ProblemDomain& a_domain) const
+{
+  CH_TIME("ComputationalGeometry::irregCells");
+
+  const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(a_phase);
+
+  if (ebis.isNull()) {
+    return IntVectSet();
+  }
+
+  if (!m_polyhedralShops[a_phase].isNull()) {
+    const int geometryLevel = this->getLevel(a_domain);
+
+    if (geometryLevel < 0) {
+      MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the geometry's");
+    }
+
+    const LevelData<EBGraph>& graph = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel);
+    const DisjointBoxLayout&  grids = graph.disjointBoxLayout();
+
+    IntVectSet cutCells;
+
+    const DataIterator& dit  = grids.dataIterator();
+    const int           nbox = dit.size();
+
+    // each thread gathers its boxes' cut cells, and the threads' sets are joined one at a time
+#pragma omp parallel
+    {
+      IntVectSet threadCells;
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        threadCells |= graph[din].getIrregCells(grids[din]);
+      }
+
+#pragma omp critical(ComputationalGeometry_irregCells)
+      cutCells |= threadCells;
+    }
+
+    return cutCells;
+  }
+
+  const int level = ebis->getLevel(a_domain);
+
+  if (level < 0) {
+    MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the index space's");
+  }
+
+  return ebis->irregCells(level);
+}
+
+DisjointBoxLayout
+ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const ProblemDomain& a_domain) const
+{
+  CH_TIME("ComputationalGeometry::irregGrids");
+
+  const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(a_phase);
+
+  if (ebis.isNull()) {
+    MayDay::Error("ComputationalGeometry::irregGrids - the phase has no index space");
+  }
+
+  if (!m_polyhedralShops[a_phase].isNull()) {
+    const int geometryLevel = this->getLevel(a_domain);
+
+    if (geometryLevel < 0) {
+      MayDay::Error("ComputationalGeometry::irregGrids - the domain is not one of the geometry's");
+    }
+
+    return m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
+  }
+
+  return ebis->getIrregGrids(a_domain);
 }
 
 Real
@@ -2311,26 +2445,29 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
     pout() << "ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)" << endl;
   }
 
-  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral generator
-  // computes its moments over the full grids ScanShop builds; the grids makeGrids made are not yet what the
-  // index space is generated over.
+  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral generator builds
+  // its index space over the grids makeGrids made, and fills the index space's layouts from it.
   if (m_generator == Generator::PolyhedralShop) {
-    auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
-                                            0,
-                                            a_finestDx,
-                                            a_probLo,
-                                            a_finestDomain,
-                                            m_scanDomain,
-                                            m_maxGhostEB,
-                                            s_thresh,
-                                            s_strictGeometry);
+    RefCountedPtr<PolyhedralGeometryShop> shop(new PolyhedralGeometryShop(*m_implicitFunctionGas,
+                                                                          0,
+                                                                          a_finestDx,
+                                                                          a_probLo,
+                                                                          a_finestDomain,
+                                                                          m_scanDomain,
+                                                                          m_maxGhostEB,
+                                                                          s_thresh,
+                                                                          s_strictGeometry));
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
     shop->setGrids(*this, phase::gas);
     shop->buildGraphs();
+    shop->buildMoments();
     shop->verifySurface();
 
-    a_geoserver = static_cast<GeometryService*>(shop);
+    // the index space is filled from the shop, which no GeometryService stands in for
+    m_polyhedralShops[phase::gas] = shop;
+
+    a_geoserver = nullptr;
   }
   else if (m_generator == Generator::ScanShop) {
     auto* scanShop = new ScanShop(*m_implicitFunctionGas,
@@ -2370,22 +2507,26 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
   else {
     // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
     if (m_generator == Generator::PolyhedralShop) {
-      auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
-                                              0,
-                                              a_finestDx,
-                                              a_probLo,
-                                              a_finestDomain,
-                                              m_scanDomain,
-                                              m_maxGhostEB,
-                                              s_thresh,
-                                              s_strictGeometry);
+      RefCountedPtr<PolyhedralGeometryShop> shop(new PolyhedralGeometryShop(*m_implicitFunctionSolid,
+                                                                            0,
+                                                                            a_finestDx,
+                                                                            a_probLo,
+                                                                            a_finestDomain,
+                                                                            m_scanDomain,
+                                                                            m_maxGhostEB,
+                                                                            s_thresh,
+                                                                            s_strictGeometry));
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
       shop->setGrids(*this, phase::solid);
       shop->buildGraphs();
+      shop->buildMoments();
       shop->verifySurface();
 
-      a_geoserver = static_cast<GeometryService*>(shop);
+      // the index space is filled from the shop, which no GeometryService stands in for
+      m_polyhedralShops[phase::solid] = shop;
+
+      a_geoserver = nullptr;
     }
     else if (m_generator == Generator::ScanShop) {
       auto* scanShop = new ScanShop(*m_implicitFunctionSolid,

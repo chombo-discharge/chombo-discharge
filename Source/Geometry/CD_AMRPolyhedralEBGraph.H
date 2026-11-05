@@ -199,14 +199,18 @@ public:
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.
    * @param[in]  a_dit             Destination box.
+   * @param[in]  a_compute         The cells to fill, over at least the box grown by the ghost width within the domain.
+   * A cell left out is marked irregular, gets no node and builds no body, so a cell filled beside it does not read its
+   * faces from it: a caller that keeps a node must fill every cell across its faces too.
    */
   void
-  fillNodes(BaseFab<int>&      a_regIrregCovered,
-            Vector<IrregNode>& a_nodes,
-            long long&         a_numCollapsed,
-            long long&         a_numFiner,
-            const int          a_level,
-            const DataIndex&   a_dit) const;
+  fillNodes(BaseFab<int>&        a_regIrregCovered,
+            Vector<IrregNode>&   a_nodes,
+            long long&           a_numCollapsed,
+            long long&           a_numFiner,
+            const int            a_level,
+            const DataIndex&     a_dit,
+            const BaseFab<bool>& a_compute) const;
 
   /**
    * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.
