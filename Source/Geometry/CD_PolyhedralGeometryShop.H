@@ -554,8 +554,10 @@ public:
    * included.
    * @details A cell in the geometry's boxes on the level takes what buildMoments made there -- its own body, or the
    * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
-   * copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns
-   * outside the geometry's boxes on the level stops the run. Collective.
+   * copied graph. A box lying wholly in the geometry's boxes out to the copy's ghost width takes the stored graph and
+   * moments as they are; only a box with cells outside them is built from nodes. A regular cell beside a multi-valued
+   * one is written as a full cut cell. A cut cell a finer level owns outside the geometry's boxes on the level stops
+   * the run. Collective.
    *
    * The graph carries the links to the next coarser level when the domain coarsens by two: a stored cell's from the
    * stored graph, and a cell cut from an ancestor into the ancestor's only VoF. It carries the links to the next finer

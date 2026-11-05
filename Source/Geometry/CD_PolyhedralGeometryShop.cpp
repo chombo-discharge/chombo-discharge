@@ -935,6 +935,30 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
 
     const Box copyRegion = grow(grids[dit()], a_copy.getGhost()) & domain.domainBox();
 
+    // A box whose region, out to the copy's ghost width, lies wholly in the geometry's boxes on the level needs nothing
+    // computed: it is what buildMoments made, and takes the stored graph and moments as they are. The stored boxes are
+    // disjoint, so the region lies in them when their overlaps with it add up to it.
+    if (haveStored) {
+      const DisjointBoxLayout& storedGrids = m_ebGraphs[geom]->disjointBoxLayout();
+
+      Vector<int> hits;
+
+      storedGrids.intersecting(copyRegion, hits);
+
+      long long numStored = 0;
+
+      for (int h = 0; h < hits.size(); h++) {
+        numStored += (storedGrids.boxArray()[hits[h]] & copyRegion).numPts();
+      }
+
+      if (numStored == copyRegion.numPts()) {
+        a_graph[dit()] = stored[dit()];
+        a_data[dit()]  = storedData[dit()];
+
+        continue;
+      }
+    }
+
     // The cells buildMoments made, in the geometry's boxes on the level, and those of them it coarsened from the next
     // finer level, which carry links to it.
     BaseFab<bool> storedCell(copyRegion, 1);
