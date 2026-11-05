@@ -20,7 +20,7 @@ FieldSolverMG.amg_fallback           = true    ## Fall back to PETSc AMG when th
 FieldSolverMG.amg_retry_interval     = 10      ## While latched to AMG, re-try GMG every N solves (1 = always try GMG first)
 
 # Geometric multigrid stage (always active)
-FieldSolverMG.gmg_solver                    = gmg bicgstab    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverMG.gmg_solver                    = bicgstab gmres  ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverMG.gmg_krylov_eps                = 1.E-10          ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 FieldSolverMG.gmg_krylov_max_iter           = 50              ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverMG.gmg_krylov_restart            = 30              ## GMRES restart length (gmres only)
