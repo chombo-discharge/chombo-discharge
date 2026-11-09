@@ -861,6 +861,10 @@ ItoKMCStepper<I, C, R, F>::postCheckpointSetup() noexcept
   // Compute velocities and diffusion coefficients so we're prepared for the next time step.
   this->computeDriftVelocities();
   this->computeDiffusionCoefficients();
+
+  // Fill the neutral density on the mesh. It is used for he reduced-field diagnostics (Emax, n/N)
+  // and for the abort_max_field check, and is otherwise onlyfilled in initialData() and regrid()
+  this->fillNeutralDensity();
 }
 
 template <typename I, typename C, typename R, typename F>
