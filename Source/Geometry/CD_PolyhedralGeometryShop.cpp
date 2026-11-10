@@ -868,6 +868,56 @@ PolyhedralGeometryShop::buildMoments()
   numInexact  = ParallelOps::sum(numInexact);
   numPromoted = ParallelOps::sum(numPromoted);
 
+  // What each stored level holds, counted over the valid cells: the boxes with cut cells, the cut cells, how many of
+  // them are multi-valued, and the volumes of fluid in them.
+  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    long long numCutBoxes = 0;
+    long long numCutCells = 0;
+    long long numMulti    = 0;
+    long long numCutVoFs  = 0;
+
+    if (!m_ebGraphs[lvl].isNull()) {
+      const LevelData<EBGraph>& graph = *m_ebGraphs[lvl];
+      const DisjointBoxLayout&  dbl   = graph.disjointBoxLayout();
+      const DataIterator&       dit   = dbl.dataIterator();
+      const int                 nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : numCutBoxes, numCutCells, numMulti, numCutVoFs)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+        const Box&       box = dbl[din];
+        const EBGraph&   ebg = graph[din];
+
+        const IntVectSet irreg = ebg.getIrregCells(box);
+
+        if (irreg.isEmpty()) {
+          continue;
+        }
+
+        numCutBoxes += 1;
+        numCutCells += irreg.numPts();
+        numMulti += ebg.getMultiCells(box).numPts();
+
+        for (IVSIterator ivsIt(irreg); ivsIt.ok(); ++ivsIt) {
+          numCutVoFs += ebg.getVoFs(ivsIt()).size();
+        }
+      }
+    }
+
+    numCutBoxes = ParallelOps::sum(numCutBoxes);
+    numCutCells = ParallelOps::sum(numCutCells);
+    numMulti    = ParallelOps::sum(numMulti);
+    numCutVoFs  = ParallelOps::sum(numCutVoFs);
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::buildMoments (" << phaseName << ") - level " << lvl << ", domain "
+             << domains[lvl].domainBox() << ": " << numCutCells << " cut cells (" << numMulti << " multi-valued, "
+             << numCutVoFs << " cut VoFs) in " << numCutBoxes << " of " << grids[lvl].size() << " boxes" << endl;
+    }
+  }
+
   if (m_testCopy && procID() == 0) {
     pout() << "PolyhedralGeometryShop::buildMoments - " << numInexact
            << " coarsened cells whose moments differ from the sums over their children, " << numPromoted
