@@ -55,6 +55,13 @@ public:
   static constexpr int s_unowned = 2;
 
   /**
+   * @brief Flag fillNodes gives a cell of a box's first ghost ring that would have to be cut from a coarser ancestor,
+   * when it is told not to cut the ring.
+   * @details Such a cell gets no body and no node; the caller decides what it is from the box's own cells.
+   */
+  static constexpr int s_ringFromCoarser = 3;
+
+  /**
    * @brief Constructor. Holds nothing until define.
    */
   AMRPolyhedralEBGraph() noexcept;
@@ -190,8 +197,14 @@ public:
    * The flags cover the box grown by the ghost width, within the domain; a cell the copy holds nothing for -- under the
    * next finer destination level -- is marked irregular and gets no node. Nodes are written for the cells one ghost
    * cell short of that, so that every face of a node has the cell across it in hand. A face beside a regular cell is
-   * open over all of it, and a face two cut cells share takes its aperture and centroid from the low cell's body, on
-   * both sides, so every box writes it with the same bits.
+   * open over all of it. A face two cut cells share takes its aperture and centroid from one body, on both sides, so
+   * every box writes it with the same bits: from the cell owned at the box's level where the other is cut from an
+   * ancestor, and from the low cell otherwise.
+   *
+   * A caller that keeps the moments of the box only can leave the ring alone. The cells beyond the first ghost ring
+   * are then marked covered without being looked at, and a cut cell of the first ghost ring that would have to be cut
+   * from an ancestor is marked s_ringFromCoarser and gets no body or node; the box's own cells write their faces
+   * beside it from their own bodies.
    * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
    * @param[out] a_nodes           One node per irregular cell the box fills.
    * A subdivision that fails with every child in one piece has lost fluid its parent holds, and stops the run.
@@ -202,6 +215,8 @@ public:
    * @param[in]  a_compute         The cells to fill, over at least the box grown by the ghost width within the domain.
    * A cell left out is marked irregular, gets no node and builds no body, so a cell filled beside it does not read its
    * faces from it: a caller that keeps a node must fill every cell across its faces too.
+   * @param[in]  a_cutRing         Whether the ghost cells are filled as the box's own cells are. If false, only the
+   * box's own cells are filled in full, and the ring is left as described above.
    */
   void
   fillNodes(BaseFab<int>&        a_regIrregCovered,
@@ -210,7 +225,8 @@ public:
             long long&           a_numFiner,
             const int            a_level,
             const DataIndex&     a_dit,
-            const BaseFab<bool>& a_compute) const;
+            const BaseFab<bool>& a_compute,
+            const bool           a_cutRing) const;
 
   /**
    * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.

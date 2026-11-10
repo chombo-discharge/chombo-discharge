@@ -674,7 +674,8 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
                                 long long&           a_numFiner,
                                 const int            a_level,
                                 const DataIndex&     a_dit,
-                                const BaseFab<bool>& a_compute) const
+                                const BaseFab<bool>& a_compute,
+                                const bool           a_cutRing) const
 {
   CH_TIME("AMRPolyhedralEBGraph::fillNodes");
 
@@ -699,6 +700,9 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
   std::vector<IntVect>     cutCells;
   std::vector<CutCellBody> cutBodies;
 
+  // whether each body is that of a cell owned at the box's level, rather than cut from an ancestor
+  std::vector<char> cutOwned;
+
   BaseFab<int> bodyIndex(region, 1);
 
   bodyIndex.setVal(-1);
@@ -713,6 +717,13 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
 
     if (!a_compute(iv, 0)) {
       a_regIrregCovered(iv, 0) = 0;
+
+      continue;
+    }
+
+    // beyond the first ghost ring a cell only gives the faces of ghost cells, which a box keeping its own moments drops
+    if (!a_cutRing && !nodeRegion.contains(iv)) {
+      a_regIrregCovered(iv, 0) = -1;
 
       continue;
     }
@@ -752,6 +763,12 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
     CH_assert(described.size() == 1);
 
     const CutCellDescription& cell = described.front();
+
+    if (!a_cutRing && cell.m_level < geometryLevel && !box.contains(iv)) {
+      a_regIrregCovered(iv, 0) = s_ringFromCoarser;
+
+      continue;
+    }
 
     if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
       MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
@@ -794,6 +811,7 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
 
       cutCells.push_back(iv);
       cutBodies.push_back(body);
+      cutOwned.push_back(cell.m_level == geometryLevel ? 1 : 0);
     }
   }
 
@@ -808,9 +826,11 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
 
     cutBodies[n].fillNode(node, a_regIrregCovered, cell, domain);
 
-    // A face is the regular cell's if one side is regular, open over all of it, and otherwise the low cell's: both
-    // sides write it from the same cell, where they would otherwise compute it each over its own polygon and to
-    // different roundings. Every box holding the face then holds the same bits, whichever box writes it into a layout.
+    // A face is the regular cell's if one side is regular, open over all of it. Otherwise it is the owned cell's where
+    // the other is cut from an ancestor, and the low cell's where both are alike: both sides write it from the same
+    // cell, where they would otherwise compute it each over its own polygon and to different roundings. Every box
+    // holding the face then holds the same bits, whichever box writes it into a layout, and a box that keeps only its
+    // own moments needs no body for a ghost cell cut from an ancestor.
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
         const IntVect across = cell + sign(sit()) * BASISV(dir);
@@ -820,18 +840,27 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
           continue;
         }
 
-        if (a_regIrregCovered(across, 0) > 0) {
+        if (a_regIrregCovered(across, 0) == 1) {
           node.m_arc[index]          = Vector<int>(1, 0);
           node.m_areaFrac[index]     = Vector<Real>(1, 1.0);
           node.m_faceCentroid[index] = Vector<RealVect>(1, RealVect::Zero);
         }
-        else if (sit() == Side::Lo && bodyIndex(across, 0) >= 0) {
-          const CutCellBody& loBody = cutBodies[bodyIndex(across, 0)];
+        else if (bodyIndex(across, 0) >= 0) {
+          const int  other     = bodyIndex(across, 0);
+          const bool alike     = cutOwned[n] == cutOwned[other];
+          const bool fromOther = alike ? (sit() == Side::Lo) : (cutOwned[other] != 0);
 
-          if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
+          if (!fromOther) {
+            continue;
+          }
+
+          const CutCellBody&   otherBody = cutBodies[other];
+          const Side::LoHiSide otherSide = flip(sit());
+
+          if (otherBody.areaFraction(dir, otherSide) > 0.0) {
             node.m_arc[index]          = Vector<int>(1, 0);
-            node.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
-            node.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+            node.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, otherBody.areaFraction(dir, otherSide)));
+            node.m_faceCentroid[index] = Vector<RealVect>(1, otherBody.faceCentroid(dir, otherSide));
           }
           else {
             node.m_arc[index].resize(0);

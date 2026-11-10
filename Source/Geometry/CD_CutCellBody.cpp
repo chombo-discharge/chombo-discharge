@@ -2785,7 +2785,7 @@ CutCellBody::fillNode(IrregNode&           a_node,
       // exception is a regular neighbour, which is full and whose faces are open by definition:
       // withholding the arc on that side leaves the two cells disagreeing about the face and
       // EBGraph stops.
-      const bool neighbourIsRegular = a_domain.contains(shifted) && a_regIrregCovered(shifted, 0) > 0;
+      const bool neighbourIsRegular = a_domain.contains(shifted) && a_regIrregCovered(shifted, 0) == 1;
       const bool faceIsOpen         = neighbourIsRegular || this->areaFraction(dir, sit()) > 0.0;
 
       if (arc.size() > 0 && faceIsOpen) {

@@ -332,6 +332,123 @@ PolyhedralGeometryShop::writeCoarserLinks(Vector<IrregNode>& a_nodes, const EBGr
   a_nodes.append(regular);
 }
 
+void
+PolyhedralGeometryShop::linkRingFromCoarser(BaseFab<int>&      a_flags,
+                                            Vector<IrregNode>& a_nodes,
+                                            const Box&         a_region,
+                                            const Box&         a_valid)
+{
+  CH_TIME("PolyhedralGeometryShop::linkRingFromCoarser");
+
+  CH_assert(a_flags.box().contains(a_region));
+  CH_assert(a_region.contains(a_valid));
+
+  // where each cell's nodes start, and how many it has
+  BaseFab<int> first(a_region, 1);
+  BaseFab<int> count(a_region, 1);
+
+  first.setVal(-1);
+  count.setVal(0);
+
+  for (int n = 0; n < a_nodes.size(); n++) {
+    const IntVect& cell = a_nodes[n].m_cell;
+
+    if (a_region.contains(cell)) {
+      if (first(cell, 0) < 0) {
+        first(cell, 0) = n;
+      }
+
+      CH_assert(first(cell, 0) + count(cell, 0) == n);
+
+      count(cell, 0)++;
+    }
+  }
+
+  Vector<IrregNode> linked;
+
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect cell = bit();
+
+    if (a_flags(cell, 0) != AMRPolyhedralEBGraph::s_ringFromCoarser) {
+      continue;
+    }
+
+    CH_assert(!a_valid.contains(cell));
+
+    // One VoF, open across each face a cell of the box opens onto it: a regular cell is open over the whole face, and
+    // a cut cell's VoFs say themselves whether they reach across. Its faces to other ghost cells are left closed,
+    // since nothing kept reads them.
+    IrregNode node;
+
+    node.m_cell      = cell;
+    node.m_cellIndex = 0;
+
+    bool open      = false;
+    bool openToCut = false;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect across = cell + sign(sit()) * BASISV(dir);
+        const int     index  = IrregNode::index(dir, sit());
+        const int     back   = IrregNode::index(dir, flip(sit()));
+
+        node.m_arc[index].resize(0);
+        node.m_areaFrac[index].resize(0);
+        node.m_faceCentroid[index].resize(0);
+
+        if (!a_valid.contains(across)) {
+          continue;
+        }
+
+        if (a_flags(across, 0) == 1) {
+          node.m_arc[index].push_back(0);
+          node.m_areaFrac[index].push_back(1.0);
+          node.m_faceCentroid[index].push_back(RealVect::Zero);
+
+          open = true;
+
+          continue;
+        }
+
+        if (a_flags(across, 0) != 0) {
+          continue;
+        }
+
+        for (int n = first(across, 0); n >= 0 && n < first(across, 0) + count(across, 0); n++) {
+          const IrregNode& other = a_nodes[n];
+
+          if (other.m_arc[back].size() > 0) {
+            CH_assert(other.m_arc[back].size() == 1 && other.m_arc[back][0] == 0);
+
+            node.m_arc[index].push_back(other.m_cellIndex);
+            node.m_areaFrac[index].push_back(other.m_areaFrac[back][0]);
+            node.m_faceCentroid[index].push_back(other.m_faceCentroid[back][0]);
+
+            open      = true;
+            openToCut = true;
+          }
+        }
+      }
+    }
+
+    // nothing of the box reaches it, so it is covered as far as the box can tell; reached only from regular cells, it
+    // is regular as far as the box can tell
+    if (!open) {
+      a_flags(cell, 0) = -1;
+    }
+    else if (!openToCut) {
+      a_flags(cell, 0) = 1;
+    }
+    else {
+      a_flags(cell, 0) = 0;
+
+      linked.push_back(node);
+    }
+  }
+
+  a_nodes.append(linked);
+}
+
 long long
 PolyhedralGeometryShop::cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
                                                     Vector<IrregNode>&   a_nodes,
@@ -1172,7 +1289,7 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
 
     all.setVal(true);
 
-    copy.fillNodes(flags, nodes, numCollapsed, numFiner, 0, din, all);
+    copy.fillNodes(flags, nodes, numCollapsed, numFiner, 0, din, all, true);
 
     Vector<IrregNode> held;
 
@@ -1822,7 +1939,9 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
     all.setVal(true);
 
-    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, din, all);
+    // Only this box's moments are kept, so the ghost cells need no moments of their own: a ghost cell cut from a
+    // coarser ancestor is left for the box's own cells to settle below, rather than cut.
+    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, din, all, false);
 
     Vector<IrregNode> held;
 
@@ -1899,6 +2018,8 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
         }
       }
     }
+
+    PolyhedralGeometryShop::linkRingFromCoarser(flags, held, region, box);
 
     numPromoted += PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, held, region, box, domain);
 
@@ -5156,7 +5277,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 #pragma omp parallel
       {
         std::vector<CutCellBody> bodies;
-        std::vector<CutCellBody> loBodies;
+        std::vector<CutCellBody> otherBodies;
 
         std::vector<PolyhedralEB::CutCellDescription> described;
 
@@ -5172,7 +5293,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
           all.setVal(true);
 
-          dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, din, all);
+          dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, din, all, true);
 
           for (BoxIterator bit(flags.box()); bit.ok(); ++bit) {
             const int state = dest.getState(i, din, bit());
@@ -5208,7 +5329,13 @@ PolyhedralGeometryShop::testCopyBodies() const
               bodies.front().fillNode(expected, flags, node.m_cell, a_domains[i]);
             }
 
-            // a face beside a regular cell is open over all of it, and one shared with a cut cell below is that cell's
+            // whether the node's cell is owned at its level, rather than cut from an ancestor
+            dest.getCutCells(described, i, din, node.m_cell);
+
+            const bool mineOwned = described.size() == 1 && described.front().m_level == dest.getGeometryLevel(i);
+
+            // A face beside a regular cell is open over all of it. One shared with a cut cell is the owned cell's where
+            // the other is cut from an ancestor, and the low cell's where both are alike.
             for (int dir = 0; dir < SpaceDim && built; dir++) {
               for (SideIterator sit; sit.ok(); ++sit) {
                 const IntVect across = node.m_cell + sign(sit()) * BASISV(dir);
@@ -5226,7 +5353,7 @@ PolyhedralGeometryShop::testCopyBodies() const
                   continue;
                 }
 
-                if (sit() == Side::Hi || flags(across, 0) != 0) {
+                if (flags(across, 0) != 0) {
                   continue;
                 }
 
@@ -5237,14 +5364,22 @@ PolyhedralGeometryShop::testCopyBodies() const
                   continue;
                 }
 
-                PolyhedralGeometryShop::destinationBodies(loBodies, ignored, dest, i, din, across);
+                const bool otherOwned = described.front().m_level == dest.getGeometryLevel(i);
+                const bool fromOther  = (mineOwned == otherOwned) ? (sit() == Side::Lo) : otherOwned;
 
-                const PolyhedralEB::CutCellBody& loBody = loBodies.front();
+                if (!fromOther) {
+                  continue;
+                }
 
-                if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
-                  expected.m_arc[index]          = Vector<int>(1, 0);
-                  expected.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
-                  expected.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+                PolyhedralGeometryShop::destinationBodies(otherBodies, ignored, dest, i, din, across);
+
+                const PolyhedralEB::CutCellBody& otherBody = otherBodies.front();
+                const Side::LoHiSide             otherSide = flip(sit());
+
+                if (otherBody.areaFraction(dir, otherSide) > 0.0) {
+                  expected.m_arc[index]      = Vector<int>(1, 0);
+                  expected.m_areaFrac[index] = Vector<Real>(1, std::min(1.0, otherBody.areaFraction(dir, otherSide)));
+                  expected.m_faceCentroid[index] = Vector<RealVect>(1, otherBody.faceCentroid(dir, otherSide));
                 }
                 else {
                   expected.m_arc[index].resize(0);
@@ -5450,7 +5585,7 @@ PolyhedralGeometryShop::testMoments() const
 
       all.setVal(true);
 
-      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, din, all);
+      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, din, all, true);
 
       const EBGraph& graph = (*m_ebGraphs[lvl])[din];
       const EBData&  data  = (*m_ebData[lvl])[din];

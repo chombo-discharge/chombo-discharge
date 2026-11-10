@@ -1231,6 +1231,22 @@ private:
   writeCoarserLinks(Vector<IrregNode>& a_nodes, const EBGraph& a_graph, const Box& a_box);
 
   /**
+   * @brief Settle the ghost cells fillNodes left as AMRPolyhedralEBGraph::s_ringFromCoarser from the box's own cells.
+   * @details Such a cell would have to be cut from a coarser ancestor, and a box keeping only its own moments needs no
+   * moments of it: only whether the faces of the box's cells open onto it. It becomes one VoF open across each face a
+   * cell of the box opens onto it, carrying that cell's aperture and centroid; covered where no cell of the box opens
+   * onto it, and regular where only regular cells do. Its faces to other ghost cells are left closed.
+   * @param[in,out] a_flags  Regular (1), cut (0), covered (-1) or AMRPolyhedralEBGraph::s_ringFromCoarser for the
+   * region's cells. The cells left by fillNodes are set to one of the first three.
+   * @param[in,out] a_nodes  Nodes of the region's cut cells, each cell's contiguous. A node is appended for each cell
+   * made cut.
+   * @param[in]     a_region Region the flags describe: the box and its first ghost ring.
+   * @param[in]     a_valid  The box.
+   */
+  static void
+  linkRingFromCoarser(BaseFab<int>& a_flags, Vector<IrregNode>& a_nodes, const Box& a_region, const Box& a_valid);
+
+  /**
    * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
    * @details Chombo's coarsening reads the face of a regular cell as leading to the first VoF of the cell across, so a
    * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
