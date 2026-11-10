@@ -773,8 +773,14 @@ PolyhedralGeometryShop::buildMoments()
     MayDay::Error("PolyhedralGeometryShop::buildMoments - the geometry's boxes were classified with no EB ghost cell");
   }
 
+  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+
+  Timer timer("PolyhedralGeometryShop::buildMoments (" + phaseName + ")");
+
   if (m_extensionLoadByCutCells) {
+    timer.startEvent("Count tile cut cells");
     this->countTileCutCells();
+    timer.stopEvent("Count tile cut cells");
   }
 
   const int numLevels = m_compGeom->getNumGridLevels();
@@ -784,6 +790,8 @@ PolyhedralGeometryShop::buildMoments()
   // cut cells, where nearly all the work is.
   std::vector<DisjointBoxLayout> grids(numLevels);
   std::vector<ProblemDomain>     domains(numLevels);
+
+  timer.startEvent("Balance boxes");
 
   for (int lvl = 0; lvl < numLevels; lvl++) {
     domains[lvl] = m_compGeom->getDomain(lvl);
@@ -827,10 +835,14 @@ PolyhedralGeometryShop::buildMoments()
     grids[lvl].define(allBoxes, allRanks, domains[lvl]);
   }
 
+  timer.stopEvent("Balance boxes");
+
   // The graph, copied onto those grids with the ring the coarsening reads.
   AMRPolyhedralEBGraph copy;
 
+  timer.startEvent("Copy graphs");
   this->copyGraphs(copy, grids, domains, s_momentRing);
+  timer.stopEvent("Copy graphs");
 
   m_ebGraphs.resize(0);
   m_ebData.resize(0);
@@ -853,9 +865,12 @@ PolyhedralGeometryShop::buildMoments()
     const bool haveFiner = lvl + 1 < numLevels && !m_ebGraphs[lvl + 1].isNull();
 
     if (haveFiner) {
+      timer.startEvent("Coarsen level " + std::to_string(lvl + 1) + "/" + std::to_string(lvl));
       this->coarsenLevel(coarsenedGraph, coarsenedData, numInexact, grids, domains, lvl + 1);
+      timer.stopEvent("Coarsen level " + std::to_string(lvl + 1) + "/" + std::to_string(lvl));
     }
 
+    timer.startEvent("Assemble level " + std::to_string(lvl));
     this->assembleLevel(numPromoted,
                         copy,
                         haveFiner ? &coarsenedGraph : nullptr,
@@ -863,6 +878,7 @@ PolyhedralGeometryShop::buildMoments()
                         grids,
                         domains,
                         lvl);
+    timer.stopEvent("Assemble level " + std::to_string(lvl));
   }
 
   numInexact  = ParallelOps::sum(numInexact);
@@ -870,7 +886,7 @@ PolyhedralGeometryShop::buildMoments()
 
   // What each stored level holds, counted over the valid cells: the boxes with cut cells, the cut cells, how many of
   // them are multi-valued, and the volumes of fluid in them.
-  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+  timer.startEvent("Count cut cells");
 
   for (int lvl = 0; lvl < numLevels; lvl++) {
     long long numCutBoxes = 0;
@@ -916,6 +932,12 @@ PolyhedralGeometryShop::buildMoments()
              << domains[lvl].domainBox() << ": " << numCutCells << " cut cells (" << numMulti << " multi-valued, "
              << numCutVoFs << " cut VoFs) in " << numCutBoxes << " of " << grids[lvl].size() << " boxes" << endl;
     }
+  }
+
+  timer.stopEvent("Count cut cells");
+
+  if (m_profile) {
+    timer.eventReport(pout(), false);
   }
 
   if (m_testCopy && procID() == 0) {
