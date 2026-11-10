@@ -1943,6 +1943,40 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     fromFiner.define(a_grids[lvl], 1, 2 * IntVect::Unit, graphFactory);
     fromFinerData.define(a_grids[lvl], 1, IntVect::Unit, dataFactory);
 
+    // A box starts out regular, and a covered box copied into one is stored a cell at a time. One whose cells out to
+    // its ghost cells, clipped to the domain as the graph is, all lie in coarsened boxes of covered fine boxes starts
+    // covered instead, so that each copy into it, covered into covered, does nothing; see coarsenLevel.
+    {
+      const Vector<Box>   finerLayoutBoxes = a_grids[lvl + 1].boxArray();
+      const DataIterator& ditOwn           = a_grids[lvl].dataIterator();
+      const int           nboxOwn          = ditOwn.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxOwn; mybox++) {
+        const DataIndex& din = ditOwn[mybox];
+
+        const Box ghosted = grow(a_grids[lvl][din], 2) & domain;
+
+        Vector<int> hits;
+
+        a_grids[lvl + 1].intersecting(refine(ghosted, 2), hits);
+
+        // the finer boxes coarsen by two to disjoint boxes, so the cells they hold of the region add up
+        long long numHeld    = 0;
+        bool      allCovered = true;
+
+        for (int h = 0; h < hits.size() && allCovered; h++) {
+          numHeld += (coarsen(finerLayoutBoxes[hits[h]], 2) & ghosted).numPts();
+
+          allCovered = m_compGeom->classify(finerLayoutBoxes[hits[h]], lvl + 1, m_phase) == GeometryService::Covered;
+        }
+
+        if (allCovered && numHeld == ghosted.numPts()) {
+          fromFiner[din].setToAllCovered();
+        }
+      }
+    }
+
     a_coarsenedGraph->copyTo(interv, fromFiner, interv);
 
     const DataIterator& ditFromFiner  = a_grids[lvl].dataIterator();
