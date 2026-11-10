@@ -3599,7 +3599,17 @@ PolyhedralGeometryShop::destinationPieces(std::vector<std::vector<std::pair<int,
         kept.refine(ratio);
       }
       else if (lvl < a_level) {
-        kept.coarsen(ratio);
+        // A set coarsened is the union of its boxes coarsened, which costs a box at a time rather than a cell at a
+        // time.
+        const Vector<Box> fineBoxes = kept.boxes();
+
+        IntVectSet coarse;
+
+        for (int i = 0; i < fineBoxes.size(); i++) {
+          coarse |= coarsen(fineBoxes[i], ratio);
+        }
+
+        kept = coarse;
       }
 
       kept &= piece.second;
