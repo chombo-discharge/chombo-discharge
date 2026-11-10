@@ -290,12 +290,15 @@ PolyhedralGeometryShop::writeCoarserLinks(Vector<IrregNode>& a_nodes, const EBGr
     const IntVect coarseCell = bit();
 
     bool allRegular = true;
+    bool allCovered = true;
 
     for (BoxIterator cit(refine(Box(coarseCell, coarseCell), 2)); cit.ok(); ++cit) {
       allRegular = allRegular && a_graph.isRegular(cit());
+      allCovered = allCovered && a_graph.isCovered(cit());
     }
 
-    if (allRegular) {
+    // children all regular are one piece and need no links, and children all covered make no pieces
+    if (allRegular || allCovered) {
       continue;
     }
 
@@ -1433,6 +1436,44 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
   LevelData<EBGraph> fineGraph(a_grids[f], 1, fineGraphGhost * IntVect::Unit, fineGraphFactory);
   LevelData<EBData>  fineData(a_grids[f], 1, fineDataGhost * IntVect::Unit, dataFactory);
 
+  // A box starts out regular, and a covered box copied into one is stored a cell at a time. One whose own cells and
+  // ghost cells are all covered starts covered instead, so that each copy into it, covered into covered, does nothing.
+  // Every cell of the ghost region, which the graph clips to the domain as its factory does, must lie in a covered box:
+  // a cell no box holds is never copied and would be read covered rather than as the regular cell it starts as, and a
+  // copy from a box with cut cells would store the graph a cell at a time with the cells it does not copy made regular.
+  const Vector<Box>   fineLayoutBoxes = a_grids[f].boxArray();
+  const DataIterator& ditOwn          = a_grids[f].dataIterator();
+  const int           nboxOwn         = ditOwn.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxOwn; mybox++) {
+    const DataIndex& din = ditOwn[mybox];
+
+    if (!(*m_ebGraphs[f])[din].isAllCovered()) {
+      continue;
+    }
+
+    const Box ghosted = grow(a_grids[f][din], fineGraphGhost) & a_domains[f];
+
+    Vector<int> hits;
+
+    a_grids[f].intersecting(ghosted, hits);
+
+    // the boxes are disjoint, so the cells they hold of the region add up
+    long long numHeld    = 0;
+    bool      allCovered = true;
+
+    for (int h = 0; h < hits.size() && allCovered; h++) {
+      numHeld += (fineLayoutBoxes[hits[h]] & ghosted).numPts();
+
+      allCovered = m_compGeom->classify(fineLayoutBoxes[hits[h]], f, m_phase) == GeometryService::Covered;
+    }
+
+    if (allCovered && numHeld == ghosted.numPts()) {
+      fineGraph[din].setToAllCovered();
+    }
+  }
+
   m_ebGraphs[f]->copyTo(interv, fineGraph, interv);
 
   const DataIterator& ditFine  = a_grids[f].dataIterator();
@@ -1467,6 +1508,21 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
 
     const Box      box   = coarsened[din];
     const EBGraph& graph = fineGraph[din];
+
+    // A fine box all regular or all covered out to its ghost cells coarsens whole. Only the box's own cells of the
+    // coarsened graph are copied on, so its ghost cells need not be told apart.
+    if (graph.isAllRegular() || graph.isAllCovered()) {
+      if (graph.isAllRegular()) {
+        a_coarGraph[din].setToAllRegular();
+      }
+      else {
+        a_coarGraph[din].setToAllCovered();
+      }
+
+      a_coarData[din].define(a_coarGraph[din], Vector<IrregNode>(), box);
+
+      continue;
+    }
 
     // The moments of the children read through an EBISBox, which answers regular cells as well as cut ones. A face
     // is read from the child's side: the cell across may lie outside the fine boxes, where the copied graph holds
@@ -1528,13 +1584,22 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
       }
 
       bool allRegular = true;
+      bool allCovered = true;
 
       for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
         allRegular = allRegular && graph.isRegular(cit());
+        allCovered = allCovered && graph.isCovered(cit());
       }
 
       if (allRegular) {
         flags(cell, 0) = 1;
+
+        continue;
+      }
+
+      // children with no VoFs make no pieces
+      if (allCovered) {
+        flags(cell, 0) = -1;
 
         continue;
       }
@@ -1896,18 +1961,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     a_coarsenedData->copyTo(interv, fromFinerData, interv);
   }
 
-  // whether a cell of this level lies under the next finer level, where the coarsening has it
-  const auto underFiner = [&](const IntVect& a_cell) -> bool {
-    if (!haveFiner) {
-      return false;
-    }
-
-    Vector<int> hits;
-
-    a_grids[lvl + 1].intersecting(refine(Box(a_cell, a_cell), 2), hits);
-
-    return hits.size() > 0;
-  };
+  const Vector<Box> finerBoxes = haveFiner ? a_grids[lvl + 1].boxArray() : Vector<Box>();
 
   long long numCollapsed = 0;
   long long numFiner     = 0;
@@ -1993,6 +2047,30 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
         held.push_back(nodes[n]);
       }
     }
+
+    // Which cells of the box and its ghost cell the next finer level covers, where the coarsening has them: a cell with
+    // a child in one of the finer boxes.
+    BaseFab<int> coveredByFiner(region, 1);
+
+    coveredByFiner.setVal(0);
+
+    if (haveFiner) {
+      Vector<int> hits;
+
+      a_grids[lvl + 1].intersecting(refine(region, 2), hits);
+
+      for (int h = 0; h < hits.size(); h++) {
+        const Box overlap = coarsen(finerBoxes[hits[h]], 2) & region;
+
+        if (!overlap.isEmpty()) {
+          coveredByFiner.setVal(1, overlap, 0);
+        }
+      }
+    }
+
+    const auto underFiner = [&coveredByFiner](const IntVect& a_cell) -> bool {
+      return coveredByFiner(a_cell, 0) != 0;
+    };
 
     if (haveFiner) {
       const EBGraph& finer     = fromFiner[din];
