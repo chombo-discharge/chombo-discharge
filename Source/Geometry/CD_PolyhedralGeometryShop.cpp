@@ -1911,10 +1911,27 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
         const int whole = (type == GeometryService::Regular) ? PolyhedralEBGraph::s_regular
                                                              : PolyhedralEBGraph::s_covered;
 
-        for (BoxIterator bit(region); bit.ok(); ++bit) {
-          const int state = a_copy.getState(lvl, din, bit());
+        std::vector<PolyhedralEB::CutCellDescription> described;
 
-          numNotWhole += (state != whole && state != AMRPolyhedralEBGraph::s_unowned) ? 1 : 0;
+        for (BoxIterator bit(region); bit.ok(); ++bit) {
+          const IntVect cell  = bit();
+          const int     state = a_copy.getState(lvl, din, cell);
+
+          if (state == whole || state == AMRPolyhedralEBGraph::s_unowned) {
+            continue;
+          }
+
+          // A ring cell a coarser leaf cut cell owns reads that cell's state, which describes the whole coarser cell
+          // and not this one, whose nodes the box's classification covered.
+          if (state == PolyhedralEBGraph::s_cut && !box.contains(cell)) {
+            a_copy.getCutCells(described, lvl, din, cell);
+
+            if (described.size() == 1 && described.front().m_level < lvl) {
+              continue;
+            }
+          }
+
+          numNotWhole++;
         }
       }
 
