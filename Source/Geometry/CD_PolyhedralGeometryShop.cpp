@@ -954,12 +954,32 @@ PolyhedralGeometryShop::buildMoments()
 
   timer.stopEvent("Balance boxes");
 
-  // The graph, copied onto those grids with the ring the coarsening reads.
+  // The boxes that read the copy: assembleLevel sets the others whole without it. A layout sorts its boxes, so they are
+  // told apart in its own order.
+  std::vector<std::vector<char>> cutOnly(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const Vector<Box> boxes = grids[lvl].boxArray();
+
+    cutOnly[lvl].resize(boxes.size());
+
+    for (int i = 0; i < boxes.size(); i++) {
+      cutOnly[lvl][i] = (m_compGeom->classify(boxes[i], lvl, m_phase) == GeometryService::Irregular) ? 1 : 0;
+    }
+  }
+
+  // The graph, copied onto the cut boxes with the one ghost cell assembleLevel reads, and under test_copy onto every
+  // box too, for the check of the boxes set whole.
   AMRPolyhedralEBGraph copy;
+  AMRPolyhedralEBGraph everyBox;
 
   timer.startEvent("Copy graphs");
-  this->copyGraphs(copy, grids, domains, s_momentRing);
+  this->copyGraphs(copy, grids, domains, s_ownRing, cutOnly);
   timer.stopEvent("Copy graphs");
+
+  if (m_testCopy) {
+    this->copyGraphs(everyBox, grids, domains, s_ownRing, std::vector<std::vector<char>>(numLevels));
+  }
 
   m_ebGraphs.resize(0);
   m_ebData.resize(0);
@@ -990,6 +1010,7 @@ PolyhedralGeometryShop::buildMoments()
     timer.startEvent("Assemble level " + std::to_string(lvl));
     this->assembleLevel(numPromoted,
                         copy,
+                        m_testCopy ? everyBox : copy,
                         haveFiner ? &coarsenedGraph : nullptr,
                         haveFiner ? &coarsenedData : nullptr,
                         grids,
@@ -1240,7 +1261,11 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
 
   AMRPolyhedralEBGraph copy;
 
-  this->copyGraphs(copy, std::vector<DisjointBoxLayout>{a_tiles}, std::vector<ProblemDomain>{a_domain}, s_momentRing);
+  this->copyGraphs(copy,
+                   std::vector<DisjointBoxLayout>{a_tiles},
+                   std::vector<ProblemDomain>{a_domain},
+                   s_cutRing,
+                   std::vector<std::vector<char>>(1));
 
   EBGraphFactory graphFactory(a_domain);
   EBDataFactory  dataFactory;
@@ -1815,6 +1840,7 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
 void
 PolyhedralGeometryShop::assembleLevel(long long&                            a_numPromoted,
                                       const AMRPolyhedralEBGraph&           a_copy,
+                                      const AMRPolyhedralEBGraph&           a_everyBox,
                                       const LevelData<EBGraph>*             a_coarsenedGraph,
                                       const LevelData<EBData>*              a_coarsenedData,
                                       const std::vector<DisjointBoxLayout>& a_grids,
@@ -1915,7 +1941,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
         for (BoxIterator bit(region); bit.ok(); ++bit) {
           const IntVect cell  = bit();
-          const int     state = a_copy.getState(lvl, din, cell);
+          const int     state = a_everyBox.getState(lvl, din, cell);
 
           if (state == whole || state == AMRPolyhedralEBGraph::s_unowned) {
             continue;
@@ -1924,7 +1950,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
           // A ring cell a coarser leaf cut cell owns reads that cell's state, which describes the whole coarser cell
           // and not this one, whose nodes the box's classification covered.
           if (state == PolyhedralEBGraph::s_cut && !box.contains(cell)) {
-            a_copy.getCutCells(described, lvl, din, cell);
+            a_everyBox.getCutCells(described, lvl, din, cell);
 
             if (described.size() == 1 && described.front().m_level < lvl) {
               continue;
@@ -1952,7 +1978,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     BaseFab<int>      flags;
     Vector<IrregNode> nodes;
 
-    BaseFab<bool> all(grow(a_copy.getGrids(lvl)[din], a_copy.getGhost()) & a_copy.getDomain(lvl).domainBox(), 1);
+    BaseFab<bool> all(grow(a_copy.getGrids(lvl)[din], 2) & a_copy.getDomain(lvl).domainBox(), 1);
 
     all.setVal(true);
 
@@ -3785,13 +3811,15 @@ void
 PolyhedralGeometryShop::planSends(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
                                   const std::vector<DisjointBoxLayout>&                    a_grids,
                                   const std::vector<ProblemDomain>&                        a_domains,
-                                  const int                                                a_ghost) const
+                                  const int                                                a_ghost,
+                                  const std::vector<std::vector<char>>&                    a_taking) const
 {
   CH_TIME("PolyhedralGeometryShop::planSends");
 
   using PolyhedralEB::GraphCopyHeader;
 
   CH_assert(a_grids.size() == a_domains.size());
+  CH_assert(a_taking.size() == a_grids.size());
   CH_assert(m_compGeom != nullptr);
 
   const int numDest    = static_cast<int>(a_grids.size());
@@ -3820,7 +3848,14 @@ PolyhedralGeometryShop::planSends(std::vector<std::vector<PolyhedralEB::GraphCop
   for (int i = 0; i < numDest; i++) {
     destBoxes[i] = a_grids[i].boxArray();
     destRanks[i] = a_grids[i].procIDs();
+
+    CH_assert(a_taking[i].empty() || a_taking[i].size() == static_cast<std::size_t>(destBoxes[i].size()));
   }
+
+  // whether a destination box takes the copy at all: every box of a level the caller left empty does
+  const auto receiving = [&a_taking](const int a_dest, const int a_box) -> bool {
+    return a_taking[a_dest].empty() || a_taking[a_dest][a_box] != 0;
+  };
 
   // the levels whose graph boxes are cut tiles, which hold the cells a copy sends
   const auto tiled = [&](const int a_level) -> bool {
@@ -3879,7 +3914,9 @@ PolyhedralGeometryShop::planSends(std::vector<std::vector<PolyhedralEB::GraphCop
         a_grids[i].intersecting(mapped, hits);
 
         for (int k = 0; k < hits.size(); k++) {
-          boxHits[lvl][mybox].emplace_back(i, hits[k]);
+          if (receiving(i, hits[k])) {
+            boxHits[lvl][mybox].emplace_back(i, hits[k]);
+          }
         }
       }
     }
@@ -4071,7 +4108,7 @@ PolyhedralGeometryShop::checkCopyPlan(const std::vector<DisjointBoxLayout>& a_gr
   std::vector<std::vector<GraphCopyHeader>> sends;
   std::vector<std::vector<GraphCopyHeader>> receives;
 
-  this->planSends(sends, a_grids, a_domains, a_ghost);
+  this->planSends(sends, a_grids, a_domains, a_ghost, std::vector<std::vector<char>>(a_grids.size()));
   this->planReceives(receives, a_grids, a_domains, a_ghost);
 
   const int numRanks = numProc();
@@ -4379,7 +4416,8 @@ void
 PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
                                    const std::vector<DisjointBoxLayout>& a_grids,
                                    const std::vector<ProblemDomain>&     a_domains,
-                                   const int                             a_ghost) const
+                                   const int                             a_ghost,
+                                   const std::vector<std::vector<char>>& a_taking) const
 {
   CH_TIME("PolyhedralGeometryShop::copyGraphs");
 
@@ -4401,7 +4439,7 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
   // Only the senders plan: every piece carries its header, so a receiver needs no plan to place what arrives.
   std::vector<std::vector<GraphCopyHeader>> sends;
 
-  this->planSends(sends, a_grids, a_domains, a_ghost);
+  this->planSends(sends, a_grids, a_domains, a_ghost, a_taking);
 
   std::vector<int> geometryLevels(numDest);
 
@@ -4777,7 +4815,7 @@ PolyhedralGeometryShop::testCopyRoundTrip() const
 
     AMRPolyhedralEBGraph dest;
 
-    this->copyGraphs(dest, {grids}, {graph.getDomain()}, ghost);
+    this->copyGraphs(dest, {grids}, {graph.getDomain()}, ghost, std::vector<std::vector<char>>(1));
 
     const DataIterator& dit  = grids.dataIterator();
     const int           nbox = dit.size();
@@ -5040,7 +5078,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
     const_cast<PolyhedralGeometryShop*>(this)->m_baseIF = &guard;
 
-    this->copyGraphs(dest, a_grids, a_domains, ghost);
+    this->copyGraphs(dest, a_grids, a_domains, ghost, std::vector<std::vector<char>>(a_grids.size()));
 
     const int numDest = static_cast<int>(a_grids.size());
 
@@ -5735,7 +5773,7 @@ PolyhedralGeometryShop::testMoments() const
 
   AMRPolyhedralEBGraph copy;
 
-  this->copyGraphs(copy, grids, domains, s_momentRing);
+  this->copyGraphs(copy, grids, domains, s_cutRing, std::vector<std::vector<char>>(grids.size()));
 
   Real      maxFaceDeviation = 0.0;
   Real      maxAreaDeviation = 0.0;

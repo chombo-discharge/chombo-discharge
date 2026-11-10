@@ -687,9 +687,11 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
   const ProblemDomain& domain        = this->getDomain(a_level);
   const int            geometryLevel = this->getGeometryLevel(a_level);
   const Box            box           = this->getGrids(a_level)[a_dit];
-  const Box            region        = grow(box, this->getGhost()) & domain.domainBox();
-  const Box            nodeRegion    = grow(box, this->getGhost() - 1) & domain.domainBox();
+  const Box            region        = grow(box, 2) & domain.domainBox();
+  const Box            nodeRegion    = grow(box, 1) & domain.domainBox();
 
+  // the ring's bodies are read only when the ring is cut, and a ring left alone needs the copy one cell wide
+  CH_assert(this->getGhost() >= (a_cutRing ? 2 : 1));
   CH_assert(a_compute.box().contains(region));
 
   a_regIrregCovered.define(region, 1);

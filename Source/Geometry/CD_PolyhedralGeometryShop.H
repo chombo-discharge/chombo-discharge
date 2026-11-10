@@ -398,17 +398,21 @@ public:
    * width, are found through the destination layouts' spatial index. The cells each of those destination boxes takes
    * come from validRegion, once per destination box on this rank. A piece is the owned cells a destination box takes:
    * a cell at or finer than the destination's level if the destination cell it lies in is taken, a cell of a coarser
-   * level if any destination cell it holds is. Every header's counts are left at zero.
+   * level if any destination cell it holds is. A destination box that does not take the copy is sent nothing. Every
+   * header's counts are left at zero.
    * @param[out] a_sends   Per destination rank, the pieces this rank sends there.
    * @param[in]  a_grids   Destination layout of every level, coarsest first.
    * @param[in]  a_domains Domain of every destination level.
    * @param[in]  a_ghost   Ghost width every destination box is filled to.
+   * @param[in]  a_taking  Per destination level, whether each box of its layout, in the order of its box array, takes
+   * the copy. A level left empty has every box take it.
    */
   void
   planSends(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
             const std::vector<DisjointBoxLayout>&                    a_grids,
             const std::vector<ProblemDomain>&                        a_domains,
-            const int                                                a_ghost) const;
+            const int                                                a_ghost,
+            const std::vector<std::vector<char>>&                    a_taking) const;
 
   /**
    * @brief The pieces of a copy of the graph that this rank's destination boxes need, worked out from the destination
@@ -468,12 +472,15 @@ public:
    * @param[in]  a_grids   Destination layout of every level, coarsest first.
    * @param[in]  a_domains Domain of every destination level.
    * @param[in]  a_ghost   Ghost width every destination box is filled to.
+   * @param[in]  a_taking  Per destination level, whether each box of its layout, in the order of its box array, takes
+   * the copy; a box that does not receives nothing. A level left empty has every box take it.
    */
   void
   copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
              const std::vector<DisjointBoxLayout>& a_grids,
              const std::vector<ProblemDomain>&     a_domains,
-             const int                             a_ghost) const;
+             const int                             a_ghost,
+             const std::vector<std::vector<char>>& a_taking) const;
 
   /**
    * @brief Copy every graph onto its own layout as a destination level of its own, and require every cell the level
@@ -614,7 +621,7 @@ public:
 
   /**
    * @brief Cut the extension tiles from their ancestors, on a layout balanced for it.
-   * @details The polyhedral graph is copied onto the tiles with a ring of s_momentRing cells, so that every face of a
+   * @details The polyhedral graph is copied onto the tiles with a ring of s_cutRing cells, so that every face of a
    * tile and of its one ghost cell has the cell across it in hand. A tile the geometry calls regular or covered with
    * its ghost cell is set whole. Every other tile is cut from its ancestors (AMRPolyhedralEBGraph::fillNodes) and a
    * regular cell beside a multi-valued one is written as a full cut cell. Each VoF is linked to the only VoF of its
@@ -672,17 +679,21 @@ public:
    * @details A box the geometry calls regular or covered is set whole with its ghost cell, and nothing of the graph is
    * read for it. The geometry classifies its boxes grown by its EB ghost width, at least one cell, so the ghost cell
    * holds no cut cell; under PolyhedralGeometryShop.test_copy every cell of the box and its ghost cell is checked
-   * against the copied graph. Otherwise, the level's own cells take what the copied graph says. Its cells under the
-   * next finer level take the coarsened VoFs, and an own cell beside one takes the faces between them from the
-   * coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than
-   * one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment.
+   * against the graph copied onto every box. Otherwise, the level's own cells take what the copied graph says. Its
+   * cells under the next finer level take the coarsened VoFs, and an own cell beside one takes the faces between them
+   * from the coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of
+   * more than one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no
+   * moment.
    *
    * A coarsened cell carries its links to the next finer level, the pieces coarsenLevel gave it, and a regular cell
    * made cut all of its children. An own cut cell, which no finer box lies over, has no links to the finer level. When
    * the domain coarsens by two, every VoF of the boxes is linked to the next coarser level by writeCoarserLinks, from
    * this level's own graph, before that level is built.
    * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
-   * @param[in]  a_copy            The graph copied onto the geometry's grids.
+   * @param[in]  a_copy            The graph copied onto the geometry's grids, with one ghost cell; the boxes set whole
+   * need not have taken it.
+   * @param[in]  a_everyBox        The graph copied onto every box of the geometry's grids, with one ghost cell. Read
+   * only under PolyhedralGeometryShop.test_copy, for the boxes set whole.
    * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.
    * @param[in]  a_coarsenedData   coarsenLevel's moments for the level above, or null on the finest level.
    * @param[in]  a_grids           The geometry's grids.
@@ -692,6 +703,7 @@ public:
   void
   assembleLevel(long long&                            a_numPromoted,
                 const AMRPolyhedralEBGraph&           a_copy,
+                const AMRPolyhedralEBGraph&           a_everyBox,
                 const LevelData<EBGraph>*             a_coarsenedGraph,
                 const LevelData<EBData>*              a_coarsenedData,
                 const std::vector<DisjointBoxLayout>& a_grids,
@@ -715,12 +727,20 @@ protected:
   static constexpr int s_elementVertices = SpaceDim;
 
   /**
-   * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
-   * @details assembleLevel builds each box with one ghost cell, fillNodes writes nodes one cell short of the copied
-   * ring, and a node's face toward a cut cell below it reads that cell's body, one cell further out. Nothing to do with
-   * the ghost cells a solver asks of the index space.
+   * @brief Width of the ring the graph is copied with for a box whose ghost cells are cut as its own cells are.
+   * @details A box is built with one ghost cell, and a node's face toward a cut cell across it reads that cell's body,
+   * one cell further out (AMRPolyhedralEBGraph::fillNodes with its ring cut). extendLevel and the tests copy with it.
+   * Nothing to do with the ghost cells a solver asks of the index space.
    */
-  static constexpr int s_momentRing = 2;
+  static constexpr int s_cutRing = 2;
+
+  /**
+   * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
+   * @details assembleLevel keeps the moments of a box's own cells only, so fillNodes leaves its ghost cells uncut and
+   * reads nothing of the copy beyond the first ghost cell. Nothing to do with the ghost cells a solver asks of the
+   * index space.
+   */
+  static constexpr int s_ownRing = 1;
 
   /**
    * @brief Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures.

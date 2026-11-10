@@ -194,15 +194,16 @@ public:
    * node whose moments are the sums over its pieces, its volume centroid the summed first moment, and is counted. A
    * cell a finer level owns is not filled yet: it is marked irregular, gets no node, and is counted.
    *
-   * The flags cover the box grown by the ghost width, within the domain; a cell the copy holds nothing for -- under the
-   * next finer destination level -- is marked irregular and gets no node. Nodes are written for the cells one ghost
-   * cell short of that, so that every face of a node has the cell across it in hand. A face beside a regular cell is
+   * The flags cover the box grown by two cells, within the domain; a cell the copy holds nothing for -- under the next
+   * finer destination level -- is marked irregular and gets no node. Nodes are written for the box and its first ghost
+   * cell, so that every face of a node has the cell across it in hand. A face beside a regular cell is
    * open over all of it. A face two cut cells share takes its aperture and centroid from one body, on both sides, so
    * every box writes it with the same bits: from the cell owned at the box's level where the other is cut from an
    * ancestor, and from the low cell otherwise.
    *
-   * A caller that keeps the moments of the box only can leave the ring alone. The cells beyond the first ghost ring
-   * are then marked covered without being looked at, and a cut cell of the first ghost ring that would have to be cut
+   * A caller that keeps the moments of the box only can leave the ring alone, and needs the copy only one ghost cell
+   * wide; a ring cut as the box is needs it two. The cells beyond the first ghost ring are then marked covered without
+   * being looked at, and a cut cell of the first ghost ring that would have to be cut
    * from an ancestor is marked s_ringFromCoarser and gets no body or node; the box's own cells write their faces
    * beside it from their own bodies.
    * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
@@ -212,7 +213,7 @@ public:
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.
    * @param[in]  a_dit             Destination box.
-   * @param[in]  a_compute         The cells to fill, over at least the box grown by the ghost width within the domain.
+   * @param[in]  a_compute         The cells to fill, over at least the box grown by two cells within the domain.
    * A cell left out is marked irregular, gets no node and builds no body, so a cell filled beside it does not read its
    * faces from it: a caller that keeps a node must fill every cell across its faces too.
    * @param[in]  a_cutRing         Whether the ghost cells are filled as the box's own cells are. If false, only the
