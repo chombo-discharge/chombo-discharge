@@ -3599,17 +3599,7 @@ PolyhedralGeometryShop::destinationPieces(std::vector<std::vector<std::pair<int,
         kept.refine(ratio);
       }
       else if (lvl < a_level) {
-        // A set coarsened is the union of its boxes coarsened, which costs a box at a time rather than a cell at a
-        // time.
-        const Vector<Box> fineBoxes = kept.boxes();
-
-        IntVectSet coarse;
-
-        for (int i = 0; i < fineBoxes.size(); i++) {
-          coarse |= coarsen(fineBoxes[i], ratio);
-        }
-
-        kept = coarse;
+        PolyhedralGeometryShop::coarsenBoxwise(kept, ratio);
       }
 
       kept &= piece.second;
@@ -3624,13 +3614,12 @@ PolyhedralGeometryShop::destinationPieces(std::vector<std::vector<std::pair<int,
 }
 
 void
-PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
-                                 std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
-                                 const std::vector<DisjointBoxLayout>&                    a_grids,
-                                 const std::vector<ProblemDomain>&                        a_domains,
-                                 const int                                                a_ghost) const
+PolyhedralGeometryShop::planReceives(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
+                                     const std::vector<DisjointBoxLayout>&                    a_grids,
+                                     const std::vector<ProblemDomain>&                        a_domains,
+                                     const int                                                a_ghost) const
 {
-  CH_TIME("PolyhedralGeometryShop::planCopy");
+  CH_TIME("PolyhedralGeometryShop::planReceives");
 
   using PolyhedralEB::GraphCopyHeader;
 
@@ -3641,7 +3630,6 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
   const int numGeo   = static_cast<int>(m_graphs.size());
   const int numRanks = numProc();
 
-  a_sends.assign(numRanks, std::vector<GraphCopyHeader>());
   a_receives.assign(numRanks, std::vector<GraphCopyHeader>());
 
   // The destination levels on the geometry's levels, and the ratio from each to the next.
@@ -3699,7 +3687,7 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
       }
 
       if (tileBox[lvl][t] < 0) {
-        MayDay::Error("PolyhedralGeometryShop::planCopy - a cut tile is not a box of its level's graph");
+        MayDay::Error("PolyhedralGeometryShop::planReceives - a cut tile is not a box of its level's graph");
       }
     }
   }
@@ -3774,25 +3762,67 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
       }
     }
   }
+}
 
-  // Sending: this rank's own graph boxes, and every destination box that could need one of them. A destination box
-  // needs a tile's cells exactly when the tile, mapped onto the destination level and grown by the ghost width, meets
-  // it. A coarse destination box meets many of this rank's tiles, so its pieces are worked out once and kept: first
-  // each graph box lists the destination boxes it meets, then the pieces of every listed destination box are worked
-  // out, and then each graph box writes its headers, appended in the order of the boxes.
-  std::vector<std::vector<char>>                                          known(numDest);
-  std::vector<std::vector<std::vector<std::vector<std::pair<int, Box>>>>> cache(numDest);
+void
+PolyhedralGeometryShop::planSends(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
+                                  const std::vector<DisjointBoxLayout>&                    a_grids,
+                                  const std::vector<ProblemDomain>&                        a_domains,
+                                  const int                                                a_ghost) const
+{
+  CH_TIME("PolyhedralGeometryShop::planSends");
+
+  using PolyhedralEB::GraphCopyHeader;
+
+  CH_assert(a_grids.size() == a_domains.size());
+  CH_assert(m_compGeom != nullptr);
+
+  const int numDest    = static_cast<int>(a_grids.size());
+  const int numGeo     = static_cast<int>(m_graphs.size());
+  const int numRanks   = numProc();
+  const int startLevel = m_compGeom->getStartLevel();
+
+  a_sends.assign(numRanks, std::vector<GraphCopyHeader>());
+
+  // The destination levels on the geometry's levels, and the ratio from each to the next.
+  std::vector<int> destLevel(numDest);
+  std::vector<int> ratio(numDest, 1);
+
+  for (int i = 0; i < numDest; i++) {
+    destLevel[i] = this->destinationLevel(a_domains[i]);
+  }
+
+  for (int i = 0; i + 1 < numDest; i++) {
+    ratio[i] = 1 << (destLevel[i + 1] - destLevel[i]);
+  }
+
+  // the destination layouts' boxes and ranks, read once: each read copies the whole list
+  std::vector<Vector<Box>> destBoxes(numDest);
+  std::vector<Vector<int>> destRanks(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    destBoxes[i] = a_grids[i].boxArray();
+    destRanks[i] = a_grids[i].procIDs();
+  }
+
+  // the levels whose graph boxes are cut tiles, which hold the cells a copy sends
+  const auto tiled = [&](const int a_level) -> bool {
+    return a_level >= startLevel && !m_graphs[a_level].isNull() && m_graphs[a_level]->isDefined();
+  };
+
+  // Each of this rank's graph boxes, which is one of its level's cut tiles: the cells its level owns of it, and the
+  // destination boxes the tile reaches, found through the destination layouts' spatial index.
+  std::vector<std::vector<Vector<Box>>>                      owned(numGeo);
+  std::vector<std::vector<std::vector<std::pair<int, int>>>> boxHits(numGeo);
+
+  std::vector<std::vector<char>> known(numDest);
 
   for (int i = 0; i < numDest; i++) {
     known[i].assign(destBoxes[i].size(), 0);
-    cache[i].resize(destBoxes[i].size());
   }
 
-  // the destination boxes each graph box meets, as (destination level, box index), on every level
-  std::vector<std::vector<std::vector<std::pair<int, int>>>> boxHits(numGeo);
-
   for (int lvl = 0; lvl < numGeo; lvl++) {
-    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+    if (!tiled(lvl)) {
       continue;
     }
 
@@ -3800,14 +3830,18 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
     const DataIterator&      dit    = layout.dataIterator();
     const int                nbox   = dit.size();
 
+    owned[lvl].resize(nbox);
     boxHits[lvl].resize(nbox);
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      const DataIndex& din  = dit[mybox];
+      const Box        tile = layout[din];
+
+      m_compGeom->ownedPart(owned[lvl][mybox], tile, lvl);
 
       for (int i = 0; i < numDest; i++) {
-        Box mapped = layout[din];
+        Box mapped = tile;
 
         if (destLevel[i] > lvl) {
           mapped.refine(1 << (destLevel[i] - lvl));
@@ -3840,9 +3874,13 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
     }
   }
 
-  std::vector<std::pair<int, int>> needed;
+  // The cells each of those destination boxes takes, worked out once on this rank however many of its tiles reach it.
+  std::vector<std::vector<IntVectSet>> takes(numDest);
+  std::vector<std::pair<int, int>>     needed;
 
   for (int i = 0; i < numDest; i++) {
+    takes[i].resize(destBoxes[i].size());
+
     for (int k = 0; k < static_cast<int>(known[i].size()); k++) {
       if (known[i][k] != 0) {
         needed.emplace_back(i, k);
@@ -3857,11 +3895,42 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
     const int i = needed[n].first;
     const int k = needed[n].second;
 
-    piecesOf(cache[i][k], i, destBoxes[i][k]);
+    PolyhedralGeometryShop::validRegion(takes[i][k],
+                                        destBoxes[i][k],
+                                        a_domains[i],
+                                        (i + 1 < numDest) ? &a_grids[i + 1] : nullptr,
+                                        (i + 1 < numDest) ? &destBoxes[i + 1] : nullptr,
+                                        ratio[i],
+                                        a_ghost);
   }
 
+  const auto header = [](const int  a_dest,
+                         const int  a_box,
+                         const int  a_source,
+                         const int  a_sourceBox,
+                         const Box& a_region) -> GraphCopyHeader {
+    GraphCopyHeader h;
+
+    h.m_destLevel     = a_dest;
+    h.m_destBox       = a_box;
+    h.m_sourceLevel   = a_source;
+    h.m_sourceBox     = a_sourceBox;
+    h.m_numSurfaces   = 0;
+    h.m_overrideBytes = 0;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      h.m_lo[d] = a_region.smallEnd(d);
+      h.m_hi[d] = a_region.bigEnd(d);
+    }
+
+    return h;
+  };
+
+  // The pieces: of the cells a tile owns, those a destination box takes -- a cell at or finer than the destination's
+  // level if the destination cell it lies in is taken, a cell of a coarser level if any destination cell it holds is.
+  // Appended in the order of the boxes.
   for (int lvl = 0; lvl < numGeo; lvl++) {
-    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+    if (!tiled(lvl)) {
       continue;
     }
 
@@ -3873,25 +3942,76 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const int t = boxTile[lvl][layout.index(din)];
-
-      CH_assert(t >= 0);
+      const DataIndex& din    = dit[mybox];
+      const int        source = static_cast<int>(layout.index(din));
 
       for (const std::pair<int, int>& hit : boxHits[lvl][mybox]) {
         const int i = hit.first;
         const int k = hit.second;
 
-        const std::vector<std::vector<std::pair<int, Box>>>& boxPieces = cache[i][k];
+        const IntVectSet& taken = takes[i][k];
 
-        if (lvl >= static_cast<int>(boxPieces.size())) {
+        if (taken.isEmpty()) {
           continue;
         }
 
-        for (const std::pair<int, Box>& piece : boxPieces[lvl]) {
-          if (piece.first == t) {
-            boxSends[mybox].emplace_back(destRanks[i][k], header(i, k, lvl, t, piece.second));
+        const int d = destLevel[i];
+        const int r = 1 << std::abs(lvl - d);
+
+        // The taken cells' bounding box on this level, coarsened outward onto a coarser one: an owned part is clipped
+        // to it first, so that a part the destination box takes all of within it goes as one piece.
+        Box reach = taken.minBox();
+
+        if (lvl < d) {
+          reach.coarsen(r);
+        }
+        else if (lvl > d) {
+          reach.refine(r);
+        }
+
+        for (int o = 0; o < owned[lvl][mybox].size(); o++) {
+          const Box part = owned[lvl][mybox][o] & reach;
+
+          if (part.isEmpty()) {
+            continue;
+          }
+
+          Box footprint = part;
+
+          if (lvl > d) {
+            footprint.coarsen(r);
+          }
+          else if (lvl < d) {
+            footprint.refine(r);
+          }
+
+          if (taken.contains(footprint)) {
+            boxSends[mybox].emplace_back(destRanks[i][k], header(i, k, lvl, source, part));
+
+            continue;
+          }
+
+          IntVectSet kept = taken;
+
+          kept &= footprint;
+
+          if (kept.isEmpty()) {
+            continue;
+          }
+
+          if (lvl > d) {
+            kept.refine(r);
+          }
+          else if (lvl < d) {
+            PolyhedralGeometryShop::coarsenBoxwise(kept, r);
+          }
+
+          kept &= part;
+
+          const Vector<Box> boxes = kept.boxes();
+
+          for (int j = 0; j < boxes.size(); j++) {
+            boxSends[mybox].emplace_back(destRanks[i][k], header(i, k, lvl, source, boxes[j]));
           }
         }
       }
@@ -3903,6 +4023,23 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
       }
     }
   }
+}
+
+void
+PolyhedralGeometryShop::coarsenBoxwise(IntVectSet& a_cells, const int a_ratio)
+{
+  CH_TIME("PolyhedralGeometryShop::coarsenBoxwise");
+
+  // A set coarsened is the union of its boxes coarsened, which costs a box at a time rather than a cell at a time.
+  const Vector<Box> boxes = a_cells.boxes();
+
+  IntVectSet coarse;
+
+  for (int i = 0; i < boxes.size(); i++) {
+    coarse |= coarsen(boxes[i], a_ratio);
+  }
+
+  a_cells = coarse;
 }
 
 long long
@@ -3917,7 +4054,8 @@ PolyhedralGeometryShop::checkCopyPlan(const std::vector<DisjointBoxLayout>& a_gr
   std::vector<std::vector<GraphCopyHeader>> sends;
   std::vector<std::vector<GraphCopyHeader>> receives;
 
-  this->planCopy(sends, receives, a_grids, a_domains, a_ghost);
+  this->planSends(sends, a_grids, a_domains, a_ghost);
+  this->planReceives(receives, a_grids, a_domains, a_ghost);
 
   const int numRanks = numProc();
 
@@ -3983,25 +4121,32 @@ PolyhedralGeometryShop::checkCopyPlan(const std::vector<DisjointBoxLayout>& a_gr
   arrived[0] = sends[0];
 #endif
 
-  // Order does not matter, only the set: both lists are sorted by every field before they are compared.
-  const auto key = [](const GraphCopyHeader& a_header) -> std::array<int, 4 + 2 * SpaceDim> {
-    std::array<int, 4 + 2 * SpaceDim> k;
-
-    k[0] = a_header.m_destLevel;
-    k[1] = a_header.m_destBox;
-    k[2] = a_header.m_sourceLevel;
-    k[3] = a_header.m_sourceBox;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      k[4 + d]            = a_header.m_lo[d];
-      k[4 + SpaceDim + d] = a_header.m_hi[d];
-    }
-
-    return k;
+  // The two sides may cut the same cells into different boxes, so what is compared is the cells: for each destination
+  // box and source box, the cells that arrived and the cells expected, with no cell arriving twice.
+  const auto pairOf = [](const GraphCopyHeader& a_header) -> std::array<int, 4> {
+    return {a_header.m_destLevel, a_header.m_destBox, a_header.m_sourceLevel, a_header.m_sourceBox};
   };
 
   const auto before = [&](const GraphCopyHeader& a_first, const GraphCopyHeader& a_second) -> bool {
-    return key(a_first) < key(a_second);
+    return pairOf(a_first) < pairOf(a_second);
+  };
+
+  // the cells of a run of headers with the same pair, and whether any cell is in two of them
+  const auto cellsOf = [&](const std::vector<GraphCopyHeader>& a_headers,
+                           const std::size_t                   a_begin,
+                           const std::size_t                   a_end,
+                           bool&                               a_twice) -> IntVectSet {
+    IntVectSet cells;
+    long long  numPts = 0;
+
+    for (std::size_t n = a_begin; n < a_end; n++) {
+      cells |= a_headers[n].region();
+      numPts += a_headers[n].region().numPts();
+    }
+
+    a_twice = numPts != cells.numPts();
+
+    return cells;
   };
 
   long long numPieces    = 0;
@@ -4011,24 +4156,59 @@ PolyhedralGeometryShop::checkCopyPlan(const std::vector<DisjointBoxLayout>& a_gr
     std::sort(arrived[r].begin(), arrived[r].end(), before);
     std::sort(receives[r].begin(), receives[r].end(), before);
 
-    numPieces += static_cast<long long>(receives[r].size());
+    numPieces += static_cast<long long>(arrived[r].size());
 
-    bool same = arrived[r].size() == receives[r].size();
+    bool        same = true;
+    std::size_t a    = 0;
+    std::size_t e    = 0;
 
-    for (std::size_t i = 0; same && i < receives[r].size(); i++) {
-      same = key(arrived[r][i]) == key(receives[r][i]);
+    while (same && (a < arrived[r].size() || e < receives[r].size())) {
+      if (a == arrived[r].size() || e == receives[r].size() || pairOf(arrived[r][a]) != pairOf(receives[r][e])) {
+        same = false;
+
+        break;
+      }
+
+      std::size_t aEnd = a;
+      std::size_t eEnd = e;
+
+      while (aEnd < arrived[r].size() && pairOf(arrived[r][aEnd]) == pairOf(arrived[r][a])) {
+        aEnd++;
+      }
+
+      while (eEnd < receives[r].size() && pairOf(receives[r][eEnd]) == pairOf(receives[r][e])) {
+        eEnd++;
+      }
+
+      bool arrivedTwice  = false;
+      bool expectedTwice = false;
+
+      const IntVectSet arrivedCells  = cellsOf(arrived[r], a, aEnd, arrivedTwice);
+      const IntVectSet expectedCells = cellsOf(receives[r], e, eEnd, expectedTwice);
+
+      // the cells, whatever representation each set holds them in
+      IntVectSet onlyArrived  = arrivedCells;
+      IntVectSet onlyExpected = expectedCells;
+
+      onlyArrived -= expectedCells;
+      onlyExpected -= arrivedCells;
+
+      same = !arrivedTwice && !expectedTwice && onlyArrived.isEmpty() && onlyExpected.isEmpty();
+
+      a = aEnd;
+      e = eEnd;
     }
 
     if (!same) {
       numDisagreed++;
 
       pout() << "PolyhedralGeometryShop::checkCopyPlan - rank " << r << " sent " << arrived[r].size()
-             << " pieces here, and " << receives[r].size() << " were expected from it" << endl;
+             << " pieces here, and " << receives[r].size() << " were expected from it, holding other cells" << endl;
     }
   }
 
   if (ParallelOps::sum(numDisagreed) > 0) {
-    MayDay::Error("PolyhedralGeometryShop::checkCopyPlan - the senders' and receivers' plans disagree");
+    MayDay::Error("PolyhedralGeometryShop::checkCopyPlan - the pieces sent are not the ones the receivers expect");
   }
 
   return ParallelOps::sum(numPieces);
@@ -4201,10 +4381,10 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
   const int numGeo   = static_cast<int>(m_graphs.size());
   const int numRanks = numProc();
 
+  // Only the senders plan: every piece carries its header, so a receiver needs no plan to place what arrives.
   std::vector<std::vector<GraphCopyHeader>> sends;
-  std::vector<std::vector<GraphCopyHeader>> receives;
 
-  this->planCopy(sends, receives, a_grids, a_domains, a_ghost);
+  this->planSends(sends, a_grids, a_domains, a_ghost);
 
   std::vector<int> geometryLevels(numDest);
 
@@ -4344,8 +4524,6 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
     const char* p   = recvBytes.data() + recvOffset[r];
     const char* end = p + recvCount[r];
 
-    std::size_t numPieces = 0;
-
     while (p < end) {
       GraphCopyHeader h;
 
@@ -4393,15 +4571,6 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 
         a_dest.addSurface(h.m_destLevel, din, h.m_sourceLevel, iv, surface);
       }
-
-      numPieces++;
-    }
-
-    if (numPieces != receives[r].size()) {
-      pout() << "PolyhedralGeometryShop::copyGraphs - rank " << r << " sent " << numPieces << " pieces, and "
-             << receives[r].size() << " were planned" << endl;
-
-      MayDay::Error("PolyhedralGeometryShop::copyGraphs - the pieces that arrived are not the ones planned");
     }
   }
 

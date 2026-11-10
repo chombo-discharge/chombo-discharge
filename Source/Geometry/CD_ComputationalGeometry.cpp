@@ -824,6 +824,41 @@ ComputationalGeometry::ownedPieces(std::vector<std::vector<std::pair<int, Box>>>
 }
 
 void
+ComputationalGeometry::ownedPart(Vector<Box>& a_owned, const Box& a_tile, const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::ownedPart");
+
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
+  a_owned.resize(0);
+
+  const int numLevels = m_domains.size();
+
+  const bool finerTiles = (a_level + 1 < numLevels) && (m_cutTiles[a_level + 1].size() > 0);
+
+  Vector<int> finer;
+
+  if (finerTiles) {
+    finer = this->tilesMeeting(a_level + 1, refine(a_tile, 2));
+  }
+
+  if (finer.size() == 0) {
+    a_owned.push_back(a_tile);
+
+    return;
+  }
+
+  // what the next level's tiles hold of it is theirs
+  IntVectSet owned(DenseIntVectSet(a_tile, true));
+
+  for (int j = 0; j < finer.size(); j++) {
+    owned -= coarsen(m_cutTiles[a_level + 1][finer[j]], 2);
+  }
+
+  a_owned = owned.boxes();
+}
+
+void
 ComputationalGeometry::checkOwnedPieces(const Box& a_box, const int a_level) const
 {
   CH_TIME("ComputationalGeometry::checkOwnedPieces");

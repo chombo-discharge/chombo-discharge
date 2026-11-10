@@ -265,6 +265,16 @@ public:
   ownedPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces, const Box& a_box, const int a_level) const;
 
   /**
+   * @brief The cells of one cut tile that its level owns: the tile less what the next level's tiles hold.
+   * @details The rule ownedPieces applies to the part of a tile a box meets, applied to the whole tile.
+   * @param[out] a_owned Boxes of the owned cells, disjoint; the tile itself where the next level holds none of it.
+   * @param[in]  a_tile  One of getCutTiles(a_level).
+   * @param[in]  a_level Level of the tile.
+   */
+  void
+  ownedPart(Vector<Box>& a_owned, const Box& a_tile, const int a_level) const;
+
+  /**
    * @brief Check ownedPieces on a box against a cell-by-cell reading of the tiles.
    * @details Every cell of every tiled level that the mapped box meets is looked up on its own: owned if a tile of
    * the level holds it and no tile of the next level holds any of its children. The pieces must cover exactly the

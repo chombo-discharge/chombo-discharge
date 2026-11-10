@@ -391,28 +391,55 @@ public:
                     const int                                      a_level) const;
 
   /**
-   * @brief Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it
-   * receives.
-   * @details The receiver walks its own destination boxes and asks each one which pieces it needs. The sender walks
-   * its own graph boxes, finds the destination boxes that could need them through the destination layouts' own spatial
-   * index, and asks each of those the same question, keeping the pieces its box holds. Both answer from replicated
-   * data alone, so the two sides agree with no communication. Every header's counts are left at zero.
-   * @param[out] a_sends    Per destination rank, the pieces this rank sends there.
-   * @param[out] a_receives Per source rank, the pieces this rank receives from there.
+   * @brief Plan the pieces of a copy of the graph onto a destination hierarchy that this rank sends.
+   * @details Only the sender plans: every piece travels with its header, so a receiver places what arrives with no
+   * plan of its own. For each of this rank's graph boxes, which are its level's cut tiles, the cells its level owns of
+   * it are taken from ComputationalGeometry::ownedPart, and the destination boxes the tile reaches, grown by the ghost
+   * width, are found through the destination layouts' spatial index. The cells each of those destination boxes takes
+   * come from validRegion, once per destination box on this rank. A piece is the owned cells a destination box takes:
+   * a cell at or finer than the destination's level if the destination cell it lies in is taken, a cell of a coarser
+   * level if any destination cell it holds is. Every header's counts are left at zero.
+   * @param[out] a_sends   Per destination rank, the pieces this rank sends there.
+   * @param[in]  a_grids   Destination layout of every level, coarsest first.
+   * @param[in]  a_domains Domain of every destination level.
+   * @param[in]  a_ghost   Ghost width every destination box is filled to.
+   */
+  void
+  planSends(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
+            const std::vector<DisjointBoxLayout>&                    a_grids,
+            const std::vector<ProblemDomain>&                        a_domains,
+            const int                                                a_ghost) const;
+
+  /**
+   * @brief The pieces of a copy of the graph that this rank's destination boxes need, worked out from the destination
+   * side: the reference checkCopyPlan holds planSends to.
+   * @details Each of this rank's destination boxes takes the cells validRegion gives it, and asks destinationPieces
+   * which levels own them. Every header's counts are left at zero.
+   * @param[out] a_receives Per source rank, the pieces this rank's destination boxes need from there.
    * @param[in]  a_grids    Destination layout of every level, coarsest first.
    * @param[in]  a_domains  Domain of every destination level.
    * @param[in]  a_ghost    Ghost width every destination box is filled to.
    */
   void
-  planCopy(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
-           std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
-           const std::vector<DisjointBoxLayout>&                    a_grids,
-           const std::vector<ProblemDomain>&                        a_domains,
-           const int                                                a_ghost) const;
+  planReceives(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
+               const std::vector<DisjointBoxLayout>&                    a_grids,
+               const std::vector<ProblemDomain>&                        a_domains,
+               const int                                                a_ghost) const;
 
   /**
-   * @brief Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to
-   * be exactly the ones it planned to receive. Collective.
+   * @brief Coarsen a set of cells: every coarse cell holding any of them.
+   * @details Coarsens the set's boxes one by one and takes their union, which costs a box at a time rather than a cell
+   * at a time.
+   * @param[in,out] a_cells The cells, coarsened in place.
+   * @param[in]     a_ratio Coarsening ratio.
+   */
+  static void
+  coarsenBoxwise(IntVectSet& a_cells, const int a_ratio);
+
+  /**
+   * @brief Plan a copy onto a destination hierarchy from both sides, send every rank the headers planSends gives it,
+   * and require them to hold exactly the cells planReceives expects, per destination box and source box, none twice.
+   * Collective.
    * @param[in] a_grids   Destination layout of every level, coarsest first.
    * @param[in] a_domains Domain of every destination level.
    * @param[in] a_ghost   Ghost width every destination box is filled to.
