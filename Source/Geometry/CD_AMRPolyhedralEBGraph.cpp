@@ -706,7 +706,7 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
   std::vector<CutCellDescription> described;
 
   CutCellBody body;
-  CutCellBody children[1 << SpaceDim];
+  CutCellBody childBody;
 
   for (BoxIterator bit(region); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -769,23 +769,17 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
         which |= (child[d] - 2 * parent[d]) << d;
       }
 
-      // A subdivision fails when a child is in more than one piece, which is kept as one and counted; one that fails
-      // with every child in one piece has lost fluid its parent holds.
-      if (!body.subdivide(children)) {
-        bool inPieces = false;
-
-        for (int c = 0; c < (1 << SpaceDim); c++) {
-          inPieces = inPieces || !children[c].isConnected();
-        }
-
-        if (!inPieces) {
+      // Only the child on the way to this cell is cut. One whose fluid is in more than one piece is kept as one and
+      // counted; one that fails in one piece has lost fluid its parent holds.
+      if (!body.subdivideChild(childBody, which)) {
+        if (childBody.isConnected()) {
           MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
         }
 
         a_numCollapsed += counted ? 1 : 0;
       }
 
-      body   = children[which];
+      body   = childBody;
       parent = child;
     }
 

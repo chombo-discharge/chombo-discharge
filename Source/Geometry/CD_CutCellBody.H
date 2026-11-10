@@ -186,6 +186,19 @@ public:
   subdivide(CutCellBody* a_children) const noexcept;
 
   /**
+   * @brief Cut this body into the body of one of the cells one refinement finer that fill its cell.
+   * @details The child subdivide gives in quadrant a_which, cut the same way, so it holds the same bits. Only that
+   * child is built, so the checks partitions makes across the children are not made: the child is checked on its own
+   * for holding its fluid in one piece and for closing.
+   * @param[out] a_child The child's body, in its own cell's frame.
+   * @param[in]  a_which Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
+   * @return False if the child's fluid region is not connected, if it does not close, or if it would need more
+   * polygons or vertices than it can hold.
+   */
+  bool
+  subdivideChild(CutCellBody& a_child, const int a_which) const noexcept;
+
+  /**
    * @brief Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.
    * @details The single-valued property is not inherited: a body whose eight children are all single valued can
    * still have a grandchild that is not, so asking one level down says nothing about two. This asks to the ratio
@@ -533,6 +546,25 @@ protected:
    * @brief Number of cell faces.
    */
   static constexpr int s_numFaces = 2 * SpaceDim;
+
+  /**
+   * @brief Largest difference between a moment of a subdivision and what it must equal.
+   * @details Held by partitions to the sums over the children, and by both partitions and subdivideChild to how far a
+   * child's boundary is from closing.
+   */
+  static constexpr Real s_partitionTolerance = 1.0E-12;
+
+  /**
+   * @brief Cut this body down to one child's quadrant, without checking the child.
+   * @details The cut subdivide and subdivideChild share, so that both give a child the same bits. A child the fluid
+   * misses comes back empty.
+   * @param[out] a_child The child's body, in its own cell's frame.
+   * @param[in]  a_which Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
+   * @return False if the child would need more polygons or vertices than it can hold, or if its cut could not be
+   * closed.
+   */
+  bool
+  cutChild(CutCellBody& a_child, const int a_which) const noexcept;
 
   /**
    * @brief Largest number of polygons a single cut cell's body can need.
