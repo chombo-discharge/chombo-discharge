@@ -273,8 +273,8 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   if (m_generator == Generator::PolyhedralShop) {
-    // The index spaces fill every layout from the shops, over the geometry's domains, finest first. The shops stay with
-    // this object, and the fillers refer to them.
+    // The index spaces fill every layout from the shops, over the geometry's domains, finest first. Each filler holds
+    // its shop, which reads the tiles of this object, so the index spaces are filled only while this object lives.
     const int numLevels = m_domains.size();
 
     if (numLevels == 0 || m_domains[numLevels - 1].domainBox() != a_finestDomain.domainBox()) {
@@ -294,7 +294,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
         continue;
       }
 
-      const PolyhedralGeometryShop* shop = &(*m_polyhedralShops[curPhase]);
+      const RefCountedPtr<PolyhedralGeometryShop> shop = m_polyhedralShops[curPhase];
 
       fillers[curPhase] = [shop](LevelData<EBGraph>&      a_graph,
                                  LevelData<EBData>&       a_data,

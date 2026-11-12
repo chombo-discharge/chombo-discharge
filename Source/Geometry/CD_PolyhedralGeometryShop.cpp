@@ -989,7 +989,7 @@ PolyhedralGeometryShop::buildMoments()
   m_ebGraphs.resize(numLevels);
   m_ebData.resize(numLevels);
 
-  // Finest first: a level's cells under the next finer level come from coarsening that level, which is complete by
+  // Finest first: a level's cells the next finer level covers come from coarsening that level, which is complete by
   // then.
   long long numInexact  = 0;
   long long numPromoted = 0;
@@ -1148,7 +1148,12 @@ PolyhedralGeometryShop::extensionTiles(Vector<Box>&             a_tiles,
         // makeGrids builds the tiled levels from whole tiles and covers the levels coarser than the start domain with
         // boxes, so a tile is either held whole or not at all.
         if (numStored > 0) {
-          MayDay::Error("PolyhedralGeometryShop::extensionTiles - a tile is held in part by the geometry's boxes");
+#pragma omp critical(PolyhedralGeometryShop_fatal)
+          {
+            pout() << "PolyhedralGeometryShop::extensionTiles - tile " << tileBox << " is held in part" << endl;
+
+            MayDay::Error("PolyhedralGeometryShop::extensionTiles - a tile is held in part by the geometry's boxes");
+          }
         }
 
         threadTiles.push_back(Box(bit(), bit()));
@@ -1330,7 +1335,7 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
     PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, held, region, box, a_domain);
 
     // Every cell is cut from an ancestor, which is one VoF: a multi-valued cell is coarsened from children that are all
-    // stored, so it has no extension below it.
+    // stored, so no extension is finer than it.
     for (int n = 0; n < held.size(); n++) {
       held[n].m_coarserNode = hasCoarser ? 0 : -1;
     }
@@ -1342,6 +1347,13 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
 
   if (ParallelOps::sum(numFiner) > 0) {
     MayDay::Error("PolyhedralGeometryShop::extendLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+
+  numCollapsed = ParallelOps::sum(numCollapsed);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::extendLevel - " << numCollapsed
+           << " cells cut from their ancestors with fluid in more than one piece, kept as one" << endl;
   }
 }
 
@@ -2198,6 +2210,13 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
   if (ParallelOps::sum(numFiner) > 0) {
     MayDay::Error("PolyhedralGeometryShop::assembleLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+
+  numCollapsed = ParallelOps::sum(numCollapsed);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::assembleLevel - " << numCollapsed
+           << " cells cut from their ancestors with fluid in more than one piece, kept as one" << endl;
   }
 
   if (ParallelOps::sum(numNotWhole) > 0) {
@@ -5703,7 +5722,7 @@ PolyhedralGeometryShop::testCopyBodies() const
                   continue;
                 }
 
-                // a cell over finer geometry stands for the finer bodies under it, and the face stays the node's own
+                // a cell covered by finer geometry stands for the finer bodies it holds; the face stays the node's own
                 dest.getCutCells(described, i, din, across);
 
                 if (described.size() != 1 || described.front().m_level > dest.getGeometryLevel(i)) {
@@ -6368,8 +6387,8 @@ PolyhedralGeometryShop::testFill() const
     return pieces;
   };
 
-  // Every level the geometry has and one past the finest: its own boxes in octants, and the boxes of the level below
-  // refined onto it, which reach the cells it holds no tile for.
+  // Every level the geometry has and one past the finest: its own boxes in octants, and the boxes of the next coarser
+  // level refined onto it, which reach the cells it holds no tile for.
   for (int lvl = 0; lvl <= numLevels; lvl++) {
     const ProblemDomain domain = (lvl < numLevels) ? m_compGeom->getDomain(lvl)
                                                    : refine(m_compGeom->getDomain(numLevels - 1), 2);
@@ -6389,7 +6408,7 @@ PolyhedralGeometryShop::testFill() const
         boxes[i].refine(2);
       }
 
-      check(level + " over the boxes below it refined",
+      check(level + " over the next coarser level's boxes refined",
             PolyhedralGeometryShop::shuffledLayout(octants(boxes), domain),
             domain,
             lvl);
@@ -6620,7 +6639,7 @@ PolyhedralGeometryShop::testLinks() const
           numMulti += (coarseVoFs.size() > 1) ? 1 : 0;
 
           // A cell the finer level's boxes lie over was coarsened from it and lists its finer VoFs. A cut cell outside
-          // them is a leaf, one VoF with no links to the finer level, and the VoFs under it are those of its children.
+          // them is a leaf, one VoF with no links to the finer level, and the VoFs it holds are those of its children.
           Vector<int> hits;
 
           m_ebGraphs[k + 1]->disjointBoxLayout().intersecting(refine(Box(cell, cell), 2), hits);
@@ -6633,13 +6652,13 @@ PolyhedralGeometryShop::testLinks() const
               return coarse.refine(a_vof);
             }
 
-            Vector<VolIndex> under;
+            Vector<VolIndex> children;
 
             for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
-              under.append(fine.getVoFs(cit()));
+              children.append(fine.getVoFs(cit()));
             }
 
-            return under;
+            return children;
           };
 
           // The numbering contract: the pieces among the children of a coarsened cell are its VoFs, in order.
@@ -6664,15 +6683,16 @@ PolyhedralGeometryShop::testLinks() const
             const Vector<VolIndex> fineVoFs = fine.getVoFs(cit());
 
             for (int v = 0; v < fineVoFs.size(); v++) {
-              const VolIndex up = fine.coarsen(fineVoFs[v]);
+              const VolIndex coarserVoF = fine.coarsen(fineVoFs[v]);
 
-              bool listed = up.gridIndex() == cell && up.cellIndex() >= 0 && up.cellIndex() < coarseVoFs.size();
+              bool listed = coarserVoF.gridIndex() == cell && coarserVoF.cellIndex() >= 0 &&
+                            coarserVoF.cellIndex() < coarseVoFs.size();
 
               if (listed) {
-                const Vector<VolIndex>       down  = finerOf(up);
-                const std::vector<VolIndex>& below = down.constStdVector();
+                const Vector<VolIndex>       finerVoFs = finerOf(coarserVoF);
+                const std::vector<VolIndex>& finerList = finerVoFs.constStdVector();
 
-                listed = std::find(below.begin(), below.end(), fineVoFs[v]) != below.end();
+                listed = std::find(finerList.begin(), finerList.end(), fineVoFs[v]) != finerList.end();
               }
 
               numInverse += listed ? 0 : 1;

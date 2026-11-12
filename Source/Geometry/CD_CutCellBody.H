@@ -206,14 +206,16 @@ public:
    * @brief Cut this body into the body of one of the cells one refinement finer that fill its cell.
    * @details The child subdivide gives in quadrant a_which, cut the same way, so it holds the same bits. Only that
    * child is built, so the checks partitions makes across the children are not made: the child is checked on its own
-   * for holding its fluid in one piece and for closing.
-   * @param[out] a_child The child's body, in its own cell's frame.
-   * @param[in]  a_which Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
-   * @return False if the child's fluid region is not connected, if it does not close, or if it would need more
-   * polygons or vertices than it can hold.
+   * for holding its fluid in one piece and, if it does, for closing.
+   * @param[out] a_child     The child's body, in its own cell's frame.
+   * @param[out] a_connected Whether the child's fluid is in one piece. False when the cut fails.
+   * @param[in]  a_which     Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
+   * @return False if the cut fails, which it does when the child would need more polygons or vertices than it can hold
+   * or its boundary cannot be closed, or if the child's fluid is in one piece and the child does not close. A child
+   * whose fluid is in more than one piece is returned with true and a_connected false.
    */
   bool
-  subdivideChild(CutCellBody& a_child, const int a_which) const noexcept;
+  subdivideChild(CutCellBody& a_child, bool& a_connected, const int a_which) const noexcept;
 
   /**
    * @brief Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.
@@ -344,8 +346,8 @@ public:
 
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
-   * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
-   * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
+   * @details The face is described at the resolution of the next finer level rather than this cell's, which is what
+   * makes it agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
    * been, which is also what recomputes the moments.
    *

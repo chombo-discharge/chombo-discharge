@@ -2383,16 +2383,20 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
 #endif
 
 bool
-CutCellBody::subdivideChild(CutCellBody& a_child, const int a_which) const noexcept
+CutCellBody::subdivideChild(CutCellBody& a_child, bool& a_connected, const int a_which) const noexcept
 {
   CH_assert(a_which >= 0 && a_which < (1 << SpaceDim));
+
+  a_connected = false;
 
   if (!this->cutChild(a_child, a_which)) {
     return false;
   }
 
-  // what partitions asks of every child on its own
-  return a_child.isConnected() && a_child.divergenceResidual() <= s_partitionTolerance;
+  a_connected = a_child.isConnected();
+
+  // what partitions asks of every child on its own, of a child in one piece
+  return !a_connected || a_child.divergenceResidual() <= s_partitionTolerance;
 }
 
 bool

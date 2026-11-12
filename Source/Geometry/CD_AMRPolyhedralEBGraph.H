@@ -194,21 +194,23 @@ public:
    * node whose moments are the sums over its pieces, its volume centroid the summed first moment, and is counted. A
    * cell a finer level owns is not filled yet: it is marked irregular, gets no node, and is counted.
    *
-   * The flags cover the box grown by two cells, within the domain; a cell the copy holds nothing for -- under the next
-   * finer destination level -- is marked irregular and gets no node. Nodes are written for the box and its first ghost
-   * cell, so that every face of a node has the cell across it in hand. A face beside a regular cell is
-   * open over all of it. A face two cut cells share takes its aperture and centroid from one body, on both sides, so
-   * every box writes it with the same bits: from the cell owned at the box's level where the other is cut from an
-   * ancestor, and from the low cell otherwise.
+   * The flags cover the box grown by two cells, within the domain; a cell the copy holds nothing for -- one the next
+   * finer destination level covers -- is marked irregular and gets no node. Nodes are written for the box and its first
+   * ghost cell, so that every face of a node has the cell across it in hand. A face beside a regular cell is open over
+   * all of it. A face two cut cells share takes its aperture and centroid from one body, on both sides, so every box
+   * writes it with the same bits: from the cell owned at the box's level where the other is cut from an ancestor, and
+   * from the low cell otherwise.
    *
    * A caller that keeps the moments of the box only can leave the ring alone, and needs the copy only one ghost cell
    * wide; a ring cut as the box is needs it two. The cells beyond the first ghost ring are then marked covered without
    * being looked at, and a cut cell of the first ghost ring that would have to be cut
    * from an ancestor is marked s_ringFromCoarser and gets no body or node; the box's own cells write their faces
    * beside it from their own bodies.
+   *
+   * A cut from an ancestor that fails, or that gives a child in one piece that does not close, has lost fluid its
+   * parent holds, and stops the run.
    * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
    * @param[out] a_nodes           One node per irregular cell the box fills.
-   * A subdivision that fails with every child in one piece has lost fluid its parent holds, and stops the run.
    * @param[out] a_numCollapsed    Incremented for every child a subdivision left in more than one piece.
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.

@@ -781,8 +781,8 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
       continue;
     }
 
-    // Only the child on the way to a cell is cut. One whose fluid is in more than one piece is kept as one and counted;
-    // one that fails in one piece has lost fluid its parent holds.
+    // Only the child on the way to a cell is cut. One whose fluid is in more than one piece is kept as one and counted.
+    // A cut that fails, or a child in one piece that does not close, has lost fluid its parent holds.
     const auto cutDown = [&](const CutCellBody& a_parent, const IntVect& a_parentCell, const IntVect& a_child) -> int {
       int which = 0;
 
@@ -790,20 +790,29 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
         which |= (a_child[d] - 2 * a_parentCell[d]) << d;
       }
 
-      if (a_parent.subdivideChild(childBody, which)) {
-        return 0;
+      bool connected = false;
+
+      if (!a_parent.subdivideChild(childBody, connected, which)) {
+#pragma omp critical(AMRPolyhedralEBGraph_fatal)
+        {
+          pout() << "AMRPolyhedralEBGraph::fillNodes - cell " << a_child << " could not be cut from " << a_parentCell
+                 << endl;
+
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+        }
       }
 
-      if (childBody.isConnected()) {
-        MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
-      }
-
-      return 1;
+      return connected ? 0 : 1;
     };
 
     if (cell.m_level == geometryLevel) {
       if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
-        MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+#pragma omp critical(AMRPolyhedralEBGraph_fatal)
+        {
+          pout() << "AMRPolyhedralEBGraph::fillNodes - cell " << cell.m_cell << " could not be built" << endl;
+
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+        }
       }
     }
     else {
@@ -817,7 +826,13 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
         CutCellBody ancestor;
 
         if (!ancestor.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
-          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+#pragma omp critical(AMRPolyhedralEBGraph_fatal)
+          {
+            pout() << "AMRPolyhedralEBGraph::fillNodes - cell " << cell.m_cell << " on level " << cell.m_level
+                   << " could not be built" << endl;
+
+            MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+          }
         }
 
         int numCollapsed = 0;
@@ -847,7 +862,12 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
     }
 
     if (body.numPolygons() > 0 && body.closureResidual() > 1.0E-9) {
-      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
+#pragma omp critical(AMRPolyhedralEBGraph_fatal)
+      {
+        pout() << "AMRPolyhedralEBGraph::fillNodes - cell " << iv << " did not close" << endl;
+
+        MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
+      }
     }
 
     a_regIrregCovered(iv, 0) = body.childState();

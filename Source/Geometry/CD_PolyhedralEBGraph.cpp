@@ -1335,14 +1335,14 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
     }
   }
 
-  // copied onto this layout coarsened, with a ring wide enough to sit under this level's ghost cells
+  // copied onto this layout coarsened, with a ring wide enough to reach this level's ghost cells
   DisjointBoxLayout coarsened;
 
   coarsen(coarsened, m_grids, 2);
 
   const int coarseGhost = (a_ghost + 1) / 2;
 
-  LevelData<BaseFab<signed char>> under(coarsened, 1, coarseGhost * IntVect::Unit);
+  LevelData<BaseFab<signed char>> coarseFlags(coarsened, 1, coarseGhost * IntVect::Unit);
 
   const DataIterator& ditCoarsened  = coarsened.dataIterator();
   const int           nboxCoarsened = ditCoarsened.size();
@@ -1351,12 +1351,12 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
   for (int mybox = 0; mybox < nboxCoarsened; mybox++) {
     const DataIndex& din = ditCoarsened[mybox];
 
-    under[din].setVal(0);
+    coarseFlags[din].setVal(0);
   }
 
   const Copier copier(a_coarser.m_grids, coarsened, a_coarser.m_domain, coarseGhost * IntVect::Unit);
 
-  coarseFilled.copyTo(Interval(0, 0), under, Interval(0, 0), copier);
+  coarseFilled.copyTo(Interval(0, 0), coarseFlags, Interval(0, 0), copier);
 
   const Box& domainBox = m_domain.domainBox();
 
@@ -1370,7 +1370,7 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
     const DataIndex& din = dit[mybox];
 
     BaseFab<signed char>&       filled = a_filled[din];
-    const BaseFab<signed char>& coarse = under[din];
+    const BaseFab<signed char>& coarse = coarseFlags[din];
 
     filled.setVal(0);
 
@@ -1638,7 +1638,7 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
         {
           pout() << "PolyhedralEBGraph::link - cell " << bit() << " is " << ((refined(bit(), 0) != 0) ? "" : "not ")
                  << "in the coarse level's covered region but is " << ((marker(bit(), 0) != 0) ? "" : "not ")
-                 << "under the fine level's tiles" << endl;
+                 << "covered by the fine level's tiles" << endl;
 
           MayDay::Error("PolyhedralEBGraph::link - the coarse level's covered region disagrees with the fine tiles");
         }

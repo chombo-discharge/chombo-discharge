@@ -234,7 +234,7 @@ public:
    * phase's cut cells and the regular or covered ones are distributed over the ranks separately, a box at a time. The
    * graph is copied onto the grids
    * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
-   * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
+   * regular, covered, or the moments of the stitched body -- and its cells the next finer level covers are coarsened
    * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). The graph
    * holds the links between levels that assembleLevel describes. Under
    * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
@@ -262,14 +262,14 @@ public:
   /**
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
    * @details A cell in the geometry's boxes on the level takes what buildMoments made there. The cells outside them,
-   * which lie under a leaf of a coarser level or above the finest stored one, are cut from their ancestors on tiles of
-   * their own (extensionTiles), balanced over the ranks with one unit of load per tile, or by the work of cutting them
-   * (extensionLoads) under PolyhedralGeometryShop.extension_cut_cell_loads, and computed there (extendLevel). The
-   * stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the
-   * links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's
-   * only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler.
-   * Collective: every rank calls it for the same layouts in the same order, since the tiles are gathered and balanced
-   * over all ranks. Requires buildMoments.
+   * which a leaf of a coarser level covers or which are finer than the finest stored level, are cut from their
+   * ancestors on tiles of their own (extensionTiles), balanced over the ranks with one unit of load per tile, or by the
+   * work of cutting them (extensionLoads) under PolyhedralGeometryShop.extension_cut_cell_loads, and computed there
+   * (extendLevel). The stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored
+   * cell carries the links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked
+   * to the ancestor's only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of
+   * EBISLayout::Filler. Collective: every rank calls it for the same layouts in the same order, since the tiles are
+   * gathered and balanced over all ranks. Requires buildMoments.
    * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
    * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
    * @param[in]  a_grids      The layout.
@@ -563,13 +563,13 @@ public:
 
   /**
    * @brief Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants
-   * and onto the boxes of the level below refined.
+   * and onto the boxes of the next coarser level refined.
    * @details The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own
-   * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level
-   * below must be the sum of the cells it holds, to round-off. Then an EBIndexSpace is defined over the geometry's
-   * domains with fillLayout as its filler, and on every level the EBISLayout it fills onto the level's boxes in
-   * octants, twice so that the second comes from its cache, must hold the graph, the moments and the links fillLayout
-   * gives, bit for bit. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the next
+   * coarser level must be the sum of the cells it holds, to round-off. Then an EBIndexSpace is defined over the
+   * geometry's domains with fillLayout as its filler, and on every level the EBISLayout it fills onto the level's boxes
+   * in octants, twice so that the second comes from its cache, must hold the graph, the moments and the links
+   * fillLayout gives, bit for bit. Collective. Switched by PolyhedralGeometryShop.test_copy.
    */
   void
   testFill() const;
@@ -580,10 +580,10 @@ public:
    * @details For every coarse cell the finer level's boxes lie over, the pieces coarsePieces finds among its children
    * in the finer layout must be its VoFs' links to the finer level, in number and in order. A coarse cut cell outside
    * them is a leaf: it must be one VoF, it has no links to the finer level, and the VoFs of its children stand in for
-   * them below. Every fine VoF's link to the coarser level must name a VoF of the coarse cell whose links list it, and
-   * every VoF a coarse VoF lists must link back to it; and each coarse cut VoF's volume fraction and apertures must be
-   * the scaled sums over the fine VoFs it lists, to round-off. Collective.
-   * Switched by PolyhedralGeometryShop.test_copy.
+   * them on the finer level. Every fine VoF's link to the coarser level must name a VoF of the coarse cell whose links
+   * list it, and every VoF a coarse VoF lists must link back to it; and each coarse cut VoF's volume fraction and
+   * apertures must be the scaled sums over the fine VoFs it lists, to round-off. Collective. Switched by
+   * PolyhedralGeometryShop.test_copy.
    */
   void
   testLinks() const;
@@ -591,10 +591,10 @@ public:
   /**
    * @brief The tiles of a destination level that the stored level does not hold.
    * @details A destination box needs every cell out to its graph's ghost width. Those the geometry's boxes on the
-   * matching level do not hold lie under a leaf of a coarser level, or above the finest stored level, and are cut
-   * from their coarser ancestors. They are gathered from every rank as whole tiles of the geometry, so that the list
-   * is the same everywhere and holds each tile once. A tile is held whole or not at all, since a leaf refines to whole
-   * tiles; one held in part stops the run. Collective.
+   * matching level do not hold are covered by a leaf of a coarser level, or finer than the finest stored level, and are
+   * cut from their coarser ancestors. They are gathered from every rank as whole tiles of the geometry, so that the
+   * list is the same everywhere and holds each tile once. A tile is held whole or not at all, since a leaf refines to
+   * whole tiles; one held in part stops the run. Collective.
    * @param[out] a_tiles      The tiles, on the destination level, clipped to its domain.
    * @param[in]  a_grids      The destination layout.
    * @param[in]  a_domain     Its domain.
@@ -680,7 +680,7 @@ public:
    * read for it. The geometry classifies its boxes grown by its EB ghost width, at least one cell, so the ghost cell
    * holds no cut cell; under PolyhedralGeometryShop.test_copy every cell of the box and its ghost cell is checked
    * against the graph copied onto every box. Otherwise, the level's own cells take what the copied graph says. Its
-   * cells under the next finer level take the coarsened VoFs, and an own cell beside one takes the faces between them
+   * cells the next finer level covers take the coarsened VoFs, and an own cell beside one takes the faces between them
    * from the coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of
    * more than one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no
    * moment.
