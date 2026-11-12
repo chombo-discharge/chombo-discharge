@@ -714,6 +714,15 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
   CutCellBody body;
   CutCellBody childBody;
 
+  // The bodies of the cells a level coarser than the box's that cells of the region are cut from, each built once and
+  // shared by its children, with how many steps on the way down to it fell into more than one piece.
+  BaseFab<int> parentIndex(coarsen(region, 2), 1);
+
+  parentIndex.setVal(-1);
+
+  std::vector<CutCellBody> parentBodies;
+  std::vector<int>         parentCollapsed;
+
   for (BoxIterator bit(region); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
@@ -772,34 +781,69 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&        a_regIrregCovered,
       continue;
     }
 
-    if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
-      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
-    }
-
-    // a coarser cell is cut down a level at a time, keeping the child on the way to this cell
-    IntVect parent = cell.m_cell;
-
-    for (int k = cell.m_level + 1; k <= geometryLevel; k++) {
-      const IntVect child = coarsen(iv, 1 << (geometryLevel - k));
-
+    // Only the child on the way to a cell is cut. One whose fluid is in more than one piece is kept as one and counted;
+    // one that fails in one piece has lost fluid its parent holds.
+    const auto cutDown = [&](const CutCellBody& a_parent, const IntVect& a_parentCell, const IntVect& a_child) -> int {
       int which = 0;
 
       for (int d = 0; d < SpaceDim; d++) {
-        which |= (child[d] - 2 * parent[d]) << d;
+        which |= (a_child[d] - 2 * a_parentCell[d]) << d;
       }
 
-      // Only the child on the way to this cell is cut. One whose fluid is in more than one piece is kept as one and
-      // counted; one that fails in one piece has lost fluid its parent holds.
-      if (!body.subdivideChild(childBody, which)) {
-        if (childBody.isConnected()) {
-          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+      if (a_parent.subdivideChild(childBody, which)) {
+        return 0;
+      }
+
+      if (childBody.isConnected()) {
+        MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+      }
+
+      return 1;
+    };
+
+    if (cell.m_level == geometryLevel) {
+      if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
+        MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+      }
+    }
+    else {
+      // A coarser cell is cut down a level at a time, keeping the child on the way to this cell. The way down to the
+      // parent is the same for the parent's every child, so it is taken once and the parent kept for its siblings.
+      const IntVect parentCell = coarsen(iv, 2);
+
+      int& slot = parentIndex(parentCell, 0);
+
+      if (slot < 0) {
+        CutCellBody ancestor;
+
+        if (!ancestor.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
         }
 
-        a_numCollapsed += counted ? 1 : 0;
+        int numCollapsed = 0;
+
+        IntVect parent = cell.m_cell;
+
+        for (int k = cell.m_level + 1; k < geometryLevel; k++) {
+          const IntVect child = coarsen(iv, 1 << (geometryLevel - k));
+
+          numCollapsed += cutDown(ancestor, parent, child);
+
+          ancestor = childBody;
+          parent   = child;
+        }
+
+        slot = parentBodies.size();
+
+        parentBodies.push_back(ancestor);
+        parentCollapsed.push_back(numCollapsed);
       }
 
-      body   = childBody;
-      parent = child;
+      const int lastCollapsed = cutDown(parentBodies[slot], parentCell, iv);
+
+      a_numCollapsed += counted ? (parentCollapsed[slot] + lastCollapsed) : 0;
+
+      body = childBody;
     }
 
     if (body.numPolygons() > 0 && body.closureResidual() > 1.0E-9) {

@@ -404,15 +404,30 @@ crossingLoops(const CutCellSurface& a_surface,
 #endif
 
 inline bool
+withinInEveryDirection(const RealVect& a_a, const RealVect& a_b, const Real a_margin) noexcept
+{
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (std::abs(a_a[dir] - a_b[dir]) > a_margin) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Two positions further apart than twice the tolerance in one coordinate are further apart than the tolerance, whatever
+// the rounding of the length, so the coordinates settle most comparisons before the length is formed.
+inline bool
 sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept
 {
-  return (a_a - a_b).vectorLength() <= s_weldTolerance;
+  return withinInEveryDirection(a_a, a_b, 2.0 * s_weldTolerance) && (a_a - a_b).vectorLength() <= s_weldTolerance;
 }
 
 inline bool
 sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept
 {
-  return (a_a - a_b).vectorLength() <= s_roundOffTolerance;
+  return withinInEveryDirection(a_a, a_b, 2.0 * s_roundOffTolerance) &&
+         (a_a - a_b).vectorLength() <= s_roundOffTolerance;
 }
 
 inline RealVect

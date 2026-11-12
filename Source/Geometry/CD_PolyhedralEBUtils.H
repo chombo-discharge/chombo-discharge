@@ -239,6 +239,18 @@ inline bool
 sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept;
 
 /**
+ * @brief Whether two positions differ by no more than a margin in any coordinate.
+ * @details Necessary for the two to lie within that distance of one another, and read off the coordinates without
+ * forming the difference vector or its length, so a comparison that fails it is settled cheaply.
+ * @param[in] a_a      One position.
+ * @param[in] a_b      The other.
+ * @param[in] a_margin Largest difference allowed in any coordinate.
+ * @return True if no coordinate differs by more than a_margin.
+ */
+inline bool
+withinInEveryDirection(const RealVect& a_a, const RealVect& a_b, const Real a_margin) noexcept;
+
+/**
  * @brief Where the segment between two vertices crosses the plane x[a_dir] = 0, the same to the bit whichever way
  * round the segment is given.
  * @details An endpoint on the plane is the crossing itself. Otherwise the crossing is interpolated from the endpoint

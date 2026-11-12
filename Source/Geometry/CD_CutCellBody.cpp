@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 
 // Chombo includes
 #include <CH_assert.H>
@@ -28,6 +29,46 @@ namespace PolyhedralEB {
 
 CutCellBody::CutCellBody() noexcept
 {
+  this->clear();
+}
+
+CutCellBody::CutCellBody(const CutCellBody& a_other) noexcept
+{
+  *this = a_other;
+}
+
+CutCellBody&
+CutCellBody::operator=(const CutCellBody& a_other) noexcept
+{
+  if (this == &a_other) {
+    return *this;
+  }
+
+  m_numPolygons = a_other.m_numPolygons;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    CutCellBody::copyPolygon(m_polygon[ip], a_other.m_polygon[ip]);
+  }
+
+  m_volumeFraction   = a_other.m_volumeFraction;
+  m_boundaryArea     = a_other.m_boundaryArea;
+  m_trueBoundaryArea = a_other.m_trueBoundaryArea;
+  m_volumeCentroid   = a_other.m_volumeCentroid;
+  m_normal           = a_other.m_normal;
+  m_boundaryCentroid = a_other.m_boundaryCentroid;
+  m_closure          = a_other.m_closure;
+
+  for (int f = 0; f < s_numFaces; f++) {
+    m_areaFraction[f] = a_other.m_areaFraction[f];
+    m_faceCentroid[f] = a_other.m_faceCentroid[f];
+  }
+
+  return *this;
+}
+
+void
+CutCellBody::clear() noexcept
+{
   m_numPolygons      = 0;
   m_volumeFraction   = 0.0;
   m_volumeCentroid   = RealVect::Zero;
@@ -40,6 +81,21 @@ CutCellBody::CutCellBody() noexcept
   for (int f = 0; f < s_numFaces; f++) {
     m_areaFraction[f] = 0.0;
     m_faceCentroid[f] = RealVect::Zero;
+  }
+}
+
+void
+CutCellBody::copyPolygon(Polygon& a_to, const Polygon& a_from) noexcept
+{
+  CH_assert(a_from.m_numVertices >= 0 && a_from.m_numVertices <= s_maxVertices);
+
+  a_to.m_numVertices = a_from.m_numVertices;
+  a_to.m_face        = a_from.m_face;
+
+  for (int i = 0; i < a_from.m_numVertices; i++) {
+    a_to.m_vertex[i]      = a_from.m_vertex[i];
+    a_to.m_vertexEdge[i]  = a_from.m_vertexEdge[i];
+    a_to.m_segmentFace[i] = a_from.m_segmentFace[i];
   }
 }
 
@@ -726,7 +782,7 @@ CutCellBody::restrictFace(const CutCellSurface* a_children,
 void
 CutCellBody::defineWhole() noexcept
 {
-  *this = CutCellBody();
+  this->clear();
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
@@ -908,6 +964,38 @@ CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
     return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
   };
 
+  // A vertex on an edge lies within the tolerance of the edge's bounding box, so a polygon whose own box keeps further
+  // from it than that holds none, and neither does a vertex outside the edge's box so grown. Twice the tolerance leaves
+  // room for the rounding of the distance the test below takes.
+  const Real margin = 2.0 * tolerance;
+
+  Real boxLo[s_maxPolygons][SpaceDim];
+  Real boxHi[s_maxPolygons][SpaceDim];
+
+  const auto encloseVertices = [&](const int a_polygon) -> void {
+    const Polygon& p = m_polygon[a_polygon];
+
+    for (int d = 0; d < SpaceDim; d++) {
+      boxLo[a_polygon][d] = std::numeric_limits<Real>::max();
+      boxHi[a_polygon][d] = -std::numeric_limits<Real>::max();
+    }
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      for (int d = 0; d < SpaceDim; d++) {
+        boxLo[a_polygon][d] = std::min(boxLo[a_polygon][d], p.m_vertex[i][d]);
+        boxHi[a_polygon][d] = std::max(boxHi[a_polygon][d], p.m_vertex[i][d]);
+      }
+    }
+  };
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    encloseVertices(ip);
+  }
+
+  // Every vertex of another polygon that lies on an edge, strictly between its ends.
+  RealVect inside[s_maxVertices];
+  Real     where[s_maxVertices];
+
   for (int ip = 0; ip < m_numPolygons; ip++) {
     Polygon& p = m_polygon[ip];
 
@@ -922,9 +1010,13 @@ CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
         continue;
       }
 
-      // Every vertex of another polygon that lies on this edge, strictly between its ends.
-      RealVect inside[s_maxVertices];
-      Real     where[s_maxVertices];
+      Real edgeLo[SpaceDim];
+      Real edgeHi[SpaceDim];
+
+      for (int d = 0; d < SpaceDim; d++) {
+        edgeLo[d] = std::min(a[d], b[d]) - margin;
+        edgeHi[d] = std::max(a[d], b[d]) + margin;
+      }
 
       int numInside = 0;
 
@@ -933,10 +1025,30 @@ CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
           continue;
         }
 
+        bool apart = false;
+
+        for (int d = 0; d < SpaceDim && !apart; d++) {
+          apart = boxHi[jp][d] < edgeLo[d] || boxLo[jp][d] > edgeHi[d];
+        }
+
+        if (apart) {
+          continue;
+        }
+
         const Polygon& q = m_polygon[jp];
 
         for (int j = 0; j < q.m_numVertices; j++) {
           const RealVect& v = q.m_vertex[j];
+
+          bool outside = false;
+
+          for (int d = 0; d < SpaceDim && !outside; d++) {
+            outside = v[d] < edgeLo[d] || v[d] > edgeHi[d];
+          }
+
+          if (outside) {
+            continue;
+          }
 
           if (same(v, a) || same(v, b)) {
             continue;
@@ -1014,6 +1126,9 @@ CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
       p.m_numVertices += numInside;
 
       i += numInside;
+
+      // the vertices taken in lie within the tolerance of this polygon's edges, and the box has to hold them all
+      encloseVertices(ip);
     }
   }
 
@@ -1046,17 +1161,24 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
     return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
   };
 
-  RealVect from[s_maxPolygons * s_maxVertices];
-  RealVect to[s_maxPolygons * s_maxVertices];
-
-  // Every edge, and which polygon it belongs to. An edge is closed by one edge of another polygon running the other
-  // way, and each edge closes at most one: a hole in a face covered by interface lying in the face uses the
+  // Every edge, as its polygon and the vertex it leaves. An edge is closed by one edge of another polygon running the
+  // other way, and each edge closes at most one: a hole in a face covered by interface lying in the face uses the
   // hole's edges three times once the body is cut through it -- the face, the hole and the interface -- and one of
-  // them stays open, as the boundary the cut has to close.
-  RealVect edgeFrom[s_maxPolygons * s_maxVertices];
-  RealVect edgeTo[s_maxPolygons * s_maxVertices];
-  int      edgeOwner[s_maxPolygons * s_maxVertices];
-  bool     matched[s_maxPolygons * s_maxVertices];
+  // them stays open, as the boundary the cut has to close. The edges are named rather than copied, since the
+  // polygons they are read from stay as they are below: the patches closing the openings are appended after them.
+  int  edgeOwner[s_maxPolygons * s_maxVertices]  = {0};
+  int  edgeVertex[s_maxPolygons * s_maxVertices] = {0};
+  bool matched[s_maxPolygons * s_maxVertices];
+
+  const auto edgeFrom = [&](const int a_edge) -> const RealVect& {
+    return m_polygon[edgeOwner[a_edge]].m_vertex[edgeVertex[a_edge]];
+  };
+
+  const auto edgeTo = [&](const int a_edge) -> const RealVect& {
+    const Polygon& p = m_polygon[edgeOwner[a_edge]];
+
+    return p.m_vertex[(edgeVertex[a_edge] + 1) % p.m_numVertices];
+  };
 
   int numEdges = 0;
 
@@ -1073,29 +1195,28 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
 
       CH_assert(numEdges < s_maxPolygons * s_maxVertices);
 
-      edgeFrom[numEdges]  = a;
-      edgeTo[numEdges]    = b;
-      edgeOwner[numEdges] = ip;
-      matched[numEdges]   = false;
+      edgeOwner[numEdges]  = ip;
+      edgeVertex[numEdges] = i;
+      matched[numEdges]    = false;
       numEdges++;
     }
   }
 
+  // The open edges, each walked the other way round: from its end back to its start.
+  int open[s_maxPolygons * s_maxVertices];
   int numOpen = 0;
 
   for (int e = 0; e < numEdges; e++) {
     for (int f = e + 1; f < numEdges && !matched[e]; f++) {
-      if (!matched[f] && (a_roundOff || edgeOwner[f] != edgeOwner[e]) && same(edgeFrom[e], edgeTo[f]) &&
-          same(edgeTo[e], edgeFrom[f])) {
+      if (!matched[f] && (a_roundOff || edgeOwner[f] != edgeOwner[e]) && same(edgeFrom(e), edgeTo(f)) &&
+          same(edgeTo(e), edgeFrom(f))) {
         matched[e] = true;
         matched[f] = true;
       }
     }
 
     if (!matched[e]) {
-      from[numOpen] = edgeTo[e];
-      to[numOpen]   = edgeFrom[e];
-      numOpen++;
+      open[numOpen++] = e;
     }
   }
 
@@ -1103,7 +1224,17 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
     return true;
   }
 
+  const auto from = [&](const int a_open) -> const RealVect& {
+    return edgeTo(open[a_open]);
+  };
+
+  const auto to = [&](const int a_open) -> const RealVect& {
+    return edgeFrom(open[a_open]);
+  };
+
   bool used[s_maxPolygons * s_maxVertices] = {false};
+
+  RealVect loop[s_maxVertices];
 
   for (int s0 = 0; s0 < numOpen; s0++) {
     if (used[s0]) {
@@ -1112,14 +1243,12 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
 
     used[s0] = true;
 
-    RealVect loop[s_maxVertices];
-
     int numLoop = 0;
 
-    loop[numLoop++] = from[s0];
+    loop[numLoop++] = from(s0);
 
-    RealVect       current = to[s0];
-    const RealVect end     = from[s0];
+    RealVect       current = to(s0);
+    const RealVect end     = from(s0);
 
     bool closed = false;
 
@@ -1133,7 +1262,7 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
       int next = -1;
 
       for (int j = 0; j < numOpen && next < 0; j++) {
-        if (!used[j] && same(from[j], current)) {
+        if (!used[j] && same(from(j), current)) {
           next = j;
         }
       }
@@ -1145,7 +1274,7 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
       used[next] = true;
 
       loop[numLoop++] = current;
-      current         = to[next];
+      current         = to(next);
     }
 
     if (!closed || numLoop < 3) {
@@ -1311,7 +1440,7 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
 void
 CutCellBody::defineWhole() noexcept
 {
-  *this = CutCellBody();
+  this->clear();
 
   // the four corners counter-clockwise, and the face each segment leaving one of them lies in
   constexpr int ringCorner[4] = {0, 1, 3, 2};
@@ -1842,7 +1971,7 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
 bool
 CutCellBody::define(const CutCellSurface& a_surface) noexcept
 {
-  *this = CutCellBody();
+  this->clear();
 
   const Kind kind = CutCellBody::classify(a_surface);
 
@@ -1945,7 +2074,7 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
   CH_assert(a_which >= 0 && a_which < (1 << SpaceDim));
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
-  a_child = CutCellBody();
+  a_child.clear();
 
   if (m_numPolygons == 0) {
     return true;
@@ -1956,8 +2085,13 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
   child.m_numPolygons = m_numPolygons;
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
-    child.m_polygon[ip] = m_polygon[ip];
+    CutCellBody::copyPolygon(child.m_polygon[ip], m_polygon[ip]);
   }
+
+  // Scratch for the polygon being cut and the vertices one edge adds to it, made once: a polygon constructs every one
+  // of its vertex slots.
+  Polygon  out;
+  RealVect add[2];
 
   // This body, cut down to the child's quadrant one direction at a time. Cutting leaves it open along the
   // plane, and the patch closing that opening lies in a face of the child -- the one between it and the
@@ -1976,7 +2110,6 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
     for (int ip = 0; ip < child.m_numPolygons; ip++) {
       const Polygon& in = child.m_polygon[ip];
 
-      Polygon out;
       out.m_numVertices = 0;
       out.m_face        = in.m_face;
 
@@ -1986,8 +2119,6 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
 
         const bool aIn = inside(a);
         const bool bIn = inside(b);
-
-        RealVect add[2];
 
         int numAdd = 0;
 
@@ -2024,7 +2155,7 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
       }
 
       if (out.m_numVertices >= 3) {
-        child.m_polygon[kept++] = out;
+        CutCellBody::copyPolygon(child.m_polygon[kept++], out);
       }
     }
 
@@ -2040,7 +2171,7 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
   }
 
   if (child.m_numPolygons == 0) {
-    child = CutCellBody();
+    child.clear();
 
     return true;
   }
@@ -2077,7 +2208,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
   constexpr int numChildren = 1 << SpaceDim;
 
   for (int c = 0; c < numChildren; c++) {
-    a_children[c] = CutCellBody();
+    a_children[c].clear();
   }
 
   if (m_numPolygons == 0) {
@@ -2102,7 +2233,7 @@ CutCellBody::cutChild(CutCellBody& a_child, const int a_which) const noexcept
   CH_assert(a_which >= 0 && a_which < (1 << SpaceDim));
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
-  a_child = CutCellBody();
+  a_child.clear();
 
   if (m_numPolygons == 0) {
     return true;
@@ -2233,7 +2364,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
   constexpr int numChildren = 1 << SpaceDim;
 
   for (int c = 0; c < numChildren; c++) {
-    a_children[c] = CutCellBody();
+    a_children[c].clear();
   }
 
   // Nothing to cut: every child is as this cell is, and a cell holding no fluid leaves them empty.

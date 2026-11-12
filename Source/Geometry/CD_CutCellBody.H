@@ -67,9 +67,26 @@ public:
   CutCellBody() noexcept;
 
   /**
+   * @brief Copy constructor.
+   * @details Copies the polygons in use, and the vertices in use of each, rather than every slot of the fixed-size
+   * storage: nothing reads past the counts, and a body uses a few of its slots as a rule.
+   * @param[in] a_other The body to copy.
+   */
+  CutCellBody(const CutCellBody& a_other) noexcept;
+
+  /**
    * @brief Destructor.
    */
   ~CutCellBody() noexcept = default;
+
+  /**
+   * @brief Copy assignment.
+   * @details Copies what the copy constructor does.
+   * @param[in] a_other The body to copy.
+   * @return This body.
+   */
+  CutCellBody&
+  operator=(const CutCellBody& a_other) noexcept;
 
   /**
    * @brief Build the body from the values the surface is reconstructed from.
@@ -727,6 +744,22 @@ protected:
    */
   void
   accumulateMoments() noexcept;
+
+  /**
+   * @brief Empty the body, as the constructor leaves it.
+   * @details Lets a body be refilled without constructing a fresh one, which costs a constructor call for every
+   * vertex slot of every polygon slot.
+   */
+  void
+  clear() noexcept;
+
+  /**
+   * @brief Copy one polygon's vertices in use, its count and its face.
+   * @param[out] a_to   The polygon written.
+   * @param[in]  a_from The polygon read.
+   */
+  static void
+  copyPolygon(Polygon& a_to, const Polygon& a_from) noexcept;
 
   /**
    * @brief The polygons bounding the fluid.
