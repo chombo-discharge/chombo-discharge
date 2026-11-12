@@ -123,11 +123,17 @@ PolyhedralEBGraph::defineData()
   // Each box's cut-cell set is a bitmap over the box and its ghost ring, which is where its cells come from: a
   // set that starts empty would be a tree, several kilobytes for a few hundred scattered cells, and the surface
   // container keeps a copy of it.
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box grown = grow(m_grids[dit()], m_numGhost) & m_domain.domainBox();
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    m_cutCells[dit()]     = IntVectSet(DenseIntVectSet(grown, false));
-    m_surfaceCells[dit()] = IntVectSet(DenseIntVectSet(grown, false));
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box grown = grow(m_grids[din], m_numGhost) & m_domain.domainBox();
+
+    m_cutCells[din]     = IntVectSet(DenseIntVectSet(grown, false));
+    m_surfaceCells[din] = IntVectSet(DenseIntVectSet(grown, false));
   }
 }
 
@@ -374,16 +380,22 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
 
   long long numFilled = 0;
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box = m_grids[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    BaseFab<signed char>& states = m_cellStates[dit()];
-    BaseFab<signed char>& faces  = m_faceStates[dit()];
-    IntVectSet&           cut    = m_cutCells[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : numFilled)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    IntVectSet& withSurface = m_surfaceCells[dit()];
+    const Box box = m_grids[din];
 
-    Vector<CutCellSurface>& surfaces = kept[dit()];
+    BaseFab<signed char>& states = m_cellStates[din];
+    BaseFab<signed char>& faces  = m_faceStates[din];
+    IntVectSet&           cut    = m_cutCells[din];
+
+    IntVectSet& withSurface = m_surfaceCells[din];
+
+    Vector<CutCellSurface>& surfaces = kept[din];
 
     // a neighbour filled on this level, or a cell the coarser level filled
     auto filledNeighbour = [&](const IntVect& a_other, const BaseFab<signed char>& a_unresolved) -> bool {
@@ -391,8 +403,8 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
         return true;
       }
 
-      return a_coarserFilled != nullptr && (*a_coarserFilled)[dit()].box().contains(a_other) &&
-             (*a_coarserFilled)[dit()](a_other, 0) != 0;
+      return a_coarserFilled != nullptr && (*a_coarserFilled)[din].box().contains(a_other) &&
+             (*a_coarserFilled)[din](a_other, 0) != 0;
     };
 
     // Ghost cells are filled afterwards: by exchange where another tile carries them, from the function where
@@ -401,7 +413,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     states.setVal(s_regular);
     faces.setVal(s_faceClosed);
 
-    const BaseFab<signed char>& refined = m_refined[dit()];
+    const BaseFab<signed char>& refined = m_refined[din];
 
     // Node values once per node and each crossed edge bisected once, shared by the cells of the box, as the
     // generator does when it builds a box.
@@ -494,9 +506,12 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
       }
       else if (kind == CutCellBody::Kind::Cut || nextToFilled) {
         if (!body.define(surface)) {
-          pout() << "PolyhedralEBGraph::defineCells - cell " << iv << " did not close" << endl;
+#pragma omp critical(PolyhedralEBGraph_report)
+          {
+            pout() << "PolyhedralEBGraph::defineCells - cell " << iv << " did not close" << endl;
 
-          MayDay::Error("PolyhedralEBGraph::defineCells - a cut cell's body did not close");
+            MayDay::Error("PolyhedralEBGraph::defineCells - a cut cell's body did not close");
+          }
         }
 
         // A body with nothing in it is a regular cell. Nothing else is discarded: a cell's interface is what
@@ -585,12 +600,15 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
 
   m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box         box         = m_grids[dit()];
-    const IntVectSet& withSurface = m_surfaceCells[dit()];
-    const auto&       surfaces    = kept[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    IVSFAB<CutCellSurface>& stored = m_surfaces[dit()];
+    const Box         box         = m_grids[din];
+    const IntVectSet& withSurface = m_surfaceCells[din];
+    const auto&       surfaces    = kept[din];
+
+    IVSFAB<CutCellSurface>& stored = m_surfaces[din];
 
     int next = 0;
 
@@ -617,14 +635,20 @@ PolyhedralEBGraph::beginAnchoring(const LevelData<BaseFab<signed char>>& a_carri
 
   m_anchored.define(m_grids, 2, m_numGhost * IntVect::Unit);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box   = m_grids[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box   = m_grids[din];
     const Box grown = grow(box, m_numGhost) & domainBox;
 
-    BaseFab<signed char>&       anchor  = m_anchored[dit()];
-    const BaseFab<signed char>& states  = m_cellStates[dit()];
-    const BaseFab<signed char>& carried = a_carried[dit()];
-    const BaseFab<signed char>& refined = m_refined[dit()];
+    BaseFab<signed char>&       anchor  = m_anchored[din];
+    const BaseFab<signed char>& states  = m_cellStates[din];
+    const BaseFab<signed char>& carried = a_carried[din];
+    const BaseFab<signed char>& refined = m_refined[din];
 
     anchor.setVal(0);
 
@@ -656,7 +680,8 @@ PolyhedralEBGraph::spreadAnchors()
 
   const Box& domainBox = m_domain.domainBox();
 
-  std::vector<IntVect> front;
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
   long long totalNew = 0;
 
@@ -665,13 +690,16 @@ PolyhedralEBGraph::spreadAnchors()
 
     long long numNew = 0;
 
-    for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-      const Box box = m_grids[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : numNew)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      BaseFab<signed char>&       anchor  = m_anchored[dit()];
-      const BaseFab<signed char>& states  = m_cellStates[dit()];
-      const BaseFab<signed char>& faces   = m_faceStates[dit()];
-      const BaseFab<signed char>& refined = m_refined[dit()];
+      const Box box = m_grids[din];
+
+      BaseFab<signed char>&       anchor  = m_anchored[din];
+      const BaseFab<signed char>& states  = m_cellStates[din];
+      const BaseFab<signed char>& faces   = m_faceStates[din];
+      const BaseFab<signed char>& refined = m_refined[din];
 
       // A face is open unless it is closed or lies on the domain boundary. By the time anchoring runs, an open face
       // onto a cell no tile of this level carries reads as a face onto the coarser level, and it joins the fluid
@@ -701,7 +729,7 @@ PolyhedralEBGraph::spreadAnchors()
         return false;
       };
 
-      front.clear();
+      std::vector<IntVect> front;
 
       for (BoxIterator bit(box); bit.ok(); ++bit) {
         if (passable(bit()) && reaches(bit())) {
@@ -764,18 +792,28 @@ PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBG
 
   coarsen(coarsenedFine, a_fine.m_grids, 2);
 
+  const DataIterator& ditCoarsenedFine  = coarsenedFine.dataIterator();
+  const DataIterator& ditCoar           = a_coarse.m_grids.dataIterator();
+  const DataIterator& ditFine           = a_fine.m_grids.dataIterator();
+  const int           nboxCoarsenedFine = ditCoarsenedFine.size();
+  const int           nboxCoar          = ditCoar.size();
+  const int           nboxFine          = ditFine.size();
+
   // Up: a coarse cell the fine level carries is anchored when any of its children is.
   {
     LevelData<BaseFab<signed char>> children(coarsenedFine, 1, IntVect::Zero);
     LevelData<BaseFab<signed char>> onCoarse(a_coarse.m_grids, 1, a_coarse.m_numGhost * IntVect::Unit);
 
-    for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
-      BaseFab<signed char>&       up     = children[dit()];
-      const BaseFab<signed char>& anchor = a_fine.m_anchored[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoarsenedFine; mybox++) {
+      const DataIndex& din = ditCoarsenedFine[mybox];
+
+      BaseFab<signed char>&       up     = children[din];
+      const BaseFab<signed char>& anchor = a_fine.m_anchored[din];
 
       up.setVal(0);
 
-      for (BoxIterator bit(coarsenedFine[dit()]); bit.ok(); ++bit) {
+      for (BoxIterator bit(coarsenedFine[din]); bit.ok(); ++bit) {
         for (BoxIterator fit(refine(Box(bit(), bit()), 2)); fit.ok(); ++fit) {
           if (anchor(fit(), 0) != 0) {
             up(bit(), 0) = 1;
@@ -784,8 +822,11 @@ PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBG
       }
     }
 
-    for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
-      onCoarse[dit()].setVal(0);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoar; mybox++) {
+      const DataIndex& din = ditCoar[mybox];
+
+      onCoarse[din].setVal(0);
     }
 
     const Copier copier(coarsenedFine, a_coarse.m_grids, a_coarse.m_domain, a_coarse.m_numGhost * IntVect::Unit);
@@ -794,12 +835,15 @@ PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBG
 
     const Box& domainBox = a_coarse.m_domain.domainBox();
 
-    for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
-      const Box grown = grow(a_coarse.m_grids[dit()], a_coarse.m_numGhost) & domainBox;
+#pragma omp parallel for schedule(runtime) reduction(+ : numNew)
+    for (int mybox = 0; mybox < nboxCoar; mybox++) {
+      const DataIndex& din = ditCoar[mybox];
 
-      BaseFab<signed char>&       anchor  = a_coarse.m_anchored[dit()];
-      const BaseFab<signed char>& up      = onCoarse[dit()];
-      const BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
+      const Box grown = grow(a_coarse.m_grids[din], a_coarse.m_numGhost) & domainBox;
+
+      BaseFab<signed char>&       anchor  = a_coarse.m_anchored[din];
+      const BaseFab<signed char>& up      = onCoarse[din];
+      const BaseFab<signed char>& refined = a_coarse.m_refined[din];
 
       for (BoxIterator bit(grown); bit.ok(); ++bit) {
         if (refined(bit(), 0) != 0 && up(bit(), 0) != 0 && anchor(bit(), 0) == 0) {
@@ -816,8 +860,11 @@ PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBG
   {
     LevelData<BaseFab<signed char>> parents(coarsenedFine, 1, IntVect::Unit);
 
-    for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
-      parents[dit()].setVal(1);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoarsenedFine; mybox++) {
+      const DataIndex& din = ditCoarsenedFine[mybox];
+
+      parents[din].setVal(1);
     }
 
     const Copier copier(a_coarse.m_grids, coarsenedFine, a_coarse.m_domain, IntVect::Unit);
@@ -826,11 +873,14 @@ PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBG
 
     const Box& domainBox = a_fine.m_domain.domainBox();
 
-    for (DataIterator dit(a_fine.m_grids); dit.ok(); ++dit) {
-      const Box grown = grow(a_fine.m_grids[dit()], a_fine.m_numGhost) & domainBox;
+#pragma omp parallel for schedule(runtime) reduction(+ : numNew)
+    for (int mybox = 0; mybox < nboxFine; mybox++) {
+      const DataIndex& din = ditFine[mybox];
 
-      BaseFab<signed char>&       anchor = a_fine.m_anchored[dit()];
-      const BaseFab<signed char>& parent = parents[dit()];
+      const Box grown = grow(a_fine.m_grids[din], a_fine.m_numGhost) & domainBox;
+
+      BaseFab<signed char>&       anchor = a_fine.m_anchored[din];
+      const BaseFab<signed char>& parent = parents[din];
 
       for (BoxIterator bit(grown); bit.ok(); ++bit) {
         const IntVect iv = bit();
@@ -854,8 +904,14 @@ PolyhedralEBGraph::anchorUncarriedCells()
 
   CH_assert(m_anchored.isDefined());
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    BaseFab<signed char>& anchor = m_anchored[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    BaseFab<signed char>& anchor = m_anchored[din];
 
     for (BoxIterator bit(anchor.box()); bit.ok(); ++bit) {
       if (anchor(bit(), 1) != 0) {
@@ -876,15 +932,21 @@ PolyhedralEBGraph::fillSealedCells()
 
   long long numSealed = 0;
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box = m_grids[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    const BaseFab<signed char>& anchor  = m_anchored[dit()];
-    const BaseFab<signed char>& refined = m_refined[dit()];
-    BaseFab<signed char>&       states  = m_cellStates[dit()];
-    BaseFab<signed char>&       faces   = m_faceStates[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : numSealed)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    IntVectSet& cut = m_cutCells[dit()];
+    const Box box = m_grids[din];
+
+    const BaseFab<signed char>& anchor  = m_anchored[din];
+    const BaseFab<signed char>& refined = m_refined[din];
+    BaseFab<signed char>&       states  = m_cellStates[din];
+    BaseFab<signed char>&       faces   = m_faceStates[din];
+
+    IntVectSet& cut = m_cutCells[din];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
@@ -913,13 +975,16 @@ PolyhedralEBGraph::fillSealedCells()
   if (totalSealed > 0) {
     m_cellStates.exchange();
 
-    for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-      const Box box   = m_grids[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box box   = m_grids[din];
       const Box grown = grow(box, m_numGhost) & domainBox;
 
-      const BaseFab<signed char>& states = m_cellStates[dit()];
+      const BaseFab<signed char>& states = m_cellStates[din];
 
-      IntVectSet& cut = m_cutCells[dit()];
+      IntVectSet& cut = m_cutCells[din];
 
       for (BoxIterator bit(grown); bit.ok(); ++bit) {
         if (!box.contains(bit()) && cut.contains(bit()) && states(bit(), 0) != s_cut) {
@@ -947,15 +1012,21 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
 
   const Box& domainBox = m_domain.domainBox();
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box   = m_grids[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box   = m_grids[din];
     const Box grown = grow(box, m_numGhost) & domainBox;
 
-    BaseFab<signed char>&       states  = m_cellStates[dit()];
-    const BaseFab<signed char>& carried = a_carried[dit()];
-    const BaseFab<signed char>& refined = m_refined[dit()];
+    BaseFab<signed char>&       states  = m_cellStates[din];
+    const BaseFab<signed char>& carried = a_carried[din];
+    const BaseFab<signed char>& refined = m_refined[din];
 
-    IntVectSet& cut = m_cutCells[dit()];
+    IntVectSet& cut = m_cutCells[din];
 
     // A ghost cell no tile carries is classified from its corners alone: regular or covered where the tiles end
     // because the surface does, and possibly cut where they end because the coarser level describes the cells
@@ -1075,9 +1146,15 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   // function, and the cut-cell sets from the states, before the surfaces have a container to land in.
   const Copier copier(a_source.m_grids, m_grids, m_domain);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    m_cellStates[dit()].setVal(s_regular);
-    m_faceStates[dit()].setVal(s_faceClosed);
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    m_cellStates[din].setVal(s_regular);
+    m_faceStates[din].setVal(s_faceClosed);
   }
 
   a_source.m_cellStates.copyTo(Interval(0, 0), m_cellStates, Interval(0, 0), copier);
@@ -1091,8 +1168,11 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
   a_source.markSurfaces(sourceMask);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    mask[dit()].setVal(0);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    mask[din].setVal(0);
   }
 
   sourceMask.copyTo(Interval(0, 0), mask, Interval(0, 0), copier);
@@ -1101,15 +1181,18 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   // exchange cannot fill, and it follows from the covered region, which the copy takes from the source and marks
   // from above. A face state copied as finer stays finer, and linking the copy to its finer level checks the mask.
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box = m_grids[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    const BaseFab<signed char>& states  = m_cellStates[dit()];
-    const BaseFab<signed char>& refined = m_refined[dit()];
-    const BaseFab<signed char>& marked  = mask[dit()];
+    const Box box = m_grids[din];
 
-    IntVectSet& cut         = m_cutCells[dit()];
-    IntVectSet& withSurface = m_surfaceCells[dit()];
+    const BaseFab<signed char>& states  = m_cellStates[din];
+    const BaseFab<signed char>& refined = m_refined[din];
+    const BaseFab<signed char>& marked  = mask[din];
+
+    IntVectSet& cut         = m_cutCells[din];
+    IntVectSet& withSurface = m_surfaceCells[din];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       if (states(bit(), 0) == s_cut && refined(bit(), 0) == 0) {
@@ -1148,13 +1231,21 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
 
   int same = 1;
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const BaseFab<signed char>& states      = m_cellStates[dit()];
-    const BaseFab<signed char>& otherStates = a_other.m_cellStates[dit()];
-    const BaseFab<signed char>& faces       = m_faceStates[dit()];
-    const BaseFab<signed char>& otherFaces  = a_other.m_faceStates[dit()];
-    const BaseFab<signed char>& refined     = m_refined[dit()];
-    const BaseFab<signed char>& otherRef    = a_other.m_refined[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+  // Each thread's copy starts true and stays false once a box of that thread differs, so the result is false
+  // exactly when any box differs.
+#pragma omp parallel for schedule(runtime) reduction(&& : same)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const BaseFab<signed char>& states      = m_cellStates[din];
+    const BaseFab<signed char>& otherStates = a_other.m_cellStates[din];
+    const BaseFab<signed char>& faces       = m_faceStates[din];
+    const BaseFab<signed char>& otherFaces  = a_other.m_faceStates[din];
+    const BaseFab<signed char>& refined     = m_refined[din];
+    const BaseFab<signed char>& otherRef    = a_other.m_refined[din];
 
     for (BoxIterator bit(states.box() & m_domain.domainBox()); bit.ok(); ++bit) {
       same = same && (states(bit(), 0) == otherStates(bit(), 0));
@@ -1170,19 +1261,19 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
       same = same && (refined(bit(), 0) == otherRef(bit(), 0));
     }
 
-    const IntVectSet& cut      = m_cutCells[dit()];
-    const IntVectSet& otherCut = a_other.m_cutCells[dit()];
+    const IntVectSet& cut      = m_cutCells[din];
+    const IntVectSet& otherCut = a_other.m_cutCells[din];
 
-    const IntVectSet& withSurface      = m_surfaceCells[dit()];
-    const IntVectSet& otherWithSurface = a_other.m_surfaceCells[dit()];
+    const IntVectSet& withSurface      = m_surfaceCells[din];
+    const IntVectSet& otherWithSurface = a_other.m_surfaceCells[din];
 
     same = same && (cut == otherCut) && (withSurface == otherWithSurface);
 
-    same = same && m_faceOverrides[dit()].equals(a_other.m_faceOverrides[dit()]);
+    same = same && m_faceOverrides[din].equals(a_other.m_faceOverrides[din]);
 
     if (same) {
-      const IVSFAB<CutCellSurface>& surfaces      = m_surfaces[dit()];
-      const IVSFAB<CutCellSurface>& otherSurfaces = a_other.m_surfaces[dit()];
+      const IVSFAB<CutCellSurface>& surfaces      = m_surfaces[din];
+      const IVSFAB<CutCellSurface>& otherSurfaces = a_other.m_surfaces[din];
 
       for (IVSIterator ivsit(withSurface); ivsit.ok(); ++ivsit) {
         const CutCellSurface& a = surfaces(ivsit(), 0);
@@ -1222,50 +1313,68 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
   // the coarser level's filled cells, on its own layout
   LevelData<BaseFab<signed char>> coarseFilled(a_coarser.m_grids, 1, IntVect::Zero);
 
-  for (DataIterator dit(a_coarser.m_grids); dit.ok(); ++dit) {
-    BaseFab<signed char>& filled = coarseFilled[dit()];
+  const DataIterator& ditCoar  = a_coarser.m_grids.dataIterator();
+  const int           nboxCoar = ditCoar.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    BaseFab<signed char>& filled = coarseFilled[din];
 
     filled.setVal(0);
 
-    for (BoxIterator bit(a_coarser.m_grids[dit()]); bit.ok(); ++bit) {
-      if (PolyhedralEBGraph::isFilled(a_coarser.m_cellStates[dit()],
-                                      a_coarser.m_refined[dit()],
-                                      a_coarser.m_surfaceCells[dit()],
-                                      a_coarser.m_surfaces[dit()],
+    for (BoxIterator bit(a_coarser.m_grids[din]); bit.ok(); ++bit) {
+      if (PolyhedralEBGraph::isFilled(a_coarser.m_cellStates[din],
+                                      a_coarser.m_refined[din],
+                                      a_coarser.m_surfaceCells[din],
+                                      a_coarser.m_surfaces[din],
                                       bit())) {
         filled(bit(), 0) = 1;
       }
     }
   }
 
-  // copied onto this layout coarsened, with a ring wide enough to sit under this level's ghost cells
+  // copied onto this layout coarsened, with a ring wide enough to reach this level's ghost cells
   DisjointBoxLayout coarsened;
 
   coarsen(coarsened, m_grids, 2);
 
   const int coarseGhost = (a_ghost + 1) / 2;
 
-  LevelData<BaseFab<signed char>> under(coarsened, 1, coarseGhost * IntVect::Unit);
+  LevelData<BaseFab<signed char>> coarseFlags(coarsened, 1, coarseGhost * IntVect::Unit);
 
-  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    under[dit()].setVal(0);
+  const DataIterator& ditCoarsened  = coarsened.dataIterator();
+  const int           nboxCoarsened = ditCoarsened.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoarsened; mybox++) {
+    const DataIndex& din = ditCoarsened[mybox];
+
+    coarseFlags[din].setVal(0);
   }
 
   const Copier copier(a_coarser.m_grids, coarsened, a_coarser.m_domain, coarseGhost * IntVect::Unit);
 
-  coarseFilled.copyTo(Interval(0, 0), under, Interval(0, 0), copier);
+  coarseFilled.copyTo(Interval(0, 0), coarseFlags, Interval(0, 0), copier);
 
   const Box& domainBox = m_domain.domainBox();
 
   a_filled.define(m_grids, 1, a_ghost * IntVect::Unit);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    BaseFab<signed char>&       filled = a_filled[dit()];
-    const BaseFab<signed char>& coarse = under[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    BaseFab<signed char>&       filled = a_filled[din];
+    const BaseFab<signed char>& coarse = coarseFlags[din];
 
     filled.setVal(0);
 
-    for (BoxIterator bit(grow(m_grids[dit()], a_ghost) & domainBox); bit.ok(); ++bit) {
+    for (BoxIterator bit(grow(m_grids[din], a_ghost) & domainBox); bit.ok(); ++bit) {
       filled(bit(), 0) = coarse(coarsen(bit(), 2), 0);
     }
   }
@@ -1280,9 +1389,15 @@ PolyhedralEBGraph::markCarried(LevelData<BaseFab<signed char>>& a_carried) const
   // ghost cell the exchange leaves at zero is carried by no tile of this level.
   a_carried.define(m_grids, 1, m_numGhost * IntVect::Unit);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    a_carried[dit()].setVal(0);
-    a_carried[dit()].setVal(1, m_grids[dit()], 0);
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_carried[din].setVal(0);
+    a_carried[din].setVal(1, m_grids[din], 0);
   }
 
   a_carried.exchange();
@@ -1295,11 +1410,17 @@ PolyhedralEBGraph::markSurfaces(LevelData<BaseFab<signed char>>& a_mask) const
 
   a_mask.define(m_grids, 1, m_numGhost * IntVect::Unit);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box         box         = m_grids[dit()];
-    const IntVectSet& withSurface = m_surfaceCells[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    BaseFab<signed char>& mask = a_mask[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box         = m_grids[din];
+    const IntVectSet& withSurface = m_surfaceCells[din];
+
+    BaseFab<signed char>& mask = a_mask[din];
 
     mask.setVal(0);
 
@@ -1357,12 +1478,18 @@ PolyhedralEBGraph::addGhostSurfaceCells()
 
   this->markSurfaces(mask);
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box = m_grids[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    const BaseFab<signed char>& marked = mask[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    IntVectSet& withSurface = m_surfaceCells[dit()];
+    const Box box = m_grids[din];
+
+    const BaseFab<signed char>& marked = mask[din];
+
+    IntVectSet& withSurface = m_surfaceCells[din];
 
     for (BoxIterator bit(marked.box() & m_domain.domainBox()); bit.ok(); ++bit) {
       if (!box.contains(bit()) && marked(bit(), 0) != 0) {
@@ -1379,8 +1506,14 @@ PolyhedralEBGraph::markRefined()
 
   // The covered region is the same list on every rank, so every box marks its own cells and ghost cells from it
   // with no communication, including ghost cells no tile of this level carries.
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    BaseFab<signed char>& refined = m_refined[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    BaseFab<signed char>& refined = m_refined[din];
 
     refined.setVal(0);
 
@@ -1403,11 +1536,17 @@ PolyhedralEBGraph::defineOuterFaces(const LevelData<BaseFab<signed char>>& a_car
 
   const Box& domainBox = m_domain.domainBox();
 
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box                   box    = m_grids[dit()];
-    const BaseFab<signed char>& marker = a_carried[dit()];
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
-    BaseFab<signed char>& faces = m_faceStates[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box                   box    = m_grids[din];
+    const BaseFab<signed char>& marker = a_carried[din];
+
+    BaseFab<signed char>& faces = m_faceStates[din];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
@@ -1457,35 +1596,52 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
   LevelData<BaseFab<signed char>> fineMarker(coarsenedFine, 1, IntVect::Zero);
   LevelData<BaseFab<signed char>> coarMarker(a_coarse.m_grids, 1, 2 * IntVect::Unit);
 
-  for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
-    fineMarker[dit()].setVal(1);
+  const DataIterator& ditCoarsenedFine  = coarsenedFine.dataIterator();
+  const DataIterator& ditCoar           = a_coarse.m_grids.dataIterator();
+  const int           nboxCoarsenedFine = ditCoarsenedFine.size();
+  const int           nboxCoar          = ditCoar.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoarsenedFine; mybox++) {
+    const DataIndex& din = ditCoarsenedFine[mybox];
+
+    fineMarker[din].setVal(1);
   }
 
-  for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
-    coarMarker[dit()].setVal(0);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
+
+    coarMarker[din].setVal(0);
   }
 
   const Copier copier(coarsenedFine, a_coarse.m_grids, a_coarse.m_domain, 2 * IntVect::Unit);
 
   fineMarker.copyTo(Interval(0, 0), coarMarker, Interval(0, 0), copier);
 
-  for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
-    const Box                   box    = a_coarse.m_grids[dit()];
-    const BaseFab<signed char>& marker = coarMarker[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    const DataIndex& din = ditCoar[mybox];
 
-    const BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
-    BaseFab<signed char>&       faces   = a_coarse.m_faceStates[dit()];
+    const Box                   box    = a_coarse.m_grids[din];
+    const BaseFab<signed char>& marker = coarMarker[din];
+
+    const BaseFab<signed char>& refined = a_coarse.m_refined[din];
+    BaseFab<signed char>&       faces   = a_coarse.m_faceStates[din];
 
     // The coarse level was told its covered region when it was defined, from the same tiles the fine level is
     // built over, so the two must agree cell for cell -- over the box and the two ghost cells a neighbour's body on
     // a level boundary reads. A disagreement means the levels were not built from one set of tiles.
     for (BoxIterator bit(grow(box, 2) & domainBox); bit.ok(); ++bit) {
       if ((refined(bit(), 0) != 0) != (marker(bit(), 0) != 0)) {
-        pout() << "PolyhedralEBGraph::link - cell " << bit() << " is " << ((refined(bit(), 0) != 0) ? "" : "not ")
-               << "in the coarse level's covered region but is " << ((marker(bit(), 0) != 0) ? "" : "not ")
-               << "under the fine level's tiles" << endl;
+#pragma omp critical(PolyhedralEBGraph_report)
+        {
+          pout() << "PolyhedralEBGraph::link - cell " << bit() << " is " << ((refined(bit(), 0) != 0) ? "" : "not ")
+                 << "in the coarse level's covered region but is " << ((marker(bit(), 0) != 0) ? "" : "not ")
+                 << "covered by the fine level's tiles" << endl;
 
-        MayDay::Error("PolyhedralEBGraph::link - the coarse level's covered region disagrees with the fine tiles");
+          MayDay::Error("PolyhedralEBGraph::link - the coarse level's covered region disagrees with the fine tiles");
+        }
       }
     }
 
