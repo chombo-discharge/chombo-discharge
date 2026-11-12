@@ -17,8 +17,11 @@
 #include <cstdint>
 
 // Chombo includes
-#include <RealVect.H>
+#include <BaseFab.H>
+#include <IrregNode.H>
 #include <LoHiSide.H>
+#include <ProblemDomain.H>
+#include <RealVect.H>
 
 // Our includes
 #include <CD_CutCellFaceOverrides.H>
@@ -64,9 +67,26 @@ public:
   CutCellBody() noexcept;
 
   /**
+   * @brief Copy constructor.
+   * @details Copies the polygons in use, and the vertices in use of each, rather than every slot of the fixed-size
+   * storage: nothing reads past the counts, and a body uses a few of its slots as a rule.
+   * @param[in] a_other The body to copy.
+   */
+  CutCellBody(const CutCellBody& a_other) noexcept;
+
+  /**
    * @brief Destructor.
    */
   ~CutCellBody() noexcept = default;
+
+  /**
+   * @brief Copy assignment.
+   * @details Copies what the copy constructor does.
+   * @param[in] a_other The body to copy.
+   * @return This body.
+   */
+  CutCellBody&
+  operator=(const CutCellBody& a_other) noexcept;
 
   /**
    * @brief Build the body from the values the surface is reconstructed from.
@@ -181,6 +201,21 @@ public:
    */
   bool
   subdivide(CutCellBody* a_children) const noexcept;
+
+  /**
+   * @brief Cut this body into the body of one of the cells one refinement finer that fill its cell.
+   * @details The child subdivide gives in quadrant a_which, cut the same way, so it holds the same bits. Only that
+   * child is built, so the checks partitions makes across the children are not made: the child is checked on its own
+   * for holding its fluid in one piece and, if it does, for closing.
+   * @param[out] a_child     The child's body, in its own cell's frame.
+   * @param[out] a_connected Whether the child's fluid is in one piece. False when the cut fails.
+   * @param[in]  a_which     Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
+   * @return False if the cut fails, which it does when the child would need more polygons or vertices than it can hold
+   * or its boundary cannot be closed, or if the child's fluid is in one piece and the child does not close. A child
+   * whose fluid is in more than one piece is returned with true and a_connected false.
+   */
+  bool
+  subdivideChild(CutCellBody& a_child, bool& a_connected, const int a_which) const noexcept;
 
   /**
    * @brief Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.
@@ -311,8 +346,8 @@ public:
 
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
-   * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
-   * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
+   * @details The face is described at the resolution of the next finer level rather than this cell's, which is what
+   * makes it agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
    * been, which is also what recomputes the moments.
    *
@@ -496,11 +531,59 @@ public:
   std::uint64_t
   fingerprint() const noexcept;
 
+  /**
+   * @brief What the cell this body describes is: covered if it holds no fluid, regular if it is all fluid with no
+   * interface, and cut otherwise.
+   * @details The classification of a body subdivided from a cut ancestor. AMRPolyhedralEBGraph::fillNodes flags a cell
+   * by it, and the links of a cut cell to its children list the children it does not call covered, so the two cannot
+   * disagree about which children hold fluid.
+   * @return 1 for regular, 0 for cut and -1 for covered, the flags GeometryService::fillGraph uses.
+   */
+  int
+  childState() const noexcept;
+
+  /**
+   * @brief Write a cut cell's node from this body.
+   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
+   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come from the
+   * body, with roundings just outside [0,1] clamped. The node is the cell's only VoF, at cell index 0; its links to
+   * the coarser and finer levels are left unset.
+   * @param[out] a_node            The node to fill.
+   * @param[in]  a_regIrregCovered Regular (1), irregular (0) and covered (-1) cells, over the cell and its neighbours
+   * inside the domain.
+   * @param[in]  a_cell            The cell, flagged irregular.
+   * @param[in]  a_domain          Domain.
+   */
+  void
+  fillNode(IrregNode&           a_node,
+           const BaseFab<int>&  a_regIrregCovered,
+           const IntVect&       a_cell,
+           const ProblemDomain& a_domain) const;
+
 protected:
   /**
    * @brief Number of cell faces.
    */
   static constexpr int s_numFaces = 2 * SpaceDim;
+
+  /**
+   * @brief Largest difference between a moment of a subdivision and what it must equal.
+   * @details Held by partitions to the sums over the children, and by both partitions and subdivideChild to how far a
+   * child's boundary is from closing.
+   */
+  static constexpr Real s_partitionTolerance = 1.0E-12;
+
+  /**
+   * @brief Cut this body down to one child's quadrant, without checking the child.
+   * @details The cut subdivide and subdivideChild share, so that both give a child the same bits. A child the fluid
+   * misses comes back empty.
+   * @param[out] a_child The child's body, in its own cell's frame.
+   * @param[in]  a_which Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high.
+   * @return False if the child would need more polygons or vertices than it can hold, or if its cut could not be
+   * closed.
+   */
+  bool
+  cutChild(CutCellBody& a_child, const int a_which) const noexcept;
 
   /**
    * @brief Largest number of polygons a single cut cell's body can need.
@@ -663,6 +746,22 @@ protected:
    */
   void
   accumulateMoments() noexcept;
+
+  /**
+   * @brief Empty the body, as the constructor leaves it.
+   * @details Lets a body be refilled without constructing a fresh one, which costs a constructor call for every
+   * vertex slot of every polygon slot.
+   */
+  void
+  clear() noexcept;
+
+  /**
+   * @brief Copy one polygon's vertices in use, its count and its face.
+   * @param[out] a_to   The polygon written.
+   * @param[in]  a_from The polygon read.
+   */
+  static void
+  copyPolygon(Polygon& a_to, const Polygon& a_from) noexcept;
 
   /**
    * @brief The polygons bounding the fluid.

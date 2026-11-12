@@ -37,6 +37,8 @@
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
+class PolyhedralGeometryShop;
+
 /**
  * @brief Abstract base class for geometries
  * @details This class encapsulates computational geometries in chombo-discharge. If you construct this object as-is,
@@ -263,6 +265,16 @@ public:
   ownedPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces, const Box& a_box, const int a_level) const;
 
   /**
+   * @brief The cells of one cut tile that its level owns: the tile less what the next level's tiles hold.
+   * @details The rule ownedPieces applies to the part of a tile a box meets, applied to the whole tile.
+   * @param[out] a_owned Boxes of the owned cells, disjoint; the tile itself where the next level holds none of it.
+   * @param[in]  a_tile  One of getCutTiles(a_level).
+   * @param[in]  a_level Level of the tile.
+   */
+  void
+  ownedPart(Vector<Box>& a_owned, const Box& a_tile, const int a_level) const;
+
+  /**
    * @brief Check ownedPieces on a box against a cell-by-cell reading of the tiles.
    * @details Every cell of every tiled level that the mapped box meets is looked up on its own: owned if a tile of
    * the level holds it and no tile of the next level holds any of its children. The pieces must cover exactly the
@@ -279,6 +291,22 @@ public:
    */
   int
   getStartLevel() const noexcept;
+
+  /**
+   * @brief The width, in cells, by which every box is grown before it is classified.
+   * @details A box classified regular or covered has no cut cell within this many cells of it.
+   * @return The EB ghost width given to makeGrids or buildGeometries.
+   */
+  int
+  getMaxGhostEB() const noexcept;
+
+  /**
+   * @brief The edge of a tile, in cells of its own level.
+   * @details Every cut tile is a whole number of such blocks, and so is every hole a leaf leaves in a finer level.
+   * @return The tile edge.
+   */
+  int
+  getMinBlockSize() const noexcept;
 
   /**
    * @brief Level of a domain among the levels makeGrids built.
@@ -344,6 +372,28 @@ public:
   getDomain(const int a_level) const noexcept;
 
   /**
+   * @brief The cut cells of a phase on a domain that this rank holds.
+   * @details Read from the polyhedral generator's stored level when it built the phase, and from the phase's index
+   * space otherwise. Empty when the phase has none.
+   * @param[in] a_phase  Phase.
+   * @param[in] a_domain Domain, one of the index space's.
+   * @return The cut cells in the boxes this rank holds.
+   */
+  IntVectSet
+  irregCells(const phase::which_phase a_phase, const ProblemDomain& a_domain) const;
+
+  /**
+   * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
+   * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
+   * irregular grids otherwise. The phase must have an index space.
+   * @param[in] a_phase  Phase.
+   * @param[in] a_domain Domain, one of the index space's.
+   * @return The layout.
+   */
+  DisjointBoxLayout
+  irregGrids(const phase::which_phase a_phase, const ProblemDomain& a_domain) const;
+
+  /**
    * @brief Grid spacing of a level.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The spacing.
@@ -401,6 +451,12 @@ protected:
    * @brief Generator selected by the user.
    */
   Generator m_generator;
+
+  /**
+   * @brief The polyhedral generator of each phase, indexed by phase::which_phase, kept for the run: the index spaces
+   * fill every layout from it. Null unless the polyhedral generator built the phase.
+   */
+  RefCountedPtr<PolyhedralGeometryShop> m_polyhedralShops[2];
 
   /**
    * @brief Multifluid index spaces

@@ -61,6 +61,32 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
   }
 }
 
+void
+MultiFluidIndexSpace::define(const Vector<ProblemDomain>&      a_domains,
+                             const RealVect&                   a_origin,
+                             const Real                        a_finestDx,
+                             const Vector<EBISLayout::Filler>& a_fillers)
+{
+  CH_TIME("MultiFluidIndexSpace::define(filler)");
+
+  CH_assert(a_fillers.size() == 2);
+
+  if (!a_fillers[phase::gas]) {
+    MayDay::Error("MultiFluidIndexSpace::define - the gas phase needs a filler");
+  }
+
+  for (const phase::which_phase curPhase : {phase::gas, phase::solid}) {
+    if (a_fillers[curPhase]) {
+      m_ebis[curPhase] = RefCountedPtr<EBIndexSpace>(new EBIndexSpace());
+
+      m_ebis[curPhase]->define(a_domains, a_origin, a_finestDx, a_fillers[curPhase]);
+    }
+    else {
+      m_ebis[curPhase] = RefCountedPtr<EBIndexSpace>(nullptr);
+    }
+  }
+}
+
 const RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase) const
 {
@@ -99,48 +125,36 @@ MultiFluidIndexSpace::numPhases() const
 }
 
 IntVectSet
-MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain) const
+MultiFluidIndexSpace::interfaceRegion(const IntVectSet& a_gasCutCells, const IntVectSet& a_solidCutCells) const
 {
   CH_TIME("MultiFluidIndexSpace::interfaceRegion");
 
-  const int which_level = m_ebis[0]->getLevel(a_domain);
-#if 0  
-  IntVectSet iface_reg = m_ebis[0]->irregCells(which_level);
-  for (int i = 1; i < this->numPhases(); i++){
-    iface_reg &= m_ebis[i]->irregCells(which_level);
-  }
+  Vector<IntVectSet> allGasCutCells(numProc());
+  Vector<IntVectSet> allSolidCutCells(numProc());
 
-  return iface_reg;
-#else
-  IntVectSet irreg0;
-  IntVectSet irreg1;
-  IntVectSet myIrregCellsPhase0 = m_ebis[0]->irregCells(which_level);
-  IntVectSet myIrregCellsPhase1 = m_ebis[1]->irregCells(which_level);
-
-  Vector<IntVectSet> allIrregCellsPhase0(numProc());
-  Vector<IntVectSet> allIrregCellsPhase1(numProc());
-
-  gather(allIrregCellsPhase0, myIrregCellsPhase0, 0);
-  gather(allIrregCellsPhase1, myIrregCellsPhase1, 0);
+  gather(allGasCutCells, a_gasCutCells, 0);
+  gather(allSolidCutCells, a_solidCutCells, 0);
 
   IntVectSet ret;
 
   if (procID() == 0) {
-    for (int i = 0; i < allIrregCellsPhase1.size(); i++) {
-      irreg0 |= allIrregCellsPhase1[i];
+    IntVectSet gasCutCells;
+    IntVectSet solidCutCells;
+
+    for (int i = 0; i < allGasCutCells.size(); i++) {
+      gasCutCells |= allGasCutCells[i];
     }
 
-    for (int i = 0; i < allIrregCellsPhase0.size(); i++) {
-      irreg1 |= allIrregCellsPhase0[i];
+    for (int i = 0; i < allSolidCutCells.size(); i++) {
+      solidCutCells |= allSolidCutCells[i];
     }
 
-    ret = irreg1 & irreg0;
+    ret = gasCutCells & solidCutCells;
   }
 
   broadcast(ret, 0);
 
   return ret;
-#endif
 }
 
 #include <CD_NamespaceFooter.H>

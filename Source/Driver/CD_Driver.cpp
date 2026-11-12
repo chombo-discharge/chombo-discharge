@@ -253,34 +253,34 @@ Driver::getGeometryTags()
 
   m_geomTags.resize(maxAmrDepth);
 
-  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on
   // maxAmrDepth-1
   for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
-
-    // Our level indexing disagrees with EBIS level indexing (where the finest level is on index 0). This is
-    // a way to get the EBIndexSpace level from the current AMR Level.
-    const ProblemDomain& curDomain = m_amr->getDomains()[lvl];     // Domain we're looking at right now.
-    const int            curLevel  = ebisGas->getLevel(curDomain); // Corresponding level index in EBIndexSpace.
+    const ProblemDomain& curDomain = m_amr->getDomains()[lvl]; // Domain we're looking at right now.
 
     IntVectSet condTags; // Irregular cells on electrodes
     IntVectSet dielTags; // Irregular cells on dielectrics
 
     // Conductor cells
     if (m_conductorTagsDepth > lvl) {
-      condTags = ebisGas->irregCells(curLevel);
+      const IntVectSet gasCutCells = m_computationalGeometry->irregCells(phase::gas, curDomain);
+
+      condTags = gasCutCells;
+
       if (!ebisSol.isNull()) {
-        condTags |= ebisSol->irregCells(curLevel);
-        condTags -= m_multifluidIndexSpace->interfaceRegion(curDomain);
+        const IntVectSet solidCutCells = m_computationalGeometry->irregCells(phase::solid, curDomain);
+
+        condTags |= solidCutCells;
+        condTags -= m_multifluidIndexSpace->interfaceRegion(gasCutCells, solidCutCells);
       }
     }
 
     // Dielectric cells
     if (m_dielectricTagsDepth > lvl) {
       if (!ebisSol.isNull()) {
-        dielTags = ebisSol->irregCells(curLevel);
+        dielTags = m_computationalGeometry->irregCells(phase::solid, curDomain);
       }
     }
 
@@ -289,15 +289,13 @@ Driver::getGeometryTags()
 
     // Evaluate angles between cut-cells and refine based on that.
     // Need one ghost cell because we fetch normal vectors from neighboring cut-cells.
-    RefCountedPtr<EBIndexSpace> indexSpaces[2];
-    indexSpaces[0] = ebisGas;
-    indexSpaces[1] = ebisSol;
-
     const int nGhost = std::min(2, m_amr->getNumberOfGhostCells());
 
-    for (const auto& ebis : indexSpaces) {
+    for (const phase::which_phase curPhase : {phase::gas, phase::solid}) {
+      const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(curPhase);
+
       if (!(ebis.isNull())) {
-        DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
+        DisjointBoxLayout irregGrids = m_computationalGeometry->irregGrids(curPhase, curDomain);
         EBISLayout        ebisl;
         ebis->fillEBISLayout(ebisl, irregGrids, curDomain, nGhost);
 
