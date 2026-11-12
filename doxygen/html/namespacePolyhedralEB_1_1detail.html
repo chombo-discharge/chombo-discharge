@@ -120,6 +120,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a77aa6f76ed228ce23792df37c7f51b07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether two positions are the same vertex.  <br /></td></tr>
 <tr class="memitem:aa33b1c3dc8c154fca959ee853672f93f" id="r_aa33b1c3dc8c154fca959ee853672f93f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa33b1c3dc8c154fca959ee853672f93f">sameToRoundOff</a> (const RealVect &amp;a_a, const RealVect &amp;a_b) noexcept</td></tr>
 <tr class="memdesc:aa33b1c3dc8c154fca959ee853672f93f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether two vertices differ only by round-off.  <br /></td></tr>
+<tr class="memitem:a5927b72e147d71d9fa3872a88324522f" id="r_a5927b72e147d71d9fa3872a88324522f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5927b72e147d71d9fa3872a88324522f">withinInEveryDirection</a> (const RealVect &amp;a_a, const RealVect &amp;a_b, const Real a_margin) noexcept</td></tr>
+<tr class="memdesc:a5927b72e147d71d9fa3872a88324522f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether two positions differ by no more than a margin in any coordinate.  <br /></td></tr>
 <tr class="memitem:aa1dfad64f7b222ae8319f9e86f827a1a" id="r_aa1dfad64f7b222ae8319f9e86f827a1a"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1dfad64f7b222ae8319f9e86f827a1a">crossing</a> (const RealVect &amp;a_a, const RealVect &amp;a_b, const int a_dir) noexcept</td></tr>
 <tr class="memdesc:aa1dfad64f7b222ae8319f9e86f827a1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Where the segment between two vertices crosses the plane x[a_dir] = 0, the same to the bit whichever way round the segment is given.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -731,6 +733,51 @@ constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_roundOffT
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if they lie within s_weldTolerance of one another. </dd></dl>
+
+</div>
+</div>
+<a id="a5927b72e147d71d9fa3872a88324522f" name="a5927b72e147d71d9fa3872a88324522f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5927b72e147d71d9fa3872a88324522f">&#9670;&#160;</a></span>withinInEveryDirection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::detail::withinInEveryDirection </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_margin</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether two positions differ by no more than a margin in any coordinate. </p>
+<p>Necessary for the two to lie within that distance of one another, and read off the coordinates without forming the difference vector or its length, so a comparison that fails it is settled cheaply. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_a</td><td>One position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_b</td><td>The other. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_margin</td><td>Largest difference allowed in any coordinate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if no coordinate differs by more than a_margin. </dd></dl>
 
 </div>
 </div>

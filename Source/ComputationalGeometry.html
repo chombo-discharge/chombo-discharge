@@ -197,6 +197,12 @@ Several pre-defined geometries are included in <code class="file docutils litera
 <span class="n">Generator</span><span class="w"> </span><span class="n">m_generator</span><span class="p">;</span>
 
 <span class="cm">/**</span>
+<span class="cm"> * @brief The polyhedral generator of each phase, indexed by phase::which_phase, kept for the run: the index spaces</span>
+<span class="cm"> * fill every layout from it. Null unless the polyhedral generator built the phase.</span>
+<span class="cm"> */</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">PolyhedralGeometryShop</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_polyhedralShops</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="cm">/**</span>
 <span class="cm"> * @brief Multifluid index spaces</span>
 <span class="cm"> */</span>
 <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">MultiFluidIndexSpace</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_multifluidIndexSpace</span><span class="p">;</span>

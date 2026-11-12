@@ -178,15 +178,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7b4e9b7c5c3b2c4d692393e75e335919"><td class="mdescLeft">&#160;</td><td class="mdescRight">The geometry level a destination domain lives on.  <br /></td></tr>
 <tr class="memitem:aa53f451d4aa864af604abd4da1cc5616" id="r_aa53f451d4aa864af604abd4da1cc5616"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa53f451d4aa864af604abd4da1cc5616">destinationPieces</a> (std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;a_pieces, const IntVectSet &amp;a_valid, const int a_level) const</td></tr>
 <tr class="memdesc:aa53f451d4aa864af604abd4da1cc5616"><td class="mdescLeft">&#160;</td><td class="mdescRight">The pieces of the graph a destination region needs: what each tiled level owns of it, tile by tile, down to the cells whose footprint on the destination level lies in the region.  <br /></td></tr>
-<tr class="memitem:a7af3163a612e80886d3530ad7ef6c155" id="r_a7af3163a612e80886d3530ad7ef6c155"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7af3163a612e80886d3530ad7ef6c155">planCopy</a> (std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_sends, std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_receives, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
-<tr class="memdesc:a7af3163a612e80886d3530ad7ef6c155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it receives.  <br /></td></tr>
+<tr class="memitem:ac08a1ceea8193793b339a365fbddf801" id="r_ac08a1ceea8193793b339a365fbddf801"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac08a1ceea8193793b339a365fbddf801">planSends</a> (std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_sends, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost, const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;a_taking) const</td></tr>
+<tr class="memdesc:ac08a1ceea8193793b339a365fbddf801"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan the pieces of a copy of the graph onto a destination hierarchy that this rank sends.  <br /></td></tr>
+<tr class="memitem:a5c001311c63e814e50e9736bfec718cd" id="r_a5c001311c63e814e50e9736bfec718cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c001311c63e814e50e9736bfec718cd">planReceives</a> (std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_receives, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
+<tr class="memdesc:a5c001311c63e814e50e9736bfec718cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">The pieces of a copy of the graph that this rank's destination boxes need, worked out from the destination side: the reference checkCopyPlan holds planSends to.  <br /></td></tr>
 <tr class="memitem:a58b4ebdbd161513ee81323fefa2908ea" id="r_a58b4ebdbd161513ee81323fefa2908ea"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58b4ebdbd161513ee81323fefa2908ea">checkCopyPlan</a> (const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
-<tr class="memdesc:a58b4ebdbd161513ee81323fefa2908ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to be exactly the ones it planned to receive. Collective.  <br /></td></tr>
+<tr class="memdesc:a58b4ebdbd161513ee81323fefa2908ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan a copy onto a destination hierarchy from both sides, send every rank the headers planSends gives it, and require them to hold exactly the cells planReceives expects, per destination box and source box, none twice. Collective.  <br /></td></tr>
 <tr class="memitem:a4ead6aba9cf9d7dbf6b84d6fe9136e7c" id="r_a4ead6aba9cf9d7dbf6b84d6fe9136e7c"><td class="memItemLeft" align="right" valign="top"><a id="a4ead6aba9cf9d7dbf6b84d6fe9136e7c" name="a4ead6aba9cf9d7dbf6b84d6fe9136e7c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyPlan</b> () const</td></tr>
 <tr class="memdesc:a4ead6aba9cf9d7dbf6b84d6fe9136e7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check the copy plan onto the geometry's own box hierarchy with the ranks shuffled, onto every level of it alone, and onto a level past the finest. Collective. Switched by PolyhedralGeometryShop.test_copy. <br /></td></tr>
-<tr class="memitem:a758f475503d8ef970fbde2f9877422a4" id="r_a758f475503d8ef970fbde2f9877422a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a758f475503d8ef970fbde2f9877422a4">copyGraphs</a> (<a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_dest, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
-<tr class="memdesc:a758f475503d8ef970fbde2f9877422a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the graphs onto a destination hierarchy.  <br /></td></tr>
+<tr class="memitem:a4d63db42a69ff721aca00b9e0fd61955" id="r_a4d63db42a69ff721aca00b9e0fd61955"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d63db42a69ff721aca00b9e0fd61955">copyGraphs</a> (<a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_dest, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost, const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;a_taking) const</td></tr>
+<tr class="memdesc:a4d63db42a69ff721aca00b9e0fd61955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the graphs onto a destination hierarchy.  <br /></td></tr>
 <tr class="memitem:a2b3da91c8781204c58f6bc3e4548a736" id="r_a2b3da91c8781204c58f6bc3e4548a736"><td class="memItemLeft" align="right" valign="top"><a id="a2b3da91c8781204c58f6bc3e4548a736" name="a2b3da91c8781204c58f6bc3e4548a736"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyRoundTrip</b> () const</td></tr>
 <tr class="memdesc:a2b3da91c8781204c58f6bc3e4548a736"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy every graph onto its own layout as a destination level of its own, and require every cell the level owns to arrive as the graph holds it, bit for bit: state, surface, role and face overrides. Collective. Switched by PolyhedralGeometryShop.test_copy. <br /></td></tr>
@@ -195,13 +197,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyRoundTrip</b>
 <tr class="memitem:a189e7ea740c35c0393160c7d5e1aaa06" id="r_a189e7ea740c35c0393160c7d5e1aaa06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a189e7ea740c35c0393160c7d5e1aaa06">testMoments</a> () const</td></tr>
 <tr class="memdesc:a189e7ea740c35c0393160c7d5e1aaa06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check the index-space data buildMoments made against the graph it came from.  <br /></td></tr>
 <tr class="memitem:af527313dffaace79a40d118521122d09" id="r_af527313dffaace79a40d118521122d09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af527313dffaace79a40d118521122d09">testFill</a> () const</td></tr>
-<tr class="memdesc:af527313dffaace79a40d118521122d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants and onto the boxes of the level below refined.  <br /></td></tr>
-<tr class="memitem:a4ec780f0ab6bb45b65561c9aa240ae89" id="r_a4ec780f0ab6bb45b65561c9aa240ae89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ec780f0ab6bb45b65561c9aa240ae89">fillLevel</a> (LevelData&lt; EBGraph &gt; &amp;a_graph, LevelData&lt; EBData &gt; &amp;a_data, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_copy, const int a_level, const int a_graphGhost, const int a_dataGhost) const</td></tr>
-<tr class="memdesc:a4ec780f0ab6bb45b65561c9aa240ae89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells included.  <br /></td></tr>
+<tr class="memdesc:af527313dffaace79a40d118521122d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants and onto the boxes of the next coarser level refined.  <br /></td></tr>
+<tr class="memitem:ae1ca2b34ee773d4ed435500122f556fc" id="r_ae1ca2b34ee773d4ed435500122f556fc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae1ca2b34ee773d4ed435500122f556fc">testLinks</a> () const</td></tr>
+<tr class="memdesc:ae1ca2b34ee773d4ed435500122f556fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check the links between every two neighbouring levels of the geometry, filled onto the coarser level's boxes in octants with the ranks shuffled and onto the same boxes refined.  <br /></td></tr>
+<tr class="memitem:a6274a84f4c56eed22e0f34a85963dc55" id="r_a6274a84f4c56eed22e0f34a85963dc55"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6274a84f4c56eed22e0f34a85963dc55">extensionTiles</a> (Vector&lt; Box &gt; &amp;a_tiles, const DisjointBoxLayout &amp;a_grids, const ProblemDomain &amp;a_domain, const int a_graphGhost) const</td></tr>
+<tr class="memdesc:a6274a84f4c56eed22e0f34a85963dc55"><td class="mdescLeft">&#160;</td><td class="mdescRight">The tiles of a destination level that the stored level does not hold.  <br /></td></tr>
+<tr class="memitem:aaaa22ca284dd68170f34ea57205f4a68" id="r_aaaa22ca284dd68170f34ea57205f4a68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaaa22ca284dd68170f34ea57205f4a68">extensionLoads</a> (Vector&lt; long &gt; &amp;a_loads, const Vector&lt; Box &gt; &amp;a_tiles, const int a_level) const</td></tr>
+<tr class="memdesc:aaaa22ca284dd68170f34ea57205f4a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">The work of cutting each extension tile from its ancestors.  <br /></td></tr>
+<tr class="memitem:a83f5dc727928b03f19b6821a1ee14544" id="r_a83f5dc727928b03f19b6821a1ee14544"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83f5dc727928b03f19b6821a1ee14544">extendLevel</a> (LevelData&lt; EBGraph &gt; &amp;a_graph, LevelData&lt; EBData &gt; &amp;a_data, const DisjointBoxLayout &amp;a_tiles, const ProblemDomain &amp;a_domain) const</td></tr>
+<tr class="memdesc:a83f5dc727928b03f19b6821a1ee14544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut the extension tiles from their ancestors, on a layout balanced for it.  <br /></td></tr>
+<tr class="memitem:a1bfff1f2bfb28d521c7866750518eba2" id="r_a1bfff1f2bfb28d521c7866750518eba2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bfff1f2bfb28d521c7866750518eba2">countTileCutCells</a> ()</td></tr>
+<tr class="memdesc:a1bfff1f2bfb28d521c7866750518eba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count the cut cells of every tile on every level, for extensionLoads.  <br /></td></tr>
 <tr class="memitem:acec465bf2191ccc5e386da3fb8e61b78" id="r_acec465bf2191ccc5e386da3fb8e61b78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acec465bf2191ccc5e386da3fb8e61b78">coarsenLevel</a> (LevelData&lt; EBGraph &gt; &amp;a_coarGraph, LevelData&lt; EBData &gt; &amp;a_coarData, long long &amp;a_numInexact, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_fineLevel) const</td></tr>
 <tr class="memdesc:acec465bf2191ccc5e386da3fb8e61b78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen a level of the index space onto its coarsened layout.  <br /></td></tr>
-<tr class="memitem:a85673fdabee704123eeeb5d6c6d8ee8f" id="r_a85673fdabee704123eeeb5d6c6d8ee8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85673fdabee704123eeeb5d6c6d8ee8f">assembleLevel</a> (long long &amp;a_numPromoted, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_copy, const LevelData&lt; EBGraph &gt; *a_coarsenedGraph, const LevelData&lt; EBData &gt; *a_coarsenedData, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_level)</td></tr>
-<tr class="memdesc:a85673fdabee704123eeeb5d6c6d8ee8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a level of the index space from its own cells and the cells coarsened from the level above.  <br /></td></tr>
+<tr class="memitem:aff5d9bc977de2ae2a0b4639b9523a2c1" id="r_aff5d9bc977de2ae2a0b4639b9523a2c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff5d9bc977de2ae2a0b4639b9523a2c1">assembleLevel</a> (long long &amp;a_numPromoted, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_copy, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_everyBox, const LevelData&lt; EBGraph &gt; *a_coarsenedGraph, const LevelData&lt; EBData &gt; *a_coarsenedData, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_level)</td></tr>
+<tr class="memdesc:aff5d9bc977de2ae2a0b4639b9523a2c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a level of the index space from its own cells and the cells coarsened from the next finer level.  <br /></td></tr>
 <tr class="inherit_header pub_methods_classScanShop"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classScanShop')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classScanShop.html">ScanShop</a></td></tr>
 <tr class="memitem:acbb51cf0dbbb601f9c29d0be2c4a92c9 inherit pub_methods_classScanShop" id="r_acbb51cf0dbbb601f9c29d0be2c4a92c9"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> ()=delete</td></tr>
@@ -236,14 +246,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyRoundTrip</b>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ab90593ee7ec3f905ce8663d03b566874" id="r_ab90593ee7ec3f905ce8663d03b566874"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab90593ee7ec3f905ce8663d03b566874">validRegion</a> (IntVectSet &amp;a_valid, const Box &amp;a_box, const ProblemDomain &amp;a_domain, const DisjointBoxLayout *a_finer, const Vector&lt; Box &gt; *a_finerBoxes, const int a_ratio, const int a_ghost)</td></tr>
 <tr class="memdesc:ab90593ee7ec3f905ce8663d03b566874"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cells of a destination box a copy of the graph fills: the box grown by a ghost width, inside the domain, less what the next finer destination level covers.  <br /></td></tr>
+<tr class="memitem:aabba4ba827d5695f42ef49a46467c289" id="r_aabba4ba827d5695f42ef49a46467c289"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aabba4ba827d5695f42ef49a46467c289">coarsenBoxwise</a> (IntVectSet &amp;a_cells, const int a_ratio)</td></tr>
+<tr class="memdesc:aabba4ba827d5695f42ef49a46467c289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen a set of cells: every coarse cell holding any of them.  <br /></td></tr>
 <tr class="memitem:a938552f2609dcd22e661157dd5a552ca" id="r_a938552f2609dcd22e661157dd5a552ca"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a938552f2609dcd22e661157dd5a552ca">sourceBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_graph, const int a_level, const DataIndex &amp;a_dit, const int a_sourceLevel, const IntVect &amp;a_cell)</td></tr>
 <tr class="memdesc:a938552f2609dcd22e661157dd5a552ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of one cut cell of a geometry level, from what a destination box holds of that level.  <br /></td></tr>
 <tr class="memitem:aeb30686a9f5812f7be1d6797763312c4" id="r_aeb30686a9f5812f7be1d6797763312c4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb30686a9f5812f7be1d6797763312c4">destinationBodies</a> (std::vector&lt; <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &gt; &amp;a_bodies, long long &amp;a_numSplit, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_graph, const int a_level, const DataIndex &amp;a_dit, const IntVect &amp;a_cell)</td></tr>
 <tr class="memdesc:aeb30686a9f5812f7be1d6797763312c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The bodies a cell of a destination level is made of, from the geometry levels that own it.  <br /></td></tr>
 <tr class="memitem:ab3bb4ffb56facc95db0d4f5f7b9facd0" id="r_ab3bb4ffb56facc95db0d4f5f7b9facd0"><td class="memItemLeft" align="right" valign="top">static DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3bb4ffb56facc95db0d4f5f7b9facd0">shuffledLayout</a> (const Vector&lt; Box &gt; &amp;a_boxes, const ProblemDomain &amp;a_domain)</td></tr>
 <tr class="memdesc:ab3bb4ffb56facc95db0d4f5f7b9facd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its length, so that no rank holds what a load balance would have given it. For the copy tests.  <br /></td></tr>
-<tr class="memitem:a39459ae2e412de8f67060ff4d70f7199" id="r_a39459ae2e412de8f67060ff4d70f7199"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a39459ae2e412de8f67060ff4d70f7199">fillNode</a> (IrregNode &amp;a_node, const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const BaseFab&lt; int &gt; &amp;a_regIrregCovered, const IntVect &amp;a_cell, const ProblemDomain &amp;a_domain)</td></tr>
-<tr class="memdesc:a39459ae2e412de8f67060ff4d70f7199"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a cut cell's node from its body.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -337,6 +347,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_fillSplitFluid</b><
 <tr class="memitem:a189f98f8fe636968427b5bd588426251" id="r_a189f98f8fe636968427b5bd588426251"><td class="memItemLeft" align="right" valign="top"><a id="a189f98f8fe636968427b5bd588426251" name="a189f98f8fe636968427b5bd588426251"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_testCopy</b></td></tr>
 <tr class="memdesc:a189f98f8fe636968427b5bd588426251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default. <br /></td></tr>
+<tr class="memitem:a10ebf07bfb0e1cd538ee2ccd20eb7091" id="r_a10ebf07bfb0e1cd538ee2ccd20eb7091"><td class="memItemLeft" align="right" valign="top"><a id="a10ebf07bfb0e1cd538ee2ccd20eb7091" name="a10ebf07bfb0e1cd538ee2ccd20eb7091"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_extensionLoadByCutCells</b></td></tr>
+<tr class="memdesc:a10ebf07bfb0e1cd538ee2ccd20eb7091"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the extension tiles are balanced by the cut cells they are cut from (true) or carry one unit of load each (false). PolyhedralGeometryShop.extension_cut_cell_loads, off by default. <br /></td></tr>
+<tr class="memitem:a0adf7aac13036993bb17290ec6f2e077" id="r_a0adf7aac13036993bb17290ec6f2e077"><td class="memItemLeft" align="right" valign="top"><a id="a0adf7aac13036993bb17290ec6f2e077" name="a0adf7aac13036993bb17290ec6f2e077"></a>
+Vector&lt; Vector&lt; long long &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_tileCutCells</b></td></tr>
+<tr class="memdesc:a0adf7aac13036993bb17290ec6f2e077"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of cut cells of every tile, indexed [level][tile] as <a class="el" href="classComputationalGeometry.html#ada0c8496f0c73dcf94ab705963a4751c" title="The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above,...">ComputationalGeometry::getCutTiles</a> lists them. The same on every rank. Set by countTileCutCells. <br /></td></tr>
 <tr class="memitem:a516c299cb34acf5081ebad0eda58e85b" id="r_a516c299cb34acf5081ebad0eda58e85b"><td class="memItemLeft" align="right" valign="top"><a id="a516c299cb34acf5081ebad0eda58e85b" name="a516c299cb34acf5081ebad0eda58e85b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbose</b></td></tr>
 <tr class="memdesc:a516c299cb34acf5081ebad0eda58e85b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the member functions that run once per level or per phase announce themselves in pout. PolyhedralGeometryShop.verbose, off by default. The functions that run per cell never announce themselves. <br /></td></tr>
@@ -396,8 +412,10 @@ Static Protected Attributes</h2></td></tr>
 <tr class="memitem:a0354a7e748f41a111158c7d4c2b2ac73" id="r_a0354a7e748f41a111158c7d4c2b2ac73"><td class="memItemLeft" align="right" valign="top"><a id="a0354a7e748f41a111158c7d4c2b2ac73" name="a0354a7e748f41a111158c7d4c2b2ac73"></a>
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_elementVertices</b> = SpaceDim</td></tr>
 <tr class="memdesc:a0354a7e748f41a111158c7d4c2b2ac73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertices of one element of the written surface: a triangle in three dimensions, a segment in two. <br /></td></tr>
-<tr class="memitem:a040998d0aa1577499cae510a095275aa" id="r_a040998d0aa1577499cae510a095275aa"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a040998d0aa1577499cae510a095275aa">s_momentRing</a> = 2</td></tr>
-<tr class="memdesc:a040998d0aa1577499cae510a095275aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of the ring the graph is copied onto the geometry's grids with for buildMoments.  <br /></td></tr>
+<tr class="memitem:af3182ba7c36bdd6a35531a2d998e908f" id="r_af3182ba7c36bdd6a35531a2d998e908f"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3182ba7c36bdd6a35531a2d998e908f">s_cutRing</a> = 2</td></tr>
+<tr class="memdesc:af3182ba7c36bdd6a35531a2d998e908f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of the ring the graph is copied with for a box whose ghost cells are cut as its own cells are.  <br /></td></tr>
+<tr class="memitem:a1115203b24be92e68d791f40e13a00a6" id="r_a1115203b24be92e68d791f40e13a00a6"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1115203b24be92e68d791f40e13a00a6">s_ownRing</a> = 1</td></tr>
+<tr class="memdesc:a1115203b24be92e68d791f40e13a00a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of the ring the graph is copied onto the geometry's grids with for buildMoments.  <br /></td></tr>
 <tr class="memitem:a2c3bc601b25547824ceb1015ad7490b4" id="r_a2c3bc601b25547824ceb1015ad7490b4"><td class="memItemLeft" align="right" valign="top"><a id="a2c3bc601b25547824ceb1015ad7490b4" name="a2c3bc601b25547824ceb1015ad7490b4"></a>
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_signatureComps</b> = 2 + 3 * SpaceDim</td></tr>
 <tr class="memdesc:a2c3bc601b25547824ceb1015ad7490b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures. <br /></td></tr>
@@ -536,8 +554,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a85673fdabee704123eeeb5d6c6d8ee8f" name="a85673fdabee704123eeeb5d6c6d8ee8f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a85673fdabee704123eeeb5d6c6d8ee8f">&#9670;&#160;</a></span>assembleLevel()</h2>
+<a id="aff5d9bc977de2ae2a0b4639b9523a2c1" name="aff5d9bc977de2ae2a0b4639b9523a2c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff5d9bc977de2ae2a0b4639b9523a2c1">&#9670;&#160;</a></span>assembleLevel()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -551,6 +569,11 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_copy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_everyBox</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -580,11 +603,13 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
       </table>
 </div><div class="memdoc">
 
-<p>Build a level of the index space from its own cells and the cells coarsened from the level above. </p>
-<p>The level's own cells take what the copied graph says. Its cells under the next finer level take the coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Build a level of the index space from its own cells and the cells coarsened from the next finer level. </p>
+<p>A box the geometry calls regular or covered is set whole with its ghost cell, and nothing of the graph is read for it. The geometry classifies its boxes grown by its EB ghost width, at least one cell, so the ghost cell holds no cut cell; under PolyhedralGeometryShop.test_copy every cell of the box and its ghost cell is checked against the graph copied onto every box. Otherwise, the level's own cells take what the copied graph says. Its cells the next finer level covers take the coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut cell, since a regular cell connects to one VoF only; this changes no moment.</p>
+<p>A coarsened cell carries its links to the next finer level, the pieces coarsenLevel gave it, and a regular cell made cut all of its children. An own cut cell, which no finer box lies over, has no links to the finer level. When the domain coarsens by two, every VoF of the boxes is linked to the next coarser level by writeCoarserLinks, from this level's own graph, before that level is built. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numPromoted</td><td>Incremented for every regular cell written as a full cut cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_copy</td><td>The graph copied onto the geometry's grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_copy</td><td>The graph copied onto the geometry's grids, with one ghost cell; the boxes set whole need not have taken it. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_everyBox</td><td>The graph copied onto every box of the geometry's grids, with one ghost cell. Read only under PolyhedralGeometryShop.test_copy, for the boxes set whole. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarsenedGraph</td><td>coarsenLevel's graph for the level above, or null on the finest level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarsenedData</td><td>coarsenLevel's moments for the level above, or null on the finest level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>The geometry's grids. </td></tr>
@@ -688,7 +713,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Compute the index-space data on the geometry's own grids, from the graph and nothing else. </p>
-<p>One LevelData&lt;EBGraph&gt; and one LevelData&lt;EBData&gt; per level, over every box the geometry built on it, as EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says &ndash; regular, covered, or the moments of the stitched body &ndash; and its cells under the next finer level are coarsened from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). Under PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective. Requires buildGraphs. </p>
+<p>One LevelData&lt;EBGraph&gt; and one LevelData&lt;EBData&gt; per level, over every box the geometry built on it, as EBISLevel keeps them: the graph with one ghost cell, the moments with none. As in <a class="el" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves.">ScanShop</a>, the boxes holding the phase's cut cells and the regular or covered ones are distributed over the ranks separately, a box at a time. The graph is copied onto the grids first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says &ndash; regular, covered, or the moments of the stitched body &ndash; and its cells the next finer level covers are coarsened from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). The graph holds the links between levels that assembleLevel describes. Under PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective. Requires buildGraphs. </p>
 
 </div>
 </div>
@@ -716,7 +741,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
       </table>
 </div><div class="memdoc">
 
-<p>Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to be exactly the ones it planned to receive. Collective. </p>
+<p>Plan a copy onto a destination hierarchy from both sides, send every rank the headers planSends gives it, and require them to hold exactly the cells planReceives expects, per destination box and source box, none twice. Collective. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
@@ -726,6 +751,44 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Number of pieces planned, over all ranks. </dd></dl>
+
+</div>
+</div>
+<a id="aabba4ba827d5695f42ef49a46467c289" name="aabba4ba827d5695f42ef49a46467c289"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabba4ba827d5695f42ef49a46467c289">&#9670;&#160;</a></span>coarsenBoxwise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::coarsenBoxwise </td>
+          <td>(</td>
+          <td class="paramtype">IntVectSet &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cells</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ratio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarsen a set of cells: every coarse cell holding any of them. </p>
+<p>Coarsens the set's boxes one by one and takes their union, which costs a box at a time rather than a cell at a time. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cells</td><td>The cells, coarsened in place. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Coarsening ratio. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -769,7 +832,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Coarsen a level of the index space onto its coarsened layout. </p>
-<p>Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the fine faces between sibling cells, and each carries the sums of its fine VoFs' volumes and first moments, and its boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns, or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with the same bits. Coarse nodes are written for the valid cells only. Under PolyhedralGeometryShop.test_copy every coarse cell's volume, first moment and apertures are compared with the sums over its children, and a cell differing by more than round-off is counted. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the fine faces between sibling cells, numbered by coarsePieces, and each lists those fine VoFs as its links to the finer level and carries the sums of their volumes and first moments, and its boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns, or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with the same bits. Coarse nodes are written for the valid cells only. Under PolyhedralGeometryShop.test_copy every coarse cell's volume, first moment and apertures are compared with the sums over its children, and a cell differing by more than round-off is counted. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_coarGraph</td><td>Coarsened graph, defined here over the coarsened fine layout. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_coarData</td><td>Coarsened moments, defined here over the coarsened fine layout. </td></tr>
@@ -889,8 +952,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a758f475503d8ef970fbde2f9877422a4" name="a758f475503d8ef970fbde2f9877422a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a758f475503d8ef970fbde2f9877422a4">&#9670;&#160;</a></span>copyGraphs()</h2>
+<a id="a4d63db42a69ff721aca00b9e0fd61955" name="a4d63db42a69ff721aca00b9e0fd61955"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d63db42a69ff721aca00b9e0fd61955">&#9670;&#160;</a></span>copyGraphs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -913,7 +976,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>&#160;) const</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_taking</em></span>&#160;) const</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -925,9 +993,30 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
     <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_taking</td><td>Per destination level, whether each box of its layout, in the order of its box array, takes the copy; a box that does not receives nothing. A level left empty has every box take it. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a1bfff1f2bfb28d521c7866750518eba2" name="a1bfff1f2bfb28d521c7866750518eba2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bfff1f2bfb28d521c7866750518eba2">&#9670;&#160;</a></span>countTileCutCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::countTileCutCells </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Count the cut cells of every tile on every level, for extensionLoads. </p>
+<p>Each rank counts the cells with a surface in its own graph boxes, and the counts are summed over the ranks. Run by buildMoments under PolyhedralGeometryShop.extension_cut_cell_loads. Collective. Requires buildGraphs. </p>
 
 </div>
 </div>
@@ -1268,6 +1357,126 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="a83f5dc727928b03f19b6821a1ee14544" name="a83f5dc727928b03f19b6821a1ee14544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83f5dc727928b03f19b6821a1ee14544">&#9670;&#160;</a></span>extendLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::extendLevel </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBGraph &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; EBData &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_tiles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Cut the extension tiles from their ancestors, on a layout balanced for it. </p>
+<p>The polyhedral graph is copied onto the tiles with a ring of s_cutRing cells, so that every face of a tile and of its one ghost cell has the cell across it in hand. A tile the geometry calls regular or covered with its ghost cell is set whole. Every other tile is cut from its ancestors (<a class="el" href="classAMRPolyhedralEBGraph.html#a73e7082ed9bdc698e8ec41c506115681" title="Fill a destination box&#39;s index-space data from the copied graph: what each cell is,...">AMRPolyhedralEBGraph::fillNodes</a>) and a regular cell beside a multi-valued one is written as a full cut cell. Each VoF is linked to the only VoF of its coarser cell when the domain coarsens by two, and to no finer cell. A cut cell a finer level owns stops the run. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_graph</td><td>The graph, defined here over the tiles with one ghost cell. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>The moments, defined here over the tiles. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tiles</td><td>The tiles, balanced over the ranks. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Their domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aaaa22ca284dd68170f34ea57205f4a68" name="aaaa22ca284dd68170f34ea57205f4a68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaaa22ca284dd68170f34ea57205f4a68">&#9670;&#160;</a></span>extensionLoads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::extensionLoads </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; long &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_loads</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_tiles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The work of cutting each extension tile from its ancestors. </p>
+<p>A tile is cut from the tiles of the coarser levels that own its cells (<a class="el" href="classComputationalGeometry.html#a85fafe83304c78a100658d9d498e472a" title="Which level describes each part of a box, and through which of its cut tiles.">ComputationalGeometry::ownedPieces</a>). Each owning piece contributes its share of its tile's cut cells, multiplied by the 2^(SpaceDim - 1) cut children a cut cell has per level of subdivision, and every tile carries one unit besides. Each rank works out a share of the tiles and the loads are summed over the ranks. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_loads</td><td>The load of each tile. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tiles</td><td>The extension tiles, on the destination level, the same on every rank. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>The geometry level of the destination level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6274a84f4c56eed22e0f34a85963dc55" name="a6274a84f4c56eed22e0f34a85963dc55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6274a84f4c56eed22e0f34a85963dc55">&#9670;&#160;</a></span>extensionTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::extensionTiles </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Box &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_tiles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_grids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_graphGhost</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The tiles of a destination level that the stored level does not hold. </p>
+<p>A destination box needs every cell out to its graph's ghost width. Those the geometry's boxes on the matching level do not hold are covered by a leaf of a coarser level, or finer than the finest stored level, and are cut from their coarser ancestors. They are gathered from every rank as whole tiles of the geometry, so that the list is the same everywhere and holds each tile once. A tile is held whole or not at all, since a leaf refines to whole tiles; one held in part stops the run. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_tiles</td><td>The tiles, on the destination level, clipped to its domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>The destination layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Its domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_graphGhost</td><td>Ghost width of the destination graph. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="abdb2194b77ed8b491058e00234027cd4" name="abdb2194b77ed8b491058e00234027cd4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abdb2194b77ed8b491058e00234027cd4">&#9670;&#160;</a></span>fillGraph()</h2>
 
@@ -1382,7 +1591,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Fill any layout on any level with its index space: graph and first moments, ghost cells included. </p>
-<p>The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. Nothing evaluates the implicit function. Collective. Requires buildMoments. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A cell in the geometry's boxes on the level takes what buildMoments made there. The cells outside them, which a leaf of a coarser level covers or which are finer than the finest stored level, are cut from their ancestors on tiles of their own (extensionTiles), balanced over the ranks with one unit of load per tile, or by the work of cutting them (extensionLoads) under PolyhedralGeometryShop.extension_cut_cell_loads, and computed there (extendLevel). The stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored cell carries the links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked to the ancestor's only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of EBISLayout::Filler. Collective: every rank calls it for the same layouts in the same order, since the tiles are gathered and balanced over all ranks. Requires buildMoments. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_graph</td><td>The graph, defined here over the layout with a_graphGhost ghost cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>The moments, defined here over the layout with a_dataGhost ghost cells. </td></tr>
@@ -1390,116 +1599,6 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Its domain: one of the geometry's, or one refined from the finest by two per level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_graphGhost</td><td>Ghost width of the graph, above a_dataGhost. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dataGhost</td><td>Ghost width of the moments. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a4ec780f0ab6bb45b65561c9aa240ae89" name="a4ec780f0ab6bb45b65561c9aa240ae89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ec780f0ab6bb45b65561c9aa240ae89">&#9670;&#160;</a></span>fillLevel()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PolyhedralGeometryShop::fillLevel </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBGraph &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_graph</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">LevelData&lt; EBData &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_data</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_copy</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_graphGhost</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dataGhost</em></span>&#160;) const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells included. </p>
-<p>A cell in the geometry's boxes on the level takes what buildMoments made there &ndash; its own body, or the VoFs coarsened from the finer level &ndash; and a cell outside them is cut from the coarser cell it lies in, from the copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns outside the geometry's boxes on the level stops the run. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_graph</td><td>The graph, defined here over the level's layout with a_graphGhost ghost cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>The moments, defined here over the level's layout with a_dataGhost ghost cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_copy</td><td>The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Destination level to fill. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_graphGhost</td><td>Ghost width of the graph, above a_dataGhost. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataGhost</td><td>Ghost width of the moments. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a39459ae2e412de8f67060ff4d70f7199" name="a39459ae2e412de8f67060ff4d70f7199"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a39459ae2e412de8f67060ff4d70f7199">&#9670;&#160;</a></span>fillNode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PolyhedralGeometryShop::fillNode </td>
-          <td>(</td>
-          <td class="paramtype">IrregNode &amp;</td>          <td class="paramname"><span class="paramname"><em>a_node</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_body</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const BaseFab&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_regIrregCovered</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const IntVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cell</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Write a cut cell's node from its body. </p>
-<p>The arcs come from the covered set and the domain rather than from the moments, so the graph this produces is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come from the body. Reads nothing of the shop, so the copied graph writes its nodes with it too. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_node</td><td>The node to fill </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_body</td><td>The cell's assembled polyhedron </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_regIrregCovered</td><td>Regular/Covered/Irregular cells </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
   </table>
   </dd>
 </dl>
@@ -1699,20 +1798,15 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a7af3163a612e80886d3530ad7ef6c155" name="a7af3163a612e80886d3530ad7ef6c155"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7af3163a612e80886d3530ad7ef6c155">&#9670;&#160;</a></span>planCopy()</h2>
+<a id="a5c001311c63e814e50e9736bfec718cd" name="a5c001311c63e814e50e9736bfec718cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c001311c63e814e50e9736bfec718cd">&#9670;&#160;</a></span>planReceives()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void PolyhedralGeometryShop::planCopy </td>
+          <td class="memname">void PolyhedralGeometryShop::planReceives </td>
           <td>(</td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_sends</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_receives</em></span>, </td>
         </tr>
         <tr>
@@ -1733,14 +1827,61 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
       </table>
 </div><div class="memdoc">
 
-<p>Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it receives. </p>
-<p>The receiver walks its own destination boxes and asks each one which pieces it needs. The sender walks its own graph boxes, finds the destination boxes that could need them through the destination layouts' own spatial index, and asks each of those the same question, keeping the pieces its box holds. Both answer from replicated data alone, so the two sides agree with no communication. Every header's counts are left at zero. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The pieces of a copy of the graph that this rank's destination boxes need, worked out from the destination side: the reference checkCopyPlan holds planSends to. </p>
+<p>Each of this rank's destination boxes takes the cells validRegion gives it, and asks destinationPieces which levels own them. Every header's counts are left at zero. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_sends</td><td>Per destination rank, the pieces this rank sends there. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_receives</td><td>Per source rank, the pieces this rank receives from there. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_receives</td><td>Per source rank, the pieces this rank's destination boxes need from there. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac08a1ceea8193793b339a365fbddf801" name="ac08a1ceea8193793b339a365fbddf801"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac08a1ceea8193793b339a365fbddf801">&#9670;&#160;</a></span>planSends()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::planSends </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_sends</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; DisjointBoxLayout &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_grids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; ProblemDomain &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domains</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_taking</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Plan the pieces of a copy of the graph onto a destination hierarchy that this rank sends. </p>
+<p>Only the sender plans: every piece travels with its header, so a receiver places what arrives with no plan of its own. For each of this rank's graph boxes, which are its level's cut tiles, the cells its level owns of it are taken from <a class="el" href="classComputationalGeometry.html#a10dba130ad4edf60eccfe3eaca1f54d1" title="The cells of one cut tile that its level owns: the tile less what the next level&#39;s tiles hold.">ComputationalGeometry::ownedPart</a>, and the destination boxes the tile reaches, grown by the ghost width, are found through the destination layouts' spatial index. The cells each of those destination boxes takes come from validRegion, once per destination box on this rank. A piece is the owned cells a destination box takes: a cell at or finer than the destination's level if the destination cell it lies in is taken, a cell of a coarser level if any destination cell it holds is. A destination box that does not take the copy is sent nothing. Every header's counts are left at zero. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sends</td><td>Per destination rank, the pieces this rank sends there. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_taking</td><td>Per destination level, whether each box of its layout, in the order of its box array, takes the copy. A level left empty has every box take it. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2230,8 +2371,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
       </table>
 </div><div class="memdoc">
 
-<p>Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants and onto the boxes of the level below refined. </p>
-<p>The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level below must be the sum of the cells it holds, to round-off. Collective. Switched by PolyhedralGeometryShop.test_copy. </p>
+<p>Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants and onto the boxes of the next coarser level refined. </p>
+<p>The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own box holds to round-off, every face must read the same aperture from its two sides, and every cell of the next coarser level must be the sum of the cells it holds, to round-off. Then an EBIndexSpace is defined over the geometry's domains with fillLayout as its filler, and on every level the EBISLayout it fills onto the level's boxes in octants, twice so that the second comes from its cache, must hold the graph, the moments and the links fillLayout gives, bit for bit. Collective. Switched by PolyhedralGeometryShop.test_copy. </p>
 
 </div>
 </div>
@@ -2252,6 +2393,26 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 <p>Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy them back onto the original layouts and require equality bit for bit. </p>
 <p>A stand-in, until the index space is generated over the graphs, for what a consumer on another layout does: take the graph's data through a Copier and read it there. Switched by PolyhedralGeometryShop.test_copy. Collective. Requires buildGraphs. </p>
+
+</div>
+</div>
+<a id="ae1ca2b34ee773d4ed435500122f556fc" name="ae1ca2b34ee773d4ed435500122f556fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1ca2b34ee773d4ed435500122f556fc">&#9670;&#160;</a></span>testLinks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::testLinks </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check the links between every two neighbouring levels of the geometry, filled onto the coarser level's boxes in octants with the ranks shuffled and onto the same boxes refined. </p>
+<p>For every coarse cell the finer level's boxes lie over, the pieces coarsePieces finds among its children in the finer layout must be its VoFs' links to the finer level, in number and in order. A coarse cut cell outside them is a leaf: it must be one VoF, it has no links to the finer level, and the VoFs of its children stand in for them on the finer level. Every fine VoF's link to the coarser level must name a VoF of the coarse cell whose links list it, and every VoF a coarse VoF lists must link back to it; and each coarse cut VoF's volume fraction and apertures must be the scaled sums over the fine VoFs it lists, to round-off. Collective. Switched by PolyhedralGeometryShop.test_copy. </p>
 
 </div>
 </div>
@@ -2359,7 +2520,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Build the polyhedra over the grids, check that they form a surface, and write it if asked. </p>
-<p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck when PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes and writes its own share of the mesh. Requires setGrids. </p>
+<p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck when PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh when PolyhedralGeometryShop.write_surface is set. Under PolyhedralGeometryShop.test_copy the copy, moment, fill and link tests run. Collective; every rank reconstructs its share of the boxes and writes its own share of the mesh. Requires setGrids, and buildMoments under PolyhedralGeometryShop.test_copy. </p>
 
 </div>
 </div>
@@ -2486,8 +2647,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a040998d0aa1577499cae510a095275aa" name="a040998d0aa1577499cae510a095275aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a040998d0aa1577499cae510a095275aa">&#9670;&#160;</a></span>s_momentRing</h2>
+<a id="af3182ba7c36bdd6a35531a2d998e908f" name="af3182ba7c36bdd6a35531a2d998e908f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3182ba7c36bdd6a35531a2d998e908f">&#9670;&#160;</a></span>s_cutRing</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2496,7 +2657,32 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int PolyhedralGeometryShop::s_momentRing = 2</td>
+          <td class="memname">int PolyhedralGeometryShop::s_cutRing = 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Width of the ring the graph is copied with for a box whose ghost cells are cut as its own cells are. </p>
+<p>A box is built with one ghost cell, and a node's face toward a cut cell across it reads that cell's body, one cell further out (<a class="el" href="classAMRPolyhedralEBGraph.html#a73e7082ed9bdc698e8ec41c506115681" title="Fill a destination box&#39;s index-space data from the copied graph: what each cell is,...">AMRPolyhedralEBGraph::fillNodes</a> with its ring cut). extendLevel and the tests copy with it. Nothing to do with the ghost cells a solver asks of the index space. </p>
+
+</div>
+</div>
+<a id="a1115203b24be92e68d791f40e13a00a6" name="a1115203b24be92e68d791f40e13a00a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1115203b24be92e68d791f40e13a00a6">&#9670;&#160;</a></span>s_ownRing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralGeometryShop::s_ownRing = 1</td>
         </tr>
       </table>
   </td>
@@ -2507,7 +2693,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Width of the ring the graph is copied onto the geometry's grids with for buildMoments. </p>
-<p>assembleLevel builds each box with one ghost cell, fillNodes writes nodes one cell short of the copied ring, and a node's face toward a cut cell below it reads that cell's body, one cell further out. Nothing to do with the ghost cells a solver asks of the index space. </p>
+<p>assembleLevel keeps the moments of a box's own cells only, so fillNodes leaves its ghost cells uncut and reads nothing of the copy beyond the first ghost cell. Nothing to do with the ghost cells a solver asks of the index space. </p>
 
 </div>
 </div>

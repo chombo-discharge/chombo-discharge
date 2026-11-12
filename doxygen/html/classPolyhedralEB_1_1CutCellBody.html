@@ -88,6 +88,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classPolyhedralEB_1_1CutCellBody-members.html">List of all members</a>  </div>
@@ -128,9 +129,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8c00df0524d2cc14233d7cf37761c248" id="r_a8c00df0524d2cc14233d7cf37761c248"><td class="memItemLeft" align="right" valign="top"><a id="a8c00df0524d2cc14233d7cf37761c248" name="a8c00df0524d2cc14233d7cf37761c248"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>CutCellBody</b> () noexcept</td></tr>
 <tr class="memdesc:a8c00df0524d2cc14233d7cf37761c248"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Leaves the body empty; call define before reading any moment. <br /></td></tr>
+<tr class="memitem:aa1b0830034108ec2f7b27fd1e01aa01a" id="r_aa1b0830034108ec2f7b27fd1e01aa01a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1b0830034108ec2f7b27fd1e01aa01a">CutCellBody</a> (const CutCellBody &amp;a_other) noexcept</td></tr>
+<tr class="memdesc:aa1b0830034108ec2f7b27fd1e01aa01a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <br /></td></tr>
 <tr class="memitem:a64891a3d2c58e4d0801a3f8fe7d54ccc" id="r_a64891a3d2c58e4d0801a3f8fe7d54ccc"><td class="memItemLeft" align="right" valign="top"><a id="a64891a3d2c58e4d0801a3f8fe7d54ccc" name="a64891a3d2c58e4d0801a3f8fe7d54ccc"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~CutCellBody</b> () noexcept=default</td></tr>
 <tr class="memdesc:a64891a3d2c58e4d0801a3f8fe7d54ccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
+<tr class="memitem:aead174fd0df621829d564cfeec0c97d2" id="r_aead174fd0df621829d564cfeec0c97d2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aead174fd0df621829d564cfeec0c97d2">operator=</a> (const <a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;a_other) noexcept</td></tr>
+<tr class="memdesc:aead174fd0df621829d564cfeec0c97d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy assignment.  <br /></td></tr>
 <tr class="memitem:a0fe5c7e1e72fd67f95c609132a6eb0bd" id="r_a0fe5c7e1e72fd67f95c609132a6eb0bd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fe5c7e1e72fd67f95c609132a6eb0bd">define</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface) noexcept</td></tr>
 <tr class="memdesc:a0fe5c7e1e72fd67f95c609132a6eb0bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body from the values the surface is reconstructed from.  <br /></td></tr>
 <tr class="memitem:a6d1d05e056eabd6ebc6951f91ea678c2" id="r_a6d1d05e056eabd6ebc6951f91ea678c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d1d05e056eabd6ebc6951f91ea678c2">define</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface, const <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">CutCellFaceOverrides</a> &amp;a_overrides, const IntVect &amp;a_cell) noexcept</td></tr>
@@ -141,6 +146,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a31a14df781f58810e75e6f4408234789"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether every polygon of the interface lies in one plane.  <br /></td></tr>
 <tr class="memitem:a24fba9fc74a1d1d53bbb2ecde18a600e" id="r_a24fba9fc74a1d1d53bbb2ecde18a600e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a24fba9fc74a1d1d53bbb2ecde18a600e">subdivide</a> (<a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> *a_children) const noexcept</td></tr>
 <tr class="memdesc:a24fba9fc74a1d1d53bbb2ecde18a600e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut this body into the bodies of the 2^SpaceDim cells one refinement finer that fill its cell.  <br /></td></tr>
+<tr class="memitem:a4e490f2702a227416cbb31b583a6e2a2" id="r_a4e490f2702a227416cbb31b583a6e2a2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e490f2702a227416cbb31b583a6e2a2">subdivideChild</a> (<a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;a_child, bool &amp;a_connected, const int a_which) const noexcept</td></tr>
+<tr class="memdesc:a4e490f2702a227416cbb31b583a6e2a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut this body into the body of one of the cells one refinement finer that fill its cell.  <br /></td></tr>
 <tr class="memitem:a07a7eb74a931e1d30dc1c78720c0b23e" id="r_a07a7eb74a931e1d30dc1c78720c0b23e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a07a7eb74a931e1d30dc1c78720c0b23e">hasMultiValuedChildren</a> (const int a_refRat) const noexcept</td></tr>
 <tr class="memdesc:a07a7eb74a931e1d30dc1c78720c0b23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.  <br /></td></tr>
 <tr class="memitem:ae3af4e249b4ac99a6f32591758f9dc55" id="r_ae3af4e249b4ac99a6f32591758f9dc55"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae3af4e249b4ac99a6f32591758f9dc55">volumeFraction</a> () const noexcept</td></tr>
@@ -191,6 +198,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:abd20f4290845bfa7127ae84ed51aae64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether another body holds the same polygons and the same moments, bit for bit.  <br /></td></tr>
 <tr class="memitem:aee821916b863103e4db94f1305ea8e32" id="r_aee821916b863103e4db94f1305ea8e32"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee821916b863103e4db94f1305ea8e32">fingerprint</a> () const noexcept</td></tr>
 <tr class="memdesc:aee821916b863103e4db94f1305ea8e32"><td class="mdescLeft">&#160;</td><td class="mdescRight">A 64-bit hash of everything identical compares: every polygon's face, vertices and vertex edges in order, and every moment, bit for bit.  <br /></td></tr>
+<tr class="memitem:a969d794638684763d81cad79b8a5708d" id="r_a969d794638684763d81cad79b8a5708d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a969d794638684763d81cad79b8a5708d">childState</a> () const noexcept</td></tr>
+<tr class="memdesc:a969d794638684763d81cad79b8a5708d"><td class="mdescLeft">&#160;</td><td class="mdescRight">What the cell this body describes is: covered if it holds no fluid, regular if it is all fluid with no interface, and cut otherwise.  <br /></td></tr>
+<tr class="memitem:a477ae9bee7edd66c5f3817261d6b40ed" id="r_a477ae9bee7edd66c5f3817261d6b40ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a477ae9bee7edd66c5f3817261d6b40ed">fillNode</a> (IrregNode &amp;a_node, const BaseFab&lt; int &gt; &amp;a_regIrregCovered, const IntVect &amp;a_cell, const ProblemDomain &amp;a_domain) const</td></tr>
+<tr class="memdesc:a477ae9bee7edd66c5f3817261d6b40ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a cut cell's node from this body.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-methods" class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -201,6 +212,8 @@ Static Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:afa7b66fce44519f093e5f2c3c78add01" id="r_afa7b66fce44519f093e5f2c3c78add01"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa7b66fce44519f093e5f2c3c78add01">cutChild</a> (<a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;a_child, const int a_which) const noexcept</td></tr>
+<tr class="memdesc:afa7b66fce44519f093e5f2c3c78add01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut this body down to one child's quadrant, without checking the child.  <br /></td></tr>
 <tr class="memitem:af9d15c6b8b49e8483e7729db0fe5ca23" id="r_af9d15c6b8b49e8483e7729db0fe5ca23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9d15c6b8b49e8483e7729db0fe5ca23">defineDegenerate</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface, const <a class="el" href="#a8d9b00641021ab37a738427d130b7fda">Kind</a> a_kind) noexcept</td></tr>
 <tr class="memdesc:af9d15c6b8b49e8483e7729db0fe5ca23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Moments of a cell the interface only touches, never enters.  <br /></td></tr>
 <tr class="memitem:ae40d2298f0e7ea1c74c1c3d6aa82cd6b" id="r_ae40d2298f0e7ea1c74c1c3d6aa82cd6b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae40d2298f0e7ea1c74c1c3d6aa82cd6b">defineCut</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface) noexcept</td></tr>
@@ -215,6 +228,13 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a00c7c1a4d15d76bdcf43ca8550e8a255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a set of children partitions this body, in every moment that has to add up.  <br /></td></tr>
 <tr class="memitem:a1990616c12b246cc662672c47ddac6e8" id="r_a1990616c12b246cc662672c47ddac6e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1990616c12b246cc662672c47ddac6e8">accumulateMoments</a> () noexcept</td></tr>
 <tr class="memdesc:a1990616c12b246cc662672c47ddac6e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Take the moments of the assembled polygons.  <br /></td></tr>
+<tr class="memitem:a086f7d8d20a2ba144248f6c069bed4f5" id="r_a086f7d8d20a2ba144248f6c069bed4f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a086f7d8d20a2ba144248f6c069bed4f5">clear</a> () noexcept</td></tr>
+<tr class="memdesc:a086f7d8d20a2ba144248f6c069bed4f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Empty the body, as the constructor leaves it.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-static-methods" class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:ae5c944f50928d6d3b98ae825211574f0" id="r_ae5c944f50928d6d3b98ae825211574f0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5c944f50928d6d3b98ae825211574f0">copyPolygon</a> (<a class="el" href="structPolyhedralEB_1_1CutCellBody_1_1Polygon.html">Polygon</a> &amp;a_to, const <a class="el" href="structPolyhedralEB_1_1CutCellBody_1_1Polygon.html">Polygon</a> &amp;a_from) noexcept</td></tr>
+<tr class="memdesc:ae5c944f50928d6d3b98ae825211574f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy one polygon's vertices in use, its count and its face.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -257,6 +277,8 @@ Static Protected Attributes</h2></td></tr>
 <tr class="memitem:afe2e43a85f6b94ef9d71d5e6d00997e6" id="r_afe2e43a85f6b94ef9d71d5e6d00997e6"><td class="memItemLeft" align="right" valign="top"><a id="afe2e43a85f6b94ef9d71d5e6d00997e6" name="afe2e43a85f6b94ef9d71d5e6d00997e6"></a>
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_numFaces</b> = 2 * SpaceDim</td></tr>
 <tr class="memdesc:afe2e43a85f6b94ef9d71d5e6d00997e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of cell faces. <br /></td></tr>
+<tr class="memitem:aba0328cd9e2972940cfd07732afd8079" id="r_aba0328cd9e2972940cfd07732afd8079"><td class="memItemLeft" align="right" valign="top">static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba0328cd9e2972940cfd07732afd8079">s_partitionTolerance</a> = 1.0E-12</td></tr>
+<tr class="memdesc:aba0328cd9e2972940cfd07732afd8079"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest difference between a moment of a subdivision and what it must equal.  <br /></td></tr>
 <tr class="memitem:ac01eea1a8188c1ed29bdac4764948afb" id="r_ac01eea1a8188c1ed29bdac4764948afb"><td class="memItemLeft" align="right" valign="top"><a id="ac01eea1a8188c1ed29bdac4764948afb" name="ac01eea1a8188c1ed29bdac4764948afb"></a>
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_maxPolygons</b> = 20</td></tr>
 <tr class="memdesc:ac01eea1a8188c1ed29bdac4764948afb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest number of polygons a single cut cell's body can need. <br /></td></tr>
@@ -272,7 +294,41 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 <p>The body is assembled from two kinds of polygon. Each cell face contributes the fluid part of that face, found by walking the face's circuit of corners and edges and closing the region off with a straight chord between the crossings. The interface contributes triangles spanning the loop those crossings form, which is not planar in general and is what closes the body.</p>
 <p>The moments are then exact integrals of that polyhedron rather than quadratures of the implicit function, which is what makes the divergence identity kappa = (1/SpaceDim)*[sum(alpha)/2 - a_B*(x_B . n)] hold to rounding, and what makes the eight children of a subdivided body sum back to it exactly.</p>
 <p>The price is the chord: where Chombo integrates the curved arc the interface really follows, this integrates the straight line between its endpoints. In two dimensions the interface in a cut cell genuinely is that line and nothing is lost. </p>
-</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="aa1b0830034108ec2f7b27fd1e01aa01a" name="aa1b0830034108ec2f7b27fd1e01aa01a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1b0830034108ec2f7b27fd1e01aa01a">&#9670;&#160;</a></span>CutCellBody()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PolyhedralEB::CutCellBody::CutCellBody </td>
+          <td>(</td>
+          <td class="paramtype">const CutCellBody &amp;</td>          <td class="paramname"><span class="paramname"><em>a_other</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy constructor. </p>
+<p>Copies the polygons in use, and the vertices in use of each, rather than every slot of the fixed-size storage: nothing reads past the counts, and a body uses a few of its slots as a rule. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>The body to copy. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a1990616c12b246cc662672c47ddac6e8" name="a1990616c12b246cc662672c47ddac6e8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1990616c12b246cc662672c47ddac6e8">&#9670;&#160;</a></span>accumulateMoments()</h2>
 
@@ -446,6 +502,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a969d794638684763d81cad79b8a5708d" name="a969d794638684763d81cad79b8a5708d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a969d794638684763d81cad79b8a5708d">&#9670;&#160;</a></span>childState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralEB::CutCellBody::childState </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>What the cell this body describes is: covered if it holds no fluid, regular if it is all fluid with no interface, and cut otherwise. </p>
+<p>The classification of a body subdivided from a cut ancestor. <a class="el" href="classAMRPolyhedralEBGraph.html#a73e7082ed9bdc698e8ec41c506115681" title="Fill a destination box&#39;s index-space data from the copied graph: what each cell is,...">AMRPolyhedralEBGraph::fillNodes</a> flags a cell by it, and the links of a cut cell to its children list the children it does not call covered, so the two cannot disagree about which children hold fluid. </p><dl class="section return"><dt>Returns</dt><dd>1 for regular, 0 for cut and -1 for covered, the flags GeometryService::fillGraph uses. </dd></dl>
+
+</div>
+</div>
 <a id="a2402e2e25cd8a6eebaa2c60e9c922043" name="a2402e2e25cd8a6eebaa2c60e9c922043"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2402e2e25cd8a6eebaa2c60e9c922043">&#9670;&#160;</a></span>classify()</h2>
 
@@ -478,6 +562,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Regular, Covered or Cut. </dd></dl>
+
+</div>
+</div>
+<a id="a086f7d8d20a2ba144248f6c069bed4f5" name="a086f7d8d20a2ba144248f6c069bed4f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a086f7d8d20a2ba144248f6c069bed4f5">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEB::CutCellBody::clear </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Empty the body, as the constructor leaves it. </p>
+<p>Lets a body be refilled without constructing a fresh one, which costs a constructor call for every vertex slot of every polygon slot. </p>
 
 </div>
 </div>
@@ -573,6 +685,83 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>How far the assembled polygons are from enclosing a volume. </p>
 <p>The sum of the outward area vectors over every polygon, which vanishes for a closed surface. Non-zero means the face polygons and the interface patch disagree about where the body's boundary is, and no moment taken from it can be trusted. </p><dl class="section return"><dt>Returns</dt><dd>Length of the summed outward area vector, which vanishes for a closed body. </dd></dl>
+
+</div>
+</div>
+<a id="ae5c944f50928d6d3b98ae825211574f0" name="ae5c944f50928d6d3b98ae825211574f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5c944f50928d6d3b98ae825211574f0">&#9670;&#160;</a></span>copyPolygon()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEB::CutCellBody::copyPolygon </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structPolyhedralEB_1_1CutCellBody_1_1Polygon.html">Polygon</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_to</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structPolyhedralEB_1_1CutCellBody_1_1Polygon.html">Polygon</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_from</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy one polygon's vertices in use, its count and its face. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_to</td><td>The polygon written. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_from</td><td>The polygon read. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afa7b66fce44519f093e5f2c3c78add01" name="afa7b66fce44519f093e5f2c3c78add01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa7b66fce44519f093e5f2c3c78add01">&#9670;&#160;</a></span>cutChild()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::cutChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_child</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_which</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cut this body down to one child's quadrant, without checking the child. </p>
+<p>The cut subdivide and subdivideChild share, so that both give a child the same bits. A child the fluid misses comes back empty. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_child</td><td>The child's body, in its own cell's frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>False if the child would need more polygons or vertices than it can hold, or if its cut could not be closed. </dd></dl>
 
 </div>
 </div>
@@ -870,6 +1059,48 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Number of polygons written, or -1 if the face could not be walked. </dd></dl>
+
+</div>
+</div>
+<a id="a477ae9bee7edd66c5f3817261d6b40ed" name="a477ae9bee7edd66c5f3817261d6b40ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a477ae9bee7edd66c5f3817261d6b40ed">&#9670;&#160;</a></span>fillNode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEB::CutCellBody::fillNode </td>
+          <td>(</td>
+          <td class="paramtype">IrregNode &amp;</td>          <td class="paramname"><span class="paramname"><em>a_node</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_regIrregCovered</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Write a cut cell's node from this body. </p>
+<p>The arcs come from the covered set and the domain rather than from the moments, so the graph this produces is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come from the body, with roundings just outside [0,1] clamped. The node is the cell's only VoF, at cell index 0; its links to the coarser and finer levels are left unset. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_node</td><td>The node to fill. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_regIrregCovered</td><td>Regular (1), irregular (0) and covered (-1) cells, over the cell and its neighbours inside the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell, flagged irregular. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1175,6 +1406,40 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="aead174fd0df621829d564cfeec0c97d2" name="aead174fd0df621829d564cfeec0c97d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aead174fd0df621829d564cfeec0c97d2">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp; PolyhedralEB::CutCellBody::operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_other</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy assignment. </p>
+<p>Copies what the copy constructor does. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>The body to copy. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>This body. </dd></dl>
+
+</div>
+</div>
 <a id="a618a304b301af28771ce75b002d36160" name="a618a304b301af28771ce75b002d36160"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a618a304b301af28771ce75b002d36160">&#9670;&#160;</a></span>orientOutward()</h2>
 
@@ -1400,7 +1665,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </div><div class="memdoc">
 
 <p>Replace one face's chord with the chords of the children that cover it. </p>
-<p>The face is described at the resolution of the level below rather than this cell's, which is what makes it agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it was built to meet the chord being replaced; call closeInterface once every face that needs restricting has been, which is also what recomputes the moments.</p>
+<p>The face is described at the resolution of the next finer level rather than this cell's, which is what makes it agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it was built to meet the chord being replaced; call closeInterface once every face that needs restricting has been, which is also what recomputes the moments.</p>
 <p>A quadrant marked closed contributes nothing: the finer cell across it was filled, so that part of the face opens onto nothing, and what the quadrant would have held becomes interface when the interface is closed, as a face closed through snapFace does. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_children</td><td>Surfaces of the children covering this face, in quadrant order. </td></tr>
@@ -1492,6 +1757,51 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>False if a child's fluid region is not connected, if a child would need more polygons or vertices than it can hold, or if the children do not add back up to this body in every moment partitions checks. </dd></dl>
+
+</div>
+</div>
+<a id="a4e490f2702a227416cbb31b583a6e2a2" name="a4e490f2702a227416cbb31b583a6e2a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e490f2702a227416cbb31b583a6e2a2">&#9670;&#160;</a></span>subdivideChild()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::subdivideChild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a8c00df0524d2cc14233d7cf37761c248">CutCellBody</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_child</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &amp;</td>          <td class="paramname"><span class="paramname"><em>a_connected</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_which</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cut this body into the body of one of the cells one refinement finer that fill its cell. </p>
+<p>The child subdivide gives in quadrant a_which, cut the same way, so it holds the same bits. Only that child is built, so the checks partitions makes across the children are not made: the child is checked on its own for holding its fluid in one piece and, if it does, for closing. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_child</td><td>The child's body, in its own cell's frame. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_connected</td><td>Whether the child's fluid is in one piece. False when the cut fails. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Quadrant of the child: bit d is the side it lies on in direction d, zero low and one high. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>False if the cut fails, which it does when the child would need more polygons or vertices than it can hold or its boundary cannot be closed, or if the child's fluid is in one piece and the child does not close. A child whose fluid is in more than one piece is returned with true and a_connected false. </dd></dl>
 
 </div>
 </div>
@@ -1716,6 +2026,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>Area below which a polygon carries no moment and is dropped. </p>
 <p>Holding crossings off the edge endpoints leaves slivers of this order behind. They contribute nothing, but a detached one reads as a second connected component, so they are culled rather than carried. </p>
+
+</div>
+</div>
+<a id="aba0328cd9e2972940cfd07732afd8079" name="aba0328cd9e2972940cfd07732afd8079"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba0328cd9e2972940cfd07732afd8079">&#9670;&#160;</a></span>s_partitionTolerance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real PolyhedralEB::CutCellBody::s_partitionTolerance = 1.0E-12</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Largest difference between a moment of a subdivision and what it must equal. </p>
+<p>Held by partitions to the sums over the children, and by both partitions and subdivideChild to how far a child's boundary is from closing. </p>
 
 </div>
 </div>

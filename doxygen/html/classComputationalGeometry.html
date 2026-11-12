@@ -204,10 +204,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memdesc:ab738bfe91a6d4bbc984553ea5fb2e686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box on any domain at or finer than a level makeGrids built.  <br /></td></tr>
 <tr class="memitem:a85fafe83304c78a100658d9d498e472a" id="r_a85fafe83304c78a100658d9d498e472a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85fafe83304c78a100658d9d498e472a">ownedPieces</a> (std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;a_pieces, const Box &amp;a_box, const int a_level) const</td></tr>
 <tr class="memdesc:a85fafe83304c78a100658d9d498e472a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which level describes each part of a box, and through which of its cut tiles.  <br /></td></tr>
+<tr class="memitem:a10dba130ad4edf60eccfe3eaca1f54d1" id="r_a10dba130ad4edf60eccfe3eaca1f54d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10dba130ad4edf60eccfe3eaca1f54d1">ownedPart</a> (Vector&lt; Box &gt; &amp;a_owned, const Box &amp;a_tile, const int a_level) const</td></tr>
+<tr class="memdesc:a10dba130ad4edf60eccfe3eaca1f54d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cells of one cut tile that its level owns: the tile less what the next level's tiles hold.  <br /></td></tr>
 <tr class="memitem:aa0b8f7a25b626d09dcaa44f5c2847fca" id="r_aa0b8f7a25b626d09dcaa44f5c2847fca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0b8f7a25b626d09dcaa44f5c2847fca">checkOwnedPieces</a> (const Box &amp;a_box, const int a_level) const</td></tr>
 <tr class="memdesc:aa0b8f7a25b626d09dcaa44f5c2847fca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check ownedPieces on a box against a cell-by-cell reading of the tiles.  <br /></td></tr>
 <tr class="memitem:a2a606f5124e0705bab3923480e17ee95" id="r_a2a606f5124e0705bab3923480e17ee95"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a606f5124e0705bab3923480e17ee95">getStartLevel</a> () const noexcept</td></tr>
 <tr class="memdesc:a2a606f5124e0705bab3923480e17ee95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.  <br /></td></tr>
+<tr class="memitem:a5b17cdf21decf5d735c8c584baec4e51" id="r_a5b17cdf21decf5d735c8c584baec4e51"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5b17cdf21decf5d735c8c584baec4e51">getMaxGhostEB</a> () const noexcept</td></tr>
+<tr class="memdesc:a5b17cdf21decf5d735c8c584baec4e51"><td class="mdescLeft">&#160;</td><td class="mdescRight">The width, in cells, by which every box is grown before it is classified.  <br /></td></tr>
+<tr class="memitem:a863dff07914a1ba8afc2b6d0bf35ccd3" id="r_a863dff07914a1ba8afc2b6d0bf35ccd3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a863dff07914a1ba8afc2b6d0bf35ccd3">getMinBlockSize</a> () const noexcept</td></tr>
+<tr class="memdesc:a863dff07914a1ba8afc2b6d0bf35ccd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The edge of a tile, in cells of its own level.  <br /></td></tr>
 <tr class="memitem:a35f3b9a6288e94f027ce7f96e5bd69fd" id="r_a35f3b9a6288e94f027ce7f96e5bd69fd"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35f3b9a6288e94f027ce7f96e5bd69fd">getLevel</a> (const ProblemDomain &amp;a_domain) const noexcept</td></tr>
 <tr class="memdesc:a35f3b9a6288e94f027ce7f96e5bd69fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of a domain among the levels makeGrids built.  <br /></td></tr>
 <tr class="memitem:abe6e9d6b2243fc6eec6f734be91b04d9" id="r_abe6e9d6b2243fc6eec6f734be91b04d9"><td class="memItemLeft" align="right" valign="top">Vector&lt; Box &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe6e9d6b2243fc6eec6f734be91b04d9">getBoxes</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_level, const GeometryService::InOut a_type) const noexcept</td></tr>
@@ -222,6 +228,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memdesc:a6d1df383d52e89d0ac70e75fe2230df4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classification of every box on a level for a phase, parallel to getBoxes(level).  <br /></td></tr>
 <tr class="memitem:ab5a377662ec405945c0103b4a762f56f" id="r_ab5a377662ec405945c0103b4a762f56f"><td class="memItemLeft" align="right" valign="top">const ProblemDomain &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab5a377662ec405945c0103b4a762f56f">getDomain</a> (const int a_level) const noexcept</td></tr>
 <tr class="memdesc:ab5a377662ec405945c0103b4a762f56f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain of a level.  <br /></td></tr>
+<tr class="memitem:a4707a1ca2d137d28abf33ee0627a1d2b" id="r_a4707a1ca2d137d28abf33ee0627a1d2b"><td class="memItemLeft" align="right" valign="top">IntVectSet&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4707a1ca2d137d28abf33ee0627a1d2b">irregCells</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const ProblemDomain &amp;a_domain) const</td></tr>
+<tr class="memdesc:a4707a1ca2d137d28abf33ee0627a1d2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cut cells of a phase on a domain that this rank holds.  <br /></td></tr>
+<tr class="memitem:af9206b423e98b4f240ec2389e435ea1c" id="r_af9206b423e98b4f240ec2389e435ea1c"><td class="memItemLeft" align="right" valign="top">DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9206b423e98b4f240ec2389e435ea1c">irregGrids</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const ProblemDomain &amp;a_domain) const</td></tr>
+<tr class="memdesc:af9206b423e98b4f240ec2389e435ea1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A layout of a phase on a domain whose boxes hold every cut cell of the phase there.  <br /></td></tr>
 <tr class="memitem:ae176529cd1b025ff4ac34e76dd835dfd" id="r_ae176529cd1b025ff4ac34e76dd835dfd"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae176529cd1b025ff4ac34e76dd835dfd">getDx</a> (const int a_level) const noexcept</td></tr>
 <tr class="memdesc:ae176529cd1b025ff4ac34e76dd835dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid spacing of a level.  <br /></td></tr>
 <tr class="memitem:a01a9788004e72269e1b6a1421090bd0d" id="r_a01a9788004e72269e1b6a1421090bd0d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01a9788004e72269e1b6a1421090bd0d">buildGeometries</a> (const ProblemDomain &amp;a_finestDomain, const RealVect &amp;a_probLo, const Real a_finestDx, const int a_nCellMax, const int a_maxGhostEB, const int a_maxCoarsen=-1)</td></tr>
@@ -322,6 +332,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a6b51f045b684b68b8463dbafb510cf69" id="r_a6b51f045b684b68b8463dbafb510cf69"><td class="memItemLeft" align="right" valign="top"><a id="a6b51f045b684b68b8463dbafb510cf69" name="a6b51f045b684b68b8463dbafb510cf69"></a>
 <a class="el" href="#a231e5922b728b2d6e90da05c0d4a4afa">Generator</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_generator</b></td></tr>
 <tr class="memdesc:a6b51f045b684b68b8463dbafb510cf69"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a231e5922b728b2d6e90da05c0d4a4afa" title="Which generator to build the geometry with.">Generator</a> selected by the user. <br /></td></tr>
+<tr class="memitem:aa2b69eceee005bd2ef33c9fe02ecad0f" id="r_aa2b69eceee005bd2ef33c9fe02ecad0f"><td class="memItemLeft" align="right" valign="top"><a id="aa2b69eceee005bd2ef33c9fe02ecad0f" name="aa2b69eceee005bd2ef33c9fe02ecad0f"></a>
+RefCountedPtr&lt; <a class="el" href="classPolyhedralGeometryShop.html">PolyhedralGeometryShop</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_polyhedralShops</b> [2]</td></tr>
+<tr class="memdesc:aa2b69eceee005bd2ef33c9fe02ecad0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The polyhedral generator of each phase, indexed by <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b" title="Enumeration of supported phases.">phase::which_phase</a>, kept for the run: the index spaces fill every layout from it. Null unless the polyhedral generator built the phase. <br /></td></tr>
 <tr class="memitem:abac0c864568642b8f7cedbf1824302a2" id="r_abac0c864568642b8f7cedbf1824302a2"><td class="memItemLeft" align="right" valign="top"><a id="abac0c864568642b8f7cedbf1824302a2" name="abac0c864568642b8f7cedbf1824302a2"></a>
 RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_multifluidIndexSpace</b></td></tr>
 <tr class="memdesc:abac0c864568642b8f7cedbf1824302a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multifluid index spaces. <br /></td></tr>
@@ -1730,6 +1743,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a5b17cdf21decf5d735c8c584baec4e51" name="a5b17cdf21decf5d735c8c584baec4e51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b17cdf21decf5d735c8c584baec4e51">&#9670;&#160;</a></span>getMaxGhostEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ComputationalGeometry::getMaxGhostEB </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The width, in cells, by which every box is grown before it is classified. </p>
+<p>A box classified regular or covered has no cut cell within this many cells of it. </p><dl class="section return"><dt>Returns</dt><dd>The EB ghost width given to makeGrids or buildGeometries. </dd></dl>
+
+</div>
+</div>
 <a id="ab8f2e8319ff04379576142eee796b1f2" name="ab8f2e8319ff04379576142eee796b1f2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab8f2e8319ff04379576142eee796b1f2">&#9670;&#160;</a></span>getMfIndexSpace()</h2>
 
@@ -1747,6 +1788,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>Get the multifluid index space. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_multiFluidIndexSpace </dd></dl>
+
+</div>
+</div>
+<a id="a863dff07914a1ba8afc2b6d0bf35ccd3" name="a863dff07914a1ba8afc2b6d0bf35ccd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a863dff07914a1ba8afc2b6d0bf35ccd3">&#9670;&#160;</a></span>getMinBlockSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ComputationalGeometry::getMinBlockSize </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The edge of a tile, in cells of its own level. </p>
+<p>Every cut tile is a whole number of such blocks, and so is every hole a leaf leaves in a finer level. </p><dl class="section return"><dt>Returns</dt><dd>The tile edge. </dd></dl>
 
 </div>
 </div>
@@ -1953,6 +2022,68 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a4707a1ca2d137d28abf33ee0627a1d2b" name="a4707a1ca2d137d28abf33ee0627a1d2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4707a1ca2d137d28abf33ee0627a1d2b">&#9670;&#160;</a></span>irregCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">IntVectSet ComputationalGeometry::irregCells </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The cut cells of a phase on a domain that this rank holds. </p>
+<p>Read from the polyhedral generator's stored level when it built the phase, and from the phase's index space otherwise. Empty when the phase has none. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain, one of the index space's. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The cut cells in the boxes this rank holds. </dd></dl>
+
+</div>
+</div>
+<a id="af9206b423e98b4f240ec2389e435ea1c" name="af9206b423e98b4f240ec2389e435ea1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9206b423e98b4f240ec2389e435ea1c">&#9670;&#160;</a></span>irregGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DisjointBoxLayout ComputationalGeometry::irregGrids </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A layout of a phase on a domain whose boxes hold every cut cell of the phase there. </p>
+<p>The polyhedral generator's stored layout of the level when it built the phase, and the index space's irregular grids otherwise. The phase must have an index space. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain, one of the index space's. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The layout. </dd></dl>
+
+</div>
+</div>
 <a id="a1e158685c21420ce4df34df3e8b96828" name="a1e158685c21420ce4df34df3e8b96828"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1e158685c21420ce4df34df3e8b96828">&#9670;&#160;</a></span>makeGrids()</h2>
 
@@ -2099,6 +2230,42 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Indices into the list, each once and in increasing index order. Empty if the tree is null. </dd></dl>
+
+</div>
+</div>
+<a id="a10dba130ad4edf60eccfe3eaca1f54d1" name="a10dba130ad4edf60eccfe3eaca1f54d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10dba130ad4edf60eccfe3eaca1f54d1">&#9670;&#160;</a></span>ownedPart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::ownedPart </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Box &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_owned</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_tile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The cells of one cut tile that its level owns: the tile less what the next level's tiles hold. </p>
+<p>The rule ownedPieces applies to the part of a tile a box meets, applied to the whole tile. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_owned</td><td>Boxes of the owned cells, disjoint; the tile itself where the next level holds none of it. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tile</td><td>One of getCutTiles(a_level). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level of the tile. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

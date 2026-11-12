@@ -1,48 +1,47 @@
 <map id="Source/Geometry/CD_CutCellSurfaceImplem.H" name="Source/Geometry/CD_CutCellSurfaceImplem.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_CutCellSurface.H." alt="" coords="307,5,496,50"/>
-<area shape="rect" id="Node000002" href="$CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="323,98,480,143"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="393,63,396,99,391,97,391,68"/>
-<area shape="poly" id="edge17_Node000002_Node000001" title=" " alt="" coords="408,82,408,53,410,48,413,83"/>
-<area shape="rect" id="Node000003" href="$CD__AMRPolyhedralEBGraph_8H.html" title="Declaration of the polyhedral graph as an AMR hierarchy of any layout holds it." alt="" coords="5,283,203,328"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="305,130,269,139,229,152,191,169,156,193,139,213,125,237,110,284,105,282,120,235,134,210,153,189,188,164,227,147,268,134,310,127"/>
-<area shape="rect" id="Node000005" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="174,376,383,421"/>
-<area shape="poly" id="edge31_Node000002_Node000005" title=" " alt="" coords="414,155,424,195,429,239,425,286,419,308,409,329,383,358,350,378,348,373,380,354,404,327,414,306,420,285,424,239,419,195,412,160"/>
-<area shape="rect" id="Node000008" href="$CD__CutCellBody_8H.html" title="Declaration of a closed polyhedron bounding the fluid in one cut cell." alt="" coords="572,283,729,328"/>
-<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="443,149,624,282,619,283,442,154"/>
-<area shape="rect" id="Node000012" href="$CD__CutCellDescription_8H.html" title="Declaration of everything one cut cell of the polyhedral geometry is built from." alt="" coords="166,191,330,235"/>
-<area shape="poly" id="edge15_Node000002_Node000012" title=" " alt="" coords="350,153,286,192,283,188,353,149"/>
-<area shape="rect" id="Node000013" href="$CD__PolyhedralEBGraph_8H.html" title="Declaration of the cut&#45;cell connectivity of one level of the polyhedral geometry." alt="" coords="227,283,394,328"/>
-<area shape="poly" id="edge18_Node000002_Node000013" title=" " alt="" coords="386,155,323,285,319,282,382,158"/>
-<area shape="rect" id="Node000014" href="$CD__PolyhedralEBUtils_8H.html" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="873,191,1031,235"/>
-<area shape="poly" id="edge22_Node000002_Node000014" title=" " alt="" coords="495,134,875,197,870,200,495,140"/>
-<area shape="rect" id="Node000004" href="$CD__AMRPolyhedralEBGraph_8cpp.html" title="Implementation of CD_AMRPolyhedralEBGraph.H." alt="" coords="103,469,313,513"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="116,340,133,380,153,419,190,469,185,469,148,422,128,382,115,345"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="160,333,240,375,235,377,159,338"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="255,432,226,471,223,466,250,434"/>
-<area shape="rect" id="Node000006" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="569,469,783,513"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="389,422,583,468,578,469,388,427"/>
-<area shape="rect" id="Node000007" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="939,469,1160,513"/>
-<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="398,418,695,454,941,480,936,481,694,460,398,424"/>
-<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="646,341,631,386,618,406,602,423,580,435,552,446,479,463,395,476,314,485,313,480,394,471,478,458,550,441,578,430,598,419,614,403,626,383,642,345"/>
-<area shape="poly" id="edge14_Node000008_Node000005" title=" " alt="" coords="555,331,369,378,368,373,560,329"/>
-<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="658,342,675,470,671,467,654,345"/>
-<area shape="rect" id="Node000009" href="$CD__CutCellBody_8cpp.html" title="Implementation of CD_CutCellBody.H." alt="" coords="908,376,1065,421"/>
-<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="745,330,910,376,905,376,744,335"/>
-<area shape="rect" id="Node000010" href="$CD__PolyhedralEBGraph_8cpp.html" title="Implementation of CD_PolyhedralEBGraph.H." alt="" coords="407,376,588,421"/>
-<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="603,335,535,378,533,373,598,337"/>
-<area shape="rect" id="Node000011" href="$CD__PolyhedralEBUtils_8cpp.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="713,376,884,421"/>
-<area shape="poly" id="edge13_Node000008_Node000011" title=" " alt="" coords="699,334,766,376,761,375,698,339"/>
-<area shape="poly" id="edge16_Node000012_Node000003" title=" " alt="" coords="199,246,140,285,136,281,202,242"/>
-<area shape="poly" id="edge19_Node000013_Node000004" title=" " alt="" coords="211,335,186,354,165,377,159,400,163,424,175,447,191,469,185,468,171,450,158,425,153,400,160,375,183,350,215,332"/>
-<area shape="poly" id="edge21_Node000013_Node000005" title=" " alt="" coords="300,341,288,377,284,374,296,344"/>
-<area shape="poly" id="edge20_Node000013_Node000010" title=" " alt="" coords="369,333,456,375,450,376,369,338"/>
-<area shape="poly" id="edge23_Node000014_Node000006" title=" " alt="" coords="973,246,1000,286,1030,326,1044,339,1057,348,1069,358,1080,375,1088,399,1086,411,1079,423,1065,431,1040,440,966,456,784,481,783,476,965,450,1039,435,1063,427,1075,419,1081,409,1082,400,1075,377,1065,362,1054,352,1041,344,1026,330,995,289,971,251"/>
-<area shape="poly" id="edge30_Node000014_Node000007" title=" " alt="" coords="1047,220,1111,229,1174,242,1228,259,1248,269,1262,282,1276,311,1274,339,1259,367,1235,392,1204,416,1170,437,1103,471,1101,466,1168,432,1201,411,1232,388,1255,363,1269,338,1271,312,1258,285,1245,274,1226,264,1173,247,1110,234,1047,225"/>
-<area shape="poly" id="edge24_Node000014_Node000008" title=" " alt="" coords="863,241,724,285,722,280,868,239"/>
-<area shape="poly" id="edge25_Node000014_Node000009" title=" " alt="" coords="961,248,985,377,980,375,957,252"/>
-<area shape="poly" id="edge26_Node000014_Node000010" title=" " alt="" coords="855,222,776,233,689,246,613,264,583,274,562,285,541,305,525,329,505,377,501,374,520,327,537,302,558,281,581,269,611,258,688,241,775,228,860,221"/>
-<area shape="poly" id="edge27_Node000014_Node000011" title=" " alt="" coords="927,246,818,378,815,374,922,249"/>
-<area shape="rect" id="Node000015" href="$CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="1040,283,1248,328"/>
-<area shape="poly" id="edge28_Node000014_Node000015" title=" " alt="" coords="1004,240,1093,283,1088,283,1003,245"/>
-<area shape="poly" id="edge29_Node000015_Node000014" title=" " alt="" coords="1090,276,1005,239,1006,233,1095,276"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_CutCellSurface.H." alt="" coords="234,5,422,50"/>
+<area shape="rect" id="Node000002" href="$CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="250,98,407,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="320,63,323,99,318,97,318,68"/>
+<area shape="poly" id="edge16_Node000002_Node000001" title=" " alt="" coords="334,82,335,53,337,48,340,83"/>
+<area shape="rect" id="Node000003" href="$CD__AMRPolyhedralEBGraph_8H.html" title="Declaration of the polyhedral graph as an AMR hierarchy of any layout holds it." alt="" coords="19,283,216,328"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="232,135,128,158,85,174,58,192,53,203,51,214,58,238,74,261,94,282,89,284,70,264,53,240,46,214,48,201,54,189,82,169,127,153,236,131"/>
+<area shape="rect" id="Node000005" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="5,376,214,421"/>
+<area shape="poly" id="edge30_Node000002_Node000005" title=" " alt="" coords="320,155,288,241,262,288,230,330,198,357,162,378,159,373,195,353,226,326,258,285,283,239,317,159"/>
+<area shape="rect" id="Node000008" href="$CD__CutCellBody_8H.html" title="Declaration of a closed polyhedron bounding the fluid in one cut cell." alt="" coords="506,283,663,328"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="371,149,557,282,552,284,370,154"/>
+<area shape="rect" id="Node000012" href="$CD__CutCellDescription_8H.html" title="Declaration of everything one cut cell of the polyhedral geometry is built from." alt="" coords="68,191,231,235"/>
+<area shape="poly" id="edge14_Node000002_Node000012" title=" " alt="" coords="270,152,194,192,190,188,274,148"/>
+<area shape="rect" id="Node000013" href="$CD__PolyhedralEBGraph_8H.html" title="Declaration of the cut&#45;cell connectivity of one level of the polyhedral geometry." alt="" coords="306,283,473,328"/>
+<area shape="poly" id="edge17_Node000002_Node000013" title=" " alt="" coords="341,155,385,283,380,283,339,160"/>
+<area shape="rect" id="Node000014" href="$CD__PolyhedralEBUtils_8H.html" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="916,191,1074,235"/>
+<area shape="poly" id="edge21_Node000002_Node000014" title=" " alt="" coords="422,132,917,199,913,203,422,137"/>
+<area shape="rect" id="Node000004" href="$CD__AMRPolyhedralEBGraph_8cpp.html" title="Implementation of CD_AMRPolyhedralEBGraph.H." alt="" coords="238,376,448,421"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,332,291,374,286,377,186,337"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="115,341,114,377,109,375,113,346"/>
+<area shape="rect" id="Node000006" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="378,469,593,513"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="214,422,398,467,393,470,214,427"/>
+<area shape="rect" id="Node000007" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="836,469,1058,513"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="229,418,564,456,839,482,833,482,564,462,229,424"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="515,333,401,378,400,373,510,335"/>
+<area shape="poly" id="edge13_Node000008_Node000005" title=" " alt="" coords="488,328,486,331,215,381,214,375,485,325,493,326"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="545,337,527,358,513,377,503,400,496,425,489,470,485,466,491,424,498,398,509,375,523,354,540,340"/>
+<area shape="rect" id="Node000009" href="$CD__CutCellBody_8cpp.html" title="Implementation of CD_CutCellBody.H." alt="" coords="728,376,886,421"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="652,332,756,375,751,375,651,337"/>
+<area shape="rect" id="Node000010" href="$CD__PolyhedralEBGraph_8cpp.html" title="Implementation of CD_PolyhedralEBGraph.H." alt="" coords="523,376,704,421"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="597,341,609,377,604,375,594,345"/>
+<area shape="rect" id="Node000011" href="$CD__PolyhedralEBUtils_8cpp.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="909,376,1080,421"/>
+<area shape="poly" id="edge12_Node000008_Node000011" title=" " alt="" coords="678,325,911,378,906,379,678,330"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="138,247,127,284,123,282,136,252"/>
+<area shape="poly" id="edge18_Node000013_Node000004" title=" " alt="" coords="374,340,356,378,352,374,369,343"/>
+<area shape="poly" id="edge20_Node000013_Node000005" title=" " alt="" coords="306,335,178,378,175,373,310,331"/>
+<area shape="poly" id="edge19_Node000013_Node000010" title=" " alt="" coords="458,332,563,375,557,376,457,337"/>
+<area shape="poly" id="edge22_Node000014_Node000006" title=" " alt="" coords="1031,244,1067,283,1098,329,1107,353,1111,377,1107,401,1094,423,1074,431,1032,439,900,455,593,484,593,478,900,450,1031,433,1072,425,1090,419,1102,399,1106,377,1102,355,1093,331,1063,286,1029,249"/>
+<area shape="poly" id="edge29_Node000014_Node000007" title=" " alt="" coords="1088,239,1117,257,1138,282,1157,319,1164,353,1158,386,1138,422,1122,440,1103,455,1059,476,1057,471,1100,451,1119,437,1134,419,1153,385,1159,353,1152,320,1134,285,1113,261,1087,244"/>
+<area shape="poly" id="edge23_Node000014_Node000008" title=" " alt="" coords="898,236,664,290,663,284,903,234"/>
+<area shape="poly" id="edge24_Node000014_Node000009" title=" " alt="" coords="965,245,830,378,827,374,960,247"/>
+<area shape="poly" id="edge25_Node000014_Node000010" title=" " alt="" coords="939,242,659,378,657,373,934,243"/>
+<area shape="poly" id="edge26_Node000014_Node000011" title=" " alt="" coords="997,249,997,377,993,374,993,253"/>
+<area shape="rect" id="Node000015" href="$CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="1205,283,1414,328"/>
+<area shape="poly" id="edge27_Node000014_Node000015" title=" " alt="" coords="1077,238,1229,283,1224,283,1077,243"/>
+<area shape="poly" id="edge28_Node000015_Node000014" title=" " alt="" coords="1225,279,1074,238,1075,232,1230,279"/>
 </map>
