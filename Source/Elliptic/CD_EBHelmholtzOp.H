@@ -78,6 +78,7 @@ public:
    * @param[in] a_eblg          Grids on this level
    * @param[in] a_eblgCoFi      Coarsening of fine level grids
    * @param[in] a_eblgCoar      Coarse grids
+   * @param[in] a_eblgCoFiMG    Grids on this level coarsened by 2. Only used if a_hasMGObjects is true.
    * @param[in] a_eblgCoarMG    Multigrid-grids
    * @param[in] a_validCells    Valid grid cells
    * @param[in] a_interpolator  Interpolator
@@ -113,6 +114,7 @@ public:
                 const EBLevelGrid&                               a_eblg,
                 const EBLevelGrid&                               a_eblgCoFi,
                 const EBLevelGrid&                               a_eblgCoar,
+                const EBLevelGrid&                               a_eblgCoFiMG,
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,

@@ -45,6 +45,7 @@ CdrMultigrid::registerOperators()
   CdrSolver::registerOperators();
 
   m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
+  m_amr->registerMultigrid(m_realm, m_minCellsBottom);
   m_amr->registerOperator(s_eb_flux_reg, m_realm, m_phase);
 }
 
@@ -534,8 +535,11 @@ CdrMultigrid::setupHelmholtzFactory()
                              m_chebyOrder,
                              m_chebyEigRatio,
                              m_rasInnerSweeps,
+                             m_amr->getMultigridLevelGrids(m_realm, m_phase),
+                             m_amr->getMultigridLevelGridsCoFi(m_realm, m_phase),
+                             m_amr->getMultigridCoarseAverage(m_realm, m_phase),
+                             m_amr->getEBLevelGridCoFi(m_realm, m_phase),
                              bottomDomain,
-                             m_amr->getMaxBlockSize(),
                              m_multigridRefluxFree));
 }
 

@@ -38,10 +38,14 @@ public:
   /**
    * @brief Full constructor. Calls the define function
    * @param[in] a_eblgFine Fine level
+   * @param[in] a_eblgCoFi Fine level coarsened by a_refRat. Its EBISLayout must allow refinement by a_refRat.
    * @param[in] a_eblgCoar Coarse level
    * @param[in] a_refRat   Refinement factor between levels.
    */
-  EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
+  EBMGRestrict(const EBLevelGrid& a_eblgFine,
+               const EBLevelGrid& a_eblgCoFi,
+               const EBLevelGrid& a_eblgCoar,
+               const int&         a_refRat) noexcept;
 
   /**
    * @brief Destructor
@@ -51,11 +55,15 @@ public:
   /**
    * @brief Define function.
    * @param[in] a_eblgFine Fine level
+   * @param[in] a_eblgCoFi Fine level coarsened by a_refRat. Its EBISLayout must allow refinement by a_refRat.
    * @param[in] a_eblgCoar Coarse level
    * @param[in] a_refRat   Refinement factor between levels.
    */
   virtual void
-  define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
+  define(const EBLevelGrid& a_eblgFine,
+         const EBLevelGrid& a_eblgCoFi,
+         const EBLevelGrid& a_eblgCoar,
+         const int&         a_refRat) noexcept;
 
   /**
    * @brief Restrict residual onto the coarse grid.
