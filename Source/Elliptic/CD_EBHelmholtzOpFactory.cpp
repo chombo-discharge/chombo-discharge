@@ -331,8 +331,7 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
                         a_eblgFine.getEBISL(),
                         a_eblgCoar.getEBISL(),
                         a_eblgCoar.getDomain(),
-                        a_refRat,
-                        a_eblgCoar.getEBIS());
+                        a_refRat);
 
     const Average average = Average::Arithmetic;
 

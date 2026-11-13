@@ -476,8 +476,7 @@ MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAc
                       eblgFine.getEBISL(),
                       eblgCoar.getEBISL(),
                       eblgCoar.getDomain(),
-                      a_refRat,
-                      eblgCoar.getEBIS());
+                      a_refRat);
 
       LevelData<EBCellFAB>       coarAco;
       LevelData<EBFluxFAB>       coarBco;
