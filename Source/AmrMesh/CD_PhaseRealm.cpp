@@ -142,6 +142,9 @@ PhaseRealm::preRegrid()
   m_eblg.resize(0);
   m_eblgCoFi.resize(0);
   m_eblgFiCo.resize(0);
+  m_mgLevelGrids.resize(0);
+  m_mgLevelGridsCoFi.resize(0);
+  m_mgCoarAve.resize(0);
   m_vofIter.resize(0);
   m_multiCutVofIter.resize(0);
   m_faceIter.resize(0);
@@ -239,6 +242,18 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("EBCoarAve");
     this->defineEBCoarAve(a_lmin);
     timer.stopEvent("EBCoarAve");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    if (m_profile) {
+      pout() << "before/after multigrid coarave define" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Multigrid EBCoarAve");
+    this->defineMultigridCoarseAverage();
+    timer.stopEvent("Multigrid EBCoarAve");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -473,6 +488,86 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
 
       refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);
       m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(m_refinementRatios[lvl], m_eblg[lvl]->getEBIS());
+    }
+  }
+}
+
+void
+PhaseRealm::defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgGrids,
+                                  const Vector<Vector<ProblemDomain>>&     a_mgDomains)
+{
+  CH_TIME("PhaseRealm::defineMultigridLevels");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridLevels" << endl;
+  }
+
+  CH_assert(a_mgGrids.size() == a_mgDomains.size());
+
+  constexpr int mgRefRat = 2;
+
+  const int numAmrLevels = static_cast<int>(a_mgGrids.size());
+
+  m_mgLevelGrids.resize(0);
+  m_mgLevelGridsCoFi.resize(0);
+  m_mgCoarAve.resize(0);
+
+  if (m_isDefined && numAmrLevels > 0) {
+    CH_assert(numAmrLevels == 1 + m_finestLevel);
+
+    m_mgLevelGrids.resize(numAmrLevels);
+    m_mgLevelGridsCoFi.resize(numAmrLevels);
+
+    for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+      const int numMgLevels = static_cast<int>(a_mgGrids[lvl].size());
+
+      CH_assert(numMgLevels >= 1);
+      CH_assert(static_cast<int>(a_mgDomains[lvl].size()) == numMgLevels);
+      CH_assert(a_mgDomains[lvl][0] == m_domains[lvl]);
+
+      m_mgLevelGrids[lvl].resize(numMgLevels);
+      m_mgLevelGridsCoFi[lvl].resize(numMgLevels - 1);
+
+      m_mgLevelGrids[lvl][0] = m_eblg[lvl];
+
+      for (int img = 1; img < numMgLevels; img++) {
+        m_mgLevelGrids[lvl][img] = RefCountedPtr<EBLevelGrid>(
+          new EBLevelGrid(a_mgGrids[lvl][img], a_mgDomains[lvl][img], m_numGhostCells, &(*m_ebis)));
+      }
+
+      for (int img = 0; img < numMgLevels - 1; img++) {
+        m_mgLevelGridsCoFi[lvl][img] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+
+        coarsen(*m_mgLevelGridsCoFi[lvl][img], *m_mgLevelGrids[lvl][img], mgRefRat);
+        m_mgLevelGridsCoFi[lvl][img]->getEBISL().setMaxRefinementRatio(mgRefRat, &(*m_ebis));
+      }
+    }
+  }
+}
+
+void
+PhaseRealm::defineMultigridCoarseAverage()
+{
+  CH_TIME("PhaseRealm::defineMultigridCoarseAverage");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridCoarseAverage" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+
+  m_mgCoarAve.resize(numAmrLevels);
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(m_mgLevelGrids[lvl].size());
+
+    m_mgCoarAve[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      m_mgCoarAve[lvl][img] = RefCountedPtr<EBCoarAve>(new EBCoarAve(*m_mgLevelGrids[lvl][img],
+                                                                     *m_mgLevelGrids[lvl][img + 1],
+                                                                     *m_mgLevelGridsCoFi[lvl][img],
+                                                                     mgRefRat));
     }
   }
 }
@@ -1744,6 +1839,24 @@ const Vector<RefCountedPtr<EBLevelGrid>>&
 PhaseRealm::getEBLevelGridCoFi() const
 {
   return m_eblgCoFi;
+}
+
+const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+PhaseRealm::getMultigridLevelGrids() const
+{
+  return m_mgLevelGrids;
+}
+
+const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+PhaseRealm::getMultigridLevelGridsCoFi() const
+{
+  return m_mgLevelGridsCoFi;
+}
+
+const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
+PhaseRealm::getMultigridCoarseAverage() const
+{
+  return m_mgCoarAve;
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

@@ -93,6 +93,8 @@ public:
    * @param[in] a_probLo           Lower-left corner of physical domain
    * @param[in] a_finestLevel      Finest grid level
    * @param[in] a_minBlockSize   Grid blocking factor
+   * @param[in] a_maxBlockSize   Largest box size. Multigrid levels that are re-partitioned are split into boxes no
+   * larger than this.
    * @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
    * @param[in] a_numGhost         Number of ghost cells in data holders
    * @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
@@ -117,6 +119,7 @@ public:
          const RealVect&                                            a_probLo,
          const int                                                  a_finestLevel,
          const int                                                  a_minBlockSize,
+         const int                                                  a_maxBlockSize,
          const int                                                  a_ebGhost,
          const int                                                  a_numGhost,
          const int                                                  a_lsfGhost,
@@ -172,6 +175,61 @@ public:
    */
   void
   registerOperator(const std::string& a_operator, const phase::which_phase a_phase);
+
+  /**
+   * @brief Register the multigrid levels.
+   * @details The realm builds the multigrid levels of every phase, and their multifluid compositions, in each
+   * regridOperators.
+   * The levels coarser than AMR level 0 go down to the coarsest bottom domain registered, which is the one with the
+   * smallest a_minCellsBottom. The bottom domain is the base AMR domain coarsened by 2 while its shortest side is at
+   * least 2*a_minCellsBottom.
+   * @param[in] a_minCellsBottom Smallest number of cells along any coordinate direction of the bottom domain.
+   */
+  void
+  registerMultigrid(const int a_minCellsBottom);
+
+  /**
+   * @brief Get the multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelGrids().
+   * @param[in] a_phase Phase
+   * @return The multigrid levels under each AMR level.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGrids(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the coarsened grids between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelGridsCoFi().
+   * @param[in] a_phase Phase
+   * @return The coarsened grids of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the coarse averaging between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridCoarseAverage().
+   * @param[in] a_phase Phase
+   * @return The coarse averaging of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
+  getMultigridCoarseAverage(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multifluid multigrid levels.
+   * @details Composed from the phases' multigrid levels, with the same indexing as getMultigridLevelGrids().
+   * @return The multifluid multigrid levels under each AMR level.
+   */
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+  getMultigridMFLevelGrids() const;
+
+  /**
+   * @brief Get the multifluid coarsened grids between consecutive multigrid levels.
+   * @details Composed from the phases' coarsened grids, with the same indexing as getMultigridLevelGridsCoFi().
+   * @return The multifluid coarsened grids of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+  getMultigridMFLevelGridsCoFi() const;
 
   /**
    * @brief Query if an AMR operator has been registered
@@ -626,6 +684,17 @@ protected:
   int m_minBlockSize;
 
   /**
+   * @brief Largest box size
+   */
+  int m_maxBlockSize;
+
+  /**
+   * @brief Smallest number of cells along any direction of the bottom domain, over all registered multigrid users.
+   * @details Negative when nothing registered, in which case the realm builds no multigrid levels.
+   */
+  int m_mgMinCellsBottom;
+
+  /**
    * @brief Number of ghost cells
    */
   int m_numGhost;
@@ -669,6 +738,17 @@ protected:
    * @brief Refined grids. Entry lvl+1 contains the refined version of grids on level lvl
    */
   Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;
+
+  /**
+   * @brief Multifluid multigrid levels, with the same indexing as PhaseRealm::m_mgLevelGrids.
+   */
+  Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflg;
+
+  /**
+   * @brief Multifluid coarsened grids between consecutive multigrid levels, with the same indexing as
+   * PhaseRealm::m_mgLevelGridsCoFi.
+   */
+  Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflgCoFi;
 
   /**
    * @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
@@ -754,6 +834,33 @@ protected:
    */
   void
   defineMFLevelGrid(const int a_lmin);
+
+  /**
+   * @brief Define the multigrid levels of every phase, and their multifluid compositions.
+   * @details Under AMR level 0 this adds factor 2 coarsenings down to the coarsest registered bottom domain. Under a
+   * finer AMR level with a refinement ratio larger than 2 this adds one intermediate level. Coarsening stops before a
+   * domain that is coarser than the bottom domain, or equal to an AMR level's domain, or when the grids can not be
+   * coarsened. Does nothing but clear the levels if no multigrid user registered.
+   */
+  void
+  defineMultigridLevels();
+
+  /**
+   * @brief Get a factor 2 coarsening of a multigrid level.
+   * @details When the fine grids cover the whole domain the coarse domain is re-partitioned: it is split into boxes
+   * of the largest power-of-2 size, no larger than m_maxBlockSize, by which the fine domain is coarsenable, and the
+   * boxes are Morton ordered and load balanced. Otherwise the fine boxes are coarsened directly, keeping their ranks.
+   * @param[out] a_dblCoar    Coarse grids
+   * @param[out] a_domainCoar Coarse domain
+   * @param[in]  a_dblFine    Fine grids
+   * @param[in]  a_domainFine Fine domain
+   * @return True if a coarsening exists, and false otherwise.
+   */
+  bool
+  getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
+                            ProblemDomain&           a_domainCoar,
+                            const DisjointBoxLayout& a_dblFine,
+                            const ProblemDomain&     a_domainFine) const;
 
   /**
    * @brief Define masks

@@ -20,6 +20,8 @@
 #include <IntVectSet.H>
 #include <DenseIntVectSet.H>
 #include <Copier.H>
+#include <BRMeshRefine.H>
+#include <LoadBalance.H>
 
 // Our includes
 #include <CD_Realm.H>
@@ -33,6 +35,7 @@ const std::string Realm::primal = "primal";
 
 Realm::Realm() : m_isDefined(false), m_verbosity(-1)
 {
+  m_mgMinCellsBottom = -1;
 
   ParmParse pp("Realm");
 
@@ -53,6 +56,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const RealVect&                                            a_probLo,
               const int                                                  a_finestLevel,
               const int                                                  a_minBlockSize,
+              const int                                                  a_maxBlockSize,
               const int                                                  a_ebGhost,
               const int                                                  a_numGhost,
               const int                                                  a_lsfGhost,
@@ -81,6 +85,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
   m_minBlockSize         = a_minBlockSize;
+  m_maxBlockSize         = a_maxBlockSize;
   m_numGhost             = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
@@ -158,6 +163,8 @@ Realm::preRegrid()
 
   m_grids.resize(0);
   m_mflg.resize(0);
+  m_mgMflg.resize(0);
+  m_mgMflgCoFi.resize(0);
   m_validCells.resize(0);
 
   for (auto& mask : m_masks) {
@@ -194,6 +201,10 @@ Realm::regridOperators(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::regridOperators" << endl;
   }
+
+  // Defined here rather than in regridBase because the multigrid users register after the first regridBase. The phase
+  // realms define the coarse averaging between the multigrid levels in their regridOperators.
+  this->defineMultigridLevels();
 
   for (auto& r : m_realms) {
     r.second->regridOperators(a_lmin);
@@ -449,6 +460,169 @@ Realm::defineMFLevelGrid(const int /*a_lmin*/)
       m_mflgFiCo[lvl] = RefCountedPtr<MFLevelGrid>(nullptr);
     }
   }
+}
+
+void
+Realm::defineMultigridLevels()
+{
+  CH_TIME("Realm::defineMultigridLevels");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineMultigridLevels" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  auto isCoarser = [](const ProblemDomain& A, const ProblemDomain& B) -> bool {
+    return A.domainBox().numPts() < B.domainBox().numPts();
+  };
+
+  Vector<Vector<DisjointBoxLayout>> mgGrids;
+  Vector<Vector<ProblemDomain>>     mgDomains;
+
+  if (m_mgMinCellsBottom > 0) {
+    ProblemDomain bottomDomain = m_domains[0];
+    while (bottomDomain.domainBox().shortside() >= 2 * m_mgMinCellsBottom) {
+      bottomDomain.coarsen(mgRefRat);
+    }
+
+    mgGrids.resize(1 + m_finestLevel);
+    mgDomains.resize(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      mgGrids[lvl].push_back(m_grids[lvl]);
+      mgDomains[lvl].push_back(m_domains[lvl]);
+
+      bool hasCoarser = (lvl == 0) ? isCoarser(bottomDomain, m_domains[lvl]) : (m_refinementRatios[lvl - 1] > 2);
+
+      while (hasCoarser) {
+        DisjointBoxLayout dblCoar;
+        ProblemDomain     domainCoar;
+
+        hasCoarser = this->getCoarserMultigridLayout(dblCoar, domainCoar, mgGrids[lvl].back(), mgDomains[lvl].back());
+
+        if (hasCoarser && isCoarser(domainCoar, bottomDomain)) {
+          hasCoarser = false;
+        }
+
+        for (int ilev = 0; ilev <= m_finestLevel; ilev++) {
+          if (hasCoarser && domainCoar == m_domains[ilev]) {
+            hasCoarser = false;
+          }
+        }
+
+        if (hasCoarser) {
+          mgGrids[lvl].push_back(dblCoar);
+          mgDomains[lvl].push_back(domainCoar);
+        }
+      }
+    }
+  }
+
+  for (auto& r : m_realms) {
+    r.second->defineMultigridLevels(mgGrids, mgDomains);
+  }
+
+  // Compose the multifluid levels from the phases, in the same phase order as defineMFLevelGrid.
+  const int numAmrLevels = static_cast<int>(mgGrids.size());
+
+  m_mgMflg.resize(numAmrLevels);
+  m_mgMflgCoFi.resize(numAmrLevels);
+
+  const PhaseRealm& gas = this->getRealm(phase::gas);
+  const PhaseRealm& sol = this->getRealm(phase::solid);
+
+  const bool hasGas = !(gas.getEBIndexSpace().isNull());
+  const bool hasSol = !(sol.getEBIndexSpace().isNull());
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(mgGrids[lvl].size());
+
+    m_mgMflg[lvl].resize(numMgLevels);
+    m_mgMflgCoFi[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels; img++) {
+      Vector<EBLevelGrid> eblgs;
+      Vector<EBLevelGrid> eblgsCoFi;
+
+      if (hasGas) {
+        eblgs.push_back(*gas.getMultigridLevelGrids()[lvl][img]);
+
+        if (img < numMgLevels - 1) {
+          eblgsCoFi.push_back(*gas.getMultigridLevelGridsCoFi()[lvl][img]);
+        }
+      }
+      if (hasSol) {
+        eblgs.push_back(*sol.getMultigridLevelGrids()[lvl][img]);
+
+        if (img < numMgLevels - 1) {
+          eblgsCoFi.push_back(*sol.getMultigridLevelGridsCoFi()[lvl][img]);
+        }
+      }
+
+      m_mgMflg[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgs));
+
+      if (img < numMgLevels - 1) {
+        m_mgMflgCoFi[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsCoFi));
+      }
+    }
+  }
+}
+
+bool
+Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
+                                 ProblemDomain&           a_domainCoar,
+                                 const DisjointBoxLayout& a_dblFine,
+                                 const ProblemDomain&     a_domainFine) const
+{
+  CH_TIME("Realm::getCoarserMultigridLayout");
+  if (m_verbosity > 5) {
+    pout() << "Realm::getCoarserMultigridLayout" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  bool hasCoarser = false;
+
+  a_domainCoar = coarsen(a_domainFine, mgRefRat);
+
+  if (refine(a_domainCoar, mgRefRat) == a_domainFine) {
+    const Box domainBox = a_domainFine.domainBox();
+
+    unsigned long long numPtsLeft = domainBox.numPts();
+
+    for (LayoutIterator lit = a_dblFine.layoutIterator(); lit.ok(); ++lit) {
+      numPtsLeft -= a_dblFine[lit()].numPts();
+    }
+
+    if (numPtsLeft == 0) {
+      int block = m_maxBlockSize;
+
+      while (block > 1 && !hasCoarser) {
+        if (domainBox.coarsenable(block)) {
+          Vector<Box> boxes;
+          Vector<int> procs;
+
+          domainSplit(a_domainCoar, boxes, block);
+          mortonOrdering(boxes);
+          LoadBalance(procs, boxes);
+
+          a_dblCoar.define(boxes, procs, a_domainCoar);
+
+          hasCoarser = true;
+        }
+        else {
+          block = block / 2;
+        }
+      }
+    }
+    else if (a_dblFine.coarsenable(mgRefRat)) {
+      coarsen(a_dblCoar, a_dblFine, mgRefRat);
+
+      hasCoarser = true;
+    }
+  }
+
+  return hasCoarser;
 }
 
 void
@@ -1709,6 +1883,51 @@ Realm::registerOperator(const std::string& a_operator, const phase::which_phase 
   }
 
   m_realms[a_phase]->registerOperator(a_operator);
+}
+
+void
+Realm::registerMultigrid(const int a_minCellsBottom)
+{
+  CH_TIME("Realm::registerMultigrid");
+  if (m_verbosity > 5) {
+    pout() << "Realm::registerMultigrid" << endl;
+  }
+
+  CH_assert(a_minCellsBottom >= 1);
+
+  if (m_mgMinCellsBottom < 0 || a_minCellsBottom < m_mgMinCellsBottom) {
+    m_mgMinCellsBottom = a_minCellsBottom;
+  }
+}
+
+const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+Realm::getMultigridLevelGrids(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelGrids();
+}
+
+const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+Realm::getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelGridsCoFi();
+}
+
+const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
+Realm::getMultigridCoarseAverage(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridCoarseAverage();
+}
+
+const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+Realm::getMultigridMFLevelGrids() const
+{
+  return m_mgMflg;
+}
+
+const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+Realm::getMultigridMFLevelGridsCoFi() const
+{
+  return m_mgMflgCoFi;
 }
 
 bool
