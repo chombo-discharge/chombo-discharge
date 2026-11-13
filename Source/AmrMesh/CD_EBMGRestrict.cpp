@@ -65,6 +65,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine,
 
   CH_assert(m_eblgCoFi.getDomain() == coarsen(m_eblgFine.getDomain(), m_refRat));
   CH_assert(m_eblgCoFi.getDBL().compatible(m_eblgFine.getDBL()));
+  CH_assert(m_eblgCoFi.getMaxRefinementRatio() >= m_refRat);
 
   // Define buffer data.
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();

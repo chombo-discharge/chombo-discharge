@@ -578,6 +578,8 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
     pout() << "Realm::getCoarserMultigridLayout" << endl;
   }
 
+  CH_assert(m_maxBlockSize >= 2);
+
   constexpr int mgRefRat = 2;
 
   bool hasCoarser = false;

@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <sstream>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <BaseIVFactory.H>
@@ -267,8 +270,12 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
     // domain only if the grids could not be coarsened further, or if the bottom cell count was lowered after
     // registration.
     if (amrLevel == 0 && isCoarser(m_bottomDomain, realmLevels.back().getDomain())) {
-      pout() << "MFHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at "
-             << realmLevels.back().getDomain() << ", which is finer than the bottom domain " << m_bottomDomain << endl;
+      std::stringstream ss;
+
+      ss << "MFHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at "
+         << realmLevels.back().getDomain() << ", which is finer than the bottom domain " << m_bottomDomain;
+
+      MayDay::Warning(ss.str().c_str());
     }
 
     m_mgLevelGrids[amrLevel].resize(0);
