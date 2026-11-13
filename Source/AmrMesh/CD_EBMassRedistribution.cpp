@@ -111,6 +111,7 @@ EBMassRedistribution::define(const EBLevelGrid& a_eblgCoar,
 
       refine(dblRefined, m_eblg.getDBL(), m_refToFine);
       m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine * m_redistRadius, m_eblg.getEBIS());
+      m_eblgRefined.getEBISL().setMaxCoarseningRatio(m_refToFine, m_eblg.getEBIS());
     }
     else {
       CH_assert(a_eblgRefined.isDefined());
@@ -237,7 +238,10 @@ EBMassRedistribution::defineStencils() noexcept
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
 
-          const Vector<VolIndex>& refinedVoFs = ebisl.refine(curVoF, m_refToFine, din);
+          const Vector<VolIndex>& refinedVoFs = VofUtils::getFinerVoFs(curVoF,
+                                                                       m_eblgRefined.getEBISL(),
+                                                                       din,
+                                                                       m_refToFine);
 
           fineVoFs.append(refinedVoFs);
 

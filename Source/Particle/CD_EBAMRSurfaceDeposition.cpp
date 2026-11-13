@@ -19,6 +19,7 @@
 // Our includes
 #include <CD_IrregAddOp.H>
 #include <CD_EBAMRSurfaceDeposition.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept : m_debug(false), m_verbose(false)
@@ -426,7 +427,7 @@ EBAMRSurfaceDeposition::defineCoarseToFineStencils() noexcept
         VoFStencil& stencil = interpStencils(coarVoF, 0);
 
         // Figure out which cut-cells on the fine grid comes from refining the current one on the coarse grid
-        const Vector<VolIndex> refinedCoarVoFs = ebislCoar.refine(coarVoF, m_refRat[lvl - 1], din);
+        const Vector<VolIndex> refinedCoarVoFs = VofUtils::getFinerVoFs(coarVoF, ebislFine, din, m_refRat[lvl - 1]);
 
         Vector<VolIndex> fineIrregVoFs;
         for (int i = 0; i < refinedCoarVoFs.size(); i++) {

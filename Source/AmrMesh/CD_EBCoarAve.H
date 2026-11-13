@@ -60,15 +60,13 @@ public:
    * @param[in] a_ebislCoar  Coarse EBISL
    * @param[in] a_domainCoar Coarse domain
    * @param[in] a_refRat     Refinement ratio
-   * @param[in] a_ebisPtr    EBIS pointer.
    */
   EBCoarAve(const DisjointBoxLayout& a_dblFine,
             const DisjointBoxLayout& a_dblCoar,
             const EBISLayout&        a_ebislFine,
             const EBISLayout&        a_ebislCoar,
             const ProblemDomain&     a_domainCoar,
-            const int&               a_refRat,
-            const EBIndexSpace*      a_ebisPtr) noexcept;
+            const int&               a_refRat) noexcept;
 
   /**
    * @brief Defining constructor. Calls the define function.

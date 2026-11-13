@@ -374,8 +374,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
                                                        eblgFine.getEBISL(),
                                                        eblgCoar.getEBISL(),
                                                        eblgCoar.getDomain(),
-                                                       mgRefRatio,
-                                                       eblgCoar.getEBIS()));
+                                                       mgRefRatio));
 
           // Append. Phew.
           m_mgLevelGrids[amrLevel].push_back(mgMflgCoar);
@@ -774,7 +773,6 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 
   if (hasCoar) { // Make a coarser layout
     const bool gotCoarse = this->getCoarserLayout(mflgCoFi, mflg, refToCoar, m_mgBlockingFactor);
-    mflgCoFi.setMaxRefinementRatio(refToCoar);
     CH_assert(gotCoarse);
   }
 

@@ -56,7 +56,6 @@ EBMGProlong::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar
 
   // Create the coarsened layout
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
 
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();

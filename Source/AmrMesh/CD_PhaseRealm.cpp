@@ -453,10 +453,6 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl - 1], &(*m_ebis));
     }
 
-    if (hasFine) {
-      m_eblg[lvl]->setMaxRefinementRatio(m_refinementRatios[lvl]);
-    }
-
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
 
     // Define the coarsened grids.
@@ -464,11 +460,10 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       m_eblgCoFi[lvl - 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
-      m_eblgCoFi[lvl - 1]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
     }
 
     // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
-    if (lvl < m_finestLevel) {
+    if (hasFine) {
       m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);

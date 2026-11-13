@@ -74,13 +74,6 @@ public:
   define(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace, const Vector<EBLevelGrid>& a_eblgs);
 
   /**
-   * @brief Set max refinement ratio
-   * @param[in] a_refRat Max refinement ratio.
-   */
-  virtual void
-  setMaxRefinementRatio(const int a_refRat);
-
-  /**
    * @brief Get the index space
    * @return Const reference to the multifluid index space.
    */

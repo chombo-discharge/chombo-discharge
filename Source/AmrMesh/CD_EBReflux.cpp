@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_EBReflux.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -253,7 +254,7 @@ EBReflux::defineStencils() noexcept
 
           if (areaCoar > 0.0) {
 
-            const Vector<FaceIndex>& fineFaces = ebislCoar.refine(coarFace, m_refRat, din);
+            const Vector<FaceIndex>& fineFaces = VofUtils::getFinerFaces(coarFace, ebislFine, din, m_refRat);
             for (int iface = 0; iface < fineFaces.size(); iface++) {
               const FaceIndex& fineFace   = fineFaces[iface];
               const Real       fineWeight = ebisBoxFine.areaFrac(fineFace) * dxFactor / areaCoar;
