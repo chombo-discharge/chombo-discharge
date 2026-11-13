@@ -616,6 +616,7 @@ FieldSolverGMG::registerOperators()
   m_amr->registerOperator(s_eb_flux_reg, m_realm, phase::solid);
   m_amr->registerOperator(s_eb_multigrid, m_realm, phase::gas);
   m_amr->registerOperator(s_eb_multigrid, m_realm, phase::solid);
+  m_amr->registerMultigrid(m_realm, m_minCellsBottom);
 }
 
 void
@@ -717,17 +718,9 @@ FieldSolverGMG::setupHelmholtzFactory()
   Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    Vector<EBLevelGrid>                            eblgPhases(numPhases);
     Vector<RefCountedPtr<EBMultigridInterpolator>> interpPhases(numPhases);
     Vector<RefCountedPtr<EBReflux>>                fluxRegPhases(numPhases);
     Vector<RefCountedPtr<EBCoarAve>>               avePhases(numPhases);
-
-    if (!ebisGas.isNull()) {
-      eblgPhases[phase::gas] = *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
-    }
 
     if (!ebisGas.isNull()) {
       interpPhases[phase::gas] = (m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl]);
@@ -750,10 +743,48 @@ FieldSolverGMG::setupHelmholtzFactory()
       avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
     }
 
-    mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
+    mflg[lvl] = *(m_amr->getMFLevelGrid(m_realm)[lvl]);
     mfInterp[lvl].define(interpPhases);
     mfFluxReg[lvl].define(fluxRegPhases);
     mfCoarAve[lvl].define(avePhases);
+  }
+
+  // The multigrid levels, the coarsened grids and coarse averaging between them, and the coarsened grids between AMR
+  // levels, all from the realm. The coarse averaging is wrapped per phase in the same way as the AMR operators above.
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>& realmMgLevels = m_amr->getMultigridMFLevelGrids(m_realm);
+
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>& realmMgLevelsCoFi = m_amr->getMultigridMFLevelGridsCoFi(m_realm);
+
+  Vector<Vector<MFLevelGrid>> mgLevelGrids(1 + finestLevel);
+  Vector<Vector<MFLevelGrid>> mgLevelGridsCoFi(1 + finestLevel);
+  Vector<Vector<MFCoarAve>>   mgCoarAve(1 + finestLevel);
+  Vector<MFLevelGrid>         mflgCoFi(1 + finestLevel);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    const int numMgLevels = static_cast<int>(realmMgLevels[lvl].size());
+
+    for (int img = 0; img < numMgLevels; img++) {
+      mgLevelGrids[lvl].push_back(*realmMgLevels[lvl][img]);
+    }
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      mgLevelGridsCoFi[lvl].push_back(*realmMgLevelsCoFi[lvl][img]);
+
+      Vector<RefCountedPtr<EBCoarAve>> avePhases(numPhases);
+
+      if (!ebisGas.isNull()) {
+        avePhases[phase::gas] = m_amr->getMultigridCoarseAverage(m_realm, phase::gas)[lvl][img];
+      }
+      if (!ebisSol.isNull()) {
+        avePhases[phase::solid] = m_amr->getMultigridCoarseAverage(m_realm, phase::solid)[lvl][img];
+      }
+
+      mgCoarAve[lvl].push_back(MFCoarAve(avePhases));
+    }
+
+    if (lvl < finestLevel) {
+      mflgCoFi[lvl] = *(m_amr->getMFLevelGridCoFi(m_realm)[lvl]);
+    }
   }
 
   // Find the coarsest domain used for multigrid. The user will have specified the minimum number of cells in any
@@ -838,11 +869,14 @@ FieldSolverGMG::setupHelmholtzFactory()
                              m_multigridChebyOrder,
                              m_multigridChebyEigRatio,
                              m_multigridRasInnerSweeps,
-                             bottomDomain,
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
-                             m_amr->getMaxBlockSize(),
+                             mgLevelGrids,
+                             mgLevelGridsCoFi,
+                             mgCoarAve,
+                             mflgCoFi,
+                             bottomDomain,
                              m_multigridRefluxFree));
 }
 

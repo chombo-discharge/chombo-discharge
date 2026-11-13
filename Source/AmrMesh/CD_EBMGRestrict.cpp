@@ -25,12 +25,15 @@ EBMGRestrict::EBMGRestrict() noexcept : m_isDefined(false)
   CH_TIME("EBMGRestrict::EBMGRestrict(default)");
 }
 
-EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine,
+                           const EBLevelGrid& a_eblgCoFi,
+                           const EBLevelGrid& a_eblgCoar,
+                           const int&         a_refRat) noexcept
   : m_isDefined(false)
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(full)");
 
-  this->define(a_eblgFine, a_eblgCoar, a_refRat);
+  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
 EBMGRestrict::~EBMGRestrict() noexcept
@@ -39,7 +42,10 @@ EBMGRestrict::~EBMGRestrict() noexcept
 }
 
 void
-EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+EBMGRestrict::define(const EBLevelGrid& a_eblgFine,
+                     const EBLevelGrid& a_eblgCoFi,
+                     const EBLevelGrid& a_eblgCoar,
+                     const int&         a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::define");
 
@@ -54,9 +60,12 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
     MayDay::Abort("EBMGRestrict::define -- the input grid is not coarsenable. We need to adopt a new strategy!");
   }
 
-  // Create the coarsend layout
-  coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
+  // The coarsened fine layout.
+  m_eblgCoFi = a_eblgCoFi;
+
+  CH_assert(m_eblgCoFi.getDomain() == coarsen(m_eblgFine.getDomain(), m_refRat));
+  CH_assert(m_eblgCoFi.getDBL().compatible(m_eblgFine.getDBL()));
+  CH_assert(m_eblgCoFi.getMaxRefinementRatio() >= m_refRat);
 
   // Define buffer data.
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
