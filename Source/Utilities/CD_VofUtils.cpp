@@ -12,7 +12,9 @@
 
 // Std includes
 #include <algorithm>
+#include <cstddef>
 #include <utility>
+#include <vector>
 
 // Chombo includes
 #include <BoxIterator.H>
@@ -408,17 +410,33 @@ VofUtils::gatherFinerVoFs(const VolIndex&   a_coarVoF,
                           const DataIndex&  a_din,
                           const int         a_refRat)
 {
+  CH_assert(
+    a_ebislFine[a_din].getRegion().contains(refine(Box(a_coarVoF.gridIndex(), a_coarVoF.gridIndex()), a_refRat)));
+
+  return VofUtils::getFinerVoFsInRegion(a_coarVoF, a_ebislFine, a_din, a_refRat);
+}
+
+Vector<VolIndex>
+VofUtils::getFinerVoFsInRegion(const VolIndex&   a_coarVoF,
+                               const EBISLayout& a_ebislFine,
+                               const DataIndex&  a_din,
+                               const int         a_refRat)
+{
+  CH_TIME("VofUtils::getFinerVoFsInRegion");
+
   CH_assert(a_refRat >= 2);
   CH_assert((a_refRat & (a_refRat - 1)) == 0);
   CH_assert(a_ebislFine.getMaxCoarseningRatio() >= a_refRat);
 
   const EBISBox& ebisBoxFine = a_ebislFine[a_din];
   const IntVect& coarCell    = a_coarVoF.gridIndex();
-  const Box      fineCells   = refine(Box(coarCell, coarCell), a_refRat);
-
-  CH_assert(ebisBoxFine.getRegion().contains(fineCells));
+  const Box      fineCells   = refine(Box(coarCell, coarCell), a_refRat) & ebisBoxFine.getRegion();
 
   Vector<VolIndex> finer;
+
+  if (fineCells.isEmpty()) {
+    return finer;
+  }
 
   for (BoxIterator bit(fineCells); bit.ok(); ++bit) {
     const Vector<VolIndex> vofs = ebisBoxFine.getVoFs(bit());
@@ -456,6 +474,14 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
   // children's cells refine one cell by two, so BoxIterator order is the binary number whose bit d is the offset along
   // direction d.
   const IntVect firstCell = 2 * coarsen(ancestors[0].gridIndex(), 2);
+
+#ifndef NDEBUG
+  for (int i = 0; i < ancestors.size(); i++) {
+    const IntVect offset = ancestors[i].gridIndex() - firstCell;
+
+    CH_assert(offset.min() >= 0 && offset.max() <= 1);
+  }
+#endif
 
   const auto gatherKey = [&](const VolIndex& a_child) -> std::pair<int, int> {
     int rank = 0;
@@ -536,8 +562,11 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
     doneAdding = order.size() == oldSize;
   }
 
-  // Children that no path joins to the first one are listed last, in gathering order.
+  // The children are the VoFs one level finer under a single VoF, so a path joins every one of them to the first one.
+  // Should one be left over in a graph that breaks this, it is listed last, in gathering order.
   for (int j = 0; j < numChildren; j++) {
+    CH_assert(listed[j]);
+
     if (!listed[j]) {
       order.push_back(j);
     }

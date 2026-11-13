@@ -3096,6 +3096,21 @@ AmrMesh::sanityCheck() const
     MayDay::Abort(msg.c_str());
   }
 
+  // Operators find the finer VoFs and faces under a coarse VoF or face on the finer level's layout, whose EB ghost
+  // cells must then hold the finer cells under every coarse cell they ask about: the coarse cell across a face on a box
+  // edge, and the coarse cells over the finer level's num_ghost ghost cells.
+  for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
+    const int refRat = m_refinementRatios[lvl];
+    const int reach  = std::max(refRat, refRat * ((m_numGhostCells + refRat - 1) / refRat));
+
+    if (m_numEbGhostsCells < reach) {
+      const std::string msg = "AmrMesh::sanityCheck -- eb_ghost = " + std::to_string(m_numEbGhostsCells) +
+                              " must be >= " + std::to_string(reach) + " for ref_rat = " + std::to_string(refRat) +
+                              " and num_ghost = " + std::to_string(m_numGhostCells);
+      MayDay::Abort(msg.c_str());
+    }
+  }
+
   // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
   // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's
   // domainSplit hard-errors otherwise; front-run it with a clear message.

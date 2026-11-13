@@ -238,6 +238,8 @@ EBMassRedistribution::defineStencils() noexcept
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
 
+          // The neighbour lies at most m_redistRadius cells outside the box, so its finer cells lie within the
+          // m_refToFine * m_redistRadius ghost cells that the refined grids carry.
           const Vector<VolIndex>& refinedVoFs = VofUtils::getFinerVoFs(curVoF,
                                                                        m_eblgRefined.getEBISL(),
                                                                        din,

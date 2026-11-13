@@ -900,7 +900,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                                         false);
   Vector<VolIndex> fineVoFs;
   for (int i = 0; i < coarVoFs.size(); i++) {
-    fineVoFs.append(VofUtils::getFinerVoFs(coarVoFs[i], a_ebislFine, a_dit, m_refRat));
+    fineVoFs.append(VofUtils::getFinerVoFsInRegion(coarVoFs[i], a_ebislFine, a_dit, m_refRat));
   }
 
   // Only unique, in case something went wrong.

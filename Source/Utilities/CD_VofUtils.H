@@ -264,6 +264,25 @@ public:
   static Vector<FaceIndex>
   getFinerFaces(const FaceIndex& a_coarFace, const EBISLayout& a_ebislFine, const DataIndex& a_din, const int a_refRat);
 
+  /**
+   * @brief Get the VoFs on a finer layout that coarsen to a coarse VoF and lie in the finer EBISBox, in no particular
+   * order.
+   * @details For callers that need only the set of finer VoFs, and may ask about coarse cells whose finer cells reach
+   * past the finer EBISBox. Finer cells outside the EBISBox are left out. The VoFs are listed in BoxIterator order of
+   * their cells, then by cell index. This costs less than getFinerVoFs, which also orders them.
+   * @param[in] a_coarVoF   Coarse VoF.
+   * @param[in] a_ebislFine Finer layout. Shares DataIndex with the layout of a_coarVoF, and has a maximum coarsening
+   * ratio of at least a_refRat.
+   * @param[in] a_din       Grid index on both layouts.
+   * @param[in] a_refRat    Refinement ratio between the two layouts. A power of two.
+   * @return The finer VoFs in the finer EBISBox that coarsen to a_coarVoF.
+   */
+  static Vector<VolIndex>
+  getFinerVoFsInRegion(const VolIndex&   a_coarVoF,
+                       const EBISLayout& a_ebislFine,
+                       const DataIndex&  a_din,
+                       const int         a_refRat);
+
 protected:
   /**
    * @brief Get the VoFs on a finer layout that coarsen to a coarse VoF, in gathering order.
