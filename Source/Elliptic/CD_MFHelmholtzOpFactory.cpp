@@ -266,14 +266,20 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
 
     m_hasMgLevels[amrLevel] = numMgLevels > 1;
 
-    // The realm builds down to the coarsest bottom domain registered on it, so it stops before this factory's bottom
-    // domain only if the grids could not be coarsened further, or if the bottom cell count was lowered after
-    // registration.
-    if (amrLevel == 0 && isCoarser(m_bottomDomain, realmLevels.back().getDomain())) {
+    // The realm builds down to the coarsest bottom domain registered on it. It stops before this factory's bottom
+    // domain when the last domain can not be coarsened by 2, which no hierarchy can get past, or otherwise when the
+    // grids could not be coarsened or the bottom cell count was lowered after registration. Only the latter is
+    // reported.
+    const ProblemDomain coarsestDomain = realmLevels.back().getDomain();
+
+    const bool stopsEarly = isCoarser(m_bottomDomain, coarsestDomain);
+    const bool canCoarsen = refine(coarsen(coarsestDomain, 2), 2) == coarsestDomain;
+
+    if (amrLevel == 0 && stopsEarly && canCoarsen) {
       std::stringstream ss;
 
-      ss << "MFHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at "
-         << realmLevels.back().getDomain() << ", which is finer than the bottom domain " << m_bottomDomain;
+      ss << "MFHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at " << coarsestDomain
+         << ", which is finer than the bottom domain " << m_bottomDomain;
 
       MayDay::Warning(ss.str().c_str());
     }

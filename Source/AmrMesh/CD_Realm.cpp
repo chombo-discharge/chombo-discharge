@@ -587,7 +587,8 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
   a_domainCoar = coarsen(a_domainFine, mgRefRat);
 
   // Restriction and prolongation between the two levels coarsen the fine grids by 2, so they must be coarsenable.
-  // Since the fine domain is then coarsenable by 2, the block search below always succeeds with a block of 2 or more.
+  // The block search below runs through powers of 2, and the fine domain is then coarsenable by 2, so the search
+  // always succeeds with a block of 2 or more.
   if (refine(a_domainCoar, mgRefRat) == a_domainFine && a_dblFine.coarsenable(mgRefRat)) {
     const Box domainBox = a_domainFine.domainBox();
 
@@ -598,8 +599,15 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
     }
 
     if (numPtsLeft == 0) {
-      int block = m_maxBlockSize;
+      // Largest power of 2 that is no larger than m_maxBlockSize.
+      int block = 1;
+      while (2 * block <= m_maxBlockSize) {
+        block *= 2;
+      }
 
+      // The coarse domain is split into boxes no larger than block. With block >= 4 the coarse domain is divisible by
+      // block/2, so every box has an even width. With block == 2 a box of width 1 is possible, and the coarsenable
+      // check above then ends the hierarchy at the next level.
       while (block > 1 && !hasCoarser) {
         if (domainBox.coarsenable(block)) {
           Vector<Box> boxes;
