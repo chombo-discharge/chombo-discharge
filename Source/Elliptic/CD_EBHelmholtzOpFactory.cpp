@@ -132,12 +132,22 @@ EBHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
 
     // Use the realm's levels down to, and including, the last one that is not coarser than the bottom domain.
     int numMgLevels = 1;
+
     while (numMgLevels < static_cast<int>(realmLevels.size()) &&
            !(ChomboDischarge::EBHelmholtzOpFactory::isCoarser(realmLevels[numMgLevels]->getDomain(), m_bottomDomain))) {
       numMgLevels++;
     }
 
     m_hasMgLevels[amrLevel] = numMgLevels > 1;
+
+    // The realm builds down to the coarsest bottom domain registered on it, so it stops before this factory's bottom
+    // domain only if the grids could not be coarsened further, or if the bottom cell count was lowered after
+    // registration.
+    if (amrLevel == 0 &&
+        ChomboDischarge::EBHelmholtzOpFactory::isCoarser(m_bottomDomain, realmLevels.back()->getDomain())) {
+      pout() << "EBHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at "
+             << realmLevels.back()->getDomain() << ", which is finer than the bottom domain " << m_bottomDomain << endl;
+    }
 
     m_mgLevelGrids[amrLevel].resize(0);
     m_mgAcoef[amrLevel].resize(0);
@@ -159,6 +169,8 @@ EBHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
         const RefCountedPtr<EBLevelGrid>& mgEblgCoar = realmLevels[img];
 
         const EBLevelGrid& eblgCoar = *mgEblgCoar;
+
+        CH_assert(eblgCoar.getGhost() >= m_ghostPhi.max());
 
         const EBISLayout& ebislCoar = eblgCoar.getEBISL();
 

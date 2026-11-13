@@ -33,10 +33,8 @@
 const std::string Realm::Primal = "primal";
 const std::string Realm::primal = "primal";
 
-Realm::Realm() : m_isDefined(false), m_verbosity(-1)
+Realm::Realm() : m_isDefined(false), m_verbosity(-1), m_maxBlockSize(-1), m_mgMinCellsBottom(-1)
 {
-  m_mgMinCellsBottom = -1;
-
   ParmParse pp("Realm");
 
   pp.query("verbosity", m_verbosity);
@@ -479,8 +477,9 @@ Realm::defineMultigridLevels()
   Vector<Vector<DisjointBoxLayout>> mgGrids;
   Vector<Vector<ProblemDomain>>     mgDomains;
 
-  if (m_mgMinCellsBottom > 0) {
+  if (m_isDefined && m_finestLevel >= 0 && m_mgMinCellsBottom > 0) {
     ProblemDomain bottomDomain = m_domains[0];
+
     while (bottomDomain.domainBox().shortside() >= 2 * m_mgMinCellsBottom) {
       bottomDomain.coarsen(mgRefRat);
     }
@@ -585,7 +584,9 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
 
   a_domainCoar = coarsen(a_domainFine, mgRefRat);
 
-  if (refine(a_domainCoar, mgRefRat) == a_domainFine) {
+  // Restriction and prolongation between the two levels coarsen the fine grids by 2, so they must be coarsenable.
+  // Since the fine domain is then coarsenable by 2, the block search below always succeeds with a block of 2 or more.
+  if (refine(a_domainCoar, mgRefRat) == a_domainFine && a_dblFine.coarsenable(mgRefRat)) {
     const Box domainBox = a_domainFine.domainBox();
 
     unsigned long long numPtsLeft = domainBox.numPts();
@@ -615,7 +616,7 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
         }
       }
     }
-    else if (a_dblFine.coarsenable(mgRefRat)) {
+    else {
       coarsen(a_dblCoar, a_dblFine, mgRefRat);
 
       hasCoarser = true;

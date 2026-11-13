@@ -255,12 +255,21 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
 
     // Use the realm's levels down to, and including, the last one that is not coarser than the bottom domain.
     int numMgLevels = 1;
+
     while (numMgLevels < static_cast<int>(realmLevels.size()) &&
            !isCoarser(realmLevels[numMgLevels].getDomain(), m_bottomDomain)) {
       numMgLevels++;
     }
 
     m_hasMgLevels[amrLevel] = numMgLevels > 1;
+
+    // The realm builds down to the coarsest bottom domain registered on it, so it stops before this factory's bottom
+    // domain only if the grids could not be coarsened further, or if the bottom cell count was lowered after
+    // registration.
+    if (amrLevel == 0 && isCoarser(m_bottomDomain, realmLevels.back().getDomain())) {
+      pout() << "MFHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at "
+             << realmLevels.back().getDomain() << ", which is finer than the bottom domain " << m_bottomDomain << endl;
+    }
 
     m_mgLevelGrids[amrLevel].resize(0);
     m_mgAcoef[amrLevel].resize(0);
@@ -280,11 +289,16 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
       for (int img = 1; img < numMgLevels; img++) {
         const MFLevelGrid& mgMflgCoar = realmLevels[img];
 
+        for (int i = 0; i < mgMflgCoar.numPhases(); i++) {
+          CH_assert(mgMflgCoar.getEBLevelGrid(i).getGhost() >= m_ghostPhi.max());
+        }
+
         const DisjointBoxLayout& dblCoar = mgMflgCoar.getGrids();
 
         // The Chombo multifluid things need Vector<EBISLayout> for the factories.
         Vector<int>        ebislComps;
         Vector<EBISLayout> ebislCoar;
+
         for (int i = 0; i < mgMflgCoar.numPhases(); i++) {
           ebislComps.push_back(m_nComp);
           ebislCoar.push_back(mgMflgCoar.getEBLevelGrid(i).getEBISL());

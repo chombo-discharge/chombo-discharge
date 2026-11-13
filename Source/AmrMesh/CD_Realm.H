@@ -847,7 +847,8 @@ protected:
 
   /**
    * @brief Get a factor 2 coarsening of a multigrid level.
-   * @details When the fine grids cover the whole domain the coarse domain is re-partitioned: it is split into boxes
+   * @details A coarsening exists only if the fine domain and the fine grids are coarsenable by 2. When the fine grids
+   * cover the whole domain the coarse domain is re-partitioned: it is split into boxes
    * of the largest power-of-2 size, no larger than m_maxBlockSize, by which the fine domain is coarsenable, and the
    * boxes are Morton ordered and load balanced. Otherwise the fine boxes are coarsened directly, keeping their ranks.
    * @param[out] a_dblCoar    Coarse grids
