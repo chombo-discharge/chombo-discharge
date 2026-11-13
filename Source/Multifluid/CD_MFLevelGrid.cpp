@@ -17,14 +17,6 @@
 
 MFLevelGrid::MFLevelGrid() = default;
 
-void
-MFLevelGrid::setMaxRefinementRatio(const int a_refRat)
-{
-  for (int i = 0; i < m_eblg.size(); i++) {
-    m_eblg[i].setMaxRefinementRatio(a_refRat);
-  }
-}
-
 // Olde code below here
 
 MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&                   a_dbl,

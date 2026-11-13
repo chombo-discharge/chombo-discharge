@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_EBCoarAve.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -40,12 +41,10 @@ EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
                      const EBISLayout&        a_ebislFine,
                      const EBISLayout&        a_ebislCoar,
                      const ProblemDomain&     a_domainCoar,
-                     const int&               a_refRat,
-                     const EBIndexSpace*      a_ebisPtr) noexcept
+                     const int&               a_refRat) noexcept
 {
   CH_TIME("EBCoarAve::EBCoarAve(DBL version)");
 
-  CH_assert(a_ebisPtr->isDefined());
   CH_assert(a_refRat >= 2);
   CH_assert(a_refRat % 2 == 0);
 
@@ -57,7 +56,6 @@ EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
   EBLevelGrid eblgCoFi;
 
   coarsen(eblgCoFi, eblgFine, a_refRat);
-  eblgCoFi.getEBISL().setMaxRefinementRatio(a_refRat, a_ebisPtr);
 
   this->define(eblgFine, eblgCoar, eblgCoFi, a_refRat);
 }
@@ -156,7 +154,7 @@ EBCoarAve::defineCellStencils() noexcept
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
-      const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs    = VofUtils::getFinerVoFs(coarVoF, ebislFine, din, m_refRat);
       const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
@@ -238,7 +236,7 @@ EBCoarAve::defineFaceStencils() noexcept
 
       auto buildStencils = [&](const FaceIndex& coarFace) -> void {
         const Real              areaCoar     = ebisBoxCoar.areaFrac(coarFace);
-        const Vector<FaceIndex> fineFaces    = ebislCoar.refine(coarFace, m_refRat, din);
+        const Vector<FaceIndex> fineFaces    = VofUtils::getFinerFaces(coarFace, ebislFine, din, m_refRat);
         const int               numFineFaces = static_cast<int>(fineFaces.size());
 
         FaceStencil& arithSten = arithmeticStencils(coarFace, 0);
@@ -312,7 +310,7 @@ EBCoarAve::defineEBStencils() noexcept
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             areaCoar    = ebisBoxCoar.bndryArea(coarVoF);
-      const Vector<VolIndex> refinedVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> refinedVoFs = VofUtils::getFinerVoFs(coarVoF, ebislFine, din, m_refRat);
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& harmSten  = harmonicStencils(coarVoF, 0);

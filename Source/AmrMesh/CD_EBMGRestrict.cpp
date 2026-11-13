@@ -18,6 +18,7 @@
 #include <CD_BoxLoops.H>
 #include <CD_DataOps.H>
 #include <CD_EBMGRestrict.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 EBMGRestrict::EBMGRestrict() noexcept : m_isDefined(false)
@@ -56,11 +57,11 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
 
   // Create the coarsend layout
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
 
   // Define buffer data.
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+  const EBISLayout&        ebislFine = m_eblgFine.getEBISL();
 
   // Weighting factor for stencils.
   const Real fineWeight = 1. / std::pow(m_refRat, SpaceDim);
@@ -92,7 +93,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
 
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
-      const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs    = VofUtils::getFinerVoFs(coarVoF, ebislFine, din, m_refRat);
       const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);

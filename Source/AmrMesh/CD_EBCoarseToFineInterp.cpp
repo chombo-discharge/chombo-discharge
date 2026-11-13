@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_EBCoarseToFineInterp.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -133,7 +134,7 @@ EBCoarseToFineInterp::defineWeights() noexcept
       // but that won't matter because they don't have a boundary area. We do it similarly for the volume fractions.
 
       const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, din);
-      const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs = VofUtils::getFinerVoFs(coarVoF, ebislFine, din, m_refRat);
 
       Real fineVolume = 0.0;
       Real fineArea   = 0.0;
@@ -337,7 +338,7 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   // coarse VoFs, and a single-valued coarse cell may refine to a multi-valued fine cell that the
   // regular single-valued kernel above cannot set, so singly-cut coarse cells cannot be skipped.
   auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
-    const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
+    const Vector<VolIndex> fineVoFs = VofUtils::getFinerVoFs(coarVoF, ebislFine, a_dit, m_refRat);
 
     for (int i = 0; i < fineVoFs.size(); i++) {
       a_fineData(fineVoFs[i], a_fineVar) = a_coarData(coarVoF, a_coarVar);

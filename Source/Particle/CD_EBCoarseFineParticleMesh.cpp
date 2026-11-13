@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_EBCoarseFineParticleMesh.H>
+#include <CD_VofUtils.H>
 #include <CD_EBAddOp.H>
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>
@@ -74,6 +75,7 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   // Make the coarsened and refine grids.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
+  m_eblgFiCo.getEBISL().setMaxCoarseningRatio(m_refRat, m_eblgCoar.getEBIS());
 
   // valid+ghost -> valid
   m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(),
@@ -213,7 +215,7 @@ EBCoarseFineParticleMesh::defineStencils() noexcept
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
-      const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs    = VofUtils::getFinerVoFs(coarVoF, ebislFiCo, din, m_refRat);
       const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
@@ -368,7 +370,7 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
 
     // Scale the value in the coarse cell.
     auto scaleCoar = [&](const VolIndex& coarVof) -> void {
-      const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, din);
+      const Vector<VolIndex> fineVofs = VofUtils::getFinerVoFs(coarVof, ebislFine, din, m_refRat);
 
       for (int comp = 0; comp < m_nComp; comp++) {
         coFiData(coarVof, comp) *= 1. / static_cast<double>(fineVofs.size());
@@ -522,7 +524,7 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
     VoFIterator& vofit = m_vofIterCoar[din];
 
     auto kernel = [&](const VolIndex& coarVoF) -> void {
-      const Vector<VolIndex>& fineVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex>& fineVoFs = VofUtils::getFinerVoFs(coarVoF, ebislFiCo, din, m_refRat);
 
       for (int ivof = 0; ivof < fineVoFs.size(); ivof++) {
         const VolIndex& fineVoF   = fineVoFs[ivof];
