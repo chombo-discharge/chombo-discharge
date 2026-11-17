@@ -77,12 +77,15 @@ public:
    * @param[in] a_mflg          Grids on this level
    * @param[in] a_mflgCoFi      Coarsening of fine level grids
    * @param[in] a_mflgCoar      Coarse grids
-   * @param[in] a_mflgCoFiMG    Grids on this level coarsened by 2. Only used if a_hasMGObjects is true.
    * @param[in] a_mflgCoarMG    Multigrid-grids
    * @param[in] a_validCells    Valid grid cells (will be null on MG levels)
    * @param[in] a_interpolator  Interpolator
    * @param[in] a_fluxReg       Flux register
    * @param[in] a_coarAve       Coarsener
+   * @param[in] a_restrictOps   Restriction onto a_mflgCoFi, per phase. Only used if a_hasCoar is true.
+   * @param[in] a_prolongOps    Prolongation from a_mflgCoar, per phase. Only used if a_hasCoar is true.
+   * @param[in] a_restrictOpsMG Restriction onto a_mflgCoarMG, per phase. Only used if a_hasMGObjects is true.
+   * @param[in] a_prolongOpsMG  Prolongation from a_mflgCoarMG, per phase. Only used if a_hasMGObjects is true.
    * @param[in] a_domainBC      Domain BC
    * @param[in] a_ebBC          Boundary conditions on EBs
    * @param[in] a_jumpBcFactory Factory class for making jump BCs
@@ -118,11 +121,14 @@ public:
                 const MFLevelGrid&                               a_mflg,
                 const MFLevelGrid&                               a_mflgCoFi,
                 const MFLevelGrid&                               a_mflgCoar,
-                const MFLevelGrid&                               a_mflgCoFiMG,
                 const MFLevelGrid&                               a_mflgCoarMG,
                 const MFMultigridInterpolator&                   a_interpolator,
                 const MFReflux&                                  a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
+                const Vector<RefCountedPtr<EBMGRestrict>>&       a_restrictOps,
+                const Vector<RefCountedPtr<EBMGProlong>>&        a_prolongOps,
+                const Vector<RefCountedPtr<EBMGRestrict>>&       a_restrictOpsMG,
+                const Vector<RefCountedPtr<EBMGProlong>>&        a_prolongOpsMG,
                 const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
                 const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,

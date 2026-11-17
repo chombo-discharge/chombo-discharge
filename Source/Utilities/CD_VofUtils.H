@@ -16,6 +16,9 @@
 // Chombo includes
 #include <Stencils.H>
 #include <EBISBox.H>
+#include <EBISLayout.H>
+#include <BaseIVFAB.H>
+#include <FaceIndex.H>
 #include <IntVectSet.H>
 #include <RealVect.H>
 #include <ProblemDomain.H>
@@ -229,7 +232,193 @@ public:
   static void
   onlyUnique(Vector<VolIndex>& a_vofs);
 
+  /**
+   * @brief Get the VoFs on a finer layout that coarsen to a coarse VoF.
+   * @details Finds the VoFs among the cells of refine(coarse cell, a_refRat) whose coarsening by a_refRat is a_coarVoF.
+   * They are listed in the order EBISLayout::refine lists them for a graph that Chombo coarsened: at each factor of
+   * two, the VoFs one level finer are gathered in BoxIterator order of their cells, and each connected set is listed in
+   * the order it grows from its first VoF, as in EBGraph::getVoFSets. VoFs on intermediate levels are identified
+   * through coarsening, and two of them are connected when some pair of the finer VoFs under them shares a face. Only
+   * coarsening links are read, so the coarse graph needs no links to the finer level.
+   * @param[in] a_coarVoF   Coarse VoF.
+   * @param[in] a_ebislFine Finer layout. Shares DataIndex with the layout of a_coarVoF, holds every cell of
+   * refine(coarse cell, a_refRat), and has a maximum coarsening ratio of at least a_refRat.
+   * @param[in] a_din       Grid index on both layouts.
+   * @param[in] a_refRat    Refinement ratio between the two layouts. A power of two.
+   * @return The finer VoFs that coarsen to a_coarVoF.
+   */
+  static Vector<VolIndex>
+  getFinerVoFs(const VolIndex& a_coarVoF, const EBISLayout& a_ebislFine, const DataIndex& a_din, const int a_refRat);
+
+  /**
+   * @brief Get the faces on a finer layout that coarsen to a coarse face.
+   * @details For an interior face, lists the faces between the finer VoFs of its low and high VoFs, pairing them in the
+   * order of getFinerVoFs at each factor of two as EBISLayout::refine does. For a face on the domain boundary, lists
+   * the boundary faces of the finer VoFs of its interior VoF that lie against the boundary.
+   * @param[in] a_coarFace  Coarse face.
+   * @param[in] a_ebislFine Finer layout. Shares DataIndex with the layout of a_coarFace, holds every cell of the
+   * refined cells on both sides of the face, and has a maximum coarsening ratio of at least a_refRat.
+   * @param[in] a_din       Grid index on both layouts.
+   * @param[in] a_refRat    Refinement ratio between the two layouts. A power of two.
+   * @return The finer faces that coarsen to a_coarFace.
+   */
+  static Vector<FaceIndex>
+  getFinerFaces(const FaceIndex& a_coarFace, const EBISLayout& a_ebislFine, const DataIndex& a_din, const int a_refRat);
+
+  /**
+   * @brief Get the finer VoFs under a coarse VoF from stored finer-VoF lists.
+   * @details A regular coarse cell gives every cell of refine(coarse cell, a_refRat) with VoF index 0, in BoxIterator
+   * order. A covered coarse cell gives no VoFs. An irregular coarse cell gives its stored list, which must exist. The
+   * result equals EBISLayout::refine on a graph that Chombo coarsened.
+   * @param[in] a_coarVoF     Coarse VoF.
+   * @param[in] a_ebisBoxCoar Coarse EBISBox holding a_coarVoF.
+   * @param[in] a_finerVoFs   Stored finer-VoF lists of the irregular coarse cells, on the same grid index.
+   * @param[in] a_refRat      Refinement ratio between the coarse and the finer layout.
+   * @return The finer VoFs under a_coarVoF.
+   */
+  static Vector<VolIndex>
+  getStoredFinerVoFs(const VolIndex&                    a_coarVoF,
+                     const EBISBox&                     a_ebisBoxCoar,
+                     const BaseIVFAB<Vector<VolIndex>>& a_finerVoFs,
+                     const int                          a_refRat);
+
+  /**
+   * @brief Get the coarse cells whose finer cells all lie in a finer region.
+   * @param[in] a_fineRegion Finer region.
+   * @param[in] a_refRat     Refinement ratio between the coarse and the finer cells.
+   * @return The coarse cells whose refinement by a_refRat lies in a_fineRegion. May be empty.
+   */
+  static Box
+  getCoarseCellsWithAllFinerCells(const Box& a_fineRegion, const int a_refRat);
+
+  /**
+   * @brief Get the finer faces under a coarse face from stored finer-VoF lists.
+   * @details When every finer cell of both coarse cells lies in the finer EBISBox, this gives EBISLayout::refine's
+   * result: with a refinement ratio of 2 it pairs the finer VoFs of the low and high VoFs that are connected on the
+   * finer graph, as EBGraph::refine does, and with a larger ratio it calls getFinerFaces. Otherwise it starts from the
+   * coarse cell whose finer cells all lie in the finer EBISBox, and keeps the faces of its finer VoFs next to the face
+   * whose other VoF coarsens to the other coarse VoF; this needs one finer ghost cell. A face on the boundary of the
+   * coarse region takes the boundary faces of the finer VoFs of its interior VoF.
+   * @param[in] a_coarFace    Coarse face.
+   * @param[in] a_ebisBoxCoar Coarse EBISBox holding a_coarFace.
+   * @param[in] a_finerVoFs   Stored finer-VoF lists of the irregular coarse cells, on the same grid index.
+   * @param[in] a_ebislFine   Finer layout, sharing DataIndex with the coarse layout.
+   * @param[in] a_din         Grid index on both layouts.
+   * @param[in] a_refRat      Refinement ratio between the coarse and the finer layout.
+   * @return The finer faces under a_coarFace.
+   */
+  static Vector<FaceIndex>
+  getStoredFinerFaces(const FaceIndex&                   a_coarFace,
+                      const EBISBox&                     a_ebisBoxCoar,
+                      const BaseIVFAB<Vector<VolIndex>>& a_finerVoFs,
+                      const EBISLayout&                  a_ebislFine,
+                      const DataIndex&                   a_din,
+                      const int                          a_refRat);
+
 protected:
+  /**
+   * @brief Get the finer faces under a coarse face from the finer VoFs of one of its coarse VoFs.
+   * @details Takes the finer VoFs of the a_side coarse VoF in the layer of cells next to the face, and keeps their
+   * faces across the face whose other VoF coarsens to the other coarse VoF. Listed in the order of a_finerVoFs, then of
+   * the faces of each finer VoF.
+   * @param[in] a_coarFace  Coarse face.
+   * @param[in] a_side      Side of the face whose coarse VoF a_finerVoFs belong to.
+   * @param[in] a_finerVoFs The finer VoFs of the a_side coarse VoF.
+   * @param[in] a_ebislFine Finer layout, with a maximum coarsening ratio of at least a_refRat.
+   * @param[in] a_din       Grid index on both layouts.
+   * @param[in] a_refRat    Refinement ratio between the two layouts.
+   * @return The finer faces under a_coarFace.
+   */
+  static Vector<FaceIndex>
+  getFinerFacesFromSide(const FaceIndex&        a_coarFace,
+                        const Side::LoHiSide    a_side,
+                        const Vector<VolIndex>& a_finerVoFs,
+                        const EBISLayout&       a_ebislFine,
+                        const DataIndex&        a_din,
+                        const int               a_refRat);
+
+  /**
+   * @brief Get the VoFs on a finer layout that coarsen to a coarse VoF, in gathering order.
+   * @details Gathering order is BoxIterator order of the cells of refine(coarse cell, a_refRat), then cell index.
+   * @param[in] a_coarVoF   Coarse VoF.
+   * @param[in] a_ebislFine Finer layout.
+   * @param[in] a_din       Grid index on both layouts.
+   * @param[in] a_refRat    Refinement ratio between the two layouts.
+   * @return The finer VoFs that coarsen to a_coarVoF.
+   */
+  static Vector<VolIndex>
+  gatherFinerVoFs(const VolIndex& a_coarVoF, const EBISLayout& a_ebislFine, const DataIndex& a_din, const int a_refRat);
+
+  /**
+   * @brief Group the finest VoFs under one VoF by their ancestor one factor of two finer than it, and order the groups.
+   * @details The groups are ordered as EBGraph::getVoFSets lists the VoFs of one connected set: gathered in BoxIterator
+   * order of the ancestors' cells, then cell index, and listed in the order the set grows from its first member. Two
+   * groups are connected when some pair of their finest VoFs shares a face.
+   * @param[in] a_finest    The finest VoFs under one VoF.
+   * @param[in] a_ebislFine Finest layout.
+   * @param[in] a_din       Grid index.
+   * @param[in] a_ratio     Ratio between the level of the VoF the finest VoFs lie under and the finest level. At least
+   * two.
+   * @return The finest VoFs of each group, groups in order.
+   */
+  static Vector<Vector<VolIndex>>
+  orderFinerGroups(const Vector<VolIndex>& a_finest,
+                   const EBISLayout&       a_ebislFine,
+                   const DataIndex&        a_din,
+                   const int               a_ratio);
+
+  /**
+   * @brief Order the finest VoFs under one VoF as EBISLayout::refine lists them.
+   * @param[in] a_finest    The finest VoFs under one VoF.
+   * @param[in] a_ebislFine Finest layout.
+   * @param[in] a_din       Grid index.
+   * @param[in] a_ratio     Ratio between the level of the VoF the finest VoFs lie under and the finest level.
+   * @return a_finest in order.
+   */
+  static Vector<VolIndex>
+  orderFinerVoFs(const Vector<VolIndex>& a_finest,
+                 const EBISLayout&       a_ebislFine,
+                 const DataIndex&        a_din,
+                 const int               a_ratio);
+
+  /**
+   * @brief Append the finest faces between the finest VoFs under two VoFs that share an interior face.
+   * @param[in,out] a_faces     Faces, appended to.
+   * @param[in]     a_finestLo  The finest VoFs under the low VoF.
+   * @param[in]     a_finestHi  The finest VoFs under the high VoF.
+   * @param[in]     a_ebislFine Finest layout.
+   * @param[in]     a_din       Grid index.
+   * @param[in]     a_ratio     Ratio between the level of the two VoFs and the finest level.
+   * @param[in]     a_dir       Face direction.
+   */
+  static void
+  appendFinerFaces(Vector<FaceIndex>&      a_faces,
+                   const Vector<VolIndex>& a_finestLo,
+                   const Vector<VolIndex>& a_finestHi,
+                   const EBISLayout&       a_ebislFine,
+                   const DataIndex&        a_din,
+                   const int               a_ratio,
+                   const int               a_dir);
+
+  /**
+   * @brief Append the finest boundary faces under a VoF's face on the domain boundary.
+   * @param[in,out] a_faces     Faces, appended to.
+   * @param[in]     a_finest    The finest VoFs under the VoF.
+   * @param[in]     a_ebislFine Finest layout.
+   * @param[in]     a_din       Grid index.
+   * @param[in]     a_ratio     Ratio between the level of the VoF and the finest level.
+   * @param[in]     a_dir       Face direction.
+   * @param[in]     a_side      Side of the VoF on which the domain boundary lies.
+   */
+  static void
+  appendFinerBoundaryFaces(Vector<FaceIndex>&      a_faces,
+                           const Vector<VolIndex>& a_finest,
+                           const EBISLayout&       a_ebislFine,
+                           const DataIndex&        a_din,
+                           const int               a_ratio,
+                           const int               a_dir,
+                           const Side::LoHiSide    a_side);
+
   /**
    * @brief Check if a quadrant is well-defined for a direction in space.
    * @param[in] a_normal The direction in space which defines the quadrant.

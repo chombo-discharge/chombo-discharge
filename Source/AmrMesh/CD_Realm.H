@@ -216,6 +216,51 @@ public:
   getMultigridCoarseAverage(const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the finer VoFs under the coarse VoFs of the coarsened fine grids, for a phase.
+   * @details See PhaseRealm::getFinerVoFs().
+   * @param[in] a_phase Phase
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels for a phase.
+   * @details See PhaseRealm::getMultigridRestriction().
+   * @param[in] a_phase Phase
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels for a phase.
+   * @details See PhaseRealm::getMultigridProlongation().
+   * @param[in] a_phase Phase
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelRestriction().
+   * @param[in] a_phase Phase
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelProlongation().
+   * @param[in] a_phase Phase
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation(const phase::which_phase a_phase) const;
+
+  /**
    * @brief Get the multifluid multigrid levels.
    * @details Composed from the phases' multigrid levels, with the same indexing as getMultigridLevelGrids().
    * @return The multifluid multigrid levels under each AMR level.

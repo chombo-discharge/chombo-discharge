@@ -18,6 +18,8 @@
 #include <EBLevelGrid.H>
 #include <VoFIterator.H>
 #include <FaceIterator.H>
+#include <BaseIVFAB.H>
+#include <LayoutData.H>
 
 // Our includes
 #include <CD_Average.H>
@@ -52,35 +54,18 @@ public:
   EBCoarAve(const EBCoarAve& a_other) = delete;
 
   /**
-   * @brief Defining constructor.
-   * @details This version creates it's own coarsened grids
-   * @param[in] a_dblFine    Fine grids
-   * @param[in] a_dblCoar    Coarse grids
-   * @param[in] a_ebislFine  Fine EBISL
-   * @param[in] a_ebislCoar  Coarse EBISL
-   * @param[in] a_domainCoar Coarse domain
-   * @param[in] a_refRat     Refinement ratio
-   * @param[in] a_ebisPtr    EBIS pointer.
-   */
-  EBCoarAve(const DisjointBoxLayout& a_dblFine,
-            const DisjointBoxLayout& a_dblCoar,
-            const EBISLayout&        a_ebislFine,
-            const EBISLayout&        a_ebislCoar,
-            const ProblemDomain&     a_domainCoar,
-            const int&               a_refRat,
-            const EBIndexSpace*      a_ebisPtr) noexcept;
-
-  /**
    * @brief Defining constructor. Calls the define function.
    * @param[in] a_eblgFine  Fine grids
    * @param[in] a_eblgCoar  Coarse grids
    * @param[in] a_eblgCoFi  Coarsened fine grids
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat    Refinement ratio between coarse and level
    */
-  EBCoarAve(const EBLevelGrid& a_eblgFine,
-            const EBLevelGrid& a_eblgCoar,
-            const EBLevelGrid& a_eblgCoFi,
-            const int&         a_refRat) noexcept;
+  EBCoarAve(const EBLevelGrid&                             a_eblgFine,
+            const EBLevelGrid&                             a_eblgCoar,
+            const EBLevelGrid&                             a_eblgCoFi,
+            const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+            const int&                                     a_refRat) noexcept;
 
   /**
    * @brief Destructor (does nothing)
@@ -89,16 +74,18 @@ public:
 
   /**
    * @brief Define function -- puts operator in usable state.
-   * @param[in] a_eblgFine Fine grids
-   * @param[in] a_eblgCoar Coarse grids
-   * @param[in] a_eblgCoFi Coarsened fine grids
-   * @param[in] a_refRat   Refinement ratio between coarse and level
+   * @param[in] a_eblgFine  Fine grids
+   * @param[in] a_eblgCoar  Coarse grids
+   * @param[in] a_eblgCoFi  Coarsened fine grids
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
+   * @param[in] a_refRat    Refinement ratio between coarse and level
    */
   virtual void
-  define(const EBLevelGrid& a_eblgFine,
-         const EBLevelGrid& a_eblgCoar,
-         const EBLevelGrid& a_eblgCoFi,
-         const int&         a_refRat) noexcept;
+  define(const EBLevelGrid&                             a_eblgFine,
+         const EBLevelGrid&                             a_eblgCoar,
+         const EBLevelGrid&                             a_eblgCoFi,
+         const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+         const int&                                     a_refRat) noexcept;
 
   /**
    * @brief Assignment not allowed.
@@ -250,21 +237,24 @@ protected:
 
   /**
    * @brief Define stencils for the various coarsening functions of cell data
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
    */
   virtual void
-  defineCellStencils() noexcept;
+  defineCellStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define stencils for the various coarsening functions of face data
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
    */
   virtual void
-  defineFaceStencils() noexcept;
+  defineFaceStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define stencils for the various coarsening functions of EB data
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
    */
   virtual void
-  defineEBStencils() noexcept;
+  defineEBStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define buffer storage

@@ -77,6 +77,16 @@ public:
   /**
    * @brief alias type alias.
    */
+  using AmrRestrictions = Vector<RefCountedPtr<EBMGRestrict>>;
+
+  /**
+   * @brief alias type alias.
+   */
+  using AmrProlongations = Vector<RefCountedPtr<EBMGProlong>>;
+
+  /**
+   * @brief alias type alias.
+   */
   using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
 
   /**
@@ -148,12 +158,18 @@ public:
    * used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
    * @param[in] a_mgLevelGrids     Multigrid levels under each AMR level, as built by the realm (see
    * PhaseRealm::getMultigridLevelGrids). The factory uses the entries that are not coarser than a_bottomDomain.
-   * @param[in] a_mgLevelGridsCoFi Coarsened grids between consecutive multigrid levels, as built by the realm (see
-   * PhaseRealm::getMultigridLevelGridsCoFi).
+   * @param[in] a_mgRestrictions  Restriction between consecutive multigrid levels, as built by the realm (see
+   * PhaseRealm::getMultigridLevelRestriction).
+   * @param[in] a_mgProlongations Prolongation between consecutive multigrid levels, as built by the realm (see
+   * PhaseRealm::getMultigridLevelProlongation).
    * @param[in] a_mgCoarseners     Coarse averaging between consecutive multigrid levels, as built by the realm (see
    * PhaseRealm::getMultigridCoarseAverage).
    * @param[in] a_amrLevelGridsCoFi Coarsened grids between AMR levels. Entry lvl is AMR level lvl+1 coarsened to AMR
    * level lvl (see PhaseRealm::getEBLevelGridCoFi).
+   * @param[in] a_amrRestrictions Restriction between AMR levels. Entry lvl restricts AMR level lvl onto
+   * a_amrLevelGridsCoFi[lvl-1] (see PhaseRealm::getMultigridRestriction).
+   * @param[in] a_amrProlongations Prolongation between AMR levels. Entry lvl prolongs from AMR level lvl-1 onto AMR
+   * level lvl (see PhaseRealm::getMultigridProlongation).
    * @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem
    * domains.
    * @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
@@ -164,35 +180,38 @@ public:
    * @param[in] a_domainBcFactory Domain bc factory
    * @param[in] a_ghostRHS Ghost r h s
    */
-  EBHelmholtzOpFactory(Location::Cell               a_dataLocation,
-                       const Real&                  a_alpha,
-                       const Real&                  a_beta,
-                       const RealVect&              a_probLo,
-                       const AmrLevelGrids&         a_amrLevelGrids,
-                       const AmrMask&               a_validCells,
-                       const AmrInterpolators&      a_amrInterpolators,
-                       const AmrFluxRegisters&      a_amrFluxRegisters,
-                       const AmrCoarseners&         a_amrCoarseners,
-                       const AmrRefRatios&          a_amrRefRatios,
-                       const AmrResolutions&        a_amrResolutions,
-                       const AmrCellData&           a_amrAcoef,
-                       const AmrFluxData&           a_amrBcoef,
-                       const AmrIrreData&           a_amrBcoefIrreg,
-                       const DomainBCFactory&       a_domainBcFactory,
-                       const EBBCFactory&           a_ebbcFactory,
-                       const IntVect&               a_ghostPhi,
-                       const IntVect&               a_ghostRHS,
-                       const Smoother&              a_smoother,
-                       const Real&                  a_relaxFactor,
-                       const int&                   a_chebyOrder,
-                       const Real&                  a_chebyEigRatio,
-                       const int&                   a_rasInnerSweeps,
-                       const Vector<AmrLevelGrids>& a_mgLevelGrids,
-                       const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
-                       const Vector<AmrCoarseners>& a_mgCoarseners,
-                       const AmrLevelGrids&         a_amrLevelGridsCoFi,
-                       const ProblemDomain&         a_bottomDomain,
-                       const bool                   a_refluxFree);
+  EBHelmholtzOpFactory(Location::Cell                  a_dataLocation,
+                       const Real&                     a_alpha,
+                       const Real&                     a_beta,
+                       const RealVect&                 a_probLo,
+                       const AmrLevelGrids&            a_amrLevelGrids,
+                       const AmrMask&                  a_validCells,
+                       const AmrInterpolators&         a_amrInterpolators,
+                       const AmrFluxRegisters&         a_amrFluxRegisters,
+                       const AmrCoarseners&            a_amrCoarseners,
+                       const AmrRefRatios&             a_amrRefRatios,
+                       const AmrResolutions&           a_amrResolutions,
+                       const AmrCellData&              a_amrAcoef,
+                       const AmrFluxData&              a_amrBcoef,
+                       const AmrIrreData&              a_amrBcoefIrreg,
+                       const DomainBCFactory&          a_domainBcFactory,
+                       const EBBCFactory&              a_ebbcFactory,
+                       const IntVect&                  a_ghostPhi,
+                       const IntVect&                  a_ghostRHS,
+                       const Smoother&                 a_smoother,
+                       const Real&                     a_relaxFactor,
+                       const int&                      a_chebyOrder,
+                       const Real&                     a_chebyEigRatio,
+                       const int&                      a_rasInnerSweeps,
+                       const Vector<AmrLevelGrids>&    a_mgLevelGrids,
+                       const Vector<AmrRestrictions>&  a_mgRestrictions,
+                       const Vector<AmrProlongations>& a_mgProlongations,
+                       const Vector<AmrCoarseners>&    a_mgCoarseners,
+                       const AmrLevelGrids&            a_amrLevelGridsCoFi,
+                       const AmrRestrictions&          a_amrRestrictions,
+                       const AmrProlongations&         a_amrProlongations,
+                       const ProblemDomain&            a_bottomDomain,
+                       const bool                      a_refluxFree);
 
   /**
    * @brief Destructor. Does nothing.
@@ -350,6 +369,16 @@ protected:
   AmrCoarseners m_amrCoarseners;
 
   /**
+   * @brief Restriction between AMR levels. Entry lvl restricts AMR level lvl onto the coarsened grids of level lvl.
+   */
+  AmrRestrictions m_amrRestrictions;
+
+  /**
+   * @brief Prolongation between AMR levels. Entry lvl prolongs from AMR level lvl-1 onto AMR level lvl.
+   */
+  AmrProlongations m_amrProlongations;
+
+  /**
    * @brief Refinement ratios
    */
   AmrRefRatios m_amrRefRatios;
@@ -430,22 +459,30 @@ protected:
   Vector<AmrCoarseners> m_mgCoarseners;
 
   /**
-   * @brief Coarsened grids between consecutive multigrid levels. m_mgLevelGridsCoFi[lvl][k] is m_mgLevelGrids[lvl][k]
-   * coarsened by 2.
+   * @brief Restriction between consecutive multigrid levels. m_mgRestrictions[lvl][k] restricts from
+   * m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1].
    */
-  Vector<AmrLevelGrids> m_mgLevelGridsCoFi;
+  Vector<AmrRestrictions> m_mgRestrictions;
+
+  /**
+   * @brief Prolongation between consecutive multigrid levels. m_mgProlongations[lvl][k] prolongs from
+   * m_mgLevelGrids[lvl][k+1] onto m_mgLevelGrids[lvl][k].
+   */
+  Vector<AmrProlongations> m_mgProlongations;
 
   /**
    * @brief Define the multigrid levels for this operator factory, and the coefficients on them.
    * @details Takes the entries of the realm's multigrid levels that are not coarser than the bottom domain.
-   * @param[in] a_mgLevelGrids     Multigrid levels under each AMR level, as built by the realm.
-   * @param[in] a_mgLevelGridsCoFi Coarsened grids between consecutive multigrid levels, as built by the realm.
-   * @param[in] a_mgCoarseners     Coarse averaging between consecutive multigrid levels, as built by the realm.
+   * @param[in] a_mgLevelGrids    Multigrid levels under each AMR level, as built by the realm.
+   * @param[in] a_mgRestrictions  Restriction between consecutive multigrid levels, as built by the realm.
+   * @param[in] a_mgProlongations Prolongation between consecutive multigrid levels, as built by the realm.
+   * @param[in] a_mgCoarseners    Coarse averaging between consecutive multigrid levels, as built by the realm.
    */
   void
-  defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLevelGrids,
-                        const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
-                        const Vector<AmrCoarseners>& a_mgCoarseners);
+  defineMultigridLevels(const Vector<AmrLevelGrids>&    a_mgLevelGrids,
+                        const Vector<AmrRestrictions>&  a_mgRestrictions,
+                        const Vector<AmrProlongations>& a_mgProlongations,
+                        const Vector<AmrCoarseners>&    a_mgCoarseners);
 
   /**
    * @brief Check if a domain is coarser than the other

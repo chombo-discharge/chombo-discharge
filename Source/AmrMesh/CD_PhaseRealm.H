@@ -26,6 +26,8 @@
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBMGRestrict.H>
+#include <CD_EBMGProlong.H>
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
@@ -316,6 +318,59 @@ public:
    */
   const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
   getMultigridCoarseAverage() const;
+
+  /**
+   * @brief Get the finer VoFs under the coarse VoFs of the coarsened fine grids.
+   * @details Entry [lvl] lives on getEBLevelGridCoFi()[lvl], for lvl smaller than the finest level. For every irregular
+   * cell whose finer cells all lie in the finer EBISBox, it holds the VoFs on level lvl+1 under each coarse VoF, in the
+   * order of EBISLayout::refine.
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs() const;
+
+  /**
+   * @brief Get the finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @details Entry [lvl][k] lives on getMultigridLevelGridsCoFi()[lvl][k] and holds the VoFs on multigrid level k
+   * under AMR level lvl, as getFinerVoFs() does for AMR levels.
+   * @return The finer-VoF lists of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
+  getMultigridFinerVoFs() const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels.
+   * @details Entry [lvl] restricts from AMR level lvl onto getEBLevelGridCoFi()[lvl-1], for lvl > 0. Defined when the
+   * multigrid operator is registered.
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction() const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels.
+   * @details Entry [lvl] prolongs from AMR level lvl-1 onto AMR level lvl, for lvl > 0. Defined when the multigrid
+   * operator is registered.
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation() const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels.
+   * @details Entry [lvl][k] restricts from multigrid level k onto multigrid level k+1 under AMR level lvl.
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction() const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels.
+   * @details Entry [lvl][k] prolongs from multigrid level k+1 onto multigrid level k under AMR level lvl.
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation() const;
 
   /**
    * @brief Get refined grids
@@ -705,6 +760,43 @@ protected:
   Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgCoarAve;
 
   /**
+   * @brief Finer VoFs under the coarse VoFs of the coarsened fine grids.
+   * @details m_finerVoFs[lvl] lives on m_eblgCoFi[lvl] and holds the VoFs on level lvl+1 under its irregular VoFs.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>> m_finerVoFs;
+
+  /**
+   * @brief Finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @details m_mgFinerVoFs[lvl][k] lives on m_mgLevelGridsCoFi[lvl][k] and holds the VoFs on m_mgLevelGrids[lvl][k]
+   * under its irregular VoFs.
+   */
+  Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>> m_mgFinerVoFs;
+
+  /**
+   * @brief Multigrid restriction between AMR levels.
+   * @details m_mgRestrict[lvl] restricts from m_eblg[lvl] onto m_eblgCoFi[lvl-1].
+   */
+  Vector<RefCountedPtr<EBMGRestrict>> m_mgRestrict;
+
+  /**
+   * @brief Multigrid prolongation between AMR levels.
+   * @details m_mgProlong[lvl] prolongs from m_eblg[lvl-1] onto m_eblg[lvl].
+   */
+  Vector<RefCountedPtr<EBMGProlong>> m_mgProlong;
+
+  /**
+   * @brief Restriction between consecutive multigrid levels.
+   * @details m_mgLevelRestrict[lvl][k] restricts from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1].
+   */
+  Vector<Vector<RefCountedPtr<EBMGRestrict>>> m_mgLevelRestrict;
+
+  /**
+   * @brief Prolongation between consecutive multigrid levels.
+   * @details m_mgLevelProlong[lvl][k] prolongs from m_mgLevelGrids[lvl][k+1] onto m_mgLevelGrids[lvl][k].
+   */
+  Vector<Vector<RefCountedPtr<EBMGProlong>>> m_mgLevelProlong;
+
+  /**
    * @brief Coarsened fine-level EB grids.
    * @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
    */
@@ -894,6 +986,41 @@ protected:
    */
   void
   defineMultigridCoarseAverage();
+
+  /**
+   * @brief Define the restriction and prolongation between consecutive multigrid levels.
+   */
+  void
+  defineMultigridLevelTransfer();
+
+  /**
+   * @brief Define the finer-VoF lists of the coarsened fine grids.
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
+  void
+  defineFinerVoFs(const int a_lmin);
+
+  /**
+   * @brief Define the finer-VoF lists of the coarsened grids between consecutive multigrid levels.
+   */
+  void
+  defineMultigridFinerVoFs();
+
+  /**
+   * @brief Fill the finer-VoF lists of one pair of grids.
+   * @details Covers the irregular cells whose finer cells all lie in the finer EBISBox: the coarsened grids, and the
+   * ghost cells around them as far as the finer EB ghost cells reach. The lists come from the finer graph's coarsening
+   * links (VofUtils::getFinerVoFs).
+   * @param[out] a_finerVoFs Finer-VoF lists, defined on the coarsened grids.
+   * @param[in]  a_eblgCoFi  Coarsened fine grids.
+   * @param[in]  a_eblgFine  Fine grids.
+   * @param[in]  a_refRat    Refinement ratio between the two.
+   */
+  void
+  fillFinerVoFs(LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                const EBLevelGrid&                       a_eblgCoFi,
+                const EBLevelGrid&                       a_eblgFine,
+                const int                                a_refRat) const;
 
   /**
    * @brief Define multigrid interpolation utility

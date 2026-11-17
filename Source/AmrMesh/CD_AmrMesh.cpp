@@ -3786,6 +3786,93 @@ AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::whic
   return m_realms[a_realm]->getMultigridCoarseAverage(a_phase);
 }
 
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+AmrMesh::getFinerVoFs(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFinerVoFs(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFinerVoFs(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFinerVoFs(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFinerVoFs(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+AmrMesh::getMultigridRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridRestriction(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridRestriction(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+AmrMesh::getMultigridProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridProlongation(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridProlongation(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+AmrMesh::getMultigridLevelRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelRestriction(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+AmrMesh::getMultigridLevelProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelProlongation(a_phase);
+}
+
 const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
 {

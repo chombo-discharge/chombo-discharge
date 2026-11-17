@@ -19,6 +19,8 @@
 // Chombo includes
 #include <Copier.H>
 #include <EBLevelGrid.H>
+#include <BaseIVFAB.H>
+#include <LayoutData.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -52,12 +54,14 @@ public:
    * @param[in] a_eblg         Grids
    * @param[in] a_eblgFine     Fine grids
    * @param[in] a_eblgCoFi     Coarsened fine grids
+   * @param[in] a_finerVoFs    Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat       Refinement ratio between grids.
    */
-  EBReflux(const EBLevelGrid& a_eblg,
-           const EBLevelGrid& a_eblgFine,
-           const EBLevelGrid& a_eblgCoFi,
-           const int          a_refRat) noexcept;
+  EBReflux(const EBLevelGrid&                             a_eblg,
+           const EBLevelGrid&                             a_eblgFine,
+           const EBLevelGrid&                             a_eblgCoFi,
+           const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+           const int                                      a_refRat) noexcept;
 
   /**
    * @brief Destructor (does nothing)
@@ -68,14 +72,16 @@ public:
    * @brief Define method. Puts object in usable state.
    * @param[in] a_eblg     Grids on this level
    * @param[in] a_eblgFine Fine grids
-   * @param[in] a_eblgCoFi Coarsened fine grids
+   * @param[in] a_eblgCoFi  Coarsened fine grids
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat    Refinement ratio between coarse and fine grids.
    */
   virtual void
-  define(const EBLevelGrid& a_eblg,
-         const EBLevelGrid& a_eblgFine,
-         const EBLevelGrid& a_eblgCoFi,
-         const int          a_refRat) noexcept;
+  define(const EBLevelGrid&                             a_eblg,
+         const EBLevelGrid&                             a_eblgFine,
+         const EBLevelGrid&                             a_eblgCoFi,
+         const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+         const int                                      a_refRat) noexcept;
 
   /**
    * @brief Reflux into the coarse data.
@@ -202,9 +208,10 @@ protected:
 
   /**
    * @brief Define the stencils required for coarsening the fine-grid fluxes onto the coarse grid
+   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
    */
   virtual void
-  defineStencils() noexcept;
+  defineStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define buffers

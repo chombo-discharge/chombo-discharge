@@ -1924,6 +1924,36 @@ Realm::getMultigridCoarseAverage(const phase::which_phase a_phase) const
   return m_realms.at(a_phase)->getMultigridCoarseAverage();
 }
 
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+Realm::getFinerVoFs(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getFinerVoFs();
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+Realm::getMultigridRestriction(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridRestriction();
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+Realm::getMultigridProlongation(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridProlongation();
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+Realm::getMultigridLevelRestriction(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelRestriction();
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+Realm::getMultigridLevelProlongation(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelProlongation();
+}
+
 const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 Realm::getMultigridMFLevelGrids() const
 {

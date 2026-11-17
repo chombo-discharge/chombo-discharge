@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -33,6 +34,7 @@
 #include <CD_Location.H>
 #include <CD_ParallelOps.H>
 #include <CD_MirrorDeposition.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int PhaseRealm::s_redistributionRadius;
@@ -145,6 +147,12 @@ PhaseRealm::preRegrid()
   m_mgLevelGrids.resize(0);
   m_mgLevelGridsCoFi.resize(0);
   m_mgCoarAve.resize(0);
+  m_finerVoFs.resize(0);
+  m_mgFinerVoFs.resize(0);
+  m_mgRestrict.resize(0);
+  m_mgProlong.resize(0);
+  m_mgLevelRestrict.resize(0);
+  m_mgLevelProlong.resize(0);
   m_vofIter.resize(0);
   m_multiCutVofIter.resize(0);
   m_faceIter.resize(0);
@@ -186,6 +194,20 @@ PhaseRealm::regridBase(const int a_lmin)
     timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
     timer.stopEvent("Define EBLevelGrid");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    // Built with the coarsened grids, so that load-balancing routines, which run after regridBase but before
+    // regridOperators, can define coarse-fine operators.
+    if (m_profile) {
+      pout() << "before/after finer VoF lists" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Finer VoF lists");
+    this->defineFinerVoFs(a_lmin);
+    timer.stopEvent("Finer VoF lists");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -236,6 +258,18 @@ PhaseRealm::regridOperators(const int a_lmin)
     Timer timer("PhaseRealm::regridOperators(int)");
 
     if (m_profile) {
+      pout() << "before/after multigrid finer VoF lists" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Multigrid finer VoF lists");
+    this->defineMultigridFinerVoFs();
+    timer.stopEvent("Multigrid finer VoF lists");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    if (m_profile) {
       pout() << "before/after coarave define" << endl;
       MemoryReport::getMaxMinMemoryUsage();
     }
@@ -254,6 +288,9 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("Multigrid EBCoarAve");
     this->defineMultigridCoarseAverage();
     timer.stopEvent("Multigrid EBCoarAve");
+    timer.startEvent("Multigrid restrict/prolong");
+    this->defineMultigridLevelTransfer();
+    timer.stopEvent("Multigrid restrict/prolong");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -479,7 +516,6 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       m_eblgCoFi[lvl - 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
-      m_eblgCoFi[lvl - 1]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
     }
 
     // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
@@ -538,7 +574,6 @@ PhaseRealm::defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgG
         m_mgLevelGridsCoFi[lvl][img] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
         coarsen(*m_mgLevelGridsCoFi[lvl][img], *m_mgLevelGrids[lvl][img], mgRefRat);
-        m_mgLevelGridsCoFi[lvl][img]->getEBISL().setMaxRefinementRatio(mgRefRat, &(*m_ebis));
       }
     }
   }
@@ -567,7 +602,210 @@ PhaseRealm::defineMultigridCoarseAverage()
       m_mgCoarAve[lvl][img] = RefCountedPtr<EBCoarAve>(new EBCoarAve(*m_mgLevelGrids[lvl][img],
                                                                      *m_mgLevelGrids[lvl][img + 1],
                                                                      *m_mgLevelGridsCoFi[lvl][img],
+                                                                     *m_mgFinerVoFs[lvl][img],
                                                                      mgRefRat));
+    }
+  }
+}
+
+void
+PhaseRealm::defineMultigridLevelTransfer()
+{
+  CH_TIME("PhaseRealm::defineMultigridLevelTransfer");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridLevelTransfer" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+
+  m_mgLevelRestrict.resize(numAmrLevels);
+  m_mgLevelProlong.resize(numAmrLevels);
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(m_mgLevelGrids[lvl].size());
+
+    m_mgLevelRestrict[lvl].resize(numMgLevels - 1);
+    m_mgLevelProlong[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      const EBLevelGrid& eblgFine = *m_mgLevelGrids[lvl][img];
+      const EBLevelGrid& eblgCoFi = *m_mgLevelGridsCoFi[lvl][img];
+      const EBLevelGrid& eblgCoar = *m_mgLevelGrids[lvl][img + 1];
+
+      m_mgLevelRestrict[lvl][img] = RefCountedPtr<EBMGRestrict>(
+        new EBMGRestrict(eblgFine, eblgCoFi, eblgCoar, *m_mgFinerVoFs[lvl][img], mgRefRat));
+      m_mgLevelProlong[lvl][img] = RefCountedPtr<EBMGProlong>(new EBMGProlong(eblgFine, eblgCoFi, eblgCoar, mgRefRat));
+    }
+  }
+}
+
+void
+PhaseRealm::defineFinerVoFs(const int a_lmin)
+{
+  CH_TIME("PhaseRealm::defineFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineFinerVoFs" << endl;
+  }
+
+  m_finerVoFs.resize(1 + m_finestLevel);
+
+  for (int lvl = std::max(1, a_lmin); lvl <= m_finestLevel; lvl++) {
+    m_finerVoFs[lvl - 1] = RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>(
+      new LayoutData<BaseIVFAB<Vector<VolIndex>>>());
+
+    this->fillFinerVoFs(*m_finerVoFs[lvl - 1], *m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
+  }
+}
+
+void
+PhaseRealm::defineMultigridFinerVoFs()
+{
+  CH_TIME("PhaseRealm::defineMultigridFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridFinerVoFs" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+
+  m_mgFinerVoFs.resize(numAmrLevels);
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(m_mgLevelGrids[lvl].size());
+
+    m_mgFinerVoFs[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      m_mgFinerVoFs[lvl][img] = RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>(
+        new LayoutData<BaseIVFAB<Vector<VolIndex>>>());
+
+      this->fillFinerVoFs(*m_mgFinerVoFs[lvl][img], *m_mgLevelGridsCoFi[lvl][img], *m_mgLevelGrids[lvl][img], mgRefRat);
+    }
+  }
+}
+
+void
+PhaseRealm::fillFinerVoFs(LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                          const EBLevelGrid&                       a_eblgCoFi,
+                          const EBLevelGrid&                       a_eblgFine,
+                          const int                                a_refRat) const
+{
+  CH_TIME("PhaseRealm::fillFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::fillFinerVoFs" << endl;
+  }
+
+  const DisjointBoxLayout& dblCoFi   = a_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = a_eblgCoFi.getEBISL();
+  const EBISLayout&        ebislFine = a_eblgFine.getEBISL();
+
+  a_finerVoFs.define(dblCoFi);
+
+  const DataIterator& dit  = dblCoFi.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisBoxCoFi = ebislCoFi[din];
+    const Box      region      = VofUtils::getCoarseCellsWithAllFinerCells(ebislFine[din].getRegion(), a_refRat) &
+                       ebisBoxCoFi.getRegion();
+    const IntVectSet irregCells = ebisBoxCoFi.getIrregIVS(region);
+
+    BaseIVFAB<Vector<VolIndex>>& finerVoFs = a_finerVoFs[din];
+
+    finerVoFs.define(irregCells, ebisBoxCoFi.getEBGraph(), 1);
+
+    for (VoFIterator vofit(irregCells, ebisBoxCoFi.getEBGraph()); vofit.ok(); ++vofit) {
+      finerVoFs(vofit(), 0) = VofUtils::getFinerVoFs(vofit(), ebislFine, din, a_refRat);
+    }
+  }
+
+  // Equivalence check against EBISLayout::refine, for review only; works in ScanShop mode, where the coarse graph holds
+  // links to the finer graph. Faces found from one side (see VofUtils::getStoredFinerFaces) may come in another order;
+  // only a different set aborts.
+  ParmParse pp("PhaseRealm");
+
+  bool checkFinerVoFs = false;
+  pp.query("check_finer_vofs", checkFinerVoFs);
+
+  if (checkFinerVoFs) {
+    EBISLayout ebislCheck = ebislCoFi;
+    ebislCheck.setMaxRefinementRatio(a_refRat, a_eblgFine.getEBIS());
+
+    long long numVoFs      = 0;
+    long long numFaces     = 0;
+    long long numVoFDiffs  = 0;
+    long long numFaceDiffs = 0;
+
+    long long numFaceOrderDiffs = 0;
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&                     ebisBoxCoFi = ebislCoFi[din];
+      const BaseIVFAB<Vector<VolIndex>>& finerVoFs   = a_finerVoFs[din];
+
+      for (VoFIterator vofit(finerVoFs.getIVS(), ebisBoxCoFi.getEBGraph()); vofit.ok(); ++vofit) {
+        const VolIndex& coarVoF = vofit();
+
+        const Vector<VolIndex> stored  = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoFi, finerVoFs, a_refRat);
+        const Vector<VolIndex> refined = ebislCheck.refine(coarVoF, a_refRat, din);
+
+        numVoFs++;
+        if (stored.constStdVector() != refined.constStdVector()) {
+          numVoFDiffs++;
+        }
+
+        // The operators ask for the faces of VoFs in the coarsened grids.
+        if (!(dblCoFi[din].contains(coarVoF.gridIndex()))) {
+          continue;
+        }
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const Vector<FaceIndex> faces = ebisBoxCoFi.getFaces(coarVoF, dir, sit());
+
+            for (int iface = 0; iface < faces.size(); iface++) {
+              const FaceIndex& face = faces[iface];
+
+              const Vector<FaceIndex> storedFaces  = VofUtils::getStoredFinerFaces(face,
+                                                                                  ebisBoxCoFi,
+                                                                                  finerVoFs,
+                                                                                  ebislFine,
+                                                                                  din,
+                                                                                  a_refRat);
+              const Vector<FaceIndex> refinedFaces = ebislCheck.refine(face, a_refRat, din);
+
+              std::vector<FaceIndex> storedSorted  = storedFaces.constStdVector();
+              std::vector<FaceIndex> refinedSorted = refinedFaces.constStdVector();
+
+              std::sort(storedSorted.begin(), storedSorted.end());
+              std::sort(refinedSorted.begin(), refinedSorted.end());
+
+              numFaces++;
+              if (storedSorted != refinedSorted) {
+                numFaceDiffs++;
+              }
+              else if (storedFaces.constStdVector() != refinedFaces.constStdVector()) {
+                numFaceOrderDiffs++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    pout() << "PhaseRealm::fillFinerVoFs check (ratio " << a_refRat << "): " << numVoFs << " VoFs, " << numVoFDiffs
+           << " differ; " << numFaces << " faces, " << numFaceDiffs << " differ, " << numFaceOrderDiffs
+           << " in another order" << endl;
+
+    if (numVoFDiffs > 0 || numFaceDiffs > 0) {
+      MayDay::Abort("PhaseRealm::fillFinerVoFs -- stored finer VoFs or faces differ from EBISLayout::refine");
     }
   }
 }
@@ -810,8 +1048,11 @@ PhaseRealm::defineEBCoarAve(const int a_lmin)
       const bool hasCoar = lvl > 0;
 
       if (hasCoar) {
-        m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(
-          new EBCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl - 1], m_refinementRatios[lvl - 1]));
+        m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(new EBCoarAve(*m_eblg[lvl],
+                                                                *m_eblg[lvl - 1],
+                                                                *m_eblgCoFi[lvl - 1],
+                                                                *m_finerVoFs[lvl - 1],
+                                                                m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -828,6 +1069,8 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
   const bool doThisOperator = this->queryOperator(s_eb_multigrid);
 
   m_multigridInterpolator.resize(1 + m_finestLevel);
+  m_mgRestrict.resize(1 + m_finestLevel);
+  m_mgProlong.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
 
@@ -851,6 +1094,12 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
                                                   m_multigridInterpolationRadius,
                                                   m_multigridInterpolationOrder,
                                                   m_multigridInterpolationWeight));
+
+        // Restriction onto the coarsened fine grids, and prolongation from the coarse level.
+        m_mgRestrict[lvl] = RefCountedPtr<EBMGRestrict>(
+          new EBMGRestrict(eblgFine, eblgCoFi, eblgCoFi, *m_finerVoFs[lvl - 1], m_refinementRatios[lvl - 1]));
+        m_mgProlong[lvl] = RefCountedPtr<EBMGProlong>(
+          new EBMGProlong(eblgFine, eblgCoFi, eblgCoar, m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -910,7 +1159,11 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
       // Interpolator for filling data on level l from level l-1 lives on level l
       if (hasCoar) {
         m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
-          new EBCoarseToFineInterp(*m_eblg[lvl], *m_eblgCoFi[lvl - 1], *m_eblg[lvl - 1], m_refinementRatios[lvl - 1]));
+          new EBCoarseToFineInterp(*m_eblg[lvl],
+                                   *m_eblgCoFi[lvl - 1],
+                                   *m_eblg[lvl - 1],
+                                   m_finerVoFs[lvl - 1],
+                                   m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -941,7 +1194,7 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
       // Flux register for matching fluxes between level l and level l+1 (the fine level) lives on level l
       if (hasFine) {
         m_ebReflux[lvl] = RefCountedPtr<EBReflux>(
-          new EBReflux(*m_eblg[lvl], *m_eblg[lvl + 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl]));
+          new EBReflux(*m_eblg[lvl], *m_eblg[lvl + 1], *m_eblgCoFi[lvl], *m_finerVoFs[lvl], m_refinementRatios[lvl]));
       }
     }
   }
@@ -1857,6 +2110,42 @@ const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 PhaseRealm::getMultigridCoarseAverage() const
 {
   return m_mgCoarAve;
+}
+
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+PhaseRealm::getFinerVoFs() const
+{
+  return m_finerVoFs;
+}
+
+const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
+PhaseRealm::getMultigridFinerVoFs() const
+{
+  return m_mgFinerVoFs;
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+PhaseRealm::getMultigridRestriction() const
+{
+  return m_mgRestrict;
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+PhaseRealm::getMultigridProlongation() const
+{
+  return m_mgProlong;
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+PhaseRealm::getMultigridLevelRestriction() const
+{
+  return m_mgLevelRestrict;
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+PhaseRealm::getMultigridLevelProlongation() const
+{
+  return m_mgLevelProlong;
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_EBCoarseToFineInterp.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -28,23 +29,25 @@ EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept : m_isDefined(false)
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(weak)");
 }
 
-EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
-                                           const EBLevelGrid& a_eblgCoFi,
-                                           const EBLevelGrid& a_eblgCoar,
-                                           const int&         a_refRat) noexcept
+EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid&                                            a_eblgFine,
+                                           const EBLevelGrid&                                            a_eblgCoFi,
+                                           const EBLevelGrid&                                            a_eblgCoar,
+                                           const RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>& a_finerVoFs,
+                                           const int& a_refRat) noexcept
 {
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(full)");
 
-  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
+  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_finerVoFs, a_refRat);
 }
 
 EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept = default;
 
 void
-EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
-                             const EBLevelGrid& a_eblgCoFi,
-                             const EBLevelGrid& a_eblgCoar,
-                             const int&         a_refRat) noexcept
+EBCoarseToFineInterp::define(const EBLevelGrid&                                            a_eblgFine,
+                             const EBLevelGrid&                                            a_eblgCoFi,
+                             const EBLevelGrid&                                            a_eblgCoar,
+                             const RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>& a_finerVoFs,
+                             const int&                                                    a_refRat) noexcept
 {
   CH_TIMERS("EBCoarseToFineInterp::define");
   CH_TIMER("EBCoarseToFineInterp::define::define_ebpwlfineinterp", t0);
@@ -52,11 +55,14 @@ EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
 
   CH_assert(a_refRat > 1);
 
-  m_refRat   = a_refRat;
-  m_eblgFine = a_eblgFine;
-  m_eblgCoar = a_eblgCoar;
-  m_eblgCoFi = a_eblgCoFi;
+  m_refRat    = a_refRat;
+  m_eblgFine  = a_eblgFine;
+  m_eblgCoar  = a_eblgCoar;
+  m_eblgCoFi  = a_eblgCoFi;
+  m_finerVoFs = a_finerVoFs;
   m_cellCopiers.clear();
+
+  CH_assert(!(m_finerVoFs.isNull()));
 
   CH_START(t1);
 
@@ -133,7 +139,10 @@ EBCoarseToFineInterp::defineWeights() noexcept
       // but that won't matter because they don't have a boundary area. We do it similarly for the volume fractions.
 
       const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, din);
-      const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs = VofUtils::getStoredFinerVoFs(coarVoF,
+                                                                     ebisBoxCoar,
+                                                                     (*m_finerVoFs)[din],
+                                                                     m_refRat);
 
       Real fineVolume = 0.0;
       Real fineArea   = 0.0;
@@ -308,6 +317,9 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   const Box coarBox = dblCoar[a_dit];
   const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
 
+  const EBISBox&                     ebisBoxCoar = ebislCoar[a_dit];
+  const BaseIVFAB<Vector<VolIndex>>& finerVoFs   = (*m_finerVoFs)[a_dit];
+
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
@@ -337,7 +349,7 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   // coarse VoFs, and a single-valued coarse cell may refine to a multi-valued fine cell that the
   // regular single-valued kernel above cannot set, so singly-cut coarse cells cannot be skipped.
   auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
-    const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
+    const Vector<VolIndex> fineVoFs = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoar, finerVoFs, m_refRat);
 
     for (int i = 0; i < fineVoFs.size(); i++) {
       a_fineData(fineVoFs[i], a_fineVar) = a_coarData(coarVoF, a_coarVar);
