@@ -10,10 +10,11 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <sstream>
+
 // Chombo includes
 #include <ParmParse.H>
-#include <BRMeshRefine.H>
-#include <LoadBalance.H>
 #include <BaseIVFactory.H>
 #include <CH_Timer.H>
 #include <EBCellFactory.H>
@@ -23,33 +24,35 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
-                                           const Real&             a_alpha,
-                                           const Real&             a_beta,
-                                           const RealVect&         a_probLo,
-                                           const AmrLevelGrids&    a_amrLevelGrids,
-                                           const AmrMask&          a_validCells,
-                                           const AmrInterpolators& a_amrInterpolators,
-                                           const AmrFluxRegisters& a_amrFluxRegisters,
-                                           const AmrCoarseners&    a_amrCoarseners,
-                                           const AmrRefRatios&     a_amrRefRatios,
-                                           const AmrResolutions&   a_amrResolutions,
-                                           const AmrCellData&      a_amrAcoef,
-                                           const AmrFluxData&      a_amrBcoef,
-                                           const AmrIrreData&      a_amrBcoefIrreg,
-                                           const DomainBCFactory&  a_domainBcFactory,
-                                           const EBBCFactory&      a_ebbcFactory,
-                                           const IntVect&          a_ghostPhi,
-                                           const IntVect&          a_ghostRhs,
-                                           const Smoother&         a_smoother,
-                                           const Real&             a_relaxFactor,
-                                           const int&              a_chebyOrder,
-                                           const Real&             a_chebyEigRatio,
-                                           const int&              a_rasInnerSweeps,
-                                           const ProblemDomain&    a_bottomDomain,
-                                           const int&              a_mgBlockingFactor,
-                                           const bool              a_refluxFree,
-                                           const AmrLevelGrids&    a_deeperLevelGrids)
+EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell         a_dataLocation,
+                                           const Real&                  a_alpha,
+                                           const Real&                  a_beta,
+                                           const RealVect&              a_probLo,
+                                           const AmrLevelGrids&         a_amrLevelGrids,
+                                           const AmrMask&               a_validCells,
+                                           const AmrInterpolators&      a_amrInterpolators,
+                                           const AmrFluxRegisters&      a_amrFluxRegisters,
+                                           const AmrCoarseners&         a_amrCoarseners,
+                                           const AmrRefRatios&          a_amrRefRatios,
+                                           const AmrResolutions&        a_amrResolutions,
+                                           const AmrCellData&           a_amrAcoef,
+                                           const AmrFluxData&           a_amrBcoef,
+                                           const AmrIrreData&           a_amrBcoefIrreg,
+                                           const DomainBCFactory&       a_domainBcFactory,
+                                           const EBBCFactory&           a_ebbcFactory,
+                                           const IntVect&               a_ghostPhi,
+                                           const IntVect&               a_ghostRhs,
+                                           const Smoother&              a_smoother,
+                                           const Real&                  a_relaxFactor,
+                                           const int&                   a_chebyOrder,
+                                           const Real&                  a_chebyEigRatio,
+                                           const int&                   a_rasInnerSweeps,
+                                           const Vector<AmrLevelGrids>& a_mgLevelGrids,
+                                           const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
+                                           const Vector<AmrCoarseners>& a_mgCoarseners,
+                                           const AmrLevelGrids&         a_amrLevelGridsCoFi,
+                                           const ProblemDomain&         a_bottomDomain,
+                                           const bool                   a_refluxFree)
   : m_dataLocation(a_dataLocation),
     m_smoother(a_smoother),
     m_chebyOrder(a_chebyOrder),
@@ -75,8 +78,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
     m_domainBcFactory(a_domainBcFactory),
     m_ebBcFactory(a_ebbcFactory),
     m_bottomDomain(a_bottomDomain),
-    m_mgBlockingFactor(a_mgBlockingFactor),
-    m_deeperLevelGrids(a_deeperLevelGrids)
+    m_amrLevelGridsCoFi(a_amrLevelGridsCoFi)
 {
   CH_TIME("EBHelmholtzOpFactory::EBHelmholtzOpFactory(...)");
 
@@ -90,7 +92,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
   }
 
   // Define the multigrid levels.
-  this->defineMultigridLevels();
+  this->defineMultigridLevels(a_mgLevelGrids, a_mgLevelGridsCoFi, a_mgCoarseners);
 }
 
 EBHelmholtzOpFactory::~EBHelmholtzOpFactory()
@@ -99,158 +101,136 @@ EBHelmholtzOpFactory::~EBHelmholtzOpFactory()
 }
 
 void
-EBHelmholtzOpFactory::defineMultigridLevels()
+EBHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLevelGrids,
+                                            const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
+                                            const Vector<AmrCoarseners>& a_mgCoarseners)
 {
-  CH_TIME("EBHelmholtzOpFactory::defineMultigridLevels()");
+  CH_TIME("EBHelmholtzOpFactory::defineMultigridLevels(Vector<AmrLevelGrids>, Vector<AmrLevelGrids>, "
+          "Vector<AmrCoarseners>)");
 
   // TLDR: This routine defines what is needed for making the multigrid levels. This includes the intermediate
   // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the
   // base AMR level. Recall that in Chombo-speak a multigrid level is a grid level completely covered by another grid
-  // level.
+  // level. The realm builds the grids; this factory takes the entries that are not coarser than its bottom domain and
+  // defines the coefficients on them.
+
+  CH_assert(static_cast<int>(a_mgLevelGrids.size()) == m_numAmrLevels);
+  CH_assert(static_cast<int>(a_mgLevelGridsCoFi.size()) == m_numAmrLevels);
+  CH_assert(static_cast<int>(a_mgCoarseners.size()) == m_numAmrLevels);
 
   // Resize data holders.
   m_mgLevelGrids.resize(m_numAmrLevels);
   m_mgAcoef.resize(m_numAmrLevels);
   m_mgBcoef.resize(m_numAmrLevels);
   m_mgBcoefIrreg.resize(m_numAmrLevels);
+  m_mgCoarseners.resize(m_numAmrLevels);
+  m_mgLevelGridsCoFi.resize(m_numAmrLevels);
   m_hasMgLevels.resize(m_numAmrLevels);
 
-  // Go through AMR levels. We will generate more levels if 1) We are at the coarsest AMR level or 2) we use a
-  // refinement factor of 4. In each case we will try to coarsen the current level directly (i.e. just coarsening the
-  // boxes but leaving the box-to-rank mapping intact). If that does not work we check if we can generate a new
-  // decomposition of the grids.
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
-    m_hasMgLevels[amrLevel] = false;
+    const AmrLevelGrids& realmLevels = a_mgLevelGrids[amrLevel];
 
-    // If we are at the coarsest AMR level then we can generate even coarser grids to accelerate multigrid convergence.
-    // But don't do this if the user has specified that the coarsest AMR level is also the bottom level in multigrid.
-    if (amrLevel == 0 &&
-        ChomboDischarge::EBHelmholtzOpFactory::isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())) {
-      m_hasMgLevels[amrLevel] = true;
+    CH_assert(realmLevels.size() >= 1);
+    CH_assert(realmLevels[0]->getDomain() == m_amrLevelGrids[amrLevel]->getDomain());
+
+    // Use the realm's levels down to, and including, the last one that is not coarser than the bottom domain.
+    int numMgLevels = 1;
+
+    while (numMgLevels < static_cast<int>(realmLevels.size()) &&
+           !(ChomboDischarge::EBHelmholtzOpFactory::isCoarser(realmLevels[numMgLevels]->getDomain(), m_bottomDomain))) {
+      numMgLevels++;
     }
 
-    // For finer levels, check if the refinement factor is 4. If it is, we should be able to add an intermediate level.
-    if (amrLevel > 0) {
-      if (m_amrRefRatios[amrLevel - 1] > 2) {
-        m_hasMgLevels[amrLevel] = true;
-      }
+    m_hasMgLevels[amrLevel] = numMgLevels > 1;
+
+    // The realm builds down to the coarsest bottom domain registered on it. It stops before this factory's bottom
+    // domain when the last domain can not be coarsened by 2, which no hierarchy can get past, or otherwise when the
+    // grids could not be coarsened or the bottom cell count was lowered after registration. Only the latter is
+    // reported.
+    const ProblemDomain coarsestDomain = realmLevels.back()->getDomain();
+
+    const bool stopsEarly = ChomboDischarge::EBHelmholtzOpFactory::isCoarser(m_bottomDomain, coarsestDomain);
+    const bool canCoarsen = refine(coarsen(coarsestDomain, 2), 2) == coarsestDomain;
+
+    if (amrLevel == 0 && stopsEarly && canCoarsen) {
+      std::stringstream ss;
+
+      ss << "EBHelmholtzOpFactory::defineMultigridLevels - the multigrid levels stop at " << coarsestDomain
+         << ", which is finer than the bottom domain " << m_bottomDomain;
+
+      MayDay::Warning(ss.str().c_str());
     }
 
-    // This loop will add multigrid levels.
+    m_mgLevelGrids[amrLevel].resize(0);
+    m_mgAcoef[amrLevel].resize(0);
+    m_mgBcoef[amrLevel].resize(0);
+    m_mgBcoefIrreg[amrLevel].resize(0);
+    m_mgCoarseners[amrLevel].resize(0);
+    m_mgLevelGridsCoFi[amrLevel].resize(0);
+
     if (m_hasMgLevels[amrLevel]) {
 
-      constexpr int mgRefRatio = 2;
-
-      // Initialization, note that m_mgLevelGrids[amrLevel] corresponds to the multigrid levels below amrLevel. With
-      // this indexing the starting index is the finest level, and elements later in the vector are coarser levels.
-      m_mgLevelGrids[amrLevel].resize(0);
-      m_mgAcoef[amrLevel].resize(0);
-      m_mgBcoef[amrLevel].resize(0);
-      m_mgBcoefIrreg[amrLevel].resize(0);
-
+      // Note that m_mgLevelGrids[amrLevel] corresponds to the multigrid levels below amrLevel. With this indexing the
+      // starting index is the finest level, and elements later in the vector are coarser levels.
       m_mgLevelGrids[amrLevel].push_back(m_amrLevelGrids[amrLevel]);
       m_mgAcoef[amrLevel].push_back(m_amrAcoef[amrLevel]);
       m_mgBcoef[amrLevel].push_back(m_amrBcoef[amrLevel]);
       m_mgBcoefIrreg[amrLevel].push_back(m_amrBcoefIrreg[amrLevel]);
 
-      // Add levels while we can.
-      bool hasCoarser = true;
-      while (hasCoarser) {
+      for (int img = 1; img < numMgLevels; img++) {
+        const RefCountedPtr<EBLevelGrid>& mgEblgCoar = realmLevels[img];
 
-        // Current number of multigrid levels and the multigrid level which we will coarsen. Again, note the inverse
-        // order here (first entry is finest level)
-        const int          curMgLevels = static_cast<int>(m_mgLevelGrids[amrLevel].size());
-        const EBLevelGrid& mgEblgFine  = *m_mgLevelGrids[amrLevel].back();
+        const EBLevelGrid& eblgCoar = *mgEblgCoar;
 
-        // BoxLayout and domains for coarsening.
-        RefCountedPtr<EBLevelGrid> mgEblgCoar = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+        CH_assert(eblgCoar.getGhost() >= m_ghostPhi.max());
 
-        // This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is
-        // only valid for coarsenings of the base AMR level, hence amrLevel == 0. Once those levels are exhausted we
-        // begin with direct coarsening.
-        if (amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()) {
-          hasCoarser = true; // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the
-          mgEblgCoar = m_deeperLevelGrids[curMgLevels - 1]; // coarsest AMR level. So curMgLevels-1 is correct.
-        }
-        else {
-          // Let the operator factory do the coarsening this time.
-          hasCoarser = this->getCoarserLayout(*mgEblgCoar, mgEblgFine, mgRefRatio, m_mgBlockingFactor);
-        }
+        const EBISLayout& ebislCoar = eblgCoar.getEBISL();
 
-        // Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
-        // we will terminate the coarsening and let AMRMultiGrid do the bottom solve.
-        if (hasCoarser) {
-          if (ChomboDischarge::EBHelmholtzOpFactory::isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)) {
-            hasCoarser = false;
-          }
-          else {
-            // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR
-            // level? If not, this code will reduce the coarsening efforts.
-            for (int iamr = 0; iamr < m_numAmrLevels; iamr++) {
-              if (mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()) {
-                hasCoarser = false;
-              }
-            }
-          }
-        }
+        const DisjointBoxLayout& gridsCoar = eblgCoar.getDBL();
 
-        // Ok, we have a valid coarser domain which is given by mgEblgCoar. Use that domain to make the coefficients.
-        if (hasCoarser) {
-          const EBLevelGrid& eblgCoar = *mgEblgCoar;
-          const EBLevelGrid& eblgFine = mgEblgFine;
+        const ProblemDomain& domainCoar = eblgCoar.getDomain();
 
-          const EBISLayout& ebislCoar = eblgCoar.getEBISL();
-          const EBISLayout& ebislFine = eblgFine.getEBISL();
+        // Make the irregular sets.
+        constexpr int nghost = 1;
 
-          const DisjointBoxLayout& gridsCoar = eblgCoar.getDBL();
-          const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
+        LayoutData<IntVectSet> irregSets(gridsCoar);
 
-          const ProblemDomain& domainCoar = eblgCoar.getDomain();
+        const DataIterator& dit = gridsCoar.dataIterator();
 
-          // Make the irregular sets.
-          constexpr int nghost = 1;
-
-          LayoutData<IntVectSet> irregSets(gridsCoar);
-
-          const DataIterator& dit = gridsCoar.dataIterator();
-
-          const int nbox = dit.size();
+        const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nbox; mybox++) {
-            const DataIndex& din = dit[mybox];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
 
-            Box bx = gridsCoar[din];
-            bx.grow(nghost);
-            bx &= domainCoar;
+          Box bx = gridsCoar[din];
+          bx.grow(nghost);
+          bx &= domainCoar;
 
-            const EBISBox& ebisbox = ebislCoar[din];
+          const EBISBox& ebisbox = ebislCoar[din];
 
-            irregSets[din] = ebisbox.getIrregIVS(bx);
-          }
-
-          // Factories for generating A and B-coefficients on the multigrid levels.
-          EBCellFactory       cellFactory(mgEblgCoar->getEBISL());
-          EBFluxFactory       fluxFactory(mgEblgCoar->getEBISL());
-          BaseIVFactory<Real> irreFactory(mgEblgCoar->getEBISL(), irregSets);
-
-          // Define coarsened coefficients
-          RefCountedPtr<LevelData<EBCellFAB>> coarAcoef(
-            new LevelData<EBCellFAB>(gridsCoar, m_nComp, nghost * IntVect::Unit, cellFactory));
-          RefCountedPtr<LevelData<EBFluxFAB>> coarBcoef(
-            new LevelData<EBFluxFAB>(gridsCoar, m_nComp, nghost * IntVect::Unit, fluxFactory));
-          RefCountedPtr<LevelData<BaseIVFAB<Real>>> coarBcoefIrreg(
-            new LevelData<BaseIVFAB<Real>>(gridsCoar, m_nComp, nghost * IntVect::Unit, irreFactory));
-
-          m_mgLevelGrids[amrLevel].push_back(mgEblgCoar);
-          m_mgAcoef[amrLevel].push_back(coarAcoef);
-          m_mgBcoef[amrLevel].push_back(coarBcoef);
-          m_mgBcoefIrreg[amrLevel].push_back(coarBcoefIrreg);
+          irregSets[din] = ebisbox.getIrregIVS(bx);
         }
-      }
-    }
 
-    if (m_mgLevelGrids[amrLevel].size() <= 1) {
-      m_hasMgLevels[amrLevel] = false;
+        // Factories for generating A and B-coefficients on the multigrid levels.
+        EBCellFactory       cellFactory(ebislCoar);
+        EBFluxFactory       fluxFactory(ebislCoar);
+        BaseIVFactory<Real> irreFactory(ebislCoar, irregSets);
+
+        // Define coarsened coefficients
+        RefCountedPtr<LevelData<EBCellFAB>> coarAcoef(
+          new LevelData<EBCellFAB>(gridsCoar, m_nComp, nghost * IntVect::Unit, cellFactory));
+        RefCountedPtr<LevelData<EBFluxFAB>> coarBcoef(
+          new LevelData<EBFluxFAB>(gridsCoar, m_nComp, nghost * IntVect::Unit, fluxFactory));
+        RefCountedPtr<LevelData<BaseIVFAB<Real>>> coarBcoefIrreg(
+          new LevelData<BaseIVFAB<Real>>(gridsCoar, m_nComp, nghost * IntVect::Unit, irreFactory));
+
+        m_mgLevelGrids[amrLevel].push_back(mgEblgCoar);
+        m_mgAcoef[amrLevel].push_back(coarAcoef);
+        m_mgBcoef[amrLevel].push_back(coarBcoef);
+        m_mgBcoefIrreg[amrLevel].push_back(coarBcoefIrreg);
+        m_mgCoarseners[amrLevel].push_back(a_mgCoarseners[amrLevel][img - 1]);
+        m_mgLevelGridsCoFi[amrLevel].push_back(a_mgLevelGridsCoFi[amrLevel][img - 1]);
+      }
     }
   }
 
@@ -261,8 +241,6 @@ void
 EBHelmholtzOpFactory::coarsenCoefficientsMG()
 {
   CH_TIME("EBHelmholtzOpFactory::coarsenCoefficientsMG");
-
-  constexpr int mgRefRat = 2;
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
 
@@ -279,10 +257,10 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
       CH_assert(mgBco.size() == (size_t)mgGrids.size());
       CH_assert(mgBcoIrreg.size() == (size_t)mgGrids.size());
 
-      for (int mgLevel = 0; mgLevel < mgGrids.size() - 1; mgLevel++) {
-        const EBLevelGrid& mflgCoar = *mgGrids[mgLevel + 1];
-        const EBLevelGrid& mflgFine = *mgGrids[mgLevel];
+      const Interval interv(m_comp, m_comp);
+      const Average  average = Average::Arithmetic;
 
+      for (int mgLevel = 0; mgLevel < mgGrids.size() - 1; mgLevel++) {
         LevelData<EBCellFAB>&       coarAcoef      = *mgAco[mgLevel + 1];
         LevelData<EBFluxFAB>&       coarBcoef      = *mgBco[mgLevel + 1];
         LevelData<BaseIVFAB<Real>>& coarBcoefIrreg = *mgBcoIrreg[mgLevel + 1];
@@ -291,58 +269,17 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
         const LevelData<EBFluxFAB>&       fineBcoef      = *mgBco[mgLevel];
         const LevelData<BaseIVFAB<Real>>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
 
-        ChomboDischarge::EBHelmholtzOpFactory::coarsenCoefficients(coarAcoef,
-                                                                   coarBcoef,
-                                                                   coarBcoefIrreg,
-                                                                   fineAcoef,
-                                                                   fineBcoef,
-                                                                   fineBcoefIrreg,
-                                                                   mflgCoar,
-                                                                   mflgFine,
-                                                                   mgRefRat);
+        const EBCoarAve& averageOp = *m_mgCoarseners[amrLevel][mgLevel];
+
+        averageOp.averageData(coarAcoef, fineAcoef, interv, average);
+        averageOp.averageData(coarBcoef, fineBcoef, interv, average);
+        averageOp.averageData(coarBcoefIrreg, fineBcoefIrreg, interv, average);
+
+        coarAcoef.exchange();
+        coarBcoef.exchange();
+        coarBcoefIrreg.exchange();
       }
     }
-  }
-}
-
-void
-EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
-                                          LevelData<EBFluxFAB>&             a_coarBcoef,
-                                          LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,
-                                          const LevelData<EBCellFAB>&       a_fineAcoef,
-                                          const LevelData<EBFluxFAB>&       a_fineBcoef,
-                                          const LevelData<BaseIVFAB<Real>>& a_fineBcoefIrreg,
-                                          const EBLevelGrid&                a_eblgCoar,
-                                          const EBLevelGrid&                a_eblgFine,
-                                          const int                         a_refRat)
-{
-  CH_TIME("EBHelmholtzOpFactory::coarsenCoefficients(...)");
-
-  const Interval interv(m_comp, m_comp);
-
-  if (a_refRat == 1) {
-    a_fineAcoef.copyTo(a_coarAcoef);
-    a_fineBcoef.copyTo(a_coarBcoef);
-    a_fineBcoefIrreg.copyTo(a_coarBcoefIrreg);
-  }
-  else {
-    EBCoarAve averageOp(a_eblgFine.getDBL(),
-                        a_eblgCoar.getDBL(),
-                        a_eblgFine.getEBISL(),
-                        a_eblgCoar.getEBISL(),
-                        a_eblgCoar.getDomain(),
-                        a_refRat,
-                        a_eblgCoar.getEBIS());
-
-    const Average average = Average::Arithmetic;
-
-    averageOp.averageData(a_coarAcoef, a_fineAcoef, interv, average);
-    averageOp.averageData(a_coarBcoef, a_fineBcoef, interv, average);
-    averageOp.averageData(a_coarBcoefIrreg, a_fineBcoefIrreg, interv, average);
-
-    a_coarAcoef.exchange();
-    a_coarBcoef.exchange();
-    a_coarBcoefIrreg.exchange();
   }
 }
 
@@ -360,75 +297,6 @@ EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
   CH_TIME("EBHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
 
   return A.domainBox().numPts() > B.domainBox().numPts();
-}
-
-bool
-EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
-                                       const EBLevelGrid& a_fineEblg,
-                                       const int          a_refRat,
-                                       const int          a_blockingFactor) const
-{
-  CH_TIME("EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid, EBLevelGrid, int, int)");
-
-  bool hasCoarser = false;
-
-  // Returns true if the grid fully covers the domain. In that case we can re-partition the domain
-  auto isFullyCovered = [&](const EBLevelGrid& a_eblg) -> bool {
-    unsigned long long       numPtsLeft = a_eblg.getDomain().domainBox().numPts();
-    const DisjointBoxLayout& dbl        = a_eblg.getDBL();
-
-    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      numPtsLeft -= dbl[lit()].numPts();
-    }
-
-    return (numPtsLeft == 0);
-  };
-
-  const ProblemDomain&     fineDomain = a_fineEblg.getDomain();
-  const ProblemDomain      coarDomain = coarsen(fineDomain, a_refRat);
-  const DisjointBoxLayout& fineDbl    = a_fineEblg.getDBL();
-  DisjointBoxLayout        coarDbl;
-
-  // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here.
-  const ProblemDomain& test = fineDomain;
-  if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
-    const Box domainBox = fineDomain.domainBox();
-
-    if (isFullyCovered(a_fineEblg)) {
-      int block = a_blockingFactor;
-
-      while (block > 1) {
-        if (domainBox.coarsenable(block)) {
-          Vector<Box> boxes;
-          Vector<int> procs;
-
-          domainSplit(coarDomain, boxes, a_blockingFactor);
-          mortonOrdering(boxes);
-          LoadBalance(procs, boxes);
-
-          coarDbl.define(boxes, procs, coarDomain);
-
-          hasCoarser = true;
-
-          break;
-        }
-        else {
-          block = block / 2;
-        }
-      }
-    }
-    else if (a_fineEblg.getDBL().coarsenable(a_refRat)) {
-      coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-
-      hasCoarser = true;
-    }
-  }
-
-  if (hasCoarser) {
-    a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
-  }
-
-  return hasCoarser;
 }
 
 EBHelmholtzOp*
@@ -458,6 +326,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   // But we might need to restrict and interpolate another, even coarser multigrid level so in that case we need
   // to define that.
   EBLevelGrid eblg;
+  EBLevelGrid eblgMgCoFi;
   EBLevelGrid eblgMgCoar;
 
   bool hasMGObjects;
@@ -487,6 +356,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
     hasMGObjects = m_hasMgLevels[amrLevel];
 
     if (hasMGObjects) {
+      eblgMgCoFi = *m_mgLevelGridsCoFi[amrLevel][0];
       eblgMgCoar = *m_mgLevelGrids[amrLevel][1];
     }
 
@@ -525,6 +395,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
       // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
       hasMGObjects = (mgLevel < mgLevelGrids.size() - 1);
       if (hasMGObjects) {
+        eblgMgCoFi = *m_mgLevelGridsCoFi[amrLevel][mgLevel];
         eblgMgCoar = *mgLevelGrids[mgLevel + 1];
       }
     }
@@ -542,6 +413,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              eblg,
                              EBLevelGrid(), // Multigrid operator, so no cofi.
                              EBLevelGrid(), // Multigrid operator, so no coarse.
+                             eblgMgCoFi,
                              eblgMgCoar,
                              validCells,   // Defined if an amr level
                              interpolator, // Defined if an amr level
@@ -590,6 +462,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
   EBLevelGrid eblg;
   EBLevelGrid eblgCoFi;
   EBLevelGrid eblgCoar;
+  EBLevelGrid eblgCoFiMG;
   EBLevelGrid eblgCoarMG;
 
   Real dx;
@@ -612,12 +485,13 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if (hasMGObjects) {
+    eblgCoFiMG = *m_mgLevelGridsCoFi[amrLevel][0];
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
     CH_assert(eblgCoarMG.isDefined());
   }
 
   if (hasCoar) {
-    this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
+    eblgCoFi = *m_amrLevelGridsCoFi[amrLevel - 1];
     CH_assert(eblgCoFi.isDefined());
   }
 
@@ -629,6 +503,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          eblg,
                          eblgCoFi,
                          eblgCoar,
+                         eblgCoFiMG,
                          eblgCoarMG,
                          m_validCells[amrLevel],
                          m_amrInterpolators[amrLevel],

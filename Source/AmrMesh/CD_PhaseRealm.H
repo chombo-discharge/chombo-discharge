@@ -192,6 +192,19 @@ public:
   regridOperators(const int a_lmin);
 
   /**
+   * @brief Define the multigrid levels on the given grids.
+   * @details Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k > 0 are defined on
+   * a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of
+   * consecutive multigrid levels are defined as well. The coarse averaging between them is defined in
+   * regridOperators. Empty inputs clear the multigrid levels.
+   * @param[in] a_mgGrids   Grids on each multigrid level. a_mgGrids[lvl][0] must be the grids on AMR level lvl.
+   * @param[in] a_mgDomains Domains on each multigrid level, with the same indexing as a_mgGrids.
+   */
+  void
+  defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgGrids,
+                        const Vector<Vector<ProblemDomain>>&     a_mgDomains);
+
+  /**
    * @brief Define the state redistribution, if the operator is registered.
    * @details Called after regridOperators, with the cell masks of the realm. The neighbourhoods depend on all levels,
    * so the operator is rebuilt on every regrid.
@@ -275,6 +288,34 @@ public:
    */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
+
+  /**
+   * @brief Get the multigrid levels.
+   * @details Entry [lvl][0] is AMR level lvl, and entry [lvl][k+1] is a factor 2 coarsening of entry [lvl][k]. AMR
+   * level 0 holds the levels coarser than itself, down to the coarsest bottom domain registered on the realm. A finer
+   * AMR level with a refinement ratio larger than 2 to the next coarser AMR level holds one intermediate level. Any
+   * other AMR level holds only itself.
+   * @return The multigrid levels under each AMR level.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGrids() const;
+
+  /**
+   * @brief Get the coarsened grids between consecutive multigrid levels.
+   * @details Entry [lvl][k] is entry [lvl][k] of getMultigridLevelGrids() coarsened by 2, for k + 1 smaller than
+   * the number of multigrid levels under AMR level lvl.
+   * @return The coarsened grids of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGridsCoFi() const;
+
+  /**
+   * @brief Get the coarse averaging between consecutive multigrid levels.
+   * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl.
+   * @return The coarse averaging of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
+  getMultigridCoarseAverage() const;
 
   /**
    * @brief Get refined grids
@@ -645,6 +686,25 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
 
   /**
+   * @brief Multigrid levels under each AMR level.
+   * @details m_mgLevelGrids[lvl][0] is AMR level lvl, and m_mgLevelGrids[lvl][k+1] is m_mgLevelGrids[lvl][k]
+   * coarsened by 2.
+   */
+  Vector<Vector<RefCountedPtr<EBLevelGrid>>> m_mgLevelGrids;
+
+  /**
+   * @brief Coarsened grids between consecutive multigrid levels.
+   * @details m_mgLevelGridsCoFi[lvl][k] is m_mgLevelGrids[lvl][k] coarsened by 2.
+   */
+  Vector<Vector<RefCountedPtr<EBLevelGrid>>> m_mgLevelGridsCoFi;
+
+  /**
+   * @brief Coarse averaging between consecutive multigrid levels.
+   * @details m_mgCoarAve[lvl][k] averages from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1].
+   */
+  Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgCoarAve;
+
+  /**
    * @brief Coarsened fine-level EB grids.
    * @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
    */
@@ -828,6 +888,12 @@ protected:
    */
   void
   defineEBCoarAve(const int a_lmin);
+
+  /**
+   * @brief Define the coarse averaging between consecutive multigrid levels.
+   */
+  void
+  defineMultigridCoarseAverage();
 
   /**
    * @brief Define multigrid interpolation utility

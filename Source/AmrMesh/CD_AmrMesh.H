@@ -307,6 +307,17 @@ public:
   registerOperator(const std::string& a_operator, const std::string& a_realm, const phase::which_phase a_phase);
 
   /**
+   * @brief Register the multigrid levels over a realm.
+   * @details The realm builds its multigrid levels down to the coarsest bottom domain registered on it. See
+   * Realm::registerMultigrid. The levels are built in regridOperators, so this must be called before the
+   * regridOperators that should build them.
+   * @param[in] a_realm          Realm name
+   * @param[in] a_minCellsBottom Smallest number of cells along any coordinate direction of the bottom domain.
+   */
+  void
+  registerMultigrid(const std::string& a_realm, const int a_minCellsBottom);
+
+  /**
    * @brief Register a boolean mask over a realm.
    * @param[in] a_mask     Mask name to be registered.
    * @param[in] a_buffer   Relevant buffer for the mask.
@@ -1950,6 +1961,63 @@ public:
    */
   const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGrid(const std::string& a_realm) const;
+
+  /**
+   * @brief Get the multifluid coarsened grids between AMR levels for a Realm.
+   * @details Entry lvl is AMR level lvl+1 coarsened to AMR level lvl. The entry on the finest level is null.
+   * @param[in] a_realm Realm name
+   * @return The multifluid coarsened grids on all AMR levels.
+   */
+  const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridCoFi(const std::string& a_realm) const;
+
+  /**
+   * @brief Get the multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelGrids().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The multigrid levels.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGrids(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the coarsened grids between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelGridsCoFi().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The coarsened grids between consecutive multigrid levels.
+   */
+  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
+  getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the coarse averaging between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridCoarseAverage().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The coarse averaging between consecutive multigrid levels.
+   */
+  const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
+  getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multifluid multigrid levels for a Realm.
+   * @details See Realm::getMultigridMFLevelGrids().
+   * @param[in] a_realm Realm name
+   * @return The multifluid multigrid levels.
+   */
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+  getMultigridMFLevelGrids(const std::string& a_realm) const;
+
+  /**
+   * @brief Get the multifluid coarsened grids between consecutive multigrid levels for a Realm.
+   * @details See Realm::getMultigridMFLevelGridsCoFi().
+   * @param[in] a_realm Realm name
+   * @return The multifluid coarsened grids between consecutive multigrid levels.
+   */
+  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
+  getMultigridMFLevelGridsCoFi(const std::string& a_realm) const;
 
   /**
    * @brief Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a Realm and phase.

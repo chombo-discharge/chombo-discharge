@@ -37,6 +37,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFLevelGrid&                               a_mflg,
                              const MFLevelGrid&                               a_mflgCoFi,
                              const MFLevelGrid&                               a_mflgCoar,
+                             const MFLevelGrid&                               a_mflgCoFiMG,
                              const MFLevelGrid&                               a_mflgCoarMG,
                              const MFMultigridInterpolator&                   a_interpolator,
                              const MFReflux&                                  a_fluxReg,
@@ -132,6 +133,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBLevelGrid        eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoFiMG = a_hasMGObjects ? a_mflgCoFiMG.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
@@ -203,6 +205,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        eblg,
                                                                                        eblgCoFi,
                                                                                        eblgCoar,
+                                                                                       eblgCoFiMG,
                                                                                        eblgCoarMG,
                                                                                        m_validCells,
                                                                                        interpolator,

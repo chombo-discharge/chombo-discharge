@@ -40,6 +40,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblg,
                              const EBLevelGrid&                               a_eblgCoFi,
                              const EBLevelGrid&                               a_eblgCoar,
+                             const EBLevelGrid&                               a_eblgCoFiMG,
                              const EBLevelGrid&                               a_eblgCoarMG,
                              const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
@@ -149,8 +150,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_eblgCoFi = a_eblgCoFi;
     m_eblgCoar = a_eblgCoar;
 
-    m_restrictOp.define(m_eblg, m_eblgCoFi, m_refToCoar);
-    m_prolongOp.define(m_eblg, m_eblgCoar, m_refToCoar);
+    m_restrictOp.define(m_eblg, m_eblgCoFi, m_eblgCoFi, m_refToCoar);
+    m_prolongOp.define(m_eblg, m_eblgCoFi, m_eblgCoar, m_refToCoar);
   }
 
   if (m_hasMGObjects) {
@@ -158,8 +159,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
     m_eblgCoarMG = a_eblgCoarMG;
 
-    m_restrictOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
-    m_prolongOpMG.define(m_eblg, m_eblgCoarMG, mgRef);
+    m_restrictOpMG.define(m_eblg, a_eblgCoFiMG, m_eblgCoarMG, mgRef);
+    m_prolongOpMG.define(m_eblg, a_eblgCoFiMG, m_eblgCoarMG, mgRef);
   }
 
   // Define BC objects.

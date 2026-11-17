@@ -643,6 +643,7 @@ EddingtonSP1::registerOperators()
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
     m_amr->registerOperator(s_eb_fine_interp, m_realm, m_phase);
     m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
+    m_amr->registerMultigrid(m_realm, m_minCellsBottom);
   }
 }
 
@@ -1126,32 +1127,36 @@ EddingtonSP1::setupHelmholtzFactory()
   // Set up the operator
   const Real relaxFactor = 1.0;
 
-  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(new EBHelmholtzOpFactory(m_dataLocation,
-                                                                                      m_alpha,
-                                                                                      m_beta,
-                                                                                      m_amr->getProbLo(),
-                                                                                      levelGrids,
-                                                                                      m_amr->getValidCells(m_realm),
-                                                                                      interpolator,
-                                                                                      fluxReg,
-                                                                                      coarAve,
-                                                                                      m_amr->getRefinementRatios(),
-                                                                                      m_amr->getDx(),
-                                                                                      m_helmAco.getData(),
-                                                                                      m_helmBco.getData(),
-                                                                                      m_helmBcoIrreg.getData(),
-                                                                                      domainBcFactory,
-                                                                                      ebbcFactory,
-                                                                                      ghostPhi,
-                                                                                      ghostRhs,
-                                                                                      m_multigridRelaxMethod,
-                                                                                      relaxFactor,
-                                                                                      m_multigridChebyOrder,
-                                                                                      m_multigridChebyEigRatio,
-                                                                                      m_multigridRasInnerSweeps,
-                                                                                      bottomDomain,
-                                                                                      m_amr->getMaxBlockSize(),
-                                                                                      m_multigridRefluxFree));
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(
+    new EBHelmholtzOpFactory(m_dataLocation,
+                             m_alpha,
+                             m_beta,
+                             m_amr->getProbLo(),
+                             levelGrids,
+                             m_amr->getValidCells(m_realm),
+                             interpolator,
+                             fluxReg,
+                             coarAve,
+                             m_amr->getRefinementRatios(),
+                             m_amr->getDx(),
+                             m_helmAco.getData(),
+                             m_helmBco.getData(),
+                             m_helmBcoIrreg.getData(),
+                             domainBcFactory,
+                             ebbcFactory,
+                             ghostPhi,
+                             ghostRhs,
+                             m_multigridRelaxMethod,
+                             relaxFactor,
+                             m_multigridChebyOrder,
+                             m_multigridChebyEigRatio,
+                             m_multigridRasInnerSweeps,
+                             m_amr->getMultigridLevelGrids(m_realm, m_phase),
+                             m_amr->getMultigridLevelGridsCoFi(m_realm, m_phase),
+                             m_amr->getMultigridCoarseAverage(m_realm, m_phase),
+                             m_amr->getEBLevelGridCoFi(m_realm, m_phase),
+                             bottomDomain,
+                             m_multigridRefluxFree));
 }
 
 void
