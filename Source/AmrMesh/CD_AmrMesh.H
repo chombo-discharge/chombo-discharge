@@ -1992,7 +1992,7 @@ public:
   getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the finer VoFs under the coarse VoFs of the coarsened fine grids, for a Realm and phase.
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a Realm and phase.
    * @details See Realm::getFinerVoFs(). Entry lvl lives on getEBLevelGridCoFi()[lvl] and is defined after regridBase.
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)

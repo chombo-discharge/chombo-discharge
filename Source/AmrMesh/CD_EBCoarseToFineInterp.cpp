@@ -135,8 +135,9 @@ EBCoarseToFineInterp::defineWeights() noexcept
     areaWeights.setVal(0.0);
 
     auto kernel = [&](const VolIndex& fineVoF) -> void {
-      // TLDR: We want refRat^(D-1) * coarArea/fineArea. We refine the coarse vof (which also gives regular cells)
-      // but that won't matter because they don't have a boundary area. We do it similarly for the volume fractions.
+      // TLDR: We want refRat^(D-1) * coarArea/fineArea. We take the finer VoFs of the coarse VoF (which also gives
+      // regular cells) but that won't matter because they don't have a boundary area. We do it similarly for the volume
+      // fractions.
 
       const VolIndex         coarVoF  = ebislFine.coarsen(fineVoF, m_refRat, din);
       const Vector<VolIndex> fineVoFs = VofUtils::getStoredFinerVoFs(coarVoF,

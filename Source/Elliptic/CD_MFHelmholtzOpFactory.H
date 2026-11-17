@@ -162,9 +162,9 @@ public:
    * @param[in] a_mgLevelGrids     Multigrid levels under each AMR level, as built by the realm (see
    * Realm::getMultigridMFLevelGrids). The factory uses the entries that are not coarser than a_bottomDomain.
    * @param[in] a_mgRestrictions  Restriction between consecutive multigrid levels, entry [lvl][k][phase], as built by
-   * the realm (see PhaseRealm::getMultigridLevelRestriction).
+   * the realm and assembled per phase (see AmrMesh::getMultigridLevelRestriction).
    * @param[in] a_mgProlongations Prolongation between consecutive multigrid levels, entry [lvl][k][phase], as built by
-   * the realm (see PhaseRealm::getMultigridLevelProlongation).
+   * the realm and assembled per phase (see AmrMesh::getMultigridLevelProlongation).
    * @param[in] a_mgCoarseners     Coarse averaging between consecutive multigrid levels, as built by the realm (see
    * Realm::getMultigridCoarseAverage).
    * @param[in] a_amrLevelGridsCoFi Coarsened grids between AMR levels. Entry lvl is AMR level lvl+1 coarsened to AMR
@@ -405,8 +405,8 @@ protected:
   AmrCoarseners m_amrCoarseners;
 
   /**
-   * @brief Restriction between AMR levels, entry [lvl][phase]. Entry lvl restricts AMR level lvl onto the coarsened
-   * grids of level lvl.
+   * @brief Restriction between AMR levels, entry [lvl][phase]. Entry lvl restricts AMR level lvl onto
+   * m_amrLevelGridsCoFi[lvl-1].
    */
   Vector<PhaseRestrictions> m_amrRestrictions;
 

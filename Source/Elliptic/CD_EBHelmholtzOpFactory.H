@@ -75,12 +75,12 @@ public:
   using AmrCoarseners = Vector<RefCountedPtr<EBCoarAve>>;
 
   /**
-   * @brief alias type alias.
+   * @brief Restriction operators between AMR levels, one per level.
    */
   using AmrRestrictions = Vector<RefCountedPtr<EBMGRestrict>>;
 
   /**
-   * @brief alias type alias.
+   * @brief Prolongation operators between AMR levels, one per level.
    */
   using AmrProlongations = Vector<RefCountedPtr<EBMGProlong>>;
 
@@ -369,7 +369,8 @@ protected:
   AmrCoarseners m_amrCoarseners;
 
   /**
-   * @brief Restriction between AMR levels. Entry lvl restricts AMR level lvl onto the coarsened grids of level lvl.
+   * @brief Restriction between AMR levels. Entry lvl restricts AMR level lvl onto
+   * m_amrLevelGridsCoFi[lvl-1].
    */
   AmrRestrictions m_amrRestrictions;
 

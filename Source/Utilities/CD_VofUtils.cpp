@@ -659,7 +659,7 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
   const EBISBox& ebisBoxFine = a_ebislFine[a_din];
   const int      childRatio  = a_ratio / 2;
 
-  // The ancestor of each finest VoF one factor of two finer than the VoF they all lie under.
+  // The ancestor of each finest VoF one factor of two finer than the VoF they all coarsen to.
   Vector<VolIndex> ancestors(a_finest.size());
 
   for (int i = 0; i < a_finest.size(); i++) {
@@ -758,8 +758,8 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
     doneAdding = order.size() == oldSize;
   }
 
-  // The children are the VoFs one level finer under a single VoF, so a path joins every one of them to the first one.
-  // Should one be left over in a graph that breaks this, it is listed last, in gathering order.
+  // The children are the VoFs one level finer that coarsen to a single VoF, so a path joins every one of them to the
+  // first one. Should one be left over in a graph that breaks this, it is listed last, in gathering order.
   for (int j = 0; j < numChildren; j++) {
     CH_assert(listed[j]);
 

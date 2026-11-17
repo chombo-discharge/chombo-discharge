@@ -58,7 +58,7 @@ public:
    * @param[in] a_eblgFine  Fine grids
    * @param[in] a_eblgCoar  Coarse grids
    * @param[in] a_eblgCoFi  Coarsened fine grids
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat    Refinement ratio between coarse and level
    */
   EBCoarAve(const EBLevelGrid&                             a_eblgFine,
@@ -77,7 +77,7 @@ public:
    * @param[in] a_eblgFine  Fine grids
    * @param[in] a_eblgCoar  Coarse grids
    * @param[in] a_eblgCoFi  Coarsened fine grids
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat    Refinement ratio between coarse and level
    */
   virtual void
@@ -237,21 +237,21 @@ protected:
 
   /**
    * @brief Define stencils for the various coarsening functions of cell data
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids.
    */
   virtual void
   defineCellStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define stencils for the various coarsening functions of face data
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids.
    */
   virtual void
   defineFaceStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;
 
   /**
    * @brief Define stencils for the various coarsening functions of EB data
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids.
    */
   virtual void
   defineEBStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;

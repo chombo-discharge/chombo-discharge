@@ -54,7 +54,7 @@ public:
    * @param[in] a_eblg         Grids
    * @param[in] a_eblgFine     Fine grids
    * @param[in] a_eblgCoFi     Coarsened fine grids
-   * @param[in] a_finerVoFs    Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
+   * @param[in] a_finerVoFs    Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat       Refinement ratio between grids.
    */
   EBReflux(const EBLevelGrid&                             a_eblg,
@@ -70,10 +70,10 @@ public:
 
   /**
    * @brief Define method. Puts object in usable state.
-   * @param[in] a_eblg     Grids on this level
-   * @param[in] a_eblgFine Fine grids
+   * @param[in] a_eblg      Grids on this level
+   * @param[in] a_eblgFine  Fine grids
    * @param[in] a_eblgCoFi  Coarsened fine grids
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids, on their grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids.
    * @param[in] a_refRat    Refinement ratio between coarse and fine grids.
    */
   virtual void
@@ -208,7 +208,7 @@ protected:
 
   /**
    * @brief Define the stencils required for coarsening the fine-grid fluxes onto the coarse grid
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of the coarsened fine grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grids.
    */
   virtual void
   defineStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept;

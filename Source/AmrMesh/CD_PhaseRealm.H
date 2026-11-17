@@ -197,8 +197,9 @@ public:
    * @brief Define the multigrid levels on the given grids.
    * @details Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k > 0 are defined on
    * a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of
-   * consecutive multigrid levels are defined as well. The coarse averaging between them is defined in
-   * regridOperators. Empty inputs clear the multigrid levels.
+   * consecutive multigrid levels are defined as well. The finer-VoF lists, coarse averaging, restriction and
+   * prolongation between them are defined in regridOperators, when the multigrid operator is registered. Empty inputs
+   * clear the multigrid levels.
    * @param[in] a_mgGrids   Grids on each multigrid level. a_mgGrids[lvl][0] must be the grids on AMR level lvl.
    * @param[in] a_mgDomains Domains on each multigrid level, with the same indexing as a_mgGrids.
    */
@@ -312,17 +313,17 @@ public:
   getMultigridCoarseAverage() const;
 
   /**
-   * @brief Get the finer VoFs under the coarse VoFs of the coarsened fine grids.
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids.
    * @details Entry [lvl] lives on getEBLevelGridCoFi()[lvl], for lvl smaller than the finest level. For every irregular
-   * cell whose finer cells all lie in the finer EBISBox, it holds the VoFs on level lvl+1 under each coarse VoF, in the
-   * order of EBISLayout::refine.
+   * cell whose finer cells all lie in the finer EBISBox, it holds the VoFs on level lvl+1 that coarsen to each coarse
+   * VoF, in the order of EBISLayout::refine.
    * @return The finer-VoF lists of each AMR level pair.
    */
   const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
   getFinerVoFs() const;
 
   /**
-   * @brief Get the finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.
    * @details Entry [lvl][k] lives on getMultigridLevelGrids()[lvl][k] coarsened by 2 and holds the VoFs on multigrid
    * level k under AMR level lvl, as getFinerVoFs() does for AMR levels. Defined when the multigrid operator is
    * registered.
@@ -755,15 +756,16 @@ protected:
   Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgCoarAve;
 
   /**
-   * @brief Finer VoFs under the coarse VoFs of the coarsened fine grids.
-   * @details m_finerVoFs[lvl] lives on m_eblgCoFi[lvl] and holds the VoFs on level lvl+1 under its irregular VoFs.
+   * @brief Finer VoFs of the coarse VoFs of the coarsened fine grids.
+   * @details m_finerVoFs[lvl] lives on m_eblgCoFi[lvl] and holds the VoFs on level lvl+1 that coarsen to its irregular
+   * VoFs.
    */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>> m_finerVoFs;
 
   /**
-   * @brief Finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @brief Finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.
    * @details m_mgFinerVoFs[lvl][k] lives on m_mgLevelGridsCoFi[lvl][k] and holds the VoFs on m_mgLevelGrids[lvl][k]
-   * under its irregular VoFs.
+   * that coarsen to its irregular VoFs.
    */
   Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>> m_mgFinerVoFs;
 

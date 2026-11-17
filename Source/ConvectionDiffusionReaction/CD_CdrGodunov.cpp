@@ -206,8 +206,8 @@ CdrGodunov::allocate()
         refRat   = refRatios[lvl - 1];
 
         // EBAdvectLevelIntegrator fills ghost cells with a fill patch of radius 4 fine cells, which reads the EB ghost
-        // cells that far out on this level and as far as the coarse cells under them, plus one for slopes, on the
-        // coarser level.
+        // cells that far out on this level and as far as the coarse cells that contain them, plus one for slopes, on
+        // the coarser level.
         constexpr int fillPatchRadius = 4;
 
         CH_assert(eblgs[lvl]->getGhost() >= fillPatchRadius);

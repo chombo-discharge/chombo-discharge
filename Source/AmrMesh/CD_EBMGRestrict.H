@@ -42,7 +42,7 @@ public:
    * @param[in] a_eblgFine Fine level
    * @param[in] a_eblgCoFi  Fine level coarsened by a_refRat.
    * @param[in] a_eblgCoar  Coarse level
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids.
    * @param[in] a_refRat    Refinement factor between levels.
    */
   EBMGRestrict(const EBLevelGrid&                             a_eblgFine,
@@ -61,7 +61,7 @@ public:
    * @param[in] a_eblgFine Fine level
    * @param[in] a_eblgCoFi  Fine level coarsened by a_refRat.
    * @param[in] a_eblgCoar  Coarse level
-   * @param[in] a_finerVoFs Finer VoFs under the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids.
    * @param[in] a_refRat    Refinement factor between levels.
    */
   virtual void

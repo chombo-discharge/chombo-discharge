@@ -207,7 +207,7 @@ public:
   getMultigridCoarseAverage(const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the finer VoFs under the coarse VoFs of the coarsened fine grids, for a phase.
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a phase.
    * @details See PhaseRealm::getFinerVoFs().
    * @param[in] a_phase Phase
    * @return The finer-VoF lists of each AMR level pair.

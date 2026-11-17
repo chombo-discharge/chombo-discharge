@@ -57,11 +57,11 @@ public:
 
   /**
    * @brief Constructor. Constructs a valid object which can be used for regridding.
-   * @param[in] a_eblgFine The fine grid.
-   * @param[in] a_eblgCoFi Coarsened fine grid.
-   * @param[in] a_eblgCoar    The coarse grid.
-   * @param[in] a_finerVoFs  Finer VoFs under the irregular VoFs of the coarsened fine grid, on its grids.
-   * @param[in] a_refRat     Refinement ratio between fine and coarse.
+   * @param[in] a_eblgFine  The fine grid.
+   * @param[in] a_eblgCoFi  Coarsened fine grid.
+   * @param[in] a_eblgCoar  The coarse grid.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grid, on its grids.
+   * @param[in] a_refRat    Refinement ratio between fine and coarse.
    */
   EBCoarseToFineInterp(const EBLevelGrid&                                            a_eblgFine,
                        const EBLevelGrid&                                            a_eblgCoFi,
@@ -98,11 +98,11 @@ public:
 
   /**
    * @brief Define operation. Puts object in usable state.
-   * @param[in] a_eblgFine The fine grid.
-   * @param[in] a_eblgCoFi Coarsened fine grid.
-   * @param[in] a_eblgCoar    The coarse grid.
-   * @param[in] a_finerVoFs  Finer VoFs under the irregular VoFs of the coarsened fine grid, on its grids.
-   * @param[in] a_refRat     Refinement ratio between fine and coarse.
+   * @param[in] a_eblgFine  The fine grid.
+   * @param[in] a_eblgCoFi  Coarsened fine grid.
+   * @param[in] a_eblgCoar  The coarse grid.
+   * @param[in] a_finerVoFs Finer VoFs of the irregular VoFs of the coarsened fine grid, on its grids.
+   * @param[in] a_refRat    Refinement ratio between fine and coarse.
    */
   virtual void
   define(const EBLevelGrid&                                            a_eblgFine,
@@ -184,7 +184,7 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /**
-   * @brief Finer VoFs under the irregular VoFs of the coarsened fine grid.
+   * @brief Finer VoFs of the irregular VoFs of the coarsened fine grid.
    */
   RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>> m_finerVoFs;
 
