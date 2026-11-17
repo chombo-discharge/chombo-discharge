@@ -150,8 +150,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:acf2e306910bfd82381d4c263ae18241e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor.  <br /></td></tr>
 <tr class="memitem:a8e8b97e874d4af3ddf9f2b50aa55f504" id="r_a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e8b97e874d4af3ddf9f2b50aa55f504">EBHelmholtzOp</a> (const <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <br /></td></tr>
-<tr class="memitem:ae65c77df705c09690fe7cc4cc9c5e0ab" id="r_ae65c77df705c09690fe7cc4cc9c5e0ab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae65c77df705c09690fe7cc4cc9c5e0ab">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const bool a_refluxFree=false)</td></tr>
-<tr class="memdesc:ae65c77df705c09690fe7cc4cc9c5e0ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="memitem:a613fb51021875d0a2ef7d4ee3d05e241" id="r_a613fb51021875d0a2ef7d4ee3d05e241"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a613fb51021875d0a2ef7d4ee3d05e241">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFiMG, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const bool a_refluxFree=false)</td></tr>
+<tr class="memdesc:a613fb51021875d0a2ef7d4ee3d05e241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="memitem:a2d728e76605bb07ea19198787f6ade65" id="r_a2d728e76605bb07ea19198787f6ade65"><td class="memItemLeft" align="right" valign="top"><a id="a2d728e76605bb07ea19198787f6ade65" name="a2d728e76605bb07ea19198787f6ade65"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzOp</b> ()</td></tr>
 <tr class="memdesc:a2d728e76605bb07ea19198787f6ade65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dtor. <br /></td></tr>
@@ -621,8 +621,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
-<a id="ae65c77df705c09690fe7cc4cc9c5e0ab" name="ae65c77df705c09690fe7cc4cc9c5e0ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae65c77df705c09690fe7cc4cc9c5e0ab">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
+<a id="a613fb51021875d0a2ef7d4ee3d05e241" name="a613fb51021875d0a2ef7d4ee3d05e241"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a613fb51021875d0a2ef7d4ee3d05e241">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -651,6 +651,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgCoFiMG</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -798,6 +803,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids on this level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsening of fine level grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFiMG</td><td>Grids on this level coarsened by 2. Only used if a_hasMGObjects is true. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoarMG</td><td>Multigrid-grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validCells</td><td>Valid grid cells </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpolator</td><td>Interpolator </td></tr>

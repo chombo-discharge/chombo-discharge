@@ -132,6 +132,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a949afed30ee8c314894e4d4498a486ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method for EBAMR base.  <br /></td></tr>
 <tr class="memitem:afeb01ce63782724e7dfa41f6aea6dc73" id="r_afeb01ce63782724e7dfa41f6aea6dc73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afeb01ce63782724e7dfa41f6aea6dc73">regridOperators</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:afeb01ce63782724e7dfa41f6aea6dc73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method for EBAMR operators.  <br /></td></tr>
+<tr class="memitem:a55f4742ff435e74fbaf7ec0917f8b416" id="r_a55f4742ff435e74fbaf7ec0917f8b416"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55f4742ff435e74fbaf7ec0917f8b416">defineMultigridLevels</a> (const Vector&lt; Vector&lt; DisjointBoxLayout &gt; &gt; &amp;a_mgGrids, const Vector&lt; Vector&lt; ProblemDomain &gt; &gt; &amp;a_mgDomains)</td></tr>
+<tr class="memdesc:a55f4742ff435e74fbaf7ec0917f8b416"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the multigrid levels on the given grids.  <br /></td></tr>
 <tr class="memitem:a76c2ea60fdf0c09eedb8dfbac03d17e6" id="r_a76c2ea60fdf0c09eedb8dfbac03d17e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a76c2ea60fdf0c09eedb8dfbac03d17e6">defineStateRedistribution</a> (const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coveredByFiner, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_coarseFineGhost)</td></tr>
 <tr class="memdesc:a76c2ea60fdf0c09eedb8dfbac03d17e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the state redistribution, if the operator is registered.  <br /></td></tr>
 <tr class="memitem:a6155a4fe37ee1044a91f6f94cb060e35" id="r_a6155a4fe37ee1044a91f6f94cb060e35"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6155a4fe37ee1044a91f6f94cb060e35">registerOperator</a> (const std::string &amp;a_operator)</td></tr>
@@ -154,6 +156,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:aa69c6b50a26a3dc0a2f8616cc3c68e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get EBLevelGrids.  <br /></td></tr>
 <tr class="memitem:a3bd7ac21a1e323ebbe89416c4709725b" id="r_a3bd7ac21a1e323ebbe89416c4709725b"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bd7ac21a1e323ebbe89416c4709725b">getEBLevelGridCoFi</a> () const</td></tr>
 <tr class="memdesc:a3bd7ac21a1e323ebbe89416c4709725b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarsened fine grids.  <br /></td></tr>
+<tr class="memitem:a033f07a40489b78878942120251da540" id="r_a033f07a40489b78878942120251da540"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a033f07a40489b78878942120251da540">getMultigridLevelGrids</a> () const</td></tr>
+<tr class="memdesc:a033f07a40489b78878942120251da540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid levels.  <br /></td></tr>
+<tr class="memitem:aad7fab010d628b479b4d5711d8e9b05f" id="r_aad7fab010d628b479b4d5711d8e9b05f"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad7fab010d628b479b4d5711d8e9b05f">getMultigridLevelGridsCoFi</a> () const</td></tr>
+<tr class="memdesc:aad7fab010d628b479b4d5711d8e9b05f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened grids between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:a26c6941cef439ff1ab129a1bd87be830" id="r_a26c6941cef439ff1ab129a1bd87be830"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26c6941cef439ff1ab129a1bd87be830">getMultigridCoarseAverage</a> () const</td></tr>
+<tr class="memdesc:a26c6941cef439ff1ab129a1bd87be830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarse averaging between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:aade764263141d96833e6c9bdfd2b5653" id="r_aade764263141d96833e6c9bdfd2b5653"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aade764263141d96833e6c9bdfd2b5653">getEBLevelGridFiCo</a> () const</td></tr>
 <tr class="memdesc:aade764263141d96833e6c9bdfd2b5653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get refined grids.  <br /></td></tr>
 <tr class="memitem:a4a6c82b907a8db5574b0d5f9dbe85a8b" id="r_a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a6c82b907a8db5574b0d5f9dbe85a8b">getVofIterator</a> () const</td></tr>
@@ -219,6 +227,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:af096f4bf383d166b40391a9ea17b1e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define vof iterators.  <br /></td></tr>
 <tr class="memitem:a2234f52cd42f490265227f495ed915fd" id="r_a2234f52cd42f490265227f495ed915fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2234f52cd42f490265227f495ed915fd">defineEBCoarAve</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a2234f52cd42f490265227f495ed915fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define coarsening utility.  <br /></td></tr>
+<tr class="memitem:ac5db77d14fb5dccb6a704fb86ba9ceec" id="r_ac5db77d14fb5dccb6a704fb86ba9ceec"><td class="memItemLeft" align="right" valign="top"><a id="ac5db77d14fb5dccb6a704fb86ba9ceec" name="ac5db77d14fb5dccb6a704fb86ba9ceec"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineMultigridCoarseAverage</b> ()</td></tr>
+<tr class="memdesc:ac5db77d14fb5dccb6a704fb86ba9ceec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the coarse averaging between consecutive multigrid levels. <br /></td></tr>
 <tr class="memitem:a3c62834f6d3371339ced5ab3e783a5ba" id="r_a3c62834f6d3371339ced5ab3e783a5ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c62834f6d3371339ced5ab3e783a5ba">defineEBMultigrid</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a3c62834f6d3371339ced5ab3e783a5ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define multigrid interpolation utility.  <br /></td></tr>
 <tr class="memitem:ab05aedd32d7f6c1bed5aeceef65eba82" id="r_ab05aedd32d7f6c1bed5aeceef65eba82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab05aedd32d7f6c1bed5aeceef65eba82">defineFillPatch</a> (const int a_lmin)</td></tr>
@@ -335,6 +346,12 @@ Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemR
 <tr class="memdesc:a42c40d876ca76325fc4300109077517d"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB level grids. <br /></td></tr>
 <tr class="memitem:a18918564d9538c935b1c3686bcab9e09" id="r_a18918564d9538c935b1c3686bcab9e09"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18918564d9538c935b1c3686bcab9e09">m_eblgCoFi</a></td></tr>
 <tr class="memdesc:a18918564d9538c935b1c3686bcab9e09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <br /></td></tr>
+<tr class="memitem:a9fd70cdec284efe3ed3ee9bd45f1ce84" id="r_a9fd70cdec284efe3ed3ee9bd45f1ce84"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fd70cdec284efe3ed3ee9bd45f1ce84">m_mgLevelGrids</a></td></tr>
+<tr class="memdesc:a9fd70cdec284efe3ed3ee9bd45f1ce84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid levels under each AMR level.  <br /></td></tr>
+<tr class="memitem:abcd5bfcad0358b10ebc104bf3661b1ea" id="r_abcd5bfcad0358b10ebc104bf3661b1ea"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abcd5bfcad0358b10ebc104bf3661b1ea">m_mgLevelGridsCoFi</a></td></tr>
+<tr class="memdesc:abcd5bfcad0358b10ebc104bf3661b1ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened grids between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:abf311151c6c3391d7979abf193dd4327" id="r_abf311151c6c3391d7979abf193dd4327"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf311151c6c3391d7979abf193dd4327">m_mgCoarAve</a></td></tr>
+<tr class="memdesc:abf311151c6c3391d7979abf193dd4327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse averaging between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:a03464ade19278214a5e4c672d552eaba" id="r_a03464ade19278214a5e4c672d552eaba"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03464ade19278214a5e4c672d552eaba">m_eblgFiCo</a></td></tr>
 <tr class="memdesc:a03464ade19278214a5e4c672d552eaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <br /></td></tr>
 <tr class="memitem:a318b7e957a7c1cbbfe11b58e149ec85c" id="r_a318b7e957a7c1cbbfe11b58e149ec85c"><td class="memItemLeft" align="right" valign="top"><a id="a318b7e957a7c1cbbfe11b58e149ec85c" name="a318b7e957a7c1cbbfe11b58e149ec85c"></a>
@@ -1176,6 +1193,36 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a55f4742ff435e74fbaf7ec0917f8b416" name="a55f4742ff435e74fbaf7ec0917f8b416"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55f4742ff435e74fbaf7ec0917f8b416">&#9670;&#160;</a></span>defineMultigridLevels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineMultigridLevels </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Vector&lt; DisjointBoxLayout &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgGrids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Vector&lt; ProblemDomain &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgDomains</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Define the multigrid levels on the given grids. </p>
+<p>Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k &gt; 0 are defined on a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of consecutive multigrid levels are defined as well. The coarse averaging between them is defined in regridOperators. Empty inputs clear the multigrid levels. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgGrids</td><td>Grids on each multigrid level. a_mgGrids[lvl][0] must be the grids on AMR level lvl. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgDomains</td><td>Domains on each multigrid level, with the same indexing as a_mgGrids. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a068109c7cdff456af8e32439298e4c24" name="a068109c7cdff456af8e32439298e4c24"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a068109c7cdff456af8e32439298e4c24">&#9670;&#160;</a></span>defineNonConservativeDivergence()</h2>
 
@@ -1812,6 +1859,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a26c6941cef439ff1ab129a1bd87be830" name="a26c6941cef439ff1ab129a1bd87be830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26c6941cef439ff1ab129a1bd87be830">&#9670;&#160;</a></span>getMultigridCoarseAverage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp; PhaseRealm::getMultigridCoarseAverage </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the coarse averaging between consecutive multigrid levels. </p>
+<p>Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl. </p><dl class="section return"><dt>Returns</dt><dd>The coarse averaging of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
 <a id="a83001d6d24388b62b7858f4264b5d424" name="a83001d6d24388b62b7858f4264b5d424"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a83001d6d24388b62b7858f4264b5d424">&#9670;&#160;</a></span>getMultigridInterpolator()</h2>
 
@@ -1829,6 +1896,46 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Get multigrid interpolator. </p>
 <dl class="section return"><dt>Returns</dt><dd>Multigrid interpolator </dd></dl>
+
+</div>
+</div>
+<a id="a033f07a40489b78878942120251da540" name="a033f07a40489b78878942120251da540"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a033f07a40489b78878942120251da540">&#9670;&#160;</a></span>getMultigridLevelGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; PhaseRealm::getMultigridLevelGrids </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multigrid levels. </p>
+<p>Entry [lvl][0] is AMR level lvl, and entry [lvl][k+1] is a factor 2 coarsening of entry [lvl][k]. AMR level 0 holds the levels coarser than itself, down to the coarsest bottom domain registered on the realm. A finer AMR level with a refinement ratio larger than 2 to the next coarser AMR level holds one intermediate level. Any other AMR level holds only itself. </p><dl class="section return"><dt>Returns</dt><dd>The multigrid levels under each AMR level. </dd></dl>
+
+</div>
+</div>
+<a id="aad7fab010d628b479b4d5711d8e9b05f" name="aad7fab010d628b479b4d5711d8e9b05f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad7fab010d628b479b4d5711d8e9b05f">&#9670;&#160;</a></span>getMultigridLevelGridsCoFi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; PhaseRealm::getMultigridLevelGridsCoFi </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the coarsened grids between consecutive multigrid levels. </p>
+<p>Entry [lvl][k] is entry [lvl][k] of <a class="el" href="#a033f07a40489b78878942120251da540" title="Get the multigrid levels.">getMultigridLevelGrids()</a> coarsened by 2, for k + 1 smaller than the number of multigrid levels under AMR level lvl. </p><dl class="section return"><dt>Returns</dt><dd>The coarsened grids of each multigrid level pair. </dd></dl>
 
 </div>
 </div>
@@ -2291,6 +2398,81 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer. </p>
 <p>For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1 in the two directions tangential to dir; the dir extent stays at the valid-box boundary. Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary). </p>
+
+</div>
+</div>
+<a id="abf311151c6c3391d7979abf193dd4327" name="abf311151c6c3391d7979abf193dd4327"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf311151c6c3391d7979abf193dd4327">&#9670;&#160;</a></span>m_mgCoarAve</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBCoarAve.html">EBCoarAve</a>&gt; &gt; &gt; PhaseRealm::m_mgCoarAve</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarse averaging between consecutive multigrid levels. </p>
+<p>m_mgCoarAve[lvl][k] averages from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1]. </p>
+
+</div>
+</div>
+<a id="a9fd70cdec284efe3ed3ee9bd45f1ce84" name="a9fd70cdec284efe3ed3ee9bd45f1ce84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fd70cdec284efe3ed3ee9bd45f1ce84">&#9670;&#160;</a></span>m_mgLevelGrids</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;EBLevelGrid&gt; &gt; &gt; PhaseRealm::m_mgLevelGrids</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Multigrid levels under each AMR level. </p>
+<p>m_mgLevelGrids[lvl][0] is AMR level lvl, and m_mgLevelGrids[lvl][k+1] is m_mgLevelGrids[lvl][k] coarsened by 2. </p>
+
+</div>
+</div>
+<a id="abcd5bfcad0358b10ebc104bf3661b1ea" name="abcd5bfcad0358b10ebc104bf3661b1ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcd5bfcad0358b10ebc104bf3661b1ea">&#9670;&#160;</a></span>m_mgLevelGridsCoFi</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;EBLevelGrid&gt; &gt; &gt; PhaseRealm::m_mgLevelGridsCoFi</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarsened grids between consecutive multigrid levels. </p>
+<p>m_mgLevelGridsCoFi[lvl][k] is m_mgLevelGrids[lvl][k] coarsened by 2. </p>
 
 </div>
 </div>

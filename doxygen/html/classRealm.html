@@ -109,8 +109,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af3274ecbfed41f903f8cfecd1233d56e" id="r_af3274ecbfed41f903f8cfecd1233d56e"><td class="memItemLeft" align="right" valign="top"><a id="af3274ecbfed41f903f8cfecd1233d56e" name="af3274ecbfed41f903f8cfecd1233d56e"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~Realm</b> ()</td></tr>
 <tr class="memdesc:af3274ecbfed41f903f8cfecd1233d56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
-<tr class="memitem:a4c7ee8a6af1156aab32259a5ce0311d8" id="r_a4c7ee8a6af1156aab32259a5ce0311d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c7ee8a6af1156aab32259a5ce0311d8">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_srdOrder, const Real a_srdTargetVolFrac, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
-<tr class="memdesc:a4c7ee8a6af1156aab32259a5ce0311d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
+<tr class="memitem:a7d876ff89d2b912c90a5b8346b10e905" id="r_a7d876ff89d2b912c90a5b8346b10e905"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d876ff89d2b912c90a5b8346b10e905">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_maxBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_srdOrder, const Real a_srdTargetVolFrac, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
+<tr class="memdesc:a7d876ff89d2b912c90a5b8346b10e905"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
 <tr class="memitem:ad3caaf4a8867b472534db7698306b671" id="r_ad3caaf4a8867b472534db7698306b671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3caaf4a8867b472534db7698306b671">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ad3caaf4a8867b472534db7698306b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <br /></td></tr>
 <tr class="memitem:aed9086405be6381b7c82e4b0800614a3" id="r_aed9086405be6381b7c82e4b0800614a3"><td class="memItemLeft" align="right" valign="top"><a id="aed9086405be6381b7c82e4b0800614a3" name="aed9086405be6381b7c82e4b0800614a3"></a>
@@ -122,6 +122,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:abb47b8d819b9929743c20232a10fe295"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method for EBAMR operators.  <br /></td></tr>
 <tr class="memitem:a7ca17a5759af950b9dfacb8d530618f0" id="r_a7ca17a5759af950b9dfacb8d530618f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ca17a5759af950b9dfacb8d530618f0">registerOperator</a> (const std::string &amp;a_operator, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase)</td></tr>
 <tr class="memdesc:a7ca17a5759af950b9dfacb8d530618f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register an AMR operator.  <br /></td></tr>
+<tr class="memitem:a646f9a82f2c6d99e92919d7b34af47ef" id="r_a646f9a82f2c6d99e92919d7b34af47ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a646f9a82f2c6d99e92919d7b34af47ef">registerMultigrid</a> (const int a_minCellsBottom)</td></tr>
+<tr class="memdesc:a646f9a82f2c6d99e92919d7b34af47ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the multigrid levels.  <br /></td></tr>
+<tr class="memitem:a9d38afe7cad3b0b8b1e2a528dea3eb0d" id="r_a9d38afe7cad3b0b8b1e2a528dea3eb0d"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d38afe7cad3b0b8b1e2a528dea3eb0d">getMultigridLevelGrids</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a9d38afe7cad3b0b8b1e2a528dea3eb0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid levels for a phase.  <br /></td></tr>
+<tr class="memitem:a7c71a581bc083508f31b8bda83ccbbc5" id="r_a7c71a581bc083508f31b8bda83ccbbc5"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c71a581bc083508f31b8bda83ccbbc5">getMultigridLevelGridsCoFi</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a7c71a581bc083508f31b8bda83ccbbc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened grids between consecutive multigrid levels for a phase.  <br /></td></tr>
+<tr class="memitem:a1c86bd0de62bbf9b2b552edd115d33ab" id="r_a1c86bd0de62bbf9b2b552edd115d33ab"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1c86bd0de62bbf9b2b552edd115d33ab">getMultigridCoarseAverage</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a1c86bd0de62bbf9b2b552edd115d33ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarse averaging between consecutive multigrid levels for a phase.  <br /></td></tr>
+<tr class="memitem:a32d8d294e84821c5ff4605ed5de9975f" id="r_a32d8d294e84821c5ff4605ed5de9975f"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a32d8d294e84821c5ff4605ed5de9975f">getMultigridMFLevelGrids</a> () const</td></tr>
+<tr class="memdesc:a32d8d294e84821c5ff4605ed5de9975f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multifluid multigrid levels.  <br /></td></tr>
+<tr class="memitem:aca69e5abe062c9c573f16a41bebf741c" id="r_aca69e5abe062c9c573f16a41bebf741c"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca69e5abe062c9c573f16a41bebf741c">getMultigridMFLevelGridsCoFi</a> () const</td></tr>
+<tr class="memdesc:aca69e5abe062c9c573f16a41bebf741c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multifluid coarsened grids between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:a1694fa5b14cdb745a962588e8f9d471d" id="r_a1694fa5b14cdb745a962588e8f9d471d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1694fa5b14cdb745a962588e8f9d471d">queryOperator</a> (const std::string &amp;a_operator, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a1694fa5b14cdb745a962588e8f9d471d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query if an AMR operator has been registered.  <br /></td></tr>
 <tr class="memitem:a012b7a96d198c8fc7e9db10d09476619" id="r_a012b7a96d198c8fc7e9db10d09476619"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a012b7a96d198c8fc7e9db10d09476619">registerMask</a> (const std::string &amp;a_mask, const int a_buffer)</td></tr>
@@ -238,6 +250,10 @@ static const std::string&#160;</td><td class="memItemRight" valign="bottom"><b>p
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a121eeb8eea20764b86fd6bb3b919a739" id="r_a121eeb8eea20764b86fd6bb3b919a739"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a121eeb8eea20764b86fd6bb3b919a739">defineMFLevelGrid</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a121eeb8eea20764b86fd6bb3b919a739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define <a class="el" href="classMFLevelGrid.html" title="Wrapper class for holding multifluid EBLevelGrids.">MFLevelGrid</a>.  <br /></td></tr>
+<tr class="memitem:aa252d8312ce6b155a53831f6147aa9f0" id="r_aa252d8312ce6b155a53831f6147aa9f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa252d8312ce6b155a53831f6147aa9f0">defineMultigridLevels</a> ()</td></tr>
+<tr class="memdesc:aa252d8312ce6b155a53831f6147aa9f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the multigrid levels of every phase, and their multifluid compositions.  <br /></td></tr>
+<tr class="memitem:a73be533af8c1760253fa18d3d9bdbaa5" id="r_a73be533af8c1760253fa18d3d9bdbaa5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73be533af8c1760253fa18d3d9bdbaa5">getCoarserMultigridLayout</a> (DisjointBoxLayout &amp;a_dblCoar, ProblemDomain &amp;a_domainCoar, const DisjointBoxLayout &amp;a_dblFine, const ProblemDomain &amp;a_domainFine, const bool a_repartition) const</td></tr>
+<tr class="memdesc:a73be533af8c1760253fa18d3d9bdbaa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a factor 2 coarsening of a multigrid level.  <br /></td></tr>
 <tr class="memitem:abb6cf81762ae24e529d42a0b34c88420" id="r_abb6cf81762ae24e529d42a0b34c88420"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abb6cf81762ae24e529d42a0b34c88420">defineMasks</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:abb6cf81762ae24e529d42a0b34c88420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define masks.  <br /></td></tr>
 <tr class="memitem:a377950fa2f23e3c2c6fcdc5573a84dd7" id="r_a377950fa2f23e3c2c6fcdc5573a84dd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a377950fa2f23e3c2c6fcdc5573a84dd7">defineOuterHaloMask</a> (const int a_lmin)</td></tr>
@@ -294,6 +310,11 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td>
 <tr class="memitem:a0cb9d208659c0bf628a84cbf0a03460e" id="r_a0cb9d208659c0bf628a84cbf0a03460e"><td class="memItemLeft" align="right" valign="top"><a id="a0cb9d208659c0bf628a84cbf0a03460e" name="a0cb9d208659c0bf628a84cbf0a03460e"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
 <tr class="memdesc:a0cb9d208659c0bf628a84cbf0a03460e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking factor. <br /></td></tr>
+<tr class="memitem:a8415830b2d4f8f12e2cc575a545b0c1a" id="r_a8415830b2d4f8f12e2cc575a545b0c1a"><td class="memItemLeft" align="right" valign="top"><a id="a8415830b2d4f8f12e2cc575a545b0c1a" name="a8415830b2d4f8f12e2cc575a545b0c1a"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxBlockSize</b></td></tr>
+<tr class="memdesc:a8415830b2d4f8f12e2cc575a545b0c1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest box size. <br /></td></tr>
+<tr class="memitem:a8d8e93505a122aed312f0ea397febfd3" id="r_a8d8e93505a122aed312f0ea397febfd3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d8e93505a122aed312f0ea397febfd3">m_mgMinCellsBottom</a></td></tr>
+<tr class="memdesc:a8d8e93505a122aed312f0ea397febfd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smallest number of cells along any direction of the bottom domain, over all registered multigrid users.  <br /></td></tr>
 <tr class="memitem:af138855ca74b0c0dbd057e1dc7a0d5f8" id="r_af138855ca74b0c0dbd057e1dc7a0d5f8"><td class="memItemLeft" align="right" valign="top"><a id="af138855ca74b0c0dbd057e1dc7a0d5f8" name="af138855ca74b0c0dbd057e1dc7a0d5f8"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numGhost</b></td></tr>
 <tr class="memdesc:af138855ca74b0c0dbd057e1dc7a0d5f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells. <br /></td></tr>
@@ -321,6 +342,12 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 <tr class="memitem:abfb96b0e740a2e457fd564b8b5bdb787" id="r_abfb96b0e740a2e457fd564b8b5bdb787"><td class="memItemLeft" align="right" valign="top"><a id="abfb96b0e740a2e457fd564b8b5bdb787" name="abfb96b0e740a2e457fd564b8b5bdb787"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mflgFiCo</b></td></tr>
 <tr class="memdesc:abfb96b0e740a2e457fd564b8b5bdb787"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined grids. Entry lvl+1 contains the refined version of grids on level lvl. <br /></td></tr>
+<tr class="memitem:a5e008413e813bb81a5e7ecc2a2aabd5e" id="r_a5e008413e813bb81a5e7ecc2a2aabd5e"><td class="memItemLeft" align="right" valign="top"><a id="a5e008413e813bb81a5e7ecc2a2aabd5e" name="a5e008413e813bb81a5e7ecc2a2aabd5e"></a>
+Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgMflg</b></td></tr>
+<tr class="memdesc:a5e008413e813bb81a5e7ecc2a2aabd5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multifluid multigrid levels, with the same indexing as <a class="el" href="classPhaseRealm.html#a9fd70cdec284efe3ed3ee9bd45f1ce84" title="Multigrid levels under each AMR level.">PhaseRealm::m_mgLevelGrids</a>. <br /></td></tr>
+<tr class="memitem:a98bc6636b1cb6668f703c23edfd496f5" id="r_a98bc6636b1cb6668f703c23edfd496f5"><td class="memItemLeft" align="right" valign="top"><a id="a98bc6636b1cb6668f703c23edfd496f5" name="a98bc6636b1cb6668f703c23edfd496f5"></a>
+Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgMflgCoFi</b></td></tr>
+<tr class="memdesc:a98bc6636b1cb6668f703c23edfd496f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multifluid coarsened grids between consecutive multigrid levels, with the same indexing as <a class="el" href="classPhaseRealm.html#abcd5bfcad0358b10ebc104bf3661b1ea" title="Coarsened grids between consecutive multigrid levels.">PhaseRealm::m_mgLevelGridsCoFi</a>. <br /></td></tr>
 <tr class="memitem:abd2a204518222c34f1cf2b2cd44ed5f2" id="r_abd2a204518222c34f1cf2b2cd44ed5f2"><td class="memItemLeft" align="right" valign="top"><a id="abd2a204518222c34f1cf2b2cd44ed5f2" name="abd2a204518222c34f1cf2b2cd44ed5f2"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelTiles</b></td></tr>
 <tr class="memdesc:abd2a204518222c34f1cf2b2cd44ed5f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level "tiles" &ndash; i.e. the grids viewed as constant-size boxes. <br /></td></tr>
@@ -426,8 +453,8 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a4c7ee8a6af1156aab32259a5ce0311d8" name="a4c7ee8a6af1156aab32259a5ce0311d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c7ee8a6af1156aab32259a5ce0311d8">&#9670;&#160;</a></span>define()</h2>
+<a id="a7d876ff89d2b912c90a5b8346b10e905" name="a7d876ff89d2b912c90a5b8346b10e905"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d876ff89d2b912c90a5b8346b10e905">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -466,6 +493,11 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_minBlockSize</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_maxBlockSize</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -555,6 +587,7 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of physical domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Grid blocking factor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxBlockSize</td><td>Largest box size. Multigrid levels that are re-partitioned are split into boxes no larger than this. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGhost</td><td>Number of ghost cells used for geometric information when making operators </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells in data holders </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lsfGhost</td><td>Number of ghost cells used when computing the level set on the mesh </td></tr>
@@ -804,6 +837,34 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aa252d8312ce6b155a53831f6147aa9f0" name="aa252d8312ce6b155a53831f6147aa9f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa252d8312ce6b155a53831f6147aa9f0">&#9670;&#160;</a></span>defineMultigridLevels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineMultigridLevels </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the multigrid levels of every phase, and their multifluid compositions. </p>
+<p>Under AMR level 0 this adds factor 2 coarsenings down to the coarsest registered bottom domain, and re-partitions every level that covers the whole domain into boxes as large as m_maxBlockSize allows. Under a finer AMR level with a refinement ratio larger than 2 this adds one intermediate level, which is a direct coarsening of the AMR level. Coarsening stops before a domain that is coarser than the bottom domain, or equal to an AMR level's domain, or when the grids can not be coarsened. Does nothing but clear the levels if no multigrid user registered. </p>
 
 </div>
 </div>
@@ -1334,6 +1395,63 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Coarse average </dd></dl>
+
+</div>
+</div>
+<a id="a73be533af8c1760253fa18d3d9bdbaa5" name="a73be533af8c1760253fa18d3d9bdbaa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73be533af8c1760253fa18d3d9bdbaa5">&#9670;&#160;</a></span>getCoarserMultigridLayout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Realm::getCoarserMultigridLayout </td>
+          <td>(</td>
+          <td class="paramtype">DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dblCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domainCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dblFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domainFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_repartition</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a factor 2 coarsening of a multigrid level. </p>
+<p>A coarsening exists only if the fine domain and the fine grids are coarsenable by 2. When a_repartition is true and the fine grids cover the whole domain, the coarse domain is split into boxes no larger than m_maxBlockSize (rounded down to an even number), and the boxes are Morton ordered and load balanced. Otherwise the fine boxes are coarsened directly, keeping their ranks. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dblCoar</td><td>Coarse grids </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_domainCoar</td><td>Coarse domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dblFine</td><td>Fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFine</td><td>Fine domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_repartition</td><td>If true, re-partition the coarse domain when the fine grids cover the whole domain </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if a coarsening exists, and false otherwise. </dd></dl>
 
 </div>
 </div>
@@ -2070,6 +2188,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
+<a id="a1c86bd0de62bbf9b2b552edd115d33ab" name="a1c86bd0de62bbf9b2b552edd115d33ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c86bd0de62bbf9b2b552edd115d33ab">&#9670;&#160;</a></span>getMultigridCoarseAverage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp; Realm::getMultigridCoarseAverage </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the coarse averaging between consecutive multigrid levels for a phase. </p>
+<p>See <a class="el" href="classPhaseRealm.html#a26c6941cef439ff1ab129a1bd87be830" title="Get the coarse averaging between consecutive multigrid levels.">PhaseRealm::getMultigridCoarseAverage()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The coarse averaging of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
 <a id="a78ddeade8cee84d4515c2df0bc9e4277" name="a78ddeade8cee84d4515c2df0bc9e4277"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a78ddeade8cee84d4515c2df0bc9e4277">&#9670;&#160;</a></span>getMultigridInterpolator()</h2>
 
@@ -2093,6 +2237,98 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Multigrid interpolator </dd></dl>
+
+</div>
+</div>
+<a id="a9d38afe7cad3b0b8b1e2a528dea3eb0d" name="a9d38afe7cad3b0b8b1e2a528dea3eb0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d38afe7cad3b0b8b1e2a528dea3eb0d">&#9670;&#160;</a></span>getMultigridLevelGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; Realm::getMultigridLevelGrids </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multigrid levels for a phase. </p>
+<p>See <a class="el" href="classPhaseRealm.html#a033f07a40489b78878942120251da540" title="Get the multigrid levels.">PhaseRealm::getMultigridLevelGrids()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The multigrid levels under each AMR level. </dd></dl>
+
+</div>
+</div>
+<a id="a7c71a581bc083508f31b8bda83ccbbc5" name="a7c71a581bc083508f31b8bda83ccbbc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c71a581bc083508f31b8bda83ccbbc5">&#9670;&#160;</a></span>getMultigridLevelGridsCoFi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; Realm::getMultigridLevelGridsCoFi </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the coarsened grids between consecutive multigrid levels for a phase. </p>
+<p>See <a class="el" href="classPhaseRealm.html#aad7fab010d628b479b4d5711d8e9b05f" title="Get the coarsened grids between consecutive multigrid levels.">PhaseRealm::getMultigridLevelGridsCoFi()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The coarsened grids of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
+<a id="a32d8d294e84821c5ff4605ed5de9975f" name="a32d8d294e84821c5ff4605ed5de9975f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32d8d294e84821c5ff4605ed5de9975f">&#9670;&#160;</a></span>getMultigridMFLevelGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp; Realm::getMultigridMFLevelGrids </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multifluid multigrid levels. </p>
+<p>Composed from the phases' multigrid levels, with the same indexing as <a class="el" href="#a9d38afe7cad3b0b8b1e2a528dea3eb0d" title="Get the multigrid levels for a phase.">getMultigridLevelGrids()</a>. </p><dl class="section return"><dt>Returns</dt><dd>The multifluid multigrid levels under each AMR level. </dd></dl>
+
+</div>
+</div>
+<a id="aca69e5abe062c9c573f16a41bebf741c" name="aca69e5abe062c9c573f16a41bebf741c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca69e5abe062c9c573f16a41bebf741c">&#9670;&#160;</a></span>getMultigridMFLevelGridsCoFi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp; Realm::getMultigridMFLevelGridsCoFi </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multifluid coarsened grids between consecutive multigrid levels. </p>
+<p>Composed from the phases' coarsened grids, with the same indexing as <a class="el" href="#a7c71a581bc083508f31b8bda83ccbbc5" title="Get the coarsened grids between consecutive multigrid levels for a phase.">getMultigridLevelGridsCoFi()</a>. </p><dl class="section return"><dt>Returns</dt><dd>The multifluid coarsened grids of each multigrid level pair. </dd></dl>
 
 </div>
 </div>
@@ -2707,6 +2943,31 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
+<a id="a646f9a82f2c6d99e92919d7b34af47ef" name="a646f9a82f2c6d99e92919d7b34af47ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a646f9a82f2c6d99e92919d7b34af47ef">&#9670;&#160;</a></span>registerMultigrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::registerMultigrid </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_minCellsBottom</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register the multigrid levels. </p>
+<p>The realm builds the multigrid levels of every phase, and their multifluid compositions, in each regridOperators. The levels coarser than AMR level 0 go down to the coarsest bottom domain registered, which is the one with the smallest a_minCellsBottom. The bottom domain is the base AMR domain coarsened by 2 while its shortest side is at least 2*a_minCellsBottom. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minCellsBottom</td><td>Smallest number of cells along any coordinate direction of the bottom domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a7ca17a5759af950b9dfacb8d530618f0" name="a7ca17a5759af950b9dfacb8d530618f0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7ca17a5759af950b9dfacb8d530618f0">&#9670;&#160;</a></span>registerOperator()</h2>
 
@@ -2855,6 +3116,31 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a8d8e93505a122aed312f0ea397febfd3" name="a8d8e93505a122aed312f0ea397febfd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d8e93505a122aed312f0ea397febfd3">&#9670;&#160;</a></span>m_mgMinCellsBottom</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Realm::m_mgMinCellsBottom</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Smallest number of cells along any direction of the bottom domain, over all registered multigrid users. </p>
+<p>Negative when nothing registered, in which case the realm builds no multigrid levels. </p>
+
+</div>
+</div>
 <a id="afa40dbffe1b4dfc754fc1670d22e29bc" name="afa40dbffe1b4dfc754fc1670d22e29bc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afa40dbffe1b4dfc754fc1670d22e29bc">&#9670;&#160;</a></span>m_particleGhostExposure</h2>
 
