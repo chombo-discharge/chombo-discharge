@@ -589,7 +589,8 @@ PhaseRealm::defineMultigridCoarseAverage()
 
   constexpr int mgRefRat = 2;
 
-  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
 
   m_mgCoarAve.resize(numAmrLevels);
 
@@ -618,7 +619,8 @@ PhaseRealm::defineMultigridLevelTransfer()
 
   constexpr int mgRefRat = 2;
 
-  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
 
   m_mgLevelRestrict.resize(numAmrLevels);
   m_mgLevelProlong.resize(numAmrLevels);
@@ -669,7 +671,8 @@ PhaseRealm::defineMultigridFinerVoFs()
 
   constexpr int mgRefRat = 2;
 
-  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
 
   m_mgFinerVoFs.resize(numAmrLevels);
 
@@ -2103,6 +2106,10 @@ PhaseRealm::getMultigridLevelGrids() const
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 PhaseRealm::getMultigridCoarseAverage() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridCoarseAverage - operator not registered!");
+  }
+
   return m_mgCoarAve;
 }
 
@@ -2115,30 +2122,50 @@ PhaseRealm::getFinerVoFs() const
 const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
 PhaseRealm::getMultigridFinerVoFs() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridFinerVoFs - operator not registered!");
+  }
+
   return m_mgFinerVoFs;
 }
 
 const Vector<RefCountedPtr<EBMGRestrict>>&
 PhaseRealm::getMultigridRestriction() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridRestriction - operator not registered!");
+  }
+
   return m_mgRestrict;
 }
 
 const Vector<RefCountedPtr<EBMGProlong>>&
 PhaseRealm::getMultigridProlongation() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridProlongation - operator not registered!");
+  }
+
   return m_mgProlong;
 }
 
 const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
 PhaseRealm::getMultigridLevelRestriction() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridLevelRestriction - operator not registered!");
+  }
+
   return m_mgLevelRestrict;
 }
 
 const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
 PhaseRealm::getMultigridLevelProlongation() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridLevelProlongation - operator not registered!");
+  }
+
   return m_mgLevelProlong;
 }
 

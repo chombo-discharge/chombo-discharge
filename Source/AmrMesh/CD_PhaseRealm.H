@@ -304,7 +304,8 @@ public:
 
   /**
    * @brief Get the coarse averaging between consecutive multigrid levels.
-   * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl.
+   * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when
+   * the multigrid operator is registered.
    * @return The coarse averaging of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
@@ -323,7 +324,8 @@ public:
   /**
    * @brief Get the finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
    * @details Entry [lvl][k] lives on getMultigridLevelGrids()[lvl][k] coarsened by 2 and holds the VoFs on multigrid
-   * level k under AMR level lvl, as getFinerVoFs() does for AMR levels.
+   * level k under AMR level lvl, as getFinerVoFs() does for AMR levels. Defined when the multigrid operator is
+   * registered.
    * @return The finer-VoF lists of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
@@ -349,7 +351,8 @@ public:
 
   /**
    * @brief Get the restriction between consecutive multigrid levels.
-   * @details Entry [lvl][k] restricts from multigrid level k onto multigrid level k+1 under AMR level lvl.
+   * @details Entry [lvl][k] restricts from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when
+   * the multigrid operator is registered.
    * @return The restriction of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
@@ -357,7 +360,8 @@ public:
 
   /**
    * @brief Get the prolongation between consecutive multigrid levels.
-   * @details Entry [lvl][k] prolongs from multigrid level k+1 onto multigrid level k under AMR level lvl.
+   * @details Entry [lvl][k] prolongs from multigrid level k+1 onto multigrid level k under AMR level lvl. Defined when
+   * the multigrid operator is registered.
    * @return The prolongation of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
