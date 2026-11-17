@@ -3752,23 +3752,6 @@ AmrMesh::getMultigridLevelGrids(const std::string& a_realm, const phase::which_p
   return m_realms[a_realm]->getMultigridLevelGrids(a_phase);
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-AmrMesh::getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridLevelGridsCoFi(a_phase);
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -3887,22 +3870,6 @@ AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
   }
 
   return m_realms[a_realm]->getMultigridMFLevelGrids();
-}
-
-const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-AmrMesh::getMultigridMFLevelGridsCoFi(const std::string& a_realm) const
-{
-  CH_TIME("AmrMesh::getMultigridMFLevelGridsCoFi(string)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridMFLevelGridsCoFi(string)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridMFLevelGridsCoFi(string) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridMFLevelGridsCoFi();
 }
 
 const EBAMRFAB&

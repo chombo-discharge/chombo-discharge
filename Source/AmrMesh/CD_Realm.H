@@ -198,15 +198,6 @@ public:
   getMultigridLevelGrids(const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels for a phase.
-   * @details See PhaseRealm::getMultigridLevelGridsCoFi().
-   * @param[in] a_phase Phase
-   * @return The coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels for a phase.
    * @details See PhaseRealm::getMultigridCoarseAverage().
    * @param[in] a_phase Phase
@@ -267,14 +258,6 @@ public:
    */
   const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
   getMultigridMFLevelGrids() const;
-
-  /**
-   * @brief Get the multifluid coarsened grids between consecutive multigrid levels.
-   * @details Composed from the phases' coarsened grids, with the same indexing as getMultigridLevelGridsCoFi().
-   * @return The multifluid coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-  getMultigridMFLevelGridsCoFi() const;
 
   /**
    * @brief Query if an AMR operator has been registered
@@ -788,12 +771,6 @@ protected:
    * @brief Multifluid multigrid levels, with the same indexing as PhaseRealm::m_mgLevelGrids.
    */
   Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflg;
-
-  /**
-   * @brief Multifluid coarsened grids between consecutive multigrid levels, with the same indexing as
-   * PhaseRealm::m_mgLevelGridsCoFi.
-   */
-  Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflgCoFi;
 
   /**
    * @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.

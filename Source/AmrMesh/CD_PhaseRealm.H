@@ -303,15 +303,6 @@ public:
   getMultigridLevelGrids() const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels.
-   * @details Entry [lvl][k] is entry [lvl][k] of getMultigridLevelGrids() coarsened by 2, for k + 1 smaller than
-   * the number of multigrid levels under AMR level lvl.
-   * @return The coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi() const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels.
    * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl.
    * @return The coarse averaging of each multigrid level pair.
@@ -331,8 +322,8 @@ public:
 
   /**
    * @brief Get the finer VoFs under the coarse VoFs of the coarsened grids between consecutive multigrid levels.
-   * @details Entry [lvl][k] lives on getMultigridLevelGridsCoFi()[lvl][k] and holds the VoFs on multigrid level k
-   * under AMR level lvl, as getFinerVoFs() does for AMR levels.
+   * @details Entry [lvl][k] lives on getMultigridLevelGrids()[lvl][k] coarsened by 2 and holds the VoFs on multigrid
+   * level k under AMR level lvl, as getFinerVoFs() does for AMR levels.
    * @return The finer-VoF lists of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&

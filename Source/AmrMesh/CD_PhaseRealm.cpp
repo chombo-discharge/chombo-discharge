@@ -2100,12 +2100,6 @@ PhaseRealm::getMultigridLevelGrids() const
   return m_mgLevelGrids;
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-PhaseRealm::getMultigridLevelGridsCoFi() const
-{
-  return m_mgLevelGridsCoFi;
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 PhaseRealm::getMultigridCoarseAverage() const
 {

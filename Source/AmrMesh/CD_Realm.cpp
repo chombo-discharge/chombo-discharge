@@ -162,7 +162,6 @@ Realm::preRegrid()
   m_grids.resize(0);
   m_mflg.resize(0);
   m_mgMflg.resize(0);
-  m_mgMflgCoFi.resize(0);
   m_validCells.resize(0);
 
   for (auto& mask : m_masks) {
@@ -530,7 +529,6 @@ Realm::defineMultigridLevels()
   const int numAmrLevels = static_cast<int>(mgGrids.size());
 
   m_mgMflg.resize(numAmrLevels);
-  m_mgMflgCoFi.resize(numAmrLevels);
 
   const PhaseRealm& gas = this->getRealm(phase::gas);
   const PhaseRealm& sol = this->getRealm(phase::solid);
@@ -542,32 +540,18 @@ Realm::defineMultigridLevels()
     const int numMgLevels = static_cast<int>(mgGrids[lvl].size());
 
     m_mgMflg[lvl].resize(numMgLevels);
-    m_mgMflgCoFi[lvl].resize(numMgLevels - 1);
 
     for (int img = 0; img < numMgLevels; img++) {
       Vector<EBLevelGrid> eblgs;
-      Vector<EBLevelGrid> eblgsCoFi;
 
       if (hasGas) {
         eblgs.push_back(*gas.getMultigridLevelGrids()[lvl][img]);
-
-        if (img < numMgLevels - 1) {
-          eblgsCoFi.push_back(*gas.getMultigridLevelGridsCoFi()[lvl][img]);
-        }
       }
       if (hasSol) {
         eblgs.push_back(*sol.getMultigridLevelGrids()[lvl][img]);
-
-        if (img < numMgLevels - 1) {
-          eblgsCoFi.push_back(*sol.getMultigridLevelGridsCoFi()[lvl][img]);
-        }
       }
 
       m_mgMflg[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgs));
-
-      if (img < numMgLevels - 1) {
-        m_mgMflgCoFi[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsCoFi));
-      }
     }
   }
 }
@@ -1912,12 +1896,6 @@ Realm::getMultigridLevelGrids(const phase::which_phase a_phase) const
   return m_realms.at(a_phase)->getMultigridLevelGrids();
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-Realm::getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const
-{
-  return m_realms.at(a_phase)->getMultigridLevelGridsCoFi();
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 Realm::getMultigridCoarseAverage(const phase::which_phase a_phase) const
 {
@@ -1958,12 +1936,6 @@ const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 Realm::getMultigridMFLevelGrids() const
 {
   return m_mgMflg;
-}
-
-const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-Realm::getMultigridMFLevelGridsCoFi() const
-{
-  return m_mgMflgCoFi;
 }
 
 bool
