@@ -11,7 +11,6 @@
  */
 
 // Std includes
-#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -725,90 +724,6 @@ PhaseRealm::fillFinerVoFs(LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
 
     for (VoFIterator vofit(irregCells, ebisBoxCoFi.getEBGraph()); vofit.ok(); ++vofit) {
       finerVoFs(vofit(), 0) = VofUtils::getFinerVoFs(vofit(), ebislFine, din, a_refRat);
-    }
-  }
-
-  // Equivalence check against EBISLayout::refine, for review only; works in ScanShop mode, where the coarse graph holds
-  // links to the finer graph. Faces found from one side (see VofUtils::getStoredFinerFaces) may come in another order;
-  // only a different set aborts.
-  ParmParse pp("PhaseRealm");
-
-  bool checkFinerVoFs = false;
-  pp.query("check_finer_vofs", checkFinerVoFs);
-
-  if (checkFinerVoFs) {
-    EBISLayout ebislCheck = ebislCoFi;
-    ebislCheck.setMaxRefinementRatio(a_refRat, a_eblgFine.getEBIS());
-
-    long long numVoFs      = 0;
-    long long numFaces     = 0;
-    long long numVoFDiffs  = 0;
-    long long numFaceDiffs = 0;
-
-    long long numFaceOrderDiffs = 0;
-
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const EBISBox&                     ebisBoxCoFi = ebislCoFi[din];
-      const BaseIVFAB<Vector<VolIndex>>& finerVoFs   = a_finerVoFs[din];
-
-      for (VoFIterator vofit(finerVoFs.getIVS(), ebisBoxCoFi.getEBGraph()); vofit.ok(); ++vofit) {
-        const VolIndex& coarVoF = vofit();
-
-        const Vector<VolIndex> stored  = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoFi, finerVoFs, a_refRat);
-        const Vector<VolIndex> refined = ebislCheck.refine(coarVoF, a_refRat, din);
-
-        numVoFs++;
-        if (stored.constStdVector() != refined.constStdVector()) {
-          numVoFDiffs++;
-        }
-
-        // The operators ask for the faces of VoFs in the coarsened grids.
-        if (!(dblCoFi[din].contains(coarVoF.gridIndex()))) {
-          continue;
-        }
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          for (SideIterator sit; sit.ok(); ++sit) {
-            const Vector<FaceIndex> faces = ebisBoxCoFi.getFaces(coarVoF, dir, sit());
-
-            for (int iface = 0; iface < faces.size(); iface++) {
-              const FaceIndex& face = faces[iface];
-
-              const Vector<FaceIndex> storedFaces  = VofUtils::getStoredFinerFaces(face,
-                                                                                  ebisBoxCoFi,
-                                                                                  finerVoFs,
-                                                                                  ebislFine,
-                                                                                  din,
-                                                                                  a_refRat);
-              const Vector<FaceIndex> refinedFaces = ebislCheck.refine(face, a_refRat, din);
-
-              std::vector<FaceIndex> storedSorted  = storedFaces.constStdVector();
-              std::vector<FaceIndex> refinedSorted = refinedFaces.constStdVector();
-
-              std::sort(storedSorted.begin(), storedSorted.end());
-              std::sort(refinedSorted.begin(), refinedSorted.end());
-
-              numFaces++;
-              if (storedSorted != refinedSorted) {
-                numFaceDiffs++;
-              }
-              else if (storedFaces.constStdVector() != refinedFaces.constStdVector()) {
-                numFaceOrderDiffs++;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    pout() << "PhaseRealm::fillFinerVoFs check (ratio " << a_refRat << "): " << numVoFs << " VoFs, " << numVoFDiffs
-           << " differ; " << numFaces << " faces, " << numFaceDiffs << " differ, " << numFaceOrderDiffs
-           << " in another order" << endl;
-
-    if (numVoFDiffs > 0 || numFaceDiffs > 0) {
-      MayDay::Abort("PhaseRealm::fillFinerVoFs -- stored finer VoFs or faces differ from EBISLayout::refine");
     }
   }
 }
