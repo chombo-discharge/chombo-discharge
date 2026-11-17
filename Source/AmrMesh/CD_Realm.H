@@ -837,31 +837,34 @@ protected:
 
   /**
    * @brief Define the multigrid levels of every phase, and their multifluid compositions.
-   * @details Under AMR level 0 this adds factor 2 coarsenings down to the coarsest registered bottom domain. Under a
-   * finer AMR level with a refinement ratio larger than 2 this adds one intermediate level. Coarsening stops before a
-   * domain that is coarser than the bottom domain, or equal to an AMR level's domain, or when the grids can not be
-   * coarsened. Does nothing but clear the levels if no multigrid user registered.
+   * @details Under AMR level 0 this adds factor 2 coarsenings down to the coarsest registered bottom domain, and
+   * re-partitions every level that covers the whole domain into boxes as large as m_maxBlockSize allows. Under a finer
+   * AMR level with a refinement ratio larger than 2 this adds one intermediate level, which is a direct coarsening of
+   * the AMR level. Coarsening stops before a domain that is coarser than the bottom domain, or equal to an AMR level's
+   * domain, or when the grids can not be coarsened. Does nothing but clear the levels if no multigrid user registered.
    */
   void
   defineMultigridLevels();
 
   /**
    * @brief Get a factor 2 coarsening of a multigrid level.
-   * @details A coarsening exists only if the fine domain and the fine grids are coarsenable by 2. When the fine grids
-   * cover the whole domain the coarse domain is re-partitioned: it is split into boxes no larger than the largest
-   * power of 2, no larger than m_maxBlockSize, by which the fine domain is coarsenable, and the boxes are Morton
-   * ordered and load balanced. Otherwise the fine boxes are coarsened directly, keeping their ranks.
-   * @param[out] a_dblCoar    Coarse grids
-   * @param[out] a_domainCoar Coarse domain
-   * @param[in]  a_dblFine    Fine grids
-   * @param[in]  a_domainFine Fine domain
+   * @details A coarsening exists only if the fine domain and the fine grids are coarsenable by 2. When a_repartition
+   * is true and the fine grids cover the whole domain, the coarse domain is split into boxes no larger than
+   * m_maxBlockSize (rounded down to an even number), and the boxes are Morton ordered and load balanced. Otherwise the
+   * fine boxes are coarsened directly, keeping their ranks.
+   * @param[out] a_dblCoar     Coarse grids
+   * @param[out] a_domainCoar  Coarse domain
+   * @param[in]  a_dblFine     Fine grids
+   * @param[in]  a_domainFine  Fine domain
+   * @param[in]  a_repartition If true, re-partition the coarse domain when the fine grids cover the whole domain
    * @return True if a coarsening exists, and false otherwise.
    */
   bool
   getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
                             ProblemDomain&           a_domainCoar,
                             const DisjointBoxLayout& a_dblFine,
-                            const ProblemDomain&     a_domainFine) const;
+                            const ProblemDomain&     a_domainFine,
+                            const bool               a_repartition) const;
 
   /**
    * @brief Define masks

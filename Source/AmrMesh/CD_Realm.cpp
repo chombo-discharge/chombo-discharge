@@ -497,7 +497,12 @@ Realm::defineMultigridLevels()
         DisjointBoxLayout dblCoar;
         ProblemDomain     domainCoar;
 
-        hasCoarser = this->getCoarserMultigridLayout(dblCoar, domainCoar, mgGrids[lvl].back(), mgDomains[lvl].back());
+        // Only the levels coarser than AMR level 0 are re-partitioned. Intermediate levels are direct coarsenings.
+        hasCoarser = this->getCoarserMultigridLayout(dblCoar,
+                                                     domainCoar,
+                                                     mgGrids[lvl].back(),
+                                                     mgDomains[lvl].back(),
+                                                     lvl == 0);
 
         if (hasCoarser && isCoarser(domainCoar, bottomDomain)) {
           hasCoarser = false;
@@ -571,7 +576,8 @@ bool
 Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
                                  ProblemDomain&           a_domainCoar,
                                  const DisjointBoxLayout& a_dblFine,
-                                 const ProblemDomain&     a_domainFine) const
+                                 const ProblemDomain&     a_domainFine,
+                                 const bool               a_repartition) const
 {
   CH_TIME("Realm::getCoarserMultigridLayout");
   if (m_verbosity > 5) {
@@ -587,50 +593,39 @@ Realm::getCoarserMultigridLayout(DisjointBoxLayout&       a_dblCoar,
   a_domainCoar = coarsen(a_domainFine, mgRefRat);
 
   // Restriction and prolongation between the two levels coarsen the fine grids by 2, so they must be coarsenable.
-  // The block search below runs through powers of 2, and the fine domain is then coarsenable by 2, so the search
-  // always succeeds with a block of 2 or more.
   if (refine(a_domainCoar, mgRefRat) == a_domainFine && a_dblFine.coarsenable(mgRefRat)) {
-    const Box domainBox = a_domainFine.domainBox();
+    bool coversDomain = false;
 
-    unsigned long long numPtsLeft = domainBox.numPts();
+    if (a_repartition) {
+      unsigned long long numPtsLeft = a_domainFine.domainBox().numPts();
 
-    for (LayoutIterator lit = a_dblFine.layoutIterator(); lit.ok(); ++lit) {
-      numPtsLeft -= a_dblFine[lit()].numPts();
+      for (LayoutIterator lit = a_dblFine.layoutIterator(); lit.ok(); ++lit) {
+        numPtsLeft -= a_dblFine[lit()].numPts();
+      }
+
+      coversDomain = (numPtsLeft == 0);
     }
 
-    if (numPtsLeft == 0) {
-      // Largest power of 2 that is no larger than m_maxBlockSize.
-      int block = 1;
-      while (2 * block <= m_maxBlockSize) {
-        block *= 2;
-      }
+    if (coversDomain) {
+      // Boxes start at the low end of the coarse domain and are an even number of cells wide, except possibly the last
+      // box in each direction. Any box is odd only if the coarse domain is not coarsenable by 2, and the hierarchy then
+      // ends at the next level anyway.
+      const int block = m_maxBlockSize - (m_maxBlockSize % 2);
 
-      // The coarse domain is split into boxes no larger than block. With block >= 4 the coarse domain is divisible by
-      // block/2, so every box has an even width. With block == 2 a box of width 1 is possible, and the coarsenable
-      // check above then ends the hierarchy at the next level.
-      while (block > 1 && !hasCoarser) {
-        if (domainBox.coarsenable(block)) {
-          Vector<Box> boxes;
-          Vector<int> procs;
+      Vector<Box> boxes;
+      Vector<int> procs;
 
-          domainSplit(a_domainCoar, boxes, block);
-          mortonOrdering(boxes);
-          LoadBalance(procs, boxes);
+      domainSplit(a_domainCoar, boxes, block);
+      mortonOrdering(boxes);
+      LoadBalance(procs, boxes);
 
-          a_dblCoar.define(boxes, procs, a_domainCoar);
-
-          hasCoarser = true;
-        }
-        else {
-          block = block / 2;
-        }
-      }
+      a_dblCoar.define(boxes, procs, a_domainCoar);
     }
     else {
       coarsen(a_dblCoar, a_dblFine, mgRefRat);
-
-      hasCoarser = true;
     }
+
+    hasCoarser = true;
   }
 
   return hasCoarser;
