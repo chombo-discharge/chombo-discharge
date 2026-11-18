@@ -597,7 +597,8 @@ protected:
     const std::size_t numParticles = a_particles.size();
 
     // The coarse ghosts arrive in an order that depends on threads and messages, so they deposit sorted by position
-    // and weight: the result then depends only on the set of ghosts.
+    // and weight. The result then depends only on the set of ghosts, except for the order among ghosts with the same
+    // position and weight.
     std::vector<std::size_t> ghostOrder;
 
     if (a_coarseGhosts) {

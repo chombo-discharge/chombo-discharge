@@ -380,7 +380,8 @@ EBAMRSurfaceDeposition::defineCoarseToFineStencils() noexcept
         const VolIndex  coarVoF = ebislFine.coarsen(fineVoF, refRat, din);
 
         // The coarse value is spread over the cut cells among the finer VoFs of the coarse VoF, in proportion to their
-        // boundary areas.
+        // boundary areas. The coarsened fine grids are defined on the coarse level of the same index space, so their
+        // VoFs and boundary areas are those of the coarse level.
         const Vector<VolIndex> siblings = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoFi, finerVoFs[din], refRat);
 
         Real fineArea = 0.0;
@@ -498,8 +499,19 @@ EBAMRSurfaceDeposition::addInvalidCoarseDataToFineData() const noexcept
 
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
 
-    // Copy the coarse data onto the coarsened fine grids, so each fine box reads its coarse VoFs locally.
-    m_data[lvl - 1]->copyTo(variables, *m_coarsenedFineData[lvl - 1], variables, m_copierCoarToCoarsenedFine[lvl - 1]);
+    // Copy the coarse data onto the coarsened fine grids, so each fine box reads its coarse VoFs locally. The buffer
+    // also serves addFineGhostDataToValidCoarData, so it is zeroed first.
+    LevelData<BaseIVFAB<Real>>& coFiData = *m_coarsenedFineData[lvl - 1];
+
+    const DataIterator& ditCoFi  = coFiData.dataIterator();
+    const int           nboxCoFi = ditCoFi.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+      coFiData[ditCoFi[mybox]].setVal(0.0);
+    }
+
+    m_data[lvl - 1]->copyTo(variables, coFiData, variables, m_copierCoarToCoarsenedFine[lvl - 1]);
 
     const DisjointBoxLayout& dblFine = m_ebGrids[lvl]->getDBL();
     const DataIterator&      dit     = dblFine.dataIterator();
