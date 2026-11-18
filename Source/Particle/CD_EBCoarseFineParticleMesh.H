@@ -85,8 +85,10 @@ public:
 
   /**
    * @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.
-   * @details Every valid fine VoF gets the value of the coarse VoF it coarsens to. The coarse valid data is copied onto
-   * the coarsened fine grids first, so no geometry finer than the fine level's is needed.
+   * @details Every valid fine VoF gets the density of the coarse VoF it coarsens to: the data is mass per cell volume,
+   * so in cut cells the coarse value is scaled by the ratio of the fine to the coarse volume fraction, which conserves
+   * mass. The coarse valid data is copied onto the coarsened fine grids first, so no geometry finer than the fine
+   * level's is needed.
    * @param[in,out] a_fineData Fine-level data.
    * @param[in]    a_coarData Coarse-level data.
    */
@@ -154,10 +156,10 @@ protected:
   mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
 
   /**
-   * @brief VoFIterator over the valid fine cells that are multi-valued or lie in a multi-valued coarse cell.
+   * @brief VoFIterator over the valid fine cells that lie in cut coarse cells.
    * @details addInvalidCoarseToFine interpolates these per VoF; every other fine cell takes the regular-cell value.
    */
-  mutable LayoutData<VoFIterator> m_vofIterFineMulti;
+  mutable LayoutData<VoFIterator> m_vofIterFineCut;
 
   /**
    * @brief Refinement ratio between the two levels
