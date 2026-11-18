@@ -53,9 +53,9 @@
  * @details
  * EBAMRParticleMesh deposits the particles of a ParticleContainer onto AMR mesh data and interpolates
  * mesh data back onto particle columns, by driving the per-patch EBParticleMesh leaf on every box of
- * every level. define() builds the per-level leaves (on the valid grids and the refined-coarse grids),
- * the level valid+ghost -> valid Copiers, the EBCoarseFineParticleMesh operators, and the halo/transition
- * masks; it must be called before any deposit or interpolate.
+ * every level. define() builds the per-level leaves, the level valid+ghost -> valid Copiers, the
+ * EBCoarseFineParticleMesh operators, and the outer-halo masks; it must be called before any deposit or
+ * interpolate.
  *
  * <h3>Interpolation</h3>
  * interpolate() and interpolateWeight() are purely per-level/per-patch: the mesh is assumed to be
@@ -65,13 +65,14 @@
  * deposit(), depositWeight(), and depositGathered() conserve mass across refinement boundaries, and
  * select how the coarse-fine overlap is handled through @c CoarseFineDeposition:
  * - <b>Interp</b>     -- move the over-boundary mass between levels with the coarse-fine mesh operators.
- * - <b>Halo</b>       -- re-deposit the coarse-side halo particles on the refined-coarse grid (via the
- *                        container's mask holder and the FiCo buffer) and add them to the fine level.
+ * - <b>Halo</b>       -- copy the coarse-side halo particles into the finer patches their clouds reach, as
+ *                        coarse ghost particles, and deposit them there with the coarse width.
  * - <b>HaloNGP</b>    -- deposit the near-boundary halo particles with NGP so their clouds do not spread
- *                        across the boundary (no refined-coarse buffer is needed).
- * - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
- *                        fine-grid width, distributing the result to both levels.
- * Halo, HaloNGP, and Transition require at least one ghost cell.
+ *                        across the boundary.
+ * - <b>Transition</b> -- deposit the coarse-side transition particles with the fine-grid width, on their own
+ *                        level and as coarse ghost particles on the finer one.
+ * Halo, HaloNGP, and Transition require at least one ghost cell. Halo and Transition need the realm's
+ * coarse-to-fine particle ghost masks (see getCoarseToFineMaskWidths).
  *
  * <h3>Cut cells, and what this class does NOT do</h3>
  * The deposition routines take an @c IrregularDeposition, but this class only implements the part of it that the
@@ -158,7 +159,6 @@ public:
     this->defineEBParticleMesh();
     this->defineLevelMotion();
     this->defineOuterHaloMasks();
-    this->defineTransitionMasks();
 
     m_isDefined = true;
   }
@@ -676,19 +676,9 @@ protected:
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>> m_coarseFinePM;
 
   /**
-   * @brief Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0).
-   */
-  Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
-
-  /**
    * @brief Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch.
    */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
-
-  /**
-   * @brief Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid.
-   */
-  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
   /**
    * @brief Abort on an unrecognized coarse-fine deposition strategy.
@@ -700,7 +690,7 @@ protected:
   }
 
   /**
-   * @brief Build the per-level per-patch EBParticleMesh leaves (valid grids + refined-coarse grids).
+   * @brief Build the per-level per-patch EBParticleMesh leaves.
    */
   void
   defineEBParticleMesh()
@@ -708,7 +698,6 @@ protected:
     CH_TIME("EBAMRParticleMesh::defineEBParticleMesh");
 
     m_ebParticleMesh.resize(1 + m_finestLevel);
-    m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const ProblemDomain&     domain = m_eblgs[lvl]->getDomain();
@@ -725,32 +714,6 @@ protected:
         const DataIndex& din = dit[mybox];
 
         (*m_ebParticleMesh[lvl])[din].define(domain, dbl[din], ebisl[din], m_dx[lvl] * RealVect::Unit, m_probLo);
-      }
-
-      // Refined-coarse leaves: deposit coarse-level halo particles at fine resolution (dx of this level).
-      if (lvl > 0) {
-        const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl]->getEblgFiCo();
-        const ProblemDomain&     domainFiCo = eblgFiCo.getDomain();
-        const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
-        const EBISLayout&        ebislFiCo  = eblgFiCo.getEBISL();
-        const DataIterator&      ditFiCo    = dblFiCo.dataIterator();
-        const int                nboxFiCo   = ditFiCo.size();
-
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dblFiCo));
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-          const DataIndex& din = ditFiCo[mybox];
-
-          (*m_ebParticleMeshFiCo[lvl])[din].define(domainFiCo,
-                                                   dblFiCo[din],
-                                                   ebislFiCo[din],
-                                                   m_dx[lvl] * RealVect::Unit,
-                                                   m_probLo);
-        }
-      }
-      else {
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(nullptr);
       }
     }
   }
@@ -1158,7 +1121,7 @@ protected:
    * the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto
    * the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles
    * back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement
-   * boundary, so no refined-coarse buffer is needed.
+   * boundary.
    * @tparam NCOMP           Number of mesh components (compile-time).
    * @tparam Container       ParticleContainer type (deduced).
    * @tparam PatchDeposit    Per-patch deposit with the requested kernel.
@@ -1226,173 +1189,6 @@ protected:
 
     // Return the halo particles to the valid holder.
     particles.transferParticles(particles.getMaskParticles());
-  }
-
-  /**
-   * @brief Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.
-   * @details For each width in [1, m_ghost] and each level with a finer level, builds the fine-grid
-   * coarse-fine interface band (fine ghost cells just outside the fine boxes), transfers it to the
-   * refined-coarse (FiCo) grid of the finer level, and stores it as a boolean mask there. Storage-
-   * agnostic. Empty BaseFabs are undefined.
-   */
-  void
-  defineTransitionMasks()
-  {
-    CH_TIME("EBAMRParticleMesh::defineTransitionMasks");
-
-    constexpr int  comp    = 0;
-    constexpr int  numComp = 1;
-    const Interval interv  = Interval(comp, comp);
-
-    m_transitionMasks.clear();
-
-    for (int ighost = 1; ighost <= m_ghost; ighost++) {
-      Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> mask(1 + m_finestLevel);
-
-      for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-        const DisjointBoxLayout& gridsFine  = m_eblgs[lvl + 1]->getDBL();
-        const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl + 1]->getEblgFiCo();
-        const DisjointBoxLayout& gridsFiCo  = eblgFiCo.getDBL();
-        const ProblemDomain&     domainFine = m_eblgs[lvl + 1]->getDomain();
-
-        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-          new LevelData<BaseFab<bool>>(gridsFiCo, numComp, IntVect::Zero));
-
-        LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
-        LevelData<FArrayBox>      cfivsFine(gridsFine, numComp, ighost * IntVect::Unit);
-        LevelData<FArrayBox>      cfivsFiCo(gridsFiCo, numComp, IntVect::Zero);
-
-        {
-          const DataIterator& dit  = gridsFiCo.dataIterator();
-          const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nbox; mybox++) {
-            const DataIndex& din = dit[mybox];
-
-            levelMask[din].setVal(false);
-            cfivsFiCo[din].setVal(0.0);
-          }
-        }
-
-        // Fine-grid coarse-fine interface band: ghost cells outside the fine boxes (minus neighbours).
-        {
-          const DataIterator& dit  = gridsFine.dataIterator();
-          const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nbox; mybox++) {
-            const DataIndex& din      = dit[mybox];
-            const Box        cellBox  = gridsFine[din];
-            const Box        ghostBox = grow(cellBox, ighost) & domainFine;
-
-            cfivsFine[din].setVal(1.0, ghostBox, comp);
-            cfivsFine[din].setVal(0.0, cellBox, comp);
-
-            NeighborIterator nit(gridsFine);
-            for (nit.begin(din); nit.ok(); ++nit) {
-              cfivsFine[din].setVal(0.0, ghostBox & gridsFine[nit()], comp);
-            }
-          }
-        }
-
-        Copier copier;
-        copier.ghostDefine(gridsFine, gridsFiCo, domainFine, ighost * IntVect::Unit);
-        cfivsFine.copyTo(interv, cfivsFiCo, interv, copier, LDaddOp<FArrayBox>());
-
-        const DataIterator& dit  = gridsFiCo.dataIterator();
-        const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din      = dit[mybox];
-          const Box        cellBox  = gridsFiCo[din];
-          const FArrayBox& realMask = cfivsFiCo[din];
-
-          BaseFab<bool>& boolMask = levelMask[din];
-
-          bool emptyMask = true;
-          for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-            if (realMask(bit(), comp) > 0.5) {
-              boolMask(bit(), comp) = true;
-              emptyMask             = false;
-            }
-          }
-          if (emptyMask) {
-            boolMask.clear();
-          }
-        }
-      }
-
-      mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
-      m_transitionMasks.emplace(ighost, mask);
-    }
-  }
-
-  /**
-   * @brief Move the coarse-side transition particles into the container mask holder (using the FiCo mask).
-   * @details The transition mask lives on the refined-coarse grid, so this is done directly here
-   * (the container's transferMaskParticles works on the valid grids). Coarse particles whose
-   * fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder.
-   * @tparam Container ParticleContainer type (deduced).
-   * @param[in,out] a_particles      Particle container.
-   * @param[in]     a_depositionType Deposition kernel (selects the mask width; NGP is a no-op).
-   */
-  template <typename Container>
-  void
-  transferMaskParticlesTransition(Container& a_particles, const DepositionType a_depositionType) const
-  {
-    CH_TIME("EBAMRParticleMesh::transferMaskParticlesTransition");
-
-    if (a_depositionType == DepositionType::NGP) {
-      return;
-    }
-
-    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-      const int                maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
-      const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL();
-      const Real               dxFine    = m_dx[lvl + 1];
-
-      const DataIterator& dit  = dbl.dataIterator();
-      const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&     din  = dit[mybox];
-        const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
-
-        if (!mask.isUsable()) {
-          continue;
-        }
-
-        const Box maskBox = mask.box();
-
-        auto& valid    = a_particles[lvl][din];
-        auto& maskLeaf = (*a_particles.getMaskParticles()[lvl])[din];
-
-        std::size_t i = 0;
-        while (i < valid.size()) {
-          const RealVect pos = valid.position(i);
-          IntVect        iv;
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            iv[dir] = static_cast<int>(std::floor((pos[dir] - m_probLo[dir]) / dxFine));
-          }
-          if (maskBox.contains(iv) && mask(iv, 0)) {
-            maskLeaf.append(pos, valid.weight(i), valid.gather(i));
-
-            const std::size_t k = maskLeaf.size() - 1;
-
-            maskLeaf.particleID(k) = valid.particleID(i);
-            maskLeaf.rankID(k)     = valid.rankID(i);
-
-            valid.remove(i);
-          }
-          else {
-            i++;
-          }
-        }
-      }
-    }
   }
 
   /**
