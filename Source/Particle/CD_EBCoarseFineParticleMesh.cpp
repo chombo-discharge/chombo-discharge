@@ -76,6 +76,9 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
 
+  // valid -> valid
+  m_copierCoarToCoFi.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_eblgCoar.getDomain(), false, IntVect::Zero);
+
   // valid+ghost -> valid
   m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(),
                                               m_eblgCoar.getDBL(),
@@ -122,6 +125,7 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 
   m_vofIterFineGhosts.define(dblFine);
   m_vofIterCoFiGhosts.define(dblCoFi);
+  m_vofIterFineMulti.define(dblFine);
   m_vofIterCoar.define(dblCoar);
 
   const DataIterator& ditFine = dblFine.dataIterator();
@@ -159,6 +163,14 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 
       m_vofIterFineGhosts[din].define(fineCells, ebisBoxFine.getEBGraph());
       m_vofIterCoFiGhosts[din].define(coarCells, ebisBoxCoFi.getEBGraph());
+
+      // Valid fine cells that are multi-valued or lie in a multi-valued coarse cell.
+      IntVectSet multiCells = ebisBoxCoFi.getMultiCells(coarsen(cellBoxFine, m_refRat));
+      multiCells.refine(m_refRat);
+      multiCells |= ebisBoxFine.getMultiCells(cellBoxFine);
+      multiCells &= cellBoxFine;
+
+      m_vofIterFineMulti[din].define(multiCells, ebisBoxFine.getEBGraph());
     }
 
 #pragma omp for schedule(runtime)
@@ -447,84 +459,47 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   CH_assert(a_fineData.ghostVect() == m_ghost);
   CH_assert(a_coarData.ghostVect() == m_ghost);
 
-  // clang-format off
-  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
-  //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.
-  //
-  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. Note that
-  //       the function signature indicates that we only add invalid coarse data, we do run kernels over all data. The addition is done only at the end in
-  //       copyTo.
-  // clang-format on
-  const DisjointBoxLayout& dblCoar   = m_eblgCoar.getDBL();
-  const EBISLayout&        ebislCoar = m_eblgCoar.getEBISL();
+  // Piecewise constant interpolation: every valid fine VoF gets the value of the coarse VoF it coarsens to. The coarse
+  // data is first copied onto the coarsened fine grids, so each fine box reads its coarse values locally.
+  const DisjointBoxLayout& dblFine   = m_eblgFine.getDBL();
+  const EBISLayout&        ebislFine = m_eblgFine.getEBISL();
 
-  const DisjointBoxLayout& dblFiCo   = m_eblgFiCo.getDBL();
-  const EBISLayout&        ebislFiCo = m_eblgFiCo.getEBISL();
+  const Interval interv(0, m_nComp - 1);
 
-  LevelData<EBCellFAB> bufferFiCo(m_eblgFiCo.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgFiCo.getEBISL()));
+  LevelData<EBCellFAB> bufferCoFi(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
 
-  const DataIterator dit = dblCoar.dataIterator();
+  a_coarData.copyTo(interv, bufferCoFi, interv, m_copierCoarToCoFi);
 
-  const int nbox = dit.size();
+  const DataIterator& dit  = dblFine.dataIterator();
+  const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    EBCellFAB&       fiCoData = bufferFiCo[din];
-    const EBCellFAB& coarData = a_coarData[din];
-    const Box        coarBox  = dblCoar[din];
+    const Box        fineBox  = dblFine[din];
+    const EBCellFAB& coFiData = bufferCoFi[din];
 
-    fiCoData.setVal(0.0);
+    EBCellFAB interpData(ebislFine[din], fineBox, m_nComp);
 
-    // Regular cells.
-    BaseFab<Real>&       fiCoDataReg = fiCoData.getSingleValuedFAB();
-    const BaseFab<Real>& coarDataReg = coarData.getSingleValuedFAB();
+    BaseFab<Real>&       interpDataReg = interpData.getSingleValuedFAB();
+    const BaseFab<Real>& coFiDataReg   = coFiData.getSingleValuedFAB();
 
-    // This is the regular kernel -- it sets the fine data equal to the coarse data.
-    auto regularKernel = [&](const IntVect& ivCoar) -> void {
-    // Iterate the m_refRat^D fine cells lying on top of this coarse cell (the box [0, m_refRat-1]^D) and set
-    // each to the coarse value, offsetting by m_refRat * ivCoar. This is a direct index loop rather than a
-    // nested BoxLoops::loop (BoxLoops kernels must not be nested). NOTE: the upper bound is m_refRat-1
-    // (inclusive); m_refRat would over-iterate by one cell into the next coarse cell's footprint.
-#if CH_SPACEDIM == 3
-      for (int k = 0; k < m_refRat; k++) {
-#endif
-        for (int j = 0; j < m_refRat; j++) {
-          for (int i = 0; i < m_refRat; i++) {
-            const IntVect ivFine = m_refRat * ivCoar + IntVect(D_DECL(i, j, k));
-
-            fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
-          }
-        }
-#if CH_SPACEDIM == 3
-      }
-#endif
+    // Not vectorizable: coarse->fine broadcast via coarsen(ivFine) is a strided read. Multi-valued cells are
+    // overwritten per VoF below.
+    auto regularKernel = [&](const IntVect& ivFine) -> void {
+      interpDataReg(ivFine, m_comp) = coFiDataReg(coarsen(ivFine, m_refRat), m_comp);
     };
 
-    // Execute kernel over the entire coarse-grid patch.
-    // Not vectorizable: coarse->fine PWC broadcast with an inner refinement loop (strided scatter to
-    // m_refRat^D fine cells). Multi-cut N/A: cut coarse cells are overwritten by the stencil loop below.
-    BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
-
-    // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
-    // fine cells to be the same as the value in the underlying coarse cell.
-    VoFIterator& vofit = m_vofIterCoar[din];
-
-    auto kernel = [&](const VolIndex& coarVoF) -> void {
-      const Vector<VolIndex>& fineVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
-
-      for (int ivof = 0; ivof < fineVoFs.size(); ivof++) {
-        const VolIndex& fineVoF   = fineVoFs[ivof];
-        fiCoData(fineVoF, m_comp) = coarData(coarVoF, m_comp);
-      }
+    auto multiKernel = [&](const VolIndex& fineVoF) -> void {
+      interpData(fineVoF, m_comp) = coFiData(ebislFine.coarsen(fineVoF, m_refRat, din), m_comp);
     };
 
-    BoxLoops::loop(vofit, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
+    BoxLoops::loop(m_vofIterFineMulti[din], multiKernel);
+
+    a_fineData[din].plus(interpData, fineBox, 0, 0, m_nComp);
   }
-
-  // Finally, add the data to the valid region on the fine grid.
-  const Interval interv(0, m_nComp - 1);
-  bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineNoGhosts, EBAddOp());
 }
 
 void

@@ -111,9 +111,8 @@ public:
 
   /**
    * @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.
-   * @details The data-motion plan is to use the valid+ghost cells on the coarse level and add it into the valid region
-   * on the fine level. However, the buffers' ghost regions are set to zero so this should only add non-ghosted data
-   * between the levels.
+   * @details Every valid fine VoF gets the value of the coarse VoF it coarsens to. The coarse valid data is copied onto
+   * the coarsened fine grids first, so no geometry finer than the fine level's is needed.
    * @param[in,out] a_fineData Fine-level data.
    * @param[in]    a_coarData Coarse-level data.
    */
@@ -202,6 +201,12 @@ protected:
   Copier m_copierFiCoToFineIncludeGhosts;
 
   /**
+   * @brief Copier for copying data from the coarse level to the coarsened fine level.
+   * @note This copier moves from valid in the source to valid in the destination.
+   */
+  Copier m_copierCoarToCoFi;
+
+  /**
    * @brief Copier for copying data from the coarsened fine level to the coarse level.
    * @note This copier moves from valid+ghost in the source to valid+ghost in the destination.
    */
@@ -242,6 +247,12 @@ protected:
    * @details addFineGhostsToCoarse sums these per VoF; every other coarse cell takes the regular-cell sum.
    */
   mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
+
+  /**
+   * @brief VoFIterator over the valid fine cells that are multi-valued or lie in a multi-valued coarse cell.
+   * @details addInvalidCoarseToFine interpolates these per VoF; every other fine cell takes the regular-cell value.
+   */
+  mutable LayoutData<VoFIterator> m_vofIterFineMulti;
 
   /**
    * @brief VoFIterator for coarse cells
