@@ -384,7 +384,10 @@ AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
+  // Masks for deposition settings that changed at run time are built on first use.
   const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
     return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
   };
 
@@ -414,7 +417,10 @@ AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
+  // Masks for deposition settings that changed at run time are built on first use.
   const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
     return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
   };
 
@@ -444,7 +450,10 @@ AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
+  // Masks for deposition settings that changed at run time are built on first use.
   const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
     return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
   };
 
