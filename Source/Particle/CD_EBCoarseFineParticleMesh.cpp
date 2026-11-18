@@ -101,7 +101,7 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 
   m_vofIterFineGhosts.define(dblFine);
   m_vofIterCoFiGhosts.define(dblCoFi);
-  m_vofIterFineMulti.define(dblFine);
+  m_vofIterFineCut.define(dblFine);
 
   const DataIterator& ditFine  = dblFine.dataIterator();
   const int           nboxFine = ditFine.size();
@@ -134,13 +134,12 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
     m_vofIterFineGhosts[din].define(fineCells, ebisBoxFine.getEBGraph());
     m_vofIterCoFiGhosts[din].define(coarCells, ebisBoxCoFi.getEBGraph());
 
-    // Valid fine cells that are multi-valued or lie in a multi-valued coarse cell.
-    IntVectSet multiCells = ebisBoxCoFi.getMultiCells(coarsen(cellBoxFine, m_refRat));
-    multiCells.refine(m_refRat);
-    multiCells |= ebisBoxFine.getMultiCells(cellBoxFine);
-    multiCells &= cellBoxFine;
+    // Valid fine cells in cut coarse cells.
+    IntVectSet cutCells = ebisBoxCoFi.getIrregIVS(coarsen(cellBoxFine, m_refRat));
+    cutCells.refine(m_refRat);
+    cutCells &= cellBoxFine;
 
-    m_vofIterFineMulti[din].define(multiCells, ebisBoxFine.getEBGraph());
+    m_vofIterFineCut[din].define(cutCells, ebisBoxFine.getEBGraph());
   }
 }
 
@@ -272,10 +271,14 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   CH_assert(a_fineData.ghostVect() == m_ghost);
   CH_assert(a_coarData.ghostVect() == m_ghost);
 
-  // Piecewise constant interpolation: every valid fine VoF gets the value of the coarse VoF it coarsens to. The coarse
-  // data is first copied onto the coarsened fine grids, so each fine box reads its coarse values locally.
+  // Piecewise constant interpolation of the density: every valid fine VoF gets the density of the coarse VoF it
+  // coarsens to. The data is mass per cell volume, i.e. volume fraction times density, so in cut cells the coarse value
+  // is scaled by kappaFine/kappaCoar; the fine volume fractions of a coarse VoF sum to refRat^SpaceDim times its own,
+  // so this conserves mass. The coarse data is first copied onto the coarsened fine grids, so each fine box reads its
+  // coarse values locally.
   const DisjointBoxLayout& dblFine   = m_eblgFine.getDBL();
   const EBISLayout&        ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
 
   const Interval interv(0, m_nComp - 1);
 
@@ -290,26 +293,31 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box        fineBox  = dblFine[din];
-    const EBCellFAB& coFiData = bufferCoFi[din];
+    const Box        fineBox     = dblFine[din];
+    const EBCellFAB& coFiData    = bufferCoFi[din];
+    const EBISBox&   ebisBoxFine = ebislFine[din];
+    const EBISBox&   ebisBoxCoFi = ebislCoFi[din];
 
     EBCellFAB interpData(ebislFine[din], fineBox, m_nComp);
 
     BaseFab<Real>&       interpDataReg = interpData.getSingleValuedFAB();
     const BaseFab<Real>& coFiDataReg   = coFiData.getSingleValuedFAB();
 
-    // Not vectorizable: coarse->fine broadcast via coarsen(ivFine) is a strided read. Multi-valued cells are
+    // Not vectorizable: coarse->fine broadcast via coarsen(ivFine) is a strided read. Cells in cut coarse cells are
     // overwritten per VoF below.
     auto regularKernel = [&](const IntVect& ivFine) -> void {
       interpDataReg(ivFine, m_comp) = coFiDataReg(coarsen(ivFine, m_refRat), m_comp);
     };
 
-    auto multiKernel = [&](const VolIndex& fineVoF) -> void {
-      interpData(fineVoF, m_comp) = coFiData(ebislFine.coarsen(fineVoF, m_refRat, din), m_comp);
+    auto cutKernel = [&](const VolIndex& fineVoF) -> void {
+      const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
+
+      interpData(fineVoF, m_comp) = coFiData(coarVoF, m_comp) * ebisBoxFine.volFrac(fineVoF) /
+                                    ebisBoxCoFi.volFrac(coarVoF);
     };
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
-    BoxLoops::loop(m_vofIterFineMulti[din], multiKernel);
+    BoxLoops::loop(m_vofIterFineCut[din], cutKernel);
 
     a_fineData[din].plus(interpData, fineBox, 0, 0, m_nComp);
   }
