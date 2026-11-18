@@ -3589,6 +3589,27 @@ AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width
   m_realms[a_realm]->registerParticleGhostMask(a_width);
 }
 
+void
+AmrMesh::registerParticleDeposition(const std::string&         a_realm,
+                                    const DepositionType       a_depositionType,
+                                    const CoarseFineDeposition a_coarseFineDeposition)
+{
+  CH_TIME("AmrMesh::registerParticleDeposition");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::registerParticleDeposition" << endl;
+  }
+
+  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
+    const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
+                                                                                 a_coarseFineDeposition,
+                                                                                 m_refinementRatios[lvl]);
+
+    for (const int width : widths) {
+      this->registerParticleGhostMask(a_realm, width);
+    }
+  }
+}
+
 const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
 {

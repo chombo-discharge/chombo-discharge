@@ -187,6 +187,7 @@ TracerParticleSolver<P>::registerOperators() const
   else {
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
+    m_amr->registerParticleDeposition(m_realm, m_deposition, m_coarseFineDeposition);
   }
 }
 

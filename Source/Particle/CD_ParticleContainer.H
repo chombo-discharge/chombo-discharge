@@ -659,6 +659,22 @@ public:
                      const AMRParticleGhostMask& a_maskFineToCoar);
 
   /**
+   * @brief Copy each level's mask-holder particles into the valid leaves of the next-finer level's patches, as
+   * GhostType::Coarse ghosts.
+   * @details The targets come from a_coarToFine: a particle is copied to a target only if its cell on the finer level
+   * lies in that target's acceptance box, and only if a_keep accepts it. Same-rank copies are appended directly, the
+   * rest go through one Alltoallv. Existing ghosts are cleared first; ghosts are transient and are dropped by
+   * clearGhostParticles(), remap() and regrid().
+   * @tparam Keep Callable bool(int level, const DataIndex& din, const IntVect& cell), where cell is the particle's
+   * cell on the mask holder's level.
+   * @param[in] a_coarToFine Coarse-to-fine particle ghost mask (Realm::getParticleGhostMaskCoarToFine).
+   * @param[in] a_keep       Per-particle selection.
+   */
+  template <typename Keep>
+  void
+  fillCoarseGhostParticlesFromMask(const AMRParticleGhostMask& a_coarToFine, const Keep& a_keep);
+
+  /**
    * @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
    * @details Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle
    * order within a leaf is not preserved. Keeps leaf capacity.
@@ -735,6 +751,16 @@ public:
    */
   void
   transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
+
+  /**
+   * @brief Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an
+   * acceptance box of a_coarToFine into the mask holder.
+   * @details Particles are selected at the finer level's cell granularity: those within the mask's width of a finer
+   * patch. Like transferMaskParticles, this accumulates into the mask holder and preserves ids and ranks.
+   * @param[in] a_coarToFine Coarse-to-fine particle ghost mask (Realm::getParticleGhostMaskCoarToFine).
+   */
+  void
+  transferMaskParticlesCoarToFine(const AMRParticleGhostMask& a_coarToFine);
 
   /**
    * @brief Drop all mask/halo particles on every level (keeps capacity).
