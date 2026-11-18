@@ -19,6 +19,7 @@
 // Our includes
 #include <CD_IrregAddOp.H>
 #include <CD_EBAMRSurfaceDeposition.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept : m_debug(false), m_verbose(false)
@@ -26,25 +27,19 @@ EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept : m_debug(false), m_ve
   CH_TIME("EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(weak)");
 }
 
-EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
-                                               const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsCoarsenedFine,
-                                               const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsRefinedCoar,
-                                               const Vector<int>&                        a_refRat,
-                                               const Vector<Real>&                       a_dx,
-                                               const RealVect&                           a_probLo,
-                                               const int                                 a_finestLevel,
-                                               const int                                 a_radius) noexcept
+EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(
+  const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGrids,
+  const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGridsCoarsenedFine,
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>& a_finerVoFs,
+  const Vector<int>&                                                    a_refRat,
+  const Vector<Real>&                                                   a_dx,
+  const RealVect&                                                       a_probLo,
+  const int                                                             a_finestLevel,
+  const int                                                             a_radius) noexcept
 {
   CH_TIME("EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(full)");
 
-  this->define(a_ebGrids,
-               a_ebGridsCoarsenedFine,
-               a_ebGridsRefinedCoar,
-               a_refRat,
-               a_dx,
-               a_probLo,
-               a_finestLevel,
-               a_radius);
+  this->define(a_ebGrids, a_ebGridsCoarsenedFine, a_finerVoFs, a_refRat, a_dx, a_probLo, a_finestLevel, a_radius);
 }
 
 EBAMRSurfaceDeposition::~EBAMRSurfaceDeposition() noexcept
@@ -55,12 +50,12 @@ EBAMRSurfaceDeposition::~EBAMRSurfaceDeposition() noexcept
 void
 EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
                                const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsCoarsenedFine,
-                               const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsRefinedCoar,
-                               const Vector<int>&                        a_refRat,
-                               const Vector<Real>&                       a_dx,
-                               const RealVect&                           a_probLo,
-                               const int                                 a_finestLevel,
-                               const int                                 a_radius) noexcept
+                               const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>& a_finerVoFs,
+                               const Vector<int>&                                                    a_refRat,
+                               const Vector<Real>&                                                   a_dx,
+                               const RealVect&                                                       a_probLo,
+                               const int                                                             a_finestLevel,
+                               const int                                                             a_radius) noexcept
 {
   CH_TIME("EBAMRSurfaceDeposition::define");
   if (m_verbose) {
@@ -71,7 +66,7 @@ EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGri
   m_verbose              = false;
   m_ebGrids              = a_ebGrids;
   m_ebGridsCoarsenedFine = a_ebGridsCoarsenedFine;
-  m_ebGridsRefinedCoar   = a_ebGridsRefinedCoar;
+  m_finerVoFs            = a_finerVoFs;
   m_refRat               = a_refRat;
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
@@ -83,7 +78,6 @@ EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGri
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const bool hasFine = lvl < m_finestLevel;
-    const bool hasCoar = lvl > 0;
 
     CH_assert(!(a_ebGrids[lvl].isNull()));
 
@@ -92,11 +86,9 @@ EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGri
       CH_assert(a_refRat[lvl] % 2 == 0);
     }
 
-    if (hasCoar) {
-      CH_assert(!(a_ebGridsRefinedCoar[lvl].isNull()));
-    }
     if (hasFine) {
       CH_assert(!(a_ebGridsCoarsenedFine[lvl].isNull()));
+      CH_assert(!(a_finerVoFs[lvl].isNull()));
     }
   }
 
@@ -119,7 +111,6 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
 {
   CH_TIMERS("EBAMRSurfaceDeposition::defineBuffers");
   CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_level", t1);
-  CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_refined_coar", t2);
   CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_coarsened_fine", t3);
   if (m_verbose) {
     pout() << "EBAMRSurfaceDeposition::defineBuffers" << endl;
@@ -134,7 +125,6 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
 
   CH_START(t1);
   m_data.resize(1 + m_finestLevel);
-  m_refinedCoarData.resize(1 + m_finestLevel);
   m_coarsenedFineData.resize(1 + m_finestLevel);
 
   // Define data on this level
@@ -161,34 +151,6 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
       new LevelData<BaseIVFAB<Real>>(dbl, nComp, m_radius * IntVect::Unit, BaseIVFactory<Real>(ebisl, irregCells)));
   }
   CH_STOP(t1);
-
-  // Define refined coarse data
-  CH_START(t2);
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& refinedCoarDBL   = m_ebGridsRefinedCoar[lvl]->getDBL();
-    const DataIterator&      dit              = refinedCoarDBL.dataIterator();
-    const EBISLayout&        refinedCoarEBISL = m_ebGridsRefinedCoar[lvl]->getEBISL();
-
-    LayoutData<IntVectSet> irregCells(refinedCoarDBL);
-
-    const int nbox = dit.size();
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const Box      box     = refinedCoarDBL[din];
-      const EBISBox& ebisbox = refinedCoarEBISL[din];
-
-      irregCells[din] = ebisbox.getIrregIVS(box);
-    }
-
-    m_refinedCoarData[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
-      new LevelData<BaseIVFAB<Real>>(refinedCoarDBL,
-                                     nComp,
-                                     IntVect::Zero,
-                                     BaseIVFactory<Real>(refinedCoarEBISL, irregCells)));
-  }
-  CH_STOP(t2);
 
   // Define coarsened fine data
   CH_START(t3);
@@ -232,7 +194,7 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
 
   m_validToValidCopiers.resize(1 + m_finestLevel);
   m_copierLevel.resize(1 + m_finestLevel);
-  m_copierRefinedCoarToFineNoGhosts.resize(1 + m_finestLevel);
+  m_copierCoarToCoarsenedFine.resize(1 + m_finestLevel);
   m_copierCoarsenedFineToCoar.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -254,13 +216,9 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
     // Reverse so that this goes from valid+ghost -> valid.
     m_copierLevel[lvl].reverse();
 
-    if (hasCoar) {
-      const DisjointBoxLayout& refinedCoarDBL = m_ebGridsRefinedCoar[lvl]->getDBL();
-
-      m_copierRefinedCoarToFineNoGhosts[lvl].define(refinedCoarDBL, dbl, domain);
-    }
-
     if (hasFine) {
+      m_copierCoarToCoarsenedFine[lvl].define(dbl, m_ebGridsCoarsenedFine[lvl]->getDBL(), domain, false, IntVect::Zero);
+
       m_copierCoarsenedFineToCoar[lvl].ghostDefine(m_ebGridsCoarsenedFine[lvl]->getDBL(),
                                                    m_ebGrids[lvl]->getDBL(),
                                                    m_ebGrids[lvl]->getDomain(),
@@ -385,73 +343,60 @@ EBAMRSurfaceDeposition::defineCoarseToFineStencils() noexcept
   m_coarseToFineStencils.resize(1 + m_finestLevel);
 
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
+    const int  refRat   = m_refRat[lvl - 1];
     const Real dxCoar   = m_dx[lvl - 1];
     const Real dxFine   = m_dx[lvl];
     const Real dxFactor = std::pow(dxCoar / dxFine, SpaceDim - 1);
 
-    const DisjointBoxLayout& dblCoar = m_ebGrids[lvl - 1]->getDBL();
-    const DisjointBoxLayout& dblFine = m_ebGridsRefinedCoar[lvl]->getDBL();
+    const DisjointBoxLayout& dblFine = m_ebGrids[lvl]->getDBL();
 
-    const EBISLayout& ebislCoar = m_ebGrids[lvl - 1]->getEBISL();
-    const EBISLayout& ebislFine = m_ebGridsRefinedCoar[lvl]->getEBISL();
+    const EBISLayout& ebislFine = m_ebGrids[lvl]->getEBISL();
+    const EBISLayout& ebislCoFi = m_ebGridsCoarsenedFine[lvl - 1]->getEBISL();
+
+    const LayoutData<BaseIVFAB<Vector<VolIndex>>>& finerVoFs = *m_finerVoFs[lvl - 1];
 
     m_coarseToFineStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>(
-      new LayoutData<BaseIVFAB<VoFStencil>>(dblCoar));
+      new LayoutData<BaseIVFAB<VoFStencil>>(dblFine));
 
-    const DataIterator& dit  = dblCoar.dataIterator();
+    const DataIterator& dit  = dblFine.dataIterator();
     const int           nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box boxFine = dblFine[din];
-      const Box boxCoar = dblCoar[din];
-
-      CH_assert(refine(boxCoar, m_refRat[lvl - 1]) == boxFine);
-
-      const EBISBox& ebisBoxCoar = ebislCoar[din];
       const EBISBox& ebisBoxFine = ebislFine[din];
+      const EBISBox& ebisBoxCoFi = ebislCoFi[din];
 
-      const EBGraph&   ebGraphCoar = ebisBoxCoar.getEBGraph();
-      const IntVectSet irregCoar   = ebisBoxCoar.getIrregIVS(dblCoar[din]);
+      const EBGraph&   ebGraphFine = ebisBoxFine.getEBGraph();
+      const IntVectSet irregFine   = ebisBoxFine.getIrregIVS(dblFine[din]);
 
       BaseIVFAB<VoFStencil>& interpStencils = (*m_coarseToFineStencils[lvl])[din];
 
-      interpStencils.define(irregCoar, ebGraphCoar, 1);
+      interpStencils.define(irregFine, ebGraphFine, 1);
 
-      for (VoFIterator vofit(irregCoar, ebGraphCoar); vofit.ok(); ++vofit) {
-        const VolIndex& coarVoF = vofit();
+      for (VoFIterator vofit(irregFine, ebGraphFine); vofit.ok(); ++vofit) {
+        const VolIndex& fineVoF = vofit();
+        const VolIndex  coarVoF = ebislFine.coarsen(fineVoF, refRat, din);
 
-        VoFStencil& stencil = interpStencils(coarVoF, 0);
-
-        // Figure out which cut-cells on the fine grid comes from refining the current one on the coarse grid
-        const Vector<VolIndex> refinedCoarVoFs = ebislCoar.refine(coarVoF, m_refRat[lvl - 1], din);
-
-        Vector<VolIndex> fineIrregVoFs;
-        for (int i = 0; i < refinedCoarVoFs.size(); i++) {
-          if (ebisBoxFine.isIrregular(refinedCoarVoFs[i].gridIndex())) {
-            fineIrregVoFs.push_back(refinedCoarVoFs[i]);
-          }
-        }
+        // The coarse value is spread over the cut cells among the finer VoFs of the coarse VoF, in proportion to their
+        // boundary areas.
+        const Vector<VolIndex> siblings = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoFi, finerVoFs[din], refRat);
 
         Real fineArea = 0.0;
-        for (int i = 0; i < fineIrregVoFs.size(); i++) {
-          fineArea += ebisBoxFine.bndryArea(fineIrregVoFs[i]);
+        for (int i = 0; i < siblings.size(); i++) {
+          if (ebisBoxFine.isIrregular(siblings[i].gridIndex())) {
+            fineArea += ebisBoxFine.bndryArea(siblings[i]);
+          }
         }
+
+        VoFStencil& stencil = interpStencils(fineVoF, 0);
 
         if (fineArea < std::numeric_limits<Real>::min()) {
-          for (int i = 0; i < fineIrregVoFs.size(); i++) {
-            stencil.add(fineIrregVoFs[i], 0.0);
-          }
+          stencil.add(coarVoF, 0.0);
         }
         else {
-          const Real coarArea   = ebisBoxCoar.bndryArea(coarVoF);
-          const Real stenWeight = coarArea * dxFactor / fineArea;
-
-          for (int i = 0; i < fineIrregVoFs.size(); i++) {
-            stencil.add(fineIrregVoFs[i], stenWeight);
-          }
+          stencil.add(coarVoF, ebisBoxCoFi.bndryArea(coarVoF) * dxFactor / fineArea);
         }
       }
     }
@@ -549,49 +494,36 @@ EBAMRSurfaceDeposition::addInvalidCoarseDataToFineData() const noexcept
     pout() << "EBAMRSurfaceDeposition::addInvalidCoarseDataToFineData" << endl;
   }
 
+  const Interval variables = Interval(0, 0);
+
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
 
-    const DisjointBoxLayout& dblCoar = m_ebGrids[lvl - 1]->getDBL();
-    const DataIterator&      dit     = dblCoar.dataIterator();
+    // Copy the coarse data onto the coarsened fine grids, so each fine box reads its coarse VoFs locally.
+    m_data[lvl - 1]->copyTo(variables, *m_coarsenedFineData[lvl - 1], variables, m_copierCoarToCoarsenedFine[lvl - 1]);
+
+    const DisjointBoxLayout& dblFine = m_ebGrids[lvl]->getDBL();
+    const DataIterator&      dit     = dblFine.dataIterator();
     const int                nbox    = dit.size();
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      BaseIVFAB<Real>&       fineData = (*m_refinedCoarData[lvl])[din];
-      const BaseIVFAB<Real>& coarData = (*m_data[lvl - 1])[din];
+      BaseIVFAB<Real>&       fineData = (*m_data[lvl])[din];
+      const BaseIVFAB<Real>& coarData = (*m_coarsenedFineData[lvl - 1])[din];
 
       const BaseIVFAB<VoFStencil>& stencils = (*m_coarseToFineStencils[lvl])[din];
 
-      const IntVectSet irregCoar   = stencils.getIVS();
-      const EBGraph&   ebGraphCoar = stencils.getEBGraph();
-
-      fineData.setVal(0.0);
-
       // Piecewise constant conservative interpolation of coarse-grid data to the fine grid.
-      for (VoFIterator vofit(irregCoar, ebGraphCoar); vofit.ok(); ++vofit) {
-        const VolIndex&   coarVoF = vofit();
-        const VoFStencil& stencil = stencils(coarVoF, 0);
-
-        const Real& coarVal = coarData(coarVoF, 0);
+      for (VoFIterator vofit(stencils.getIVS(), stencils.getEBGraph()); vofit.ok(); ++vofit) {
+        const VolIndex&   fineVoF = vofit();
+        const VoFStencil& stencil = stencils(fineVoF, 0);
 
         for (int i = 0; i < stencil.size(); i++) {
-          const VolIndex& fineVoF    = stencil.vof(i);
-          const Real&     fineWeight = stencil.weight(i);
-
-          fineData(fineVoF, 0) += coarVal * fineWeight;
+          fineData(fineVoF, 0) += coarData(stencil.vof(i), 0) * stencil.weight(i);
         }
       }
     }
-
-    // Add the interpolated data to the fine-grid data.
-    const Interval variables = Interval(0, 0);
-    m_refinedCoarData[lvl]->copyTo(variables,
-                                   *m_data[lvl],
-                                   variables,
-                                   m_copierRefinedCoarToFineNoGhosts[lvl],
-                                   IrregAddOp());
   }
 }
 
