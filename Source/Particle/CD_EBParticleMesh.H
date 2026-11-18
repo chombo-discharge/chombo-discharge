@@ -565,8 +565,8 @@ protected:
    * @param[in]     a_depositionType Deposition kernel.
    * @param[in]     a_widthScale     Particle-width multiplier.
    * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-   * @param[in]     a_coarseGhosts   If false, deposit the owned particles into the data holder; if true, deposit only
-   * the GhostType::Coarse particles, clipped to the valid box (NGP deposits nothing).
+   * @param[in]     a_coarseGhosts   If false, deposit the owned particles into the whole data holder; if true, deposit
+   * only the GhostType::Coarse particles, clipped to the valid box (NGP deposits nothing).
    * @param[in]     a_gather         Strength gatherer (promotes column values to Real).
    */
   template <typename P, typename Traits, typename StrengthFn>
@@ -590,7 +590,7 @@ protected:
       return;
     }
 
-    const Box clipBox = a_coarseGhosts ? m_region : a_meshData.box();
+    const Box clipBox = a_coarseGhosts ? m_region : a_meshData.getFArrayBox().box();
 
     const auto skip = [&](const std::size_t a_i) -> bool {
       return a_coarseGhosts ? (a_particles.ghost(a_i) != GhostType::Coarse) : a_particles.isGhost(a_i);
