@@ -71,16 +71,20 @@ public:
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
    * @param[in] a_redistRadius        Radius of the redistribution neighbourhood, in cells. Only verified and validated
    * for 1.
-   * @param[in] a_eblgRefined Eblg refined
+   * @param[in] a_eblgRefined        Refined grids, with geometry copied from the fine level (see
+   * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach a_refToFine * a_redistRadius cells.
+   * @param[in] a_fineCellsRefined    Cells of a_eblgRefined that hold the fine level's geometry (null without a fine
+   * level).
    */
-  EBMassRedistribution(const EBLevelGrid& a_eblgCoar,
-                       const EBLevelGrid& a_eblgCoarsened,
-                       const EBLevelGrid& a_eblg,
-                       const EBLevelGrid& a_eblgRefined,
-                       const EBLevelGrid& a_eblgFine,
-                       const int          a_refToCoar,
-                       const int          a_refToFine,
-                       const int          a_redistRadius) noexcept;
+  EBMassRedistribution(const EBLevelGrid&                             a_eblgCoar,
+                       const EBLevelGrid&                             a_eblgCoarsened,
+                       const EBLevelGrid&                             a_eblg,
+                       const EBLevelGrid&                             a_eblgRefined,
+                       const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fineCellsRefined,
+                       const EBLevelGrid&                             a_eblgFine,
+                       const int                                      a_refToCoar,
+                       const int                                      a_refToFine,
+                       const int                                      a_redistRadius) noexcept;
 
   /**
    * @brief Destructor (does nothing)
@@ -94,7 +98,10 @@ public:
    * @param[in] a_eblgCoar             Coarser grid level
    * @param[in] a_eblgCoarsened        Coarsened grids
    * @param[in] a_eblg                 Grids on this level
-   * @param[in] a_eblgRefined          Refined grids
+   * @param[in] a_eblgRefined          Refined grids, with geometry copied from the fine level (see
+   * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach a_refToFine * a_redistRadius cells.
+   * @param[in] a_fineCellsRefined     Cells of a_eblgRefined that hold the fine level's geometry (null without a fine
+   * level).
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
@@ -102,14 +109,15 @@ public:
    * for 1.
    */
   virtual void
-  define(const EBLevelGrid& a_eblgCoar,
-         const EBLevelGrid& a_eblgCoarsened,
-         const EBLevelGrid& a_eblg,
-         const EBLevelGrid& a_eblgRefined,
-         const EBLevelGrid& a_eblgFine,
-         const int          a_refToCoar,
-         const int          a_refToFine,
-         const int          a_redistRadius) noexcept;
+  define(const EBLevelGrid&                             a_eblgCoar,
+         const EBLevelGrid&                             a_eblgCoarsened,
+         const EBLevelGrid&                             a_eblg,
+         const EBLevelGrid&                             a_eblgRefined,
+         const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fineCellsRefined,
+         const EBLevelGrid&                             a_eblgFine,
+         const int                                      a_refToCoar,
+         const int                                      a_refToFine,
+         const int                                      a_redistRadius) noexcept;
 
   /**
    * @brief Redistribute the input quantity to the coarse level.
@@ -200,9 +208,14 @@ protected:
   EBLevelGrid m_eblg;
 
   /**
-   * @brief Grids on this level that are a coarsening of the fine level
+   * @brief Grids on this level refined to the fine level's resolution, with the fine level's geometry copied on.
    */
   EBLevelGrid m_eblgRefined;
+
+  /**
+   * @brief Cells of m_eblgRefined that hold the fine level's geometry.
+   */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_fineCellsRefined;
 
   /**
    * @brief Fine grids
