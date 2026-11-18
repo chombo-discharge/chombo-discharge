@@ -1664,6 +1664,9 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
 
   // Required for non-cell-based particle mergers.
   m_amr->registerParticleGhostMask(m_particleRealm, 1);
+
+  // The stepper's own solid-phase charge deposits use CIC with Halo.
+  m_amr->registerParticleDeposition(m_particleRealm, DepositionType::CIC, CoarseFineDeposition::Halo);
 }
 
 template <typename I, typename C, typename R, typename F>
