@@ -74,9 +74,6 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   // Make the coarsened and refine grids.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
 
-  // addFineGhostsToCoarse refines coarse VoFs on the coarsened grids.
-  m_eblgCoFi.getEBISL().setMaxRefinementRatio(m_refRat, m_eblgFine.getEBIS());
-
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
 
   // valid+ghost -> valid
@@ -113,9 +110,8 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
     pout() << "EBCoarseFineParticleMesh::defineVoFIterators" << endl;
   }
 
-  const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL();
-  const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();
-  const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL();
+  const DisjointBoxLayout& dblCoar   = m_eblgCoar.getDBL();
+  const EBISLayout&        ebislCoar = m_eblgCoar.getEBISL();
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
@@ -142,24 +138,27 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 
       const Box&     cellBoxFine = dblFine[din];
       const EBISBox& ebisBoxFine = ebislFine[din];
-      const EBGraph& ebgraphFine = ebisBoxFine.getEBGraph();
-
       const EBISBox& ebisBoxCoFi = ebislCoFi[din];
-      const EBGraph& ebgraphCoFi = ebisBoxCoFi.getEBGraph();
 
-      Box grownBoxFine = grow(cellBoxFine, m_ghost);
-      grownBoxFine &= domainFine;
+      const Box grownBoxFine = grow(cellBoxFine, m_ghost) & domainFine;
+      const Box grownBoxCoFi = coarsen(grownBoxFine, m_refRat);
 
-      // On the fine grid I only want the ghost cells that are irregular.
-      IntVectSet irregIVSFine = ebisBoxFine.getIrregIVS(grownBoxFine);
-      irregIVSFine -= cellBoxFine;
-      irregIVSFine &= domainFine;
-      m_vofIterFineGhosts[din].define(irregIVSFine, ebgraphFine);
+      // Coarse cells that the regular-cell sum in addFineGhostsToCoarse cannot handle: multi-valued coarse cells, and
+      // coarse cells with a multi-valued cell among the fine ghost cells.
+      IntVectSet multiCellsFine = ebisBoxFine.getMultiCells(grownBoxFine);
+      multiCellsFine -= cellBoxFine;
 
-      // On the coarse grid I want coarsenings of the irregular ghost cells on the fine level.
-      IntVectSet ivsCoFi = coarsen(irregIVSFine, m_refRat);
-      ivsCoFi &= domainCoar;
-      m_vofIterCoFiGhosts[din].define(ivsCoFi, ebgraphCoFi);
+      IntVectSet coarCells = ebisBoxCoFi.getMultiCells(grownBoxCoFi);
+      coarCells |= coarsen(multiCellsFine, m_refRat);
+
+      // The fine ghost cells in those coarse cells.
+      IntVectSet fineCells = coarCells;
+      fineCells.refine(m_refRat);
+      fineCells &= grownBoxFine;
+      fineCells -= cellBoxFine;
+
+      m_vofIterFineGhosts[din].define(fineCells, ebisBoxFine.getEBGraph());
+      m_vofIterCoFiGhosts[din].define(coarCells, ebisBoxCoFi.getEBGraph());
     }
 
 #pragma omp for schedule(runtime)
@@ -289,8 +288,7 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
   const EBISLayout&        ebislFine  = m_eblgFine.getEBISL();
 
-  const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
-  const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
+  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
 
   const DataIterator& ditFine = dblFine.dataIterator();
   const DataIterator& ditCoFi = dblCoFi.dataIterator();
@@ -344,45 +342,32 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
       };
 
       // Not vectorizable: fine->coarse scatter via coarsen(ivFine) is a non-contiguous write
-      // (m_refRat^D fine cells alias the same coarse cell). Multi-cut N/A: the irregular path below
-      // resets + re-accumulates cut cells, so the regular kernel intentionally runs over all cells.
+      // (m_refRat^D fine cells alias the same coarse cell). Covered fine cells hold no mass, so this sum is right for
+      // every coarse cell that has one VoF and no multi-valued finer cell; the loops below redo the others.
       BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
     }
 
-    // Now do the irregular cells. First reset the coarse cell values and then increment with the fine-grid values.
+    // Multi-valued cells: reset each coarse VoF and add the fine ghost VoFs that coarsen to it, with the same weight as
+    // the regular cells.
     VoFIterator& vofitCoar = m_vofIterCoFiGhosts[din];
     VoFIterator& vofitFine = m_vofIterFineGhosts[din];
 
-    // Set the value in the coarse cell.
-    auto setCoarData = [&](const VolIndex& fineVof) -> void {
-      const VolIndex coarVof = ebislFine.coarsen(fineVof, m_refRat, din);
-
+    auto resetCoar = [&](const VolIndex& coarVoF) -> void {
       for (int comp = 0; comp < m_nComp; comp++) {
-        coFiData(coarVof, comp) = 0.0;
+        coFiData(coarVoF, comp) = 0.0;
       }
     };
 
-    // Add mass from the fine vof to the coarse vof.
-    auto addFineToCoar = [&](const VolIndex& fineVof) -> void {
-      const VolIndex& coarVof = ebislFine.coarsen(fineVof, m_refRat, din);
+    auto addFineToCoar = [&](const VolIndex& fineVoF) -> void {
+      const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
+
       for (int comp = 0; comp < m_nComp; comp++) {
-        coFiData(coarVof, comp) += fineData(fineVof, comp);
+        coFiData(coarVoF, comp) += fineData(fineVoF, comp) * factor;
       }
     };
 
-    // Scale the value in the coarse cell.
-    auto scaleCoar = [&](const VolIndex& coarVof) -> void {
-      const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, din);
-
-      for (int comp = 0; comp < m_nComp; comp++) {
-        coFiData(coarVof, comp) *= 1. / static_cast<double>(fineVofs.size());
-      }
-    };
-
-    // Execute kernels.
-    BoxLoops::loop(vofitFine, setCoarData);
+    BoxLoops::loop(vofitCoar, resetCoar);
     BoxLoops::loop(vofitFine, addFineToCoar);
-    BoxLoops::loop(vofitCoar, scaleCoar);
   }
 
   const Interval interv(0, m_nComp - 1);

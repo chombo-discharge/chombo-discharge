@@ -90,7 +90,8 @@ public:
    * @details On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the
    * coarse level. This routine is used when the fine-level particles have particle clouds that deposit into the ghost
    * cells outside the fine level, i.e. over the refinement boundary. This routine coarsens that data and adds the mass
-   * to the coarse level.
+   * to the coarse level. The data is mass per cell volume, so each coarse VoF gets the sum of the fine ghost VoFs that
+   * coarsen to it, divided by refRat^SpaceDim, which conserves mass.
    * @param[in,out] a_coarData Coarse mesh data.
    * @param[in]    a_fineData Fine mesh data.
    */
@@ -231,13 +232,14 @@ protected:
   mutable LevelData<EBCellFAB> m_bufferFiCoRealVect;
 
   /**
-   * @brief VoFIterator for fine-grid irregular ghost cells.
+   * @brief VoFIterator over the fine ghost cells in the coarse cells of m_vofIterCoFiGhosts.
    */
   mutable LayoutData<VoFIterator> m_vofIterFineGhosts;
 
   /**
-   * @brief VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.
-   * @details Essentially a coarsening of m_vofIterFineGhosts.
+   * @brief VoFIterator over the coarse cells, on the coarsened fine grids, that are multi-valued or contain a
+   * multi-valued fine ghost cell.
+   * @details addFineGhostsToCoarse sums these per VoF; every other coarse cell takes the regular-cell sum.
    */
   mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
 
