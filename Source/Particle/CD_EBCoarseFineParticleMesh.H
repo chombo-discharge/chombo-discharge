@@ -85,15 +85,19 @@ public:
 
   /**
    * @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.
-   * @details Every valid fine VoF gets the density of the coarse VoF it coarsens to: the data is mass per cell volume,
-   * so in cut cells the coarse value is scaled by the ratio of the fine to the coarse volume fraction, which conserves
-   * mass. The coarse valid data is copied onto the coarsened fine grids first, so no geometry finer than the fine
-   * level's is needed.
-   * @param[in,out] a_fineData Fine-level data.
-   * @param[in]    a_coarData Coarse-level data.
+   * @details Every valid fine VoF gets the density of the coarse VoF it coarsens to. When the data is mass per cell
+   * volume (kappa times the density in cut cells), the coarse value is scaled by the ratio of the fine to the coarse
+   * volume fraction in cut cells, which conserves mass. When the cut cells already hold the density, as with mirror
+   * deposition, the coarse value is used as is. The coarse valid data is copied onto the coarsened fine grids first, so
+   * no geometry finer than the fine level's is needed.
+   * @param[in,out] a_fineData            Fine-level data.
+   * @param[in]     a_coarData            Coarse-level data.
+   * @param[in]     a_cutCellsHoldDensity True if the cut cells hold the density rather than kappa times it.
    */
   virtual void
-  addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const noexcept;
+  addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_fineData,
+                         const LevelData<EBCellFAB>& a_coarData,
+                         const bool                  a_cutCellsHoldDensity) const noexcept;
 
 protected:
   /**
