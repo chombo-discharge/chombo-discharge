@@ -43,6 +43,8 @@
 #define CD_EBPARTICLEMESH_H
 
 // Std includes
+#include <algorithm>
+#include <vector>
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -592,9 +594,34 @@ protected:
 
     const Box clipBox = a_coarseGhosts ? m_region : a_meshData.getFArrayBox().box();
 
-    const auto skip = [&](const std::size_t a_i) -> bool {
-      return a_coarseGhosts ? (a_particles.ghost(a_i) != GhostType::Coarse) : a_particles.isGhost(a_i);
-    };
+    const std::size_t numParticles = a_particles.size();
+
+    // The coarse ghosts arrive in an order that depends on threads and messages, so they deposit sorted by position
+    // and weight: the result then depends only on the set of ghosts.
+    std::vector<std::size_t> ghostOrder;
+
+    if (a_coarseGhosts) {
+      for (std::size_t i = 0; i < numParticles; i++) {
+        if (a_particles.ghost(i) == GhostType::Coarse) {
+          ghostOrder.push_back(i);
+        }
+      }
+
+      std::sort(ghostOrder.begin(), ghostOrder.end(), [&](const std::size_t a_left, const std::size_t a_right) -> bool {
+        const RealVect& left  = a_particles.position(a_left);
+        const RealVect& right = a_particles.position(a_right);
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          if (left[dir] != right[dir]) {
+            return left[dir] < right[dir];
+          }
+        }
+
+        return a_particles.weight(a_left) < a_particles.weight(a_right);
+      });
+    }
+
+    const std::size_t numDeposits = a_coarseGhosts ? ghostOrder.size() : numParticles;
 
     Real invVol = 1.0;
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -612,14 +639,14 @@ protected:
       tscFactor *= 2.0 / tscWidth[dir];
     }
 
-    const std::size_t numParticles = a_particles.size();
-
     Real strength[SpaceDim];
 
     switch (a_depositionType) {
     case DepositionType::NGP: {
-      for (std::size_t i = 0; i < numParticles; i++) {
-        if (skip(i)) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
           continue;
         }
 
@@ -629,8 +656,10 @@ protected:
       break;
     }
     case DepositionType::CIC: {
-      for (std::size_t i = 0; i < numParticles; i++) {
-        if (skip(i)) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
           continue;
         }
 
@@ -651,8 +680,10 @@ protected:
       break;
     }
     case DepositionType::TSC: {
-      for (std::size_t i = 0; i < numParticles; i++) {
-        if (skip(i)) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
           continue;
         }
 

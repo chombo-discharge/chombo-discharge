@@ -1132,7 +1132,7 @@ protected:
       }
     }
 
-    particles.clearGhostParticles();
+    particles.clearGhostParticles(GhostType::Coarse);
     particles.clearMaskParticles();
   }
 
@@ -1323,7 +1323,7 @@ protected:
     }
 
     // Return the transition particles to the valid holder.
-    particles.clearGhostParticles();
+    particles.clearGhostParticles(GhostType::Coarse);
     particles.transferParticles(particles.getMaskParticles());
   }
 };

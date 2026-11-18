@@ -653,6 +653,14 @@ The following coarse-fine deposition methods are currently supported:
    Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
    The ``CoarseFineDeposition::Transition`` method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.
 
+``Halo`` and ``Transition`` copy the coarse-grid particles whose clouds reach the fine grid into the fine patches as ghost particles (see :ref:`Chap:GhostParticles`), which deposit there.
+The copies go through the realm's coarse-to-fine particle ghost masks, whose widths in fine cells depend on the deposition kernel and the refinement ratio :math:`r`:
+
+* ``Halo``: :math:`r/2` for CIC and :math:`r` for TSC.
+* ``Transition``: :math:`r/2 + 1` for CIC and :math:`r + 1` for TSC.
+
+Every width must be smaller than ``AmrMesh.min_block_size``, which is checked when a solver registers its deposition.
+
 .. _Chap:IrregularDeposition:
 
 Cut-cell deposition
