@@ -1876,6 +1876,15 @@ public:
   registerParticleGhostMask(const std::string& a_realm, const int a_width);
 
   /**
+   * @brief Register a particle ghost-mask width on a realm and build its masks now if they do not exist yet.
+   * @details See Realm::defineParticleGhostMask.
+   * @param[in] a_realm Realm name
+   * @param[in] a_width Ghost width (cells). Must be > 0.
+   */
+  void
+  defineParticleGhostMask(const std::string& a_realm, const int a_width);
+
+  /**
    * @brief Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs.
    * @details Halo and Transition deposition copy coarser particles into the finer patches through these masks, with
    * widths that depend on the deposition kernel and the refinement ratios (see

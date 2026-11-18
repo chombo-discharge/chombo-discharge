@@ -3590,6 +3590,22 @@ AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width
 }
 
 void
+AmrMesh::defineParticleGhostMask(const std::string& a_realm, const int a_width)
+{
+  CH_TIME("AmrMesh::defineParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::defineParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::defineParticleGhostMask - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->defineParticleGhostMask(a_width);
+}
+
+void
 AmrMesh::registerParticleDeposition(const std::string&         a_realm,
                                     const DepositionType       a_depositionType,
                                     const CoarseFineDeposition a_coarseFineDeposition)
