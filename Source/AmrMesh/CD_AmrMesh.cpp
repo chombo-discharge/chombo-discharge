@@ -3621,6 +3621,15 @@ AmrMesh::registerParticleDeposition(const std::string&         a_realm,
                                                                                  m_refinementRatios[lvl]);
 
     for (const int width : widths) {
+      if (width >= m_minBlockSize) {
+        const std::string
+          str = "AmrMesh::registerParticleDeposition - this coarse-fine deposition needs particle ghost "
+                "masks of width " +
+                std::to_string(width) + " at refinement ratio " + std::to_string(m_refinementRatios[lvl]) +
+                ", which must be smaller than min_block_size = " + std::to_string(m_minBlockSize);
+        MayDay::Abort(str.c_str());
+      }
+
       this->registerParticleGhostMask(a_realm, width);
     }
   }

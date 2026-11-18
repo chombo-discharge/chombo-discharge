@@ -603,6 +603,41 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
 
 template <typename P, typename Traits>
 inline void
+ParticleContainer<P, Traits>::clearGhostParticles(const GhostType a_type)
+{
+  CH_TIME("ParticleContainer::clearGhostParticles(GhostType)");
+
+  CH_assert(m_isDefined);
+  CH_assert(a_type != GhostType::Valid);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&     level = *m_particles[lvl];
+    const DataIterator& dit   = m_grids[lvl].dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      Leaf& leaf = level[dit[mybox]];
+
+      // Swap-and-pop; the swapped-in particle now occupies index i, so do NOT advance on a hit.
+      std::size_t i = 0;
+      while (i < leaf.size()) {
+        if (leaf.ghost(i) == a_type) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+
+  m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+inline void
 ParticleContainer<P, Traits>::clearGhostParticles()
 {
   CH_TIME("ParticleContainer::clearGhostParticles");
@@ -1040,7 +1075,7 @@ ParticleContainer<P, Traits>::fillCoarseGhostParticlesFromMask(const AMRParticle
 
   CH_assert(m_isDefined);
 
-  this->clearGhostParticles();
+  this->clearGhostParticles(GhostType::Coarse);
 
   MoverPool pool(numProc());
 
@@ -1071,7 +1106,7 @@ ParticleContainer<P, Traits>::fillCoarseGhostParticlesFromMask(const AMRParticle
         const std::size_t j = bin.size() - 1;
 
         bin.particleID(j) = a_leaf.particleID(i);
-        bin.rankID(j)     = procID();
+        bin.rankID(j)     = procID(); // the mask holder's particles are owned by this rank
         bin.ghost(j)      = GhostType::Coarse;
       }
     }
@@ -1112,7 +1147,7 @@ ParticleContainer<P, Traits>::fillCoarseGhostParticlesFromMask(const AMRParticle
 #endif
   }
 
-  // Ghost copies keep their owner's rankID.
+  // a_setOwnerToReceiver == false, so the copies keep the rankID set above, the owner's.
   this->distributeFromPool(pool, false);
 
   m_isOrganizedByCell = false;

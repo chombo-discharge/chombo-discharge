@@ -663,8 +663,8 @@ public:
    * GhostType::Coarse ghosts.
    * @details The targets come from a_coarToFine: a particle is copied to a target only if its cell on the finer level
    * lies in that target's acceptance box, and only if a_keep accepts it. Same-rank copies are appended directly, the
-   * rest go through one Alltoallv. Existing ghosts are cleared first; ghosts are transient and are dropped by
-   * clearGhostParticles(), remap() and regrid().
+   * rest go through one Alltoallv. Existing GhostType::Coarse ghosts are cleared first; other ghosts are left alone.
+   * Ghosts are transient and are dropped by clearGhostParticles(), remap() and regrid().
    * @tparam Keep Callable bool(int level, const DataIndex& din, const IntVect& cell), where cell is the particle's
    * cell on the mask holder's level.
    * @param[in] a_coarToFine Coarse-to-fine particle ghost mask (Realm::getParticleGhostMaskCoarToFine).
@@ -681,6 +681,14 @@ public:
    */
   void
   clearGhostParticles();
+
+  /**
+   * @brief Remove the ghost particles of one GhostType from all levels and patches.
+   * @details Like clearGhostParticles(), but every other particle, owned or ghost, is left untouched.
+   * @param[in] a_type Ghost type to remove. Must not be GhostType::Valid.
+   */
+  void
+  clearGhostParticles(const GhostType a_type);
 
   /**
    * @brief Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).
