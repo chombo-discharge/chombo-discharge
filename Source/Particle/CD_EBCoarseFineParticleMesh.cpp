@@ -258,7 +258,8 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
 
 void
 EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_fineData,
-                                                 const LevelData<EBCellFAB>& a_coarData) const noexcept
+                                                 const LevelData<EBCellFAB>& a_coarData,
+                                                 const bool                  a_cutCellsHoldDensity) const noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::addInvalidCoarseToFine");
   if (m_verbose) {
@@ -272,10 +273,10 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   CH_assert(a_coarData.ghostVect() == m_ghost);
 
   // Piecewise constant interpolation of the density: every valid fine VoF gets the density of the coarse VoF it
-  // coarsens to. The data is mass per cell volume, i.e. volume fraction times density, so in cut cells the coarse value
-  // is scaled by kappaFine/kappaCoar; the fine volume fractions of a coarse VoF sum to refRat^SpaceDim times its own,
-  // so this conserves mass. The coarse data is first copied onto the coarsened fine grids, so each fine box reads its
-  // coarse values locally.
+  // coarsens to. Mass per cell volume, i.e. volume fraction times density, is scaled by kappaFine/kappaCoar in cut
+  // cells; the fine volume fractions of a coarse VoF sum to refRat^SpaceDim times its own, so this conserves mass.
+  // Cut cells that already hold the density take the coarse value as is. The coarse data is first copied onto the
+  // coarsened fine grids, so each fine box reads its coarse values locally.
   const DisjointBoxLayout& dblFine   = m_eblgFine.getDBL();
   const EBISLayout&        ebislFine = m_eblgFine.getEBISL();
   const EBISLayout&        ebislCoFi = m_eblgCoFi.getEBISL();
@@ -312,8 +313,9 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
     auto cutKernel = [&](const VolIndex& fineVoF) -> void {
       const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
 
-      interpData(fineVoF, m_comp) = coFiData(coarVoF, m_comp) * ebisBoxFine.volFrac(fineVoF) /
-                                    ebisBoxCoFi.volFrac(coarVoF);
+      const Real scale = a_cutCellsHoldDensity ? 1.0 : ebisBoxFine.volFrac(fineVoF) / ebisBoxCoFi.volFrac(coarVoF);
+
+      interpData(fineVoF, m_comp) = coFiData(coarVoF, m_comp) * scale;
     };
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);

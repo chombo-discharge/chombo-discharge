@@ -81,12 +81,14 @@
  * - <b>Mirror</b> -- NOT handled here. It is a second pass that reflects each band particle across the embedded
  *                    boundary and deposits the image, so it needs an image container, a scratch field and a
  *                    collective remap, none of which this class owns. See @c ItoSolver::mirrorPass.
+ *                    The one part handled here: Interp's coarse-to-fine step does not rescale cut cells by volume
+ *                    fraction, because with the mirror they hold the density rather than kappa times it.
  * - <b>Redistribute</b>, <b>RedistributeBlended</b> -- NOT handled here. They act on the field AFTER the deposit.
  *                    See @c ItoSolver::redistributeAMR and @c McPhoto::depositHybridDivergence.
  *
  * The consequence is worth stating plainly, because it is silent: passing @c Mirror or @c Redistribute to a
- * deposition routine here and then omitting the caller's half produces @c Native behaviour, with no error and no
- * diagnostic. The run completes and the output is bit-for-bit what @c Native would have given. A caller that selects
+ * deposition routine here and then omitting the caller's half produces @c Native behaviour (for @c Mirror with
+ * Interp, Native without the volume-fraction rescaling), with no error and no diagnostic. A caller that selects
  * one of those values owns the rest of its meaning.
  *
  * This split is deliberate but not ideal -- the enum is named in one place and interpreted in three, so there is no
@@ -290,6 +292,9 @@ public:
     // documentation for why that is silent when the caller forgets.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
 
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, forceIrregNGP);
@@ -305,7 +310,7 @@ public:
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, 1, patch);
+      this->depositInterpCore(a_meshData, a_particles, 1, cutCellsHoldDensity, patch);
 
       break;
     }
@@ -330,6 +335,7 @@ public:
                                               a_particles,
                                               a_depositionType,
                                               forceIrregNGP,
+                                              cutCellsHoldDensity,
                                               a_coarToFineMasks,
                                               patch,
                                               patchGhosts);
@@ -379,6 +385,9 @@ public:
     // See depositWeight for why the selector collapses to a bool here.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
 
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositGathered(a_rho,
@@ -417,7 +426,7 @@ public:
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, 1, patch);
+      this->depositInterpCore(a_meshData, a_particles, 1, cutCellsHoldDensity, patch);
 
       break;
     }
@@ -442,6 +451,7 @@ public:
                                               a_particles,
                                               a_depositionType,
                                               forceIrregNGP,
+                                              cutCellsHoldDensity,
                                               a_coarToFineMasks,
                                               patch,
                                               patchGhosts);
@@ -487,6 +497,9 @@ public:
     // See depositWeight for why the selector collapses to a bool here.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
 
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.template deposit<Members...>(a_rho, a_soa, a_depositionType, a_widthScale, forceIrregNGP);
@@ -502,7 +515,11 @@ public:
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, static_cast<int>(sizeof...(Members)), patch);
+      this->depositInterpCore(a_meshData,
+                              a_particles,
+                              static_cast<int>(sizeof...(Members)),
+                              cutCellsHoldDensity,
+                              patch);
 
       break;
     }
@@ -527,6 +544,7 @@ public:
                                                                                  a_particles,
                                                                                  a_depositionType,
                                                                                  forceIrregNGP,
+                                                                                 cutCellsHoldDensity,
                                                                                  a_coarToFineMasks,
                                                                                  patch,
                                                                                  patchGhosts);
@@ -767,6 +785,8 @@ protected:
    * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
    * @param[in]     a_particles    Particle container.
    * @param[in]     a_numComp      Number of mesh components written.
+   * @param[in]     a_cutCellsHoldDensity True if the cut cells hold the density rather than kappa times it (mirror
+   * deposition).
    * @param[in]     a_patchDeposit Per-patch deposition functor.
    */
   template <typename Container, typename PatchDeposit>
@@ -774,6 +794,7 @@ protected:
   depositInterpCore(EBAMRCellData&   a_meshData,
                     const Container& a_particles,
                     const int        a_numComp,
+                    const bool       a_cutCellsHoldDensity,
                     PatchDeposit     a_patchDeposit) const
   {
     CH_TIME("EBAMRParticleMesh::depositInterpCore");
@@ -814,7 +835,7 @@ protected:
           aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
 
           m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
-          m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+          m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias, a_cutCellsHoldDensity);
         }
       }
     }
@@ -1206,6 +1227,8 @@ protected:
    * @param[in]     a_particles       Particle container.
    * @param[in]     a_depositionType  Deposition kernel.
    * @param[in]     a_forceIrregNGP   Force NGP in cut cells.
+   * @param[in]     a_cutCellsHoldDensity True if the cut cells hold the density (mirror deposition); passed to the
+   * Interp fallback for NGP.
    * @param[in]     a_coarToFineMasks Realm coarse-to-fine mask getter.
    * @param[in]     a_patch           Per-patch deposit functor (requested kernel).
    * @param[in]     a_patchGhosts     Per-patch coarse-ghost deposit functor.
@@ -1216,6 +1239,7 @@ protected:
                         const Container&     a_particles,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP,
+                        const bool           a_cutCellsHoldDensity,
                         const MaskGetter&    a_coarToFineMasks,
                         PatchDeposit         a_patch,
                         PatchGhosts          a_patchGhosts) const
@@ -1226,7 +1250,7 @@ protected:
     CH_assert(a_meshData[0]->nComp() == NCOMP);
 
     if (a_depositionType == DepositionType::NGP) {
-      this->depositInterpCore(a_meshData, a_particles, NCOMP, a_patch);
+      this->depositInterpCore(a_meshData, a_particles, NCOMP, a_cutCellsHoldDensity, a_patch);
 
       return;
     }
