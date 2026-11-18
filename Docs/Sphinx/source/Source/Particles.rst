@@ -324,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 709-710
+   :lines: 725-726
    :language: c++
    :dedent: 2
 
@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 739-743
+   :lines: 765-769
    :language: c++
    :dedent: 2
 
@@ -447,7 +447,7 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 666-667
+   :lines: 682-683
    :language: c++
    :dedent: 2
 
