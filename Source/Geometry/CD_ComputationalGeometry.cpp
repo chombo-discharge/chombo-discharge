@@ -1130,6 +1130,11 @@ ComputationalGeometry::irregCells(const phase::which_phase a_phase, const Proble
       MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the geometry's");
     }
 
+    // A level no tile was split down to resolves no surface of its own.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return IntVectSet();
+    }
+
     const LevelData<EBGraph>& graph = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel);
     const DisjointBoxLayout&  grids = graph.disjointBoxLayout();
 
@@ -1182,6 +1187,11 @@ ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const Proble
 
     if (geometryLevel < 0) {
       MayDay::Error("ComputationalGeometry::irregGrids - the domain is not one of the geometry's");
+    }
+
+    // A level no tile was split down to resolves no surface of its own, and holds no grids of it.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return DisjointBoxLayout(Vector<Box>(), Vector<int>(), a_domain);
     }
 
     return m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();

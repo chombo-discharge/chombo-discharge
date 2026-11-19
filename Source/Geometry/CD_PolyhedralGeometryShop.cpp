@@ -2397,6 +2397,12 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
   }
 }
 
+bool
+PolyhedralGeometryShop::hasEBGraph(const int a_level) const noexcept
+{
+  return a_level >= 0 && a_level < m_ebGraphs.size() && !m_ebGraphs[a_level].isNull();
+}
+
 const LevelData<EBGraph>&
 PolyhedralGeometryShop::getEBGraph(const int a_level) const
 {

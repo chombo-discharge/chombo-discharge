@@ -244,6 +244,16 @@ public:
   buildMoments();
 
   /**
+   * @brief Whether buildMoments made an index-space graph for a level.
+   * @details A level no tile was split down to has none: its cells are all cut from coarser leaves when a layout asks
+   * for them.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return True if getEBGraph and getEBData can be called for the level.
+   */
+  bool
+  hasEBGraph(const int a_level) const noexcept;
+
+  /**
    * @brief The index-space graph buildMoments made for a level.
    * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
    * @return The graph, over the level's boxes.
