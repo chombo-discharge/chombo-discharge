@@ -331,21 +331,48 @@ LoadBalancing::sortSFC(Vector<Box>&                                             
     buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
   }
 
-  // Compute Hilbert keys
+  // The curve runs over tiles, not cells. The tile size is the largest power of two that divides every corner, so
+  // tile coordinates are the corners shifted right by that many bits.
+  uint32_t allCorners = 0;
+
   for (std::size_t i = 0; i < n; ++i) {
-    const auto& b  = std::get<0>(buf[i]);
-    const auto  iv = b.smallEnd();
+    const IntVect& corner = std::get<0>(buf[i]).smallEnd();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (corner[dir] < 0) {
+        MayDay::Abort("LoadBalancing::sortSFC - boxes must have non-negative corners");
+      }
+
+      allCorners |= static_cast<uint32_t>(corner[dir]);
+    }
+  }
+
+  int shift = 0;
+
+  if (allCorners != 0) {
+    while (((allCorners >> shift) & 1U) == 0U) {
+      shift++;
+    }
+  }
+
+  // Compute the SFC keys from the tile coordinates.
+  for (std::size_t i = 0; i < n; ++i) {
+    const IntVect& corner = std::get<0>(buf[i]).smallEnd();
 
     std::array<uint32_t, SpaceDim> c;
 
-    for (int d = 0; d < SpaceDim; ++d) {
-      c[d] = static_cast<uint32_t>(iv[d]);
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      c[dir] = static_cast<uint32_t>(corner[dir]) >> shift;
+
+      if (c[dir] >= s_sfcMaxCoordinate) {
+        MayDay::Abort("LoadBalancing::sortSFC - a level spans more than 2^21 tiles in one direction");
+      }
     }
 
     std::get<2>(buf[i]) = a_sfcEncoder(c);
   }
 
-  // 3) Sort by hilbert key.
+  // Sort by the SFC key.
   std::sort(buf.begin(), buf.end(), [](const Bundle& a, const Bundle& b) noexcept {
     return std::get<2>(a) < std::get<2>(b);
   });
@@ -363,13 +390,10 @@ LoadBalancing::mortonIndex(const std::array<uint32_t, DIM>& a_coords) noexcept
 {
   uint64_t code = 0;
 
-  // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
-  // by their blocking factors, or switch to 128/256 bit integers.
-  const int maxDim = 1 << 21;
-
+  // A 64-bit code holds 21 bits per direction.
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if (a_coords[dir] > maxDim) {
-      MayDay::Abort("LoadBalancing::mortonIndex - logic bust");
+    if (a_coords[dir] >= s_sfcMaxCoordinate) {
+      MayDay::Abort("LoadBalancing::mortonIndex - coordinate does not fit in 21 bits");
     }
   }
 
@@ -395,6 +419,10 @@ LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
   uint32_t x[DIM];
 
   for (int i = 0; i < DIM; ++i) {
+    if (a_coords[i] >= s_sfcMaxCoordinate) {
+      MayDay::Abort("LoadBalancing::hilbertIndex - coordinate does not fit in 21 bits");
+    }
+
     x[i] = a_coords[i];
   }
 
