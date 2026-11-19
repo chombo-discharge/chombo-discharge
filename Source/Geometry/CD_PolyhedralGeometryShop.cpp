@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <iomanip>
 #include <limits>
 #include <array>
@@ -452,6 +453,27 @@ PolyhedralGeometryShop::linkRingFromCoarser(BaseFab<int>&      a_flags,
   a_nodes.append(linked);
 }
 
+bool
+PolyhedralGeometryShop::isCrossed(const PolyhedralEB::CutCellSurface& a_surface) noexcept
+{
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    if (a_surface.hasCrossing(e)) {
+      return true;
+    }
+  }
+
+  // a corner on the surface counts as a crossing
+  bool anyPositive = false;
+  bool anyNegative = false;
+
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+    anyPositive = anyPositive || !(a_surface.m_corner[c] < 0.0);
+    anyNegative = anyNegative || !(a_surface.m_corner[c] > 0.0);
+  }
+
+  return anyPositive && anyNegative;
+}
+
 long long
 PolyhedralGeometryShop::cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
                                                     Vector<IrregNode>&   a_nodes,
@@ -731,6 +753,11 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   }
 
   pp.query("extension_cut_cell_loads", m_extensionLoadByCutCells);
+
+  // TEMPORARY: compare every fill with one made without the cache.
+  m_checkExtensionCache = false;
+
+  pp.query("check_extension_cache", m_checkExtensionCache);
 
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::PolyhedralGeometryShop()" << endl;
@@ -1077,6 +1104,68 @@ PolyhedralGeometryShop::buildMoments()
 
   timer.stopEvent("Count cut cells");
 
+  // The multi-valued cells of every stored level, on every rank, for extendLevel: a regular cell beside one is made a
+  // full cut cell, so a tile beside one is cut even if no surface lies over the tile itself.
+  timer.startEvent("Gather multi-valued cells");
+
+  m_multiValuedCells.resize(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    m_multiValuedCells[lvl].makeEmpty();
+
+    if (m_ebGraphs[lvl].isNull()) {
+      continue;
+    }
+
+    const LevelData<EBGraph>& graph = *m_ebGraphs[lvl];
+    const DisjointBoxLayout&  dbl   = graph.disjointBoxLayout();
+    const DataIterator&       dit   = dbl.dataIterator();
+    const int                 nbox  = dit.size();
+
+    Vector<Box> mine;
+
+#pragma omp parallel
+    {
+      Vector<Box> threadCells;
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const IntVectSet multi = graph[din].getMultiCells(dbl[din]);
+
+        for (IVSIterator ivsIt(multi); ivsIt.ok(); ++ivsIt) {
+          threadCells.push_back(Box(ivsIt(), ivsIt()));
+        }
+      }
+
+      // the cells go into a set, so the threads may append in any order
+#pragma omp critical(PolyhedralGeometryShop_multiValuedCells)
+      mine.append(threadCells);
+    }
+
+    constexpr int root = 0;
+
+    Vector<Vector<Box>> all;
+    Vector<Box>         cells;
+
+    gather(all, mine, root);
+
+    if (procID() == root) {
+      for (int r = 0; r < all.size(); r++) {
+        cells.append(all[r]);
+      }
+    }
+
+    broadcast(cells, root);
+
+    for (int i = 0; i < cells.size(); i++) {
+      m_multiValuedCells[lvl] |= cells[i].smallEnd();
+    }
+  }
+
+  timer.stopEvent("Gather multi-valued cells");
+
   if (m_profile) {
     timer.eventReport(pout(), false);
   }
@@ -1263,7 +1352,8 @@ void
 PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
                                     LevelData<EBData>&       a_data,
                                     const DisjointBoxLayout& a_tiles,
-                                    const ProblemDomain&     a_domain) const
+                                    const ProblemDomain&     a_domain,
+                                    const bool               a_skipUncut) const
 {
   CH_TIME("PolyhedralGeometryShop::extendLevel");
 
@@ -1286,11 +1376,12 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
 
   long long numCollapsed = 0;
   long long numFiner     = 0;
+  long long numSkipped   = 0;
 
   const DataIterator& dit  = a_tiles.dataIterator();
   const int           nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCollapsed, numFiner)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCollapsed, numFiner, numSkipped)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
@@ -1313,6 +1404,75 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
       data.define(graph, Vector<IrregNode>(), box);
 
       continue;
+    }
+
+    // A tile none of whose own cells has a surface over it is regular or covered whole, as the cells over it are, and
+    // is set whole without being cut. Only its own cells are copied out of it, and they read the ghost cell only
+    // where it has more than one VoF: a regular cell beside one is made a full cut cell. A cell cut from an ancestor
+    // has one VoF, so the ghost cell matters only where the geometry holds it at the tile's level or finer.
+    if (a_skipUncut) {
+      const int tileLevel = copy.getGeometryLevel(0);
+      const Box ghosted   = grow(box, 1) & a_domain.domainBox();
+
+      bool hasSurface = false;
+
+      for (int src = 0; src < copy.getNumSourceLevels() && !hasSurface; src++) {
+        const std::vector<IntVect>& cells = copy.getSurfaceCells(0, din, src);
+
+        if (cells.empty()) {
+          continue;
+        }
+
+        // The surface cells are on their own level, which is coarser than the tile's, as fine, or finer. One over a
+        // ghost cell counts only if the ghost cell is multi-valued, which only a cell stored at the tile's level can
+        // be, a finer one being coarsened onto it.
+        const bool coarser = src < tileLevel;
+        const Box  valid   = coarser ? coarsen(box, 1 << (tileLevel - src)) : refine(box, 1 << (src - tileLevel));
+        const Box  ring = coarser ? coarsen(ghosted, 1 << (tileLevel - src)) : refine(ghosted, 1 << (src - tileLevel));
+
+        for (const IntVect& cell : cells) {
+          // A cell the copy carries a surface for need not be cut: its corners can all lie on one side.
+          const PolyhedralEB::CutCellSurface* surface = copy.getSourceSurface(0, din, src, cell);
+
+          if (surface == nullptr || !PolyhedralGeometryShop::isCrossed(*surface)) {
+            continue;
+          }
+
+          if (valid.contains(cell)) {
+            hasSurface = true;
+          }
+          else if (!coarser && ring.contains(cell)) {
+            const IntVect tileCell = coarsen(cell, 1 << (src - tileLevel));
+
+            hasSurface = tileLevel < m_multiValuedCells.size() && m_multiValuedCells[tileLevel].contains(tileCell);
+          }
+
+          if (hasSurface) {
+            break;
+          }
+        }
+      }
+
+      if (!hasSurface) {
+        const int state = copy.getState(0, din, box.smallEnd());
+
+        if (state == PolyhedralEBGraph::s_regular) {
+          graph.setToAllRegular();
+        }
+        else if (state == PolyhedralEBGraph::s_covered) {
+          graph.setToAllCovered();
+        }
+        else {
+          MayDay::Error("PolyhedralGeometryShop::extendLevel - a tile with no surface over it is neither regular nor "
+                        "covered");
+        }
+
+        data.define(graph, Vector<IrregNode>(), box);
+
+        numSkipped++;
+
+        continue;
+      }
     }
 
     BaseFab<int>      flags;
@@ -1351,8 +1511,11 @@ PolyhedralGeometryShop::extendLevel(LevelData<EBGraph>&      a_graph,
 
   numCollapsed = ParallelOps::sum(numCollapsed);
 
+  numSkipped = ParallelOps::sum(numSkipped);
+
   if (m_verbose) {
-    pout() << "PolyhedralGeometryShop::extendLevel - " << numCollapsed
+    pout() << "PolyhedralGeometryShop::extendLevel - " << numSkipped << " of " << a_tiles.size()
+           << " tiles set whole without being cut, " << numCollapsed
            << " cells cut from their ancestors with fluid in more than one piece, kept as one" << endl;
   }
 }
@@ -2269,36 +2432,16 @@ PolyhedralGeometryShop::fillLayout(LevelData<EBGraph>&      a_graph,
   const int  geom       = this->destinationLevel(a_domain);
   const bool haveStored = geom < m_ebGraphs.size() && !m_ebGraphs[geom].isNull();
 
-  // The cells the stored level does not hold are cut from their ancestors on tiles of their own, balanced over the
-  // ranks by the work of cutting them.
+  // The cells the stored level does not hold are cut from their ancestors on tiles of their own, which the extension
+  // cache keeps once they are cut.
   Vector<Box> tiles;
 
   this->extensionTiles(tiles, a_grids, a_domain, a_graphGhost);
 
   const bool haveExtension = tiles.size() > 0;
 
-  LevelData<EBGraph> extensionGraph;
-  LevelData<EBData>  extensionData;
-
   if (haveExtension) {
-    LoadBalancing::sort(tiles, m_boxSorting);
-
-    Vector<long> loads;
-
-    if (m_extensionLoadByCutCells) {
-      this->extensionLoads(loads, tiles, geom);
-    }
-    else {
-      loads.resize(tiles.size(), 1L);
-    }
-
-    Vector<int> ranks;
-
-    LoadBalancing::makeBalance(ranks, loads, tiles);
-
-    const DisjointBoxLayout extensionGrids(tiles, ranks, a_domain);
-
-    this->extendLevel(extensionGraph, extensionData, extensionGrids, a_domain);
+    this->cacheExtension(tiles, a_domain, geom);
   }
 
   // The stored level and the extension hold disjoint cells, and a copy overwrites the cells it reaches, so both are
@@ -2316,7 +2459,7 @@ PolyhedralGeometryShop::fillLayout(LevelData<EBGraph>&      a_graph,
   }
 
   if (haveExtension) {
-    extensionGraph.copyTo(interv, a_graph, interv);
+    m_extensionGraphs[geom]->copyTo(interv, a_graph, interv);
   }
 
   const DataIterator& dit  = a_grids.dataIterator();
@@ -2337,7 +2480,434 @@ PolyhedralGeometryShop::fillLayout(LevelData<EBGraph>&      a_graph,
   }
 
   if (haveExtension) {
-    extensionData.copyTo(interv, a_data, interv);
+    m_extensionData[geom]->copyTo(interv, a_data, interv);
+  }
+
+  if (m_checkExtensionCache && haveExtension) {
+    this->checkExtensionCache(a_graph, a_data, tiles, a_grids, a_domain, a_graphGhost, a_dataGhost);
+  }
+}
+
+void
+PolyhedralGeometryShop::cacheExtension(const Vector<Box>&   a_tiles,
+                                       const ProblemDomain& a_domain,
+                                       const int            a_level) const
+{
+  CH_TIME("PolyhedralGeometryShop::cacheExtension");
+
+  if (a_level >= m_extensionGrids.size()) {
+    m_extensionGrids.resize(a_level + 1);
+    m_extensionGraphs.resize(a_level + 1);
+    m_extensionData.resize(a_level + 1);
+    m_extensionCutTiles.resize(a_level + 1);
+  }
+
+  const bool haveCache = !m_extensionGraphs[a_level].isNull();
+
+  // The tiles asked for that no fill has derived yet. Both lists are the same on every rank, and so is the result.
+  Vector<Box> cached;
+  Vector<int> cachedRanks;
+
+  if (haveCache) {
+    const DisjointBoxLayout& grids = m_extensionGrids[a_level];
+
+    for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
+      cached.push_back(grids[lit()]);
+      cachedRanks.push_back(grids.procID(lit()));
+    }
+  }
+
+  const auto lessThan = [](const Box& a_a, const Box& a_b) -> bool {
+    return a_a.smallEnd().lexLT(a_b.smallEnd());
+  };
+
+  std::vector<Box> asked = a_tiles.constStdVector();
+  std::vector<Box> held  = cached.constStdVector();
+  std::vector<Box> missed;
+
+  std::sort(asked.begin(), asked.end(), lessThan);
+  std::sort(held.begin(), held.end(), lessThan);
+  std::set_difference(asked.begin(), asked.end(), held.begin(), held.end(), std::back_inserter(missed), lessThan);
+
+  if (missed.empty()) {
+    return;
+  }
+
+  // The new tiles are balanced among themselves and derived on a layout of their own. The ones derived before keep
+  // their ranks.
+  Vector<Box> newTiles(missed);
+
+  LoadBalancing::sort(newTiles, m_boxSorting);
+
+  Vector<long> loads;
+
+  if (m_extensionLoadByCutCells) {
+    this->extensionLoads(loads, newTiles, a_level);
+  }
+  else {
+    loads.resize(newTiles.size(), 1L);
+  }
+
+  Vector<int> newRanks;
+
+  LoadBalancing::makeBalance(newRanks, loads, newTiles);
+
+  const DisjointBoxLayout newGrids(newTiles, newRanks, a_domain);
+
+  LevelData<EBGraph> newGraph;
+  LevelData<EBData>  newData;
+
+  this->extendLevel(newGraph, newData, newGrids, a_domain, true);
+
+  // The cut tiles, those whose graph holds its cells rather than a whole regular or covered tag, hold nearly all of the
+  // cache's memory. Each rank flags its own, and the flags are summed so that every rank has all of them, indexed as
+  // newTiles lists the tiles.
+  const int numNew = newTiles.size();
+
+  std::vector<std::pair<IntVect, int>> newIndex(numNew);
+
+  for (int i = 0; i < numNew; i++) {
+    newIndex[i] = std::make_pair(newTiles[i].smallEnd(), i);
+  }
+
+  const auto lexLess = [](const std::pair<IntVect, int>& a_a, const std::pair<IntVect, int>& a_b) -> bool {
+    return a_a.first.lexLT(a_b.first);
+  };
+
+  std::sort(newIndex.begin(), newIndex.end(), lexLess);
+
+  std::vector<int> isCut(numNew, 0);
+
+  const DataIterator& newDit  = newGrids.dataIterator();
+  const int           numMine = newDit.size();
+
+  // every box writes the flag of its own tile
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < numMine; mybox++) {
+    const DataIndex& din   = newDit[mybox];
+    const EBGraph&   graph = newGraph[din];
+
+    if (!graph.isAllRegular() && !graph.isAllCovered()) {
+      const auto it = std::lower_bound(newIndex.begin(),
+                                       newIndex.end(),
+                                       std::make_pair(newGrids[din].smallEnd(), 0),
+                                       lexLess);
+
+      CH_assert(it != newIndex.end() && it->first == newGrids[din].smallEnd());
+
+      isCut[it->second] = 1;
+    }
+  }
+
+#ifdef CH_MPI
+  MPI_Allreduce(MPI_IN_PLACE, isCut.data(), numNew, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+#endif
+
+  // Every rank should own about as many cut tiles as the others. A cut tile stays on the rank that derived it while
+  // that rank owns fewer than its share, and goes to the next rank short of it otherwise; the tiles that are not cut
+  // stay where they were derived. Every rank makes the same choice, from the counts every rank keeps.
+  const int numRanks = numProc();
+
+  if (static_cast<int>(m_extensionCutTiles[a_level].size()) != numRanks) {
+    m_extensionCutTiles[a_level].assign(numRanks, 0);
+  }
+
+  std::vector<long long>& owned = m_extensionCutTiles[a_level];
+
+  long long numCut = std::accumulate(owned.begin(), owned.end(), 0LL);
+
+  numCut += std::accumulate(isCut.begin(), isCut.end(), 0LL);
+
+  const long long share = (numCut + numRanks - 1) / numRanks;
+
+  Vector<int> ownerRanks = newRanks;
+
+  int next = 0;
+
+  for (int i = 0; i < numNew; i++) {
+    if (isCut[i] == 0) {
+      continue;
+    }
+
+    int owner = newRanks[i];
+
+    if (owned[owner] >= share) {
+      while (owned[next] >= share) {
+        next = (next + 1) % numRanks;
+      }
+
+      owner = next;
+    }
+
+    ownerRanks[i] = owner;
+    owned[owner]++;
+  }
+
+  // The tiles that change rank are copied to their owners. The graph is copied first, the moments are defined on it,
+  // and then copied as well.
+  const bool moved = !(ownerRanks.stdVector() == newRanks.stdVector());
+
+  const DisjointBoxLayout ownerGrids = moved ? DisjointBoxLayout(newTiles, ownerRanks, a_domain) : newGrids;
+
+  EBGraphFactory graphFactory(a_domain);
+  EBDataFactory  dataFactory;
+
+  LevelData<EBGraph> ownerGraph;
+  LevelData<EBData>  ownerData;
+
+  if (moved) {
+    const Interval interv(0, 0);
+
+    ownerGraph.define(ownerGrids, 1, IntVect::Unit, graphFactory);
+    ownerData.define(ownerGrids, 1, IntVect::Zero, dataFactory);
+
+    newGraph.copyTo(interv, ownerGraph, interv);
+
+    const DataIterator& ownerDit = ownerGrids.dataIterator();
+    const int           numOwned = ownerDit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < numOwned; mybox++) {
+      const DataIndex& din = ownerDit[mybox];
+
+      ownerData[din].defineVoFData(ownerGraph[din], ownerGrids[din]);
+      ownerData[din].defineFaceData(ownerGraph[din], ownerGrids[din]);
+    }
+
+    newData.copyTo(interv, ownerData, interv);
+  }
+
+  const LevelData<EBGraph>& placedGraph = moved ? ownerGraph : newGraph;
+  const LevelData<EBData>&  placedData  = moved ? ownerData : newData;
+
+  // The cache grows by the new tiles. The graphs and moments are handles, so the tiles move into it without a copy.
+  Vector<Box> allTiles = cached;
+  Vector<int> allRanks = cachedRanks;
+
+  allTiles.append(newTiles);
+  allRanks.append(ownerRanks);
+
+  const DisjointBoxLayout allGrids(allTiles, allRanks, a_domain);
+
+  RefCountedPtr<LevelData<EBGraph>> allGraph(new LevelData<EBGraph>(allGrids, 1, IntVect::Unit, graphFactory));
+  RefCountedPtr<LevelData<EBData>>  allData(new LevelData<EBData>(allGrids, 1, IntVect::Zero, dataFactory));
+
+  // This rank's tiles of the old and the new layout, each in the order its layout keeps them, are merged into the
+  // order of the grown layout.
+  const DataIterator oldDit   = haveCache ? m_extensionGrids[a_level].dataIterator() : DataIterator();
+  const DataIterator placeDit = ownerGrids.dataIterator();
+  const int          numOld   = haveCache ? oldDit.size() : 0;
+  const int          numPlace = placeDit.size();
+
+  std::vector<std::pair<Box, std::pair<int, DataIndex>>> sources(numOld + numPlace);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < numOld; mybox++) {
+    sources[mybox] = std::make_pair(m_extensionGrids[a_level][oldDit[mybox]], std::make_pair(0, oldDit[mybox]));
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < numPlace; mybox++) {
+    sources[numOld + mybox] = std::make_pair(ownerGrids[placeDit[mybox]], std::make_pair(1, placeDit[mybox]));
+  }
+
+  std::sort(sources.begin(), sources.end(), [&lessThan](const auto& a_a, const auto& a_b) -> bool {
+    return lessThan(a_a.first, a_b.first);
+  });
+
+  const DataIterator& dit  = allGrids.dataIterator();
+  const int           nbox = dit.size();
+
+  std::vector<std::pair<Box, DataIndex>> targets(nbox);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    targets[mybox] = std::make_pair(allGrids[dit[mybox]], dit[mybox]);
+  }
+
+  std::sort(targets.begin(), targets.end(), [&lessThan](const auto& a_a, const auto& a_b) -> bool {
+    return lessThan(a_a.first, a_b.first);
+  });
+
+  if (targets.size() != sources.size()) {
+    MayDay::Error("PolyhedralGeometryShop::cacheExtension - the grown layout holds other tiles on this rank");
+  }
+
+  int numMismatched = 0;
+
+  // every box writes its own tile
+#pragma omp parallel for schedule(runtime) reduction(+ : numMismatched)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    if (targets[mybox].first != sources[mybox].first) {
+      numMismatched++;
+
+      continue;
+    }
+
+    const bool       isNew = sources[mybox].second.first == 1;
+    const DataIndex& from  = sources[mybox].second.second;
+    const DataIndex& to    = targets[mybox].second;
+
+    (*allGraph)[to] = isNew ? placedGraph[from] : (*m_extensionGraphs[a_level])[from];
+    (*allData)[to]  = isNew ? placedData[from] : (*m_extensionData[a_level])[from];
+  }
+
+  if (numMismatched > 0) {
+    MayDay::Error("PolyhedralGeometryShop::cacheExtension - the grown layout holds other tiles on this rank");
+  }
+
+  m_extensionGrids[a_level]  = allGrids;
+  m_extensionGraphs[a_level] = allGraph;
+  m_extensionData[a_level]   = allData;
+}
+
+void
+PolyhedralGeometryShop::checkExtensionCache(const LevelData<EBGraph>& a_graph,
+                                            const LevelData<EBData>&  a_data,
+                                            const Vector<Box>&        a_tiles,
+                                            const DisjointBoxLayout&  a_grids,
+                                            const ProblemDomain&      a_domain,
+                                            const int                 a_graphGhost,
+                                            const int                 a_dataGhost) const
+{
+  CH_TIME("PolyhedralGeometryShop::checkExtensionCache");
+
+  const int  geom       = this->destinationLevel(a_domain);
+  const bool haveStored = geom < m_ebGraphs.size() && !m_ebGraphs[geom].isNull();
+
+  // The fill as it was made before the cache: every tile cut afresh, none skipped.
+  Vector<Box> tiles = a_tiles;
+
+  LoadBalancing::sort(tiles, m_boxSorting);
+
+  Vector<long> loads(tiles.size(), 1L);
+  Vector<int>  ranks;
+
+  LoadBalancing::makeBalance(ranks, loads, tiles);
+
+  const DisjointBoxLayout extensionGrids(tiles, ranks, a_domain);
+
+  LevelData<EBGraph> extensionGraph;
+  LevelData<EBData>  extensionData;
+
+  this->extendLevel(extensionGraph, extensionData, extensionGrids, a_domain, false);
+
+  const Interval interv(0, 0);
+
+  EBGraphFactory graphFactory(a_domain);
+  EBDataFactory  dataFactory;
+
+  LevelData<EBGraph> refGraph(a_grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
+  LevelData<EBData>  refData(a_grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
+
+  if (haveStored) {
+    m_ebGraphs[geom]->copyTo(interv, refGraph, interv);
+  }
+
+  extensionGraph.copyTo(interv, refGraph, interv);
+
+  const DataIterator& dit  = a_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box region = grow(a_grids[din], a_dataGhost) & a_domain.domainBox();
+
+    refData[din].defineVoFData(refGraph[din], region);
+    refData[din].defineFaceData(refGraph[din], region);
+  }
+
+  if (haveStored) {
+    m_ebData[geom]->copyTo(interv, refData, interv);
+  }
+
+  extensionData.copyTo(interv, refData, interv);
+
+  // Every cell of the boxes and their moment ghost cells, compared bit for bit.
+  long long numCells = 0;
+  long long numDiffs = 0;
+
+  const auto differ = [](const Real a, const Real b) -> bool {
+    return !(a == b);
+  };
+
+#pragma omp parallel for schedule(runtime) reduction(+ : numCells, numDiffs)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box region = grow(a_grids[din], a_dataGhost) & a_domain.domainBox();
+
+    EBISBox cache;
+    EBISBox ref;
+
+    cache.define(a_graph[din], a_data[din], din);
+    ref.define(refGraph[din], refData[din], din);
+
+    for (BoxIterator bit(region); bit.ok(); ++bit) {
+      const IntVect& iv = bit();
+
+      numCells++;
+
+      bool diff = (cache.numVoFs(iv) != ref.numVoFs(iv)) || (cache.isCovered(iv) != ref.isCovered(iv)) ||
+                  (cache.isRegular(iv) != ref.isRegular(iv));
+
+      if (!diff) {
+        const Vector<VolIndex> vofs = cache.getVoFs(iv);
+
+        for (int v = 0; v < vofs.size(); v++) {
+          const VolIndex& vof = vofs[v];
+
+          diff = diff || differ(cache.volFrac(vof), ref.volFrac(vof)) ||
+                 differ(cache.bndryArea(vof), ref.bndryArea(vof));
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            diff = diff || differ(cache.centroid(vof)[dir], ref.centroid(vof)[dir]) ||
+                   differ(cache.normal(vof)[dir], ref.normal(vof)[dir]) ||
+                   differ(cache.bndryCentroid(vof)[dir], ref.bndryCentroid(vof)[dir]);
+
+            for (SideIterator sit; sit.ok(); ++sit) {
+              const Vector<FaceIndex> facesCache = cache.getFaces(vof, dir, sit());
+              const Vector<FaceIndex> facesRef   = ref.getFaces(vof, dir, sit());
+
+              diff = diff || (facesCache.size() != facesRef.size());
+
+              for (int f = 0; f < facesCache.size() && f < facesRef.size(); f++) {
+                diff = diff || !(facesCache[f] == facesRef[f]) ||
+                       differ(cache.areaFrac(facesCache[f]), ref.areaFrac(facesRef[f]));
+
+                for (int d = 0; d < SpaceDim; d++) {
+                  diff = diff || differ(cache.centroid(facesCache[f])[d], ref.centroid(facesRef[f])[d]);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (diff) {
+        if (numDiffs < 5) {
+#pragma omp critical(PolyhedralGeometryShop_checkExtensionCache)
+          pout() << "PolyhedralGeometryShop::checkExtensionCache - cell " << iv << " differs, cache n/cov/reg "
+                 << cache.numVoFs(iv) << "/" << cache.isCovered(iv) << "/" << cache.isRegular(iv) << " reference "
+                 << ref.numVoFs(iv) << "/" << ref.isCovered(iv) << "/" << ref.isRegular(iv) << " box " << a_grids[din]
+                 << endl;
+        }
+
+        numDiffs++;
+      }
+    }
+  }
+
+  numCells = ParallelOps::sum(numCells);
+  numDiffs = ParallelOps::sum(numDiffs);
+
+  pout() << "PolyhedralGeometryShop::checkExtensionCache - domain " << a_domain.domainBox().size() << ": " << numCells
+         << " cells, " << numDiffs << " differ" << endl;
+
+  if (numDiffs > 0) {
+    MayDay::Abort("PolyhedralGeometryShop::checkExtensionCache - the cached fill differs from a fresh one");
   }
 }
 
