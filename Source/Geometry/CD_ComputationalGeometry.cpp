@@ -57,6 +57,8 @@ ComputationalGeometry::ComputationalGeometry()
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
+    m_electrodeLevel(0),
+    m_dielectricLevel(0),
     m_minBlockSize(0),
     m_maxBlockSize(0),
     m_profile(false),
@@ -401,6 +403,8 @@ ComputationalGeometry::buildImplicitFunctions()
 void
 ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const ProblemDomain& a_stopDomain,
+                                 const ProblemDomain& a_electrodeDomain,
+                                 const ProblemDomain& a_dielectricDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_startDx,
                                  const Real           a_refineAngle,
@@ -500,9 +504,16 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
   CH_assert(m_domains.size() == m_dx.size());
 
+  m_electrodeLevel  = this->getLevel(a_electrodeDomain);
+  m_dielectricLevel = this->getLevel(a_dielectricDomain);
+
+  if (m_electrodeLevel < 0 || m_dielectricLevel < 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the electrode or dielectric domain is not one of the levels");
+  }
+
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(8, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(9, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -602,6 +613,58 @@ int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_domains.size();
+}
+
+bool
+ComputationalGeometry::holdsConductorCell(const Box& a_box, const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::holdsConductorCell");
+
+  const RefCountedPtr<BaseIF>& gasFunction   = this->getImplicitFunction(phase::gas);
+  const RefCountedPtr<BaseIF>& solidFunction = this->getImplicitFunction(phase::solid);
+
+  if (gasFunction.isNull() || solidFunction.isNull()) {
+    return true;
+  }
+
+  const Real dx    = m_dx[a_level];
+  const Box  valid = a_box & m_domains[a_level].domainBox();
+
+  // Whether each cell of the box is cut by a phase's surface, decided as the polyhedral shop decides it.
+  const auto cutCells = [&](BaseFab<int>& a_isCut, const BaseIF& a_function) -> void {
+    BaseFab<Real> nodeValues;
+    BaseFab<Real> intercept[SpaceDim];
+
+    PolyhedralEB::fillNodeValues(nodeValues, a_function, valid, m_probLo, dx);
+    PolyhedralEB::defineIntercepts(intercept, valid);
+
+    a_isCut.define(valid, 1);
+    a_isCut.setVal(0);
+
+    for (BoxIterator bit(valid); bit.ok(); ++bit) {
+      PolyhedralEB::CutCellSurface surface;
+
+      PolyhedralEB::buildSurface(intercept, surface, a_function, nodeValues, bit(), m_probLo, dx);
+
+      if (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Cut) {
+        a_isCut(bit(), 0) = 1;
+      }
+    }
+  };
+
+  BaseFab<int> gasCut;
+  BaseFab<int> solidCut;
+
+  cutCells(gasCut, *gasFunction);
+  cutCells(solidCut, *solidFunction);
+
+  for (BoxIterator bit(valid); bit.ok(); ++bit) {
+    if (gasCut(bit(), 0) != solidCut(bit(), 0)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 GeometryService::InOut
@@ -1356,6 +1419,26 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
     // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
     // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
     // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
+    // A box holding a surface the geometric tags refine further is split, so that the geometry is resolved wherever
+    // they refine. Driver::getGeometryTags tags as conductor every cell cut in exactly one phase, and as dielectric
+    // every cell cut in the solid phase.
+    if (reason == SplitReason::None) {
+      const bool gasCut   = a_gasTypes[i] == GeometryService::Irregular;
+      const bool solidCut = a_solidTypes[i] == GeometryService::Irregular;
+
+      const bool dielectric = solidCut && a_level < m_dielectricLevel;
+
+      bool conductor = false;
+
+      if (a_level < m_electrodeLevel && (gasCut || solidCut)) {
+        conductor = (gasCut != solidCut) || this->holdsConductorCell(a_boxes[i], a_level);
+      }
+
+      if (dielectric || conductor) {
+        reason = SplitReason::Depth;
+      }
+    }
+
     if (reason == SplitReason::None && m_refineSaddles) {
       const bool gasTwist = (a_gasTypes[i] == GeometryService::Irregular) &&
                             this->hasTwistedPatch(a_boxes[i], a_level, phase::gas);
@@ -2333,7 +2416,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 6 : 7]++;
+      m_splitCounts[lvl][tagged ? 7 : 8]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -2487,10 +2570,10 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial/doubled/twist " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2]
-           << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5]
-           << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting " << m_splitCounts[lvl][6] << "/"
-           << m_splitCounts[lvl][7] << endl;
+           << "; split interior/ring/medial/doubled/twist/depth " << m_splitCounts[lvl][1] << "/"
+           << m_splitCounts[lvl][2] << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/"
+           << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << " (leaves " << m_splitCounts[lvl][0]
+           << "); tiles tagged/nesting " << m_splitCounts[lvl][7] << "/" << m_splitCounts[lvl][8] << endl;
   }
 }
 
