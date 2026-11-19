@@ -188,6 +188,10 @@ public:
    * constructor.
    * @param[in] a_startDomain  Domain the upward pass starts from.
    * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
+   * @param[in] a_electrodeDomain  Domain the geometric tags refine electrode surfaces down to, one of the levels. A box
+   * on a coarser level that holds an electrode surface is split.
+   * @param[in] a_dielectricDomain Domain the geometric tags refine dielectric surfaces down to, one of the levels. A
+   * box on a coarser level that holds a dielectric surface is split.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
@@ -199,6 +203,8 @@ public:
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
             const ProblemDomain& a_stopDomain,
+            const ProblemDomain& a_electrodeDomain,
+            const ProblemDomain& a_dielectricDomain,
             const RealVect&      a_probLo,
             const Real           a_startDx,
             const Real           a_refineAngle,
@@ -535,6 +541,16 @@ protected:
   int m_stopLevel;
 
   /**
+   * @brief Level the geometric tags refine electrode surfaces down to; a box on a coarser level holding one is split.
+   */
+  int m_electrodeLevel;
+
+  /**
+   * @brief Level the geometric tags refine dielectric surfaces down to; a box on a coarser level holding one is split.
+   */
+  int m_dielectricLevel;
+
+  /**
    * @brief Tile size, in cells. ComputationalGeometry.min_block_size, 8 when not given.
    */
   int m_minBlockSize;
@@ -746,8 +762,9 @@ protected:
   /**
    * @brief Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair
    * reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than
-   * the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle.
-   * @details Only None against anything else decides whether a box splits. Which of the five reasons it is, is
+   * the band), an edge the level above would cross twice, a cut cell whose interface is twisted into a saddle, or a
+   * surface the geometric tags refine below the box's level (Driver.refine_electrodes, Driver.refine_dielectrics).
+   * @details Only None against anything else decides whether a box splits. Which of the six reasons it is, is
    * recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it
    * is a diagnostic rather than a part of the generator.
    */
@@ -758,7 +775,8 @@ protected:
     Ring,
     Medial,
     DoubleCrossing,
-    Twist
+    Twist,
+    Depth
   };
 
   /**
@@ -822,6 +840,18 @@ protected:
    */
   SplitReason
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Whether a box holds a cell cut in exactly one phase, which Driver::getGeometryTags tags as conductor.
+   * @details A cell is cut in a phase when that phase's surface crosses it, decided as the polyhedral shop decides it,
+   * from the implicit function at the cell's nodes and edges. Without one of the two implicit functions every cut cell
+   * is cut in one phase only, and the answer is true.
+   * @param[in] a_box   The box, on a_level.
+   * @param[in] a_level Level of the box.
+   * @return True if some cell of the box is cut in one phase and not the other.
+   */
+  bool
+  holdsConductorCell(const Box& a_box, const int a_level) const;
 
   /**
    * @brief Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it.

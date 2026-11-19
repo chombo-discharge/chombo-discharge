@@ -542,32 +542,13 @@ protected:
   /**
    * @brief Build the grids the index space is generated over, from the start domain to the finest domain.
    * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the domain on level max_eb_depth
-   * as the stop domain, and the simulation's EB ghost count and refinement angle. Runs before the geometry is built,
-   * since the generators read the grids it makes.
+   * as the stop domain, the domains the geometric tags refine electrode and dielectric surfaces down to
+   * (Driver.refine_electrodes and Driver.refine_dielectrics, at most max_eb_depth), and the simulation's EB ghost count
+   * and refinement angle. Runs before the geometry is built, since the generators read the grids it makes.
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
    */
   void
   buildGeometryGrids(const ProblemDomain& a_startDomain);
-
-  /**
-   * @brief The grids ComputationalGeometry::makeGrids built, per AMR level.
-   * @details Level lvl holds the geometry's cut tiles on the AMR domain of that level, found through
-   * ComputationalGeometry::getLevel, or the whole domain split as AmrMesh splits its coarsest level when that domain
-   * is at or below the geometry's start level (Driver.geometry_scan_level above zero). Level 0 is left empty, AmrMesh
-   * always splits the coarsest domain itself. The levels the geometry did not reach are empty, and AmrMesh stops at
-   * the first empty level.
-   * @return Boxes per AMR level, 1 + max_eb_depth entries.
-   */
-  Vector<Vector<Box>>
-  getGeometryGrids() const;
-
-  /**
-   * @brief Regrid AmrMesh onto the grids the polyhedral geometry was built over, and add the simulation level next
-   * finer than max_eb_depth from the geometric tags if max_sim_depth asks for one.
-   * @details The geometric tags must be current (getGeometryTags).
-   */
-  void
-  regridOntoGeometryGrids();
 
   /**
    * @brief Setup function for fresh (non-restart) simulations.
