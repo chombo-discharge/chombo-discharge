@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -46,11 +47,19 @@ namespace {
 /**
  * @brief HDF5 checkpoint header key holding the git description of the executable that wrote the
  * file.
- * @details Driver::writeCheckpointFile stores one string per realm in the same header map, so
- * Driver::readCheckpointFile has to know this key in order not to mistake the git description for
- * the name of a realm.
  */
 constexpr const char* gitHashKey = "git_hash";
+
+/**
+ * @brief HDF5 checkpoint header key holding the polyhedral graph file the geometry was built from, relative to the
+ * checkpoint's directory.
+ */
+constexpr const char* graphFileKey = "polyhedral_graph_file";
+
+/**
+ * @brief HDF5 checkpoint header key holding the identifier of the polyhedral graph file.
+ */
+constexpr const char* graphIdKey = "polyhedral_graph_id";
 } // namespace
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -1414,20 +1423,7 @@ Driver::setupGeometryOnly()
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
     // base AMR level, which we make here.
-    ProblemDomain scanDomain;
-    if (m_geoScanLevel < 0) {
-      // Make a coarsening of the base AMR level, but don't coarsen beyond 2x2 domains.
-      scanDomain  = m_amr->getDomains()[0];
-      int numCoar = 0;
-      while (scanDomain.domainBox().shortside() >= 4 && numCoar < std::abs(m_geoScanLevel)) {
-        scanDomain.coarsen(2);
-        numCoar++;
-      }
-    }
-    else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxEbDepth());
-      scanDomain         = m_amr->getDomains()[amrLevel];
-    }
+    const ProblemDomain scanDomain = this->getScanDomain();
 
     EBISLevel::s_distributedData = true;
 
@@ -1524,6 +1520,75 @@ Driver::buildGeometryGrids(const ProblemDomain& a_startDomain)
                                      m_amr->getEbMaxBlockSize());
 }
 
+ProblemDomain
+Driver::getScanDomain() const
+{
+  CH_TIME("Driver::getScanDomain");
+  if (m_verbosity > 5) {
+    pout() << "Driver::getScanDomain" << endl;
+  }
+
+  // The geometry is generated from a coarsening of the coarsest AMR level, at most down to a domain whose shortest side
+  // is two cells, or from a finer AMR level, at most max_eb_depth.
+  ProblemDomain scanDomain;
+
+  if (m_geoScanLevel < 0) {
+    scanDomain  = m_amr->getDomains()[0];
+    int numCoar = 0;
+
+    while (scanDomain.domainBox().shortside() >= 4 && numCoar < std::abs(m_geoScanLevel)) {
+      scanDomain.coarsen(2);
+      numCoar++;
+    }
+  }
+  else {
+    const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxEbDepth());
+    scanDomain         = m_amr->getDomains()[amrLevel];
+  }
+
+  return scanDomain;
+}
+
+std::string
+Driver::getGraphFileName() const
+{
+  return m_outputDirectory + "/chk/" + m_outputFileNames + ".graph." + std::to_string(SpaceDim) + "d.hdf5";
+}
+
+void
+Driver::findGraphFile(const std::string& a_restartFile)
+{
+  CH_TIME("Driver::findGraphFile");
+  if (m_verbosity > 5) {
+    pout() << "Driver::findGraphFile" << endl;
+  }
+
+#ifdef CH_USE_HDF5
+  HDF5Handle     handle(a_restartFile, HDF5Handle::OPEN_RDONLY);
+  HDF5HeaderData header;
+
+  header.readFromFile(handle);
+  handle.close();
+
+  if (header.m_string.find(graphFileKey) != header.m_string.end()) {
+    const std::filesystem::path checkpointDirectory = std::filesystem::path(a_restartFile).parent_path();
+    const std::filesystem::path graphFile = (checkpointDirectory / header.m_string[graphFileKey]).lexically_normal();
+
+    pout() << "Driver::findGraphFile - the geometry is read from " << graphFile.string() << endl;
+
+    m_computationalGeometry->readGraphFrom(graphFile.string(), header.m_string[graphIdKey]);
+  }
+  else {
+    pout() << "Driver::findGraphFile - the checkpoint names no graph file, so the geometry is generated from the inputs"
+           << endl;
+
+    if (m_checkpointInterval > 0) {
+      m_computationalGeometry->writeGraphTo(this->getGraphFileName());
+    }
+  }
+#endif
+}
+
 void
 Driver::setupFresh(const int a_initialRegrids)
 {
@@ -1539,25 +1604,17 @@ Driver::setupFresh(const int a_initialRegrids)
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
     // base AMR level, which we make here.
-    ProblemDomain scanDomain;
-    if (m_geoScanLevel < 0) {
-      // Make a coarsening of the base AMR level, but don't coarsen beyond 2x2 domains.
-      scanDomain  = m_amr->getDomains()[0];
-      int numCoar = 0;
-      while (scanDomain.domainBox().shortside() >= 4 && numCoar < std::abs(m_geoScanLevel)) {
-        scanDomain.coarsen(2);
-        numCoar++;
-      }
-    }
-    else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxEbDepth());
-      scanDomain         = m_amr->getDomains()[amrLevel];
-    }
+    const ProblemDomain scanDomain = this->getScanDomain();
 
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      // A run that checkpoints keeps the graph, so that a restart continues on exactly this geometry.
+      if (m_checkpointInterval > 0) {
+        m_computationalGeometry->writeGraphTo(this->getGraphFileName());
+      }
 
       this->buildGeometryGrids(scanDomain);
     }
@@ -1700,13 +1757,17 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
     EBISLevel::s_distributedData = true;
 
-    if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel]);
+    const ProblemDomain scanDomain = this->getScanDomain();
 
-      this->buildGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      this->findGraphFile(a_restartFile);
+
+      this->buildGeometryGrids(scanDomain);
     }
     else {
-      m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+      m_computationalGeometry->useScanShop(scanDomain);
     }
   }
   else if (m_geometryGeneration == "chombo") {
@@ -2705,6 +2766,17 @@ Driver::writeCheckpointFile()
   // Provenance -- the git description of the executable that wrote this file.
   header.m_string[gitHashKey] = DischargeIO::gitHash();
 
+  // The graph the geometry was built from, relative to the checkpoint directory, and the identifier that tells it
+  // from a graph file another run has written over it.
+  const std::string& graphFile = m_computationalGeometry->getGraphFile();
+
+  if (m_geometryGeneration == "polyhedral" && !graphFile.empty()) {
+    const std::filesystem::path checkpointDirectory(m_outputDirectory + "/chk");
+
+    header.m_string[graphFileKey] = std::filesystem::proximate(graphFile, checkpointDirectory).string();
+    header.m_string[graphIdKey]   = m_computationalGeometry->getGraphId();
+  }
+
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
   for (const auto& r : m_amr->getRealms()) {
@@ -2892,13 +2964,13 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     MayDay::Warning(err.c_str());
   }
 
-  // Get the names of the realms that were checkpointed. This is a part of the HDF header. The header
-  // also carries the git description of the writing executable, which is not a realm -- taking it
-  // for one would send readCheckpointRealmLoads looking for a "<git description>_loads" data set
-  // that does not exist. Files written before the git description was added simply lack the key.
+  // Get the names of the realms that were checkpointed. This is a part of the HDF header, where each realm is written
+  // with its name as both key and value. The header also carries other strings, such as the git description of the
+  // writing executable and the polyhedral graph file, which are not realms -- taking one for a realm would send
+  // readCheckpointRealmLoads looking for a "<value>_loads" data set that does not exist.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
   for (const auto& s : header.m_string) {
-    if (s.first != gitHashKey) {
+    if (s.first == s.second) {
       checkpointedLoads.emplace(s.second, Vector<Vector<long int>>());
     }
   }

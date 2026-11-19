@@ -145,6 +145,29 @@ writeEBHDF5Level(HDF5Handle&                 a_handleH5,
 
 #ifdef CH_USE_HDF5
 /**
+ * @brief Write a table of integers, identical on every rank, to a dataset in the handle's current group.
+ * @details The first rank writes it, the others take part in creating it. A table without rows writes nothing, and
+ * readH5Table reads it back as empty. Collective.
+ * @param[in,out] a_handle  File.
+ * @param[in]     a_name    Name of the dataset.
+ * @param[in]     a_values  The table, row by row.
+ * @param[in]     a_columns Number of columns. The number of values must be a whole number of rows.
+ */
+void
+writeH5Table(HDF5Handle& a_handle, const std::string& a_name, const std::vector<int>& a_values, const int a_columns);
+
+/**
+ * @brief Read a table that writeH5Table wrote, on every rank.
+ * @details Aborts if the table has another number of columns. Collective.
+ * @param[in,out] a_handle  File, at the group the table was written to.
+ * @param[in]     a_name    Name of the dataset.
+ * @param[in]     a_columns Number of columns.
+ * @return The table, row by row; empty if it has no rows.
+ */
+std::vector<int>
+readH5Table(HDF5Handle& a_handle, const std::string& a_name, const int a_columns);
+
+/**
  * @brief Debugging function for quickly writing EBAMRCellData to HDF5
  * @param[in] a_data Cell-centered EB+AMR data
  * @param[in] a_file File name
