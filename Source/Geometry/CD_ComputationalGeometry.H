@@ -403,7 +403,10 @@ public:
 
   /**
    * @brief Build geometries and the MFIndexSpace.
-   * @param[in] a_finestDomain Finest domain
+   * @param[in] a_finestDomain     Finest domain the geometry is resolved on
+   * @param[in] a_finestMeshDomain Finest domain the mesh may refine to, a_finestDomain refined by a power of two. It is
+   * finer than a_finestDomain only with the polyhedral generator, whose index space cuts those levels from the finest
+   * resolved one.
    * @param[in] a_probLo       Lower-left corner
    * @param[in] a_finestDx     Finest grid resolution
    * @param[in] a_nCellMax     Patch size
@@ -415,6 +418,7 @@ public:
    */
   virtual void
   buildGeometries(const ProblemDomain& a_finestDomain,
+                  const ProblemDomain& a_finestMeshDomain,
                   const RealVect&      a_probLo,
                   const Real           a_finestDx,
                   const int            a_nCellMax,

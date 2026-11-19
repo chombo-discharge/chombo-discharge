@@ -246,6 +246,7 @@ ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 
 void
 ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
+                                       const ProblemDomain& a_finestMeshDomain,
                                        const RealVect&      a_probLo,
                                        const Real           a_finestDx,
                                        const int            a_nCellMax,
@@ -260,6 +261,11 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
   // through grown grid patches when it determines if a grid patch is irregular or not.
   m_maxGhostEB = a_maxGhostEB;
+
+  if (m_generator != Generator::PolyhedralShop && a_finestMeshDomain.domainBox() != a_finestDomain.domainBox()) {
+    MayDay::Error("ComputationalGeometry::buildGeometries - only the polyhedral generator supports mesh levels finer "
+                  "than the geometry's finest level");
+  }
 
   // Build the composite implicit functions and then the GeometryService* objects which can be passed to Chombo.
   this->buildImplicitFunctions();
@@ -281,10 +287,29 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       MayDay::Error("ComputationalGeometry::buildGeometries - the geometry's finest domain is not the finest domain");
     }
 
-    Vector<ProblemDomain> domains(numLevels);
+    // The mesh levels finer than the geometry's finest domain go first, each a refinement by two of the next, so
+    // that every refinement the mesh makes of it is a level of the index space.
+    Vector<ProblemDomain> domains;
 
-    for (int lvl = 0; lvl < numLevels; lvl++) {
-      domains[numLevels - 1 - lvl] = m_domains[lvl];
+    ProblemDomain finer = a_finestDomain;
+    Real          dx    = a_finestDx;
+
+    while (finer.domainBox().size(0) < a_finestMeshDomain.domainBox().size(0)) {
+      finer.refine(2);
+      dx /= 2.0;
+
+      domains.push_back(finer);
+    }
+
+    if (finer.domainBox() != a_finestMeshDomain.domainBox()) {
+      MayDay::Error("ComputationalGeometry::buildGeometries - the finest mesh domain is not a refinement by a power of "
+                    "two of the geometry's finest domain");
+    }
+
+    std::reverse(domains.stdVector().begin(), domains.stdVector().end());
+
+    for (int lvl = numLevels - 1; lvl >= 0; lvl--) {
+      domains.push_back(m_domains[lvl]);
     }
 
     Vector<EBISLayout::Filler> fillers(2);
@@ -306,7 +331,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       };
     }
 
-    m_multifluidIndexSpace->define(domains, a_probLo, a_finestDx, fillers);
+    m_multifluidIndexSpace->define(domains, a_probLo, dx, fillers);
   }
   else {
     // Define the multifluid index space.

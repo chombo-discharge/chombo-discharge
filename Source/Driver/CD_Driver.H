@@ -541,7 +541,7 @@ protected:
 
   /**
    * @brief Build the grids the index space is generated over, from the start domain to the finest domain.
-   * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the domain on level max_amr_depth
+   * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the domain on level max_eb_depth
    * as the stop domain, and the simulation's EB ghost count and refinement angle. Runs before the geometry is built,
    * since the generators read the grids it makes.
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
@@ -556,10 +556,18 @@ protected:
    * is at or below the geometry's start level (Driver.geometry_scan_level above zero). Level 0 is left empty, AmrMesh
    * always splits the coarsest domain itself. The levels the geometry did not reach are empty, and AmrMesh stops at
    * the first empty level.
-   * @return Boxes per AMR level, 1 + max_amr_depth entries.
+   * @return Boxes per AMR level, 1 + max_eb_depth entries.
    */
   Vector<Vector<Box>>
   getGeometryGrids() const;
+
+  /**
+   * @brief Regrid AmrMesh onto the grids the polyhedral geometry was built over, and add the simulation level next
+   * finer than max_eb_depth from the geometric tags if max_sim_depth asks for one.
+   * @details The geometric tags must be current (getGeometryTags).
+   */
+  void
+  regridOntoGeometryGrids();
 
   /**
    * @brief Setup function for fresh (non-restart) simulations.
