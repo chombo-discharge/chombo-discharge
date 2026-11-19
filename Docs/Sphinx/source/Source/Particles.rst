@@ -324,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 725-726
+   :lines: 733-734
    :language: c++
    :dedent: 2
 
@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 765-769
+   :lines: 773-777
    :language: c++
    :dedent: 2
 
