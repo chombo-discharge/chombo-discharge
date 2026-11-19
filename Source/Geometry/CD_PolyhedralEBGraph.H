@@ -27,6 +27,11 @@
 // Our includes
 #include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
+// Chombo's own namespace, which HDF5Handle lives in whether or not HDF5 is used
+#include <NamespaceHeader.H>
+class HDF5Handle;
+#include <NamespaceFooter.H>
+
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -107,6 +112,12 @@ public:
   static constexpr int s_filledGap = 2;
 
   /**
+   * @brief Records per cell in a written graph: the cell state, whether a surface is kept for the cell, and one state
+   * per face.
+   */
+  static constexpr int s_numCellRecords = 2 + 2 * SpaceDim;
+
+  /**
    * @brief Constructor. Leaves the graph undefined.
    */
   PolyhedralEBGraph();
@@ -137,6 +148,8 @@ public:
    * a cell it filled is closed here, and a cell with such a face is kept cut, as beside a cell this level fills.
    * @param[in] a_fillSplitFluid  Whether a cell whose fluid falls into more than one piece is always filled, or only
    * when its fluid is the larger part of it; see findUnresolvedCells.
+   * @param[in] a_handle          File to write what the level reads from the implicit function to, at the handle's
+   * current group, or null to write nothing. The other define reads it back. Collective when not null.
    */
   virtual void
   define(const BaseIF&            a_function,
@@ -147,7 +160,31 @@ public:
          const int                a_numGhost,
          const Vector<Box>&       a_covered,
          const PolyhedralEBGraph* a_coarser,
-         const bool               a_fillSplitFluid);
+         const bool               a_fillSplitFluid,
+         HDF5Handle* const        a_handle);
+
+  /**
+   * @brief Build the graph of one level from what the other define wrote, without the implicit function.
+   * @details Reads the cell states, with the ghost cells no tile carries, the face states and the surfaces that the
+   * other define computed from the implicit function, and does everything else as that define does, so that the graph
+   * is the one it built, bit for bit. The tiles, covered cells, domain, spacing and ghost cells must be those it was
+   * built with. Collective.
+   * @param[in] a_handle   File the other define wrote to, at the group it wrote this level to.
+   * @param[in] a_cutTiles The level's cut tiles, identical on every rank.
+   * @param[in] a_domain   Domain of the level.
+   * @param[in] a_probLo   Lower-left corner of the domain.
+   * @param[in] a_dx       Grid spacing of the level.
+   * @param[in] a_numGhost Ghost cells the cell states are kept for.
+   * @param[in] a_covered  Cells of this level the finer level will carry, coarsened onto this level.
+   */
+  virtual void
+  define(HDF5Handle&          a_handle,
+         const Vector<Box>&   a_cutTiles,
+         const ProblemDomain& a_domain,
+         const RealVect&      a_probLo,
+         const Real           a_dx,
+         const int            a_numGhost,
+         const Vector<Box>&   a_covered);
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
@@ -539,14 +576,50 @@ protected:
   defineData();
 
   /**
-   * @brief Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells some
-   * tile carries into each box's cut-cell set.
-   * @details The cells another tile carries are expected to hold that tile's state already, by exchange.
+   * @brief Classify the ghost cells no tile of this level carries from their corners.
    * @param[in] a_function Implicit function.
    * @param[in] a_carried  The marker from markCarried.
    */
   void
   defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
+
+  /**
+   * @brief Take the ghost cut cells some tile carries into each box's cut-cell set.
+   * @details The cells another tile carries are expected to hold that tile's state already, by exchange.
+   * @param[in] a_carried The marker from markCarried.
+   */
+  void
+  addCarriedGhostCutCells(const LevelData<BaseFab<signed char>>& a_carried);
+
+  /**
+   * @brief Complete the cells once the valid cells, their faces and surfaces, and the ghost cells no tile carries are
+   * known: the ghost cut cells, the anchors, the ghost surface cells, and the surfaces themselves.
+   * @param[in] a_carried The marker from markCarried.
+   * @param[in] a_kept    The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
+   */
+  void
+  finishCells(const LevelData<BaseFab<signed char>>&                  a_carried,
+              const LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept);
+
+#ifdef CH_USE_HDF5
+  /**
+   * @brief Write what defineCells read from the implicit function: the cell states with their ghost cells, the face
+   * states, and the surfaces of the valid cells. Collective.
+   * @param[in] a_handle File, at the group to write to.
+   * @param[in] a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
+   */
+  void
+  writeCells(HDF5Handle& a_handle, const LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept) const;
+
+  /**
+   * @brief Read what writeCells wrote into the cell states, face states and cut-cell and surface sets of the valid
+   * cells. Collective.
+   * @param[in]  a_handle File, at the group writeCells wrote to.
+   * @param[out] a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
+   */
+  void
+  readCells(HDF5Handle& a_handle, LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept);
+#endif
 
   /**
    * @brief Record which cells anchor fluid before any of it is spread, for fillSealedCells.
@@ -573,12 +646,14 @@ protected:
    * @param[in] a_coarserFilled The marker from markCoarserFilled, with one ghost cell, or null where there is no
    * coarser level.
    * @param[in] a_fillSplitFluid Whether a cell whose fluid falls into more than one piece is always filled.
+   * @param[in] a_handle        File to write what is read from the implicit function to, or null.
    */
   void
   defineCells(const BaseIF&                          a_function,
               const LevelData<BaseFab<signed char>>& a_carried,
               const LevelData<BaseFab<signed char>>* a_coarserFilled,
-              const bool                             a_fillSplitFluid);
+              const bool                             a_fillSplitFluid,
+              HDF5Handle* const                      a_handle);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.

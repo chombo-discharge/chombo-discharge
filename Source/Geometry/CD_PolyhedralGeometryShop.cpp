@@ -36,6 +36,9 @@
 #include <BRMeshRefine.H>
 #include <BoxIterator.H>
 #include <CH_assert.H>
+#ifdef CH_USE_HDF5
+#include <CH_HDF5.H>
+#endif
 #include <EBDataFactory.H>
 #include <EBGraphFactory.H>
 #include <EBISBox.H>
@@ -792,7 +795,14 @@ PolyhedralGeometryShop::buildGraphs()
     m_graphs[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
   }
 
-  Timer timer("PolyhedralGeometryShop::buildGraphs (" + std::string((m_phase == phase::gas) ? "gas" : "solid") + ")");
+  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+
+  Timer timer("PolyhedralGeometryShop::buildGraphs (" + phaseName + ")");
+
+  // The file the graph is written to or read from, if there is one. A level read from it is the level the function
+  // gave when it was written, and everything after the cells is built from it as it was then.
+  HDF5Handle* const handle   = m_compGeom->getGraphHandle();
+  const bool        fromFile = m_compGeom->readsGraph();
 
   // Each level with cut tiles on its own, from this phase's implicit function.
   for (int lvl = startLevel; lvl < numLevels; lvl++) {
@@ -821,15 +831,27 @@ PolyhedralGeometryShop::buildGraphs()
     const PolyhedralEBGraph* coarser = (lvl > startLevel && m_graphs[lvl - 1]->isDefined()) ? &(*m_graphs[lvl - 1])
                                                                                             : nullptr;
 
-    m_graphs[lvl]->define(*m_baseIF,
-                          tiles,
-                          m_compGeom->getDomain(lvl),
-                          m_probLo,
-                          m_compGeom->getDx(lvl),
-                          1,
-                          covered,
-                          coarser,
-                          m_fillSplitFluid);
+    if (handle != nullptr) {
+#ifdef CH_USE_HDF5
+      handle->setGroup("/" + phaseName + "_level_" + std::to_string(lvl));
+#endif
+    }
+
+    if (fromFile) {
+      m_graphs[lvl]->define(*handle, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, covered);
+    }
+    else {
+      m_graphs[lvl]->define(*m_baseIF,
+                            tiles,
+                            m_compGeom->getDomain(lvl),
+                            m_probLo,
+                            m_compGeom->getDx(lvl),
+                            1,
+                            covered,
+                            coarser,
+                            m_fillSplitFluid,
+                            handle);
+    }
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
