@@ -1224,23 +1224,22 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& 
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
-  DataOps::setValue(*m_particleScratch1[a_level], 0.0, a_icomp);
+  // The scratch has one component, and only this level is written out.
+  DataOps::setValue(*m_particleScratch1[a_level], 0.0);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-      const DataIterator&      dit = dbl.dataIterator();
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
+    const DataIterator&      dit = dbl.dataIterator();
 
-      const int nbox = dit.size();
+    const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-        (*m_particleScratch1[lvl])[din] += particles[lvl][din].size();
-      }
+      (*m_particleScratch1[a_level])[din] += particles[a_level][din].size();
     }
   }
 
@@ -1957,6 +1956,11 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
                         cellCenteredE,
                         m_amr->getNotCoveredCells(m_fluidRealm, a_phase),
                         m_amr->getMultiCutVofIterator(m_fluidRealm, a_phase));
+
+  // The centroid interpolation reads the cell across each face, which at a box edge is a ghost cell. The vector length
+  // fills the valid cells only, and the scratch holds whatever an earlier use left in its ghost cells, so they are
+  // filled from the valid cells first, as the field's own ghost cells are.
+  m_amr->interpGhost(tmp, m_fluidRealm, a_phase);
   m_amr->interpToCentroids(tmp, m_fluidRealm, m_plasmaPhase);
 
   DataOps::divideFallback(tmp, m_neutralDensity, 0.0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
@@ -3345,6 +3349,12 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& 
   // coefficients) but we need to run the computation on the fluid realm. m_fluidScratchIto is that staging
   // area; see computeMobilities(), which uses it for the same purpose at a different point in the step.
   CH_assert(m_fluidScratchIto.size() == numItoSpecies);
+
+  // The staging area is copied whole, ghost cells included, and the coefficients are computed on the valid and covered
+  // cells only, so it is cleared first rather than relying on what an earlier use left in it.
+  for (int i = 0; i < numItoSpecies; i++) {
+    DataOps::setValue(m_fluidScratchIto[i], 0.0);
+  }
 
   // Compute mesh-based diffusion coefficients on the fluid realm.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -6591,10 +6601,6 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
   // Electrostatic potential on appropriate phase. This is defined on the fluid realm
   // but we need it on the particle realm.
   const EBAMRCellData potentialPhase = m_amr->alias(m_plasmaPhase, m_fieldSolver->getPotential());
-  m_amr->copyData(m_particleScratch1, potentialPhase);
-
-  m_amr->conservativeAverage(m_particleScratch1, m_particleRealm, m_plasmaPhase);
-  m_amr->interpGhost(m_particleScratch1, m_particleRealm, m_plasmaPhase);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
@@ -6606,6 +6612,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
     const bool diffusive = solver->isDiffusive();
 
     if (Z != 0 && (mobile || diffusive)) {
+
+      // The potential is copied into the scratch for every species, since the deposit below overwrites it.
+      m_amr->copyData(m_particleScratch1, potentialPhase);
+
+      m_amr->conservativeAverage(m_particleScratch1, m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhost(m_particleScratch1, m_particleRealm, m_plasmaPhase);
 
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
