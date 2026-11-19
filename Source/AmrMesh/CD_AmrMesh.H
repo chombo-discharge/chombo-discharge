@@ -1664,18 +1664,29 @@ public:
   getFinestLevel() const;
 
   /**
-   * @brief Get maximum permitted amr depth.
-   * @return Maximum AMR depth
+   * @brief Get the finest level the geometry is resolved on, AmrMesh.max_eb_depth.
+   * @details Levels finer than this, up to max_sim_depth, have their geometry cut from the resolved levels.
+   * @return Finest level the geometry is resolved on
    */
   int
-  getMaxAmrDepth() const;
+  getMaxEbDepth() const;
 
   /**
    * @brief Get maximum permitted simulation depth.
+   * @details It may be finer than max_eb_depth, the finest level the geometry is resolved on. The geometry of the
+   * finer levels is then cut from the resolved ones.
    * @return Maximum simulation depth
    */
   int
   getMaxSimulationDepth() const;
+
+  /**
+   * @brief Get the finest level AmrMesh has a domain for.
+   * @details The larger of max_eb_depth and max_sim_depth as they were when the domains were built. No level is finer.
+   * @return Finest level with a domain
+   */
+  int
+  getMaxDomainDepth() const;
 
   /**
    * @brief Get the minimum block size (i.e. the smallest possible box / tile size).
@@ -1759,8 +1770,8 @@ public:
   getNumberOfEbGhostCells() const;
 
   /**
-   * @brief Get resolution on the finest grid level.
-   * @return Grid spacing on finest level
+   * @brief Get resolution on level max_eb_depth, the finest level the geometry is resolved on.
+   * @return Grid spacing on level max_eb_depth
    */
   Real
   getFinestDx() const;
@@ -1780,8 +1791,8 @@ public:
   getProbHi() const;
 
   /**
-   * @brief Get finest domain
-   * @return Problem domain on the finest level
+   * @brief Get the domain of level max_eb_depth, the finest level the geometry is resolved on.
+   * @return Problem domain on level max_eb_depth
    */
   ProblemDomain
   getFinestDomain() const;
@@ -2479,9 +2490,9 @@ protected:
   int m_oldFinestLevel;
 
   /**
-   * @brief Maximum amr depth
+   * @brief Finest level the geometry is resolved on, AmrMesh.max_eb_depth.
    */
-  int m_maxAmrDepth;
+  int m_maxEbDepth;
 
   /**
    * @brief Maximum allowed depth for simulation
@@ -2690,10 +2701,11 @@ protected:
   parseCoarsestLevelNumCells();
 
   /**
-   * @brief Parse the maximum permitted AMR depth
+   * @brief Parse the finest level the geometry is resolved on, AmrMesh.max_eb_depth.
+   * @details An input that still sets the former AmrMesh.max_amr_depth stops the run, naming the new option.
    */
   void
-  parseMaxAmrDepth();
+  parseMaxEbDepth();
 
   /**
    * @brief Set maximum simulation depth.
