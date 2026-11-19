@@ -380,7 +380,8 @@ public:
   /**
    * @brief The cut cells of a phase on a domain that this rank holds.
    * @details Read from the polyhedral generator's stored level when it built the phase, and from the phase's index
-   * space otherwise. Empty when the phase has none.
+   * space otherwise. Empty when the phase has none, and with the polyhedral generator when no tile was split down to
+   * the level, which then resolves no surface of its own.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The cut cells in the boxes this rank holds.
@@ -391,7 +392,8 @@ public:
   /**
    * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
    * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
-   * irregular grids otherwise. The phase must have an index space.
+   * irregular grids otherwise. With the polyhedral generator, a level no tile was split down to has an empty layout.
+   * The phase must have an index space.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The layout.
