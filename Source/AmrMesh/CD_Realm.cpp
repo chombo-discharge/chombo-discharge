@@ -162,7 +162,6 @@ Realm::preRegrid()
   m_grids.resize(0);
   m_mflg.resize(0);
   m_mgMflg.resize(0);
-  m_mgMflgCoFi.resize(0);
   m_validCells.resize(0);
 
   for (auto& mask : m_masks) {
@@ -530,7 +529,6 @@ Realm::defineMultigridLevels()
   const int numAmrLevels = static_cast<int>(mgGrids.size());
 
   m_mgMflg.resize(numAmrLevels);
-  m_mgMflgCoFi.resize(numAmrLevels);
 
   const PhaseRealm& gas = this->getRealm(phase::gas);
   const PhaseRealm& sol = this->getRealm(phase::solid);
@@ -542,32 +540,18 @@ Realm::defineMultigridLevels()
     const int numMgLevels = static_cast<int>(mgGrids[lvl].size());
 
     m_mgMflg[lvl].resize(numMgLevels);
-    m_mgMflgCoFi[lvl].resize(numMgLevels - 1);
 
     for (int img = 0; img < numMgLevels; img++) {
       Vector<EBLevelGrid> eblgs;
-      Vector<EBLevelGrid> eblgsCoFi;
 
       if (hasGas) {
         eblgs.push_back(*gas.getMultigridLevelGrids()[lvl][img]);
-
-        if (img < numMgLevels - 1) {
-          eblgsCoFi.push_back(*gas.getMultigridLevelGridsCoFi()[lvl][img]);
-        }
       }
       if (hasSol) {
         eblgs.push_back(*sol.getMultigridLevelGrids()[lvl][img]);
-
-        if (img < numMgLevels - 1) {
-          eblgsCoFi.push_back(*sol.getMultigridLevelGridsCoFi()[lvl][img]);
-        }
       }
 
       m_mgMflg[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgs));
-
-      if (img < numMgLevels - 1) {
-        m_mgMflgCoFi[lvl][img] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsCoFi));
-      }
     }
   }
 }
@@ -1435,6 +1419,27 @@ Realm::registerParticleGhostMask(const int a_width) noexcept
 }
 
 void
+Realm::defineParticleGhostMask(const int a_width) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMask" << endl;
+  }
+
+  this->registerParticleGhostMask(a_width);
+
+  if (m_grids.size() > 0 && m_particleGhostMaskCoarToFine.find(a_width) == m_particleGhostMaskCoarToFine.end()) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      if (m_domains[lvl].isPeriodic()) {
+        MayDay::Abort("Realm::defineParticleGhostMask -- particle ghost masks do not support periodic domains");
+      }
+    }
+
+    this->defineParticleGhostMasks(a_width);
+  }
+}
+
+void
 Realm::defineParticleGhostMasks() noexcept
 {
   CH_TIME("Realm::defineParticleGhostMasks");
@@ -1460,72 +1465,83 @@ Realm::defineParticleGhostMasks() noexcept
 
   // No particle ghost masks are built unless downstream code has registered at least one width.
   for (const int ghost : m_particleGhostMaskWidths) {
-    if (ghost >= m_minBlockSize) {
-      const std::string msg = "Realm::defineParticleGhostMasks -- ghost width = " + std::to_string(ghost) +
-                              " must be < min_block_size = " + std::to_string(m_minBlockSize);
-      MayDay::Abort(msg.c_str());
+    this->defineParticleGhostMasks(ghost);
+  }
+}
+
+void
+Realm::defineParticleGhostMasks(const int a_ghost) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMasks(int)");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMasks(int)" << endl;
+  }
+
+  if (a_ghost >= m_minBlockSize) {
+    const std::string msg = "Realm::defineParticleGhostMasks -- ghost width = " + std::to_string(a_ghost) +
+                            " must be < min_block_size = " + std::to_string(m_minBlockSize);
+    MayDay::Abort(msg.c_str());
+  }
+
+  AMRParticleGhostMask& same       = m_particleGhostMask[a_ghost];
+  AMRParticleGhostMask& fineToCoar = m_particleGhostMaskFineToCoar[a_ghost];
+  AMRParticleGhostMask& coarToFine = m_particleGhostMaskCoarToFine[a_ghost];
+  AMRMask&              exposure   = m_particleGhostExposure[a_ghost];
+
+  same.resize(1 + m_finestLevel);
+  fineToCoar.resize(1 + m_finestLevel);
+  coarToFine.resize(1 + m_finestLevel);
+  exposure.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl    = m_grids[lvl];
+    const ProblemDomain&     domain = m_domains[lvl];
+
+    same[lvl]       = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+    fineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+    coarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+
+    // SAME level: targets are the abutting boxes on this level (each grown by the ghost width at this resolution).
+    this->defineParticleGhostMaskSameLevel(*same[lvl], dbl, domain, a_ghost);
+
+    // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
+    // side of the coarse-fine halo; ghost width in destination (coarse) cells. CONTRACT: fineToCoar[0]
+    // is intentionally left allocated-but-undefined (level 0 has no coarser level); callers must not
+    // query it (gatherGhostsFromMasks guards with a_srcLvl >= 1).
+    if (lvl > 0) {
+      this->defineParticleGhostMaskFineToCoar(*fineToCoar[lvl],
+                                              dbl,
+                                              m_grids[lvl - 1],
+                                              m_domains[lvl - 1],
+                                              m_refinementRatios[lvl - 1],
+                                              a_ghost);
     }
 
-    AMRParticleGhostMask& same       = m_particleGhostMask[ghost];
-    AMRParticleGhostMask& fineToCoar = m_particleGhostMaskFineToCoar[ghost];
-    AMRParticleGhostMask& coarToFine = m_particleGhostMaskCoarToFine[ghost];
-    AMRMask&              exposure   = m_particleGhostExposure[ghost];
-
-    same.resize(1 + m_finestLevel);
-    fineToCoar.resize(1 + m_finestLevel);
-    coarToFine.resize(1 + m_finestLevel);
-    exposure.resize(1 + m_finestLevel);
-
-    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const DisjointBoxLayout& dbl    = m_grids[lvl];
-      const ProblemDomain&     domain = m_domains[lvl];
-
-      same[lvl]       = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
-      fineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
-      coarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
-
-      // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
-      this->defineParticleGhostMaskSameLevel(*same[lvl], dbl, domain, ghost);
-
-      // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
-      // side of the coarse-fine halo; ghost width in destination (coarse) cells. CONTRACT: fineToCoar[0]
-      // is intentionally left allocated-but-undefined (level 0 has no coarser level); callers must not
-      // query it (gatherGhostsFromMasks guards with a_srcLvl >= 1).
-      if (lvl > 0) {
-        this->defineParticleGhostMaskFineToCoar(*fineToCoar[lvl],
-                                                dbl,
-                                                m_grids[lvl - 1],
-                                                m_domains[lvl - 1],
-                                                m_refinementRatios[lvl - 1],
-                                                ghost);
-      }
-
-      // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
-      // side of the coarse-fine halo; ghost width in destination (fine) cells. CONTRACT: coarToFine
-      // [m_finestLevel] is intentionally left allocated-but-undefined (the finest level has no finer
-      // level); callers must not query it (gatherGhostsFromMasks guards with a_srcLvl < m_finestLevel).
-      if (lvl < m_finestLevel) {
-        this->defineParticleGhostMaskCoarToFine(*coarToFine[lvl],
-                                                dbl,
-                                                m_grids[lvl + 1],
-                                                *m_validCells[lvl],
-                                                m_domains[lvl + 1],
-                                                m_refinementRatios[lvl],
-                                                ghost);
-      }
-
-      // Derived quantities, folded in here rather than recomputed by consumers every timestep: both are
-      // pure functions of the three masks just built, so this is the only place their lifetime is defined.
-      exposure[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(dbl, 1, IntVect::Zero));
-
-      this->defineParticleGhostExposure(*exposure[lvl],
-                                        dbl,
-                                        *same[lvl],
-                                        *fineToCoar[lvl],
-                                        *coarToFine[lvl],
-                                        lvl > 0,
-                                        lvl < m_finestLevel);
+    // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
+    // side of the coarse-fine halo; ghost width in destination (fine) cells. CONTRACT: coarToFine
+    // [m_finestLevel] is intentionally left allocated-but-undefined (the finest level has no finer
+    // level); callers must not query it (gatherGhostsFromMasks guards with a_srcLvl < m_finestLevel).
+    if (lvl < m_finestLevel) {
+      this->defineParticleGhostMaskCoarToFine(*coarToFine[lvl],
+                                              dbl,
+                                              m_grids[lvl + 1],
+                                              *m_validCells[lvl],
+                                              m_domains[lvl + 1],
+                                              m_refinementRatios[lvl],
+                                              a_ghost);
     }
+
+    // Derived quantities, folded in here rather than recomputed by consumers every timestep: both are
+    // pure functions of the three masks just built, so this is the only place their lifetime is defined.
+    exposure[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(dbl, 1, IntVect::Zero));
+
+    this->defineParticleGhostExposure(*exposure[lvl],
+                                      dbl,
+                                      *same[lvl],
+                                      *fineToCoar[lvl],
+                                      *coarToFine[lvl],
+                                      lvl > 0,
+                                      lvl < m_finestLevel);
   }
 }
 
@@ -1912,28 +1928,46 @@ Realm::getMultigridLevelGrids(const phase::which_phase a_phase) const
   return m_realms.at(a_phase)->getMultigridLevelGrids();
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-Realm::getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const
-{
-  return m_realms.at(a_phase)->getMultigridLevelGridsCoFi();
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 Realm::getMultigridCoarseAverage(const phase::which_phase a_phase) const
 {
   return m_realms.at(a_phase)->getMultigridCoarseAverage();
 }
 
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+Realm::getFinerVoFs(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getFinerVoFs();
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+Realm::getMultigridRestriction(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridRestriction();
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+Realm::getMultigridProlongation(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridProlongation();
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+Realm::getMultigridLevelRestriction(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelRestriction();
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+Realm::getMultigridLevelProlongation(const phase::which_phase a_phase) const
+{
+  return m_realms.at(a_phase)->getMultigridLevelProlongation();
+}
+
 const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 Realm::getMultigridMFLevelGrids() const
 {
   return m_mgMflg;
-}
-
-const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-Realm::getMultigridMFLevelGridsCoFi() const
-{
-  return m_mgMflgCoFi;
 }
 
 bool

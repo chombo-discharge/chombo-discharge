@@ -37,11 +37,14 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFLevelGrid&                               a_mflg,
                              const MFLevelGrid&                               a_mflgCoFi,
                              const MFLevelGrid&                               a_mflgCoar,
-                             const MFLevelGrid&                               a_mflgCoFiMG,
                              const MFLevelGrid&                               a_mflgCoarMG,
                              const MFMultigridInterpolator&                   a_interpolator,
                              const MFReflux&                                  a_fluxReg,
                              const MFCoarAve&                                 a_coarAve,
+                             const Vector<RefCountedPtr<EBMGRestrict>>&       a_restrictOps,
+                             const Vector<RefCountedPtr<EBMGProlong>>&        a_prolongOps,
+                             const Vector<RefCountedPtr<EBMGRestrict>>&       a_restrictOpsMG,
+                             const Vector<RefCountedPtr<EBMGProlong>>&        a_prolongOpsMG,
                              const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                              const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
                              const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
@@ -133,12 +136,25 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBLevelGrid        eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid        eblgCoFiMG = a_hasMGObjects ? a_mflgCoFiMG.getEBLevelGrid(iphase) : dummy;
     EBLevelGrid        eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBReflux>                fluxRegister = RefCountedPtr<EBReflux>(nullptr);
     RefCountedPtr<EBCoarAve>               coarsener    = RefCountedPtr<EBCoarAve>(nullptr);
+    RefCountedPtr<EBMGRestrict>            restrictOp   = RefCountedPtr<EBMGRestrict>(nullptr);
+    RefCountedPtr<EBMGProlong>             prolongOp    = RefCountedPtr<EBMGProlong>(nullptr);
+    RefCountedPtr<EBMGRestrict>            restrictOpMG = RefCountedPtr<EBMGRestrict>(nullptr);
+    RefCountedPtr<EBMGProlong>             prolongOpMG  = RefCountedPtr<EBMGProlong>(nullptr);
+
+    if (a_hasCoar) {
+      restrictOp = a_restrictOps[iphase];
+      prolongOp  = a_prolongOps[iphase];
+    }
+
+    if (a_hasMGObjects) {
+      restrictOpMG = a_restrictOpsMG[iphase];
+      prolongOpMG  = a_prolongOpsMG[iphase];
+    }
 
     if (!a_isMGOperator) {
       if (a_hasFine) {
@@ -205,12 +221,15 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        eblg,
                                                                                        eblgCoFi,
                                                                                        eblgCoar,
-                                                                                       eblgCoFiMG,
                                                                                        eblgCoarMG,
                                                                                        m_validCells,
                                                                                        interpolator,
                                                                                        fluxRegister,
                                                                                        coarsener,
+                                                                                       restrictOp,
+                                                                                       prolongOp,
+                                                                                       restrictOpMG,
+                                                                                       prolongOpMG,
                                                                                        domainBC,
                                                                                        ebBC,
                                                                                        a_probLo,

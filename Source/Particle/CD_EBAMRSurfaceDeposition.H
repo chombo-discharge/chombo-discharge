@@ -37,23 +37,23 @@ public:
   /**
    * @brief Full constructor. Calls the define function.
    * @param[in] a_ebGrids              Grids
-   * @param[in] a_ebGridsCoarsenedFine Coarsened fine grids
-   * @param[in] a_ebGridsRefinedCoar   Refined coarse grids
+   * @param[in] a_ebGridsCoarsenedFine Coarsened fine grids. Entry lvl is level lvl+1 coarsened to level lvl.
+   * @param[in] a_finerVoFs            Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids
+   * (see PhaseRealm::getFinerVoFs).
    * @param[in] a_refRat               Refinement factory between levels
    * @param[in] a_dx                   Grid resolutions.
-   * @πaram[in] a_probLo               Lower-left corner of physical domain.
+   * @param[in] a_probLo               Lower-left corner of physical domain.
    * @param[in] a_finestLevel          Finest grid level.
    * @param[in] a_radius               Deposition radius
-   * @param[in] a_probLo Description
    */
-  EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
-                         const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsCoarsenedFine,
-                         const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsRefinedCoar,
-                         const Vector<int>&                        a_refRat,
-                         const Vector<Real>&                       a_dx,
-                         const RealVect&                           a_probLo,
-                         const int                                 a_finestLevel,
-                         const int                                 a_radius) noexcept;
+  EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGrids,
+                         const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGridsCoarsenedFine,
+                         const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>& a_finerVoFs,
+                         const Vector<int>&                                                    a_refRat,
+                         const Vector<Real>&                                                   a_dx,
+                         const RealVect&                                                       a_probLo,
+                         const int                                                             a_finestLevel,
+                         const int                                                             a_radius) noexcept;
 
   /**
    * @brief Destructor
@@ -63,24 +63,24 @@ public:
   /**
    * @brief Define function. Puts objects in usable state.
    * @param[in] a_ebGrids              Grids
-   * @param[in] a_ebGridsCoarsenedFine Coarsened fine grids
-   * @param[in] a_ebGridsRefinedCoar   Refined coarse grids
+   * @param[in] a_ebGridsCoarsenedFine Coarsened fine grids. Entry lvl is level lvl+1 coarsened to level lvl.
+   * @param[in] a_finerVoFs            Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids
+   * (see PhaseRealm::getFinerVoFs).
    * @param[in] a_refRat               Refinement factory between levels
    * @param[in] a_dx                   Grid resolutions.
-   * @πaram[in] a_probLo               Lower-left corner of physical domain.
+   * @param[in] a_probLo               Lower-left corner of physical domain.
    * @param[in] a_finestLevel          Finest grid level.
    * @param[in] a_radius               Deposition radius
-   * @param[in] a_probLo Description
    */
   virtual void
-  define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
-         const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsCoarsenedFine,
-         const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsRefinedCoar,
-         const Vector<int>&                        a_refRat,
-         const Vector<Real>&                       a_dx,
-         const RealVect&                           a_probLo,
-         const int                                 a_finestLevel,
-         const int                                 a_radius) noexcept;
+  define(const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGrids,
+         const Vector<RefCountedPtr<EBLevelGrid>>&                             a_ebGridsCoarsenedFine,
+         const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>& a_finerVoFs,
+         const Vector<int>&                                                    a_refRat,
+         const Vector<Real>&                                                   a_dx,
+         const RealVect&                                                       a_probLo,
+         const int                                                             a_finestLevel,
+         const int                                                             a_radius) noexcept;
 
   /**
    * @brief Deposit the container-owned weight column of an SoA particle container onto the surface.
@@ -139,11 +139,10 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_ebGridsCoarsenedFine;
 
   /**
-   * @brief Refined grids.
-   * @note m_ebGridsCoarsenedFine[i] contains the refinement of m_ebGrids[i] and m_ebGridsCoarsenedFine[m_finestLevel-1]
-   * contains the nullpointer
+   * @brief Finer VoFs of the irregular VoFs of the coarsened fine grids.
+   * @details Entry lvl lives on m_ebGridsCoarsenedFine[lvl].
    */
-  Vector<RefCountedPtr<EBLevelGrid>> m_ebGridsRefinedCoar;
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>> m_finerVoFs;
 
   /**
    * @brief Refinement ratios between levels
@@ -162,13 +161,15 @@ protected:
 
   /**
    * @brief Stencils for interpolating coarse-grid data to the fine grid.
-   * @details This is defined on the coarse grid but reaches into the refined coarse grid.
+   * @details Entry lvl is defined on the valid cut cells of level lvl, and each stencil reads the coarse VoF on
+   * m_ebGridsCoarsenedFine[lvl-1] that the fine VoF coarsens to.
    */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>> m_coarseToFineStencils;
 
   /**
    * @brief Stencils for conservatively coarsening fine-grid data (in ghost cells) to the coarse grid.
-   * @details Defined on the fine grid but reaches into the refined coarse grid.
+   * @details Defined on the fine grid, for the cut cells of its ghost cells that no fine box holds. Each maps such a
+   * VoF to the VoF it coarsens to on the coarsened fine grid.
    */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>> m_fineToCoarseStencils;
 
@@ -179,12 +180,9 @@ protected:
   mutable EBAMRIVData m_data;
 
   /**
-   * @brief Data defined on a refinement of the coarse grid.
-   */
-  mutable EBAMRIVData m_refinedCoarData;
-
-  /**
-   * @brief Coarsening of the fine-grid data
+   * @brief Data on the coarsened fine grids.
+   * @details Scratch for both directions between levels: addInvalidCoarseDataToFineData copies the coarse data here,
+   * and addFineGhostDataToValidCoarData coarsens the fine data here.
    */
   mutable EBAMRIVData m_coarsenedFineData;
 
@@ -200,9 +198,9 @@ protected:
   Vector<Copier> m_copierLevel;
 
   /**
-   * @brief Copier for copying data from the refined coarse level to the fine level.
+   * @brief Copier for copying valid data from the coarse level to the valid cells of the coarsened fine level.
    */
-  Vector<Copier> m_copierRefinedCoarToFineNoGhosts;
+  Vector<Copier> m_copierCoarToCoarsenedFine;
 
   /**
    * @brief Copier for copying data from the coarsened fine level to the coarse level.
@@ -241,7 +239,8 @@ protected:
 
   /**
    * @brief Add the invalid coarse data (i.e., underneath the fine grid) to the fine level.
-   * @details This does conservative interpolation to the fine grid. This all takes place on our buffer storage.
+   * @details This does conservative interpolation to the fine grid. The coarse data is copied onto the coarsened fine
+   * grids, and each valid fine cut cell reads the coarse VoF it coarsens to.
    */
   virtual void
   addInvalidCoarseDataToFineData() const noexcept;

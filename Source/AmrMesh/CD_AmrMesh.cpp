@@ -3589,6 +3589,67 @@ AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width
   m_realms[a_realm]->registerParticleGhostMask(a_width);
 }
 
+void
+AmrMesh::defineParticleGhostMask(const std::string& a_realm, const int a_width)
+{
+  CH_TIME("AmrMesh::defineParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::defineParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::defineParticleGhostMask - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->defineParticleGhostMask(a_width);
+}
+
+void
+AmrMesh::registerParticleDeposition(const std::string&         a_realm,
+                                    const DepositionType       a_depositionType,
+                                    const CoarseFineDeposition a_coarseFineDeposition)
+{
+  CH_TIME("AmrMesh::registerParticleDeposition");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::registerParticleDeposition" << endl;
+  }
+
+  // the ratios between the levels a run can have; the list may be longer
+  const int numRatios = std::min(m_maxAmrDepth, static_cast<int>(m_refinementRatios.size()));
+
+  // The particle ghost masks do not wrap around periodic boundaries.
+  bool isPeriodic = false;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    isPeriodic = isPeriodic || m_domains[0].isPeriodic(dir);
+  }
+
+  for (int lvl = 0; lvl < numRatios; lvl++) {
+    const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
+                                                                                 a_coarseFineDeposition,
+                                                                                 m_refinementRatios[lvl]);
+
+    if (isPeriodic && !widths.empty()) {
+      MayDay::Abort("AmrMesh::registerParticleDeposition - Halo and Transition coarse-fine deposition use particle "
+                    "ghost masks, which do not support periodic domains. Use Interp or HaloNGP on a periodic domain");
+    }
+
+    for (const int width : widths) {
+      if (width >= m_minBlockSize) {
+        const std::string
+          str = "AmrMesh::registerParticleDeposition - this coarse-fine deposition needs particle ghost "
+                "masks of width " +
+                std::to_string(width) + " at refinement ratio " + std::to_string(m_refinementRatios[lvl]) +
+                ", which must be smaller than min_block_size = " + std::to_string(m_minBlockSize);
+        MayDay::Abort(str.c_str());
+      }
+
+      this->registerParticleGhostMask(a_realm, width);
+    }
+  }
+}
+
 const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
 {
@@ -3752,23 +3813,6 @@ AmrMesh::getMultigridLevelGrids(const std::string& a_realm, const phase::which_p
   return m_realms[a_realm]->getMultigridLevelGrids(a_phase);
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-AmrMesh::getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridLevelGridsCoFi(a_phase);
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -3786,6 +3830,93 @@ AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::whic
   return m_realms[a_realm]->getMultigridCoarseAverage(a_phase);
 }
 
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+AmrMesh::getFinerVoFs(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFinerVoFs(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFinerVoFs(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFinerVoFs(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFinerVoFs(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+AmrMesh::getMultigridRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridRestriction(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridRestriction(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+AmrMesh::getMultigridProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridProlongation(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridProlongation(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+AmrMesh::getMultigridLevelRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelRestriction(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+AmrMesh::getMultigridLevelProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelProlongation(a_phase);
+}
+
 const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
 {
@@ -3800,22 +3931,6 @@ AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
   }
 
   return m_realms[a_realm]->getMultigridMFLevelGrids();
-}
-
-const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-AmrMesh::getMultigridMFLevelGridsCoFi(const std::string& a_realm) const
-{
-  CH_TIME("AmrMesh::getMultigridMFLevelGridsCoFi(string)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridMFLevelGridsCoFi(string)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridMFLevelGridsCoFi(string) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridMFLevelGridsCoFi();
 }
 
 const EBAMRFAB&
