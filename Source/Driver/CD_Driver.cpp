@@ -366,6 +366,24 @@ Driver::getGeometryTags()
     // Things from depth specifications
     geomTags |= dielTags;
     geomTags |= condTags;
+
+    // Let the geometry restrict where, and how far, geometric tags refine.
+    if (!geomTags.isEmpty()) {
+      const RealVect probLo = m_amr->getProbLo();
+      const Real     dx     = m_amr->getDx()[lvl];
+
+      IntVectSet rejected;
+      for (IVSIterator ivsIt(geomTags); ivsIt.ok(); ++ivsIt) {
+        const IntVect  iv  = ivsIt();
+        const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+
+        if (lvl >= m_computationalGeometry->getMaxGeometricTagDepth(pos)) {
+          rejected |= iv;
+        }
+      }
+
+      geomTags -= rejected;
+    }
   }
 
   // Grow tags with specified factor.

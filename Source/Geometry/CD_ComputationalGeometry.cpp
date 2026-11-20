@@ -84,6 +84,39 @@ ComputationalGeometry::ComputationalGeometry()
   pp.query("refine_saddles", m_refineSaddles);
   pp.query("profile", m_profile);
 
+  // Boxes restricting where geometric tags may refine, and how far.
+  int numTagBoxes = 0;
+
+  pp.query("num_tag_boxes", numTagBoxes);
+
+  m_tagBoxes.resize(0);
+
+  for (int ibox = 1; ibox <= numTagBoxes; ibox++) {
+    const std::string prefix = "tag_box" + std::to_string(ibox);
+
+    Vector<Real> lo(SpaceDim);
+    Vector<Real> hi(SpaceDim);
+    int          depth = 0;
+
+    pp.getarr((prefix + "_lo").c_str(), lo, 0, SpaceDim);
+    pp.getarr((prefix + "_hi").c_str(), hi, 0, SpaceDim);
+    pp.get((prefix + "_depth").c_str(), depth);
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (hi[dir] < lo[dir]) {
+        MayDay::Error(
+          ("ComputationalGeometry::ComputationalGeometry - " + prefix + "_hi is below " + prefix + "_lo").c_str());
+      }
+    }
+
+    if (depth < 0) {
+      MayDay::Error(("ComputationalGeometry::ComputationalGeometry - " + prefix + "_depth is negative").c_str());
+    }
+
+    m_tagBoxes.emplace_back(RealBox(RealVect(D_DECL(lo[0], lo[1], lo[2])), RealVect(D_DECL(hi[0], hi[1], hi[2]))),
+                            depth);
+  }
+
   if (m_verbose) {
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
   }
@@ -104,6 +137,24 @@ ComputationalGeometry::~ComputationalGeometry()
   }
 
   this->closeGraphFile();
+}
+
+int
+ComputationalGeometry::getMaxGeometricTagDepth(const RealVect& a_pos) const
+{
+  if (m_tagBoxes.empty()) {
+    return std::numeric_limits<int>::max();
+  }
+
+  int depth = 0;
+
+  for (const auto& tagBox : m_tagBoxes) {
+    if (tagBox.first.isPointInside(a_pos)) {
+      depth = std::max(depth, tagBox.second);
+    }
+  }
+
+  return depth;
 }
 
 void
