@@ -89,6 +89,10 @@ EBGradient::define(const EBLevelGrid&                             a_eblg,
   // Second order one-sided differences reach two cells away, which must exist both in the data and in the EBISBox.
   m_stencilWidth = (m_ghostVector.min() >= 2 && m_eblg.getEBISL().getGhost() >= 2) ? 2 : 1;
 
+  // The two-level stencils refine coarse cells up to the stencil width outside the coarse box, which the copied
+  // layout must hold.
+  CH_assert(!m_hasFine || m_eblgFiCo.getGhost() >= m_refRat * m_stencilWidth);
+
   if (m_hasFine) {
     m_dxFine = m_dx / m_refRat;
   }
@@ -710,9 +714,9 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     // The fine data is supplied to computeAMRGradient through a refined-coarse holder that carries only m_ghostVector
     // ghost cells, so the two-level stencils may only reference fine cells within that reach of this patch. Restrict
     // the fine valid region accordingly. Without this, for m_refRat > m_ghostVector the stencil reaches fine cells the
-    // holder never allocates/fills, producing garbage
-    // gradients at EBCF cells abutting a box boundary. For m_refRat == m_ghostVector (e.g. refRat = 2 with the default
-    // two ghost cells) fineDataBox == grownBoxFine, so this changes nothing.
+    // holder never allocates/fills, producing garbage gradients at EBCF cells abutting a box boundary. For m_refRat ==
+    // m_ghostVector (e.g. refRat = 2 with the default two ghost cells) fineDataBox == grownBoxFine, so this changes
+    // nothing.
     const Box fineDataBox = grow(refine(cellBox, m_refRat), m_ghostVector) & grownBoxFine;
 
     // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch and
