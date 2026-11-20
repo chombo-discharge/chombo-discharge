@@ -78,7 +78,8 @@ public:
    * @param[in] a_eblgFiCo     Refined coarse grids, with geometry copied from the fine level (see
    * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach the fine cells of every coarse cell within two
    * cells of a coarse box.
-   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry (null without a fine level).
+   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a
+   * fine level and in release builds).
    * @param[in] a_hasFine      Has fine level or not
    * @param[in] a_dx           Resolution
    * @param[in] a_refRat       Refinement ratio
@@ -109,7 +110,8 @@ public:
    * @param[in] a_eblgFiCo     Refined coarse grids, with geometry copied from the fine level (see
    * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach the fine cells of every coarse cell within two
    * cells of a coarse box.
-   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry (null without a fine level).
+   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a
+   * fine level and in release builds).
    * @param[in] a_hasFine      Has fine level or not
    * @param[in] a_dx           Resolution
    * @param[in] a_refRat       Refinement ratio

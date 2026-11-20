@@ -809,7 +809,8 @@ protected:
   /**
    * @brief Cells of m_eblgFiCo, valid and ghost, that hold geometry copied from the finer level.
    * @details Entry lvl+1 lives on m_eblgFiCo[lvl+1], with its ghost cells, and is true in the cells of level lvl+1.
-   * The geometry of every other cell of m_eblgFiCo carries no meaning. Null on level 0.
+   * The geometry of every other cell of m_eblgFiCo carries no meaning. Only the consumers' assertions read it, so it is
+   * built in DEBUG builds only, and is null otherwise and on level 0.
    */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fiCoFineCells;
 
@@ -1013,13 +1014,6 @@ protected:
                    const ProblemDomain&     a_domain,
                    const int                a_graphGhost,
                    const int                a_dataGhost) const;
-
-  /**
-   * @brief TEMPORARY: compare the copied m_eblgFiCo with a filled one in the cells of the finer level.
-   * @param[in] a_lvl Coarse level.
-   */
-  void
-  checkCopiedFiCo(const int a_lvl) const;
 
   /**
    * @brief Define vof iterators
