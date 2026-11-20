@@ -2344,6 +2344,7 @@ Specification of secondary emission is done separately on dielectrics, electrode
 The internal specification for these are identical (see :ref:`Chap:ItoKMCDomainEmission` for the one addition for the domain), so all examples below use ``dielectric emission``.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+On dielectrics, surface species can also appear on either side (see :ref:`Chap:ItoKMCSurfaceSpecies`).
 Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
 An example JSON specification that enables secondary electron emission due to photons and ion impact is
 
@@ -2422,6 +2423,88 @@ A primary that leaves through a cell on an edge or corner of the domain is assig
 Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
 CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver's boundary conditions.
 Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.
+
+.. _Chap:ItoKMCSurfaceSpecies:
+
+Surface species
+_______________
+
+Charged states bound to dielectric surfaces, such as trapped electrons or adsorbed ions, can be tracked as surface species.
+They are declared in a top-level ``surface species`` array, where each entry has an ``id``, a charge number ``Z``, and an optional ``initial density`` (in :math:`\text{m}^{-2}`, zero by default).
+Species ids must be unique across the background, plasma, photon, and surface species.
+For example:
+
+.. code-block:: json
+
+   "surface species":
+   [
+      {
+         "id": "e(s)",
+	 "Z": -1
+      },
+      {
+         "id": "O2+(s)",
+	 "Z": 1,
+	 "initial density": 1E10
+      }
+   ]
+
+Each surface species is stored as an areal density on the dielectric cut cells, with its own ``SurfaceODESolver``.
+The surface charge density :math:`\sigma` remains the record of the charge on the surface: it is updated by the charge of the primaries that hit the surface and of the secondaries that leave it, exactly as without surface species, and the initial surface species densities are added to the initial :math:`\sigma`.
+The surface species are a breakdown of :math:`\sigma`, and the step report lists the charge of each surface species together with the part of the surface charge that no surface species accounts for, :math:`\sigma - \sum_s Z_s q_\text{e} n_s` integrated over the surface.
+This unassigned charge stays at round-off when every charged species that reaches a dielectric is captured by a reaction that conserves charge.
+
+Surface species may appear in ``dielectric emission`` reactions, on both sides, next to the one impinging particle or photon species.
+They are not permitted in ``electrode emission`` or ``domain emission``.
+Typical reactions are capture, neutralisation, and photodetachment:
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "e -> e(s)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "O2+ -> O2+(s)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "Y + e(s) -> e",
+	 "efficiency": 0.01
+      },
+      {
+         "reaction": "Y -> (null)",
+	 "efficiency": 0.99
+      }
+   ]
+
+The pathways are drawn exactly as for other secondary emission reactions.
+In each cut cell the surface densities are converted to whole numbers of surface particles, and a pathway that consumes surface species fires at most as many times as those are available.
+The primary is absorbed either way, so its charge goes into :math:`\sigma`; if the pathway did not fire, that charge is unassigned.
+A pathway that involves surface species only fires if all its charged products can be released, i.e. if the field pushes them away from the surface.
+A reaction with surface species that does not conserve charge is accepted with a warning.
+
+First-order reactions of surface species, such as desorption, are given in a top-level ``surface reactions`` array.
+Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or ``(null)``) on the right-hand side, and a ``rate`` in :math:`\text{s}^{-1}`:
+
+.. code-block:: json
+
+   "surface reactions":
+   [
+      {
+         "reaction": "e(s) -> e",
+	 "rate": 1E3
+      }
+   ]
+
+These reactions are sampled exactly over the time step.
+For a surface species with :math:`N` surface particles in a cut cell and reactions with rates :math:`k_1, k_2, \ldots`, the number of particles that react is drawn from a binomial distribution with :math:`N` trials and probability :math:`1 - \exp\left(-K\Delta t\right)` where :math:`K = \sum_i k_i`, and the reacting particles are distributed over the reactions by a multinomial draw with probabilities :math:`k_i/K`.
+As for the impact reactions, a reaction whose charged products the field would push back onto the surface does not fire.
+Surface reactions do not restrict the time step.
+
+When restarting from a checkpoint file that was written without surface species, the surface species densities are set to zero and a warning is issued; the surface charge is kept but is unassigned.
 
 Field emission
 --------------

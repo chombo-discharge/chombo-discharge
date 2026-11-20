@@ -348,5 +348,40 @@
 	{
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
+    ],
+    "surface species":
+    [
+	// List of charged species bound to dielectric surfaces. They are stored as areal densities (1/m^2) and break
+	// down the surface charge: charge reaches the surface through the dielectric emission reactions, and the part of
+	// the surface charge that no surface species accounts for is reported as unassigned.
+	{
+	    "id": "e(s)",		// Species ID. Must be unique across all species.
+	    "Z": -1,			// Charge number
+	    "initial density": 0.0	// Optional initial areal density (1/m^2). Defaults to zero.
+	}
+    ],
+    "dielectric emission":
+    [
+	// Reactions for particles and photons that hit a dielectric. Surface species may appear on both sides.
+	{
+	    "reaction": "e -> e(s)",	// Electrons that hit the dielectric are captured on the surface.
+	    "efficiency": 1.0
+	},
+	{
+	    "reaction": "Y + e(s) -> e",	// Photodetachment of a surface electron. Fires only if a surface electron is present.
+	    "efficiency": 1E-2
+	},
+	{
+	    "reaction": "Y -> (null)",		// Photons that do not detach an electron are absorbed.
+	    "efficiency": 0.99
+	}
+    ],
+    "surface reactions":
+    [
+	// First-order reactions of surface species, sampled exactly over the time step.
+	{
+	    "reaction": "e(s) -> e",	// Thermal desorption of surface electrons.
+	    "rate": 1E3			// Rate constant (1/s).
+	}
     ]
 }
