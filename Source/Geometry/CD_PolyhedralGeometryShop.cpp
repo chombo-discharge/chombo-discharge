@@ -1612,6 +1612,50 @@ PolyhedralGeometryShop::countTileCutCells()
 }
 
 void
+PolyhedralGeometryShop::makeCutGrids(DisjointBoxLayout&       a_cutGrids,
+                                     std::vector<int>&        a_cutSlot,
+                                     const DisjointBoxLayout& a_grids,
+                                     const int                a_level) const
+{
+  CH_TIME("PolyhedralGeometryShop::makeCutGrids");
+
+  const Vector<Box> boxes = a_grids.boxArray();
+  const Vector<int> ranks = a_grids.procIDs();
+
+  Vector<Box> cutBoxes;
+  Vector<int> cutRanks;
+
+  for (int i = 0; i < boxes.size(); i++) {
+    if (m_compGeom->classify(boxes[i], a_level, m_phase) == GeometryService::Irregular) {
+      cutBoxes.push_back(boxes[i]);
+      cutRanks.push_back(ranks[i]);
+    }
+  }
+
+  a_cutGrids.define(cutBoxes, cutRanks, a_grids.physDomain());
+
+  // Both layouts are sorted, so the cut boxes on this rank come in the same order in both.
+  const DataIterator& dit    = a_grids.dataIterator();
+  const DataIterator& ditCut = a_cutGrids.dataIterator();
+
+  a_cutSlot.assign(dit.size(), -1);
+
+  int next = 0;
+
+  for (int mybox = 0; mybox < dit.size(); mybox++) {
+    if (next < ditCut.size() && a_cutGrids[ditCut[next]] == a_grids[dit[mybox]]) {
+      a_cutSlot[mybox] = next;
+
+      next++;
+    }
+  }
+
+  if (next != ditCut.size()) {
+    MayDay::Error("PolyhedralGeometryShop::makeCutGrids - the cut boxes are not in the order of the grids");
+  }
+}
+
+void
 PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
                                      LevelData<EBData>&                    a_coarData,
                                      long long&                            a_numInexact,
@@ -1640,57 +1684,26 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
   constexpr int fineGraphGhost = 3;
   constexpr int fineDataGhost  = 2;
 
-  LevelData<EBGraph> fineGraph(a_grids[f], 1, fineGraphGhost * IntVect::Unit, fineGraphFactory);
-  LevelData<EBData>  fineData(a_grids[f], 1, fineDataGhost * IntVect::Unit, dataFactory);
+  // Only on the cut boxes. A regular or covered fine box coarsens whole from its own graph, and a copy of a cut cell
+  // into its ghost cells would store the whole box a cell at a time.
+  DisjointBoxLayout cutFine;
+  std::vector<int>  cutSlot;
 
-  // A box starts out regular, and a covered box copied into one is stored a cell at a time. One whose own cells and
-  // ghost cells are all covered starts covered instead, so that each copy into it, covered into covered, does nothing.
-  // Every cell of the ghost region, which the graph clips to the domain as its factory does, must lie in a covered box:
-  // a cell no box holds is never copied and would be read covered rather than as the regular cell it starts as, and a
-  // copy from a box with cut cells would store the graph a cell at a time with the cells it does not copy made regular.
-  const Vector<Box>   fineLayoutBoxes = a_grids[f].boxArray();
-  const DataIterator& ditOwn          = a_grids[f].dataIterator();
-  const int           nboxOwn         = ditOwn.size();
+  this->makeCutGrids(cutFine, cutSlot, a_grids[f], f);
 
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nboxOwn; mybox++) {
-    const DataIndex& din = ditOwn[mybox];
-
-    if (!(*m_ebGraphs[f])[din].isAllCovered()) {
-      continue;
-    }
-
-    const Box ghosted = grow(a_grids[f][din], fineGraphGhost) & a_domains[f];
-
-    Vector<int> hits;
-
-    a_grids[f].intersecting(ghosted, hits);
-
-    // the boxes are disjoint, so the cells they hold of the region add up
-    long long numHeld    = 0;
-    bool      allCovered = true;
-
-    for (int h = 0; h < hits.size() && allCovered; h++) {
-      numHeld += (fineLayoutBoxes[hits[h]] & ghosted).numPts();
-
-      allCovered = m_compGeom->classify(fineLayoutBoxes[hits[h]], f, m_phase) == GeometryService::Covered;
-    }
-
-    if (allCovered && numHeld == ghosted.numPts()) {
-      fineGraph[din].setToAllCovered();
-    }
-  }
+  LevelData<EBGraph> fineGraph(cutFine, 1, fineGraphGhost * IntVect::Unit, fineGraphFactory);
+  LevelData<EBData>  fineData(cutFine, 1, fineDataGhost * IntVect::Unit, dataFactory);
 
   m_ebGraphs[f]->copyTo(interv, fineGraph, interv);
 
-  const DataIterator& ditFine  = a_grids[f].dataIterator();
+  const DataIterator& ditFine  = cutFine.dataIterator();
   const int           nboxFine = ditFine.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxFine; mybox++) {
     const DataIndex& din = ditFine[mybox];
 
-    const Box region = grow(a_grids[f][din], fineDataGhost) & a_domains[f].domainBox();
+    const Box region = grow(cutFine[din], fineDataGhost) & a_domains[f].domainBox();
 
     fineData[din].defineVoFData(fineGraph[din], region);
     fineData[din].defineFaceData(fineGraph[din], region);
@@ -1713,8 +1726,11 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      box   = coarsened[din];
-    const EBGraph& graph = fineGraph[din];
+    const Box box  = coarsened[din];
+    const int slot = cutSlot[mybox];
+
+    // a box that is not cut is read from the finished fine level itself, where it is all regular or all covered
+    const EBGraph& graph = (slot >= 0) ? fineGraph[ditFine[slot]] : (*m_ebGraphs[f])[din];
 
     // A fine box all regular or all covered out to its ghost cells coarsens whole. Only the box's own cells of the
     // coarsened graph are copied on, so its ghost cells need not be told apart.
@@ -1736,9 +1752,11 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
     // nothing, and EBISBox would read any face beside a regular cell as fully open.
     EBISBox data;
 
-    data.define(fineGraph[din], fineData[din], din);
+    const DataIndex& dinFine = ditFine[slot];
 
-    const EBData& faceData = fineData[din];
+    data.define(fineGraph[dinFine], fineData[dinFine], dinFine);
+
+    const EBData& faceData = fineData[dinFine];
 
     // Which coarse cells around the box lie under the fine level: the fine boxes are blocked by two, so such a cell has
     // all of its children in them.
@@ -2034,6 +2052,11 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
     for (int mybox = 0; mybox < nboxCheck; mybox++) {
       const DataIndex& din = ditCheck[mybox];
 
+      const int slot = cutSlot[mybox];
+
+      const EBGraph& fineBoxGraph = (slot >= 0) ? fineGraph[ditFine[slot]] : (*m_ebGraphs[f])[din];
+      const EBData&  fineBoxData  = (slot >= 0) ? fineData[ditFine[slot]] : (*m_ebData[f])[din];
+
       for (BoxIterator bit(coarsened[din]); bit.ok(); ++bit) {
         const IntVect cell = bit();
 
@@ -2047,7 +2070,7 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
         for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
           RealVect moment;
 
-          const Real childVolume = volume(fineGraph[din], fineData[din], cit(), moment);
+          const Real childVolume = volume(fineBoxGraph, fineBoxData, cit(), moment);
 
           // the child's centre, a quarter of a coarse cell from the parent's
           RealVect offset;
@@ -2075,7 +2098,7 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
             Real fineAperture = 0.0;
 
             for (BoxIterator cit(layer); cit.ok(); ++cit) {
-              fineAperture += faceScale * aperture(fineGraph[din], fineData[din], cit(), dir, sit());
+              fineAperture += faceScale * aperture(fineBoxGraph, fineBoxData, cit(), dir, sit());
             }
 
             const Real coarseAperture = aperture(a_coarGraph[din], a_coarData[din], cell, dir, sit());
@@ -2142,27 +2165,34 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
   // The coarsened cells, brought onto this level's boxes and their one ghost cell.
   const bool haveFiner = a_coarsenedGraph != nullptr;
 
+  // Only on the cut boxes, the ones that read it. A copy of a cut cell into the ghost cells of a regular or covered
+  // box would store the whole box a cell at a time.
+  DisjointBoxLayout cutGrids;
+  std::vector<int>  cutSlot;
+
   LevelData<EBGraph> fromFiner;
   LevelData<EBData>  fromFinerData;
 
   if (haveFiner) {
+    this->makeCutGrids(cutGrids, cutSlot, a_grids[lvl], lvl);
+
     // the graph one cell wider than the moments, whose faces at their edge read the cells across them
-    fromFiner.define(a_grids[lvl], 1, 2 * IntVect::Unit, graphFactory);
-    fromFinerData.define(a_grids[lvl], 1, IntVect::Unit, dataFactory);
+    fromFiner.define(cutGrids, 1, 2 * IntVect::Unit, graphFactory);
+    fromFinerData.define(cutGrids, 1, IntVect::Unit, dataFactory);
 
     // A box starts out regular, and a covered box copied into one is stored a cell at a time. One whose cells out to
     // its ghost cells, clipped to the domain as the graph is, all lie in coarsened boxes of covered fine boxes starts
-    // covered instead, so that each copy into it, covered into covered, does nothing; see coarsenLevel.
+    // covered instead, so that each copy into it, covered into covered, does nothing.
     {
       const Vector<Box>   finerLayoutBoxes = a_grids[lvl + 1].boxArray();
-      const DataIterator& ditOwn           = a_grids[lvl].dataIterator();
+      const DataIterator& ditOwn           = cutGrids.dataIterator();
       const int           nboxOwn          = ditOwn.size();
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nboxOwn; mybox++) {
         const DataIndex& din = ditOwn[mybox];
 
-        const Box ghosted = grow(a_grids[lvl][din], 2) & domain;
+        const Box ghosted = grow(cutGrids[din], 2) & domain;
 
         Vector<int> hits;
 
@@ -2186,20 +2216,31 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
     a_coarsenedGraph->copyTo(interv, fromFiner, interv);
 
-    const DataIterator& ditFromFiner  = a_grids[lvl].dataIterator();
+    const DataIterator& ditFromFiner  = cutGrids.dataIterator();
     const int           nboxFromFiner = ditFromFiner.size();
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nboxFromFiner; mybox++) {
       const DataIndex& din = ditFromFiner[mybox];
 
-      const Box region = grow(a_grids[lvl][din], 1) & domain.domainBox();
+      const Box region = grow(cutGrids[din], 1) & domain.domainBox();
 
       fromFinerData[din].defineVoFData(fromFiner[din], region);
       fromFinerData[din].defineFaceData(fromFiner[din], region);
     }
 
     a_coarsenedData->copyTo(interv, fromFinerData, interv);
+  }
+
+  // the cut boxes on this rank, in the order cutSlot counts them
+  std::vector<DataIndex> cutIndex;
+
+  if (haveFiner) {
+    const DataIterator& ditCut = cutGrids.dataIterator();
+
+    for (int i = 0; i < ditCut.size(); i++) {
+      cutIndex.push_back(ditCut[i]);
+    }
   }
 
   const Vector<Box> finerBoxes = haveFiner ? a_grids[lvl + 1].boxArray() : Vector<Box>();
@@ -2314,8 +2355,12 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     };
 
     if (haveFiner) {
-      const EBGraph& finer     = fromFiner[din];
-      const EBData&  finerData = fromFinerData[din];
+      CH_assert(cutSlot[mybox] >= 0);
+
+      const DataIndex& dinCut = cutIndex[cutSlot[mybox]];
+
+      const EBGraph& finer     = fromFiner[dinCut];
+      const EBData&  finerData = fromFinerData[dinCut];
 
       // A coarsened cell becomes the nodes of its VoFs, as the coarsening made them.
       for (BoxIterator bit(region); bit.ok(); ++bit) {

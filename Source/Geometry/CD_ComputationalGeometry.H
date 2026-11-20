@@ -446,8 +446,9 @@ public:
 
   /**
    * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
-   * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
-   * irregular grids otherwise. With the polyhedral generator, a level no tile was split down to has an empty layout.
+   * @details With the polyhedral generator, the boxes of its stored layout of the level that the geometry classifies
+   * as irregular in the phase, on the ranks that hold them there, and the index space's irregular grids otherwise.
+   * With the polyhedral generator, a level no tile was split down to has an empty layout.
    * The phase must have an index space.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.

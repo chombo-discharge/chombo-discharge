@@ -712,6 +712,23 @@ public:
                const int                             a_fineLevel) const;
 
   /**
+   * @brief The boxes of a level of the geometry's grids that hold this phase's cut cells, on the ranks that own them.
+   * @details A copy of a graph with cut cells into a box that is all regular or all covered stores the box's whole
+   * graph a cell at a time, and a regular or covered box of the geometry's grids can be far larger than a cut one.
+   * Containers that only the cut boxes read are therefore defined over this layout.
+   * @param[out] a_cutGrids The cut boxes of a_grids, each on the rank that owns it in a_grids.
+   * @param[out] a_cutSlot  For each box of a_grids on this rank, in the order of its data iterator, the position of the
+   * same box in the data iterator of a_cutGrids, or -1 for a box that is not cut.
+   * @param[in]  a_grids    A level of the geometry's grids.
+   * @param[in]  a_level    The level.
+   */
+  void
+  makeCutGrids(DisjointBoxLayout&       a_cutGrids,
+               std::vector<int>&        a_cutSlot,
+               const DisjointBoxLayout& a_grids,
+               const int                a_level) const;
+
+  /**
    * @brief Build a level of the index space from its own cells and the cells coarsened from the next finer level.
    * @details A box the geometry calls regular or covered is set whole with its ghost cell, and nothing of the graph is
    * read for it. The geometry classifies its boxes grown by its EB ghost width, at least one cell, so the ghost cell
