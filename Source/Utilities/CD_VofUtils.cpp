@@ -18,6 +18,7 @@
 
 // Chombo includes
 #include <BoxIterator.H>
+#include <parstream.H>
 
 // Our includes
 #include <CD_VofUtils.H>
@@ -772,11 +773,55 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
   }
 
   // The children are the VoFs one level finer that coarsen to a single VoF, so a path joins every one of them to the
-  // first one. A graph that breaks this has no order EBISLayout::refine would agree with.
-  for (int j = 0; j < numChildren; j++) {
-    if (!listed[j]) {
-      MayDay::Error("VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected");
+  // first one. A graph that breaks this has no order EBISLayout::refine would agree with. The report names the cell
+  // and the connected pieces its children fall into.
+  if (static_cast<int>(order.size()) < numChildren) {
+    std::vector<int> piece(numChildren, -1);
+
+    int numPieces = 0;
+
+    for (int first = 0; first < numChildren; first++) {
+      if (piece[first] >= 0) {
+        continue;
+      }
+
+      std::vector<int> members(1, first);
+
+      piece[first] = numPieces;
+
+      for (std::size_t k = 0; k < members.size(); k++) {
+        for (int j = 0; j < numChildren; j++) {
+          if (piece[j] < 0 && connected(members[k], j)) {
+            piece[j] = numPieces;
+
+            members.push_back(j);
+          }
+        }
+      }
+
+      numPieces++;
     }
+
+    const IntVect coarseCell = coarsen(a_finest[0].gridIndex(), a_ratio);
+
+    pout() << "VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected" << endl;
+    pout() << "  finer domain " << a_ebislFine.getDomain().domainBox() << ", refinement ratio " << a_ratio
+           << ", coarse cell " << coarseCell << ", " << numChildren << " children in " << numPieces << " pieces"
+           << endl;
+
+    for (int c = 0; c < numChildren; c++) {
+      Real volume = 0.0;
+
+      for (int i = 0; i < groups[c].size(); i++) {
+        volume += ebisBoxFine.volFrac(groups[c][i]);
+      }
+
+      pout() << "  child " << c << ": cell " << children[c].gridIndex() << ", VoF " << children[c].cellIndex()
+             << ", piece " << piece[c] << ", " << groups[c].size() << " finest VoFs with volume fractions summing to "
+             << volume << endl;
+    }
+
+    MayDay::Error("VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected");
   }
 
   Vector<Vector<VolIndex>> ordered;
