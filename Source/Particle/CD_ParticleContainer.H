@@ -736,7 +736,7 @@ public:
   /**
    * @brief Copy the valid particles whose cell the mask marks true into the mask holder, one level.
    * @details Clears the level's mask leaves, then COPIES (keeps in the valid holder) every valid
-   * particle whose cell is true in the mask. Ids/rank are preserved.
+   * particle whose cell is true in the mask. Ghost particles are never copied. Ids/rank are preserved.
    * @param[in] a_level Level to fill.
    * @param[in] a_mask  Per-cell boolean mask over that level's valid grids (box == grid box).
    */

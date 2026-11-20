@@ -74,6 +74,10 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
   m_amr
     ->depositWeight(a_phi, m_realm, m_phase, a_particles, a_deposition, a_coarseFineDeposition, m_irregularDeposition);
 
+  // With mirror deposition, a cut cell holds kappa*n after the real particles alone, and the density n only once
+  // mirrorPass has added the images. The coarse-fine steps of both deposits treat cut cells as holding the density
+  // and do not rescale them by kappa. That is right for the sum, because the coarse-fine steps are linear, and only
+  // for the sum.
   if (m_irregularDeposition == IrregularDeposition::Mirror) {
     this->mirrorPass(a_phi,
                      a_particles,
