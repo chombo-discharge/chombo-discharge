@@ -73,8 +73,8 @@ public:
    * for 1.
    * @param[in] a_eblgRefined        Refined grids, with geometry copied from the fine level (see
    * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach a_refToFine * a_redistRadius cells.
-   * @param[in] a_fineCellsRefined    Cells of a_eblgRefined that hold the fine level's geometry (null without a fine
-   * level).
+   * @param[in] a_fineCellsRefined    Cells of a_eblgRefined that hold the fine level's geometry, for assertions
+   * (null without a fine level and in release builds).
    */
   EBMassRedistribution(const EBLevelGrid&                             a_eblgCoar,
                        const EBLevelGrid&                             a_eblgCoarsened,
@@ -100,8 +100,8 @@ public:
    * @param[in] a_eblg                 Grids on this level
    * @param[in] a_eblgRefined          Refined grids, with geometry copied from the fine level (see
    * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach a_refToFine * a_redistRadius cells.
-   * @param[in] a_fineCellsRefined     Cells of a_eblgRefined that hold the fine level's geometry (null without a fine
-   * level).
+   * @param[in] a_fineCellsRefined     Cells of a_eblgRefined that hold the fine level's geometry, for assertions
+   * (null without a fine level and in release builds).
    * @param[in] a_eblgFine             Fine grid
    * @param[in] a_refToCoar            Refinement factor between this level and the coarse level
    * @param[in] a_refToFine            Refinement factor between this level and the fine level
