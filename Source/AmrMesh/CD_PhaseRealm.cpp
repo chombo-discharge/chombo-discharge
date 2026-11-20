@@ -545,6 +545,9 @@ PhaseRealm::defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgG
   m_mgLevelGrids.resize(0);
   m_mgLevelGridsCoFi.resize(0);
   m_mgCoarAve.resize(0);
+  m_mgFinerVoFs.resize(0);
+  m_mgLevelRestrict.resize(0);
+  m_mgLevelProlong.resize(0);
 
   if (m_isDefined && numAmrLevels > 0) {
     CH_assert(numAmrLevels == 1 + m_finestLevel);

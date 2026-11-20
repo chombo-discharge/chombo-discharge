@@ -267,9 +267,10 @@ public:
 
   /**
    * @brief Get the finer VoFs of a coarse VoF from stored finer-VoF lists.
-   * @details A regular coarse cell gives every cell of refine(coarse cell, a_refRat) with VoF index 0, in BoxIterator
-   * order. A covered coarse cell gives no VoFs. An irregular coarse cell gives its stored list, which must exist. The
-   * result equals EBISLayout::refine on a graph that Chombo coarsened.
+   * @details A regular coarse cell gives every cell of refine(coarse cell, a_refRat) with VoF index 0, in the order
+   * EBISLayout::refine gives them: refined by two at a time, each cell's children in BoxIterator order. A covered
+   * coarse cell gives no VoFs. An irregular coarse cell gives its stored list, which must exist. The result equals
+   * EBISLayout::refine on a graph that Chombo coarsened.
    * @param[in] a_coarVoF     Coarse VoF.
    * @param[in] a_ebisBoxCoar Coarse EBISBox holding a_coarVoF.
    * @param[in] a_finerVoFs   Stored finer-VoF lists of the irregular coarse cells, on the same grid index.

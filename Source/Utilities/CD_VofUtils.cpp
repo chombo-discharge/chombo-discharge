@@ -448,8 +448,23 @@ VofUtils::getStoredFinerVoFs(const VolIndex&                    a_coarVoF,
   Vector<VolIndex> finer;
 
   if (a_ebisBoxCoar.isRegular(coarCell)) {
-    for (BoxIterator bit(refine(Box(coarCell, coarCell), a_refRat)); bit.ok(); ++bit) {
-      finer.push_back(VolIndex(bit(), 0));
+    // In EBISLayout::refine's order: refined by two at a time, each cell's children in BoxIterator order.
+    Vector<IntVect> cells(1, coarCell);
+
+    for (int ratio = 2; ratio <= a_refRat; ratio *= 2) {
+      Vector<IntVect> children;
+
+      for (int i = 0; i < cells.size(); i++) {
+        for (BoxIterator bit(refine(Box(cells[i], cells[i]), 2)); bit.ok(); ++bit) {
+          children.push_back(bit());
+        }
+      }
+
+      cells = children;
+    }
+
+    for (int i = 0; i < cells.size(); i++) {
+      finer.push_back(VolIndex(cells[i], 0));
     }
   }
   else if (!(a_ebisBoxCoar.isCovered(coarCell))) {
@@ -536,11 +551,9 @@ VofUtils::getStoredFinerFaces(const FaceIndex&                   a_coarFace,
     }
   }
   else {
-    if (a_refRat > 2) {
-      return VofUtils::getFinerFaces(a_coarFace, a_ebislFine, a_din, a_refRat);
-    }
-
-    // Face on the boundary of the coarse region, as in EBGraph::refine.
+    // Face on the boundary of the coarse region, as in EBGraph::refine, which EBISLayout::refine applies at every
+    // factor of two. The cell outside the region has no finer cells to pair with, so the faces are those of the inside
+    // cell's finer VoFs that open onto cells outside the refined region.
     const Box refinedRegionCoar = refine(regionCoar, a_refRat);
 
     if (regionCoar.contains(ivLoCoar)) {
@@ -759,12 +772,10 @@ VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
   }
 
   // The children are the VoFs one level finer that coarsen to a single VoF, so a path joins every one of them to the
-  // first one. Should one be left over in a graph that breaks this, it is listed last, in gathering order.
+  // first one. A graph that breaks this has no order EBISLayout::refine would agree with.
   for (int j = 0; j < numChildren; j++) {
-    CH_assert(listed[j]);
-
     if (!listed[j]) {
-      order.push_back(j);
+      MayDay::Error("VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected");
     }
   }
 
