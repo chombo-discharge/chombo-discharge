@@ -341,9 +341,8 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
-   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what
-   * a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below
-   * it.
+   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, on which the
+   * level's graph is built. On the start level, its boxes irregular in either phase; empty below it.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The cut tiles.
    */
@@ -847,7 +846,8 @@ protected:
    * @brief Whether a box holds a cell cut in exactly one phase, which Driver::getGeometryTags tags as conductor.
    * @details A cell is cut in a phase when that phase's surface crosses it, decided as the polyhedral shop decides it,
    * from the implicit function at the cell's nodes and edges. Without one of the two implicit functions every cut cell
-   * is cut in one phase only, and the answer is true.
+   * is cut in one phase only, and the answer is true. The tags are taken from the finished graph, after the fill rule,
+   * so a cell the fill rule covers in one phase is cut in one phase for the tags but in both here.
    * @param[in] a_box   The box, on a_level.
    * @param[in] a_level Level of the box.
    * @return True if some cell of the box is cut in one phase and not the other.
