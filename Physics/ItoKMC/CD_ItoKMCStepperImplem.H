@@ -5387,10 +5387,18 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
     primaryPhotons.push_back(&intersectedPhotons);
   }
 
+  // Surface species densities are held on the fluid realm. Copy them to the particle realm where the kernel runs.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    m_amr->copyData(m_particleSurfaceScratch, m_surfaceSolvers[i]->getPhi(), Interval(i, i), Interval(0, 0));
+  }
+
   // Call the other version.
   this->fillSecondaryEmissionEB(m_secondaryParticles,
                                 m_cdrFluxes,
                                 m_secondaryPhotons,
+                                m_particleSurfaceScratch,
                                 primaryParticles,
                                 m_cdrFluxesExtrap,
                                 primaryPhotons,
@@ -5404,6 +5412,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
   Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
   Vector<EBAMRIVData>&                                   a_cdrFluxes,
   Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+  EBAMRIVData&                                           a_surfaceSpecies,
   Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
   Vector<EBAMRIVData>&                                   a_cdrFluxesExtrap,
   Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
@@ -5415,13 +5424,16 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
     pout() << m_name + "::fillSecondaryEmissionEB(full)" << endl;
   }
 
-  const int numItoSpecies    = m_physics->getNumItoSpecies();
-  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+  const int numItoSpecies     = m_physics->getNumItoSpecies();
+  const int numCdrSpecies     = m_physics->getNumCdrSpecies();
+  const int numPhotonSpecies  = m_physics->getNumPhotonSpecies();
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
 
   CH_assert(a_secondaryParticles.size() == numItoSpecies);
   CH_assert(a_cdrFluxes.size() == numCdrSpecies);
   CH_assert(a_secondaryPhotons.size() == numPhotonSpecies);
+  CH_assert(numSurfaceSpecies == 0 || a_surfaceSpecies.getRealm() == m_particleRealm);
+  CH_assert(numSurfaceSpecies == 0 || a_surfaceSpecies[0]->nComp() == numSurfaceSpecies);
   CH_assert(a_primaryParticles.size() == numItoSpecies);
   CH_assert(a_cdrFluxesExtrap.size() == numCdrSpecies);
   CH_assert(a_primaryPhotons.size() == numPhotonSpecies);
@@ -5500,6 +5512,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       Vector<BaseIVFAB<Real>*> cdrFluxesFAB;
       Vector<BaseIVFAB<Real>*> cdrFluxesExtrapFAB;
 
+      // Surface species densities in, and their change out. Not defined when there are no surface species.
+      BaseIVFAB<Real>* surfaceSpeciesFAB = (numSurfaceSpecies > 0) ? &((*a_surfaceSpecies[lvl])[din]) : nullptr;
+
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int idx = it.index();
 
@@ -5559,6 +5574,13 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
             primaryPhotons[i] = std::move(primaryPhotonCells[i][cellIdx]);
           }
 
+          Vector<Real> surfaceDensities(numSurfaceSpecies, 0.0);
+          Vector<Real> surfaceDensityChange(numSurfaceSpecies, 0.0);
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            surfaceDensities[i] = (*surfaceSpeciesFAB)(vof, i);
+          }
+
           // Figure out which material we are dealing with. The material is the one whose implicit function is
           // closest to zero at the boundary centroid, and the classification is made independently for each cell.
           int  matIndex     = -1;
@@ -5585,22 +5607,24 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
           }
 
           // Call the physics framework.
-          m_physics->secondaryEmissionEB(secondaryParticles,
-                                         cdrFluxes,
-                                         secondaryPhotons,
-                                         primaryParticles,
-                                         cdrFluxesExtrap,
-                                         primaryPhotons,
-                                         E,
-                                         cellCenter,
-                                         cellCentroid,
-                                         bndryCentroid,
-                                         bndryNormal,
-                                         bndryArea,
-                                         dx,
-                                         a_dt,
-                                         isDielectric,
-                                         matIndex);
+          m_physics->surfaceEmissionEB(secondaryParticles,
+                                       cdrFluxes,
+                                       secondaryPhotons,
+                                       surfaceDensityChange,
+                                       primaryParticles,
+                                       cdrFluxesExtrap,
+                                       primaryPhotons,
+                                       surfaceDensities,
+                                       E,
+                                       cellCenter,
+                                       cellCentroid,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       bndryArea,
+                                       dx,
+                                       a_dt,
+                                       isDielectric,
+                                       matIndex);
 
           // Fill output data holders (move the per-cell secondary results into the per-cell scratch).
           for (int i = 0; i < numItoSpecies; i++) {
@@ -5613,6 +5637,16 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
 
           for (int i = 0; i < numPhotonSpecies; i++) {
             secondaryPhotonCells[i][cellIdx] = std::move(secondaryPhotons[i]);
+          }
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            (*surfaceSpeciesFAB)(vof, i) = surfaceDensityChange[i];
+          }
+        }
+        else {
+          // Cells covered by a finer level are not advanced here; their densities follow from coarsening.
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            (*surfaceSpeciesFAB)(vof, i) = 0.0;
           }
         }
       };
@@ -5686,6 +5720,22 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
   m_sigmaSolver->resetElectrodes(0.0);
   m_amr->arithmeticAverage(surfaceChargeDensity, m_fluidRealm, m_plasmaPhase);
+
+  // Add the change in the surface species densities, which fillSecondaryEmissionEB() left in the particle-realm
+  // scratch, and coarsen them the same way as the surface charge.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    EBAMRIVData& density = m_surfaceSolvers[i]->getPhi();
+
+    m_amr->copyData(m_fluidScratchEB, m_particleSurfaceScratch, Interval(0, 0), Interval(i, i));
+
+    DataOps::incr(density, m_fluidScratchEB, 1.0, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
+
+    m_amr->conservativeAverage(density, m_fluidRealm, m_plasmaPhase);
+    m_surfaceSolvers[i]->resetElectrodes(0.0);
+    m_amr->arithmeticAverage(density, m_fluidRealm, m_plasmaPhase);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>

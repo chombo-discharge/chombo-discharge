@@ -1735,19 +1735,24 @@ protected:
   /**
    * @brief Compute secondary emission at the EB.
    * @details This routine fills the input data holders using physics framework. It does NOT fill solvers.
-   * @param[out] a_secondaryParticles   Secondary emitted (gained) particles at the EB
-   * @param[out] a_cdrFluxes            CDR fluxes for BCs.
-   * @param[out] a_secondaryPhotons     Secondary emitted photons at the EB
-   * @param[in]  a_primaryParticles     Primary (lost) particles at the EB
-   * @param[in]  a_cdrFluxesExtrap      Extrapolated CDR fluxes at the EB
-   * @param[in]  a_primaryPhotons       Primary (lost) photons at the EB
-   * @param[in]  a_electricField        Electric field at the EB.
-   * @param[in]  a_dt                   Time step.
+   * @param[out]    a_secondaryParticles Secondary emitted (gained) particles at the EB
+   * @param[out]    a_cdrFluxes          CDR fluxes for BCs.
+   * @param[out]    a_secondaryPhotons   Secondary emitted photons at the EB
+   * @param[in,out] a_surfaceSpecies     Surface species on the particle realm, one component per species. On input
+   *                                     the areal densities, on output their change over the time step. Not read
+   *                                     or written when there are no surface species. Cells covered by a finer
+   *                                     level are given zero change.
+   * @param[in]     a_primaryParticles   Primary (lost) particles at the EB
+   * @param[in]     a_cdrFluxesExtrap    Extrapolated CDR fluxes at the EB
+   * @param[in]     a_primaryPhotons     Primary (lost) photons at the EB
+   * @param[in]     a_electricField      Electric field at the EB.
+   * @param[in]     a_dt                 Time step.
    */
   virtual void
   fillSecondaryEmissionEB(Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
                           Vector<EBAMRIVData>&                                   a_cdrFluxes,
                           Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+                          EBAMRIVData&                                           a_surfaceSpecies,
                           Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
                           Vector<EBAMRIVData>&                                   a_cdrFluxesExtrap,
                           Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
@@ -1756,8 +1761,9 @@ protected:
 
   /**
    * @brief Resolve secondary emission at the EB.
+   * @details Calls the other version, which updates the surface charge, and then adds the change in the surface
+   * species densities computed by fillSecondaryEmissionEB() to the surface species solvers.
    * @param[in] a_dt Time step.
-   * @note Calls the other version.
    */
   virtual void
   resolveSecondaryEmissionEB(const Real a_dt) noexcept;
