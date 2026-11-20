@@ -352,6 +352,12 @@ ItoKMCPhysics::getRtSpecies() const
   return m_rtSpecies;
 }
 
+inline const Vector<RefCountedPtr<CdrSpecies>>&
+ItoKMCPhysics::getSurfaceSpecies() const
+{
+  return m_surfaceSpecies;
+}
+
 inline const Vector<DiffusionFunction>&
 ItoKMCPhysics::getItoDiffusionFunctions() const noexcept
 {
@@ -380,6 +386,12 @@ inline int
 ItoKMCPhysics::getNumPhotonSpecies() const
 {
   return m_rtSpecies.size();
+}
+
+inline int
+ItoKMCPhysics::getNumSurfaceSpecies() const
+{
+  return m_surfaceSpecies.size();
 }
 
 inline Real

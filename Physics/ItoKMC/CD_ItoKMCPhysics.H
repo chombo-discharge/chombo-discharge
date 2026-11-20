@@ -158,6 +158,17 @@ public:
   getRtSpecies() const;
 
   /**
+   * @brief Get all surface species.
+   * @details Surface species are charged states bound to dielectric surfaces, stored as areal densities
+   * (1/m^2). Only the name, the charge number and initialData() of each species are used; initialData() gives the
+   * initial areal density. The stepper keeps the surface charge density as its own record and reports the
+   * surface species as a breakdown of it.
+   * @return m_surfaceSpecies
+   */
+  const Vector<RefCountedPtr<CdrSpecies>>&
+  getSurfaceSpecies() const;
+
+  /**
    * @brief Get diffusion functions for all Ito species.
    * @return Vector of per-species diffusion displacement functors.
    */
@@ -223,6 +234,13 @@ public:
    */
   inline int
   getNumPhotonSpecies() const;
+
+  /**
+   * @brief Return the number of surface species.
+   * @return Number of entries in m_surfaceSpecies.
+   */
+  inline int
+  getNumSurfaceSpecies() const;
 
   /**
    * @brief Return true if the physics model requires species density gradients.
@@ -359,6 +377,58 @@ public:
                       const Real                              a_dt,
                       const bool                              a_isDielectric,
                       const int                               a_matIndex) const noexcept = 0;
+
+  /**
+   * @brief Resolve secondary emission and surface-species kinetics at the EB.
+   * @details This is the EB emission entry point called by the stepper. It takes the same arguments as
+   * secondaryEmissionEB() plus the areal densities of the surface species in the cut cell, and returns the change
+   * in those densities over the time step. The default implementation sets the change to zero and calls
+   * secondaryEmissionEB(), so a model without surface species only needs to implement that function.
+   *
+   * The stepper keeps the surface charge density as an independent record that is updated by the charge of the
+   * primaries and secondaries, exactly as without surface species. Changes in the surface densities do not
+   * update the surface charge; they only change how it is broken down. An implementation therefore conserves the
+   * breakdown when every change in a surface density is matched by an absorbed primary or an emitted secondary
+   * of the same charge.
+   * @param[out] a_secondaryParticles     Outgoing plasma species particles.
+   * @param[out] a_cdrFluxes              CDR fluxes for CDR species.
+   * @param[out] a_secondaryPhotons       Photons injected through the EB.
+   * @param[out] a_surfaceDensityChange   Change in the areal density (1/m^2) of each surface species over the
+   *                                      time step. Sized to the number of surface species by the caller.
+   * @param[in]  a_primaryParticles       Particles that left the computational domain through the EB.
+   * @param[in]  a_cdrFluxesExtrap        Extrapolated CDR fluxes.
+   * @param[in]  a_primaryPhotons         Photons that left the computational domain through the EB.
+   * @param[in]  a_surfaceDensities       Areal density (1/m^2) of each surface species in this cut cell.
+   * @param[in]  a_E                      Electric field.
+   * @param[in]  a_physicalCellCenter     Physical position of the cell center.
+   * @param[in]  a_cellCentroid           Cell centroid relative to the cell center (not multiplied by dx).
+   * @param[in]  a_bndryCentroid          EB face centroid relative to the cell center (not multiplied by dx).
+   * @param[in]  a_bndryNormal            Cut-cell normal vector.
+   * @param[in]  a_bndryArea              Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).
+   * @param[in]  a_dx                     Grid resolution on this level.
+   * @param[in]  a_dt                     Time step.
+   * @param[in]  a_isDielectric           Dielectric or electrode.
+   * @param[in]  a_matIndex               Material index (taken from computationalGeometry).
+   */
+  virtual void
+  surfaceEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                    Vector<Real>&                           a_cdrFluxes,
+                    Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                    Vector<Real>&                           a_surfaceDensityChange,
+                    const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                    const Vector<Real>&                     a_cdrFluxesExtrap,
+                    const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                    const Vector<Real>&                     a_surfaceDensities,
+                    const RealVect&                         a_E,
+                    const RealVect&                         a_physicalCellCenter,
+                    const RealVect&                         a_cellCentroid,
+                    const RealVect&                         a_bndryCentroid,
+                    const RealVect&                         a_bndryNormal,
+                    const Real                              a_bndryArea,
+                    const Real                              a_dx,
+                    const Real                              a_dt,
+                    const bool                              a_isDielectric,
+                    const int                               a_matIndex) const noexcept;
 
   /**
    * @brief Resolve secondary emission on one face of the computational domain.
@@ -704,6 +774,12 @@ protected:
    * @brief List of solver-tracked photon species.
    */
   Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
+
+  /**
+   * @brief List of surface species, bound to dielectric surfaces.
+   * @details Only the name, charge number and initial data are used. Empty unless the subclass fills it.
+   */
+  Vector<RefCountedPtr<CdrSpecies>> m_surfaceSpecies;
 
   /**
    * @brief An internal integer describing which species is the "ionizing" species.
