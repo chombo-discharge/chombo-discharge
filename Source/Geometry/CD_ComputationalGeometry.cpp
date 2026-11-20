@@ -1598,7 +1598,24 @@ ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const Proble
       return DisjointBoxLayout(Vector<Box>(), Vector<int>(), a_domain);
     }
 
-    return m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
+    // The boxes of the stored level that hold cut cells, on the ranks that hold them there. The regular and covered
+    // boxes are left out: they hold no cut cell, and can be far larger than a cut one.
+    const DisjointBoxLayout& grids = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
+
+    const Vector<Box> boxes = grids.boxArray();
+    const Vector<int> ranks = grids.procIDs();
+
+    Vector<Box> cutBoxes;
+    Vector<int> cutRanks;
+
+    for (int i = 0; i < boxes.size(); i++) {
+      if (this->classify(boxes[i], geometryLevel, a_phase) == GeometryService::Irregular) {
+        cutBoxes.push_back(boxes[i]);
+        cutRanks.push_back(ranks[i]);
+      }
+    }
+
+    return DisjointBoxLayout(cutBoxes, cutRanks, a_domain);
   }
 
   return ebis->getIrregGrids(a_domain);
