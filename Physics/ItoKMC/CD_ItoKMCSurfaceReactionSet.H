@@ -107,6 +107,43 @@ public:
   getSurfaceSpeciesReactions() const noexcept;
 
   /**
+   * @brief Add a first-order reaction that injects solid species from a surface species into a dielectric.
+   * @details The reaction's reactant is the index of the decaying surface species, its products are indices into the
+   * solid species list (not the plasma species list), its surface products are surface species, and its efficiency is
+   * the rate constant (1/s). Reactions with the same surface species compete.
+   * @param[in] a_reaction Reaction to add.
+   */
+  inline void
+  addSolidInjectionReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept;
+
+  /**
+   * @brief Get the reactions that inject solid species from the surface species.
+   * @details Indexed by surface species, like getSurfaceSpeciesReactions(). The products of these reactions are
+   * indices into the solid species list.
+   * @return Solid injection reactions, grouped by the decaying surface species.
+   */
+  inline const std::vector<ItoKMCSurfaceReactions>&
+  getSolidInjectionReactions() const noexcept;
+
+  /**
+   * @brief Add the reaction that turns a solid species arriving at a dielectric surface into surface species.
+   * @details The reaction's reactant is the index of the solid species and its surface products are surface species.
+   * The rate is set by the drift of the solid species to the surface, so the efficiency is not used.
+   * @param[in] a_reaction Reaction to add.
+   */
+  inline void
+  addSolidArrivalReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept;
+
+  /**
+   * @brief Get the reactions of the solid species that arrive at a dielectric surface.
+   * @details Indexed by solid species. A solid species without an arrival reaction has an entry with no pathways,
+   * and solid species beyond the last one with a reaction have no entry.
+   * @return Solid arrival reactions, grouped by the arriving solid species.
+   */
+  inline const std::vector<ItoKMCSurfaceReactions>&
+  getSolidArrivalReactions() const noexcept;
+
+  /**
    * @brief Get the dielectric surface reactions where the outgoing species is a plasma species.
    * @return Map from species index to reaction list for dielectric plasma reactions.
    */
@@ -189,6 +226,16 @@ protected:
    * @brief First-order surface species reactions, indexed by the decaying surface species.
    */
   std::vector<ItoKMCSurfaceReactions> m_surfaceSpeciesReactions;
+
+  /**
+   * @brief Reactions that inject solid species from the surface, indexed by the decaying surface species.
+   */
+  std::vector<ItoKMCSurfaceReactions> m_solidInjectionReactions;
+
+  /**
+   * @brief Reactions of solid species arriving at the surface, indexed by the arriving solid species.
+   */
+  std::vector<ItoKMCSurfaceReactions> m_solidArrivalReactions;
 
   /**
    * @brief Index of a domain face in m_domainPlasmaReactions and m_domainPhotonReactions.

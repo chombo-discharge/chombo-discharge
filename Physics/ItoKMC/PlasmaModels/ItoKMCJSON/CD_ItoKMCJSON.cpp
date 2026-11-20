@@ -62,8 +62,9 @@ ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnk
   // Initialize the photon species
   this->initializePhotonSpecies();
 
-  // Initialize the surface species
+  // Initialize the surface and solid species
   this->initializeSurfaceSpecies();
+  this->initializeSolidSpecies();
 
   // Initialize reactions
   this->initializeTownsendCoefficient("alpha");
@@ -354,6 +355,23 @@ ItoKMCJSON::getSurfaceSpeciesIndex(const std::string& a_name) const noexcept
   return -1;
 }
 
+int
+ItoKMCJSON::getSolidSpeciesIndex(const std::string& a_name) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getSolidSpeciesIndex");
+  if (m_verbose) {
+    pout() << m_className + "::getSolidSpeciesIndex" << endl;
+  }
+
+  for (int i = 0; i < m_solidSpecies.size(); i++) {
+    if (m_solidSpecies[i]->getName() == a_name) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 void
 ItoKMCJSON::checkSurfaceChargeConservation(const int          a_chargeIn,
                                            const int          a_chargeOut,
@@ -486,7 +504,8 @@ ItoKMCJSON::parseJSON()
                      "field emission",
                      "particle placement",
                      "surface species",
-                     "surface reactions"},
+                     "surface reactions",
+                     "solid species"},
                     "(top level)");
 
     if (m_verbose) {
@@ -2733,6 +2752,174 @@ ItoKMCJSON::initializeSurfaceSpecies()
 }
 
 void
+ItoKMCJSON::initializeSolidSpecies()
+{
+  CH_TIME("ItoKMCJSON::initializeSolidSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::initializeSolidSpecies" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeSolidSpecies";
+
+  if (!(m_json.contains("solid species"))) {
+    return;
+  }
+
+  for (const auto& species : m_json["solid species"]) {
+    if (!(species.contains("id"))) {
+      this->throwParserError(baseError + " but one of the species does not contain the 'id' field");
+    }
+
+    const std::string speciesID   = this->trim(species["id"].get<std::string>());
+    const std::string baseErrorID = std::string{baseError}.append(" for species '").append(speciesID).append("'");
+
+    this->checkKeys(species,
+                    {"id", "Z", "mobility", "diffusion", "initial density", "domain bc"},
+                    "solid species/" + speciesID);
+
+    if (speciesID.empty()) {
+      this->throwParserError(baseError + " but one of the species has an empty 'id'");
+    }
+    if (this->containsWildcard(speciesID)) {
+      this->throwParserError(baseErrorID + " but the name should not contain wildcard @");
+    }
+    if (this->isBracketed(speciesID)) {
+      this->throwParserError(baseErrorID + " but the name should not be enclosed in brackets");
+    }
+    if (speciesID.find(' ') != std::string::npos) {
+      this->throwParserError(baseErrorID + " but the name should not contain white space");
+    }
+    if (m_allSpecies.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but the species was already defined elsewhere");
+    }
+    if (!(species.contains("Z"))) {
+      this->throwParserError(baseErrorID + " but did not find 'Z' (must be integer)");
+    }
+    if (!(species.contains("mobility"))) {
+      this->throwParserError(baseErrorID + " but did not find the required field 'mobility'");
+    }
+    if (!(species.contains("diffusion"))) {
+      this->throwParserError(baseErrorID + " but did not find the required field 'diffusion'");
+    }
+
+    const int  Z  = species["Z"].get<int>();
+    const Real mu = this->parseSolidCoefficient(species["mobility"], "solid species/" + speciesID + "/mobility");
+    const Real D  = this->parseSolidCoefficient(species["diffusion"], "solid species/" + speciesID + "/diffusion");
+
+    // A species with a zero coefficient does not take that kind of transport.
+    const bool isMobile    = mu > 0.0 && Z != 0;
+    const bool isDiffusive = D > 0.0;
+
+    auto* solidSpecies = new ItoKMCCDRSpecies(speciesID, Z, isMobile, isDiffusive);
+
+    if (species.contains("initial density")) {
+      const Real density = species["initial density"].get<Real>();
+
+      if (density < 0.0) {
+        this->throwParserError(baseErrorID + " but 'initial density' can not be negative");
+      }
+
+      solidSpecies->setInitialData([density](const RealVect& /*x*/, const Real /*t*/) -> Real {
+        return density;
+      });
+    }
+
+    // Domain boundary conditions. A side that is not given is outflow.
+    std::array<CdrDomainBC::BcType, 2 * SpaceDim> domainBcs;
+
+    domainBcs.fill(CdrDomainBC::BcType::Outflow);
+
+    if (species.contains("domain bc")) {
+      const nlohmann::json& bcJSON = species["domain bc"];
+
+      std::vector<std::string> sides;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const std::string coord = (dir == 0) ? "x" : ((dir == 1) ? "y" : "z");
+
+        sides.emplace_back(coord + ".lo");
+        sides.emplace_back(coord + ".hi");
+      }
+
+      this->checkKeys(bcJSON,
+                      std::set<std::string>(sides.begin(), sides.end()),
+                      "solid species/" + speciesID + "/domain bc");
+
+      for (int i = 0; i < sides.size(); i++) {
+        if (bcJSON.contains(sides[i])) {
+          const std::string bc = this->trim(bcJSON[sides[i]].get<std::string>());
+
+          if (bc == "outflow") {
+            domainBcs[i] = CdrDomainBC::BcType::Outflow;
+          }
+          else if (bc == "wall") {
+            domainBcs[i] = CdrDomainBC::BcType::Wall;
+          }
+          else {
+            this->throwParserError(baseErrorID + " but domain bc '" + sides[i] + "' must be 'outflow' or 'wall'");
+          }
+        }
+      }
+    }
+
+    m_solidSpecies.push_back(RefCountedPtr<CdrSpecies>(solidSpecies));
+    m_solidMobilities.emplace_back([mu](const Real /*E*/, const RealVect& /*x*/) -> Real {
+      return mu;
+    });
+    m_solidDiffusionCoefficients.emplace_back([D](const Real /*E*/, const RealVect& /*x*/) -> Real {
+      return D;
+    });
+    m_solidDomainBcs.emplace_back(domainBcs);
+
+    m_allSpecies.emplace(speciesID);
+
+    if (m_verbose) {
+      pout() << "ItoKMCJSON::initializeSolidSpecies, instantiating species:" << "\n"
+             << "\tName = " << speciesID << "\n"
+             << "\tZ    = " << Z << "\n"
+             << "\tmu   = " << mu << "\n"
+             << "\tD    = " << D << "\n"
+             << "\n";
+    }
+  }
+}
+
+Real
+ItoKMCJSON::parseSolidCoefficient(const nlohmann::json& a_json, const std::string& a_context) const
+{
+  CH_TIME("ItoKMCJSON::parseSolidCoefficient");
+  if (m_verbose) {
+    pout() << m_className + "::parseSolidCoefficient" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::parseSolidCoefficient for '" + a_context + "'";
+
+  if (!(a_json.contains("type"))) {
+    this->throwParserError(baseError + " but 'type' specifier was not found");
+  }
+
+  const std::string type = a_json["type"].get<std::string>();
+
+  if (type != "constant") {
+    this->throwParserError(baseError + " but type '" + type + "' is not supported (must be 'constant')");
+  }
+
+  this->checkKeys(a_json, {"type", "value"}, a_context);
+
+  if (!(a_json.contains("value"))) {
+    this->throwParserError(baseError + " but did not find the 'value' field");
+  }
+
+  const Real value = a_json["value"].get<Real>();
+
+  if (value < 0.0) {
+    this->throwParserError(baseError + " but 'value' can not be negative");
+  }
+
+  return value;
+}
+
+void
 ItoKMCJSON::initializeSurfaceReactions()
 {
   CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
@@ -2756,17 +2943,8 @@ ItoKMCJSON::initializeSurfaceReactions()
 
     this->checkKeys(reactionJSON, {"reaction", "rate"}, "surface reactions/" + reaction);
 
-    if (!(reactionJSON.contains("rate"))) {
-      this->throwParserError(baseErrorID + " but did not find the field 'rate'");
-    }
     if (this->containsWildcard(reaction)) {
       this->throwParserError(baseErrorID + " but wildcards are not supported in surface reactions");
-    }
-
-    const Real rate = reactionJSON["rate"].get<Real>();
-
-    if (rate < 0.0) {
-      this->throwParserError(baseErrorID + " but 'rate' can not be negative");
     }
 
     std::vector<std::string> reactants;
@@ -2787,26 +2965,33 @@ ItoKMCJSON::initializeSurfaceReactions()
       this->throwParserError(baseErrorID + " but surface reactions must have exactly one reactant");
     }
 
-    const int reactantIndex = this->getSurfaceSpeciesIndex(trimmedReactants.front());
+    // The reactant is either a surface species that decays, or a solid species that arrives at the surface.
+    const int surfaceReactant = this->getSurfaceSpeciesIndex(trimmedReactants.front());
+    const int solidReactant   = this->getSolidSpeciesIndex(trimmedReactants.front());
 
-    if (reactantIndex < 0) {
-      this->throwParserError(baseErrorID + " but the reactant must be a surface species");
+    if (surfaceReactant < 0 && solidReactant < 0) {
+      this->throwParserError(baseErrorID + " but the reactant must be a surface or solid species");
     }
 
     std::list<size_t> productIndices;
     std::list<size_t> surfaceProducts;
+    std::list<size_t> solidProducts;
 
     for (const auto& p : products) {
       const int surfaceIndex = this->getSurfaceSpeciesIndex(p);
+      const int solidIndex   = this->getSolidSpeciesIndex(p);
 
       if (surfaceIndex >= 0) {
         surfaceProducts.emplace_back((size_t)surfaceIndex);
+      }
+      else if (solidIndex >= 0) {
+        solidProducts.emplace_back((size_t)solidIndex);
       }
       else if (this->isPlasmaSpecies(p) && m_plasmaSpeciesTypes.at(p) == SpeciesType::Ito) {
         productIndices.emplace_back((size_t)m_itoSpeciesMap.at(p));
       }
       else if (!(this->isBracketed(p))) {
-        this->throwParserError(baseErrorID + " but products must be Ito or surface species");
+        this->throwParserError(baseErrorID + " but products must be Ito, surface or solid species");
       }
     }
 
@@ -2820,10 +3005,63 @@ ItoKMCJSON::initializeSurfaceReactions()
       chargeOut += m_surfaceSpecies[idx]->getChargeNumber();
     }
 
-    this->checkSurfaceChargeConservation(m_surfaceSpecies[reactantIndex]->getChargeNumber(), chargeOut, baseErrorID);
+    for (const auto& idx : solidProducts) {
+      chargeOut += m_solidSpecies[idx]->getChargeNumber();
+    }
 
-    m_surfaceReactions.addSurfaceSpeciesReaction(
-      ItoKMCSurfaceReaction((size_t)reactantIndex, productIndices, std::list<size_t>(), surfaceProducts, rate));
+    if (solidReactant >= 0) {
+
+      // Arrival of a solid species at the surface. How much arrives is set by the drift of the species to the
+      // surface, so there is no rate.
+      if (reactionJSON.contains("rate")) {
+        this->throwParserError(baseErrorID + " but a solid species arriving at the surface takes no 'rate'");
+      }
+      if (!(productIndices.empty()) || !(solidProducts.empty()) || surfaceProducts.empty()) {
+        this->throwParserError(baseErrorID +
+                               " but a solid species arriving at the surface must become surface species");
+      }
+
+      const std::vector<ItoKMCSurfaceReactions>& arrivals = m_surfaceReactions.getSolidArrivalReactions();
+
+      if (arrivals.size() > solidReactant && !(arrivals[solidReactant].getEfficiencies().empty())) {
+        this->throwParserError(baseErrorID + " but the solid species already has an arrival reaction");
+      }
+
+      this->checkSurfaceChargeConservation(m_solidSpecies[solidReactant]->getChargeNumber(), chargeOut, baseErrorID);
+
+      m_surfaceReactions.addSolidArrivalReaction(
+        ItoKMCSurfaceReaction((size_t)solidReactant, std::list<size_t>(), std::list<size_t>(), surfaceProducts, 1.0));
+    }
+    else {
+      if (!(reactionJSON.contains("rate"))) {
+        this->throwParserError(baseErrorID + " but did not find the field 'rate'");
+      }
+
+      const Real rate = reactionJSON["rate"].get<Real>();
+
+      if (rate < 0.0) {
+        this->throwParserError(baseErrorID + " but 'rate' can not be negative");
+      }
+
+      this->checkSurfaceChargeConservation(m_surfaceSpecies[surfaceReactant]->getChargeNumber(),
+                                           chargeOut,
+                                           baseErrorID);
+
+      // A reaction that injects solid species runs in the exchange between the surface and the dielectric, the
+      // others in the EB emission.
+      if (!(solidProducts.empty())) {
+        if (!(productIndices.empty())) {
+          this->throwParserError(baseErrorID + " but a surface reaction can not produce both Ito and solid species");
+        }
+
+        m_surfaceReactions.addSolidInjectionReaction(
+          ItoKMCSurfaceReaction((size_t)surfaceReactant, solidProducts, std::list<size_t>(), surfaceProducts, rate));
+      }
+      else {
+        m_surfaceReactions.addSurfaceSpeciesReaction(
+          ItoKMCSurfaceReaction((size_t)surfaceReactant, productIndices, std::list<size_t>(), surfaceProducts, rate));
+      }
+    }
   }
 }
 
@@ -4196,6 +4434,157 @@ ItoKMCJSON::computeDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
 
   for (int i = 0; i < m_numPlasmaSpecies; i++) {
     a_diffusionCoefficients[i] = m_diffusionCoefficients[i](E, a_pos);
+  }
+}
+
+void
+ItoKMCJSON::computeSolidMobilities(Vector<Real>& a_mobilities,
+                                   const Real /*a_time*/,
+                                   const RealVect& a_pos,
+                                   const RealVect& a_E) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::computeSolidMobilities" << endl;
+  }
+
+  const Real E = a_E.vectorLength();
+
+  a_mobilities.resize(m_solidSpecies.size());
+
+  for (int i = 0; i < m_solidSpecies.size(); i++) {
+    a_mobilities[i] = m_solidMobilities[i](E, a_pos);
+  }
+}
+
+void
+ItoKMCJSON::computeSolidDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
+                                              const Real /*a_time*/,
+                                              const RealVect& a_pos,
+                                              const RealVect& a_E) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::computeSolidDiffusionCoefficients" << endl;
+  }
+
+  const Real E = a_E.vectorLength();
+
+  a_diffusionCoefficients.resize(m_solidSpecies.size());
+
+  for (int i = 0; i < m_solidSpecies.size(); i++) {
+    a_diffusionCoefficients[i] = m_solidDiffusionCoefficients[i](E, a_pos);
+  }
+}
+
+CdrDomainBC::BcType
+ItoKMCJSON::getSolidDomainBc(const int a_species, const int a_dir, const Side::LoHiSide a_side) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::getSolidDomainBc" << endl;
+  }
+
+  CH_assert(a_species >= 0 && a_species < m_solidDomainBcs.size());
+
+  return m_solidDomainBcs[a_species][2 * a_dir + ((a_side == Side::Lo) ? 0 : 1)];
+}
+
+void
+ItoKMCJSON::surfaceSolidExchangeEB(Vector<Real>&       a_surfaceDensityChange,
+                                   Vector<Real>&       a_solidInjection,
+                                   const Vector<Real>& a_surfaceDensities,
+                                   const Vector<Real>& a_solidArrival,
+                                   const RealVect& /*a_E*/,
+                                   const RealVect& /*a_physicalCellCenter*/,
+                                   const RealVect& /*a_bndryNormal*/,
+                                   const Real a_bndryArea,
+                                   const Real a_dx,
+                                   const Real a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::surfaceSolidExchangeEB" << endl;
+  }
+
+  const int numSurfaceSpecies = m_surfaceSpecies.size();
+  const int numSolidSpecies   = m_solidSpecies.size();
+
+  CH_assert(a_surfaceDensityChange.size() == numSurfaceSpecies);
+  CH_assert(a_solidInjection.size() == numSolidSpecies);
+  CH_assert(a_surfaceDensities.size() == numSurfaceSpecies);
+  CH_assert(a_solidArrival.size() == numSolidSpecies);
+
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    a_surfaceDensityChange[i] = 0.0;
+  }
+
+  for (int i = 0; i < numSolidSpecies; i++) {
+    a_solidInjection[i] = 0.0;
+  }
+
+  const Real physicalArea = a_bndryArea * std::pow(a_dx, SpaceDim - 1);
+
+  if (physicalArea > 0.0) {
+
+    // Injection. The surface densities become whole numbers of surface particles, as in surfaceEmissionEB(), and
+    // each one is injected with probability 1 - exp(-K dt).
+    const std::vector<ItoKMCSurfaceReactions>& injections = m_surfaceReactions.getSolidInjectionReactions();
+
+    for (size_t s = 0; s < injections.size(); s++) {
+      const ItoKMCSurfaceReactions& reactions = injections[s];
+      const std::vector<Real>&      rates     = reactions.getEfficiencies();
+
+      Real totalRate = 0.0;
+
+      for (const auto& k : rates) {
+        totalRate += k;
+      }
+
+      const long long numAvailable = std::max(
+        0LL,
+        static_cast<long long>(std::floor((a_surfaceDensities[s] + a_surfaceDensityChange[s]) * physicalArea + 1.E-6)));
+
+      if (numAvailable > 0 && totalRate > 0.0) {
+        const double reactProbability = -std::expm1(-totalRate * a_dt);
+
+        std::binomial_distribution<long long> binomial(numAvailable, reactProbability);
+
+        const long long numReact = Random::getDiscrete(binomial);
+
+        if (numReact > 0) {
+          const std::vector<size_t> X = this->multinomial(static_cast<size_t>(numReact), reactions.getDistribution());
+
+          const auto& solidProducts   = reactions.getProducts();
+          const auto& surfaceProducts = reactions.getSurfaceProducts();
+
+          for (int k = 0; k < X.size(); k++) {
+            if (X[k] > 0) {
+              const Real numFire = static_cast<Real>(X[k]) / physicalArea;
+
+              a_surfaceDensityChange[s] -= numFire;
+
+              for (const auto& p : solidProducts[k]) {
+                a_solidInjection[p] += numFire;
+              }
+
+              for (const auto& q : surfaceProducts[k]) {
+                a_surfaceDensityChange[q] += numFire;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Arrival. The solid species that reached the surface become the surface products of their arrival reaction.
+    const std::vector<ItoKMCSurfaceReactions>& arrivals = m_surfaceReactions.getSolidArrivalReactions();
+
+    for (size_t j = 0; j < arrivals.size(); j++) {
+      const std::vector<std::list<size_t>>& surfaceProducts = arrivals[j].getSurfaceProducts();
+
+      for (const auto& products : surfaceProducts) {
+        for (const auto& q : products) {
+          a_surfaceDensityChange[q] += a_solidArrival[j];
+        }
+      }
+    }
   }
 }
 

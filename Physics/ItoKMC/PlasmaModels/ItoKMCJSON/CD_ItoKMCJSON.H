@@ -241,6 +241,72 @@ public:
                                const RealVect& a_E) const noexcept override;
 
   /**
+   * @brief Compute the mobilities of the solid species.
+   * @param[out] a_mobilities Non-negative mobility for every solid species. Resized here.
+   * @param[in]  a_time       Time.
+   * @param[in]  a_pos        Physical position.
+   * @param[in]  a_E          Electric field vector inside the dielectric.
+   */
+  virtual void
+  computeSolidMobilities(Vector<Real>&   a_mobilities,
+                         const Real      a_time,
+                         const RealVect& a_pos,
+                         const RealVect& a_E) const noexcept override;
+
+  /**
+   * @brief Compute the diffusion coefficients of the solid species.
+   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient for every solid species. Resized here.
+   * @param[in]  a_time                  Time.
+   * @param[in]  a_pos                   Physical position.
+   * @param[in]  a_E                     Electric field vector inside the dielectric.
+   */
+  virtual void
+  computeSolidDiffusionCoefficients(Vector<Real>&   a_diffusionCoefficients,
+                                    const Real      a_time,
+                                    const RealVect& a_pos,
+                                    const RealVect& a_E) const noexcept override;
+
+  /**
+   * @brief Get the domain boundary condition of a solid species, from its 'domain bc' entry.
+   * @param[in] a_species Solid species index.
+   * @param[in] a_dir     Coordinate direction normal to the domain face.
+   * @param[in] a_side    Low or high side of the domain.
+   * @return The boundary condition given for this side, or outflow if none was given.
+   */
+  virtual CdrDomainBC::BcType
+  getSolidDomainBc(const int a_species, const int a_dir, const Side::LoHiSide a_side) const noexcept override;
+
+  /**
+   * @brief Exchange charge between the surface species and the solid species through a dielectric surface.
+   * @details The surface species are first converted to whole numbers of surface particles in the cut cell, as in
+   * surfaceEmissionEB(), and the solid injection reactions of the 'surface reactions' fire on them: each one with
+   * probability 1 - exp(-K dt) where K is the sum of the rates of its injection reactions, split over the reactions in
+   * proportion to the rates. Then the arriving solid species become the surface products of their arrival reaction.
+   * A solid species without an arrival reaction is not assigned to any surface species.
+   * @param[out] a_surfaceDensityChange Change in the areal density (1/m^2) of each surface species.
+   * @param[out] a_solidInjection       Areal density (1/m^2) of each solid species injected into the dielectric.
+   * @param[in]  a_surfaceDensities     Areal density (1/m^2) of each surface species in this cut cell.
+   * @param[in]  a_solidArrival         Areal density (1/m^2) of each solid species that arrived at the surface.
+   * @param[in]  a_E                    Electric field on the gas side.
+   * @param[in]  a_physicalCellCenter   Physical position of the cell center.
+   * @param[in]  a_bndryNormal          Gas-side cut-cell normal vector.
+   * @param[in]  a_bndryArea            Gas-side cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).
+   * @param[in]  a_dx                   Grid resolution on this level.
+   * @param[in]  a_dt                   Time step.
+   */
+  virtual void
+  surfaceSolidExchangeEB(Vector<Real>&       a_surfaceDensityChange,
+                         Vector<Real>&       a_solidInjection,
+                         const Vector<Real>& a_surfaceDensities,
+                         const Vector<Real>& a_solidArrival,
+                         const RealVect&     a_E,
+                         const RealVect&     a_physicalCellCenter,
+                         const RealVect&     a_bndryNormal,
+                         const Real          a_bndryArea,
+                         const Real          a_dx,
+                         const Real          a_dt) const noexcept override;
+
+  /**
    * @brief Resolve secondary emission at the EB.
    * @details Calls surfaceEmissionEB() with an empty surface and discards the change in the surface species
    * densities.
@@ -491,6 +557,21 @@ protected:
   std::vector<FunctionEX> m_plasmaTemperatures;
 
   /**
+   * @brief Mobilities of the solid species
+   */
+  std::vector<FunctionEX> m_solidMobilities;
+
+  /**
+   * @brief Diffusion coefficients of the solid species
+   */
+  std::vector<FunctionEX> m_solidDiffusionCoefficients;
+
+  /**
+   * @brief Domain boundary conditions of the solid species, one per domain face in the order x.lo, x.hi, y.lo, ...
+   */
+  std::vector<std::array<CdrDomainBC::BcType, 2 * SpaceDim>> m_solidDomainBcs;
+
+  /**
    * @brief Function-based plasma reaction rates. Same index as the actual reactions.
    */
   std::vector<FunctionEVXTP> m_kmcReactionRates;
@@ -685,6 +766,14 @@ protected:
   getSurfaceSpeciesIndex(const std::string& a_name) const noexcept;
 
   /**
+   * @brief Get the index of a solid species.
+   * @param[in] a_name Species name
+   * @return Index in m_solidSpecies, or -1 if a_name is not a solid species.
+   */
+  virtual int
+  getSolidSpeciesIndex(const std::string& a_name) const noexcept;
+
+  /**
    * @brief Stop the run if a reaction that involves surface species does not conserve charge.
    * @param[in] a_chargeIn  Total charge number of the reactants, including the impinging species.
    * @param[in] a_chargeOut Total charge number of the products.
@@ -841,6 +930,23 @@ protected:
    */
   virtual void
   initializeSurfaceReactions();
+
+  /**
+   * @brief Initialize the solid species from the 'solid species' array.
+   * @details Reads the charge number, the constant mobility and diffusion coefficient, the optional initial density
+   * and the optional domain boundary conditions of each species.
+   */
+  virtual void
+  initializeSolidSpecies();
+
+  /**
+   * @brief Parse a constant transport coefficient of a solid species.
+   * @param[in] a_json    The 'mobility' or 'diffusion' object of the species.
+   * @param[in] a_context Species and field name used in errors.
+   * @return The coefficient, which is not negative.
+   */
+  virtual Real
+  parseSolidCoefficient(const nlohmann::json& a_json, const std::string& a_context) const;
 
   /**
    * @brief Initialize plasma reactions
