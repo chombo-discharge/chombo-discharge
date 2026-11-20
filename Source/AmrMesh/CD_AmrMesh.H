@@ -1982,16 +1982,6 @@ public:
   getMultigridLevelGrids(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels for a Realm and phase.
-   * @details See Realm::getMultigridLevelGridsCoFi().
-   * @param[in] a_realm Realm name
-   * @param[in] a_phase Phase (gas or solid)
-   * @return The coarsened grids between consecutive multigrid levels.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels for a Realm and phase.
    * @details See Realm::getMultigridCoarseAverage().
    * @param[in] a_realm Realm name
@@ -2002,6 +1992,56 @@ public:
   getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a Realm and phase.
+   * @details See Realm::getFinerVoFs(). Entry lvl lives on getEBLevelGridCoFi()[lvl] and is defined after regridBase.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels for a Realm and phase.
+   * @details See Realm::getMultigridRestriction().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels for a Realm and phase.
+   * @details See Realm::getMultigridProlongation().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelRestriction().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelProlongation().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
    * @brief Get the multifluid multigrid levels for a Realm.
    * @details See Realm::getMultigridMFLevelGrids().
    * @param[in] a_realm Realm name
@@ -2009,15 +2049,6 @@ public:
    */
   const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
   getMultigridMFLevelGrids(const std::string& a_realm) const;
-
-  /**
-   * @brief Get the multifluid coarsened grids between consecutive multigrid levels for a Realm.
-   * @details See Realm::getMultigridMFLevelGridsCoFi().
-   * @param[in] a_realm Realm name
-   * @return The multifluid coarsened grids between consecutive multigrid levels.
-   */
-  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-  getMultigridMFLevelGridsCoFi(const std::string& a_realm) const;
 
   /**
    * @brief Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a Realm and phase.
