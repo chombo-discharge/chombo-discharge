@@ -544,7 +544,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //      normal turns by more than m_refineAngle between neighbouring cells near the surface; otherwise it is a
   //      leaf and nothing is built above it (buildFinerLevels, exceedsCurvature).
   //   2. Tiles, once: the boxes irregular in either phase on every level are tiled by TiledMeshRefine into a
-  //      properly nested set (makeTiles). This is the coverage the simulation regrids onto.
+  //      properly nested set (makeTiles). The graph of each level is built on them.
   //   3. Every tile lies inside a box or above a leaf; per phase it inherits a regular or covered box's tag and
   //      is otherwise classified by that phase's implicit function at its own level (classifyTiles).
   //   4. Every hit box is cut down to what the tiles left of it (decimateBoxes).
@@ -1425,13 +1425,11 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
       }
     }
 
-    // A box no other rule splits may still hold a twisted patch, which is the one shape whose fluid can fall
-    // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
-    // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
-    // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
     // A box holding a surface the geometric tags refine further is split, so that the geometry is resolved wherever
     // they refine. Driver::getGeometryTags tags as conductor every cell cut in exactly one phase, and as dielectric
-    // every cell cut in the solid phase.
+    // every cell cut in the solid phase. A box cut in both phases is decided cell by cell from the surfaces as they
+    // cut the cells, before the fill rule settles them; where the fill rule covers a cell in one phase, the tags can
+    // refine a surface that this rule left whole.
     if (reason == SplitReason::None) {
       const bool gasCut   = a_gasTypes[i] == GeometryService::Irregular;
       const bool solidCut = a_solidTypes[i] == GeometryService::Irregular;
@@ -1449,6 +1447,10 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
       }
     }
 
+    // A box no other rule splits may still hold a twisted patch, which is the one shape whose fluid can fall
+    // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
+    // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
+    // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
     if (reason == SplitReason::None && m_refineSaddles) {
       const bool gasTwist = (a_gasTypes[i] == GeometryService::Irregular) &&
                             this->hasTwistedPatch(a_boxes[i], a_level, phase::gas);

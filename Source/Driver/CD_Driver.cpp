@@ -1246,6 +1246,12 @@ Driver::parseGeometryRefinement()
     if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth) {
       m_needsNewGeometricTags = true;
     }
+
+    // The polyhedral geometry is resolved where the depths read at setup refine, and nowhere else.
+    if (m_geometryGeneration == "polyhedral" && (c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth)) {
+      MayDay::Warning("Driver::parseGeometryRefinement - Driver.refine_electrodes or Driver.refine_dielectrics changed "
+                      "during the run; the polyhedral geometry stays resolved to the depths it was built with");
+    }
   }
   else { // Fresh simulation -- we should have gotten geometric tags before entering regrid so we can set this to false.
     m_needsNewGeometricTags = false;
