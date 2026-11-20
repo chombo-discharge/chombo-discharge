@@ -25,6 +25,7 @@
 // Our includes
 #include <CD_ItoSpecies.H>
 #include <CD_CdrSpecies.H>
+#include <CD_CdrDomainBC.H>
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
@@ -169,6 +170,17 @@ public:
   getSurfaceSpecies() const;
 
   /**
+   * @brief Get all solid species.
+   * @details Solid species are charge carriers inside dielectrics, held as volume densities (1/m^3) and transported
+   * by CDR solvers on the solid phase. Only the name, the charge number, the mobile and diffusive flags and
+   * initialData() of each species are used. The transport coefficients come from computeSolidMobilities() and
+   * computeSolidDiffusionCoefficients(), and the domain boundary conditions from getSolidDomainBc().
+   * @return m_solidSpecies
+   */
+  const Vector<RefCountedPtr<CdrSpecies>>&
+  getSolidSpecies() const;
+
+  /**
    * @brief Get diffusion functions for all Ito species.
    * @return Vector of per-species diffusion displacement functors.
    */
@@ -241,6 +253,13 @@ public:
    */
   inline int
   getNumSurfaceSpecies() const;
+
+  /**
+   * @brief Return the number of solid species.
+   * @return Number of entries in m_solidSpecies.
+   */
+  inline int
+  getNumSolidSpecies() const;
 
   /**
    * @brief Return true if the physics model requires species density gradients.
@@ -341,6 +360,46 @@ public:
                                const RealVect& a_E) const noexcept = 0;
 
   /**
+   * @brief Compute the mobilities of the solid species.
+   * @details Called once per solid-phase grid cell. The default implementation sets every mobility to zero.
+   * @param[out] a_mobilities Non-negative mobility per solid species. Resized by the callee.
+   * @param[in]  a_time       Time
+   * @param[in]  a_pos        Position
+   * @param[in]  a_E          Electric field inside the dielectric
+   */
+  virtual void
+  computeSolidMobilities(Vector<Real>&   a_mobilities,
+                         const Real      a_time,
+                         const RealVect& a_pos,
+                         const RealVect& a_E) const noexcept;
+
+  /**
+   * @brief Compute the diffusion coefficients of the solid species.
+   * @details Called once per solid-phase grid cell. The default implementation sets every coefficient to zero.
+   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient per solid species. Resized by the callee.
+   * @param[in]  a_time                  Time
+   * @param[in]  a_pos                   Position
+   * @param[in]  a_E                     Electric field inside the dielectric
+   */
+  virtual void
+  computeSolidDiffusionCoefficients(Vector<Real>&   a_diffusionCoefficients,
+                                    const Real      a_time,
+                                    const RealVect& a_pos,
+                                    const RealVect& a_E) const noexcept;
+
+  /**
+   * @brief Get the domain boundary condition of a solid species on one side of the domain.
+   * @details The solid species do not use the domain boundary conditions of the gas-phase CDR solvers. The default
+   * implementation returns outflow on every side.
+   * @param[in] a_species Solid species index.
+   * @param[in] a_dir     Coordinate direction normal to the domain face.
+   * @param[in] a_side    Low or high side of the domain.
+   * @return Boundary condition type, either CdrDomainBC::BcType::Outflow or CdrDomainBC::BcType::Wall.
+   */
+  virtual CdrDomainBC::BcType
+  getSolidDomainBc(const int a_species, const int a_dir, const Side::LoHiSide a_side) const noexcept;
+
+  /**
    * @brief Resolve secondary emission at the EB.
    * @details Routine is here to handle charge injection, secondary emission etc.
    * @param[out] a_secondaryParticles Outgoing plasma species particles.
@@ -429,6 +488,48 @@ public:
                     const Real                              a_dt,
                     const bool                              a_isDielectric,
                     const int                               a_matIndex) const noexcept;
+
+  /**
+   * @brief Exchange charge between the surface species and the solid species through a dielectric surface.
+   * @details Called by the stepper once per time step for each cut cell on the gas side of a gas-dielectric
+   * interface, after the solid species have been transported. All quantities are areal densities on the gas side of
+   * the cut cell, i.e. numbers of particles divided by the physical boundary area of the gas-side cut cell.
+   *
+   * a_solidArrival holds the solid carriers that left the dielectric through this surface during the time step.
+   * They have already been removed from the solid species and the stepper adds their charge to the surface charge.
+   * An implementation assigns them to surface species through a_surfaceDensityChange; carriers that are not
+   * assigned stay in the surface charge without belonging to a surface species.
+   *
+   * a_solidInjection returns the carriers that enter the dielectric from the surface. The stepper adds them to the
+   * solid species and subtracts their charge from the surface charge, so an implementation must take the same
+   * charge out of the surface species through a_surfaceDensityChange for the breakdown of the surface charge to
+   * remain exact.
+   *
+   * The default implementation assigns nothing and injects nothing.
+   * @param[out] a_surfaceDensityChange Change in the areal density (1/m^2) of each surface species. Sized to the
+   *                                    number of surface species by the caller.
+   * @param[out] a_solidInjection       Areal density (1/m^2) of each solid species injected into the dielectric.
+   *                                    Sized to the number of solid species by the caller.
+   * @param[in]  a_surfaceDensities     Areal density (1/m^2) of each surface species in this cut cell.
+   * @param[in]  a_solidArrival         Areal density (1/m^2) of each solid species that arrived at the surface.
+   * @param[in]  a_E                    Electric field on the gas side.
+   * @param[in]  a_physicalCellCenter   Physical position of the cell center.
+   * @param[in]  a_bndryNormal          Gas-side cut-cell normal vector, pointing into the gas.
+   * @param[in]  a_bndryArea            Gas-side cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).
+   * @param[in]  a_dx                   Grid resolution on this level.
+   * @param[in]  a_dt                   Time step.
+   */
+  virtual void
+  surfaceSolidExchangeEB(Vector<Real>&       a_surfaceDensityChange,
+                         Vector<Real>&       a_solidInjection,
+                         const Vector<Real>& a_surfaceDensities,
+                         const Vector<Real>& a_solidArrival,
+                         const RealVect&     a_E,
+                         const RealVect&     a_physicalCellCenter,
+                         const RealVect&     a_bndryNormal,
+                         const Real          a_bndryArea,
+                         const Real          a_dx,
+                         const Real          a_dt) const noexcept;
 
   /**
    * @brief Resolve secondary emission on one face of the computational domain.
@@ -780,6 +881,13 @@ protected:
    * @details Only the name, charge number and initial data are used. Empty unless the subclass fills it.
    */
   Vector<RefCountedPtr<CdrSpecies>> m_surfaceSpecies;
+
+  /**
+   * @brief List of solid species, transported inside dielectrics.
+   * @details Only the name, charge number, mobile and diffusive flags and initial data are used. Empty unless the
+   * subclass fills it.
+   */
+  Vector<RefCountedPtr<CdrSpecies>> m_solidSpecies;
 
   /**
    * @brief An internal integer describing which species is the "ionizing" species.

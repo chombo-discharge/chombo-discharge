@@ -110,6 +110,61 @@ ItoKMCPhysics::surfaceEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secon
                             a_matIndex);
 }
 
+void
+ItoKMCPhysics::computeSolidMobilities(Vector<Real>& a_mobilities,
+                                      const Real /*a_time*/,
+                                      const RealVect& /*a_pos*/,
+                                      const RealVect& /*a_E*/) const noexcept
+{
+  a_mobilities.resize(m_solidSpecies.size());
+
+  for (int i = 0; i < a_mobilities.size(); i++) {
+    a_mobilities[i] = 0.0;
+  }
+}
+
+void
+ItoKMCPhysics::computeSolidDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
+                                                 const Real /*a_time*/,
+                                                 const RealVect& /*a_pos*/,
+                                                 const RealVect& /*a_E*/) const noexcept
+{
+  a_diffusionCoefficients.resize(m_solidSpecies.size());
+
+  for (int i = 0; i < a_diffusionCoefficients.size(); i++) {
+    a_diffusionCoefficients[i] = 0.0;
+  }
+}
+
+CdrDomainBC::BcType
+ItoKMCPhysics::getSolidDomainBc(const int /*a_species*/,
+                                const int /*a_dir*/,
+                                const Side::LoHiSide /*a_side*/) const noexcept
+{
+  return CdrDomainBC::BcType::Outflow;
+}
+
+void
+ItoKMCPhysics::surfaceSolidExchangeEB(Vector<Real>& a_surfaceDensityChange,
+                                      Vector<Real>& a_solidInjection,
+                                      const Vector<Real>& /*a_surfaceDensities*/,
+                                      const Vector<Real>& /*a_solidArrival*/,
+                                      const RealVect& /*a_E*/,
+                                      const RealVect& /*a_physicalCellCenter*/,
+                                      const RealVect& /*a_bndryNormal*/,
+                                      const Real /*a_bndryArea*/,
+                                      const Real /*a_dx*/,
+                                      const Real /*a_dt*/) const noexcept
+{
+  for (int i = 0; i < a_surfaceDensityChange.size(); i++) {
+    a_surfaceDensityChange[i] = 0.0;
+  }
+
+  for (int i = 0; i < a_solidInjection.size(); i++) {
+    a_solidInjection[i] = 0.0;
+  }
+}
+
 bool
 ItoKMCPhysics::emitsWithoutPrimariesEB() const noexcept
 {
