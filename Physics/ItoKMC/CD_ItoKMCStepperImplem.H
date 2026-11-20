@@ -5320,8 +5320,6 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
       const Box            box           = dbl[din];
 
-      bool isDielectric = false;
-
       // Per-cell SoA scratch (indexed by Box::index(iv)). Primary cells are read from the SoA leaves;
       // secondary cells start empty and are rebuilt into the SoA leaves after the kernel.
       std::vector<std::vector<ParticleSoA<ItoParticle>>> primaryItoCells(numItoSpecies);
@@ -5391,9 +5389,11 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
             primaryPhotons[i] = std::move(primaryPhotonCells[i][cellIdx]);
           }
 
-          // Figure out which material we are dealing with.
-          int  matIndex = -1;
-          Real minDist  = std::numeric_limits<Real>::max();
+          // Figure out which material we are dealing with. The material is the one whose implicit function is
+          // closest to zero at the boundary centroid, and the classification is made independently for each cell.
+          int  matIndex     = -1;
+          bool isDielectric = false;
+          Real minDist      = std::numeric_limits<Real>::max();
 
           for (int i = 0; i < electrodes.size(); i++) {
             const Real curDist = electrodes[i].getImplicitFunction()->value(physPos);
