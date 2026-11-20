@@ -2015,8 +2015,10 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
     solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
-  // Solid species densities
-  this->writeSolidPlotData(a_output, a_icomp, a_outputRealm, a_level);
+  // Solid species densities. Without solid species there may be no solid phase at all, so its layouts are not read.
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    this->writeSolidPlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
 
   // RTE solvers copy their output data
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
