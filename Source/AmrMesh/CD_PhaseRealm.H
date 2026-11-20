@@ -802,7 +802,8 @@ protected:
   /**
    * @brief Filler-mode index space whose layouts are copied from this realm's levels instead of generated.
    * @details m_eblgFiCo is defined through it, so the fine geometry is copied onto the coarse layout at fine
-   * resolution.
+   * resolution. Its filler reads this realm's level grids when a layout is filled, so a layout of it is valid only
+   * until the next regrid, when the index space is rebuilt.
    */
   RefCountedPtr<EBIndexSpace> m_ebisFiCo;
 

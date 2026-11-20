@@ -550,7 +550,9 @@ PhaseRealm::defineEBLevelGridFiCo()
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
     const int refRat = m_refinementRatios[lvl - 1];
 
-    CH_assert(refRat == 2 || refRat == 4);
+    if (refRat != 2 && refRat != 4) {
+      MayDay::Abort("PhaseRealm::defineEBLevelGridFiCo - refinement ratios must be 2 or 4");
+    }
 
     if (refRat == 4) {
       m_eblgFineHalf[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
@@ -644,6 +646,9 @@ PhaseRealm::fillCopiedLayout(LevelData<EBGraph>&      a_graph,
   if (m_verbose) {
     pout() << "PhaseRealm::fillCopiedLayout" << endl;
   }
+
+  // Every data cell lies in the region the boxes are classified over.
+  CH_assert(a_dataGhost <= a_graphGhost);
 
   const EBLevelGrid* source = nullptr;
 
