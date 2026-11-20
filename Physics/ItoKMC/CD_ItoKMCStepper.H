@@ -1882,6 +1882,15 @@ protected:
   computeQsurf() const noexcept;
 
   /**
+   * @brief Compute the charge held by one surface species.
+   * @details This is part of the surface charge returned by computeQsurf(), not in addition to it.
+   * @param[in] a_species Surface species index.
+   * @return Z q_e times the integrated areal density of the species.
+   */
+  virtual Real
+  computeQsurfSpecies(const int a_species) const noexcept;
+
+  /**
    * @brief Photon advancement routine
    * @param[in] a_dt Time step
    */

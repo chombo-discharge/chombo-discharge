@@ -1546,6 +1546,23 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
          << whitespace + "#Avg. part. = " << avgParticles << endl
          << whitespace + "#Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)" << endl;
   //clang-format on
+
+  // Breakdown of the surface charge into the surface species, and the part that no surface species accounts for.
+  if (m_surfaceSolvers.size() > 0) {
+    const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+    Real Qassigned = 0.0;
+
+    for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+      const Real Qspecies = this->computeQsurfSpecies(i);
+
+      pout() << whitespace + "Qsurf(" + surfaceSpecies[i]->getName() + ") = " << Qspecies << endl;
+
+      Qassigned += Qspecies;
+    }
+
+    pout() << whitespace + "Qsurf(unassigned) = " << Qsurf - Qassigned << endl;
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -6370,6 +6387,22 @@ ItoKMCStepper<I, C, R, F>::computeQsurf() const noexcept
   }
 
   return m_sigmaSolver->computeMass();
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQsurfSpecies(const int a_species) const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQsurfSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQsurfSpecies()" << endl;
+  }
+
+  CH_assert(a_species >= 0 && a_species < m_surfaceSolvers.size());
+
+  const int Z = m_physics->getSurfaceSpecies()[a_species]->getChargeNumber();
+
+  return Z * Units::Qe * m_surfaceSolvers[a_species]->computeMass();
 }
 
 template <typename I, typename C, typename R, typename F>
