@@ -986,6 +986,10 @@ ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelDa
     Leaf&       dst = maskLevel[din];
 
     for (std::size_t i = 0; i < src.size(); i++) {
+      if (src.isGhost(i)) {
+        continue;
+      }
+
       const IntVect iv = this->cellIndex(a_level, src.position(i));
 
       if (maskBox.contains(iv) && mask(iv, 0)) {
