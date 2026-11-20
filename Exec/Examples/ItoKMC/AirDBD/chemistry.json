@@ -360,6 +360,19 @@
 	    "initial density": 0.0	// Optional initial areal density (1/m^2). Defaults to zero.
 	}
     ],
+    "solid species":
+    [
+	// List of charge carriers inside the dielectrics. They are stored as volume densities (1/m^3), transported by CDR
+	// solvers inside the dielectrics, and exchange charge with the plasma only through the surface species.
+	{
+	    "id": "e(d)",					// Species ID. Must be unique across all species.
+	    "Z": -1,						// Charge number
+	    "mobility": {"type": "constant", "value": 1E-10},	// Mobility (m^2/(V*s)). Only 'constant' is supported.
+	    "diffusion": {"type": "constant", "value": 0.0},	// Diffusion coefficient (m^2/s). Only 'constant' is supported.
+	    "initial density": 0.0,				// Optional initial density (1/m^3). Defaults to zero.
+	    "domain bc": {"y.lo": "outflow"}			// Optional domain boundary conditions, 'outflow' or 'wall'. Sides that are not given are 'outflow'.
+	}
+    ],
     "dielectric emission":
     [
 	// Reactions for particles and photons that hit a dielectric. Surface species may appear on both sides.
@@ -382,6 +395,13 @@
 	{
 	    "reaction": "e(s) -> e",	// Thermal desorption of surface electrons.
 	    "rate": 1E3			// Rate constant (1/s).
+	},
+	{
+	    "reaction": "e(s) -> e(d)",	// Injection of surface electrons into the dielectric.
+	    "rate": 1E3			// Rate constant (1/s).
+	},
+	{
+	    "reaction": "e(d) -> e(s)"	// Electrons that drift out of the dielectric become surface electrons. No rate: the drift sets it.
 	}
     ]
 }

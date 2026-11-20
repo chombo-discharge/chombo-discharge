@@ -2431,7 +2431,7 @@ _______________
 
 Charged states bound to dielectric surfaces, such as trapped electrons or adsorbed ions, can be tracked as surface species.
 They are declared in a top-level ``surface species`` array, where each entry has an ``id``, a charge number ``Z``, and an optional ``initial density`` (in :math:`\text{m}^{-2}`, zero by default).
-Species ids must be unique across the background, plasma, photon, and surface species.
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
 For example:
 
 .. code-block:: json
@@ -2487,7 +2487,8 @@ A pathway that involves surface species only fires if all its charged products c
 A reaction with surface species must conserve charge, or the run stops with an error.
 
 First-order reactions of surface species, such as desorption, are given in a top-level ``surface reactions`` array.
-Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or ``(null)``) on the right-hand side, and a ``rate`` in :math:`\text{s}^{-1}`:
+Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or ``(null)``) on the right-hand side, and a ``rate`` in :math:`\text{s}^{-1}`.
+Entries that involve solid species are described in :ref:`Chap:ItoKMCSolidSpecies`.
 
 .. code-block:: json
 
@@ -2505,6 +2506,72 @@ As for the impact reactions, a reaction whose charged products the field would p
 Surface reactions do not restrict the time step.
 
 When restarting from a checkpoint file that was written without surface species, the surface species densities are set to zero and a warning is issued; the surface charge is kept but is unassigned.
+
+.. _Chap:ItoKMCSolidSpecies:
+
+Solid species
+_____________
+
+Charge carriers inside dielectrics, such as electrons or holes in a polymer, can be tracked as solid species.
+They are declared in a top-level ``solid species`` array, where each entry has an ``id``, a charge number ``Z``, a ``mobility`` and a ``diffusion`` coefficient, an optional ``initial density`` (in :math:`\text{m}^{-3}`, zero by default), and optional ``domain bc`` entries.
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
+The mobility and diffusion coefficient must be of type ``constant``; a zero mobility or diffusion coefficient turns that kind of transport off.
+For example:
+
+.. code-block:: json
+
+   "solid species":
+   [
+      {
+         "id": "e(d)",
+	 "Z": -1,
+	 "mobility": {"type": "constant", "value": 1E-10},
+	 "diffusion": {"type": "constant", "value": 0.0},
+	 "initial density": 0.0,
+	 "domain bc": {"y.lo": "wall"}
+      }
+   ]
+
+Each solid species is transported by its own CDR solver on the solid phase, with the drift velocity :math:`\text{sgn}(Z)\mu\mathbf{E}` where :math:`\mathbf{E}` is the electric field inside the dielectric.
+The update is explicit, and the solid species restrict the time step through their CFL condition and through their dielectric relaxation time :math:`\epsilon_0/\sigma_s` with :math:`\sigma_s = \sum_s |Z_s| q_\text{e}\mu_s n_s`.
+The diffusive flux is zero through the embedded boundaries and the domain boundaries.
+
+The domain boundary conditions of the solid species do not use the ``bc`` options of the CDR solver class (e.g. ``CdrCTU.bc.x.lo``), which only apply to the CDR species in the gas.
+Instead, each solid species gives its own boundary conditions in ``domain bc``, with keys ``x.lo``, ``x.hi``, ``y.lo``, ``y.hi`` (and ``z.lo``, ``z.hi`` in 3D) and values ``outflow`` or ``wall``.
+A side that is not given is ``outflow``.
+
+The space charge of the solid species enters the field solve on the solid side.
+Their conductivity is not part of the semi-implicit field solve.
+
+Solid species exchange charge with the plasma only through the surface species.
+A solid species is injected from the surface by a ``surface reactions`` entry with a surface species on the left-hand side and solid species (and optionally surface species, but no Ito species) on the right-hand side:
+
+.. code-block:: json
+
+   "surface reactions":
+   [
+      {
+         "reaction": "e(s) -> e(d)",
+	 "rate": 1E3
+      },
+      {
+         "reaction": "e(d) -> e(s)"
+      }
+   ]
+
+Injection reactions are sampled as the other first-order surface reactions, on the whole surface particles of the cut cell, and their charge is moved from the surface charge to the solid species.
+Solid species that drift out of the dielectric where it meets the gas arrive at the surface and their charge is added to the surface charge.
+An arrival entry, with a solid species on the left-hand side and surface species on the right-hand side and no ``rate``, assigns the arriving charge to surface species; without one it stays in the surface charge without being assigned to a surface species.
+Each solid species can have at most one arrival entry.
+Solid species that drift out of the dielectric elsewhere, e.g. into an electrode or through a domain boundary with ``outflow``, leave the simulation.
+In a cut cell that holds more than one volume of the gas or the solid phase, the surface exchanges with the first one of each.
+Injection and arrival reactions must conserve charge, or the run stops with an error, and every exchange takes as much charge out of the surface charge as it adds to the solid species, or the other way around.
+The step report lists the charge of each solid species, ``Qsolid``, and includes it in ``Qtot``.
+The densities are written to plot files as ``<id> phi``.
+
+Solid species are only solved for when the geometry has dielectrics.
+Cells inside dielectrics are not tagged for refinement by the solid species.
+When restarting from a checkpoint file that was written without solid species, the solid species densities are set to zero and a warning is issued.
 
 Field emission
 --------------
