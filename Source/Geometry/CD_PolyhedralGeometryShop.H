@@ -666,28 +666,6 @@ public:
   cacheExtension(const Vector<Box>& a_tiles, const ProblemDomain& a_domain, const int a_level) const;
 
   /**
-   * @brief TEMPORARY. Compare a fill made from the extension cache with one whose tiles are all cut afresh.
-   * @details Every cell of the boxes and their moment ghost cells is compared bit for bit: its state, and every VoF's
-   * moments and faces. A difference stops the run. Run by fillLayout under
-   * PolyhedralGeometryShop.check_extension_cache. Collective.
-   * @param[in] a_graph      The graph the cache filled.
-   * @param[in] a_data       The moments the cache filled.
-   * @param[in] a_tiles      The extension tiles of the fill.
-   * @param[in] a_grids      The layout.
-   * @param[in] a_domain     Its domain.
-   * @param[in] a_graphGhost Ghost width of the graph.
-   * @param[in] a_dataGhost  Ghost width of the moments.
-   */
-  void
-  checkExtensionCache(const LevelData<EBGraph>& a_graph,
-                      const LevelData<EBData>&  a_data,
-                      const Vector<Box>&        a_tiles,
-                      const DisjointBoxLayout&  a_grids,
-                      const ProblemDomain&      a_domain,
-                      const int                 a_graphGhost,
-                      const int                 a_dataGhost) const;
-
-  /**
    * @brief Count the cut cells of every tile on every level, for extensionLoads.
    * @details Each rank counts the cells with a surface in its own graph boxes, and the counts are summed over the
    * ranks. Run by buildMoments under PolyhedralGeometryShop.extension_cut_cell_loads. Collective. Requires buildGraphs.
@@ -930,12 +908,6 @@ protected:
    * @brief The multi-valued cells of every stored level, the same on every rank. Set by buildMoments.
    */
   Vector<IntVectSet> m_multiValuedCells;
-
-  /**
-   * @brief TEMPORARY. Whether fillLayout compares every fill with one made without the extension cache.
-   * PolyhedralGeometryShop.check_extension_cache, off by default.
-   */
-  bool m_checkExtensionCache;
 
   /**
    * @brief The extension tiles cut so far, per geometry level as destinationLevel numbers them, on the ranks that cut
