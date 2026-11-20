@@ -127,6 +127,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_maxDt                            = std::numeric_limits<Real>::max();
   m_physicsDt                        = std::numeric_limits<Real>::max();
   m_maxReducedField                  = 0.0;
+  m_checkpointSurfaceSpecies         = 0;
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -192,6 +193,10 @@ ItoKMCStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   m_fieldSolver->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_sigmaSolver->parseRuntimeOptions();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->parseRuntimeOptions();
+  }
 
   m_physics->parseRuntimeOptions();
 }
@@ -504,6 +509,7 @@ ItoKMCStepper<I, C, R, F>::setupSolvers() noexcept
   this->setupPoisson();
   this->setupRadiativeTransfer();
   this->setupSigma();
+  this->setupSurfaceSpecies();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -600,6 +606,29 @@ ItoKMCStepper<I, C, R, F>::setupSigma() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCStepper<I, C, R, F>::setupSurfaceSpecies() noexcept
+{
+  CH_TIME("ItoKMCStepper::setupSurfaceSpecies");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setupSurfaceSpecies" << endl;
+  }
+
+  const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+  m_surfaceSolvers.resize(surfaceSpecies.size());
+
+  for (int i = 0; i < surfaceSpecies.size(); i++) {
+    m_surfaceSolvers[i] = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
+    m_surfaceSolvers[i]->parseOptions();
+    m_surfaceSolvers[i]->setRealm(m_fluidRealm);
+    m_surfaceSolvers[i]->setPhase(m_plasmaPhase);
+    m_surfaceSolvers[i]->setName("Surface density " + surfaceSpecies[i]->getName());
+    m_surfaceSolvers[i]->setTime(0, 0.0, 0.0);
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCStepper<I, C, R, F>::allocate() noexcept
 {
   CH_TIME("ItoKMCStepper::allocate");
@@ -612,6 +641,10 @@ ItoKMCStepper<I, C, R, F>::allocate() noexcept
   m_rte->allocate();
   m_fieldSolver->allocate();
   m_sigmaSolver->allocate();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->allocate();
+  }
 
   this->allocateInternals();
 }
@@ -640,6 +673,13 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_particleScratch1, m_particleRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_particleScratchD, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_particleScratchEB, m_particleRealm, m_plasmaPhase, 1);
+
+  // Surface species scratch, one component per species.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (numSurfaceSpecies > 0) {
+    m_amr->allocate(m_particleSurfaceScratch, m_particleRealm, m_plasmaPhase, numSurfaceSpecies);
+  }
 
   // Storage for neutral density
   m_amr->allocate(m_neutralDensity, m_fluidRealm, m_plasmaPhase, 1);
@@ -777,6 +817,7 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
   m_cdr->initialData();
   m_rte->initialData();
   this->initialSigma();
+  this->initialSurfaceSpecies();
 
   // Make superparticles (makeSuperparticles() cell-sorts internally as needed and returns the containers
   // patch-organized).
@@ -842,6 +883,65 @@ ItoKMCStepper<I, C, R, F>::initialSigma() noexcept
 
   // Set surface charge to zero on electrode cut-cells.
   m_sigmaSolver->resetElectrodes(sigma, 0.0);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::initialSurfaceSpecies() noexcept
+{
+  CH_TIME("ItoKMCStepper::initialSurfaceSpecies");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::initialSurfaceSpecies" << endl;
+  }
+
+  const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+  CH_assert(m_surfaceSolvers.size() == surfaceSpecies.size());
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  EBAMRIVData& sigma = m_sigmaSolver->getPhi();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    const RefCountedPtr<CdrSpecies>& species = surfaceSpecies[i];
+
+    EBAMRIVData& density = m_surfaceSolvers[i]->getPhi();
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BaseIVFAB<Real>& phi     = (*density[lvl])[din];
+        const EBISBox&   ebisbox = ebisl[din];
+
+        auto kernel = [&](const VolIndex& vof) -> void {
+          const RealVect pos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+          phi(vof, 0) = species->initialData(pos, m_time);
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
+
+        BoxLoops::loop(vofit, kernel);
+      }
+    }
+
+    // Same coarsening and electrode treatment as the surface charge.
+    m_amr->conservativeAverage(density, m_fluidRealm, m_plasmaPhase);
+
+    m_surfaceSolvers[i]->resetElectrodes(density, 0.0);
+
+    // The surface charge is the total, so it includes the charge of the surface species.
+    DataOps::incr(sigma, density, species->getChargeNumber() * Units::Qe);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -915,6 +1015,13 @@ ItoKMCStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const
   if (m_verbosity > 5) {
     pout() << m_name + "::writeCheckpointHeader" << endl;
   }
+
+  // The count is only written when there are surface species, so a checkpoint without them is unchanged.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (numSurfaceSpecies > 0) {
+    a_header.m_int["num_surface_species"] = numSurfaceSpecies;
+  }
 }
 #endif
 
@@ -926,6 +1033,24 @@ ItoKMCStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header) noexce
   CH_TIME("ItoKMCStepper::readCheckpointHeader");
   if (m_verbosity > 5) {
     pout() << m_name + "::readCheckpointHeader" << endl;
+  }
+
+  const auto it = a_header.m_int.find("num_surface_species");
+
+  m_checkpointSurfaceSpecies = (it != a_header.m_int.end()) ? it->second : 0;
+
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (m_checkpointSurfaceSpecies != numSurfaceSpecies) {
+    if (m_checkpointSurfaceSpecies == 0) {
+      MayDay::Warning("ItoKMCStepper::readCheckpointHeader -- checkpoint file has no surface species, setting the "
+                      "surface species densities to zero. The surface charge is kept but is not assigned to any "
+                      "surface species.");
+    }
+    else {
+      MayDay::Error("ItoKMCStepper::readCheckpointHeader -- checkpoint file has a different number of surface species "
+                    "than the physics model");
+    }
   }
 }
 #endif
@@ -954,6 +1079,10 @@ ItoKMCStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigmaSolver->writeCheckpointLevel(a_handle, a_lvl);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->writeCheckpointLevel(a_handle, a_lvl);
+  }
 }
 #endif
 
@@ -981,6 +1110,17 @@ ItoKMCStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigmaSolver->readCheckpointLevel(a_handle, a_lvl);
+
+  // A checkpoint written without surface species has no data for them; readCheckpointHeader() has already
+  // warned about it.
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    if (m_checkpointSurfaceSpecies == m_surfaceSolvers.size()) {
+      m_surfaceSolvers[i]->readCheckpointLevel(a_handle, a_lvl);
+    }
+    else {
+      DataOps::setValue(*(m_surfaceSolvers[i]->getPhi())[a_lvl], 0.0);
+    }
+  }
 }
 #endif
 
@@ -1016,6 +1156,11 @@ ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
   // Surface charge solver variables.
   numComp += m_sigmaSolver->getNumberOfPlotVariables();
 
+  // Surface species variables.
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    numComp += m_surfaceSolvers[i]->getNumberOfPlotVariables();
+  }
+
   // Conductivity
   if (m_plotConductivity) {
     numComp += 1;
@@ -1050,6 +1195,10 @@ ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
 
   plotVarNames.append(m_fieldSolver->getPlotVariableNames());
   plotVarNames.append(m_sigmaSolver->getPlotVariableNames());
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    plotVarNames.append(m_surfaceSolvers[i]->getPlotVariableNames());
+  }
 
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     plotVarNames.append(solverIt()->getPlotVariableNames());
@@ -1105,6 +1254,11 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Surface charge solver writes
   m_sigmaSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+
+  // Surface species solvers write
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
 
   // Ito solvers copy their output data
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1271,6 +1425,10 @@ ItoKMCStepper<I, C, R, F>::synchronizeSolverTimes(const int a_step, const Real a
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_rte->setTime(a_step, a_time, a_dt);
   m_sigmaSolver->setTime(a_step, a_time, a_dt);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->setTime(a_step, a_time, a_dt);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1661,6 +1819,10 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
 
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->registerOperators();
+  }
+
   // Required for non-cell-based particle mergers.
   m_amr->registerParticleGhostMask(m_particleRealm, 1);
 }
@@ -1806,6 +1968,10 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
   m_sigmaSolver->preRegrid(a_lmin, a_oldFinestLevel);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->preRegrid(a_lmin, a_oldFinestLevel);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1824,6 +1990,10 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  }
 
   // The regrid super-particle merge now runs inside ItoSolver::regrid(), on the reduced particles and
   // before they are rebuilt as ItoParticles -- which is the whole point: the de-refinement pile-up is

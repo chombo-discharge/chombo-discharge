@@ -439,6 +439,23 @@ protected:
   RefCountedPtr<SurfaceODESolver<1>> m_sigmaSolver;
 
   /**
+   * @brief Areal densities (1/m^2) of the surface species, one solver per species in the order of
+   * ItoKMCPhysics::getSurfaceSpecies().
+   * @details Stored on the fluid realm, like m_sigmaSolver. The surface charge density in m_sigmaSolver remains the
+   * record of the charge on the surface; these densities are a breakdown of it, and the part of the surface charge
+   * that is not assigned to any surface species is sigma - sum_s Z_s q_e n_s. Empty when the physics model has no
+   * surface species.
+   */
+  Vector<RefCountedPtr<SurfaceODESolver<1>>> m_surfaceSolvers;
+
+  /**
+   * @brief Number of surface species found in the checkpoint file being restarted from.
+   * @details Set by readCheckpointHeader(). A checkpoint written without surface species carries no count and is
+   * read as zero.
+   */
+  int m_checkpointSurfaceSpecies;
+
+  /**
    * @brief List of secondary particles injected through the EB
    * @details This is used when injecting secondary particles through the EB.
    * @note Stored on the particle realm
@@ -839,6 +856,13 @@ protected:
   mutable EBAMRIVData m_particleScratchEB;
 
   /**
+   * @brief Scratch storage for the surface species on the particle realm, one component per surface species.
+   * @details Carries the areal densities into the EB emission kernel, and their change out of it. Only allocated
+   * when the physics model has surface species.
+   */
+  mutable EBAMRIVData m_particleSurfaceScratch;
+
+  /**
    * @brief Per-Ito-species scratch storage on the fluid realm, one component each.
    * @details computeMobilities() and computeDiffusionCoefficients() evaluate the physics on the fluid realm
    * and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar
@@ -883,6 +907,12 @@ protected:
    */
   virtual void
   setupSigma() noexcept;
+
+  /**
+   * @brief Set up one surface density solver per surface species in the physics model.
+   */
+  virtual void
+  setupSurfaceSpecies() noexcept;
 
   /**
    * @brief Intersect a subset of the particles with the domain and embedded boundary.
@@ -1887,6 +1917,15 @@ protected:
    */
   virtual void
   initialSigma() noexcept;
+
+  /**
+   * @brief Fill the surface density solvers with the initial data of the surface species.
+   * @details The charge of the initial surface densities, sum_s Z_s q_e n_s, is added to the surface charge
+   * density so that the surface charge remains the total. Must be called after initialSigma(). Does nothing when
+   * there are no surface species.
+   */
+  virtual void
+  initialSurfaceSpecies() noexcept;
 
   /**
    * @brief Parse chattiness

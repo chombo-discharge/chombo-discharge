@@ -963,6 +963,11 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   m_timer.startEvent("Regrid SurfaceODESolver");
   this->m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  for (int i = 0; i < this->m_surfaceSolvers.size(); i++) {
+    this->m_surfaceSolvers[i]->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  }
+
   m_timer.stopEvent("Regrid SurfaceODESolver");
 
   // Allocate internal memory for ItoKMCGodunovStepper now....
@@ -2429,6 +2434,8 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header
     pout() << this->m_name + "::writeCheckpointHeader" << endl;
   }
 
+  ItoKMCStepper<I, C, R, F>::writeCheckpointHeader(a_header);
+
   a_header.m_real["prev_dt"]             = this->m_prevDt;
   a_header.m_real["physics_dt"]          = this->m_physicsDt;
   a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
@@ -2444,6 +2451,8 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
+
+  ItoKMCStepper<I, C, R, F>::readCheckpointHeader(a_header);
 
   this->m_prevDt    = a_header.m_real["prev_dt"];
   this->m_physicsDt = a_header.m_real["physics_dt"];
