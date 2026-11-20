@@ -2484,7 +2484,7 @@ The pathways are drawn exactly as for other secondary emission reactions.
 In each cut cell the surface densities are converted to whole numbers of surface particles, and a pathway that consumes surface species fires at most as many times as those are available.
 The primary is absorbed either way, so its charge goes into :math:`\sigma`; if the pathway did not fire, that charge is unassigned.
 A pathway that involves surface species only fires if all its charged products can be released, i.e. if the field pushes them away from the surface.
-A reaction with surface species that does not conserve charge is accepted with a warning.
+A reaction with surface species must conserve charge, or the run stops with an error.
 
 First-order reactions of surface species, such as desorption, are given in a top-level ``surface reactions`` array.
 Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or ``(null)``) on the right-hand side, and a ``rate`` in :math:`\text{s}^{-1}`:

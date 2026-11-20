@@ -365,8 +365,7 @@ ItoKMCJSON::checkSurfaceChargeConservation(const int          a_chargeIn,
   }
 
   if (a_chargeIn != a_chargeOut) {
-    this->throwParserWarning(a_context + " does not conserve charge; the difference stays in the surface charge but "
-                                         "is not assigned to any surface species");
+    this->throwParserError(a_context + " does not conserve charge");
   }
 }
 
@@ -2598,8 +2597,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
         }
       }
 
-      // A reaction with surface species should conserve charge, or the surface charge it leaves behind is not
-      // assigned to any surface species.
+      // A reaction with surface species must conserve charge.
       if (!(surfaceReactants.empty()) || !(surfaceProducts.empty())) {
         int chargeIn  = isPlasma ? m_itoSpecies[reactantIndex]->getChargeNumber() : 0;
         int chargeOut = 0;

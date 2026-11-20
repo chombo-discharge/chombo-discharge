@@ -685,12 +685,10 @@ protected:
   getSurfaceSpeciesIndex(const std::string& a_name) const noexcept;
 
   /**
-   * @brief Warn if a reaction that involves surface species does not conserve charge.
-   * @details A reaction that does not conserve charge is allowed. The surface charge still accounts for all
-   * charge that reaches or leaves the surface, but the difference is not assigned to any surface species.
+   * @brief Stop the run if a reaction that involves surface species does not conserve charge.
    * @param[in] a_chargeIn  Total charge number of the reactants, including the impinging species.
    * @param[in] a_chargeOut Total charge number of the products.
-   * @param[in] a_context   Reaction description used in the warning.
+   * @param[in] a_context   Reaction description used in the error.
    */
   virtual void
   checkSurfaceChargeConservation(const int a_chargeIn, const int a_chargeOut, const std::string& a_context) const;
