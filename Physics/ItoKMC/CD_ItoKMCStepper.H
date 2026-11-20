@@ -456,6 +456,21 @@ protected:
   int m_checkpointSurfaceSpecies;
 
   /**
+   * @brief CDR solvers for the solid species, one per species in the order of ItoKMCPhysics::getSolidSpecies().
+   * @details Solved on the solid phase of the fluid realm, with domain boundary conditions taken from
+   * ItoKMCPhysics::getSolidDomainBc() rather than from the input options of the CDR solver class. The layout holds no
+   * solvers when the physics model has no solid species or the geometry has no dielectrics.
+   */
+  RefCountedPtr<CdrLayout<CdrSolver>> m_cdrSolid;
+
+  /**
+   * @brief Number of solid species found in the checkpoint file being restarted from.
+   * @details Set by readCheckpointHeader() and checked against the solid species solvers by readCheckpointData(). A
+   * checkpoint written without solid species carries no count and is read as zero.
+   */
+  int m_checkpointSolidSpecies;
+
+  /**
    * @brief List of secondary particles injected through the EB
    * @details This is used when injecting secondary particles through the EB.
    * @note Stored on the particle realm
@@ -863,6 +878,25 @@ protected:
   mutable EBAMRIVData m_particleSurfaceScratch;
 
   /**
+   * @brief Scratch storage on the solid phase of the fluid realm for the advective divergence of a solid species.
+   * @details One component. Only allocated when there are solid species.
+   */
+  mutable EBAMRCellData m_solidScratchDivF;
+
+  /**
+   * @brief Scratch storage on the solid phase of the fluid realm for the diffusive divergence of a solid species.
+   * @details One component. Only allocated when there are solid species.
+   */
+  mutable EBAMRCellData m_solidScratchDivD;
+
+  /**
+   * @brief Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm.
+   * @details One component each. Holds the injected mass that exchangeSurfaceSolid() redistributes. Empty when there
+   * are no solid species.
+   */
+  mutable Vector<EBAMRIVData> m_solidScratchEB;
+
+  /**
    * @brief Per-Ito-species scratch storage on the fluid realm, one component each.
    * @details computeMobilities() and computeDiffusionCoefficients() evaluate the physics on the fluid realm
    * and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar
@@ -913,6 +947,59 @@ protected:
    */
   virtual void
   setupSurfaceSpecies() noexcept;
+
+  /**
+   * @brief Set up the CDR solvers for the solid species on the solid phase.
+   * @details The layout gets one solver per solid species when the geometry has dielectrics, and no solvers
+   * otherwise. The domain boundary conditions are set by setSolidDomainBcs().
+   */
+  virtual void
+  setupSolidCdr() noexcept;
+
+  /**
+   * @brief Give each solid species solver the domain boundary conditions from the physics model.
+   * @details The CDR solver classes read their domain boundary conditions from their input options, which the gas
+   * solvers share. This replaces them on every side with ItoKMCPhysics::getSolidDomainBc().
+   */
+  virtual void
+  setSolidDomainBcs() noexcept;
+
+  /**
+   * @brief Compute the velocities and diffusion coefficients of the solid species.
+   * @details The velocity is sgn(Z) * mu * E with the electric field inside the dielectric and the mobility from
+   * ItoKMCPhysics::computeSolidMobilities(). The diffusion coefficients come from
+   * ItoKMCPhysics::computeSolidDiffusionCoefficients() and are averaged to faces. Does nothing without solid species.
+   */
+  virtual void
+  computeSolidTransportCoefficients() noexcept;
+
+  /**
+   * @brief Advance the solid species over one time step with an explicit update.
+   * @details The update is phi^(k+1) = phi^k - dt*(div(F) - div(D*grad(phi))) with the drift flux, the diffusion
+   * flux and the EB flux added as conservative divergences and stabilized together. The EB flux is the drift flux
+   * leaving the dielectric. It is set to zero where the dielectric meets the gas in a cut cell whose gas side has no
+   * boundary area, since that charge would have no surface to go to. Elsewhere on the gas-dielectric interface the
+   * carriers that leave are handed to the surface by exchangeSurfaceSolid(), and on other parts of the dielectric
+   * boundary they leave the system. The diffusion flux is zero through the EB and the domain boundaries. The
+   * densities are not floored, so the update conserves the charge exactly. Does nothing without solid species.
+   * @param[in] a_dt Time step.
+   */
+  virtual void
+  advanceSolidSpecies(const Real a_dt) noexcept;
+
+  /**
+   * @brief Exchange charge between the surface and the solid species through the gas-dielectric interface.
+   * @details Must be called after advanceSolidSpecies(), which leaves the EB flux of the carriers that left the
+   * dielectric in the solvers. In each valid cut cell on the gas side of the interface, the gas VoF is paired with
+   * the solid VoF by taking the first VoF of each phase. The carriers that arrived at the surface are added to the
+   * surface charge, and ItoKMCPhysics::surfaceSolidExchangeEB() assigns them to surface species and returns the
+   * carriers injected into the dielectric, whose charge is taken out of the surface charge. The injected carriers
+   * are added to the solid species with the mass that does not fit in the cut cell redistributed to its neighbors.
+   * Every transfer moves the same charge out of one ledger and into the other. Does nothing without solid species.
+   * @param[in] a_dt Time step.
+   */
+  virtual void
+  exchangeSurfaceSolid(const Real a_dt) noexcept;
 
   /**
    * @brief Intersect a subset of the particles with the domain and embedded boundary.
@@ -1031,6 +1118,22 @@ protected:
             const int             a_level,
             const bool            a_interpToCentroids,
             const bool            a_interpGhost) const noexcept;
+
+  /**
+   * @brief Write the densities of the solid species to the output holder.
+   * @details The output holder lives on the gas phase. Cells inside the dielectrics, which the gas phase covers, and
+   * cut cells of the solid phase get the solid density of the first solid VoF in the cell; all other cells get
+   * zero. Writes one component per solid species and nothing when there are none.
+   * @param[in,out] a_output      Output data holder.
+   * @param[in,out] a_icomp       Starting component in a_output. Incremented by the number of components written.
+   * @param[in]     a_outputRealm Realm where a_output belongs.
+   * @param[in]     a_level       Grid level.
+   */
+  virtual void
+  writeSolidPlotData(LevelData<EBCellFAB>& a_output,
+                     int&                  a_icomp,
+                     const std::string&    a_outputRealm,
+                     const int             a_level) const noexcept;
 
   /**
    * @brief Write number of particles per patch to output holder.
@@ -1208,6 +1311,15 @@ protected:
    */
   virtual Real
   computeRelaxationTime() noexcept;
+
+  /**
+   * @brief Compute the dielectric relaxation time of the solid species inside the dielectrics.
+   * @details Computes eps0/sigma with the conductivity sigma = sum_s |Z_s| q_e mu_s n_s of the solid species, and
+   * returns its minimum over the solid phase.
+   * @return Minimum relaxation time inside the dielectrics, or the largest Real when there are no solid species.
+   */
+  virtual Real
+  computeSolidRelaxationTime() noexcept;
 
   /**
    * @brief Solve the electrostatic problem
@@ -1889,6 +2001,14 @@ protected:
    */
   virtual Real
   computeQsurfSpecies(const int a_species) const noexcept;
+
+  /**
+   * @brief Compute the charge held by one solid species.
+   * @param[in] a_species Solid species index.
+   * @return Z q_e times the number of carriers of the species inside the dielectrics.
+   */
+  virtual Real
+  computeQsolid(const int a_species) const noexcept;
 
   /**
    * @brief Photon advancement routine
