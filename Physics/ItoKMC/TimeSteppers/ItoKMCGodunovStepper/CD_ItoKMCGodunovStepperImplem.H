@@ -709,6 +709,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
   }
   m_timer.stopEvent("EB/Particle intersection");
+
+  // Hand the solid carriers that reached the dielectric surface to the surface, and inject carriers from it.
+  this->barrier();
+  m_timer.startEvent("Surface-solid exchange");
+  this->exchangeSurfaceSolid(a_dt);
+  m_timer.stopEvent("Surface-solid exchange");
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
@@ -951,6 +957,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   m_timer.startEvent("Regrid CdrSolver");
   (this->m_cdr)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  (this->m_cdrSolid)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_timer.stopEvent("Regrid CdrSolver");
 
   m_timer.startEvent("Regrid FieldSolver");
@@ -963,6 +970,11 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   m_timer.startEvent("Regrid SurfaceODESolver");
   this->m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  for (int i = 0; i < this->m_surfaceSolvers.size(); i++) {
+    this->m_surfaceSolvers[i]->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  }
+
   m_timer.stopEvent("Regrid SurfaceODESolver");
 
   // Allocate internal memory for ItoKMCGodunovStepper now....
@@ -1693,6 +1705,16 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
       DataOps::incr(rhoSolid, m_fluidScratchSolid, 1.0);
     }
 
+    // Space charge of the solid species, at the start of the step. Their conductivity is not in the semi-implicit
+    // field solve.
+    for (auto solverIt = (this->m_cdrSolid)->iterator(); solverIt.ok(); ++solverIt) {
+      const int Z = solverIt()->getSpecies()->getChargeNumber();
+
+      if (Z != 0) {
+        DataOps::incr(rhoSolid, solverIt()->getPhi(), 1.0 * Z * Units::Qe);
+      }
+    }
+
     CH_STOP(t2);
   }
 
@@ -1979,6 +2001,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->stepEulerMaruyamaParticles(a_dt);
   this->stepEulerMaruyamaCDR(a_dt);
   m_timer.stopEvent("Euler-Maruyama step");
+
+  // Transport the solid species in the new field.
+  this->barrier();
+  m_timer.startEvent("Solid species step");
+  this->advanceSolidSpecies(a_dt);
+  m_timer.stopEvent("Solid species step");
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2429,6 +2457,8 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header
     pout() << this->m_name + "::writeCheckpointHeader" << endl;
   }
 
+  ItoKMCStepper<I, C, R, F>::writeCheckpointHeader(a_header);
+
   a_header.m_real["prev_dt"]             = this->m_prevDt;
   a_header.m_real["physics_dt"]          = this->m_physicsDt;
   a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
@@ -2444,6 +2474,8 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
+
+  ItoKMCStepper<I, C, R, F>::readCheckpointHeader(a_header);
 
   this->m_prevDt    = a_header.m_real["prev_dt"];
   this->m_physicsDt = a_header.m_real["physics_dt"];

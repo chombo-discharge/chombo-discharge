@@ -75,6 +75,20 @@ public:
   getProducts() const noexcept;
 
   /**
+   * @brief Get the surface species consumed by each competing reaction pathway.
+   * @return Vector of surface species index lists, one per reaction pathway.
+   */
+  inline const std::vector<Products>&
+  getSurfaceReactants() const noexcept;
+
+  /**
+   * @brief Get the surface species produced by each competing reaction pathway.
+   * @return Vector of surface species index lists, one per reaction pathway.
+   */
+  inline const std::vector<Products>&
+  getSurfaceProducts() const noexcept;
+
+  /**
    * @brief Get the efficiency (probability) for each competing reaction pathway.
    * @return Vector of efficiencies, one per reaction pathway.
    */
@@ -103,6 +117,16 @@ protected:
    * @brief Plasma product indices
    */
   std::vector<Products> m_products;
+
+  /**
+   * @brief Surface species consumed by each pathway.
+   */
+  std::vector<Products> m_surfaceReactants;
+
+  /**
+   * @brief Surface species produced by each pathway.
+   */
+  std::vector<Products> m_surfaceProducts;
 
   /**
    * @brief Reaction efficiencies

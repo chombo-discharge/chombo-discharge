@@ -427,6 +427,18 @@ SurfaceODESolver<N>::getPhi() const noexcept
 }
 
 template <int N>
+const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+SurfaceODESolver<N>::getDielectricVoFs() const noexcept
+{
+  CH_TIME("SurfaceODESolver::getDielectricVoFs");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getDielectricVoFs" << endl;
+  }
+
+  return m_dielectricVoFs;
+}
+
+template <int N>
 void
 SurfaceODESolver<N>::setRHS(const Real a_rhs)
 {

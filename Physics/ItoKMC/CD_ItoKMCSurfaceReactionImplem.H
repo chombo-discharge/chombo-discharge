@@ -26,6 +26,15 @@ inline ItoKMCSurfaceReaction::ItoKMCSurfaceReaction(const size_t            a_re
   this->define(a_reactant, a_products, a_efficiency);
 }
 
+inline ItoKMCSurfaceReaction::ItoKMCSurfaceReaction(const size_t            a_reactant,
+                                                    const std::list<size_t> a_products,
+                                                    const std::list<size_t> a_surfaceReactants,
+                                                    const std::list<size_t> a_surfaceProducts,
+                                                    const Real              a_efficiency) noexcept
+{
+  this->define(a_reactant, a_products, a_surfaceReactants, a_surfaceProducts, a_efficiency);
+}
+
 inline ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction() noexcept
 {}
 
@@ -34,9 +43,21 @@ ItoKMCSurfaceReaction::define(const size_t            a_reactant,
                               const std::list<size_t> a_products,
                               const Real              a_efficiency) noexcept
 {
-  m_reactant   = a_reactant;
-  m_products   = a_products;
-  m_efficiency = a_efficiency;
+  this->define(a_reactant, a_products, std::list<size_t>(), std::list<size_t>(), a_efficiency);
+}
+
+inline void
+ItoKMCSurfaceReaction::define(const size_t            a_reactant,
+                              const std::list<size_t> a_products,
+                              const std::list<size_t> a_surfaceReactants,
+                              const std::list<size_t> a_surfaceProducts,
+                              const Real              a_efficiency) noexcept
+{
+  m_reactant         = a_reactant;
+  m_products         = a_products;
+  m_surfaceReactants = a_surfaceReactants;
+  m_surfaceProducts  = a_surfaceProducts;
+  m_efficiency       = a_efficiency;
 }
 
 inline const size_t&
@@ -61,6 +82,18 @@ inline std::list<size_t>&
 ItoKMCSurfaceReaction::getProducts() noexcept
 {
   return m_products;
+}
+
+inline const std::list<size_t>&
+ItoKMCSurfaceReaction::getSurfaceReactants() const noexcept
+{
+  return m_surfaceReactants;
+}
+
+inline const std::list<size_t>&
+ItoKMCSurfaceReaction::getSurfaceProducts() const noexcept
+{
+  return m_surfaceProducts;
 }
 
 inline const Real&

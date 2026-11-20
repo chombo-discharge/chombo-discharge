@@ -127,6 +127,8 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_maxDt                            = std::numeric_limits<Real>::max();
   m_physicsDt                        = std::numeric_limits<Real>::max();
   m_maxReducedField                  = 0.0;
+  m_checkpointSurfaceSpecies         = 0;
+  m_checkpointSolidSpecies           = 0;
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -192,6 +194,15 @@ ItoKMCStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   m_fieldSolver->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_sigmaSolver->parseRuntimeOptions();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->parseRuntimeOptions();
+  }
+
+  // The CDR solvers re-read their domain boundary conditions from the input options, which the solid species do not
+  // use.
+  m_cdrSolid->parseRuntimeOptions();
+  this->setSolidDomainBcs();
 
   m_physics->parseRuntimeOptions();
 }
@@ -504,6 +515,8 @@ ItoKMCStepper<I, C, R, F>::setupSolvers() noexcept
   this->setupPoisson();
   this->setupRadiativeTransfer();
   this->setupSigma();
+  this->setupSurfaceSpecies();
+  this->setupSolidCdr();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -600,6 +613,29 @@ ItoKMCStepper<I, C, R, F>::setupSigma() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCStepper<I, C, R, F>::setupSurfaceSpecies() noexcept
+{
+  CH_TIME("ItoKMCStepper::setupSurfaceSpecies");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setupSurfaceSpecies" << endl;
+  }
+
+  const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+  m_surfaceSolvers.resize(surfaceSpecies.size());
+
+  for (int i = 0; i < surfaceSpecies.size(); i++) {
+    m_surfaceSolvers[i] = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
+    m_surfaceSolvers[i]->parseOptions();
+    m_surfaceSolvers[i]->setRealm(m_fluidRealm);
+    m_surfaceSolvers[i]->setPhase(m_plasmaPhase);
+    m_surfaceSolvers[i]->setName("Surface density " + surfaceSpecies[i]->getName());
+    m_surfaceSolvers[i]->setTime(0, 0.0, 0.0);
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCStepper<I, C, R, F>::allocate() noexcept
 {
   CH_TIME("ItoKMCStepper::allocate");
@@ -612,6 +648,12 @@ ItoKMCStepper<I, C, R, F>::allocate() noexcept
   m_rte->allocate();
   m_fieldSolver->allocate();
   m_sigmaSolver->allocate();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->allocate();
+  }
+
+  m_cdrSolid->allocate();
 
   this->allocateInternals();
 }
@@ -640,6 +682,27 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_particleScratch1, m_particleRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_particleScratchD, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_particleScratchEB, m_particleRealm, m_plasmaPhase, 1);
+
+  // Surface species scratch, one component per species.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (numSurfaceSpecies > 0) {
+    m_amr->allocate(m_particleSurfaceScratch, m_particleRealm, m_plasmaPhase, numSurfaceSpecies);
+  }
+
+  // Solid species scratch on the solid phase.
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  m_solidScratchEB.resize(numSolidSpecies);
+
+  if (numSolidSpecies > 0) {
+    m_amr->allocate(m_solidScratchDivF, m_fluidRealm, phase::solid, 1);
+    m_amr->allocate(m_solidScratchDivD, m_fluidRealm, phase::solid, 1);
+
+    for (int i = 0; i < numSolidSpecies; i++) {
+      m_amr->allocate(m_solidScratchEB[i], m_fluidRealm, phase::solid, 1);
+    }
+  }
 
   // Storage for neutral density
   m_amr->allocate(m_neutralDensity, m_fluidRealm, m_plasmaPhase, 1);
@@ -775,8 +838,10 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
 
   m_ito->initialData();
   m_cdr->initialData();
+  m_cdrSolid->initialData();
   m_rte->initialData();
   this->initialSigma();
+  this->initialSurfaceSpecies();
 
   // Make superparticles (makeSuperparticles() cell-sorts internally as needed and returns the containers
   // patch-organized).
@@ -842,6 +907,739 @@ ItoKMCStepper<I, C, R, F>::initialSigma() noexcept
 
   // Set surface charge to zero on electrode cut-cells.
   m_sigmaSolver->resetElectrodes(sigma, 0.0);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::initialSurfaceSpecies() noexcept
+{
+  CH_TIME("ItoKMCStepper::initialSurfaceSpecies");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::initialSurfaceSpecies" << endl;
+  }
+
+  const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+  CH_assert(m_surfaceSolvers.size() == surfaceSpecies.size());
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  EBAMRIVData& sigma = m_sigmaSolver->getPhi();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    const RefCountedPtr<CdrSpecies>& species = surfaceSpecies[i];
+
+    EBAMRIVData& density = m_surfaceSolvers[i]->getPhi();
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BaseIVFAB<Real>& phi     = (*density[lvl])[din];
+        const EBISBox&   ebisbox = ebisl[din];
+
+        auto kernel = [&](const VolIndex& vof) -> void {
+          const RealVect pos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+          phi(vof, 0) = species->initialData(pos, m_time);
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
+
+        BoxLoops::loop(vofit, kernel);
+      }
+    }
+
+    // Same coarsening and electrode treatment as the surface charge.
+    m_amr->conservativeAverage(density, m_fluidRealm, m_plasmaPhase);
+
+    m_surfaceSolvers[i]->resetElectrodes(density, 0.0);
+
+    // The surface charge is the total, so it includes the charge of the surface species.
+    DataOps::incr(sigma, density, species->getChargeNumber() * Units::Qe);
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::setupSolidCdr() noexcept
+{
+  CH_TIME("ItoKMCStepper::setupSolidCdr");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setupSolidCdr" << endl;
+  }
+
+  const RefCountedPtr<MultiFluidIndexSpace>& mfis        = m_computationalGeometry->getMfIndexSpace();
+  const Vector<Dielectric>&                  dielectrics = m_computationalGeometry->getDielectrics();
+
+  const bool hasDielectrics = (mfis->numPhases() > 1) && (dielectrics.size() > 0);
+
+  // Solid species live inside dielectrics. Without dielectrics the layout holds no solvers.
+  Vector<RefCountedPtr<CdrSpecies>> solidSpecies;
+
+  if (m_physics->getNumSolidSpecies() > 0) {
+    if (hasDielectrics) {
+      solidSpecies = m_physics->getSolidSpecies();
+    }
+    else {
+      MayDay::Warning("ItoKMCStepper::setupSolidCdr -- the physics model has solid species but the geometry has no "
+                      "dielectrics, so the solid species are not solved for");
+    }
+  }
+
+  CdrFactory<CdrSolver, C> factory;
+  m_cdrSolid = factory.newLayout(solidSpecies);
+
+  m_cdrSolid->parseOptions();
+  m_cdrSolid->setAmr(m_amr);
+  m_cdrSolid->setPhase(phase::solid);
+  m_cdrSolid->setComputationalGeometry(m_computationalGeometry);
+  m_cdrSolid->setRealm(m_fluidRealm);
+
+  this->setSolidDomainBcs();
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::setSolidDomainBcs() noexcept
+{
+  CH_TIME("ItoKMCStepper::setSolidDomainBcs");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setSolidDomainBcs" << endl;
+  }
+
+  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const CdrDomainBC::DomainSide domainSide = std::make_pair(dir, sit());
+
+        solverIt()->setDomainBcType(domainSide, m_physics->getSolidDomainBc(idx, dir, sit()));
+      }
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::computeSolidTransportCoefficients() noexcept
+{
+  CH_TIME("ItoKMCStepper::computeSolidTransportCoefficients");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeSolidTransportCoefficients" << endl;
+  }
+
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  if (numSolidSpecies > 0) {
+    const RealVect probLo = m_amr->getProbLo();
+
+    // The drift direction of each species.
+    Vector<Real> chargeSign(numSolidSpecies, 0.0);
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      const int Z = solverIt()->getSpecies()->getChargeNumber();
+
+      chargeSign[solverIt.index()] = (Z > 0) ? 1.0 : ((Z < 0) ? -1.0 : 0.0);
+    }
+
+    // Electric field inside the dielectrics.
+    const EBAMRCellData electricField = m_amr->alias(phase::solid, m_fieldSolver->getElectricField());
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, phase::solid)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box        cellBox = dbl[din];
+        const EBISBox&   ebisbox = ebisl[din];
+        const EBCellFAB& E       = (*electricField[lvl])[din];
+        const FArrayBox& EReg    = E.getFArrayBox();
+
+        // Velocity and diffusion coefficient of each species on this patch. Null where the species is not mobile or
+        // not diffusive.
+        Vector<EBCellFAB*> velocities(numSolidSpecies, nullptr);
+        Vector<EBCellFAB*> diffusionCoefficients(numSolidSpecies, nullptr);
+
+        for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+          const RefCountedPtr<CdrSolver>& solver = solverIt();
+
+          if (solver->isMobile()) {
+            velocities[solverIt.index()] = &((*solver->getCellCenteredVelocity()[lvl])[din]);
+          }
+          if (solver->isDiffusive()) {
+            diffusionCoefficients[solverIt.index()] = &((*solver->getCellCenteredDiffusionCoefficient()[lvl])[din]);
+          }
+        }
+
+        // One buffer of each for the whole patch, filled by the physics in every cell.
+        Vector<Real> mu;
+        Vector<Real> D;
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          RealVect e = RealVect::Zero;
+
+          if (!(ebisbox.isCovered(iv))) {
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              e[dir] = EReg(iv, dir);
+            }
+          }
+
+          const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+
+          m_physics->computeSolidMobilities(mu, m_time, pos, e);
+          m_physics->computeSolidDiffusionCoefficients(D, m_time, pos, e);
+
+          for (int i = 0; i < numSolidSpecies; i++) {
+            if (velocities[i] != nullptr) {
+              FArrayBox& vel = velocities[i]->getFArrayBox();
+
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                vel(iv, dir) = chargeSign[i] * mu[i] * e[dir];
+              }
+            }
+            if (diffusionCoefficients[i] != nullptr) {
+              diffusionCoefficients[i]->getFArrayBox()(iv, 0) = D[i];
+            }
+          }
+        };
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          RealVect e;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            e[dir] = E(vof, dir);
+          }
+
+          const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+
+          m_physics->computeSolidMobilities(mu, m_time, pos, e);
+          m_physics->computeSolidDiffusionCoefficients(D, m_time, pos, e);
+
+          for (int i = 0; i < numSolidSpecies; i++) {
+            if (velocities[i] != nullptr) {
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                (*velocities[i])(vof, dir) = chargeSign[i] * mu[i] * e[dir];
+              }
+            }
+            if (diffusionCoefficients[i] != nullptr) {
+              (*diffusionCoefficients[i])(vof, 0) = D[i];
+            }
+          }
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, phase::solid)[lvl])[din];
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    // Coarsen, fill ghost cells, and put the diffusion coefficients on faces.
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<CdrSolver>& solver = solverIt();
+
+      if (solver->isMobile()) {
+        EBAMRCellData& velocity = solver->getCellCenteredVelocity();
+
+        m_amr->conservativeAverage(velocity, m_fluidRealm, phase::solid);
+        m_amr->interpGhostPwl(velocity, m_fluidRealm, phase::solid);
+      }
+
+      if (solver->isDiffusive()) {
+        EBAMRCellData& cellCenteredDiffusionCoefficient = solver->getCellCenteredDiffusionCoefficient();
+        EBAMRFluxData& faceCenteredDiffusionCoefficient = solver->getFaceCenteredDiffusionCoefficient();
+
+        DataOps::setValue(faceCenteredDiffusionCoefficient, std::numeric_limits<Real>::max());
+
+        m_amr->arithmeticAverage(cellCenteredDiffusionCoefficient, m_fluidRealm, phase::solid);
+        m_amr->interpGhostPwl(cellCenteredDiffusionCoefficient, m_fluidRealm, phase::solid);
+
+        // Average to cell faces, including one ghost face as for the gas-phase CDR solvers.
+        const int      tanGhost = 1;
+        const Interval interv   = Interval(0, 0);
+        const Average  average  = Average::Arithmetic;
+
+        DataOps::averageCellToFace(faceCenteredDiffusionCoefficient,
+                                   cellCenteredDiffusionCoefficient,
+                                   m_amr->getDomains(),
+                                   tanGhost,
+                                   interv,
+                                   interv,
+                                   average,
+                                   m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, phase::solid));
+      }
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::advanceSolidSpecies(const Real a_dt) noexcept
+{
+  CH_TIME("ItoKMCStepper::advanceSolidSpecies");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::advanceSolidSpecies" << endl;
+  }
+
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    this->computeSolidTransportCoefficients();
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      RefCountedPtr<CdrSolver>& solver = solverIt();
+
+      EBAMRCellData& phi    = solver->getPhi();
+      EBAMRIVData&   ebFlux = solver->getEbFlux();
+
+      // exchangeSurfaceSolid() reads the EB flux of every solver, so a stationary species must leave it at zero.
+      DataOps::setValue(ebFlux, 0.0);
+
+      if (solver->isMobile() || solver->isDiffusive()) {
+        m_amr->conservativeAverage(phi, m_fluidRealm, phase::solid);
+        m_amr->interpGhostPwl(phi, m_fluidRealm, phase::solid);
+
+        DataOps::setValue(m_solidScratchDivF, 0.0);
+
+        if (solver->isMobile()) {
+
+          // The drift flux through the EB, positive when it leaves the dielectric. Only outflow is kept: carriers
+          // enter the dielectric through exchangeSurfaceSolid().
+          solver->extrapolateAdvectiveFluxToEB(ebFlux);
+
+          for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+            const DisjointBoxLayout& dbl        = m_amr->getGrids(m_fluidRealm)[lvl];
+            const DataIterator&      dit        = dbl.dataIterator();
+            const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+            const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_fluidRealm, phase::solid)[lvl];
+
+            const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+            for (int mybox = 0; mybox < nbox; mybox++) {
+              const DataIndex& din = dit[mybox];
+
+              const EBISBox&   ebisboxGas   = ebislGas[din];
+              const EBISBox&   ebisboxSolid = ebislSolid[din];
+              BaseIVFAB<Real>& flux         = (*ebFlux[lvl])[din];
+
+              auto kernel = [&](const VolIndex& vof) -> void {
+                const IntVect iv = vof.gridIndex();
+
+                Real outflow = std::max(0.0, flux(vof, 0));
+
+                // A cut cell that is also cut on the gas side lies on the gas-dielectric interface. When its first
+                // gas VoF has no boundary area there is no surface to put the carriers on, and none leave.
+                if (ebisboxGas.isIrregular(iv)) {
+                  const Vector<VolIndex> gasVoFs = ebisboxGas.getVoFs(iv);
+
+                  if (gasVoFs.size() == 0 || ebisboxGas.bndryArea(gasVoFs[0]) <= 0.0) {
+                    outflow = 0.0;
+                  }
+                }
+
+                flux(vof, 0) = outflow;
+              };
+
+              VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, phase::solid)[lvl])[din];
+
+              BoxLoops::loop(vofit, kernel);
+            }
+          }
+
+          solver->computeDivF(m_solidScratchDivF, phi, a_dt, a_dt, true, true, true);
+        }
+
+        // The diffusion flux is zero through the EB and the domain boundaries.
+        if (solver->isDiffusive()) {
+          solver->computeDivD(m_solidScratchDivD, phi, a_dt, true, false, false);
+
+          DataOps::incr(m_solidScratchDivF, m_solidScratchDivD, -1.0);
+        }
+
+        // Stabilize the sum of the divergences once, then update. The density is not floored, which would break the
+        // charge conservation of the exchange with the surface.
+        solver->redistributeDivergence(m_solidScratchDivF, phi, a_dt);
+
+        DataOps::incr(phi, m_solidScratchDivF, -a_dt);
+
+        m_amr->conservativeAverage(phi, m_fluidRealm, phase::solid);
+        m_amr->interpGhostPwl(phi, m_fluidRealm, phase::solid);
+      }
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::exchangeSurfaceSolid(const Real a_dt) noexcept
+{
+  CH_TIME("ItoKMCStepper::exchangeSurfaceSolid");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::exchangeSurfaceSolid" << endl;
+  }
+
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  if (numSolidSpecies > 0) {
+    const int      numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+    const RealVect probLo            = m_amr->getProbLo();
+
+    CH_assert(m_solidScratchEB.size() == numSolidSpecies);
+
+    Vector<int> chargeNumbers(numSolidSpecies, 0);
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      chargeNumbers[solverIt.index()] = solverIt()->getSpecies()->getChargeNumber();
+    }
+
+    EBAMRIVData& sigma = m_sigmaSolver->getPhi();
+
+    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& dielectricVoFs = m_sigmaSolver->getDielectricVoFs();
+
+    for (int i = 0; i < numSolidSpecies; i++) {
+      DataOps::setValue(m_solidScratchEB[i], 0.0);
+    }
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl        = m_amr->getGrids(m_fluidRealm)[lvl];
+      const DataIterator&      dit        = dbl.dataIterator();
+      const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+      const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_fluidRealm, phase::solid)[lvl];
+      const Real               dx         = m_amr->getDx()[lvl];
+      const Real               dxArea     = std::pow(dx, SpaceDim - 1);
+      const Real               dxVol      = std::pow(dx, SpaceDim);
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const EBISBox&       ebisboxGas   = ebislGas[din];
+        const EBISBox&       ebisboxSolid = ebislSolid[din];
+        const BaseFab<bool>& validCells   = (*m_amr->getValidCells(m_fluidRealm)[lvl])[din];
+        const EBCellFAB&     E            = (*m_electricFieldFluid[lvl])[din];
+
+        BaseIVFAB<Real>& sigmaFAB = (*sigma[lvl])[din];
+
+        Vector<BaseIVFAB<Real>*> surfaceDensityFABs(numSurfaceSpecies, nullptr);
+
+        for (int i = 0; i < numSurfaceSpecies; i++) {
+          surfaceDensityFABs[i] = &((*(m_surfaceSolvers[i]->getPhi())[lvl])[din]);
+        }
+
+        Vector<const BaseIVFAB<Real>*> outflowFABs(numSolidSpecies, nullptr);
+        Vector<EBCellFAB*>             phiFABs(numSolidSpecies, nullptr);
+        Vector<BaseIVFAB<Real>*>       deltaMassFABs(numSolidSpecies, nullptr);
+
+        for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+          const int idx = solverIt.index();
+
+          outflowFABs[idx]   = &((*(solverIt()->getEbFlux())[lvl])[din]);
+          phiFABs[idx]       = &((*(solverIt()->getPhi())[lvl])[din]);
+          deltaMassFABs[idx] = &((*m_solidScratchEB[idx][lvl])[din]);
+        }
+
+        Vector<Real> surfaceDensities(numSurfaceSpecies, 0.0);
+        Vector<Real> surfaceDensityChange(numSurfaceSpecies, 0.0);
+        Vector<Real> solidArrival(numSolidSpecies, 0.0);
+        Vector<Real> solidInjection(numSolidSpecies, 0.0);
+
+        auto kernel = [&](const VolIndex& gasVoF) -> void {
+          const IntVect iv = gasVoF.gridIndex();
+
+          // Cells covered by a finer level are not exchanged; their data follows from coarsening.
+          if (!validCells(iv)) {
+            return;
+          }
+
+          // The first VoF of each phase is the pair that exchanges. The other gas VoFs of a multi-valued cell do not
+          // take part, and the carriers that left through every solid VoF of the cell arrive at the first gas VoF.
+          const Vector<VolIndex> gasVoFs   = ebisboxGas.getVoFs(iv);
+          const Vector<VolIndex> solidVoFs = ebisboxSolid.getVoFs(iv);
+
+          const Real gasArea = ebisboxGas.bndryArea(gasVoF);
+
+          if (gasVoF != gasVoFs[0] || solidVoFs.size() == 0 || gasArea <= 0.0) {
+            return;
+          }
+
+          // Carriers that left the dielectric during the time step, per unit gas-side boundary area.
+          for (int i = 0; i < numSolidSpecies; i++) {
+            Real numPerDxArea = 0.0;
+
+            for (int j = 0; j < solidVoFs.size(); j++) {
+              numPerDxArea += (*outflowFABs[i])(solidVoFs[j], 0) * ebisboxSolid.bndryArea(solidVoFs[j]);
+            }
+
+            solidArrival[i] = numPerDxArea * a_dt / gasArea;
+          }
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            surfaceDensities[i] = (*surfaceDensityFABs[i])(gasVoF, 0);
+          }
+
+          RealVect e;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            e[dir] = E(gasVoF, dir);
+          }
+
+          const RealVect pos = probLo + Location::position(Location::Cell::Center, gasVoF, ebisboxGas, dx);
+
+          m_physics->surfaceSolidExchangeEB(surfaceDensityChange,
+                                            solidInjection,
+                                            surfaceDensities,
+                                            solidArrival,
+                                            e,
+                                            pos,
+                                            ebisboxGas.normal(gasVoF),
+                                            gasArea,
+                                            dx,
+                                            a_dt);
+
+          // The surface charge gains what arrived and loses what was injected.
+          Real chargeChange = 0.0;
+
+          for (int i = 0; i < numSolidSpecies; i++) {
+            chargeChange += chargeNumbers[i] * (solidArrival[i] - solidInjection[i]);
+          }
+
+          sigmaFAB(gasVoF, 0) += chargeChange * Units::Qe;
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            (*surfaceDensityFABs[i])(gasVoF, 0) += surfaceDensityChange[i];
+          }
+
+          // The injected carriers go into the first solid VoF. The part of their mass that does not fit in the cut
+          // cell is redistributed to its neighbors below.
+          const VolIndex& solidVoF = solidVoFs[0];
+          const Real      kappa    = ebisboxSolid.volFrac(solidVoF);
+
+          for (int i = 0; i < numSolidSpecies; i++) {
+            const Real numInjected = solidInjection[i] * gasArea * dxArea;
+
+            (*phiFABs[i])(solidVoF, 0) += numInjected / dxVol;
+            (*deltaMassFABs[i])(solidVoF, 0) = numInjected * (1.0 - kappa) / dxVol;
+          }
+        };
+
+        VoFIterator& vofit = (*dielectricVoFs[lvl])[din];
+
+        BoxLoops::loop(vofit, kernel);
+      }
+    }
+
+    // Surface charge and surface species follow the same coarsening as in resolveSecondaryEmissionEB().
+    m_amr->conservativeAverage(sigma, m_fluidRealm, m_plasmaPhase);
+    m_sigmaSolver->resetElectrodes(0.0);
+    m_amr->arithmeticAverage(sigma, m_fluidRealm, m_plasmaPhase);
+
+    for (int i = 0; i < numSurfaceSpecies; i++) {
+      EBAMRIVData& density = m_surfaceSolvers[i]->getPhi();
+
+      m_amr->conservativeAverage(density, m_fluidRealm, m_plasmaPhase);
+      m_surfaceSolvers[i]->resetElectrodes(0.0);
+      m_amr->arithmeticAverage(density, m_fluidRealm, m_plasmaPhase);
+    }
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      EBAMRCellData& phi = solverIt()->getPhi();
+
+      solverIt()->redistribute(phi, m_solidScratchEB[solverIt.index()]);
+
+      m_amr->conservativeAverage(phi, m_fluidRealm, phase::solid);
+      m_amr->interpGhostPwl(phi, m_fluidRealm, phase::solid);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeSolidRelaxationTime() noexcept
+{
+  CH_TIME("ItoKMCStepper::computeSolidRelaxationTime");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeSolidRelaxationTime" << endl;
+  }
+
+  Real minRelaxationTime = std::numeric_limits<Real>::max();
+
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  if (numSolidSpecies > 0) {
+    const RealVect probLo = m_amr->getProbLo();
+
+    Vector<Real> chargeMagnitudes(numSolidSpecies, 0.0);
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      chargeMagnitudes[solverIt.index()] = std::abs(solverIt()->getSpecies()->getChargeNumber()) * Units::Qe;
+    }
+
+    const EBAMRCellData electricField = m_amr->alias(phase::solid, m_fieldSolver->getElectricField());
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, phase::solid)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : minRelaxationTime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box            cellBox    = dbl[din];
+        const EBISBox&       ebisbox    = ebisl[din];
+        const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[din];
+        const EBCellFAB&     E          = (*electricField[lvl])[din];
+
+        Vector<const EBCellFAB*> phis(numSolidSpecies, nullptr);
+
+        for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+          phis[solverIt.index()] = &((*(solverIt()->getPhi())[lvl])[din]);
+        }
+
+        Vector<Real> mu;
+
+        // Conductivity in one VoF, from the mobilities at its field.
+        auto relaxationTime = [&](const VolIndex& vof) -> Real {
+          RealVect e;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            e[dir] = E(vof, dir);
+          }
+
+          const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
+
+          m_physics->computeSolidMobilities(mu, m_time, pos, e);
+
+          Real conductivity = 0.0;
+
+          for (int i = 0; i < numSolidSpecies; i++) {
+            conductivity += chargeMagnitudes[i] * mu[i] * std::max(0.0, (*phis[i])(vof, 0));
+          }
+
+          return (conductivity > 0.0) ? Units::eps0 / conductivity : std::numeric_limits<Real>::max();
+        };
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (validCells(iv) && ebisbox.isRegular(iv)) {
+            minRelaxationTime = std::min(minRelaxationTime, relaxationTime(VolIndex(iv, 0)));
+          }
+        };
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          if (validCells(vof.gridIndex())) {
+            minRelaxationTime = std::min(minRelaxationTime, relaxationTime(vof));
+          }
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, phase::solid)[lvl])[din];
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    minRelaxationTime = ParallelOps::min(minRelaxationTime);
+  }
+
+  return minRelaxationTime;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQsolid(const int a_species) const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQsolid()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQsolid()" << endl;
+  }
+
+  CH_assert(a_species >= 0 && a_species < m_cdrSolid->getSolvers().size());
+
+  const RefCountedPtr<CdrSolver>& solver = m_cdrSolid->getSolvers()[a_species];
+
+  const bool kappaScale = true;
+  const int  Z          = solver->getSpecies()->getChargeNumber();
+
+  return Z * Units::Qe * solver->computeMass(solver->getPhi(), kappaScale);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::writeSolidPlotData(LevelData<EBCellFAB>& a_output,
+                                              int&                  a_icomp,
+                                              const std::string&    a_outputRealm,
+                                              const int             a_level) const noexcept
+{
+  CH_TIME("ItoKMCStepper::writeSolidPlotData");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeSolidPlotData" << endl;
+  }
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_amr->getFinestLevel());
+
+  const DisjointBoxLayout& dbl        = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit        = dbl.dataIterator();
+  const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_fluidRealm, phase::solid)[a_level];
+
+  // The solid density is moved onto the gas-phase scratch cell by cell, and the scratch is copied to the output.
+  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+    const EBAMRCellData& phi = solverIt()->getPhi();
+
+    DataOps::setValue(*m_fluidScratch1[a_level], 0.0);
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        cellBox      = dbl[din];
+      const EBISBox&   ebisboxSolid = ebislSolid[din];
+      const EBCellFAB& phiSolid     = (*phi[a_level])[din];
+
+      FArrayBox& output = (*m_fluidScratch1[a_level])[din].getFArrayBox();
+
+      auto kernel = [&](const IntVect& iv) -> void {
+        if (!(ebisboxSolid.isCovered(iv))) {
+          output(iv, 0) = phiSolid(ebisboxSolid.getVoFs(iv)[0], 0);
+        }
+      };
+
+      BoxLoops::loop(cellBox, kernel);
+    }
+
+    m_amr->copyData(a_output,
+                    *m_fluidScratch1[a_level],
+                    a_level,
+                    a_outputRealm,
+                    m_fluidRealm,
+                    Interval(a_icomp, a_icomp),
+                    Interval(0, 0));
+
+    a_icomp += 1;
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -915,6 +1713,20 @@ ItoKMCStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header) const
   if (m_verbosity > 5) {
     pout() << m_name + "::writeCheckpointHeader" << endl;
   }
+
+  // The count is only written when there are surface species, so a checkpoint without them is unchanged.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (numSurfaceSpecies > 0) {
+    a_header.m_int["num_surface_species"] = numSurfaceSpecies;
+  }
+
+  // Same for the solid species.
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  if (numSolidSpecies > 0) {
+    a_header.m_int["num_solid_species"] = numSolidSpecies;
+  }
 }
 #endif
 
@@ -927,6 +1739,29 @@ ItoKMCStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header) noexce
   if (m_verbosity > 5) {
     pout() << m_name + "::readCheckpointHeader" << endl;
   }
+
+  const auto it = a_header.m_int.find("num_surface_species");
+
+  m_checkpointSurfaceSpecies = (it != a_header.m_int.end()) ? it->second : 0;
+
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  if (m_checkpointSurfaceSpecies != numSurfaceSpecies) {
+    if (m_checkpointSurfaceSpecies == 0) {
+      MayDay::Warning("ItoKMCStepper::readCheckpointHeader -- checkpoint file has no surface species, setting the "
+                      "surface species densities to zero. The surface charge is kept but is not assigned to any "
+                      "surface species.");
+    }
+    else {
+      MayDay::Error("ItoKMCStepper::readCheckpointHeader -- checkpoint file has a different number of surface species "
+                    "than the physics model");
+    }
+  }
+
+  // The solid species solvers do not exist yet, so readCheckpointData() checks the count.
+  const auto solidIt = a_header.m_int.find("num_solid_species");
+
+  m_checkpointSolidSpecies = (solidIt != a_header.m_int.end()) ? solidIt->second : 0;
 }
 #endif
 
@@ -954,6 +1789,14 @@ ItoKMCStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigmaSolver->writeCheckpointLevel(a_handle, a_lvl);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->writeCheckpointLevel(a_handle, a_lvl);
+  }
+
+  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  }
 }
 #endif
 
@@ -981,6 +1824,41 @@ ItoKMCStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigmaSolver->readCheckpointLevel(a_handle, a_lvl);
+
+  // A checkpoint written without surface species has no data for them; readCheckpointHeader() has already
+  // warned about it.
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    if (m_checkpointSurfaceSpecies == m_surfaceSolvers.size()) {
+      m_surfaceSolvers[i]->readCheckpointLevel(a_handle, a_lvl);
+    }
+    else {
+      DataOps::setValue(*(m_surfaceSolvers[i]->getPhi())[a_lvl], 0.0);
+    }
+  }
+
+  // Likewise for the solid species.
+  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
+
+  if (m_checkpointSolidSpecies != numSolidSpecies) {
+    if (m_checkpointSolidSpecies != 0) {
+      MayDay::Error("ItoKMCStepper::readCheckpointData -- checkpoint file has a different number of solid species "
+                    "than the physics model");
+    }
+    else if (a_lvl == 0) {
+      MayDay::Warning("ItoKMCStepper::readCheckpointData -- checkpoint file has no solid species, setting the solid "
+                      "species densities to zero.");
+    }
+  }
+
+  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+    if (m_checkpointSolidSpecies == numSolidSpecies) {
+      solverIt()->readCheckpointLevel(a_handle, a_lvl);
+    }
+    else {
+      DataOps::setValue(*(solverIt()->getPhi())[a_lvl], 0.0);
+      DataOps::setValue(*(solverIt()->getSource())[a_lvl], 0.0);
+    }
+  }
 }
 #endif
 
@@ -1005,6 +1883,9 @@ ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
     numComp += solverIt()->getNumberOfPlotVariables();
   }
 
+  // Solid species densities.
+  numComp += m_cdrSolid->getSolvers().size();
+
   // RTE solver variables.
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     numComp += solverIt()->getNumberOfPlotVariables();
@@ -1015,6 +1896,11 @@ ItoKMCStepper<I, C, R, F>::getNumberOfPlotVariables() const noexcept
 
   // Surface charge solver variables.
   numComp += m_sigmaSolver->getNumberOfPlotVariables();
+
+  // Surface species variables.
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    numComp += m_surfaceSolvers[i]->getNumberOfPlotVariables();
+  }
 
   // Conductivity
   if (m_plotConductivity) {
@@ -1051,12 +1937,20 @@ ItoKMCStepper<I, C, R, F>::getPlotVariableNames() const noexcept
   plotVarNames.append(m_fieldSolver->getPlotVariableNames());
   plotVarNames.append(m_sigmaSolver->getPlotVariableNames());
 
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    plotVarNames.append(m_surfaceSolvers[i]->getPlotVariableNames());
+  }
+
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     plotVarNames.append(solverIt()->getPlotVariableNames());
   }
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     plotVarNames.append(solverIt()->getPlotVariableNames());
+  }
+
+  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+    plotVarNames.push_back(solverIt()->getName() + " phi");
   }
 
   for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -1106,6 +2000,11 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
   // Surface charge solver writes
   m_sigmaSolver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
 
+  // Surface species solvers write
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
+
   // Ito solvers copy their output data
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
@@ -1114,6 +2013,11 @@ ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
   // Cdr solvers output their data
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
+
+  // Solid species densities. Without solid species there may be no solid phase at all, so its layouts are not read.
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    this->writeSolidPlotData(a_output, a_icomp, a_outputRealm, a_level);
   }
 
   // RTE solvers copy their output data
@@ -1271,6 +2175,12 @@ ItoKMCStepper<I, C, R, F>::synchronizeSolverTimes(const int a_step, const Real a
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_rte->setTime(a_step, a_time, a_dt);
   m_sigmaSolver->setTime(a_step, a_time, a_dt);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->setTime(a_step, a_time, a_dt);
+  }
+
+  m_cdrSolid->setTime(a_step, a_time, a_dt);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1359,7 +2269,14 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   const Real Qplus = this->computeQplus();
   const Real Qminu = this->computeQminu();
   const Real Qsurf = this->computeQsurf();
-  const Real Qtot  = Qplus + Qminu + Qsurf;
+
+  Real Qsolid = 0.0;
+
+  for (int i = 0; i < m_cdrSolid->getSolvers().size(); i++) {
+    Qsolid += this->computeQsolid(i);
+  }
+
+  const Real Qtot = Qplus + Qminu + Qsurf + Qsolid;
 
   // Print the step report.
 
@@ -1388,6 +2305,33 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
          << whitespace + "#Avg. part. = " << avgParticles << endl
          << whitespace + "#Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)" << endl;
   //clang-format on
+
+  // Breakdown of the surface charge into the surface species, and the part that no surface species accounts for.
+  if (m_surfaceSolvers.size() > 0) {
+    const Vector<RefCountedPtr<CdrSpecies>>& surfaceSpecies = m_physics->getSurfaceSpecies();
+
+    Real Qassigned = 0.0;
+
+    for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+      const Real Qspecies = this->computeQsurfSpecies(i);
+
+      pout() << whitespace + "Qsurf(" + surfaceSpecies[i]->getName() + ") = " << Qspecies << endl;
+
+      Qassigned += Qspecies;
+    }
+
+    pout() << whitespace + "Qsurf(unassigned) = " << Qsurf - Qassigned << endl;
+  }
+
+  // Charge held by the solid species. It is part of Qtot.
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      pout() << whitespace + "Qsolid(" + solverIt()->getName() + ") = " << this->computeQsolid(solverIt.index())
+             << endl;
+    }
+
+    pout() << whitespace + "Qsolid      = " << Qsolid << endl;
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1552,6 +2496,13 @@ ItoKMCStepper<I, C, R, F>::computeDt()
 
   timer.startEvent("AdvectionDiffusion (CDR)");
   m_fluidAdvectionDiffusionDt = m_cdr->computeAdvectionDiffusionDt();
+
+  // The solid species are advanced explicitly, so they also restrict the time step.
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    this->computeSolidTransportCoefficients();
+
+    m_fluidAdvectionDiffusionDt = std::min(m_fluidAdvectionDiffusionDt, m_cdrSolid->computeAdvectionDiffusionDt());
+  }
   timer.stopEvent("AdvectionDiffusion (CDR)");
 
   timer.startEvent("Relaxation");
@@ -1660,6 +2611,12 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->registerOperators();
+  }
+
+  m_cdrSolid->registerOperators();
 
   // Required for non-cell-based particle mergers.
   m_amr->registerParticleGhostMask(m_particleRealm, 1);
@@ -1806,6 +2763,12 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
   m_sigmaSolver->preRegrid(a_lmin, a_oldFinestLevel);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->preRegrid(a_lmin, a_oldFinestLevel);
+  }
+
+  m_cdrSolid->preRegrid(a_lmin, a_oldFinestLevel);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1824,6 +2787,12 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+    m_surfaceSolvers[i]->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  }
+
+  m_cdrSolid->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // The regrid super-particle merge now runs inside ItoSolver::regrid(), on the reduced particles and
   // before they are rebuilt as ItoParticles -- which is the whole point: the de-refinement pile-up is
@@ -2062,6 +3031,23 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
     }
   }
 
+  // Solid species inside the dielectrics.
+  const bool hasSolidSpecies = m_cdrSolid->getSolvers().size() > 0;
+
+  EBAMRCellData rhoSolid;
+
+  if (hasSolidSpecies) {
+    rhoSolid = m_amr->alias(phase::solid, a_rho);
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      const int Z = solverIt()->getSpecies()->getChargeNumber();
+
+      if (Z != 0) {
+        DataOps::incr(rhoSolid, solverIt()->getPhi(), 1.0 * Z);
+      }
+    }
+  }
+
   DataOps::scale(a_rho, Units::Qe);
 
   m_amr->arithmeticAverage(a_rho, m_fluidRealm);
@@ -2069,6 +3055,10 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(rhoPhase, m_fluidRealm, m_plasmaPhase);
+
+  if (hasSolidSpecies) {
+    m_amr->interpToCentroids(rhoSolid, m_fluidRealm, phase::solid);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2252,6 +3242,11 @@ ItoKMCStepper<I, C, R, F>::computeRelaxationTime() noexcept
   Real max = -std::numeric_limits<Real>::max();
 
   DataOps::getMaxMinNorm(max, min, relaxTime, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
+
+  // The solid species are not in the semi-implicit field solve, so their relaxation time also restricts the time step.
+  if (m_cdrSolid->getSolvers().size() > 0) {
+    min = std::min(min, this->computeSolidRelaxationTime());
+  }
 
   return min;
 }
@@ -5217,10 +6212,18 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
     primaryPhotons.push_back(&intersectedPhotons);
   }
 
+  // Surface species densities are held on the fluid realm. Copy them to the particle realm where the kernel runs.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    m_amr->copyData(m_particleSurfaceScratch, m_surfaceSolvers[i]->getPhi(), Interval(i, i), Interval(0, 0));
+  }
+
   // Call the other version.
   this->fillSecondaryEmissionEB(m_secondaryParticles,
                                 m_cdrFluxes,
                                 m_secondaryPhotons,
+                                m_particleSurfaceScratch,
                                 primaryParticles,
                                 m_cdrFluxesExtrap,
                                 primaryPhotons,
@@ -5234,6 +6237,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
   Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
   Vector<EBAMRIVData>&                                   a_cdrFluxes,
   Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+  EBAMRIVData&                                           a_surfaceSpecies,
   Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
   Vector<EBAMRIVData>&                                   a_cdrFluxesExtrap,
   Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
@@ -5245,13 +6249,16 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
     pout() << m_name + "::fillSecondaryEmissionEB(full)" << endl;
   }
 
-  const int numItoSpecies    = m_physics->getNumItoSpecies();
-  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+  const int numItoSpecies     = m_physics->getNumItoSpecies();
+  const int numCdrSpecies     = m_physics->getNumCdrSpecies();
+  const int numPhotonSpecies  = m_physics->getNumPhotonSpecies();
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
 
   CH_assert(a_secondaryParticles.size() == numItoSpecies);
   CH_assert(a_cdrFluxes.size() == numCdrSpecies);
   CH_assert(a_secondaryPhotons.size() == numPhotonSpecies);
+  CH_assert(numSurfaceSpecies == 0 || a_surfaceSpecies.getRealm() == m_particleRealm);
+  CH_assert(numSurfaceSpecies == 0 || a_surfaceSpecies[0]->nComp() == numSurfaceSpecies);
   CH_assert(a_primaryParticles.size() == numItoSpecies);
   CH_assert(a_cdrFluxesExtrap.size() == numCdrSpecies);
   CH_assert(a_primaryPhotons.size() == numPhotonSpecies);
@@ -5320,8 +6327,6 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
       const Box            box           = dbl[din];
 
-      bool isDielectric = false;
-
       // Per-cell SoA scratch (indexed by Box::index(iv)). Primary cells are read from the SoA leaves;
       // secondary cells start empty and are rebuilt into the SoA leaves after the kernel.
       std::vector<std::vector<ParticleSoA<ItoParticle>>> primaryItoCells(numItoSpecies);
@@ -5331,6 +6336,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
 
       Vector<BaseIVFAB<Real>*> cdrFluxesFAB;
       Vector<BaseIVFAB<Real>*> cdrFluxesExtrapFAB;
+
+      // Surface species densities in, and their change out. Not defined when there are no surface species.
+      BaseIVFAB<Real>* surfaceSpeciesFAB = (numSurfaceSpecies > 0) ? &((*a_surfaceSpecies[lvl])[din]) : nullptr;
 
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int idx = it.index();
@@ -5391,9 +6399,18 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
             primaryPhotons[i] = std::move(primaryPhotonCells[i][cellIdx]);
           }
 
-          // Figure out which material we are dealing with.
-          int  matIndex = -1;
-          Real minDist  = std::numeric_limits<Real>::max();
+          Vector<Real> surfaceDensities(numSurfaceSpecies, 0.0);
+          Vector<Real> surfaceDensityChange(numSurfaceSpecies, 0.0);
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            surfaceDensities[i] = (*surfaceSpeciesFAB)(vof, i);
+          }
+
+          // Figure out which material we are dealing with. The material is the one whose implicit function is
+          // closest to zero at the boundary centroid, and the classification is made independently for each cell.
+          int  matIndex     = -1;
+          bool isDielectric = false;
+          Real minDist      = std::numeric_limits<Real>::max();
 
           for (int i = 0; i < electrodes.size(); i++) {
             const Real curDist = electrodes[i].getImplicitFunction()->value(physPos);
@@ -5415,22 +6432,24 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
           }
 
           // Call the physics framework.
-          m_physics->secondaryEmissionEB(secondaryParticles,
-                                         cdrFluxes,
-                                         secondaryPhotons,
-                                         primaryParticles,
-                                         cdrFluxesExtrap,
-                                         primaryPhotons,
-                                         E,
-                                         cellCenter,
-                                         cellCentroid,
-                                         bndryCentroid,
-                                         bndryNormal,
-                                         bndryArea,
-                                         dx,
-                                         a_dt,
-                                         isDielectric,
-                                         matIndex);
+          m_physics->surfaceEmissionEB(secondaryParticles,
+                                       cdrFluxes,
+                                       secondaryPhotons,
+                                       surfaceDensityChange,
+                                       primaryParticles,
+                                       cdrFluxesExtrap,
+                                       primaryPhotons,
+                                       surfaceDensities,
+                                       E,
+                                       cellCenter,
+                                       cellCentroid,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       bndryArea,
+                                       dx,
+                                       a_dt,
+                                       isDielectric,
+                                       matIndex);
 
           // Fill output data holders (move the per-cell secondary results into the per-cell scratch).
           for (int i = 0; i < numItoSpecies; i++) {
@@ -5443,6 +6462,16 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
 
           for (int i = 0; i < numPhotonSpecies; i++) {
             secondaryPhotonCells[i][cellIdx] = std::move(secondaryPhotons[i]);
+          }
+
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            (*surfaceSpeciesFAB)(vof, i) = surfaceDensityChange[i];
+          }
+        }
+        else {
+          // Cells covered by a finer level are not advanced here; their densities follow from coarsening.
+          for (int i = 0; i < numSurfaceSpecies; i++) {
+            (*surfaceSpeciesFAB)(vof, i) = 0.0;
           }
         }
       };
@@ -5516,6 +6545,22 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
   m_sigmaSolver->resetElectrodes(0.0);
   m_amr->arithmeticAverage(surfaceChargeDensity, m_fluidRealm, m_plasmaPhase);
+
+  // Add the change in the surface species densities, which fillSecondaryEmissionEB() left in the particle-realm
+  // scratch, and coarsen them the same way as the surface charge.
+  const int numSurfaceSpecies = m_physics->getNumSurfaceSpecies();
+
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    EBAMRIVData& density = m_surfaceSolvers[i]->getPhi();
+
+    m_amr->copyData(m_fluidScratchEB, m_particleSurfaceScratch, Interval(0, 0), Interval(i, i));
+
+    DataOps::incr(density, m_fluidScratchEB, 1.0, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
+
+    m_amr->conservativeAverage(density, m_fluidRealm, m_plasmaPhase);
+    m_surfaceSolvers[i]->resetElectrodes(0.0);
+    m_amr->arithmeticAverage(density, m_fluidRealm, m_plasmaPhase);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -6049,6 +7094,10 @@ ItoKMCStepper<I, C, R, F>::computeTotalCharge() const noexcept
   totalCharge += this->computeQminu();
   totalCharge += this->computeQsurf();
 
+  for (int i = 0; i < m_cdrSolid->getSolvers().size(); i++) {
+    totalCharge += this->computeQsolid(i);
+  }
+
   return totalCharge;
 }
 
@@ -6150,6 +7199,22 @@ ItoKMCStepper<I, C, R, F>::computeQsurf() const noexcept
   }
 
   return m_sigmaSolver->computeMass();
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeQsurfSpecies(const int a_species) const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeQsurfSpecies()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeQsurfSpecies()" << endl;
+  }
+
+  CH_assert(a_species >= 0 && a_species < m_surfaceSolvers.size());
+
+  const int Z = m_physics->getSurfaceSpecies()[a_species]->getChargeNumber();
+
+  return Z * Units::Qe * m_surfaceSolvers[a_species]->computeMass();
 }
 
 template <typename I, typename C, typename R, typename F>
