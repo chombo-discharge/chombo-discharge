@@ -536,9 +536,12 @@ CdrMultigrid::setupHelmholtzFactory()
                              m_chebyEigRatio,
                              m_rasInnerSweeps,
                              m_amr->getMultigridLevelGrids(m_realm, m_phase),
-                             m_amr->getMultigridLevelGridsCoFi(m_realm, m_phase),
+                             m_amr->getMultigridLevelRestriction(m_realm, m_phase),
+                             m_amr->getMultigridLevelProlongation(m_realm, m_phase),
                              m_amr->getMultigridCoarseAverage(m_realm, m_phase),
                              m_amr->getEBLevelGridCoFi(m_realm, m_phase),
+                             m_amr->getMultigridRestriction(m_realm, m_phase),
+                             m_amr->getMultigridProlongation(m_realm, m_phase),
                              bottomDomain,
                              m_multigridRefluxFree));
 }

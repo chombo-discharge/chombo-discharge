@@ -640,6 +640,7 @@ ItoSolver::registerOperators() const
     m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
+    m_amr->registerParticleDeposition(m_realm, m_deposition, m_coarseFineDeposition);
 
     // computeDiffusionGradient() differentiates the mesh diffusion field through this operator. PhaseRealm
     // registers it by default, but the dependency is real, so make it explicit rather than inherited.

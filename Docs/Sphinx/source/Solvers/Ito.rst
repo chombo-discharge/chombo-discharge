@@ -615,7 +615,9 @@ Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) are control
 * ``ItoSolver.deposition`` for the base deposition scheme.
   Valid options are ``ngp``, ``cic``, and ``tsc``.
 * ``ItoSolver.deposition_cf`` for the coarse-fine deposition strategy.
-  Valid options are ``interp``, ``halo``, or ``halo_ngp``.
+  Valid options are ``interp``, ``halo``, ``halo_ngp``, or ``transition``.
+  ``halo`` and ``transition`` copy coarser particles into the finer patches through particle ghost masks, which do not wrap around periodic boundaries.
+  On a periodic domain the run stops when these are selected; use ``interp`` or ``halo_ngp`` there.
 
 How the cut cells are treated when depositing is selected with a single flag,
 

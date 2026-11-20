@@ -78,12 +78,15 @@ public:
    * @param[in] a_eblg          Grids on this level
    * @param[in] a_eblgCoFi      Coarsening of fine level grids
    * @param[in] a_eblgCoar      Coarse grids
-   * @param[in] a_eblgCoFiMG    Grids on this level coarsened by 2. Only used if a_hasMGObjects is true.
    * @param[in] a_eblgCoarMG    Multigrid-grids
    * @param[in] a_validCells    Valid grid cells
    * @param[in] a_interpolator  Interpolator
    * @param[in] a_fluxReg       Flux register
    * @param[in] a_coarAve       Coarsener
+   * @param[in] a_restrictOp    Restriction onto a_eblgCoFi. Only used if a_hasCoar is true.
+   * @param[in] a_prolongOp     Prolongation from a_eblgCoar. Only used if a_hasCoar is true.
+   * @param[in] a_restrictOpMG  Restriction onto a_eblgCoarMG. Only used if a_hasMGObjects is true.
+   * @param[in] a_prolongOpMG   Prolongation from a_eblgCoarMG. Only used if a_hasMGObjects is true.
    * @param[in] a_domainBC      Domain BC
    * @param[in] a_ebBC          Boundary conditions on EBs
    * @param[in] a_probLo        Lower-left corner of computational domain
@@ -114,12 +117,15 @@ public:
                 const EBLevelGrid&                               a_eblg,
                 const EBLevelGrid&                               a_eblgCoFi,
                 const EBLevelGrid&                               a_eblgCoar,
-                const EBLevelGrid&                               a_eblgCoFiMG,
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                 const RefCountedPtr<EBReflux>&                   a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,
+                const RefCountedPtr<EBMGRestrict>&               a_restrictOp,
+                const RefCountedPtr<EBMGProlong>&                a_prolongOp,
+                const RefCountedPtr<EBMGRestrict>&               a_restrictOpMG,
+                const RefCountedPtr<EBMGProlong>&                a_prolongOpMG,
                 const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBC,
                 const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBC,
                 const RealVect&                                  a_probLo,
@@ -1166,22 +1172,22 @@ protected:
   /**
    * @brief Restriction operator for AMR levels.
    */
-  EBMGRestrict m_restrictOp;
+  RefCountedPtr<EBMGRestrict> m_restrictOp;
 
   /**
    * @brief Restriction operator if this is an MG level
    */
-  EBMGRestrict m_restrictOpMG;
+  RefCountedPtr<EBMGRestrict> m_restrictOpMG;
 
   /**
    * @brief Prolongation operator for AMR levels
    */
-  EBMGProlong m_prolongOp;
+  RefCountedPtr<EBMGProlong> m_prolongOp;
 
   /**
    * @brief Prolongation operator for MG levels
    */
-  EBMGProlong m_prolongOpMG;
+  RefCountedPtr<EBMGProlong> m_prolongOpMG;
 
   /**
    * @brief Valid grid cells (might be nullptr on MG levels)

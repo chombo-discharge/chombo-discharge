@@ -29,40 +29,43 @@ constexpr int MFHelmholtzOpFactory::m_comp;
 constexpr int MFHelmholtzOpFactory::m_nComp;
 constexpr int MFHelmholtzOpFactory::m_mainPhase;
 
-MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&                  a_mfis,
-                                           const Location::Cell         a_dataLocation,
-                                           const Real&                  a_alpha,
-                                           const Real&                  a_beta,
-                                           const RealVect&              a_probLo,
-                                           const AmrLevelGrids&         a_amrLevelGrids,
-                                           const AmrMask&               a_validCells,
-                                           const AmrInterpolators&      a_amrInterpolators,
-                                           const AmrFluxRegisters&      a_amrFluxRegisters,
-                                           const AmrCoarseners&         a_amrCoarseners,
-                                           const AmrRefRatios&          a_amrRefRatios,
-                                           const AmrResolutions&        a_amrResolutions,
-                                           const AmrCellData&           a_amrAcoef,
-                                           const AmrFluxData&           a_amrBcoef,
-                                           const AmrIrreData&           a_amrBcoefIrreg,
-                                           const DomainBCFactory&       a_domainBcFactory,
-                                           const EBBCFactory&           a_ebBcFactory,
-                                           const JumpBCFactory&         a_jumpBcFactory,
-                                           const IntVect&               a_ghostPhi,
-                                           const IntVect&               a_ghostRhs,
-                                           const Smoother&              a_smoother,
-                                           const Real&                  a_relaxFactor,
-                                           const int&                   a_chebyOrder,
-                                           const Real&                  a_chebyEigRatio,
-                                           const int&                   a_rasInnerSweeps,
-                                           const int&                   a_jumpOrder,
-                                           const int&                   a_jumpWeight,
-                                           const int&                   a_preCondSmooth,
-                                           const Vector<AmrLevelGrids>& a_mgLevelGrids,
-                                           const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
-                                           const Vector<AmrCoarseners>& a_mgCoarseners,
-                                           const AmrLevelGrids&         a_amrLevelGridsCoFi,
-                                           const ProblemDomain&         a_bottomDomain,
-                                           const bool                   a_refluxFree)
+MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&                               a_mfis,
+                                           const Location::Cell                      a_dataLocation,
+                                           const Real&                               a_alpha,
+                                           const Real&                               a_beta,
+                                           const RealVect&                           a_probLo,
+                                           const AmrLevelGrids&                      a_amrLevelGrids,
+                                           const AmrMask&                            a_validCells,
+                                           const AmrInterpolators&                   a_amrInterpolators,
+                                           const AmrFluxRegisters&                   a_amrFluxRegisters,
+                                           const AmrCoarseners&                      a_amrCoarseners,
+                                           const AmrRefRatios&                       a_amrRefRatios,
+                                           const AmrResolutions&                     a_amrResolutions,
+                                           const AmrCellData&                        a_amrAcoef,
+                                           const AmrFluxData&                        a_amrBcoef,
+                                           const AmrIrreData&                        a_amrBcoefIrreg,
+                                           const DomainBCFactory&                    a_domainBcFactory,
+                                           const EBBCFactory&                        a_ebBcFactory,
+                                           const JumpBCFactory&                      a_jumpBcFactory,
+                                           const IntVect&                            a_ghostPhi,
+                                           const IntVect&                            a_ghostRhs,
+                                           const Smoother&                           a_smoother,
+                                           const Real&                               a_relaxFactor,
+                                           const int&                                a_chebyOrder,
+                                           const Real&                               a_chebyEigRatio,
+                                           const int&                                a_rasInnerSweeps,
+                                           const int&                                a_jumpOrder,
+                                           const int&                                a_jumpWeight,
+                                           const int&                                a_preCondSmooth,
+                                           const Vector<AmrLevelGrids>&              a_mgLevelGrids,
+                                           const Vector<Vector<PhaseRestrictions>>&  a_mgRestrictions,
+                                           const Vector<Vector<PhaseProlongations>>& a_mgProlongations,
+                                           const Vector<AmrCoarseners>&              a_mgCoarseners,
+                                           const AmrLevelGrids&                      a_amrLevelGridsCoFi,
+                                           const Vector<PhaseRestrictions>&          a_amrRestrictions,
+                                           const Vector<PhaseProlongations>&         a_amrProlongations,
+                                           const ProblemDomain&                      a_bottomDomain,
+                                           const bool                                a_refluxFree)
   : m_mfis(a_mfis),
     m_dataLocation(a_dataLocation),
     m_smoother(a_smoother),
@@ -82,6 +85,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&                  a_mfis,
     m_amrInterpolators(a_amrInterpolators),
     m_amrFluxRegisters(a_amrFluxRegisters),
     m_amrCoarseners(a_amrCoarseners),
+    m_amrRestrictions(a_amrRestrictions),
+    m_amrProlongations(a_amrProlongations),
     m_amrRefRatios(a_amrRefRatios),
     m_amrResolutions(a_amrResolutions),
     m_amrAcoef(a_amrAcoef),
@@ -106,7 +111,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&                  a_mfis,
 
   // Define the jump data and the multigrid levels.
   this->defineJump();
-  this->defineMultigridLevels(a_mgLevelGrids, a_mgLevelGridsCoFi, a_mgCoarseners);
+  this->defineMultigridLevels(a_mgLevelGrids, a_mgRestrictions, a_mgProlongations, a_mgCoarseners);
   this->setJump(0.0, 0.0);
 }
 
@@ -224,12 +229,12 @@ MFHelmholtzOpFactory::defineJump()
 }
 
 void
-MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLevelGrids,
-                                            const Vector<AmrLevelGrids>& a_mgLevelGridsCoFi,
-                                            const Vector<AmrCoarseners>& a_mgCoarseners)
+MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>&              a_mgLevelGrids,
+                                            const Vector<Vector<PhaseRestrictions>>&  a_mgRestrictions,
+                                            const Vector<Vector<PhaseProlongations>>& a_mgProlongations,
+                                            const Vector<AmrCoarseners>&              a_mgCoarseners)
 {
-  CH_TIME("MFHelmholtzOpFactory::defineMultigridLevels(Vector<AmrLevelGrids>, Vector<AmrLevelGrids>, "
-          "Vector<AmrCoarseners>)");
+  CH_TIME("MFHelmholtzOpFactory::defineMultigridLevels");
 
   // TLDR: This routine defines what is needed for making the multigrid levels. This includes the intermediate
   // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the
@@ -238,7 +243,8 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
   // defines the coefficients on them.
 
   CH_assert(static_cast<int>(a_mgLevelGrids.size()) == m_numAmrLevels);
-  CH_assert(static_cast<int>(a_mgLevelGridsCoFi.size()) == m_numAmrLevels);
+  CH_assert(static_cast<int>(a_mgRestrictions.size()) == m_numAmrLevels);
+  CH_assert(static_cast<int>(a_mgProlongations.size()) == m_numAmrLevels);
   CH_assert(static_cast<int>(a_mgCoarseners.size()) == m_numAmrLevels);
 
   m_mgLevelGrids.resize(m_numAmrLevels);
@@ -247,7 +253,8 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
   m_mgBcoefIrreg.resize(m_numAmrLevels);
   m_mgJump.resize(m_numAmrLevels);
   m_mgCoarseners.resize(m_numAmrLevels);
-  m_mgLevelGridsCoFi.resize(m_numAmrLevels);
+  m_mgRestrictions.resize(m_numAmrLevels);
+  m_mgProlongations.resize(m_numAmrLevels);
   m_hasMgLevels.resize(m_numAmrLevels);
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
@@ -290,7 +297,8 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
     m_mgBcoefIrreg[amrLevel].resize(0);
     m_mgJump[amrLevel].resize(0);
     m_mgCoarseners[amrLevel].resize(0);
-    m_mgLevelGridsCoFi[amrLevel].resize(0);
+    m_mgRestrictions[amrLevel].resize(0);
+    m_mgProlongations[amrLevel].resize(0);
 
     if (m_hasMgLevels[amrLevel]) {
       m_mgLevelGrids[amrLevel].push_back(m_amrLevelGrids[amrLevel]);
@@ -345,7 +353,8 @@ MFHelmholtzOpFactory::defineMultigridLevels(const Vector<AmrLevelGrids>& a_mgLev
         m_mgBcoefIrreg[amrLevel].push_back(coarBcoefIrreg);
         m_mgJump[amrLevel].push_back(coarJump);
         m_mgCoarseners[amrLevel].push_back(a_mgCoarseners[amrLevel][img - 1]);
-        m_mgLevelGridsCoFi[amrLevel].push_back(a_mgLevelGridsCoFi[amrLevel][img - 1]);
+        m_mgRestrictions[amrLevel].push_back(a_mgRestrictions[amrLevel][img - 1]);
+        m_mgProlongations[amrLevel].push_back(a_mgProlongations[amrLevel][img - 1]);
       }
     }
   }
@@ -439,8 +448,10 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   // But we might need to restrict and interpolate another, even coarser multigrid level so in that case we need
   // to define that.
   MFLevelGrid mflg;
-  MFLevelGrid mflgMgCoFi;
   MFLevelGrid mflgMgCoar;
+
+  PhaseRestrictions  restrictMG; // Only if there is a coarser multigrid level
+  PhaseProlongations prolongMG;  // Only if there is a coarser multigrid level
 
   MFMultigridInterpolator interpolator; // Only if defined on an AMR level
   MFReflux                fluxReg;      // Only if defined on an AMR level
@@ -471,8 +482,9 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
     hasMGObjects = m_hasMgLevels[amrLevel];
 
     if (hasMGObjects) {
-      mflgMgCoFi = m_mgLevelGridsCoFi[amrLevel][0];
       mflgMgCoar = m_mgLevelGrids[amrLevel][1];
+      restrictMG = m_mgRestrictions[amrLevel][0];
+      prolongMG  = m_mgProlongations[amrLevel][0];
     }
 
     foundMgLevel = true;
@@ -511,8 +523,9 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
       hasMGObjects = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in
                                                           // mgLevelGrids so there's even coarser stuff below.
       if (hasMGObjects) {
-        mflgMgCoFi = m_mgLevelGridsCoFi[amrLevel][mgLevel];
         mflgMgCoar = mgLevelGrids[mgLevel + 1];
+        restrictMG = m_mgRestrictions[amrLevel][mgLevel];
+        prolongMG  = m_mgProlongations[amrLevel][mgLevel];
       }
     }
   }
@@ -528,11 +541,14 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              mflg,
                              MFLevelGrid(),
                              MFLevelGrid(),
-                             mflgMgCoFi,
                              mflgMgCoar,
                              interpolator,
                              fluxReg,
                              coarsener,
+                             PhaseRestrictions(),  // Multigrid operator, so no AMR restriction.
+                             PhaseProlongations(), // Multigrid operator, so no AMR prolongation.
+                             restrictMG,
+                             prolongMG,
                              validCells,
                              m_domainBcFactory,
                              m_ebBcFactory,
@@ -582,8 +598,12 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
   MFLevelGrid mflg;
   MFLevelGrid mflgCoFi;
   MFLevelGrid mflgCoar;
-  MFLevelGrid mflgCoFiMG;
   MFLevelGrid mflgCoarMG;
+
+  PhaseRestrictions  restrictOps;
+  PhaseProlongations prolongOps;
+  PhaseRestrictions  restrictOpsMG;
+  PhaseProlongations prolongOpsMG;
 
   Real dx;
 
@@ -605,12 +625,15 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if (hasMGObjects) {
-    mflgCoFiMG = m_mgLevelGridsCoFi[amrLevel][0];
-    mflgCoarMG = m_mgLevelGrids[amrLevel][1];
+    mflgCoarMG    = m_mgLevelGrids[amrLevel][1];
+    restrictOpsMG = m_mgRestrictions[amrLevel][0];
+    prolongOpsMG  = m_mgProlongations[amrLevel][0];
   }
 
   if (hasCoar) {
-    mflgCoFi = m_amrLevelGridsCoFi[amrLevel - 1];
+    mflgCoFi    = m_amrLevelGridsCoFi[amrLevel - 1];
+    restrictOps = m_amrRestrictions[amrLevel];
+    prolongOps  = m_amrProlongations[amrLevel];
   }
 
   auto* op = new MFHelmholtzOp(m_dataLocation,
@@ -618,11 +641,14 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                                mflg,
                                mflgCoFi,
                                mflgCoar,
-                               mflgCoFiMG,
                                mflgCoarMG,
                                m_amrInterpolators[amrLevel],
                                m_amrFluxRegisters[amrLevel],
                                m_amrCoarseners[amrLevel],
+                               restrictOps,
+                               prolongOps,
+                               restrictOpsMG,
+                               prolongOpsMG,
                                m_validCells[amrLevel],
                                m_domainBcFactory,
                                m_ebBcFactory,
