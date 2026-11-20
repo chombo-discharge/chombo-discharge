@@ -647,7 +647,9 @@ PhaseRealm::fillCopiedLayout(LevelData<EBGraph>&      a_graph,
 
   const EBLevelGrid* source = nullptr;
 
-  for (int lvl = 1; lvl <= m_finestLevel && source == nullptr; lvl++) {
+  // Any of the realm's levels can be the source, the coarsest included, although the copied layouts are only ever
+  // filled on the domains of the finer levels and of the half steps between ratio-4 levels.
+  for (int lvl = 0; lvl <= m_finestLevel && source == nullptr; lvl++) {
     if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
       source = &(*m_eblg[lvl]);
     }
