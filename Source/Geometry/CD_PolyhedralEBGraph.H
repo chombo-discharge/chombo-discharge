@@ -169,13 +169,13 @@ public:
    * other define computed from the implicit function, and does everything else as that define does, so that the graph
    * is the one it built, bit for bit. The tiles, covered cells, domain, spacing and ghost cells must be those it was
    * built with. Collective.
-   * @param[in] a_handle   File the other define wrote to, at the group it wrote this level to.
-   * @param[in] a_cutTiles The level's cut tiles, identical on every rank.
-   * @param[in] a_domain   Domain of the level.
-   * @param[in] a_probLo   Lower-left corner of the domain.
-   * @param[in] a_dx       Grid spacing of the level.
-   * @param[in] a_numGhost Ghost cells the cell states are kept for.
-   * @param[in] a_covered  Cells of this level the finer level will carry, coarsened onto this level.
+   * @param[in,out] a_handle   File the other define wrote to, at the group it wrote this level to.
+   * @param[in]     a_cutTiles The level's cut tiles, identical on every rank.
+   * @param[in]     a_domain   Domain of the level.
+   * @param[in]     a_probLo   Lower-left corner of the domain.
+   * @param[in]     a_dx       Grid spacing of the level.
+   * @param[in]     a_numGhost Ghost cells the cell states are kept for.
+   * @param[in]     a_covered  Cells of this level the finer level will carry, coarsened onto this level.
    */
   virtual void
   define(HDF5Handle&          a_handle,
@@ -605,8 +605,8 @@ protected:
   /**
    * @brief Write what defineCells read from the implicit function: the cell states with their ghost cells, the face
    * states, and the surfaces of the valid cells. Collective.
-   * @param[in] a_handle File, at the group to write to.
-   * @param[in] a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
+   * @param[in,out] a_handle File, at the group to write to.
+   * @param[in]     a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
    */
   void
   writeCells(HDF5Handle& a_handle, const LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept) const;
@@ -614,8 +614,8 @@ protected:
   /**
    * @brief Read what writeCells wrote into the cell states, face states and cut-cell and surface sets of the valid
    * cells. Collective.
-   * @param[in]  a_handle File, at the group writeCells wrote to.
-   * @param[out] a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
+   * @param[in,out] a_handle File, at the group writeCells wrote to.
+   * @param[out]    a_kept   The surfaces of each box's valid surface cells, in the order a BoxIterator meets them.
    */
   void
   readCells(HDF5Handle& a_handle, LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept);

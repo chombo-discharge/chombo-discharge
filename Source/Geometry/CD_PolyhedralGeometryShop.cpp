@@ -833,7 +833,11 @@ PolyhedralGeometryShop::buildGraphs()
 
     if (handle != nullptr) {
 #ifdef CH_USE_HDF5
-      handle->setGroup("/" + phaseName + "_level_" + std::to_string(lvl));
+      const std::string group = "/" + phaseName + "_level_" + std::to_string(lvl);
+
+      if (handle->setGroup(group) != 0) {
+        MayDay::Error(("PolyhedralGeometryShop::buildGraphs - the graph file has no group '" + group + "'").c_str());
+      }
 #endif
     }
 

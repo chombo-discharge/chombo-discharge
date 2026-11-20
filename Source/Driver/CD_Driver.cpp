@@ -1611,10 +1611,12 @@ Driver::setupFresh(const int a_initialRegrids)
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
 
+#ifdef CH_USE_HDF5
       // A run that checkpoints keeps the graph, so that a restart continues on exactly this geometry.
       if (m_checkpointInterval > 0) {
         m_computationalGeometry->writeGraphTo(this->getGraphFileName());
       }
+#endif
 
       this->buildGeometryGrids(scanDomain);
     }

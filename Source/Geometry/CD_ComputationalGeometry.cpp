@@ -794,22 +794,23 @@ ComputationalGeometry::writeGrids()
 
   HDF5HeaderData header;
 
-  header.m_string["id"]              = m_graphId;
-  header.m_int["space_dim"]          = SpaceDim;
-  header.m_box["start_domain"]       = m_domains[m_startLevel].domainBox();
-  header.m_box["stop_domain"]        = m_domains[m_stopLevel].domainBox();
-  header.m_realvect["prob_lo"]       = m_probLo;
-  header.m_real["start_dx"]          = m_dx[m_startLevel];
-  header.m_real["refine_angle"]      = m_refineAngle;
-  header.m_int["refine_saddles"]     = m_refineSaddles ? 1 : 0;
-  header.m_int["max_ghost_eb"]       = m_maxGhostEB;
-  header.m_int["min_block_size"]     = m_minBlockSize;
-  header.m_int["max_block_size"]     = m_maxBlockSize;
-  header.m_int["start_level"]        = m_startLevel;
-  header.m_int["stop_level"]         = m_stopLevel;
-  header.m_int["electrode_level"]    = m_electrodeLevel;
-  header.m_int["dielectric_level"]   = m_dielectricLevel;
-  header.m_int["has_implicit_fluid"] = (m_implicitFunctionGas.isNull() && m_implicitFunctionSolid.isNull()) ? 0 : 1;
+  header.m_string["id"]            = m_graphId;
+  header.m_int["space_dim"]        = SpaceDim;
+  header.m_box["start_domain"]     = m_domains[m_startLevel].domainBox();
+  header.m_box["stop_domain"]      = m_domains[m_stopLevel].domainBox();
+  header.m_realvect["prob_lo"]     = m_probLo;
+  header.m_real["start_dx"]        = m_dx[m_startLevel];
+  header.m_real["refine_angle"]    = m_refineAngle;
+  header.m_int["refine_saddles"]   = m_refineSaddles ? 1 : 0;
+  header.m_int["max_ghost_eb"]     = m_maxGhostEB;
+  header.m_int["min_block_size"]   = m_minBlockSize;
+  header.m_int["max_block_size"]   = m_maxBlockSize;
+  header.m_int["start_level"]      = m_startLevel;
+  header.m_int["stop_level"]       = m_stopLevel;
+  header.m_int["electrode_level"]  = m_electrodeLevel;
+  header.m_int["dielectric_level"] = m_dielectricLevel;
+  header.m_int["has_gas"]          = m_implicitFunctionGas.isNull() ? 0 : 1;
+  header.m_int["has_solid"]        = m_implicitFunctionSolid.isNull() ? 0 : 1;
 
   m_graphHandle->setGroup("/");
 
@@ -969,6 +970,13 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
   m_solidTypes.resize(numLevels);
 
   this->buildImplicitFunctions();
+
+  // The file holds a graph for each phase the geometry had when it was written, and is read for each phase it has now.
+  if (header.m_int["has_gas"] != (m_implicitFunctionGas.isNull() ? 0 : 1) ||
+      header.m_int["has_solid"] != (m_implicitFunctionSolid.isNull() ? 0 : 1)) {
+    MayDay::Error("ComputationalGeometry::readGrids - the inputs give the geometry other phases than the graph file "
+                  "was written with (a dielectric added or removed)");
+  }
 
   auto boxesOf = [](const std::vector<int>& a_rows) -> Vector<Box> {
     Vector<Box> boxes;
