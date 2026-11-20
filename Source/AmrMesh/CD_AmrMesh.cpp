@@ -3615,7 +3615,10 @@ AmrMesh::registerParticleDeposition(const std::string&         a_realm,
     pout() << "AmrMesh::registerParticleDeposition" << endl;
   }
 
-  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
+  // the ratios between the levels a run can have; the list may be longer
+  const int numRatios = std::min(m_maxAmrDepth, static_cast<int>(m_refinementRatios.size()));
+
+  for (int lvl = 0; lvl < numRatios; lvl++) {
     const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
                                                                                  a_coarseFineDeposition,
                                                                                  m_refinementRatios[lvl]);

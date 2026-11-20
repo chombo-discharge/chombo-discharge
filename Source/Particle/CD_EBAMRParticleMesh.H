@@ -613,8 +613,8 @@ public:
 
   /**
    * @brief The coarse-to-fine particle ghost-mask widths a deposition needs between two levels.
-   * @details Callers register these with Realm::registerParticleGhostMask before regridding. Interp and HaloNGP need
-   * none; Halo needs getHaloGhostWidth; Transition needs getTransitionMaskWidth and getTransitionGhostWidth.
+   * @details Callers register these through AmrMesh::registerParticleDeposition before regridding. Interp and HaloNGP
+   * need none; Halo needs getHaloGhostWidth; Transition needs getTransitionMaskWidth and getTransitionGhostWidth.
    * @param[in] a_depositionType       Deposition kernel.
    * @param[in] a_coarseFineDeposition Coarse-fine handling.
    * @param[in] a_refRat               Refinement ratio between the level and the finer one.
