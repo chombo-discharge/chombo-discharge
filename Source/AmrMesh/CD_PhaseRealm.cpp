@@ -1165,6 +1165,12 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           continue;
         }
 
+        // A cut cell the surface only touches, at a corner or an edge, has no boundary area and a zero normal. It holds
+        // no surface to reflect against, and as a source it would hand its zero normal to the cells around it.
+        if (!(ebisbox.bndryArea(vof) > 0.0)) {
+          continue;
+        }
+
         // Physical position. Do NOT difference raw bndryCentroid values between cells -- that drops the inter-cell
         // offset and inflates the fitted curvature by an order of magnitude.
         RealVect       xc   = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
