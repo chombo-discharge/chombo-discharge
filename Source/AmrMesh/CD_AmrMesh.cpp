@@ -3618,10 +3618,22 @@ AmrMesh::registerParticleDeposition(const std::string&         a_realm,
   // the ratios between the levels a run can have; the list may be longer
   const int numRatios = std::min(m_maxAmrDepth, static_cast<int>(m_refinementRatios.size()));
 
+  // The particle ghost masks do not wrap around periodic boundaries.
+  bool isPeriodic = false;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    isPeriodic = isPeriodic || m_domains[0].isPeriodic(dir);
+  }
+
   for (int lvl = 0; lvl < numRatios; lvl++) {
     const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
                                                                                  a_coarseFineDeposition,
                                                                                  m_refinementRatios[lvl]);
+
+    if (isPeriodic && !widths.empty()) {
+      MayDay::Abort("AmrMesh::registerParticleDeposition - Halo and Transition coarse-fine deposition use particle "
+                    "ghost masks, which do not support periodic domains. Use Interp or HaloNGP on a periodic domain");
+    }
 
     for (const int width : widths) {
       if (width >= m_minBlockSize) {

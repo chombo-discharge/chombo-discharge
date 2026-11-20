@@ -1889,7 +1889,8 @@ public:
    * @details Halo and Transition deposition copy coarser particles into the finer patches through these masks, with
    * widths that depend on the deposition kernel and the refinement ratios (see
    * EBAMRParticleMesh::getCoarseToFineMaskWidths). Interp and HaloNGP need none. Call before regridding, with the
-   * settings the deposits will use. Aborts if a width is not smaller than min_block_size.
+   * settings the deposits will use. Aborts if a width is not smaller than min_block_size, and on a periodic domain
+   * whenever masks are needed, since the masks do not wrap around periodic boundaries.
    * @param[in] a_realm                Realm name
    * @param[in] a_depositionType       Deposition kernel.
    * @param[in] a_coarseFineDeposition Coarse-fine handling.
