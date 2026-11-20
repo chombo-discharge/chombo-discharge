@@ -10,6 +10,10 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <algorithm>
+#include <cmath>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <ParmParse.H>
@@ -58,6 +62,9 @@ ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnk
   // Initialize the photon species
   this->initializePhotonSpecies();
 
+  // Initialize the surface species
+  this->initializeSurfaceSpecies();
+
   // Initialize reactions
   this->initializeTownsendCoefficient("alpha");
   this->initializeTownsendCoefficient("eta");
@@ -66,6 +73,7 @@ ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false), m_abortOnUnk
   this->initializeSurfaceEmission("dielectric");
   this->initializeSurfaceEmission("electrode");
   this->initializeSurfaceEmission("domain");
+  this->initializeSurfaceReactions();
   this->initializeFieldEmission();
 
   // Initialize the particle placement algorithm
@@ -329,6 +337,39 @@ ItoKMCJSON::isPhotonSpecies(const std::string& a_name) const noexcept
   return m_photonIndexMap.count(a_name) != 0;
 }
 
+int
+ItoKMCJSON::getSurfaceSpeciesIndex(const std::string& a_name) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getSurfaceSpeciesIndex");
+  if (m_verbose) {
+    pout() << m_className + "::getSurfaceSpeciesIndex" << endl;
+  }
+
+  for (int i = 0; i < m_surfaceSpecies.size(); i++) {
+    if (m_surfaceSpecies[i]->getName() == a_name) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+void
+ItoKMCJSON::checkSurfaceChargeConservation(const int          a_chargeIn,
+                                           const int          a_chargeOut,
+                                           const std::string& a_context) const
+{
+  CH_TIME("ItoKMCJSON::checkSurfaceChargeConservation");
+  if (m_verbose) {
+    pout() << m_className + "::checkSurfaceChargeConservation" << endl;
+  }
+
+  if (a_chargeIn != a_chargeOut) {
+    this->throwParserWarning(a_context + " does not conserve charge; the difference stays in the surface charge but "
+                                         "is not assigned to any surface species");
+  }
+}
+
 bool
 ItoKMCJSON::containsBracket(const std::string& a_str) const noexcept
 {
@@ -444,7 +485,9 @@ ItoKMCJSON::parseJSON()
                      "dielectric emission",
                      "domain emission",
                      "field emission",
-                     "particle placement"},
+                     "particle placement",
+                     "surface species",
+                     "surface reactions"},
                     "(top level)");
 
     if (m_verbose) {
@@ -2475,13 +2518,34 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
         }
       }
 
-      // Do not permit more than one species on the right-hand side.
-      if (trimmedReactants.size() != 1) {
-        this->throwParserError(baseErrorID + " - only one species allowed on the left-hand side (can't be wildcard)");
+      // Surface species on the left-hand side are consumed by the impact. The remaining reactant is the impinging
+      // particle species.
+      std::vector<std::string> particleReactants;
+      std::list<size_t>        surfaceReactants;
+
+      for (const auto& r : trimmedReactants) {
+        const int surfaceIndex = this->getSurfaceSpeciesIndex(r);
+
+        if (surfaceIndex >= 0) {
+          surfaceReactants.emplace_back((size_t)surfaceIndex);
+        }
+        else {
+          particleReactants.emplace_back(r);
+        }
+      }
+
+      if (!(surfaceReactants.empty()) && a_surface != "dielectric") {
+        this->throwParserError(baseErrorID + " but surface species are only allowed in 'dielectric emission'");
+      }
+
+      // Do not permit more than one particle species on the left-hand side.
+      if (particleReactants.size() != 1) {
+        this->throwParserError(baseErrorID + " - only one particle species allowed on the left-hand side, plus "
+                                             "surface species on dielectrics (can't be wildcard)");
       }
 
       // Left-hand side must be a particle species (Ito or photon)
-      const std::string r        = trimmedReactants.front();
+      const std::string r        = particleReactants.front();
       const bool        isPlasma = this->isPlasmaSpecies(r);
       const bool        isPhoton = this->isPhotonSpecies(r);
 
@@ -2505,8 +2569,19 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
       // Turn product strings into indices
       std::list<size_t> productIndices;
+      std::list<size_t> surfaceProducts;
+
       for (const auto& p : trimmedProducts) {
-        if (p != "(null)") {
+        const int surfaceIndex = this->getSurfaceSpeciesIndex(p);
+
+        if (surfaceIndex >= 0) {
+          if (a_surface != "dielectric") {
+            this->throwParserError(baseErrorID + " but surface species are only allowed in 'dielectric emission'");
+          }
+
+          surfaceProducts.emplace_back((size_t)surfaceIndex);
+        }
+        else if (p != "(null)") {
           if (this->isPhotonSpecies(p)) {
             this->throwParserError(baseErrorID + " but product must be an Ito species");
           }
@@ -2523,8 +2598,29 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
         }
       }
 
+      // A reaction with surface species should conserve charge, or the surface charge it leaves behind is not
+      // assigned to any surface species.
+      if (!(surfaceReactants.empty()) || !(surfaceProducts.empty())) {
+        int chargeIn  = isPlasma ? m_itoSpecies[reactantIndex]->getChargeNumber() : 0;
+        int chargeOut = 0;
+
+        for (const auto& idx : surfaceReactants) {
+          chargeIn += m_surfaceSpecies[idx]->getChargeNumber();
+        }
+
+        for (const auto& idx : productIndices) {
+          chargeOut += m_itoSpecies[idx]->getChargeNumber();
+        }
+
+        for (const auto& idx : surfaceProducts) {
+          chargeOut += m_surfaceSpecies[idx]->getChargeNumber();
+        }
+
+        this->checkSurfaceChargeConservation(chargeIn, chargeOut, baseErrorID);
+      }
+
       // Create the reaction and append it to the set.
-      ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, efficiencies[i]);
+      ItoKMCSurfaceReaction reaction(reactantIndex, productIndices, surfaceReactants, surfaceProducts, efficiencies[i]);
 
       ItoKMCSurfaceReactions reactions;
 
@@ -2563,6 +2659,173 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
                                ItoKMCSurfaceReactionSet::Species::Photon);
       }
     }
+  }
+}
+
+void
+ItoKMCJSON::initializeSurfaceSpecies()
+{
+  CH_TIME("ItoKMCJSON::initializeSurfaceSpecies");
+  if (m_verbose) {
+    pout() << m_className + "::initializeSurfaceSpecies" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeSurfaceSpecies";
+
+  if (!(m_json.contains("surface species"))) {
+    return;
+  }
+
+  for (const auto& species : m_json["surface species"]) {
+    if (!(species.contains("id"))) {
+      this->throwParserError(baseError + " but one of the species does not contain the 'id' field");
+    }
+
+    const std::string speciesID   = this->trim(species["id"].get<std::string>());
+    const std::string baseErrorID = std::string{baseError}.append(" for species '").append(speciesID).append("'");
+
+    this->checkKeys(species, {"id", "Z", "initial density"}, "surface species/" + speciesID);
+
+    if (speciesID.empty()) {
+      this->throwParserError(baseError + " but one of the species has an empty 'id'");
+    }
+    if (this->containsWildcard(speciesID)) {
+      this->throwParserError(baseErrorID + " but the name should not contain wildcard @");
+    }
+    if (this->isBracketed(speciesID)) {
+      this->throwParserError(baseErrorID + " but the name should not be enclosed in brackets");
+    }
+    if (speciesID.find(' ') != std::string::npos) {
+      this->throwParserError(baseErrorID + " but the name should not contain white space");
+    }
+    if (m_allSpecies.count(speciesID) != 0) {
+      this->throwParserError(baseErrorID + " but the species was already defined elsewhere");
+    }
+    if (!(species.contains("Z"))) {
+      this->throwParserError(baseErrorID + " but did not find 'Z' (must be integer)");
+    }
+
+    const int Z = species["Z"].get<int>();
+
+    auto* surfaceSpecies = new ItoKMCCDRSpecies(speciesID, Z, false, false);
+
+    if (species.contains("initial density")) {
+      const Real density = species["initial density"].get<Real>();
+
+      if (density < 0.0) {
+        this->throwParserError(baseErrorID + " but 'initial density' can not be negative");
+      }
+
+      surfaceSpecies->setInitialData([density](const RealVect& /*x*/, const Real /*t*/) -> Real {
+        return density;
+      });
+    }
+
+    m_surfaceSpecies.push_back(RefCountedPtr<CdrSpecies>(surfaceSpecies));
+
+    m_allSpecies.emplace(speciesID);
+
+    if (m_verbose) {
+      pout() << "ItoKMCJSON::initializeSurfaceSpecies, instantiating species:" << "\n"
+             << "\tName = " << speciesID << "\n"
+             << "\tZ    = " << Z << "\n"
+             << "\n";
+    }
+  }
+}
+
+void
+ItoKMCJSON::initializeSurfaceReactions()
+{
+  CH_TIME("ItoKMCJSON::initializeSurfaceReactions");
+  if (m_verbose) {
+    pout() << m_className + "::initializeSurfaceReactions" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeSurfaceReactions";
+
+  if (!(m_json.contains("surface reactions"))) {
+    return;
+  }
+
+  for (const auto& reactionJSON : m_json["surface reactions"]) {
+    if (!(reactionJSON.contains("reaction"))) {
+      this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
+    }
+
+    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
+    const std::string baseErrorID = std::string{baseError}.append(" for reaction '").append(reaction).append("'");
+
+    this->checkKeys(reactionJSON, {"reaction", "rate"}, "surface reactions/" + reaction);
+
+    if (!(reactionJSON.contains("rate"))) {
+      this->throwParserError(baseErrorID + " but did not find the field 'rate'");
+    }
+    if (this->containsWildcard(reaction)) {
+      this->throwParserError(baseErrorID + " but wildcards are not supported in surface reactions");
+    }
+
+    const Real rate = reactionJSON["rate"].get<Real>();
+
+    if (rate < 0.0) {
+      this->throwParserError(baseErrorID + " but 'rate' can not be negative");
+    }
+
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    this->parseReactionString(reactants, products, reaction);
+
+    // Species enclosed in brackets are ignored, except (null).
+    std::vector<std::string> trimmedReactants;
+
+    for (const auto& r : reactants) {
+      if (!(this->isBracketed(r))) {
+        trimmedReactants.emplace_back(r);
+      }
+    }
+
+    if (trimmedReactants.size() != 1) {
+      this->throwParserError(baseErrorID + " but surface reactions must have exactly one reactant");
+    }
+
+    const int reactantIndex = this->getSurfaceSpeciesIndex(trimmedReactants.front());
+
+    if (reactantIndex < 0) {
+      this->throwParserError(baseErrorID + " but the reactant must be a surface species");
+    }
+
+    std::list<size_t> productIndices;
+    std::list<size_t> surfaceProducts;
+
+    for (const auto& p : products) {
+      const int surfaceIndex = this->getSurfaceSpeciesIndex(p);
+
+      if (surfaceIndex >= 0) {
+        surfaceProducts.emplace_back((size_t)surfaceIndex);
+      }
+      else if (this->isPlasmaSpecies(p) && m_plasmaSpeciesTypes.at(p) == SpeciesType::Ito) {
+        productIndices.emplace_back((size_t)m_itoSpeciesMap.at(p));
+      }
+      else if (!(this->isBracketed(p))) {
+        this->throwParserError(baseErrorID + " but products must be Ito or surface species");
+      }
+    }
+
+    int chargeOut = 0;
+
+    for (const auto& idx : productIndices) {
+      chargeOut += m_itoSpecies[idx]->getChargeNumber();
+    }
+
+    for (const auto& idx : surfaceProducts) {
+      chargeOut += m_surfaceSpecies[idx]->getChargeNumber();
+    }
+
+    this->checkSurfaceChargeConservation(m_surfaceSpecies[reactantIndex]->getChargeNumber(), chargeOut, baseErrorID);
+
+    m_surfaceReactions.addSurfaceSpeciesReaction(
+      ItoKMCSurfaceReaction((size_t)reactantIndex, productIndices, std::list<size_t>(), surfaceProducts, rate));
   }
 }
 
@@ -3987,9 +4250,9 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 }
 
 void
-ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
-                                Vector<Real>&                     a_secondaryCDRFluxes,
-                                Vector<ParticleSoA<Photon>>& /*a_secondaryPhotons*/,
+ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                                Vector<Real>&                           a_secondaryCDRFluxes,
+                                Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
                                 const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
                                 const Vector<Real>&                     a_primaryCDRFluxes,
                                 const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
@@ -4002,10 +4265,80 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
                                 const Real                              a_dx,
                                 const Real                              a_dt,
                                 const bool                              a_isDielectric,
-                                const int /*a_matIndex*/) const noexcept
+                                const int                               a_matIndex) const noexcept
 {
   if (m_verbose) {
     pout() << m_className + "::secondaryEmissionEB" << endl;
+  }
+
+  // Without surface densities the surface is treated as empty, and the change in the surface densities is discarded.
+  const Vector<Real> surfaceDensities(m_surfaceSpecies.size(), 0.0);
+  Vector<Real>       surfaceDensityChange(m_surfaceSpecies.size(), 0.0);
+
+  this->surfaceEmissionEB(a_secondaryParticles,
+                          a_secondaryCDRFluxes,
+                          a_secondaryPhotons,
+                          surfaceDensityChange,
+                          a_primaryParticles,
+                          a_primaryCDRFluxes,
+                          a_primaryPhotons,
+                          surfaceDensities,
+                          a_E,
+                          a_cellCenter,
+                          a_cellCentroid,
+                          a_bndryCentroid,
+                          a_bndryNormal,
+                          a_bndryArea,
+                          a_dx,
+                          a_dt,
+                          a_isDielectric,
+                          a_matIndex);
+}
+
+void
+ItoKMCJSON::surfaceEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                              Vector<Real>&                     a_secondaryCDRFluxes,
+                              Vector<ParticleSoA<Photon>>& /*a_secondaryPhotons*/,
+                              Vector<Real>&                           a_surfaceDensityChange,
+                              const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                              const Vector<Real>&                     a_primaryCDRFluxes,
+                              const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                              const Vector<Real>&                     a_surfaceDensities,
+                              const RealVect&                         a_E,
+                              const RealVect&                         a_cellCenter,
+                              const RealVect&                         a_cellCentroid,
+                              const RealVect&                         a_bndryCentroid,
+                              const RealVect&                         a_bndryNormal,
+                              const Real                              a_bndryArea,
+                              const Real                              a_dx,
+                              const Real                              a_dt,
+                              const bool                              a_isDielectric,
+                              const int /*a_matIndex*/) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::surfaceEmissionEB" << endl;
+  }
+
+  const int numSurfaceSpecies = m_surfaceSpecies.size();
+
+  CH_assert(a_surfaceDensities.size() == numSurfaceSpecies);
+  CH_assert(a_surfaceDensityChange.size() == numSurfaceSpecies);
+
+  // Surface species only live on dielectrics. There, the densities are turned into whole numbers of surface
+  // particles. The small tolerance keeps a density that holds a whole number of particles from losing one to
+  // round-off.
+  const Real physicalArea      = a_bndryArea * std::pow(a_dx, SpaceDim - 1);
+  const bool hasSurfaceSpecies = a_isDielectric && numSurfaceSpecies > 0 && physicalArea > 0.0;
+
+  std::vector<long long> surfaceAvailable(numSurfaceSpecies, 0LL);
+  std::vector<long long> surfaceChange(numSurfaceSpecies, 0LL);
+
+  if (hasSurfaceSpecies) {
+    for (int i = 0; i < numSurfaceSpecies; i++) {
+      const Real numSurface = a_surfaceDensities[i] * physicalArea;
+
+      surfaceAvailable[i] = std::max(0LL, static_cast<long long>(std::floor(numSurface + 1.E-6)));
+    }
   }
 
   const bool isCathode = a_E.dotProduct(a_bndryNormal) <= 0.0;
@@ -4038,6 +4371,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
                               photonReactions,
                               a_primaryParticles,
                               a_primaryPhotons,
+                              surfaceAvailable,
+                              surfaceChange,
                               releasePosition,
                               isCathode);
 
@@ -4051,6 +4386,20 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
                               a_bndryArea,
                               a_dx,
                               a_dt);
+  }
+
+  if (hasSurfaceSpecies) {
+    this->sampleSurfaceSpeciesReactions(a_secondaryParticles,
+                                        surfaceAvailable,
+                                        surfaceChange,
+                                        releasePosition,
+                                        isCathode,
+                                        a_dt);
+  }
+
+  // Convert the change in the number of surface particles back to areal densities.
+  for (int i = 0; i < numSurfaceSpecies; i++) {
+    a_surfaceDensityChange[i] = hasSurfaceSpecies ? static_cast<Real>(surfaceChange[i]) / physicalArea : 0.0;
   }
 }
 
@@ -4098,11 +4447,16 @@ ItoKMCJSON::secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>& a_secondar
     return a_cellCenter + Random::randomPosition(lo, hi) * a_dx;
   };
 
+  // Surface species do not take part in domain emission.
+  std::vector<long long> noSurfaceSpecies;
+
   this->sampleSurfaceEmission(a_secondaryParticles,
                               m_surfaceReactions.getDomainPlasmaReactions(a_dir, a_side),
                               m_surfaceReactions.getDomainPhotonReactions(a_dir, a_side),
                               a_primaryParticles,
                               a_primaryPhotons,
+                              noSurfaceSpecies,
+                              noSurfaceSpecies,
                               releasePosition,
                               isCathode);
 
@@ -4125,6 +4479,8 @@ ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&             
                                   const std::map<size_t, ItoKMCSurfaceReactions>& a_photonReactions,
                                   const Vector<ParticleSoA<ItoParticle>>&         a_primaryParticles,
                                   const Vector<ParticleSoA<Photon>>&              a_primaryPhotons,
+                                  std::vector<long long>&                         a_surfaceAvailable,
+                                  std::vector<long long>&                         a_surfaceChange,
                                   const std::function<RealVect()>&                a_releasePosition,
                                   const bool                                      a_isCathode) const noexcept
 {
@@ -4143,9 +4499,11 @@ ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&             
       if (a_reactions.count(i) > 0) {
 
         // These are the products and distribution for this reaction.
-        const auto& reactions      = a_reactions.at(i);
-        const auto& plasmaProducts = reactions.getProducts();
-        const auto& distribution   = reactions.getDistribution();
+        const auto& reactions        = a_reactions.at(i);
+        const auto& plasmaProducts   = reactions.getProducts();
+        const auto& surfaceReactants = reactions.getSurfaceReactants();
+        const auto& surfaceProducts  = reactions.getSurfaceProducts();
+        const auto& distribution     = reactions.getDistribution();
 
         // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
         // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
@@ -4164,14 +4522,39 @@ ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&             
 
         // Release the particles.
         for (int k = 0; k < X.size(); k++) {
-          if (X[k] > 0) {
+          size_t numFire = X[k];
+
+          // A pathway that involves surface species fires only if its plasma products can be released, and at
+          // most as many times as its surface reactants allow. The primaries are absorbed regardless.
+          if (numFire > 0 && (!(surfaceReactants[k].empty()) || !(surfaceProducts[k].empty()))) {
+            if (!(this->canReleaseProducts(plasmaProducts[k], a_isCathode))) {
+              numFire = 0;
+            }
+
+            for (const auto& r : surfaceReactants[k]) {
+              const long long multiplicity = std::count(surfaceReactants[k].begin(), surfaceReactants[k].end(), r);
+
+              numFire = std::min(numFire, static_cast<size_t>(a_surfaceAvailable[r] / multiplicity));
+            }
+
+            for (const auto& r : surfaceReactants[k]) {
+              a_surfaceAvailable[r] -= static_cast<long long>(numFire);
+              a_surfaceChange[r] -= static_cast<long long>(numFire);
+            }
+
+            for (const auto& q : surfaceProducts[k]) {
+              a_surfaceChange[q] += static_cast<long long>(numFire);
+            }
+          }
+
+          if (numFire > 0) {
             const RealVect releasePosition = a_releasePosition();
 
             for (const auto& p : plasmaProducts[k]) {
               const int Z = m_itoSpecies[p]->getChargeNumber();
 
               if ((Z < 0 && a_isCathode) || (Z > 0 && isAnode) || Z == 0) {
-                a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[k]), ItoParticle{});
+                a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(numFire), ItoParticle{});
               }
             }
           }
@@ -4182,6 +4565,82 @@ ItoKMCJSON::sampleSurfaceEmission(Vector<ParticleSoA<ItoParticle>>&             
 
   emit(a_plasmaReactions, a_primaryParticles, m_itoSpecies.size());
   emit(a_photonReactions, a_primaryPhotons, m_rtSpecies.size());
+}
+
+void
+ItoKMCJSON::sampleSurfaceSpeciesReactions(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                                          std::vector<long long>&           a_surfaceAvailable,
+                                          std::vector<long long>&           a_surfaceChange,
+                                          const std::function<RealVect()>&  a_releasePosition,
+                                          const bool                        a_isCathode,
+                                          const Real                        a_dt) const noexcept
+{
+  if (m_verbose) {
+    pout() << m_className + "::sampleSurfaceSpeciesReactions" << endl;
+  }
+
+  const std::vector<ItoKMCSurfaceReactions>& surfaceSpeciesReactions = m_surfaceReactions.getSurfaceSpeciesReactions();
+
+  for (size_t s = 0; s < surfaceSpeciesReactions.size(); s++) {
+    const ItoKMCSurfaceReactions& reactions = surfaceSpeciesReactions[s];
+    const std::vector<Real>&      rates     = reactions.getEfficiencies();
+
+    Real totalRate = 0.0;
+
+    for (const auto& k : rates) {
+      totalRate += k;
+    }
+
+    if (a_surfaceAvailable[s] > 0 && totalRate > 0.0) {
+
+      // Number of surface particles that react within the time step, then which reaction each one takes.
+      const double reactProbability = -std::expm1(-totalRate * a_dt);
+
+      std::binomial_distribution<long long> binomial(a_surfaceAvailable[s], reactProbability);
+
+      const long long numReact = Random::getDiscrete(binomial);
+
+      if (numReact > 0) {
+        const std::vector<size_t> X = this->multinomial(static_cast<size_t>(numReact), reactions.getDistribution());
+
+        const auto& plasmaProducts  = reactions.getProducts();
+        const auto& surfaceProducts = reactions.getSurfaceProducts();
+
+        for (int k = 0; k < X.size(); k++) {
+          if (X[k] > 0 && this->canReleaseProducts(plasmaProducts[k], a_isCathode)) {
+            const long long numFire = static_cast<long long>(X[k]);
+
+            a_surfaceAvailable[s] -= numFire;
+            a_surfaceChange[s] -= numFire;
+
+            for (const auto& q : surfaceProducts[k]) {
+              a_surfaceChange[q] += numFire;
+            }
+
+            const RealVect releasePosition = a_releasePosition();
+
+            for (const auto& p : plasmaProducts[k]) {
+              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(numFire), ItoParticle{});
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+bool
+ItoKMCJSON::canReleaseProducts(const std::list<size_t>& a_products, const bool a_isCathode) const noexcept
+{
+  for (const auto& p : a_products) {
+    const int Z = m_itoSpecies[p]->getChargeNumber();
+
+    if ((Z < 0 && !a_isCathode) || (Z > 0 && a_isCathode)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void
@@ -4281,6 +4740,12 @@ ItoKMCJSON::emitsWithoutPrimariesEB() const noexcept
   CH_TIME("ItoKMCJSON::emitsWithoutPrimariesEB");
   if (m_verbose) {
     pout() << m_className + "::emitsWithoutPrimariesEB" << endl;
+  }
+
+  for (const auto& reactions : m_surfaceReactions.getSurfaceSpeciesReactions()) {
+    if (!(reactions.getEfficiencies().empty())) {
+      return true;
+    }
   }
 
   return !(m_electrodeFieldEmission.empty()) || !(m_dielectricFieldEmission.empty());

@@ -194,9 +194,9 @@ public:
   needGradient(const int a_plasmaIndex) const noexcept override;
 
   /**
-   * @brief Return true if field emission is specified on electrodes or dielectrics.
-   * @details Field emission is the only EB emission in this model that does not need a primary particle or
-   * photon.
+   * @brief Return true if field emission is specified on electrodes or dielectrics, or if surface species have
+   * first-order surface reactions.
+   * @details These are the EB emission processes in this model that do not need a primary particle or photon.
    * @return True if the EB emission pass must run even when no primaries reached the EB.
    */
   virtual bool
@@ -242,7 +242,8 @@ public:
 
   /**
    * @brief Resolve secondary emission at the EB.
-   * @details Routine is here to handle charge injection, secondary emission etc.
+   * @details Calls surfaceEmissionEB() with an empty surface and discards the change in the surface species
+   * densities.
    * @param[out] a_secondaryParticles Outgoing plasma species particles.
    * @param[out] a_secondaryCDRFluxes Outgoing plasma species CDR fluxes
    * @param[out] a_secondaryPhotons   Photons injected through the EB
@@ -277,6 +278,56 @@ public:
                       const Real                              a_dt,
                       const bool                              a_isDielectric,
                       const int                               a_matIndex) const noexcept override;
+
+  /**
+   * @brief Resolve secondary emission and surface species kinetics at the EB.
+   * @details On dielectrics, the surface species densities are converted to whole numbers of surface particles in
+   * the cut cell, floor(n*A) with A the physical boundary area, and the 'dielectric emission' reactions consume and
+   * produce surface particles alongside the gas secondaries. A pathway with surface reactants fires at most as many
+   * times as those reactants allow; the primaries are absorbed either way. A pathway with surface reactants or
+   * products only fires if all its plasma products can be released, i.e. if the field pushes them away from the
+   * surface. After the impact reactions, the first-order 'surface reactions' fire on the remaining surface
+   * particles, each one with probability 1 - exp(-K dt) where K is the sum of the rates of its reactions, and the
+   * reaction is chosen in proportion to the rates. On electrodes, and in cut cells with zero boundary area, the
+   * surface species do not change.
+   * @param[out] a_secondaryParticles   Outgoing plasma species particles.
+   * @param[out] a_secondaryCDRFluxes   Outgoing plasma species CDR fluxes
+   * @param[out] a_secondaryPhotons     Photons injected through the EB
+   * @param[out] a_surfaceDensityChange Change in the areal density (1/m^2) of each surface species.
+   * @param[in]  a_primaryParticles     Particles that left the computational domain through the EB
+   * @param[in]  a_primaryCDRFluxes     CDR fluxes leaving the computational domain through the EB
+   * @param[in]  a_primaryPhotons       Photons that left the computational domain through the EB
+   * @param[in]  a_surfaceDensities     Areal density (1/m^2) of each surface species.
+   * @param[in]  a_E                    Electric field.
+   * @param[in]  a_cellCenter           Physical position of the cell center.
+   * @param[in]  a_cellCentroid         Cell centroid relative to the cell center (not multiplied by dx)
+   * @param[in]  a_bndryCentroid        EB face centroid relative to the cell center (not multiplied by dx)
+   * @param[in]  a_bndryNormal          Cut-cell normal vector.
+   * @param[in]  a_bndryArea            Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D)
+   * @param[in]  a_dx                   Grid resolution on this level.
+   * @param[in]  a_dt                   Time step
+   * @param[in]  a_isDielectric         Dielectric or electrode.
+   * @param[in]  a_matIndex             Material index (taken from computationalGeometry)
+   */
+  virtual void
+  surfaceEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                    Vector<Real>&                           a_secondaryCDRFluxes,
+                    Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                    Vector<Real>&                           a_surfaceDensityChange,
+                    const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                    const Vector<Real>&                     a_primaryCDRFluxes,
+                    const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                    const Vector<Real>&                     a_surfaceDensities,
+                    const RealVect&                         a_E,
+                    const RealVect&                         a_cellCenter,
+                    const RealVect&                         a_cellCentroid,
+                    const RealVect&                         a_bndryCentroid,
+                    const RealVect&                         a_bndryNormal,
+                    const Real                              a_bndryArea,
+                    const Real                              a_dx,
+                    const Real                              a_dt,
+                    const bool                              a_isDielectric,
+                    const int                               a_matIndex) const noexcept override;
 
   /**
    * @brief Resolve secondary emission on one face of the computational domain.
@@ -626,6 +677,25 @@ protected:
   isPhotonSpecies(const std::string& a_name) const noexcept;
 
   /**
+   * @brief Get the index of a surface species.
+   * @param[in] a_name Species name
+   * @return Index in m_surfaceSpecies, or -1 if a_name is not a surface species.
+   */
+  virtual int
+  getSurfaceSpeciesIndex(const std::string& a_name) const noexcept;
+
+  /**
+   * @brief Warn if a reaction that involves surface species does not conserve charge.
+   * @details A reaction that does not conserve charge is allowed. The surface charge still accounts for all
+   * charge that reaches or leaves the surface, but the difference is not assigned to any surface species.
+   * @param[in] a_chargeIn  Total charge number of the reactants, including the impinging species.
+   * @param[in] a_chargeOut Total charge number of the products.
+   * @param[in] a_context   Reaction description used in the warning.
+   */
+  virtual void
+  checkSurfaceChargeConservation(const int a_chargeIn, const int a_chargeOut, const std::string& a_context) const;
+
+  /**
    * @brief Check if a string contains the wildcard @ and return true if it does
    * @param[in] a_str Input string
    *         @return Return value
@@ -763,6 +833,18 @@ protected:
   initializePhotonSpecies();
 
   /**
+   * @brief Initialize the surface species from the 'surface species' array.
+   */
+  virtual void
+  initializeSurfaceSpecies();
+
+  /**
+   * @brief Initialize the first-order surface species reactions from the 'surface reactions' array.
+   */
+  virtual void
+  initializeSurfaceReactions();
+
+  /**
    * @brief Initialize plasma reactions
    */
   virtual void
@@ -803,6 +885,10 @@ protected:
    * @param[in]     a_photonReactions    Surface reactions triggered by photon species.
    * @param[in]     a_primaryParticles   Particles that hit the surface.
    * @param[in]     a_primaryPhotons     Photons that hit the surface.
+   * @param[in,out] a_surfaceAvailable   Number of surface particles of each surface species that reactions can
+   *                                     still consume. Empty where surface species do not take part.
+   * @param[in,out] a_surfaceChange      Net number of surface particles of each surface species created.
+   *                                     Same size as a_surfaceAvailable.
    * @param[in]     a_releasePosition    Draws a release position for one group of products.
    * @param[in]     a_isCathode          Whether the surface is a cathode.
    */
@@ -812,8 +898,41 @@ protected:
                         const std::map<size_t, ItoKMCSurfaceReactions>& a_photonReactions,
                         const Vector<ParticleSoA<ItoParticle>>&         a_primaryParticles,
                         const Vector<ParticleSoA<Photon>>&              a_primaryPhotons,
+                        std::vector<long long>&                         a_surfaceAvailable,
+                        std::vector<long long>&                         a_surfaceChange,
                         const std::function<RealVect()>&                a_releasePosition,
                         const bool                                      a_isCathode) const noexcept;
+
+  /**
+   * @brief Sample the first-order surface species reactions over a time step.
+   * @details Each surface particle of a species with total rate K reacts with probability 1 - exp(-K dt), drawn
+   * as one binomial over the species, and the reacting particles are split over the competing reactions by a
+   * multinomial draw weighted by the rates. A reaction whose plasma products the field would push back onto the
+   * surface does not fire.
+   * @param[in,out] a_secondaryParticles Secondary particles; products are appended.
+   * @param[in,out] a_surfaceAvailable   Number of surface particles of each surface species available to react.
+   * @param[in,out] a_surfaceChange      Net number of surface particles of each surface species created.
+   * @param[in]     a_releasePosition    Draws a release position for one group of products.
+   * @param[in]     a_isCathode          Whether the surface is a cathode.
+   * @param[in]     a_dt                 Time step.
+   */
+  virtual void
+  sampleSurfaceSpeciesReactions(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                                std::vector<long long>&           a_surfaceAvailable,
+                                std::vector<long long>&           a_surfaceChange,
+                                const std::function<RealVect()>&  a_releasePosition,
+                                const bool                        a_isCathode,
+                                const Real                        a_dt) const noexcept;
+
+  /**
+   * @brief Check if the field pushes all the plasma products of a reaction pathway away from the surface.
+   * @param[in] a_products  Plasma (Ito) product indices.
+   * @param[in] a_isCathode Whether the surface is a cathode.
+   * @return True if every charged product would be released: negative products from a cathode, positive
+   * products from an anode.
+   */
+  virtual bool
+  canReleaseProducts(const std::list<size_t>& a_products, const bool a_isCathode) const noexcept;
 
   /**
    * @brief Sample field emission from a cathode surface.

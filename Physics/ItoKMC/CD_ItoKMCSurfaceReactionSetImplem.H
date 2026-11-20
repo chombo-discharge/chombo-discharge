@@ -77,6 +77,24 @@ ItoKMCSurfaceReactionSet::addDomain(const size_t                            a_sp
   }
 }
 
+inline void
+ItoKMCSurfaceReactionSet::addSurfaceSpeciesReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept
+{
+  const size_t surfaceIndex = a_reaction.getReactant();
+
+  if (m_surfaceSpeciesReactions.size() <= surfaceIndex) {
+    m_surfaceSpeciesReactions.resize(surfaceIndex + 1);
+  }
+
+  m_surfaceSpeciesReactions[surfaceIndex].add(a_reaction);
+}
+
+inline const std::vector<ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getSurfaceSpeciesReactions() const noexcept
+{
+  return m_surfaceSpeciesReactions;
+}
+
 inline const std::map<size_t, ItoKMCSurfaceReactions>&
 ItoKMCSurfaceReactionSet::getDielectricPlasmaReactions() const noexcept
 {

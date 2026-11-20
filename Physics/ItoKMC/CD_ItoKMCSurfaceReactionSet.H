@@ -89,6 +89,24 @@ public:
             const ItoKMCSurfaceReactionSet::Species a_speciesType) noexcept;
 
   /**
+   * @brief Add a first-order reaction of a surface species.
+   * @details The reaction's reactant is the index of the decaying surface species and its efficiency is the rate
+   * constant (1/s). Reactions with the same surface species compete.
+   * @param[in] a_reaction Reaction to add.
+   */
+  inline void
+  addSurfaceSpeciesReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept;
+
+  /**
+   * @brief Get the first-order reactions of the surface species.
+   * @details Indexed by surface species. A surface species without reactions has an entry with no pathways, and
+   * surface species beyond the last one with reactions have no entry.
+   * @return First-order surface species reactions, grouped by the decaying surface species.
+   */
+  inline const std::vector<ItoKMCSurfaceReactions>&
+  getSurfaceSpeciesReactions() const noexcept;
+
+  /**
    * @brief Get the dielectric surface reactions where the outgoing species is a plasma species.
    * @return Map from species index to reaction list for dielectric plasma reactions.
    */
@@ -166,6 +184,11 @@ protected:
    * @details Indexed by 2*dir + side, with the low side first.
    */
   std::array<std::map<size_t, ItoKMCSurfaceReactions>, 2 * SpaceDim> m_domainPhotonReactions;
+
+  /**
+   * @brief First-order surface species reactions, indexed by the decaying surface species.
+   */
+  std::vector<ItoKMCSurfaceReactions> m_surfaceSpeciesReactions;
 
   /**
    * @brief Index of a domain face in m_domainPlasmaReactions and m_domainPhotonReactions.
