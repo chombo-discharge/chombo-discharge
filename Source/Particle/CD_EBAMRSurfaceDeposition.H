@@ -168,7 +168,8 @@ protected:
 
   /**
    * @brief Stencils for conservatively coarsening fine-grid data (in ghost cells) to the coarse grid.
-   * @details Defined on the fine grid but reaches into the refined coarse grid.
+   * @details Defined on the fine grid, for the cut cells of its ghost cells that no fine box holds. Each maps such a
+   * VoF to the VoF it coarsens to on the coarsened fine grid.
    */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>> m_fineToCoarseStencils;
 

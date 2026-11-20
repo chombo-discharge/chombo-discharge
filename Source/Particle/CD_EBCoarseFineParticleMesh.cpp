@@ -313,7 +313,14 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
     auto cutKernel = [&](const VolIndex& fineVoF) -> void {
       const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
 
-      const Real scale = a_cutCellsHoldDensity ? 1.0 : ebisBoxFine.volFrac(fineVoF) / ebisBoxCoFi.volFrac(coarVoF);
+      // A coarse VoF without volume has children without volume, which take nothing.
+      const Real coarVolFrac = ebisBoxCoFi.volFrac(coarVoF);
+
+      Real scale = 1.0;
+
+      if (!a_cutCellsHoldDensity) {
+        scale = (coarVolFrac > 0.0) ? ebisBoxFine.volFrac(fineVoF) / coarVolFrac : 0.0;
+      }
 
       interpData(fineVoF, m_comp) = coFiData(coarVoF, m_comp) * scale;
     };
