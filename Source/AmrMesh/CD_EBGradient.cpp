@@ -31,51 +31,67 @@
 constexpr int EBGradient::m_comp;
 constexpr int EBGradient::m_nComp;
 
-EBGradient::EBGradient(const EBLevelGrid& a_eblg,
-                       const EBLevelGrid& a_eblgFine,
-                       const EBLevelGrid& a_eblgFiCo,
-                       const bool         a_hasFine,
-                       const Real         a_dx,
-                       const int          a_refRat,
-                       const int          a_order,
-                       const int          a_weighting,
-                       const IntVect      a_ghostVector) noexcept
+EBGradient::EBGradient(const EBLevelGrid&                             a_eblg,
+                       const EBLevelGrid&                             a_eblgFine,
+                       const EBLevelGrid&                             a_eblgFiCo,
+                       const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fiCoFineCells,
+                       const bool                                     a_hasFine,
+                       const Real                                     a_dx,
+                       const int                                      a_refRat,
+                       const int                                      a_order,
+                       const int                                      a_weighting,
+                       const IntVect                                  a_ghostVector) noexcept
 {
   CH_TIME("EBGradient::EBGradient");
 
-  this->define(a_eblg, a_eblgFine, a_eblgFiCo, a_hasFine, a_dx, a_refRat, a_order, a_weighting, a_ghostVector);
+  this->define(a_eblg,
+               a_eblgFine,
+               a_eblgFiCo,
+               a_fiCoFineCells,
+               a_hasFine,
+               a_dx,
+               a_refRat,
+               a_order,
+               a_weighting,
+               a_ghostVector);
 }
 
 void
-EBGradient::define(const EBLevelGrid& a_eblg,
-                   const EBLevelGrid& a_eblgFine,
-                   const EBLevelGrid& a_eblgFiCo,
-                   const bool         a_hasFine,
-                   const Real         a_dx,
-                   const int          a_refRat,
-                   const int          a_order,
-                   const int          a_weighting,
-                   const IntVect      a_ghostVector) noexcept
+EBGradient::define(const EBLevelGrid&                             a_eblg,
+                   const EBLevelGrid&                             a_eblgFine,
+                   const EBLevelGrid&                             a_eblgFiCo,
+                   const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fiCoFineCells,
+                   const bool                                     a_hasFine,
+                   const Real                                     a_dx,
+                   const int                                      a_refRat,
+                   const int                                      a_order,
+                   const int                                      a_weighting,
+                   const IntVect                                  a_ghostVector) noexcept
 {
   CH_TIME("EBGradient::define");
 
   CH_assert(a_order > 0);
   CH_assert(a_weighting >= 0);
 
-  m_eblg         = a_eblg;
-  m_eblgFine     = a_eblgFine;
-  m_eblgFiCo     = a_eblgFiCo;
-  m_dataLocation = Location::Cell::Center;
-  m_dx           = a_dx;
-  m_refRat       = a_refRat;
-  m_order        = a_order;
-  m_weighting    = a_weighting;
-  m_ghostVector  = a_ghostVector;
-  m_hasFine      = a_hasFine;
-  m_hasEBCF      = false;
+  m_eblg          = a_eblg;
+  m_eblgFine      = a_eblgFine;
+  m_eblgFiCo      = a_eblgFiCo;
+  m_fiCoFineCells = a_fiCoFineCells;
+  m_dataLocation  = Location::Cell::Center;
+  m_dx            = a_dx;
+  m_refRat        = a_refRat;
+  m_order         = a_order;
+  m_weighting     = a_weighting;
+  m_ghostVector   = a_ghostVector;
+  m_hasFine       = a_hasFine;
+  m_hasEBCF       = false;
 
   // Second order one-sided differences reach two cells away, which must exist both in the data and in the EBISBox.
   m_stencilWidth = (m_ghostVector.min() >= 2 && m_eblg.getEBISL().getGhost() >= 2) ? 2 : 1;
+
+  // The two-level stencils refine coarse cells up to the stencil width outside the coarse box, which the copied
+  // layout must hold.
+  CH_assert(!m_hasFine || m_eblgFiCo.getGhost() >= m_refRat * m_stencilWidth);
 
   if (m_hasFine) {
     m_dxFine = m_dx / m_refRat;
@@ -698,9 +714,9 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     // The fine data is supplied to computeAMRGradient through a refined-coarse holder that carries only m_ghostVector
     // ghost cells, so the two-level stencils may only reference fine cells within that reach of this patch. Restrict
     // the fine valid region accordingly. Without this, for m_refRat > m_ghostVector the stencil reaches fine cells the
-    // holder never allocates/fills (the refined-coarse EBISL only carries m_ghostVector ghosts), producing garbage
-    // gradients at EBCF cells abutting a box boundary. For m_refRat == m_ghostVector (e.g. refRat = 2 with the default
-    // two ghost cells) fineDataBox == grownBoxFine, so this changes nothing.
+    // holder never allocates/fills, producing garbage gradients at EBCF cells abutting a box boundary. For m_refRat ==
+    // m_ghostVector (e.g. refRat = 2 with the default two ghost cells) fineDataBox == grownBoxFine, so this changes
+    // nothing.
     const Box fineDataBox = grow(refine(cellBox, m_refRat), m_ghostVector) & grownBoxFine;
 
     // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch and
@@ -891,8 +907,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   // cells that those stencils could not use are included.
   const int coarRadius = m_stencilWidth;
 
-  // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse
-  // vofs.
+  // Get coar vofs in range. The fine VoFs are the VoFs of the refined coarse grids that coarsen to them.
   Vector<VolIndex> coarVoFs = VofUtils::getVofsInRadius(a_vofCoar,
                                                         ebisBoxCoar,
                                                         coarRadius,
@@ -900,7 +915,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                                         false);
   Vector<VolIndex> fineVoFs;
   for (int i = 0; i < coarVoFs.size(); i++) {
-    fineVoFs.append(a_ebislCoar.refine(coarVoFs[i], m_refRat, a_dit));
+    fineVoFs.append(VofUtils::getFinerVoFs(coarVoFs[i], a_ebislFine, a_dit, m_refRat));
   }
 
   // Only unique, in case something went wrong.
@@ -910,6 +925,13 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   // Only include fine VoFs that lie with a_validCellsFine.
   VofUtils::includeCells(coarVoFs, a_validCellsCoar);
   VofUtils::includeCells(fineVoFs, a_validCellsFine);
+
+#ifndef NDEBUG
+  // The refined coarse grids hold meaningful geometry only in the fine level's cells.
+  for (int i = 0; i < fineVoFs.size(); i++) {
+    CH_assert((*m_fiCoFineCells)[a_dit](fineVoFs[i].gridIndex(), 0));
+  }
+#endif
 
   // See if we have enough cells to solve the system of equations. The "-1" is because we interpolate to the cell
   // center/centroid, but we already know phi at this point.

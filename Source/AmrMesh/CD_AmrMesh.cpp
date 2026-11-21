@@ -36,7 +36,7 @@ AmrMesh::AmrMesh() : m_finestLevel(0), m_oldFinestLevel(-1), m_hasGrids(false)
   this->parseOptions();
 
   // Some things might require a vector which is just a tiny bit longer.
-  m_refinementRatios.resize(m_maxAmrDepth);
+  m_refinementRatios.resize(std::max(m_maxEbDepth, m_maxSimulationDepth));
   m_refinementRatios.push_back(2);
 }
 
@@ -960,7 +960,7 @@ AmrMesh::parseOptions()
   }
 
   this->parseCoarsestLevelNumCells();
-  this->parseMaxAmrDepth();
+  this->parseMaxEbDepth();
   this->parseMaxSimulationDepth();
   this->parseRefinementRatios();
   this->parseMinBlockSize();
@@ -1028,7 +1028,9 @@ AmrMesh::buildDomains()
     pout() << "AmrMesh::buildDomains()" << endl;
   }
 
-  const int numLevels = 1 + m_maxAmrDepth;
+  // The levels finer than max_eb_depth are simulation levels, which the geometry does not resolve.
+  const int maxDepth  = std::max(m_maxEbDepth, m_maxSimulationDepth);
+  const int numLevels = 1 + maxDepth;
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
@@ -1037,7 +1039,7 @@ AmrMesh::buildDomains()
   m_dx[0]      = (m_probHi[0] - m_probLo[0]) / m_numCells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_numCells - IntVect::Unit);
 
-  for (int lvl = 1; lvl <= m_maxAmrDepth; lvl++) {
+  for (int lvl = 1; lvl <= maxDepth; lvl++) {
     m_dx[lvl]      = m_dx[lvl - 1] / m_refinementRatios[lvl - 1];
     m_domains[lvl] = m_domains[lvl - 1];
 
@@ -1194,22 +1196,23 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
 
   // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
-  //       be generated. If a_hardcap < 0 the restriction is m_maxAmrDepth.
+  //       be generated. If a_hardcap < 0 the restriction is the finest level with a domain.
 
   // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should
-  // never have tags on max_amr_depth, and we make that restriction here.
+  // never have tags on the finest level with a domain, and we make that restriction here.
+  const int maxDepth  = this->getMaxDomainDepth();
   const int baseLevel = std::max(0, a_lmin - 1);
-  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : static_cast<int>(a_tags.size()) - 1;
+  const int topLevel  = (m_finestLevel == maxDepth) ? m_finestLevel - 1 : static_cast<int>(a_tags.size()) - 1;
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
   Vector<Vector<Box>> oldBoxes(1 + topLevel);
 
   // Enforce potential hardcap.
-  const int hardcap = (a_hardcap < 0) ? m_maxAmrDepth : a_hardcap;
+  const int hardcap = (a_hardcap < 0) ? maxDepth : a_hardcap;
 
   // Inside this loop we make the boxes.
-  if (m_maxAmrDepth > 0 && hardcap > 0) {
+  if (maxDepth > 0 && hardcap > 0) {
     domainSplit(m_domains[0], oldBoxes[0], m_maxBlockSize, m_minBlockSize);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid
@@ -1264,7 +1267,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     }
 
     // Identify the new finest grid level.
-    m_finestLevel = std::min(newFinestLevel, m_maxAmrDepth);       // Don't exceed m_maxAmrDepth
+    m_finestLevel = std::min(newFinestLevel, maxDepth);            // Don't exceed the finest domain
     m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
     m_finestLevel = std::min(m_finestLevel, hardcap);              // Don't exceed hardcap
   }
@@ -1303,7 +1306,7 @@ AmrMesh::buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin)
     m_finestLevel = lvl;
   }
 
-  m_finestLevel = std::min(m_finestLevel, m_maxAmrDepth);
+  m_finestLevel = std::min(m_finestLevel, this->getMaxDomainDepth());
   m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth);
 
   Vector<Vector<Box>> newBoxes(1 + m_finestLevel);
@@ -2572,21 +2575,26 @@ AmrMesh::parseCoarsestLevelNumCells()
 }
 
 void
-AmrMesh::parseMaxAmrDepth()
+AmrMesh::parseMaxEbDepth()
 {
-  CH_TIME("AmrMesh::parseMaxAmrDepth()");
+  CH_TIME("AmrMesh::parseMaxEbDepth()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseMaxAmrDepth()" << endl;
+    pout() << "AmrMesh::parseMaxEbDepth()" << endl;
   }
 
   ParmParse pp("AmrMesh");
-  int       depth;
-  pp.get("max_amr_depth", depth);
+
+  if (pp.contains("max_amr_depth")) {
+    MayDay::Error("AmrMesh::parseMaxEbDepth - AmrMesh.max_amr_depth has been renamed AmrMesh.max_eb_depth");
+  }
+
+  int depth;
+  pp.get("max_eb_depth", depth);
   if (depth >= 0) {
-    m_maxAmrDepth = depth;
+    m_maxEbDepth = depth;
   }
   else {
-    m_maxAmrDepth = 0;
+    m_maxEbDepth = 0;
   }
 }
 
@@ -2605,7 +2613,12 @@ AmrMesh::parseMaxSimulationDepth()
     m_maxSimulationDepth = depth;
   }
   else {
-    m_maxSimulationDepth = m_maxAmrDepth;
+    m_maxSimulationDepth = m_maxEbDepth;
+  }
+
+  // The domains are built once, so a depth changed at run time cannot reach past the finest of them.
+  if (m_domains.size() > 0) {
+    m_maxSimulationDepth = std::min(m_maxSimulationDepth, this->getMaxDomainDepth());
   }
 }
 
@@ -2623,7 +2636,7 @@ AmrMesh::parseRefinementRatios()
   pp.getarr("ref_rat", ratios, 0, static_cast<int>(ratios.size()));
 
   // Pad with whatever was last specified if user didn't supply enough refinement factors
-  while (ratios.size() < m_maxAmrDepth) {
+  while (ratios.size() < std::max(m_maxEbDepth, m_maxSimulationDepth)) {
     //    ratios.push_back(2);
     ratios.push_back(ratios.back());
   }
@@ -2656,8 +2669,8 @@ AmrMesh::setFinestLevel(const int a_finestLevel)
   }
 
   m_finestLevel = a_finestLevel;
-  m_finestLevel = Min(m_finestLevel, m_maxAmrDepth);        // Don't exceed m_maxAmrDepth
-  m_finestLevel = Min(m_finestLevel, m_maxSimulationDepth); // Don't exceed maximum simulation depth
+  m_finestLevel = Min(m_finestLevel, this->getMaxDomainDepth()); // Don't exceed the finest domain
+  m_finestLevel = Min(m_finestLevel, m_maxSimulationDepth);      // Don't exceed maximum simulation depth
 }
 
 void
@@ -3061,7 +3074,7 @@ AmrMesh::sanityCheck() const
     pout() << "AmrMesh::sanityCheck()" << endl;
   }
 
-  CH_assert(m_maxAmrDepth >= 0);
+  CH_assert(m_maxEbDepth >= 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
@@ -3139,8 +3152,8 @@ AmrMesh::sanityCheck() const
   // I'm not sure why this was in here? It seems to work well without this restriction?
   //
   // If this ever becomes a problem, take a look at this again.
-  if (m_maxAmrDepth > 0) {
-    for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
+  if (m_maxEbDepth > 0) {
+    for (int lvl = 0; lvl < m_maxEbDepth; lvl++) {
       if (m_refinementRatios[lvl] > 2 && m_minBlockSize < 8) {
         //        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
@@ -3183,14 +3196,25 @@ AmrMesh::getFinestLevel() const
 }
 
 int
-AmrMesh::getMaxAmrDepth() const
+AmrMesh::getMaxEbDepth() const
 {
-  CH_TIME("AmrMesh::getMaxAmrDepth()");
+  CH_TIME("AmrMesh::getMaxEbDepth()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMaxAmrDepth()" << endl;
+    pout() << "AmrMesh::getMaxEbDepth()" << endl;
   }
 
-  return m_maxAmrDepth;
+  return m_maxEbDepth;
+}
+
+int
+AmrMesh::getMaxDomainDepth() const
+{
+  CH_TIME("AmrMesh::getMaxDomainDepth()");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMaxDomainDepth()" << endl;
+  }
+
+  return static_cast<int>(m_domains.size()) - 1;
 }
 
 int
@@ -3319,7 +3343,7 @@ AmrMesh::getFinestDomain() const
     pout() << "AmrMesh::getFinestDomain()" << endl;
   }
 
-  return m_domains[m_maxAmrDepth];
+  return m_domains[m_maxEbDepth];
 }
 
 Real
@@ -3330,7 +3354,7 @@ AmrMesh::getFinestDx() const
     pout() << "AmrMesh::getFinestDx()" << endl;
   }
 
-  return m_dx[m_maxAmrDepth];
+  return m_dx[m_maxEbDepth];
 }
 
 const Vector<Real>&
@@ -3589,6 +3613,67 @@ AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width
   m_realms[a_realm]->registerParticleGhostMask(a_width);
 }
 
+void
+AmrMesh::defineParticleGhostMask(const std::string& a_realm, const int a_width)
+{
+  CH_TIME("AmrMesh::defineParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::defineParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::defineParticleGhostMask - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->defineParticleGhostMask(a_width);
+}
+
+void
+AmrMesh::registerParticleDeposition(const std::string&         a_realm,
+                                    const DepositionType       a_depositionType,
+                                    const CoarseFineDeposition a_coarseFineDeposition)
+{
+  CH_TIME("AmrMesh::registerParticleDeposition");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::registerParticleDeposition" << endl;
+  }
+
+  // the ratios between the levels a run can have; the list may be longer
+  const int numRatios = std::min(this->getMaxDomainDepth(), static_cast<int>(m_refinementRatios.size()));
+
+  // The particle ghost masks do not wrap around periodic boundaries.
+  bool isPeriodic = false;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    isPeriodic = isPeriodic || m_domains[0].isPeriodic(dir);
+  }
+
+  for (int lvl = 0; lvl < numRatios; lvl++) {
+    const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
+                                                                                 a_coarseFineDeposition,
+                                                                                 m_refinementRatios[lvl]);
+
+    if (isPeriodic && !widths.empty()) {
+      MayDay::Abort("AmrMesh::registerParticleDeposition - Halo and Transition coarse-fine deposition use particle "
+                    "ghost masks, which do not support periodic domains. Use Interp or HaloNGP on a periodic domain");
+    }
+
+    for (const int width : widths) {
+      if (width >= m_minBlockSize) {
+        const std::string
+          str = "AmrMesh::registerParticleDeposition - this coarse-fine deposition needs particle ghost "
+                "masks of width " +
+                std::to_string(width) + " at refinement ratio " + std::to_string(m_refinementRatios[lvl]) +
+                ", which must be smaller than min_block_size = " + std::to_string(m_minBlockSize);
+        MayDay::Abort(str.c_str());
+      }
+
+      this->registerParticleGhostMask(a_realm, width);
+    }
+  }
+}
+
 const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
 {
@@ -3752,23 +3837,6 @@ AmrMesh::getMultigridLevelGrids(const std::string& a_realm, const phase::which_p
   return m_realms[a_realm]->getMultigridLevelGrids(a_phase);
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-AmrMesh::getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridLevelGridsCoFi(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridLevelGridsCoFi(a_phase);
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -3786,6 +3854,93 @@ AmrMesh::getMultigridCoarseAverage(const std::string& a_realm, const phase::whic
   return m_realms[a_realm]->getMultigridCoarseAverage(a_phase);
 }
 
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+AmrMesh::getFinerVoFs(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFinerVoFs(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFinerVoFs(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFinerVoFs(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFinerVoFs(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+AmrMesh::getMultigridRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridRestriction(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridRestriction(a_phase);
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+AmrMesh::getMultigridProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultigridProlongation(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridProlongation(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+AmrMesh::getMultigridLevelRestriction(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelRestriction(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelRestriction(a_phase);
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+AmrMesh::getMultigridLevelProlongation(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getMultigridLevelProlongation(string, phase::which_phase) - could not find realm '" + a_realm +
+            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultigridLevelProlongation(a_phase);
+}
+
 const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
 AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
 {
@@ -3800,22 +3955,6 @@ AmrMesh::getMultigridMFLevelGrids(const std::string& a_realm) const
   }
 
   return m_realms[a_realm]->getMultigridMFLevelGrids();
-}
-
-const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-AmrMesh::getMultigridMFLevelGridsCoFi(const std::string& a_realm) const
-{
-  CH_TIME("AmrMesh::getMultigridMFLevelGridsCoFi(string)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMultigridMFLevelGridsCoFi(string)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getMultigridMFLevelGridsCoFi(string) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getMultigridMFLevelGridsCoFi();
 }
 
 const EBAMRFAB&

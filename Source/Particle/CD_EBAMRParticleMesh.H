@@ -14,8 +14,10 @@
 #define CD_EBAMRPARTICLEMESH_H
 
 // Std includes
+#include <algorithm>
 #include <cstddef>
 #include <map>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -51,9 +53,9 @@
  * @details
  * EBAMRParticleMesh deposits the particles of a ParticleContainer onto AMR mesh data and interpolates
  * mesh data back onto particle columns, by driving the per-patch EBParticleMesh leaf on every box of
- * every level. define() builds the per-level leaves (on the valid grids and the refined-coarse grids),
- * the level valid+ghost -> valid Copiers, the EBCoarseFineParticleMesh operators, and the halo/transition
- * masks; it must be called before any deposit or interpolate.
+ * every level. define() builds the per-level leaves, the level valid+ghost -> valid Copiers, the
+ * EBCoarseFineParticleMesh operators, and the outer-halo masks; it must be called before any deposit or
+ * interpolate.
  *
  * <h3>Interpolation</h3>
  * interpolate() and interpolateWeight() are purely per-level/per-patch: the mesh is assumed to be
@@ -63,13 +65,14 @@
  * deposit(), depositWeight(), and depositGathered() conserve mass across refinement boundaries, and
  * select how the coarse-fine overlap is handled through @c CoarseFineDeposition:
  * - <b>Interp</b>     -- move the over-boundary mass between levels with the coarse-fine mesh operators.
- * - <b>Halo</b>       -- re-deposit the coarse-side halo particles on the refined-coarse grid (via the
- *                        container's mask holder and the FiCo buffer) and add them to the fine level.
+ * - <b>Halo</b>       -- copy the coarse-side halo particles into the finer patches their clouds reach, as
+ *                        coarse ghost particles, and deposit them there with the coarse width.
  * - <b>HaloNGP</b>    -- deposit the near-boundary halo particles with NGP so their clouds do not spread
- *                        across the boundary (no refined-coarse buffer is needed).
- * - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
- *                        fine-grid width, distributing the result to both levels.
- * Halo, HaloNGP, and Transition require at least one ghost cell.
+ *                        across the boundary.
+ * - <b>Transition</b> -- deposit the coarse-side transition particles with the fine-grid width, on their own
+ *                        level and as coarse ghost particles on the finer one.
+ * Halo, HaloNGP, and Transition require at least one ghost cell. Halo and Transition need the realm's
+ * coarse-to-fine particle ghost masks (see getCoarseToFineMaskWidths).
  *
  * <h3>Cut cells, and what this class does NOT do</h3>
  * The deposition routines take an @c IrregularDeposition, but this class only implements the part of it that the
@@ -78,12 +81,14 @@
  * - <b>Mirror</b> -- NOT handled here. It is a second pass that reflects each band particle across the embedded
  *                    boundary and deposits the image, so it needs an image container, a scratch field and a
  *                    collective remap, none of which this class owns. See @c ItoSolver::mirrorPass.
+ *                    The one part handled here: Interp's coarse-to-fine step does not rescale cut cells by volume
+ *                    fraction, because with the mirror they hold the density rather than kappa times it.
  * - <b>Redistribute</b>, <b>RedistributeBlended</b> -- NOT handled here. They act on the field AFTER the deposit.
  *                    See @c ItoSolver::redistributeAMR and @c McPhoto::depositHybridDivergence.
  *
  * The consequence is worth stating plainly, because it is silent: passing @c Mirror or @c Redistribute to a
- * deposition routine here and then omitting the caller's half produces @c Native behaviour, with no error and no
- * diagnostic. The run completes and the output is bit-for-bit what @c Native would have given. A caller that selects
+ * deposition routine here and then omitting the caller's half produces @c Native behaviour (for @c Mirror with
+ * Interp, Native without the volume-fraction rescaling), with no error and no diagnostic. A caller that selects
  * one of those values owns the rest of its meaning.
  *
  * This split is deliberate but not ideal -- the enum is named in one place and interpreted in three, so there is no
@@ -156,7 +161,6 @@ public:
     this->defineEBParticleMesh();
     this->defineLevelMotion();
     this->defineOuterHaloMasks();
-    this->defineTransitionMasks();
 
     m_isDefined = true;
   }
@@ -259,21 +263,25 @@ public:
    * @brief Deposit the container-owned weight onto the AMR mesh.
    * @details Dispatches on the coarse-fine strategy (Interp / Halo / HaloNGP / Transition); see the
    * class documentation. Halo/HaloNGP/Transition need ghost >= 1.
-   * @tparam P      Payload type (deduced).
-   * @tparam Traits Column descriptor (deduced).
+   * @tparam P          Payload type (deduced).
+   * @tparam Traits     Column descriptor (deduced).
+   * @tparam MaskGetter Callable (int width) -> const AMRParticleGhostMask&.
    * @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
    * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
+   * @param[in]     a_coarToFineMasks      Callable int -> const AMRParticleGhostMask&, giving the realm's
+   * coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths).
    */
-  template <typename P, typename Traits>
+  template <typename P, typename Traits, typename MaskGetter>
   void
   depositWeight(EBAMRCellData&                      a_meshData,
                 const ParticleContainer<P, Traits>& a_particles,
                 const DepositionType                a_depositionType,
                 const CoarseFineDeposition          a_coarseFineDeposition,
-                const IrregularDeposition           a_irregularDeposition)
+                const IrregularDeposition           a_irregularDeposition,
+                const MaskGetter&                   a_coarToFineMasks)
   {
     CH_TIME("EBAMRParticleMesh::depositWeight");
 
@@ -284,6 +292,9 @@ public:
     // documentation for why that is silent when the caller forgets.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
 
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, forceIrregNGP);
@@ -292,15 +303,25 @@ public:
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, DepositionType::NGP, a_widthScale, forceIrregNGP);
       };
+    const auto patchGhosts =
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+        a_interp.depositCoarseGhostsWeight(a_rho, 0, a_soa, a_depositionType, a_widthScale);
+      };
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, 1, patch);
+      this->depositInterpCore(a_meshData, a_particles, 1, cutCellsHoldDensity, patch);
 
       break;
     }
     case CoarseFineDeposition::Halo: {
-      this->template depositHaloCore<1>(a_meshData, a_particles, patch);
+      this->template depositHaloCore<1>(a_meshData,
+                                        a_particles,
+                                        a_depositionType,
+                                        forceIrregNGP,
+                                        a_coarToFineMasks,
+                                        patch,
+                                        patchGhosts);
 
       break;
     }
@@ -310,7 +331,14 @@ public:
       break;
     }
     case CoarseFineDeposition::Transition: {
-      this->template depositTransitionCore<1>(a_meshData, a_particles, a_depositionType, patch);
+      this->template depositTransitionCore<1>(a_meshData,
+                                              a_particles,
+                                              a_depositionType,
+                                              forceIrregNGP,
+                                              cutCellsHoldDensity,
+                                              a_coarToFineMasks,
+                                              patch,
+                                              patchGhosts);
 
       break;
     }
@@ -330,21 +358,25 @@ public:
    * @tparam P          Payload type (deduced).
    * @tparam Traits     Column descriptor (deduced).
    * @tparam CellGather Callable (const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> Real.
+   * @tparam MaskGetter Callable (int width) -> const AMRParticleGhostMask&.
    * @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
    * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
    * @param[in]     a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
+   * @param[in]     a_coarToFineMasks      Callable int -> const AMRParticleGhostMask&, giving the realm's
+   * coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths).
    */
-  template <typename P, typename Traits, typename CellGather>
+  template <typename P, typename Traits, typename CellGather, typename MaskGetter>
   void
   depositGathered(EBAMRCellData&                      a_meshData,
                   const ParticleContainer<P, Traits>& a_particles,
                   const DepositionType                a_depositionType,
                   const CoarseFineDeposition          a_coarseFineDeposition,
                   const IrregularDeposition           a_irregularDeposition,
-                  CellGather                          a_cellGather)
+                  CellGather                          a_cellGather,
+                  const MaskGetter&                   a_coarToFineMasks)
   {
     CH_TIME("EBAMRParticleMesh::depositGathered");
 
@@ -352,6 +384,9 @@ public:
 
     // See depositWeight for why the selector collapses to a bool here.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
+
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
 
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
@@ -377,15 +412,32 @@ public:
                                    a_out[0] = a_cellGather(a_soa, a_i);
                                  });
       };
+    const auto patchGhosts =
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+        a_interp.depositCoarseGhostsGathered(a_rho,
+                                             0,
+                                             a_soa,
+                                             a_depositionType,
+                                             a_widthScale,
+                                             [&](const std::size_t a_i, Real* a_out) {
+                                               a_out[0] = a_cellGather(a_soa, a_i);
+                                             });
+      };
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, 1, patch);
+      this->depositInterpCore(a_meshData, a_particles, 1, cutCellsHoldDensity, patch);
 
       break;
     }
     case CoarseFineDeposition::Halo: {
-      this->template depositHaloCore<1>(a_meshData, a_particles, patch);
+      this->template depositHaloCore<1>(a_meshData,
+                                        a_particles,
+                                        a_depositionType,
+                                        forceIrregNGP,
+                                        a_coarToFineMasks,
+                                        patch,
+                                        patchGhosts);
 
       break;
     }
@@ -395,7 +447,14 @@ public:
       break;
     }
     case CoarseFineDeposition::Transition: {
-      this->template depositTransitionCore<1>(a_meshData, a_particles, a_depositionType, patch);
+      this->template depositTransitionCore<1>(a_meshData,
+                                              a_particles,
+                                              a_depositionType,
+                                              forceIrregNGP,
+                                              cutCellsHoldDensity,
+                                              a_coarToFineMasks,
+                                              patch,
+                                              patchGhosts);
 
       break;
     }
@@ -410,22 +469,26 @@ public:
   /**
    * @brief Deposit one or more payload columns onto the AMR mesh.
    * @details See depositWeight for the coarse-fine dispatch.
-   * @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
-   * @tparam P       Payload type (deduced).
-   * @tparam Traits  Column descriptor (deduced).
+   * @tparam Members    Pack of payload data-member pointers selecting the column(s) to deposit.
+   * @tparam P          Payload type (deduced).
+   * @tparam Traits     Column descriptor (deduced).
+   * @tparam MaskGetter Callable (int width) -> const AMRParticleGhostMask&.
    * @param[in,out] a_meshData             AMR mesh data (sizeof...(Members) components; RESET then filled).
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
    * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
+   * @param[in]     a_coarToFineMasks      Callable int -> const AMRParticleGhostMask&, giving the realm's
+   * coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths).
    */
-  template <auto... Members, typename P, typename Traits>
+  template <auto... Members, typename P, typename Traits, typename MaskGetter>
   void
   deposit(EBAMRCellData&                      a_meshData,
           const ParticleContainer<P, Traits>& a_particles,
           const DepositionType                a_depositionType,
           const CoarseFineDeposition          a_coarseFineDeposition,
-          const IrregularDeposition           a_irregularDeposition)
+          const IrregularDeposition           a_irregularDeposition,
+          const MaskGetter&                   a_coarToFineMasks)
   {
     CH_TIME("EBAMRParticleMesh::deposit");
 
@@ -433,6 +496,9 @@ public:
 
     // See depositWeight for why the selector collapses to a bool here.
     const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
+
+    // Mirror deposition makes the cut cells hold the density, which Interp's coarse-to-fine step must not rescale.
+    const bool cutCellsHoldDensity = (a_irregularDeposition == IrregularDeposition::Mirror);
 
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
@@ -442,15 +508,29 @@ public:
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.template deposit<Members...>(a_rho, a_soa, DepositionType::NGP, a_widthScale, forceIrregNGP);
       };
+    const auto patchGhosts =
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+        a_interp.template depositCoarseGhosts<Members...>(a_rho, 0, a_soa, a_depositionType, a_widthScale);
+      };
 
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
-      this->depositInterpCore(a_meshData, a_particles, static_cast<int>(sizeof...(Members)), patch);
+      this->depositInterpCore(a_meshData,
+                              a_particles,
+                              static_cast<int>(sizeof...(Members)),
+                              cutCellsHoldDensity,
+                              patch);
 
       break;
     }
     case CoarseFineDeposition::Halo: {
-      this->template depositHaloCore<static_cast<int>(sizeof...(Members))>(a_meshData, a_particles, patch);
+      this->template depositHaloCore<static_cast<int>(sizeof...(Members))>(a_meshData,
+                                                                           a_particles,
+                                                                           a_depositionType,
+                                                                           forceIrregNGP,
+                                                                           a_coarToFineMasks,
+                                                                           patch,
+                                                                           patchGhosts);
 
       break;
     }
@@ -463,7 +543,11 @@ public:
       this->template depositTransitionCore<static_cast<int>(sizeof...(Members))>(a_meshData,
                                                                                  a_particles,
                                                                                  a_depositionType,
-                                                                                 patch);
+                                                                                 forceIrregNGP,
+                                                                                 cutCellsHoldDensity,
+                                                                                 a_coarToFineMasks,
+                                                                                 patch,
+                                                                                 patchGhosts);
       break;
     }
     default: {
@@ -472,6 +556,88 @@ public:
       break;
     }
     }
+  }
+
+  /**
+   * @brief Width, in finer cells, of the coarse-to-fine particle ghost mask that Halo deposition fills with.
+   * @details The reach into the finer level of a coarser-width cloud: refRat/2 for CIC, refRat for TSC, and 0 for NGP,
+   * whose cloud never leaves the particle's own cell.
+   * @param[in] a_depositionType Deposition kernel.
+   * @param[in] a_refRat         Refinement ratio between the level and the finer one.
+   * @return The mask width.
+   */
+  static int
+  getHaloGhostWidth(const DepositionType a_depositionType, const int a_refRat) noexcept
+  {
+    switch (a_depositionType) {
+    case DepositionType::CIC: {
+      return a_refRat / 2;
+    }
+    case DepositionType::TSC: {
+      return a_refRat;
+    }
+    default: {
+      return 0;
+    }
+    }
+  }
+
+  /**
+   * @brief Transition band width, in finer cells: the coarser particles within this distance of the finer grid deposit
+   * with the finer-level width.
+   * @details refRat/2 for CIC and refRat for TSC. NGP has no band (Transition with NGP deposits as Interp).
+   * @param[in] a_depositionType Deposition kernel.
+   * @param[in] a_refRat         Refinement ratio between the level and the finer one.
+   * @return The band width.
+   */
+  static int
+  getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) noexcept
+  {
+    return getHaloGhostWidth(a_depositionType, a_refRat);
+  }
+
+  /**
+   * @brief Width, in finer cells, of the coarse-to-fine particle ghost mask that Transition deposition fills with.
+   * @details The band width plus the one cell that a finer-width CIC or TSC cloud reaches.
+   * @param[in] a_depositionType Deposition kernel.
+   * @param[in] a_refRat         Refinement ratio between the level and the finer one.
+   * @return The mask width, or 0 for NGP.
+   */
+  static int
+  getTransitionGhostWidth(const DepositionType a_depositionType, const int a_refRat) noexcept
+  {
+    const int maskWidth = getTransitionMaskWidth(a_depositionType, a_refRat);
+
+    return (maskWidth > 0) ? maskWidth + 1 : 0;
+  }
+
+  /**
+   * @brief The coarse-to-fine particle ghost-mask widths a deposition needs between two levels.
+   * @details Callers register these through AmrMesh::registerParticleDeposition before regridding. Interp and HaloNGP
+   * need none; Halo needs getHaloGhostWidth; Transition needs getTransitionMaskWidth and getTransitionGhostWidth.
+   * @param[in] a_depositionType       Deposition kernel.
+   * @param[in] a_coarseFineDeposition Coarse-fine handling.
+   * @param[in] a_refRat               Refinement ratio between the level and the finer one.
+   * @return The widths (all > 0).
+   */
+  static std::vector<int>
+  getCoarseToFineMaskWidths(const DepositionType       a_depositionType,
+                            const CoarseFineDeposition a_coarseFineDeposition,
+                            const int                  a_refRat) noexcept
+  {
+    std::vector<int> widths;
+
+    if (a_coarseFineDeposition == CoarseFineDeposition::Halo) {
+      widths.push_back(getHaloGhostWidth(a_depositionType, a_refRat));
+    }
+    else if (a_coarseFineDeposition == CoarseFineDeposition::Transition) {
+      widths.push_back(getTransitionMaskWidth(a_depositionType, a_refRat));
+      widths.push_back(getTransitionGhostWidth(a_depositionType, a_refRat));
+    }
+
+    widths.erase(std::remove(widths.begin(), widths.end(), 0), widths.end());
+
+    return widths;
   }
 
   ///@}
@@ -528,19 +694,9 @@ protected:
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>> m_coarseFinePM;
 
   /**
-   * @brief Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0).
-   */
-  Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
-
-  /**
    * @brief Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch.
    */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
-
-  /**
-   * @brief Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid.
-   */
-  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
   /**
    * @brief Abort on an unrecognized coarse-fine deposition strategy.
@@ -552,7 +708,7 @@ protected:
   }
 
   /**
-   * @brief Build the per-level per-patch EBParticleMesh leaves (valid grids + refined-coarse grids).
+   * @brief Build the per-level per-patch EBParticleMesh leaves.
    */
   void
   defineEBParticleMesh()
@@ -560,7 +716,6 @@ protected:
     CH_TIME("EBAMRParticleMesh::defineEBParticleMesh");
 
     m_ebParticleMesh.resize(1 + m_finestLevel);
-    m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const ProblemDomain&     domain = m_eblgs[lvl]->getDomain();
@@ -577,32 +732,6 @@ protected:
         const DataIndex& din = dit[mybox];
 
         (*m_ebParticleMesh[lvl])[din].define(domain, dbl[din], ebisl[din], m_dx[lvl] * RealVect::Unit, m_probLo);
-      }
-
-      // Refined-coarse leaves: deposit coarse-level halo particles at fine resolution (dx of this level).
-      if (lvl > 0) {
-        const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl]->getEblgFiCo();
-        const ProblemDomain&     domainFiCo = eblgFiCo.getDomain();
-        const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
-        const EBISLayout&        ebislFiCo  = eblgFiCo.getEBISL();
-        const DataIterator&      ditFiCo    = dblFiCo.dataIterator();
-        const int                nboxFiCo   = ditFiCo.size();
-
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dblFiCo));
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-          const DataIndex& din = ditFiCo[mybox];
-
-          (*m_ebParticleMeshFiCo[lvl])[din].define(domainFiCo,
-                                                   dblFiCo[din],
-                                                   ebislFiCo[din],
-                                                   m_dx[lvl] * RealVect::Unit,
-                                                   m_probLo);
-        }
-      }
-      else {
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(nullptr);
       }
     }
   }
@@ -656,6 +785,8 @@ protected:
    * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
    * @param[in]     a_particles    Particle container.
    * @param[in]     a_numComp      Number of mesh components written.
+   * @param[in]     a_cutCellsHoldDensity True if the cut cells hold the density rather than kappa times it (mirror
+   * deposition).
    * @param[in]     a_patchDeposit Per-patch deposition functor.
    */
   template <typename Container, typename PatchDeposit>
@@ -663,6 +794,7 @@ protected:
   depositInterpCore(EBAMRCellData&   a_meshData,
                     const Container& a_particles,
                     const int        a_numComp,
+                    const bool       a_cutCellsHoldDensity,
                     PatchDeposit     a_patchDeposit) const
   {
     CH_TIME("EBAMRParticleMesh::depositInterpCore");
@@ -703,7 +835,7 @@ protected:
           aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
 
           m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
-          m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+          m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias, a_cutCellsHoldDensity);
         }
       }
     }
@@ -852,21 +984,82 @@ protected:
   }
 
   /**
-   * @brief The CoarseFineDeposition::Halo deposition algorithm.
-   * @details Like Interp for the on-level deposit + fine-ghost->coarse transfer, but instead of
-   * interpolating the coarse mass under the fine grid, it re-deposits the coarse-side halo particles
-   * (selected by the width-1 outer-halo mask, copied into the container mask holder) on the
-   * refined-coarse grid with widthScale = refinement ratio, and adds that to the fine level.
-   * @tparam NCOMP        Number of mesh components (compile-time; selects the FiCo buffer).
-   * @tparam Container    ParticleContainer type (deduced).
-   * @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
-   * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
-   * @param[in]     a_particles    Particle container (its mask holder is filled then cleared).
-   * @param[in]     a_patchDeposit Per-patch deposition functor.
+   * @brief Assemble a per-level coarse-to-fine particle ghost mask from the realm's masks.
+   * @details Entry lvl, for each level with a finer level, is entry lvl of the realm's mask of width
+   * a_width(m_refRat[lvl]); it is null where that width is 0 and on the finest level.
+   * @tparam MaskGetter Callable (int width) -> const AMRParticleGhostMask&.
+   * @tparam WidthFn    Callable (int refRat) -> int.
+   * @param[in] a_coarToFineMasks Realm mask getter.
+   * @param[in] a_width           Mask width of a level pair, from its refinement ratio.
+   * @return The per-level mask.
    */
-  template <int NCOMP, typename Container, typename PatchDeposit>
+  template <typename MaskGetter, typename WidthFn>
+  AMRParticleGhostMask
+  getCoarToFineMask(const MaskGetter& a_coarToFineMasks, const WidthFn& a_width) const
+  {
+    AMRParticleGhostMask mask(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+      const int width = a_width(m_refRat[lvl]);
+
+      if (width > 0) {
+        mask[lvl] = a_coarToFineMasks(width)[lvl];
+      }
+    }
+
+    return mask;
+  }
+
+  /**
+   * @brief Copy the mask-holder particles into the finer patches as coarse ghosts.
+   * @details When NGP is forced in cut cells, particles in cut cells deposit by NGP on their own level only, so they
+   * are not copied.
+   * @tparam Container ParticleContainer type (deduced).
+   * @param[in,out] a_particles     Particle container.
+   * @param[in]     a_coarToFine    Per-level coarse-to-fine particle ghost mask.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
+  template <typename Container>
   void
-  depositHaloCore(EBAMRCellData& a_meshData, const Container& a_particles, PatchDeposit a_patchDeposit) const
+  fillCoarseGhosts(Container& a_particles, const AMRParticleGhostMask& a_coarToFine, const bool a_forceIrregNGP) const
+  {
+    CH_TIME("EBAMRParticleMesh::fillCoarseGhosts");
+
+    a_particles.fillCoarseGhostParticlesFromMask(a_coarToFine,
+                                                 [&](const int a_lvl, const DataIndex& a_din, const IntVect& a_iv) {
+                                                   return !(a_forceIrregNGP &&
+                                                            m_eblgs[a_lvl]->getEBISL()[a_din].isIrregular(a_iv));
+                                                 });
+  }
+
+  /**
+   * @brief The CoarseFineDeposition::Halo deposition algorithm.
+   * @details Like Interp for the on-level deposit and the fine-ghost transfer to the coarse level, but instead of
+   * interpolating the coarse mass under the fine grid, the coarse-side halo particles (width-1 outer-halo mask) are
+   * copied into the finer patches as coarse ghosts and deposit there with the coarse width, clipped to the valid box.
+   * Their coarse-level deposit is unchanged; its part under the finer grid is invalid.
+   * @tparam NCOMP        Number of mesh components (compile-time).
+   * @tparam Container    ParticleContainer type (deduced).
+   * @tparam MaskGetter   Callable (int width) -> const AMRParticleGhostMask&.
+   * @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
+   * @tparam PatchGhosts  Same signature, depositing only the coarse ghosts.
+   * @param[in,out] a_meshData        AMR mesh data (RESET then filled).
+   * @param[in]     a_particles       Particle container (its mask holder and ghosts are filled then cleared).
+   * @param[in]     a_depositionType  Deposition kernel.
+   * @param[in]     a_forceIrregNGP   Force NGP in cut cells.
+   * @param[in]     a_coarToFineMasks Realm coarse-to-fine mask getter.
+   * @param[in]     a_patchDeposit    Per-patch deposition functor.
+   * @param[in]     a_patchGhosts     Per-patch coarse-ghost deposition functor.
+   */
+  template <int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts>
+  void
+  depositHaloCore(EBAMRCellData&       a_meshData,
+                  const Container&     a_particles,
+                  const DepositionType a_depositionType,
+                  const bool           a_forceIrregNGP,
+                  const MaskGetter&    a_coarToFineMasks,
+                  PatchDeposit         a_patchDeposit,
+                  PatchGhosts          a_patchGhosts) const
   {
     CH_TIME("EBAMRParticleMesh::depositHaloCore");
 
@@ -875,19 +1068,28 @@ protected:
 
     DataOps::setValue(a_meshData, 0.0);
 
-    // Copy the coarse-side halo particles (width 1) into the container's mask holder.
+    // Copy the coarse-side halo particles (width 1) into the container's mask holder, and from there into the finer
+    // patches their clouds reach.
     constexpr int coarseMaskWidth = 1;
     Container&    particles       = const_cast<Container&>(a_particles);
+
     particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
+    this->fillCoarseGhosts(particles,
+                           this->getCoarToFineMask(a_coarToFineMasks,
+                                                   [&](const int a_refRat) {
+                                                     return getHaloGhostWidth(a_depositionType, a_refRat);
+                                                   }),
+                           a_forceIrregNGP);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
       const bool               hasCoar = (lvl > 0);
 
-      // 1. Deposit this level's valid particles.
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
 
+      // 1. Deposit this level's own particles.
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
@@ -903,44 +1105,34 @@ protected:
 
       // 3. Mass deposited into fine ghosts across the refinement boundary belongs to the coarse level.
       if (hasCoar) {
-        m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
+        for (int comp = 0; comp < NCOMP; comp++) {
+          LevelData<EBCellFAB> coarAlias;
+          LevelData<EBCellFAB> fineAlias;
+
+          aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(comp, comp));
+          aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
+
+          m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
+        }
       }
 
-      // 4. Re-deposit the coarse halo particles on the refined-coarse grid and add to the fine level.
+      // 4. The coarse halo particles deposit into the valid cells of this level with the coarse width.
       if (hasCoar) {
-        const auto&              coarHalo   = a_particles.getMaskParticles()[lvl - 1];
-        const Real               widthScale = static_cast<Real>(m_refRat[lvl - 1]);
-        const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl]->getEblgFiCo();
-        const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
+        const Real widthScale = static_cast<Real>(m_refRat[lvl - 1]);
 
-        LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl]->template getBufferFiCo<NCOMP>();
-
-        const DataIterator& ditFiCo = dblFiCo.dataIterator();
-
-        const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-          const DataIndex&      din    = ditFiCo[mybox];
-          const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex&      din    = dit[mybox];
+          const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-          EBCellFAB& dataFiCo = bufferFiCo[din];
+          EBCellFAB& rho = (*a_meshData[lvl])[din];
 
-          dataFiCo.setVal(0.0);
-          a_patchDeposit(interp, dataFiCo, (*coarHalo)[din], widthScale);
-        }
-
-        for (int comp = 0; comp < NCOMP; comp++) {
-          LevelData<EBCellFAB> meshAlias;
-          LevelData<EBCellFAB> bufAlias;
-
-          aliasLevelData<EBCellFAB>(meshAlias, &(*a_meshData[lvl]), Interval(comp, comp));
-          aliasLevelData<EBCellFAB>(bufAlias, &bufferFiCo, Interval(comp, comp));
-
-          m_coarseFinePM[lvl]->addFiCoDataToFine(meshAlias, bufAlias);
+          a_patchGhosts(interp, rho, a_particles[lvl][din], widthScale);
         }
       }
     }
 
+    particles.clearGhostParticles(GhostType::Coarse);
     particles.clearMaskParticles();
   }
 
@@ -950,7 +1142,7 @@ protected:
    * the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto
    * the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles
    * back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement
-   * boundary, so no refined-coarse buffer is needed.
+   * boundary.
    * @tparam NCOMP           Number of mesh components (compile-time).
    * @tparam Container       ParticleContainer type (deduced).
    * @tparam PatchDeposit    Per-patch deposit with the requested kernel.
@@ -1021,219 +1213,36 @@ protected:
   }
 
   /**
-   * @brief Transition-mask width for a kernel: CIC -> refRat/2, TSC -> refRat (NGP is handled upstream).
-   * @param[in] a_depositionType Deposition kernel.
-   * @param[in] a_refRat         Refinement ratio between the level and the finer one.
-   * @return The transition band width (in fine cells).
-   */
-  int
-  getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const
-  {
-    int maskWidth = 0;
-    if (a_depositionType == DepositionType::CIC) {
-      maskWidth = a_refRat / 2;
-    }
-    else if (a_depositionType == DepositionType::TSC) {
-      maskWidth = a_refRat;
-    }
-    else {
-      MayDay::Abort("EBAMRParticleMesh::getTransitionMaskWidth - logic bust");
-    }
-    if (maskWidth > m_ghost) {
-      MayDay::Abort("EBAMRParticleMesh::getTransitionMaskWidth - not enough ghost cells");
-    }
-    return maskWidth;
-  }
-
-  /**
-   * @brief Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.
-   * @details For each width in [1, m_ghost] and each level with a finer level, builds the fine-grid
-   * coarse-fine interface band (fine ghost cells just outside the fine boxes), transfers it to the
-   * refined-coarse (FiCo) grid of the finer level, and stores it as a boolean mask there. Storage-
-   * agnostic. Empty BaseFabs are undefined.
-   */
-  void
-  defineTransitionMasks()
-  {
-    CH_TIME("EBAMRParticleMesh::defineTransitionMasks");
-
-    constexpr int  comp    = 0;
-    constexpr int  numComp = 1;
-    const Interval interv  = Interval(comp, comp);
-
-    m_transitionMasks.clear();
-
-    for (int ighost = 1; ighost <= m_ghost; ighost++) {
-      Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> mask(1 + m_finestLevel);
-
-      for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-        const DisjointBoxLayout& gridsFine  = m_eblgs[lvl + 1]->getDBL();
-        const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl + 1]->getEblgFiCo();
-        const DisjointBoxLayout& gridsFiCo  = eblgFiCo.getDBL();
-        const ProblemDomain&     domainFine = m_eblgs[lvl + 1]->getDomain();
-
-        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-          new LevelData<BaseFab<bool>>(gridsFiCo, numComp, IntVect::Zero));
-
-        LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
-        LevelData<FArrayBox>      cfivsFine(gridsFine, numComp, ighost * IntVect::Unit);
-        LevelData<FArrayBox>      cfivsFiCo(gridsFiCo, numComp, IntVect::Zero);
-
-        {
-          const DataIterator& dit  = gridsFiCo.dataIterator();
-          const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nbox; mybox++) {
-            const DataIndex& din = dit[mybox];
-
-            levelMask[din].setVal(false);
-            cfivsFiCo[din].setVal(0.0);
-          }
-        }
-
-        // Fine-grid coarse-fine interface band: ghost cells outside the fine boxes (minus neighbours).
-        {
-          const DataIterator& dit  = gridsFine.dataIterator();
-          const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nbox; mybox++) {
-            const DataIndex& din      = dit[mybox];
-            const Box        cellBox  = gridsFine[din];
-            const Box        ghostBox = grow(cellBox, ighost) & domainFine;
-
-            cfivsFine[din].setVal(1.0, ghostBox, comp);
-            cfivsFine[din].setVal(0.0, cellBox, comp);
-
-            NeighborIterator nit(gridsFine);
-            for (nit.begin(din); nit.ok(); ++nit) {
-              cfivsFine[din].setVal(0.0, ghostBox & gridsFine[nit()], comp);
-            }
-          }
-        }
-
-        Copier copier;
-        copier.ghostDefine(gridsFine, gridsFiCo, domainFine, ighost * IntVect::Unit);
-        cfivsFine.copyTo(interv, cfivsFiCo, interv, copier, LDaddOp<FArrayBox>());
-
-        const DataIterator& dit  = gridsFiCo.dataIterator();
-        const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din      = dit[mybox];
-          const Box        cellBox  = gridsFiCo[din];
-          const FArrayBox& realMask = cfivsFiCo[din];
-
-          BaseFab<bool>& boolMask = levelMask[din];
-
-          bool emptyMask = true;
-          for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-            if (realMask(bit(), comp) > 0.5) {
-              boolMask(bit(), comp) = true;
-              emptyMask             = false;
-            }
-          }
-          if (emptyMask) {
-            boolMask.clear();
-          }
-        }
-      }
-
-      mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
-      m_transitionMasks.emplace(ighost, mask);
-    }
-  }
-
-  /**
-   * @brief Move the coarse-side transition particles into the container mask holder (using the FiCo mask).
-   * @details The transition mask lives on the refined-coarse grid, so this is done directly here
-   * (the container's transferMaskParticles works on the valid grids). Coarse particles whose
-   * fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder.
-   * @tparam Container ParticleContainer type (deduced).
-   * @param[in,out] a_particles      Particle container.
-   * @param[in]     a_depositionType Deposition kernel (selects the mask width; NGP is a no-op).
-   */
-  template <typename Container>
-  void
-  transferMaskParticlesTransition(Container& a_particles, const DepositionType a_depositionType) const
-  {
-    CH_TIME("EBAMRParticleMesh::transferMaskParticlesTransition");
-
-    if (a_depositionType == DepositionType::NGP) {
-      return;
-    }
-
-    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-      const int                maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
-      const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL();
-      const Real               dxFine    = m_dx[lvl + 1];
-
-      const DataIterator& dit  = dbl.dataIterator();
-      const int           nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&     din  = dit[mybox];
-        const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
-
-        if (!mask.isUsable()) {
-          continue;
-        }
-
-        const Box maskBox = mask.box();
-
-        auto& valid    = a_particles[lvl][din];
-        auto& maskLeaf = (*a_particles.getMaskParticles()[lvl])[din];
-
-        std::size_t i = 0;
-        while (i < valid.size()) {
-          const RealVect pos = valid.position(i);
-          IntVect        iv;
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            iv[dir] = static_cast<int>(std::floor((pos[dir] - m_probLo[dir]) / dxFine));
-          }
-          if (maskBox.contains(iv) && mask(iv, 0)) {
-            maskLeaf.append(pos, valid.weight(i), valid.gather(i));
-
-            const std::size_t k = maskLeaf.size() - 1;
-
-            maskLeaf.particleID(k) = valid.particleID(i);
-            maskLeaf.rankID(k)     = valid.rankID(i);
-
-            valid.remove(i);
-          }
-          else {
-            i++;
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * @brief The CoarseFineDeposition::Transition deposition algorithm.
-   * @details NGP short-circuits to the Interp result. Otherwise: moves the coarse-side transition
-   * particles out of the valid holder; deposits the remaining particles with the kernel and folds
-   * fine-ghost mass to coarse; then deposits the transition particles on the refined-coarse grid with
-   * the fine-grid width and distributes that buffer to both the fine level (addFiCoDataToFine +
-   * exchangeAndAddFiCoData) and the coarse level (restrictAndAddFiCoDataToCoar); finally returns the
-   * transition particles to the valid holder.
+   * @details NGP short-circuits to the Interp result. Otherwise, the coarser particles within the transition band of a
+   * finer grid deposit with the finer-level width: on their own level, into the same data as the other particles, and
+   * as coarse ghosts in the finer patches their clouds reach, clipped to the valid box. The part of the coarse-level
+   * deposit under the finer grid is invalid, so the composite mass is conserved.
    * @tparam NCOMP        Number of mesh components (compile-time).
    * @tparam Container    ParticleContainer type (deduced).
+   * @tparam MaskGetter   Callable (int width) -> const AMRParticleGhostMask&.
    * @tparam PatchDeposit Per-patch deposit with the requested kernel.
-   * @param[in,out] a_meshData       AMR mesh data (RESET then filled).
-   * @param[in]     a_particles      Particle container.
-   * @param[in]     a_depositionType Deposition kernel.
-   * @param[in]     a_patch          Per-patch deposit functor (requested kernel).
+   * @tparam PatchGhosts  Per-patch coarse-ghost deposit with the requested kernel.
+   * @param[in,out] a_meshData        AMR mesh data (RESET then filled).
+   * @param[in]     a_particles       Particle container.
+   * @param[in]     a_depositionType  Deposition kernel.
+   * @param[in]     a_forceIrregNGP   Force NGP in cut cells.
+   * @param[in]     a_cutCellsHoldDensity True if the cut cells hold the density (mirror deposition); passed to the
+   * Interp fallback for NGP.
+   * @param[in]     a_coarToFineMasks Realm coarse-to-fine mask getter.
+   * @param[in]     a_patch           Per-patch deposit functor (requested kernel).
+   * @param[in]     a_patchGhosts     Per-patch coarse-ghost deposit functor.
    */
-  template <int NCOMP, typename Container, typename PatchDeposit>
+  template <int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts>
   void
   depositTransitionCore(EBAMRCellData&       a_meshData,
                         const Container&     a_particles,
                         const DepositionType a_depositionType,
-                        PatchDeposit         a_patch) const
+                        const bool           a_forceIrregNGP,
+                        const bool           a_cutCellsHoldDensity,
+                        const MaskGetter&    a_coarToFineMasks,
+                        PatchDeposit         a_patch,
+                        PatchGhosts          a_patchGhosts) const
   {
     CH_TIME("EBAMRParticleMesh::depositTransitionCore");
 
@@ -1241,22 +1250,37 @@ protected:
     CH_assert(a_meshData[0]->nComp() == NCOMP);
 
     if (a_depositionType == DepositionType::NGP) {
-      this->depositInterpCore(a_meshData, a_particles, NCOMP, a_patch);
+      this->depositInterpCore(a_meshData, a_particles, NCOMP, a_cutCellsHoldDensity, a_patch);
 
       return;
     }
 
     DataOps::setValue(a_meshData, 0.0);
 
+    // Move the transition particles into the mask holder, and copy them into the finer patches their finer-width clouds
+    // reach.
     Container& particles = const_cast<Container&>(a_particles);
-    this->transferMaskParticlesTransition(particles, a_depositionType);
 
-    // 1. Deposit the non-transition particles on their levels.
+    particles.transferMaskParticlesCoarToFine(this->getCoarToFineMask(a_coarToFineMasks, [&](const int a_refRat) {
+      return getTransitionMaskWidth(a_depositionType, a_refRat);
+    }));
+
+    this->fillCoarseGhosts(particles,
+                           this->getCoarToFineMask(a_coarToFineMasks,
+                                                   [&](const int a_refRat) {
+                                                     return getTransitionGhostWidth(a_depositionType, a_refRat);
+                                                   }),
+                           a_forceIrregNGP);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const DisjointBoxLayout& dbl  = m_eblgs[lvl]->getDBL();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+      const bool               hasCoar = (lvl > 0);
+      const bool               hasFine = (lvl < m_finestLevel);
 
+      const DataIterator& dit  = dbl.dataIterator();
+      const int           nbox = dit.size();
+
+      // 1. Deposit this level's own particles, and its transition particles with the finer-level width.
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
@@ -1265,13 +1289,16 @@ protected:
         EBCellFAB& rho = (*a_meshData[lvl])[din];
 
         a_patch(interp, rho, a_particles[lvl][din], 1.0);
-      }
-    }
 
-    // 2. Fold ghost mass into the owner patch; fine-ghost mass over the boundary goes to coarse.
-    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        if (hasFine) {
+          a_patch(interp, rho, (*a_particles.getMaskParticles()[lvl])[din], 1.0 / m_refRat[lvl]);
+        }
+      }
+
+      // 2. Fold ghost-deposited mass into the owner patch; fine-ghost mass over the boundary goes to the coarse level.
       a_meshData[lvl]->exchange(Interval(0, NCOMP - 1), m_levelCopiers[lvl], EBAddOp());
-      if (lvl > 0) {
+
+      if (hasCoar) {
         for (int comp = 0; comp < NCOMP; comp++) {
           LevelData<EBCellFAB> coarAlias;
           LevelData<EBCellFAB> fineAlias;
@@ -1281,47 +1308,22 @@ protected:
 
           m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
         }
-      }
-    }
 
-    // 3a. Deposit the transition particles on the refined-coarse grid (fine-grid width).
-    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-      const int                maskWidth  = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
-      const DisjointBoxLayout& dblFiCo    = m_coarseFinePM[lvl + 1]->getEblgFiCo().getDBL();
-      LevelData<EBCellFAB>&    bufferFiCo = m_coarseFinePM[lvl + 1]->template getBufferFiCo<NCOMP>();
-
-      const DataIterator& ditFiCo  = dblFiCo.dataIterator();
-      const int           nboxFiCo = ditFiCo.size();
-
+        // 3. The coarser transition particles deposit into the valid cells of this level with this level's width.
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-        const DataIndex& din = ditFiCo[mybox];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex&      din    = dit[mybox];
+          const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-        EBCellFAB& dataFiCo = bufferFiCo[din];
+          EBCellFAB& rho = (*a_meshData[lvl])[din];
 
-        dataFiCo.setVal(0.0);
-
-        const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
-        if (mask.isUsable()) {
-          const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl + 1])[din];
-
-          a_patch(interp, dataFiCo, (*a_particles.getMaskParticles()[lvl])[din], 1.0);
+          a_patchGhosts(interp, rho, a_particles[lvl][din], 1.0);
         }
       }
     }
 
-    // 3b/c/d. Distribute the refined-coarse buffer to the fine level and (restricted) to the coarse level.
-    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->template getBufferFiCo<NCOMP>();
-
-      m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
-      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
-      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
-                                                            bufferFiCo,
-                                                            EBCoarseFineParticleMesh::Average::Conservative);
-    }
-
     // Return the transition particles to the valid holder.
+    particles.clearGhostParticles(GhostType::Coarse);
     particles.transferParticles(particles.getMaskParticles());
   }
 };

@@ -43,6 +43,8 @@
 #define CD_EBPARTICLEMESH_H
 
 // Std includes
+#include <algorithm>
+#include <vector>
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -149,6 +151,7 @@ public:
                       a_depositionType,
                       a_widthScale,
                       a_forceIrregNGP,
+                      false,
                       [&](const std::size_t a_i, Real* a_out) {
                         a_out[0] = a_particles.weight(a_i);
                       });
@@ -212,6 +215,7 @@ public:
                       a_depositionType,
                       a_widthScale,
                       a_forceIrregNGP,
+                      false,
                       [&](const std::size_t a_i, Real* a_out) {
                         std::size_t k = 0;
                         ((a_out[k++] = static_cast<Real>(a_particles.template get<Members>(a_i))), ...);
@@ -277,6 +281,120 @@ public:
                       a_depositionType,
                       a_widthScale,
                       a_forceIrregNGP,
+                      false,
+                      std::forward<GatherFunc>(a_gather));
+  }
+
+  /**
+   * @brief Deposit the weight column of the GhostType::Coarse particles onto mesh component a_comp, in the valid box.
+   * @details The coarse ghosts are copies of coarser-level particles near this patch (see
+   * ParticleContainer::fillCoarseGhostParticlesFromMask). Their clouds are clipped to the valid box, and they never
+   * deposit by NGP: an NGP cloud of a particle outside the valid box has no part in it, and copies are only made of
+   * particles whose coarser cell is not cut when NGP is forced in cut cells.
+   * @tparam P      Payload type of the ParticleSoA.
+   * @tparam Traits Column descriptor of P.
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
+   * @param[in]     a_comp           Destination mesh component.
+   * @param[in]     a_particles      Particles; only the GhostType::Coarse ones deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   */
+  template <typename P, typename Traits>
+  void
+  depositCoarseGhostsWeight(EBCellFAB&                    a_meshData,
+                            const int                     a_comp,
+                            const ParticleSoA<P, Traits>& a_particles,
+                            const DepositionType          a_depositionType,
+                            const Real                    a_widthScale) const
+  {
+    CH_TIME("EBParticleMesh::depositCoarseGhostsWeight");
+
+    this->depositCore(a_meshData,
+                      a_comp,
+                      a_particles,
+                      1,
+                      a_depositionType,
+                      a_widthScale,
+                      false,
+                      true,
+                      [&](const std::size_t a_i, Real* a_out) {
+                        a_out[0] = a_particles.weight(a_i);
+                      });
+  }
+
+  /**
+   * @brief Deposit payload columns of the GhostType::Coarse particles onto mesh components [a_comp, a_comp +
+   * nColumns), in the valid box.
+   * @details As depositCoarseGhostsWeight, for the columns selected by Members.
+   * @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Needs at least a_comp+sizeof...(Members) components.
+   * @param[in]     a_comp           First destination mesh component.
+   * @param[in]     a_particles      Particles; only the GhostType::Coarse ones deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   */
+  template <auto... Members, typename P, typename Traits>
+  void
+  depositCoarseGhosts(EBCellFAB&                    a_meshData,
+                      const int                     a_comp,
+                      const ParticleSoA<P, Traits>& a_particles,
+                      const DepositionType          a_depositionType,
+                      const Real                    a_widthScale) const
+  {
+    CH_TIME("EBParticleMesh::depositCoarseGhosts");
+
+    static_assert(sizeof...(Members) == 1 || sizeof...(Members) == SpaceDim,
+                  "deposit selects either one scalar column or SpaceDim vector-component columns");
+
+    this->depositCore(a_meshData,
+                      a_comp,
+                      a_particles,
+                      static_cast<int>(sizeof...(Members)),
+                      a_depositionType,
+                      a_widthScale,
+                      false,
+                      true,
+                      [&](const std::size_t a_i, Real* a_out) {
+                        std::size_t k = 0;
+                        ((a_out[k++] = static_cast<Real>(a_particles.template get<Members>(a_i))), ...);
+                      });
+  }
+
+  /**
+   * @brief Deposit a custom per-particle scalar of the GhostType::Coarse particles onto mesh component a_comp, in the
+   * valid box.
+   * @details As depositCoarseGhostsWeight, with the value computed by a_gather.
+   * @tparam P          Payload type of the ParticleSoA.
+   * @tparam Traits     Column descriptor of P.
+   * @tparam GatherFunc Callable (std::size_t a_i, Real* a_out) writing the particle's deposited value.
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
+   * @param[in]     a_comp           Destination mesh component.
+   * @param[in]     a_particles      Particles; only the GhostType::Coarse ones deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_gather         Per-particle value gatherer.
+   */
+  template <typename P, typename Traits, typename GatherFunc>
+  void
+  depositCoarseGhostsGathered(EBCellFAB&                    a_meshData,
+                              const int                     a_comp,
+                              const ParticleSoA<P, Traits>& a_particles,
+                              const DepositionType          a_depositionType,
+                              const Real                    a_widthScale,
+                              GatherFunc&&                  a_gather) const
+  {
+    CH_TIME("EBParticleMesh::depositCoarseGhostsGathered");
+
+    this->depositCore(a_meshData,
+                      a_comp,
+                      a_particles,
+                      1,
+                      a_depositionType,
+                      a_widthScale,
+                      false,
+                      true,
                       std::forward<GatherFunc>(a_gather));
   }
 
@@ -449,6 +567,8 @@ protected:
    * @param[in]     a_depositionType Deposition kernel.
    * @param[in]     a_widthScale     Particle-width multiplier.
    * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   * @param[in]     a_coarseGhosts   If false, deposit the owned particles into the whole data holder; if true, deposit
+   * only the GhostType::Coarse particles, clipped to the valid box (NGP deposits nothing).
    * @param[in]     a_gather         Strength gatherer (promotes column values to Real).
    */
   template <typename P, typename Traits, typename StrengthFn>
@@ -460,11 +580,49 @@ protected:
               const DepositionType          a_depositionType,
               const Real                    a_widthScale,
               const bool                    a_forceIrregNGP,
+              const bool                    a_coarseGhosts,
               StrengthFn                    a_gather) const
   {
     CH_TIME("EBParticleMesh::depositCore");
 
     CH_assert(a_meshData.nComp() >= a_comp + a_numComp);
+
+    // A coarse ghost's cell lies outside the valid box, so its NGP cloud has no part there.
+    if (a_coarseGhosts && a_depositionType == DepositionType::NGP) {
+      return;
+    }
+
+    const Box clipBox = a_coarseGhosts ? m_region : a_meshData.getFArrayBox().box();
+
+    const std::size_t numParticles = a_particles.size();
+
+    // The coarse ghosts arrive in an order that depends on threads and messages, so they deposit sorted by position
+    // and weight. The result then depends only on the set of ghosts, except for the order among ghosts with the same
+    // position and weight.
+    std::vector<std::size_t> ghostOrder;
+
+    if (a_coarseGhosts) {
+      for (std::size_t i = 0; i < numParticles; i++) {
+        if (a_particles.ghost(i) == GhostType::Coarse) {
+          ghostOrder.push_back(i);
+        }
+      }
+
+      std::sort(ghostOrder.begin(), ghostOrder.end(), [&](const std::size_t a_left, const std::size_t a_right) -> bool {
+        const RealVect& left  = a_particles.position(a_left);
+        const RealVect& right = a_particles.position(a_right);
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          if (left[dir] != right[dir]) {
+            return left[dir] < right[dir];
+          }
+        }
+
+        return a_particles.weight(a_left) < a_particles.weight(a_right);
+      });
+    }
+
+    const std::size_t numDeposits = a_coarseGhosts ? ghostOrder.size() : numParticles;
 
     Real invVol = 1.0;
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -482,20 +640,33 @@ protected:
       tscFactor *= 2.0 / tscWidth[dir];
     }
 
-    const std::size_t numParticles = a_particles.size();
-
     Real strength[SpaceDim];
 
     switch (a_depositionType) {
     case DepositionType::NGP: {
-      for (std::size_t i = 0; i < numParticles; i++) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
+          continue;
+        }
+
         a_gather(i, strength);
         this->depositParticleNGP(a_meshData, a_comp, a_particles.position(i), ngpFactor, strength, a_numComp);
       }
       break;
     }
     case DepositionType::CIC: {
-      for (std::size_t i = 0; i < numParticles; i++) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
+          continue;
+        }
+
+        CH_assert(a_coarseGhosts ||
+                  m_region.contains(ParticleOps::getParticleCellIndex(a_particles.position(i), m_probLo, m_dx)));
+
         a_gather(i, strength);
         this->depositParticleCIC(a_meshData,
                                  a_comp,
@@ -504,12 +675,22 @@ protected:
                                  cicFactor,
                                  strength,
                                  a_numComp,
-                                 a_forceIrregNGP);
+                                 a_forceIrregNGP && !a_coarseGhosts,
+                                 clipBox);
       }
       break;
     }
     case DepositionType::TSC: {
-      for (std::size_t i = 0; i < numParticles; i++) {
+      for (std::size_t k = 0; k < numDeposits; k++) {
+        const std::size_t i = a_coarseGhosts ? ghostOrder[k] : k;
+
+        if (!a_coarseGhosts && a_particles.isGhost(i)) {
+          continue;
+        }
+
+        CH_assert(a_coarseGhosts ||
+                  m_region.contains(ParticleOps::getParticleCellIndex(a_particles.position(i), m_probLo, m_dx)));
+
         a_gather(i, strength);
         this->depositParticleTSC(a_meshData,
                                  a_comp,
@@ -518,7 +699,8 @@ protected:
                                  tscFactor,
                                  strength,
                                  a_numComp,
-                                 a_forceIrregNGP);
+                                 a_forceIrregNGP && !a_coarseGhosts,
+                                 clipBox);
       }
       break;
     }
@@ -696,7 +878,8 @@ protected:
    * @param[in]     a_volumeFactor  Volume factor.
    * @param[in]     a_strength      Per-component strength to deposit.
    * @param[in]     a_numComp       Number of components.
-   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells. Requires the particle's cell to be in the EBISBox.
+   * @param[in]     a_clipBox       Cells the cloud may deposit into.
    */
   inline void
   depositParticleCIC(EBCellFAB&      a_rho,
@@ -706,11 +889,10 @@ protected:
                      const Real&     a_volumeFactor,
                      const Real*     a_strength,
                      const int&      a_numComp,
-                     const bool      a_forceIrregNGP) const noexcept
+                     const bool      a_forceIrregNGP,
+                     const Box&      a_clipBox) const noexcept
   {
     const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
-
-    CH_assert(m_region.contains(particleIV));
 
     FArrayBox& rho = a_rho.getFArrayBox();
 
@@ -737,7 +919,7 @@ protected:
         }
       };
 
-      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth), cicKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth) & a_clipBox, cicKernel);
     }
   }
 
@@ -750,7 +932,8 @@ protected:
    * @param[in]     a_volumeFactor  Volume factor.
    * @param[in]     a_strength      Per-component strength to deposit.
    * @param[in]     a_numComp       Number of components.
-   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells. Requires the particle's cell to be in the EBISBox.
+   * @param[in]     a_clipBox       Cells the cloud may deposit into.
    */
   inline void
   depositParticleTSC(EBCellFAB&      a_rho,
@@ -760,11 +943,10 @@ protected:
                      const Real&     a_volumeFactor,
                      const Real*     a_strength,
                      const int&      a_numComp,
-                     const bool      a_forceIrregNGP) const noexcept
+                     const bool      a_forceIrregNGP,
+                     const Box&      a_clipBox) const noexcept
   {
     const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
-
-    CH_assert(m_region.contains(particleIV));
 
     FArrayBox& rho = a_rho.getFArrayBox();
 
@@ -799,7 +981,7 @@ protected:
         }
       };
 
-      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth), tscKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth) & a_clipBox, tscKernel);
     }
   }
 

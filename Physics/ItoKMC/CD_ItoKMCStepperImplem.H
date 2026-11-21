@@ -1663,6 +1663,9 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
 
   // Required for non-cell-based particle mergers.
   m_amr->registerParticleGhostMask(m_particleRealm, 1);
+
+  // The stepper's own solid-phase charge deposits use CIC with Halo.
+  m_amr->registerParticleDeposition(m_particleRealm, DepositionType::CIC, CoarseFineDeposition::Halo);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -6375,7 +6378,12 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
     const EBLevelGrid& eblgCoar = *m_amr->getEBLevelGrid(m_particleRealm, m_plasmaPhase)[lvl - 1];
     const int          refRat   = m_amr->getRefinementRatios()[lvl - 1];
 
-    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, refRat));
+    const RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>& finerVoFs = m_amr->getFinerVoFs(
+      m_particleRealm,
+      m_plasmaPhase)[lvl - 1];
+
+    interpOp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
+      new EBCoarseToFineInterp(eblgFine, eblgCoFi, eblgCoar, finerVoFs, refRat));
   }
 
   // 3. Go through each solver and figure out the number of particles on the new grids. Add

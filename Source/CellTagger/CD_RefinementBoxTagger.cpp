@@ -69,7 +69,7 @@ RefinementBoxTagger::tagCells(EBAMRTags& a_tags)
   int haveTags = 0;
 
   // Tags on a level ask for the next finer level, so there are none on the finest allowed level.
-  const int numTagLevels = std::min(static_cast<int>(a_tags.size()), m_amr->getMaxAmrDepth());
+  const int numTagLevels = std::min(static_cast<int>(a_tags.size()), m_amr->getMaxDomainDepth());
 
   for (int lvl = 0; lvl < numTagLevels; lvl++) {
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];

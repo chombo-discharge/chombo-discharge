@@ -249,15 +249,16 @@ Driver::getGeometryTags()
 
   // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script).
 
-  const int maxAmrDepth = m_amr->getMaxAmrDepth();
+  // Tags are needed up to the level below the finest domain, since the grids of a level are generated from the tags
+  // on the level below it. Geometric tags come only from levels the geometry resolves, up to max_eb_depth, so they
+  // refine at most one level finer than that; the finer simulation levels follow the cell tagger.
+  const int maxDepth = std::min(m_amr->getMaxDomainDepth(), m_amr->getMaxEbDepth() + 1);
 
-  m_geomTags.resize(maxAmrDepth);
+  m_geomTags.resize(maxDepth);
 
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on
-  // maxAmrDepth-1
-  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
+  for (int lvl = 0; lvl < maxDepth; lvl++) {
     const ProblemDomain& curDomain = m_amr->getDomains()[lvl]; // Domain we're looking at right now.
 
     IntVectSet condTags; // Irregular cells on electrodes
@@ -359,7 +360,7 @@ Driver::getGeometryTags()
   }
 
   // Grow tags with specified factor.
-  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
+  for (int lvl = 0; lvl < maxDepth; lvl++) {
     m_geomTags[lvl].grow(m_irregTagGrowth);
   }
 
@@ -800,10 +801,9 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
     while (m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep && m_timeStepper->keepGoing()) {
       const int maxSimDepth = m_amr->getMaxSimulationDepth();
-      const int maxAmrDepth = m_amr->getMaxAmrDepth();
 
       // Check if we should regrid. This can be due to regular intervals, or the TimeStepper can call for it.
-      const bool canRegrid         = maxSimDepth > 0 && maxAmrDepth > 0 && m_regridInterval > 0;
+      const bool canRegrid         = maxSimDepth > 0 && m_regridInterval > 0;
       const bool regridStep        = m_timeStep % m_regridInterval == 0;
       const bool regridTimeStepper = m_timeStepper->needToRegrid();
       if (canRegrid && (regridStep || regridTimeStepper)) {
@@ -1232,10 +1232,10 @@ Driver::parseGeometryRefinement()
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
 
   if (m_conductorTagsDepth < 0) {
-    m_conductorTagsDepth = m_amr->getMaxAmrDepth();
+    m_conductorTagsDepth = m_amr->getMaxEbDepth();
   }
   if (m_dielectricTagsDepth < 0) {
-    m_dielectricTagsDepth = m_amr->getMaxAmrDepth();
+    m_dielectricTagsDepth = m_amr->getMaxEbDepth();
   }
 
   // We are also allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we
@@ -1419,7 +1419,7 @@ Driver::setupGeometryOnly()
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxEbDepth());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1445,9 +1445,10 @@ Driver::setupGeometryOnly()
     }
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxEbDepth();
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
+                                           m_amr->getDomains()[m_amr->getMaxDomainDepth()],
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
@@ -1474,7 +1475,7 @@ Driver::setupGeometryOnly()
 
   // Regrid using geometric tags only, or onto the grids the geometry was built over.
   if (m_geometryGeneration == "polyhedral") {
-    m_amr->regridAmr(this->getGeometryGrids(), 0);
+    this->regridOntoGeometryGrids();
   }
   else {
     m_amr->regridAmr(m_geomTags, 0);
@@ -1500,7 +1501,7 @@ Driver::buildGeometryGrids(const ProblemDomain& a_startDomain)
 
   // The stop domain is the deepest level the geometry is resolved on. The start domain may be coarser than the
   // coarsest AMR level, so its spacing is scaled off the stop domain's.
-  const int            stopLevel  = m_amr->getMaxAmrDepth();
+  const int            stopLevel  = m_amr->getMaxEbDepth();
   const ProblemDomain& stopDomain = m_amr->getDomains()[stopLevel];
   const Real           stopDx     = m_amr->getDx()[stopLevel];
   const Real           startDx    = stopDx * (stopDomain.domainBox().size(0) / a_startDomain.domainBox().size(0));
@@ -1525,7 +1526,7 @@ Driver::getGeometryGrids() const
 
   const Vector<ProblemDomain>& domains = m_amr->getDomains();
 
-  Vector<Vector<Box>> boxes(1 + m_amr->getMaxAmrDepth());
+  Vector<Vector<Box>> boxes(1 + m_amr->getMaxEbDepth());
 
   // An AMR level at or below the geometry's start level is whole, since the geometry builds those levels whole
   // and has no cut tiles there; it is split as AmrMesh splits its coarsest level. Above the start level the
@@ -1548,6 +1549,27 @@ Driver::getGeometryGrids() const
   }
 
   return boxes;
+}
+
+void
+Driver::regridOntoGeometryGrids()
+{
+  CH_TIME("Driver::regridOntoGeometryGrids");
+  if (m_verbosity > 5) {
+    pout() << "Driver::regridOntoGeometryGrids" << endl;
+  }
+
+  m_amr->regridAmr(this->getGeometryGrids(), 0);
+
+  // The geometry has no grids finer than max_eb_depth, so the simulation level next finer than that is made from the
+  // geometric tags on the level below it, keeping the coarser levels. Any finer level follows the cell tagger.
+  const int maxEbDepth = m_amr->getMaxEbDepth();
+
+  if (m_amr->getMaxSimulationDepth() > maxEbDepth && m_amr->getFinestLevel() == maxEbDepth) {
+    const int hardcap = -1;
+
+    m_amr->regridAmr(m_geomTags, maxEbDepth + 1, hardcap);
+  }
 }
 
 void
@@ -1576,7 +1598,7 @@ Driver::setupFresh(const int a_initialRegrids)
       }
     }
     else {
-      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxEbDepth());
       scanDomain         = m_amr->getDomains()[amrLevel];
     }
 
@@ -1601,8 +1623,9 @@ Driver::setupFresh(const int a_initialRegrids)
     m_computationalGeometry->useChomboShop();
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxEbDepth();
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
+                                           m_amr->getDomains()[m_amr->getMaxDomainDepth()],
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
@@ -1632,7 +1655,7 @@ Driver::setupFresh(const int a_initialRegrids)
   const int lmin    = 0;
   const int hardcap = -1;
   if (m_geometryGeneration == "polyhedral") {
-    m_amr->regridAmr(this->getGeometryGrids(), lmin);
+    this->regridOntoGeometryGrids();
   }
   else {
     m_amr->regridAmr(m_geomTags, lmin, hardcap);
@@ -1750,9 +1773,10 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
     }
   }
 
-  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxEbDepth();
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
+                                           m_amr->getDomains()[m_amr->getMaxDomainDepth()],
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
@@ -2121,7 +2145,7 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
     const int finestTagLevel = this->getFinestTagLevel(a_cellTags);
 
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
-      if (lvl <= finestTagLevel) {
+      if (lvl <= finestTagLevel && lvl < m_geomTags.size()) {
         a_allTags[lvl] |= m_geomTags[lvl];
       }
     }
@@ -2129,7 +2153,7 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
   else {
     // Loop only goes to the current finest level because we only add one level at a time
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
-      if (lvl < m_amr->getMaxAmrDepth()) { // Geometric tags don't exist on AmrMesh.m_maxAmrDepth
+      if (lvl < m_geomTags.size()) { // Geometric tags don't exist on the finest level with a domain
         a_allTags[lvl] |= m_geomTags[lvl];
       }
     }
@@ -2724,7 +2748,7 @@ Driver::writeCheckpointFile()
 
   // Write header containing time step information, grid resolution, etc.
   HDF5HeaderData header;
-  header.m_int["finest_eb_lvl"] = m_amr->getMaxAmrDepth();
+  header.m_int["finest_eb_lvl"] = m_amr->getMaxEbDepth();
   header.m_real["coarsest_dx"]  = m_amr->getDx()[0];
   header.m_real["time"]         = m_time;
   header.m_real["dt"]           = m_dt;
@@ -2915,7 +2939,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   const int  finestLevel = header.m_int["finestLevel"];
   const int  prevMaxEB   = header.m_int["finest_eb_lvl"];
 
-  if (prevMaxEB != m_amr->getMaxAmrDepth()) {
+  if (prevMaxEB != m_amr->getMaxEbDepth()) {
     const std::string err = "Driver::readCheckpointFile -- max EB level changed. Proceed at your own peril";
 
     MayDay::Warning(err.c_str());

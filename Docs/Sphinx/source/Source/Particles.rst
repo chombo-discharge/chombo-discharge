@@ -324,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 709-710
+   :lines: 733-734
    :language: c++
    :dedent: 2
 
@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 739-743
+   :lines: 773-777
    :language: c++
    :dedent: 2
 
@@ -401,7 +401,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1875-1876
+   :lines: 1886-1887
    :language: c++
    :dedent: 2
 
@@ -447,7 +447,7 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 666-667
+   :lines: 682-683
    :language: c++
    :dedent: 2
 
@@ -652,6 +652,14 @@ The following coarse-fine deposition methods are currently supported:
 
    Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
    The ``CoarseFineDeposition::Transition`` method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.
+
+``Halo`` and ``Transition`` copy the coarse-grid particles whose clouds reach the fine grid into the fine patches as ghost particles (see :ref:`Chap:GhostParticles`), which deposit there.
+The copies go through the realm's coarse-to-fine particle ghost masks, whose widths in fine cells depend on the deposition kernel and the refinement ratio :math:`r`:
+
+* ``Halo``: :math:`r/2` for CIC and :math:`r` for TSC.
+* ``Transition``: :math:`r/2 + 1` for CIC and :math:`r + 1` for TSC.
+
+Every width must be smaller than ``AmrMesh.min_block_size``, which is checked when a solver registers its deposition.
 
 .. _Chap:IrregularDeposition:
 

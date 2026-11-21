@@ -21,6 +21,9 @@
 #include <BaseIVFactory.H>
 #include <EBCellFactory.H>
 #include <EBFluxFactory.H>
+#include <EBIndexSpace.H>
+#include <EBGraphFactory.H>
+#include <EBDataFactory.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -33,6 +36,7 @@
 #include <CD_Location.H>
 #include <CD_ParallelOps.H>
 #include <CD_MirrorDeposition.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int PhaseRealm::s_redistributionRadius;
@@ -142,9 +146,18 @@ PhaseRealm::preRegrid()
   m_eblg.resize(0);
   m_eblgCoFi.resize(0);
   m_eblgFiCo.resize(0);
+  m_eblgFineHalf.resize(0);
+  m_fiCoFineCells.resize(0);
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(nullptr);
   m_mgLevelGrids.resize(0);
   m_mgLevelGridsCoFi.resize(0);
   m_mgCoarAve.resize(0);
+  m_finerVoFs.resize(0);
+  m_mgFinerVoFs.resize(0);
+  m_mgRestrict.resize(0);
+  m_mgProlong.resize(0);
+  m_mgLevelRestrict.resize(0);
+  m_mgLevelProlong.resize(0);
   m_vofIter.resize(0);
   m_multiCutVofIter.resize(0);
   m_faceIter.resize(0);
@@ -186,6 +199,20 @@ PhaseRealm::regridBase(const int a_lmin)
     timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
     timer.stopEvent("Define EBLevelGrid");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    // Built with the coarsened grids, so that load-balancing routines, which run after regridBase but before
+    // regridOperators, can define coarse-fine operators.
+    if (m_profile) {
+      pout() << "before/after finer VoF lists" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Finer VoF lists");
+    this->defineFinerVoFs(a_lmin);
+    timer.stopEvent("Finer VoF lists");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -236,6 +263,18 @@ PhaseRealm::regridOperators(const int a_lmin)
     Timer timer("PhaseRealm::regridOperators(int)");
 
     if (m_profile) {
+      pout() << "before/after multigrid finer VoF lists" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Multigrid finer VoF lists");
+    this->defineMultigridFinerVoFs();
+    timer.stopEvent("Multigrid finer VoF lists");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    if (m_profile) {
       pout() << "before/after coarave define" << endl;
       MemoryReport::getMaxMinMemoryUsage();
     }
@@ -254,6 +293,9 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("Multigrid EBCoarAve");
     this->defineMultigridCoarseAverage();
     timer.stopEvent("Multigrid EBCoarAve");
+    timer.startEvent("Multigrid restrict/prolong");
+    this->defineMultigridLevelTransfer();
+    timer.stopEvent("Multigrid restrict/prolong");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -462,14 +504,9 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis)));
 
     const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < m_finestLevel;
 
     if (hasCoar) {
       m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl - 1], &(*m_ebis));
-    }
-
-    if (hasFine) {
-      m_eblg[lvl]->setMaxRefinementRatio(m_refinementRatios[lvl]);
     }
 
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
@@ -479,17 +516,289 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       m_eblgCoFi[lvl - 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
       coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
-      m_eblgCoFi[lvl - 1]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
-    }
-
-    // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
-    if (lvl < m_finestLevel) {
-      m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
-
-      refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);
-      m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(m_refinementRatios[lvl], m_eblg[lvl]->getEBIS());
     }
   }
+
+  this->defineEBLevelGridFiCo();
+}
+
+void
+PhaseRealm::defineEBLevelGridFiCo()
+{
+  CH_TIME("PhaseRealm::defineEBLevelGridFiCo");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineEBLevelGridFiCo" << endl;
+  }
+
+  m_eblgFiCo.resize(1 + m_finestLevel);
+  m_eblgFineHalf.resize(1 + m_finestLevel);
+  m_fiCoFineCells.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    m_eblgFiCo[lvl]      = RefCountedPtr<EBLevelGrid>(nullptr);
+    m_eblgFineHalf[lvl]  = RefCountedPtr<EBLevelGrid>(nullptr);
+    m_fiCoFineCells[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+  }
+
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(nullptr);
+
+  if (m_finestLevel == 0) {
+    return;
+  }
+
+  // Sources of the half-resolution layouts that coarsening the copied geometry by 4 steps through.
+  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
+    const int refRat = m_refinementRatios[lvl - 1];
+
+    if (refRat != 2 && refRat != 4) {
+      MayDay::Abort("PhaseRealm::defineEBLevelGridFiCo - refinement ratios must be 2 or 4");
+    }
+
+    if (refRat == 4) {
+      m_eblgFineHalf[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+
+      coarsen(*m_eblgFineHalf[lvl], *m_eblg[lvl], 2);
+    }
+  }
+
+  // The copying index space spans the realm's domains, finest first, each a coarsening by two of the one before.
+  Vector<ProblemDomain> domains;
+
+  ProblemDomain domain = m_domains[m_finestLevel];
+  domains.push_back(domain);
+
+  while (domain.domainBox() != m_domains[0].domainBox()) {
+    domain.coarsen(2);
+    domains.push_back(domain);
+  }
+
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(new EBIndexSpace());
+
+  m_ebisFiCo->define(domains,
+                     m_probLo,
+                     m_dx[m_finestLevel],
+                     [this](LevelData<EBGraph>&      a_graph,
+                            LevelData<EBData>&       a_data,
+                            const DisjointBoxLayout& a_grids,
+                            const ProblemDomain&     a_domain,
+                            const int                a_graphGhost,
+                            const int                a_dataGhost) -> void {
+                       this->fillCopiedLayout(a_graph, a_data, a_grids, a_domain, a_graphGhost, a_dataGhost);
+                     });
+
+  m_fiCoFineCells.resize(1 + m_finestLevel);
+  m_fiCoFineCells[0] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    const int refRat = m_refinementRatios[lvl];
+
+    // The gradient stencils refine coarse cells up to two cells outside the coarse box, and the mass redistribution
+    // up to the redistribution radius. A copy costs no geometry work, so the ghost cells reach both.
+    constexpr int gradientStencilWidth = 2;
+
+    const int ghostFiCo = std::max(std::max(m_numEbGhostsCells, m_numGhostCells),
+                                   refRat * std::max(gradientStencilWidth, s_redistributionRadius));
+
+    DisjointBoxLayout dblFiCo;
+    refine(dblFiCo, m_grids[lvl], refRat);
+
+    m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(
+      new EBLevelGrid(dblFiCo, m_domains[lvl + 1], ghostFiCo, &(*m_ebisFiCo)));
+
+    m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(refRat, &(*m_ebisFiCo));
+
+#ifndef NDEBUG
+    // Mark the cells of level lvl+1, which only the consumers' assertions read.
+    m_fiCoFineCells[lvl + 1] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+      new LevelData<BaseFab<bool>>(dblFiCo, 1, ghostFiCo * IntVect::Unit));
+
+    LevelData<BaseFab<bool>> fineCells(m_grids[lvl + 1], 1, IntVect::Zero);
+
+    const DataIterator& ditFine  = m_grids[lvl + 1].dataIterator();
+    const DataIterator& ditFiCo  = dblFiCo.dataIterator();
+    const int           nboxFine = ditFine.size();
+    const int           nboxFiCo = ditFiCo.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxFine; mybox++) {
+      fineCells[ditFine[mybox]].setVal(true);
+    }
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+      (*m_fiCoFineCells[lvl + 1])[ditFiCo[mybox]].setVal(false);
+    }
+
+    fineCells.copyTo(Interval(0, 0), *m_fiCoFineCells[lvl + 1], Interval(0, 0));
+#endif
+  }
+}
+
+void
+PhaseRealm::fillCopiedLayout(LevelData<EBGraph>&      a_graph,
+                             LevelData<EBData>&       a_data,
+                             const DisjointBoxLayout& a_grids,
+                             const ProblemDomain&     a_domain,
+                             const int                a_graphGhost,
+                             const int                a_dataGhost) const
+{
+  CH_TIME("PhaseRealm::fillCopiedLayout");
+  if (m_verbose) {
+    pout() << "PhaseRealm::fillCopiedLayout" << endl;
+  }
+
+  // Every data cell lies in the region the boxes are classified over.
+  CH_assert(a_dataGhost <= a_graphGhost);
+
+  const EBLevelGrid* source = nullptr;
+
+  // Any of the realm's levels can be the source, the coarsest included, although the copied layouts are only ever
+  // filled on the domains of the finer levels and of the half steps between ratio-4 levels.
+  for (int lvl = 0; lvl <= m_finestLevel && source == nullptr; lvl++) {
+    if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
+      source = &(*m_eblg[lvl]);
+    }
+    else if (!m_eblgFineHalf[lvl].isNull() && m_eblgFineHalf[lvl]->getDomain().domainBox() == a_domain.domainBox()) {
+      source = &(*m_eblgFineHalf[lvl]);
+    }
+  }
+
+  if (source == nullptr) {
+    MayDay::Abort("PhaseRealm::fillCopiedLayout - no level to copy from on the requested domain");
+  }
+
+  const DisjointBoxLayout& dblSrc   = source->getDBL();
+  const EBISLayout&        ebislSrc = source->getEBISL();
+  const Interval           interv(0, 0);
+  const IntVect            graphGhost = a_graphGhost * IntVect::Unit;
+  const IntVect            dataGhost  = a_dataGhost * IntVect::Unit;
+
+  const DataIterator& ditSrc  = dblSrc.dataIterator();
+  const DataIterator& ditDst  = a_grids.dataIterator();
+  const int           nboxSrc = ditSrc.size();
+  const int           nboxDst = ditDst.size();
+
+  // Classify each destination cell from the source boxes: 0 where no source cell lands, 1 under all-regular source
+  // boxes, 3 under all-covered ones, 2 under the others.
+  LevelData<BaseFab<int>> classSrc(dblSrc, 1, IntVect::Zero);
+  LevelData<BaseFab<int>> classDst(a_grids, 1, graphGhost);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    const EBISBox& ebisBox = ebislSrc[din];
+
+    classSrc[din].setVal(ebisBox.isAllRegular() ? 1 : (ebisBox.isAllCovered() ? 3 : 2));
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    classDst[ditDst[mybox]].setVal(0);
+  }
+
+  classSrc.copyTo(interv, classDst, interv);
+
+  // The source graph, aliased box by box.
+  EBGraphFactory graphFact(a_domain);
+
+  LevelData<EBGraph> graphSrc(dblSrc, 1, IntVect::Zero, graphFact);
+  LevelData<EBGraph> graphCopy(a_grids, 1, graphGhost, graphFact);
+
+  a_graph.define(a_grids, 1, graphGhost, graphFact);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    graphSrc[din] = ebislSrc[din].getEBGraph();
+  }
+
+  // Each destination box is whole and covered when no regular or cut source cell lands in it, whole and regular when
+  // regular source cells fill it, and copied cell by cell otherwise. The cells no source reaches lie outside the finer
+  // level, where the copy is not read.
+  constexpr int wholeCovered = 0;
+  constexpr int wholeRegular = 1;
+  constexpr int copied       = 2;
+
+  std::vector<int> boxKind(nboxDst, copied);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    const Box           region = grow(a_grids[din], a_graphGhost) & a_domain;
+    const BaseFab<int>& cls    = classDst[din];
+
+    bool anyOpen    = false;
+    bool allRegular = true;
+
+    for (BoxIterator bit(region); bit.ok(); ++bit) {
+      const int c = cls(bit(), 0);
+
+      anyOpen    = anyOpen || (c == 1) || (c == 2);
+      allRegular = allRegular && (c == 1);
+    }
+
+    boxKind[mybox] = !anyOpen ? wholeCovered : (allRegular ? wholeRegular : copied);
+  }
+
+  // A box copied cell by cell starts all regular. EBGraph::copy skips a covered source while the destination is all
+  // covered, and the per-cell graph that a later cut source makes it allocate starts out regular, which would turn the
+  // skipped cells regular. From an all-regular start every copy order gives the source's states. A whole covered box
+  // starts covered, so that the covered sources copied into it change nothing and store nothing a cell at a time.
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    if (boxKind[mybox] == wholeCovered) {
+      graphCopy[ditDst[mybox]].setToAllCovered();
+    }
+    else {
+      graphCopy[ditDst[mybox]].setToAllRegular();
+    }
+  }
+
+  graphSrc.copyTo(interv, graphCopy, interv);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    if (boxKind[mybox] == wholeCovered) {
+      a_graph[din].setToAllCovered();
+    }
+    else if (boxKind[mybox] == wholeRegular) {
+      a_graph[din].setToAllRegular();
+    }
+    else {
+      a_graph[din] = graphCopy[din];
+    }
+  }
+
+  // The data, built over the graph and copied.
+  EBDataFactory dataFact;
+
+  LevelData<EBData> dataSrc(dblSrc, 1, IntVect::Zero, dataFact);
+
+  a_data.define(a_grids, 1, dataGhost, dataFact);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    dataSrc[din] = ebislSrc[din].getEBData();
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    const Box localBox = grow(a_grids[din], a_dataGhost) & a_domain;
+
+    a_data[din].defineVoFData(a_graph[din], localBox);
+    a_data[din].defineFaceData(a_graph[din], localBox);
+  }
+
+  dataSrc.copyTo(interv, a_data, interv);
 }
 
 void
@@ -510,6 +819,9 @@ PhaseRealm::defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgG
   m_mgLevelGrids.resize(0);
   m_mgLevelGridsCoFi.resize(0);
   m_mgCoarAve.resize(0);
+  m_mgFinerVoFs.resize(0);
+  m_mgLevelRestrict.resize(0);
+  m_mgLevelProlong.resize(0);
 
   if (m_isDefined && numAmrLevels > 0) {
     CH_assert(numAmrLevels == 1 + m_finestLevel);
@@ -538,7 +850,6 @@ PhaseRealm::defineMultigridLevels(const Vector<Vector<DisjointBoxLayout>>& a_mgG
         m_mgLevelGridsCoFi[lvl][img] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
         coarsen(*m_mgLevelGridsCoFi[lvl][img], *m_mgLevelGrids[lvl][img], mgRefRat);
-        m_mgLevelGridsCoFi[lvl][img]->getEBISL().setMaxRefinementRatio(mgRefRat, &(*m_ebis));
       }
     }
   }
@@ -554,7 +865,8 @@ PhaseRealm::defineMultigridCoarseAverage()
 
   constexpr int mgRefRat = 2;
 
-  const int numAmrLevels = static_cast<int>(m_mgLevelGrids.size());
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
 
   m_mgCoarAve.resize(numAmrLevels);
 
@@ -567,7 +879,128 @@ PhaseRealm::defineMultigridCoarseAverage()
       m_mgCoarAve[lvl][img] = RefCountedPtr<EBCoarAve>(new EBCoarAve(*m_mgLevelGrids[lvl][img],
                                                                      *m_mgLevelGrids[lvl][img + 1],
                                                                      *m_mgLevelGridsCoFi[lvl][img],
+                                                                     *m_mgFinerVoFs[lvl][img],
                                                                      mgRefRat));
+    }
+  }
+}
+
+void
+PhaseRealm::defineMultigridLevelTransfer()
+{
+  CH_TIME("PhaseRealm::defineMultigridLevelTransfer");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridLevelTransfer" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
+
+  m_mgLevelRestrict.resize(numAmrLevels);
+  m_mgLevelProlong.resize(numAmrLevels);
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(m_mgLevelGrids[lvl].size());
+
+    m_mgLevelRestrict[lvl].resize(numMgLevels - 1);
+    m_mgLevelProlong[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      const EBLevelGrid& eblgFine = *m_mgLevelGrids[lvl][img];
+      const EBLevelGrid& eblgCoFi = *m_mgLevelGridsCoFi[lvl][img];
+      const EBLevelGrid& eblgCoar = *m_mgLevelGrids[lvl][img + 1];
+
+      m_mgLevelRestrict[lvl][img] = RefCountedPtr<EBMGRestrict>(
+        new EBMGRestrict(eblgFine, eblgCoFi, eblgCoar, *m_mgFinerVoFs[lvl][img], mgRefRat));
+      m_mgLevelProlong[lvl][img] = RefCountedPtr<EBMGProlong>(new EBMGProlong(eblgFine, eblgCoFi, eblgCoar, mgRefRat));
+    }
+  }
+}
+
+void
+PhaseRealm::defineFinerVoFs(const int a_lmin)
+{
+  CH_TIME("PhaseRealm::defineFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineFinerVoFs" << endl;
+  }
+
+  m_finerVoFs.resize(1 + m_finestLevel);
+
+  for (int lvl = std::max(1, a_lmin); lvl <= m_finestLevel; lvl++) {
+    m_finerVoFs[lvl - 1] = RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>(
+      new LayoutData<BaseIVFAB<Vector<VolIndex>>>());
+
+    this->fillFinerVoFs(*m_finerVoFs[lvl - 1], *m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
+  }
+}
+
+void
+PhaseRealm::defineMultigridFinerVoFs()
+{
+  CH_TIME("PhaseRealm::defineMultigridFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMultigridFinerVoFs" << endl;
+  }
+
+  constexpr int mgRefRat = 2;
+
+  // Only multigrid solvers use this, so it stays empty unless one registered the multigrid operator.
+  const int numAmrLevels = this->queryOperator(s_eb_multigrid) ? static_cast<int>(m_mgLevelGrids.size()) : 0;
+
+  m_mgFinerVoFs.resize(numAmrLevels);
+
+  for (int lvl = 0; lvl < numAmrLevels; lvl++) {
+    const int numMgLevels = static_cast<int>(m_mgLevelGrids[lvl].size());
+
+    m_mgFinerVoFs[lvl].resize(numMgLevels - 1);
+
+    for (int img = 0; img < numMgLevels - 1; img++) {
+      m_mgFinerVoFs[lvl][img] = RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>(
+        new LayoutData<BaseIVFAB<Vector<VolIndex>>>());
+
+      this->fillFinerVoFs(*m_mgFinerVoFs[lvl][img], *m_mgLevelGridsCoFi[lvl][img], *m_mgLevelGrids[lvl][img], mgRefRat);
+    }
+  }
+}
+
+void
+PhaseRealm::fillFinerVoFs(LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                          const EBLevelGrid&                       a_eblgCoFi,
+                          const EBLevelGrid&                       a_eblgFine,
+                          const int                                a_refRat) const
+{
+  CH_TIME("PhaseRealm::fillFinerVoFs");
+  if (m_verbose) {
+    pout() << "PhaseRealm::fillFinerVoFs" << endl;
+  }
+
+  const DisjointBoxLayout& dblCoFi   = a_eblgCoFi.getDBL();
+  const EBISLayout&        ebislCoFi = a_eblgCoFi.getEBISL();
+  const EBISLayout&        ebislFine = a_eblgFine.getEBISL();
+
+  a_finerVoFs.define(dblCoFi);
+
+  const DataIterator& dit  = dblCoFi.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisBoxCoFi = ebislCoFi[din];
+    const Box      region      = VofUtils::getCoarseCellsWithAllFinerCells(ebislFine[din].getRegion(), a_refRat) &
+                       ebisBoxCoFi.getRegion();
+    const IntVectSet irregCells = ebisBoxCoFi.getIrregIVS(region);
+
+    BaseIVFAB<Vector<VolIndex>>& finerVoFs = a_finerVoFs[din];
+
+    finerVoFs.define(irregCells, ebisBoxCoFi.getEBGraph(), 1);
+
+    for (VoFIterator vofit(irregCells, ebisBoxCoFi.getEBGraph()); vofit.ok(); ++vofit) {
+      finerVoFs(vofit(), 0) = VofUtils::getFinerVoFs(vofit(), ebislFine, din, a_refRat);
     }
   }
 }
@@ -810,8 +1243,11 @@ PhaseRealm::defineEBCoarAve(const int a_lmin)
       const bool hasCoar = lvl > 0;
 
       if (hasCoar) {
-        m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(
-          new EBCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl - 1], m_refinementRatios[lvl - 1]));
+        m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(new EBCoarAve(*m_eblg[lvl],
+                                                                *m_eblg[lvl - 1],
+                                                                *m_eblgCoFi[lvl - 1],
+                                                                *m_finerVoFs[lvl - 1],
+                                                                m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -828,6 +1264,8 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
   const bool doThisOperator = this->queryOperator(s_eb_multigrid);
 
   m_multigridInterpolator.resize(1 + m_finestLevel);
+  m_mgRestrict.resize(1 + m_finestLevel);
+  m_mgProlong.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
 
@@ -851,6 +1289,12 @@ PhaseRealm::defineEBMultigrid(const int a_lmin)
                                                   m_multigridInterpolationRadius,
                                                   m_multigridInterpolationOrder,
                                                   m_multigridInterpolationWeight));
+
+        // Restriction onto the coarsened fine grids, and prolongation from the coarse level.
+        m_mgRestrict[lvl] = RefCountedPtr<EBMGRestrict>(
+          new EBMGRestrict(eblgFine, eblgCoFi, eblgCoFi, *m_finerVoFs[lvl - 1], m_refinementRatios[lvl - 1]));
+        m_mgProlong[lvl] = RefCountedPtr<EBMGProlong>(
+          new EBMGProlong(eblgFine, eblgCoFi, eblgCoar, m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -910,7 +1354,11 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
       // Interpolator for filling data on level l from level l-1 lives on level l
       if (hasCoar) {
         m_ebFineInterp[lvl] = RefCountedPtr<EBCoarseToFineInterp>(
-          new EBCoarseToFineInterp(*m_eblg[lvl], *m_eblgCoFi[lvl - 1], *m_eblg[lvl - 1], m_refinementRatios[lvl - 1]));
+          new EBCoarseToFineInterp(*m_eblg[lvl],
+                                   *m_eblgCoFi[lvl - 1],
+                                   *m_eblg[lvl - 1],
+                                   m_finerVoFs[lvl - 1],
+                                   m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -941,7 +1389,7 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
       // Flux register for matching fluxes between level l and level l+1 (the fine level) lives on level l
       if (hasFine) {
         m_ebReflux[lvl] = RefCountedPtr<EBReflux>(
-          new EBReflux(*m_eblg[lvl], *m_eblg[lvl + 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl]));
+          new EBReflux(*m_eblg[lvl], *m_eblg[lvl + 1], *m_eblgCoFi[lvl], *m_finerVoFs[lvl], m_refinementRatios[lvl]));
       }
     }
   }
@@ -1027,6 +1475,7 @@ PhaseRealm::defineMassRedistOper(const int a_lmin, const int /*a_regsize*/)
                                  eblgCoarsened,
                                  eblg,
                                  eblgRefined,
+                                 hasFine ? m_fiCoFineCells[lvl + 1] : RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr),
                                  eblgFine,
                                  refToCoar,
                                  refToFine,
@@ -1044,7 +1493,7 @@ PhaseRealm::defineParticleMesh()
   }
 
   m_particleMesh.define(m_eblg, m_refinementRatios, m_dx, m_probLo, m_numGhostCells, m_finestLevel);
-  m_surfaceDeposition.define(m_eblg, m_eblgCoFi, m_eblgFiCo, m_refinementRatios, m_dx, m_probLo, m_finestLevel, 1);
+  m_surfaceDeposition.define(m_eblg, m_eblgCoFi, m_finerVoFs, m_refinementRatios, m_dx, m_probLo, m_finestLevel, 1);
 }
 
 void
@@ -1742,15 +2191,17 @@ PhaseRealm::defineGradSten(const int /*a_lmin*/)
       const int order  = 2;
       const int weight = 1;
 
-      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(new EBGradient(eblg,
-                                                                   eblgFine,
-                                                                   eblgFiCo,
-                                                                   hasFine,
-                                                                   m_dx[lvl],
-                                                                   refRat,
-                                                                   order,
-                                                                   weight,
-                                                                   m_numGhostCells * IntVect::Unit));
+      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(
+        new EBGradient(eblg,
+                       eblgFine,
+                       eblgFiCo,
+                       hasFine ? m_fiCoFineCells[lvl + 1] : RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr),
+                       hasFine,
+                       m_dx[lvl],
+                       refRat,
+                       order,
+                       weight,
+                       m_numGhostCells * IntVect::Unit));
     }
   }
 }
@@ -1853,16 +2304,70 @@ PhaseRealm::getMultigridLevelGrids() const
   return m_mgLevelGrids;
 }
 
-const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-PhaseRealm::getMultigridLevelGridsCoFi() const
-{
-  return m_mgLevelGridsCoFi;
-}
-
 const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
 PhaseRealm::getMultigridCoarseAverage() const
 {
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridCoarseAverage - operator not registered!");
+  }
+
   return m_mgCoarAve;
+}
+
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+PhaseRealm::getFinerVoFs() const
+{
+  return m_finerVoFs;
+}
+
+const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
+PhaseRealm::getMultigridFinerVoFs() const
+{
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridFinerVoFs - operator not registered!");
+  }
+
+  return m_mgFinerVoFs;
+}
+
+const Vector<RefCountedPtr<EBMGRestrict>>&
+PhaseRealm::getMultigridRestriction() const
+{
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridRestriction - operator not registered!");
+  }
+
+  return m_mgRestrict;
+}
+
+const Vector<RefCountedPtr<EBMGProlong>>&
+PhaseRealm::getMultigridProlongation() const
+{
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridProlongation - operator not registered!");
+  }
+
+  return m_mgProlong;
+}
+
+const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+PhaseRealm::getMultigridLevelRestriction() const
+{
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridLevelRestriction - operator not registered!");
+  }
+
+  return m_mgLevelRestrict;
+}
+
+const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+PhaseRealm::getMultigridLevelProlongation() const
+{
+  if (!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getMultigridLevelProlongation - operator not registered!");
+  }
+
+  return m_mgLevelProlong;
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&
