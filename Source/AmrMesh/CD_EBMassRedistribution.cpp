@@ -28,19 +28,27 @@ EBMassRedistribution::EBMassRedistribution() noexcept : m_isDefined(false)
   CH_TIME("EBMassRedistribution::EBMassRedistribution(weak)");
 }
 
-EBMassRedistribution::EBMassRedistribution(const EBLevelGrid& a_eblgCoar,
-                                           const EBLevelGrid& a_eblgCoarsened,
-                                           const EBLevelGrid& a_eblg,
-                                           const EBLevelGrid& a_eblgRefined,
-                                           const EBLevelGrid& a_eblgFine,
-                                           const int          a_refToCoar,
-                                           const int          a_refToFine,
-                                           const int          a_redistRadius) noexcept
+EBMassRedistribution::EBMassRedistribution(const EBLevelGrid&                             a_eblgCoar,
+                                           const EBLevelGrid&                             a_eblgCoarsened,
+                                           const EBLevelGrid&                             a_eblg,
+                                           const EBLevelGrid&                             a_eblgRefined,
+                                           const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fineCellsRefined,
+                                           const EBLevelGrid&                             a_eblgFine,
+                                           const int                                      a_refToCoar,
+                                           const int                                      a_refToFine,
+                                           const int                                      a_redistRadius) noexcept
 {
   CH_TIME("EBMassRedistribution::EBMassRedistribution(full)");
 
-  this
-    ->define(a_eblgCoar, a_eblgCoarsened, a_eblg, a_eblgRefined, a_eblgFine, a_refToCoar, a_refToFine, a_redistRadius);
+  this->define(a_eblgCoar,
+               a_eblgCoarsened,
+               a_eblg,
+               a_eblgRefined,
+               a_fineCellsRefined,
+               a_eblgFine,
+               a_refToCoar,
+               a_refToFine,
+               a_redistRadius);
 }
 
 EBMassRedistribution::~EBMassRedistribution() noexcept
@@ -49,14 +57,15 @@ EBMassRedistribution::~EBMassRedistribution() noexcept
 }
 
 void
-EBMassRedistribution::define(const EBLevelGrid& a_eblgCoar,
-                             const EBLevelGrid& a_eblgCoarsened,
-                             const EBLevelGrid& a_eblg,
-                             const EBLevelGrid& a_eblgRefined,
-                             const EBLevelGrid& a_eblgFine,
-                             const int          a_refToCoar,
-                             const int          a_refToFine,
-                             const int          a_redistRadius) noexcept
+EBMassRedistribution::define(const EBLevelGrid&                             a_eblgCoar,
+                             const EBLevelGrid&                             a_eblgCoarsened,
+                             const EBLevelGrid&                             a_eblg,
+                             const EBLevelGrid&                             a_eblgRefined,
+                             const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fineCellsRefined,
+                             const EBLevelGrid&                             a_eblgFine,
+                             const int                                      a_refToCoar,
+                             const int                                      a_refToFine,
+                             const int                                      a_redistRadius) noexcept
 {
   CH_TIME("EBMassRedistribution::define");
 
@@ -103,20 +112,12 @@ EBMassRedistribution::define(const EBLevelGrid& a_eblgCoar,
     m_refToFine = a_refToFine;
     m_hasFine   = true;
 
-    // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
-    // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
-    // data in a larger radius than what is available in the input arguments.
-    if (m_refToFine * m_redistRadius > a_eblgRefined.getGhost()) {
-      DisjointBoxLayout dblRefined;
+    // The redistribution reaches the fine cells of coarse cells up to m_redistRadius outside the box.
+    CH_assert(a_eblgRefined.isDefined());
+    CH_assert(a_eblgRefined.getGhost() >= m_refToFine * m_redistRadius);
 
-      refine(dblRefined, m_eblg.getDBL(), m_refToFine);
-      m_eblgRefined.define(dblRefined, m_eblgFine.getDomain(), m_refToFine * m_redistRadius, m_eblg.getEBIS());
-    }
-    else {
-      CH_assert(a_eblgRefined.isDefined());
-
-      m_eblgRefined = a_eblgRefined;
-    }
+    m_eblgRefined      = a_eblgRefined;
+    m_fineCellsRefined = a_fineCellsRefined;
   }
 
   this->defineStencils();
@@ -237,7 +238,17 @@ EBMassRedistribution::defineStencils() noexcept
         if (!(validCells(curIV))) {
           CH_assert(m_hasFine);
 
-          const Vector<VolIndex>& refinedVoFs = ebisl.refine(curVoF, m_refToFine, din);
+          const Vector<VolIndex> refinedVoFs = VofUtils::getFinerVoFs(curVoF,
+                                                                      m_eblgRefined.getEBISL(),
+                                                                      din,
+                                                                      m_refToFine);
+
+#ifndef NDEBUG
+          // The refined grids hold meaningful geometry only in the fine level's cells.
+          for (int k = 0; k < refinedVoFs.size(); k++) {
+            CH_assert((*m_fineCellsRefined)[din](refinedVoFs[k].gridIndex(), 0));
+          }
+#endif
 
           fineVoFs.append(refinedVoFs);
 

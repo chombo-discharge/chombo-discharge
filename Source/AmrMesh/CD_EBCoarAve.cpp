@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_EBCoarAve.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -35,49 +36,24 @@ EBCoarAve::~EBCoarAve() noexcept
   m_ebCopiers.clear();
 }
 
-EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
-                     const DisjointBoxLayout& a_dblCoar,
-                     const EBISLayout&        a_ebislFine,
-                     const EBISLayout&        a_ebislCoar,
-                     const ProblemDomain&     a_domainCoar,
-                     const int&               a_refRat,
-                     const EBIndexSpace*      a_ebisPtr) noexcept
-{
-  CH_TIME("EBCoarAve::EBCoarAve(DBL version)");
-
-  CH_assert(a_ebisPtr->isDefined());
-  CH_assert(a_refRat >= 2);
-  CH_assert(a_refRat % 2 == 0);
-
-  ProblemDomain domainFine = a_domainCoar;
-  domainFine.refine(a_refRat);
-
-  EBLevelGrid eblgFine(a_dblFine, a_ebislFine, domainFine);
-  EBLevelGrid eblgCoar(a_dblCoar, a_ebislCoar, a_domainCoar);
-  EBLevelGrid eblgCoFi;
-
-  coarsen(eblgCoFi, eblgFine, a_refRat);
-  eblgCoFi.getEBISL().setMaxRefinementRatio(a_refRat, a_ebisPtr);
-
-  this->define(eblgFine, eblgCoar, eblgCoFi, a_refRat);
-}
-
-EBCoarAve::EBCoarAve(const EBLevelGrid& a_eblgFine,
-                     const EBLevelGrid& a_eblgCoar,
-                     const EBLevelGrid& a_eblgCoFi,
-                     const int&         a_refRat) noexcept
+EBCoarAve::EBCoarAve(const EBLevelGrid&                             a_eblgFine,
+                     const EBLevelGrid&                             a_eblgCoar,
+                     const EBLevelGrid&                             a_eblgCoFi,
+                     const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                     const int&                                     a_refRat) noexcept
   : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve(EBLevelGrid version)");
 
-  this->define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_refRat);
+  this->define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_finerVoFs, a_refRat);
 }
 
 void
-EBCoarAve::define(const EBLevelGrid& a_eblgFine,
-                  const EBLevelGrid& a_eblgCoar,
-                  const EBLevelGrid& a_eblgCoFi,
-                  const int&         a_refRat) noexcept
+EBCoarAve::define(const EBLevelGrid&                             a_eblgFine,
+                  const EBLevelGrid&                             a_eblgCoar,
+                  const EBLevelGrid&                             a_eblgCoFi,
+                  const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                  const int&                                     a_refRat) noexcept
 {
   CH_TIME("EBCoarAve::define");
 
@@ -106,16 +82,16 @@ EBCoarAve::define(const EBLevelGrid& a_eblgFine,
     m_irregSetsCoFi[din] = m_eblgCoFi.getEBISL()[din].getIrregIVS(dblCoFi[din]);
   }
 
-  this->defineCellStencils();
-  this->defineFaceStencils();
-  this->defineEBStencils();
+  this->defineCellStencils(a_finerVoFs);
+  this->defineFaceStencils(a_finerVoFs);
+  this->defineEBStencils(a_finerVoFs);
   this->defineBuffers();
 
   m_isDefined = true;
 }
 
 void
-EBCoarAve::defineCellStencils() noexcept
+EBCoarAve::defineCellStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept
 {
   CH_TIME("EBCoarAve::defineCellStencils");
 
@@ -155,8 +131,8 @@ EBCoarAve::defineCellStencils() noexcept
     harmonicStencils.define(m_irregSetsCoFi[din], ebGraphCoar, 1);
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
-      const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
-      const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Real             kappaC   = ebisBoxCoar.volFrac(coarVoF);
+      const Vector<VolIndex> fineVoFs = VofUtils::getStoredFinerVoFs(coarVoF, ebisBoxCoar, a_finerVoFs[din], m_refRat);
       const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
@@ -191,7 +167,7 @@ EBCoarAve::defineCellStencils() noexcept
 }
 
 void
-EBCoarAve::defineFaceStencils() noexcept
+EBCoarAve::defineFaceStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept
 {
   CH_TIME("EBCoarAve::defineFaceStencils");
 
@@ -238,7 +214,12 @@ EBCoarAve::defineFaceStencils() noexcept
 
       auto buildStencils = [&](const FaceIndex& coarFace) -> void {
         const Real              areaCoar     = ebisBoxCoar.areaFrac(coarFace);
-        const Vector<FaceIndex> fineFaces    = ebislCoar.refine(coarFace, m_refRat, din);
+        const Vector<FaceIndex> fineFaces    = VofUtils::getStoredFinerFaces(coarFace,
+                                                                          ebisBoxCoar,
+                                                                          a_finerVoFs[din],
+                                                                          ebislFine,
+                                                                          din,
+                                                                          m_refRat);
         const int               numFineFaces = static_cast<int>(fineFaces.size());
 
         FaceStencil& arithSten = arithmeticStencils(coarFace, 0);
@@ -273,7 +254,7 @@ EBCoarAve::defineFaceStencils() noexcept
 }
 
 void
-EBCoarAve::defineEBStencils() noexcept
+EBCoarAve::defineEBStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept
 {
   CH_TIME("EBCoarAve::defineEBStencils");
 
@@ -312,7 +293,10 @@ EBCoarAve::defineEBStencils() noexcept
 
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             areaCoar    = ebisBoxCoar.bndryArea(coarVoF);
-      const Vector<VolIndex> refinedVoFs = ebislCoar.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> refinedVoFs = VofUtils::getStoredFinerVoFs(coarVoF,
+                                                                        ebisBoxCoar,
+                                                                        a_finerVoFs[din],
+                                                                        m_refRat);
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& harmSten  = harmonicStencils(coarVoF, 0);

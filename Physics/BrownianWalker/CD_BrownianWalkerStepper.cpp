@@ -794,7 +794,9 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   // Grid information.
   const Vector<RefCountedPtr<EBLevelGrid>>& eblg     = m_amr->getEBLevelGrid(a_realm, m_phase);
   const Vector<RefCountedPtr<EBLevelGrid>>& eblgCoFi = m_amr->getEBLevelGridCoFi(a_realm, m_phase);
-  const Vector<int>&                        refRat   = m_amr->getRefinementRatios();
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>& finerVoFs = m_amr->getFinerVoFs(a_realm,
+                                                                                                        m_phase);
+  const Vector<int>&                                                    refRat    = m_amr->getRefinementRatios();
 
   // Copy old mesh data to new mesh data.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
@@ -804,7 +806,11 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   // Now regrid where we got new grids.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
     if (lvl > 0) {
-      EBCoarseToFineInterp fineInterp(*eblg[lvl], *eblgCoFi[lvl - 1], *eblg[lvl - 1], refRat[lvl - 1]);
+      EBCoarseToFineInterp fineInterp(*eblg[lvl],
+                                      *eblgCoFi[lvl - 1],
+                                      *eblg[lvl - 1],
+                                      finerVoFs[lvl - 1],
+                                      refRat[lvl - 1]);
 
       fineInterp.interpolate(*newParticlesPerCell[lvl],
                              *newParticlesPerCell[lvl - 1],

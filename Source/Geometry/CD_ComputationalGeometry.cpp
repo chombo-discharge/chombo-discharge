@@ -57,6 +57,8 @@ ComputationalGeometry::ComputationalGeometry()
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
+    m_electrodeLevel(0),
+    m_dielectricLevel(0),
     m_minBlockSize(0),
     m_maxBlockSize(0),
     m_profile(false),
@@ -246,6 +248,7 @@ ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 
 void
 ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
+                                       const ProblemDomain& a_finestMeshDomain,
                                        const RealVect&      a_probLo,
                                        const Real           a_finestDx,
                                        const int            a_nCellMax,
@@ -260,6 +263,11 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
   // through grown grid patches when it determines if a grid patch is irregular or not.
   m_maxGhostEB = a_maxGhostEB;
+
+  if (m_generator != Generator::PolyhedralShop && a_finestMeshDomain.domainBox() != a_finestDomain.domainBox()) {
+    MayDay::Error("ComputationalGeometry::buildGeometries - only the polyhedral generator supports mesh levels finer "
+                  "than the geometry's finest level");
+  }
 
   // Build the composite implicit functions and then the GeometryService* objects which can be passed to Chombo.
   this->buildImplicitFunctions();
@@ -281,10 +289,29 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       MayDay::Error("ComputationalGeometry::buildGeometries - the geometry's finest domain is not the finest domain");
     }
 
-    Vector<ProblemDomain> domains(numLevels);
+    // The mesh levels finer than the geometry's finest domain go first, each a refinement by two of the next, so
+    // that every refinement the mesh makes of it is a level of the index space.
+    Vector<ProblemDomain> domains;
 
-    for (int lvl = 0; lvl < numLevels; lvl++) {
-      domains[numLevels - 1 - lvl] = m_domains[lvl];
+    ProblemDomain finer = a_finestDomain;
+    Real          dx    = a_finestDx;
+
+    while (finer.domainBox().size(0) < a_finestMeshDomain.domainBox().size(0)) {
+      finer.refine(2);
+      dx /= 2.0;
+
+      domains.push_back(finer);
+    }
+
+    if (finer.domainBox() != a_finestMeshDomain.domainBox()) {
+      MayDay::Error("ComputationalGeometry::buildGeometries - the finest mesh domain is not a refinement by a power of "
+                    "two of the geometry's finest domain");
+    }
+
+    std::reverse(domains.stdVector().begin(), domains.stdVector().end());
+
+    for (int lvl = numLevels - 1; lvl >= 0; lvl--) {
+      domains.push_back(m_domains[lvl]);
     }
 
     Vector<EBISLayout::Filler> fillers(2);
@@ -306,7 +333,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       };
     }
 
-    m_multifluidIndexSpace->define(domains, a_probLo, a_finestDx, fillers);
+    m_multifluidIndexSpace->define(domains, a_probLo, dx, fillers);
   }
   else {
     // Define the multifluid index space.
@@ -376,6 +403,8 @@ ComputationalGeometry::buildImplicitFunctions()
 void
 ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const ProblemDomain& a_stopDomain,
+                                 const ProblemDomain& a_electrodeDomain,
+                                 const ProblemDomain& a_dielectricDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_startDx,
                                  const Real           a_refineAngle,
@@ -475,9 +504,16 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
   CH_assert(m_domains.size() == m_dx.size());
 
+  m_electrodeLevel  = this->getLevel(a_electrodeDomain);
+  m_dielectricLevel = this->getLevel(a_dielectricDomain);
+
+  if (m_electrodeLevel < 0 || m_dielectricLevel < 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the electrode or dielectric domain is not one of the levels");
+  }
+
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(8, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(9, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -508,7 +544,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //      normal turns by more than m_refineAngle between neighbouring cells near the surface; otherwise it is a
   //      leaf and nothing is built above it (buildFinerLevels, exceedsCurvature).
   //   2. Tiles, once: the boxes irregular in either phase on every level are tiled by TiledMeshRefine into a
-  //      properly nested set (makeTiles). This is the coverage the simulation regrids onto.
+  //      properly nested set (makeTiles). The graph of each level is built on them.
   //   3. Every tile lies inside a box or above a leaf; per phase it inherits a regular or covered box's tag and
   //      is otherwise classified by that phase's implicit function at its own level (classifyTiles).
   //   4. Every hit box is cut down to what the tiles left of it (decimateBoxes).
@@ -577,6 +613,58 @@ int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_domains.size();
+}
+
+bool
+ComputationalGeometry::holdsConductorCell(const Box& a_box, const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::holdsConductorCell");
+
+  const RefCountedPtr<BaseIF>& gasFunction   = this->getImplicitFunction(phase::gas);
+  const RefCountedPtr<BaseIF>& solidFunction = this->getImplicitFunction(phase::solid);
+
+  if (gasFunction.isNull() || solidFunction.isNull()) {
+    return true;
+  }
+
+  const Real dx    = m_dx[a_level];
+  const Box  valid = a_box & m_domains[a_level].domainBox();
+
+  // Whether each cell of the box is cut by a phase's surface, decided as the polyhedral shop decides it.
+  const auto cutCells = [&](BaseFab<int>& a_isCut, const BaseIF& a_function) -> void {
+    BaseFab<Real> nodeValues;
+    BaseFab<Real> intercept[SpaceDim];
+
+    PolyhedralEB::fillNodeValues(nodeValues, a_function, valid, m_probLo, dx);
+    PolyhedralEB::defineIntercepts(intercept, valid);
+
+    a_isCut.define(valid, 1);
+    a_isCut.setVal(0);
+
+    for (BoxIterator bit(valid); bit.ok(); ++bit) {
+      PolyhedralEB::CutCellSurface surface;
+
+      PolyhedralEB::buildSurface(intercept, surface, a_function, nodeValues, bit(), m_probLo, dx);
+
+      if (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Cut) {
+        a_isCut(bit(), 0) = 1;
+      }
+    }
+  };
+
+  BaseFab<int> gasCut;
+  BaseFab<int> solidCut;
+
+  cutCells(gasCut, *gasFunction);
+  cutCells(solidCut, *solidFunction);
+
+  for (BoxIterator bit(valid); bit.ok(); ++bit) {
+    if (gasCut(bit(), 0) != solidCut(bit(), 0)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 GeometryService::InOut
@@ -1042,6 +1130,11 @@ ComputationalGeometry::irregCells(const phase::which_phase a_phase, const Proble
       MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the geometry's");
     }
 
+    // A level no tile was split down to resolves no surface of its own.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return IntVectSet();
+    }
+
     const LevelData<EBGraph>& graph = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel);
     const DisjointBoxLayout&  grids = graph.disjointBoxLayout();
 
@@ -1094,6 +1187,11 @@ ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const Proble
 
     if (geometryLevel < 0) {
       MayDay::Error("ComputationalGeometry::irregGrids - the domain is not one of the geometry's");
+    }
+
+    // A level no tile was split down to resolves no surface of its own, and holds no grids of it.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return DisjointBoxLayout(Vector<Box>(), Vector<int>(), a_domain);
     }
 
     return m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
@@ -1324,6 +1422,28 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
 
       if (gasDoubled || solidDoubled) {
         reason = SplitReason::DoubleCrossing;
+      }
+    }
+
+    // A box holding a surface the geometric tags refine further is split, so that the geometry is resolved wherever
+    // they refine. Driver::getGeometryTags tags as conductor every cell cut in exactly one phase, and as dielectric
+    // every cell cut in the solid phase. A box cut in both phases is decided cell by cell from the surfaces as they
+    // cut the cells, before the fill rule settles them; where the fill rule covers a cell in one phase, the tags can
+    // refine a surface that this rule left whole.
+    if (reason == SplitReason::None) {
+      const bool gasCut   = a_gasTypes[i] == GeometryService::Irregular;
+      const bool solidCut = a_solidTypes[i] == GeometryService::Irregular;
+
+      const bool dielectric = solidCut && a_level < m_dielectricLevel;
+
+      bool conductor = false;
+
+      if (a_level < m_electrodeLevel && (gasCut || solidCut)) {
+        conductor = (gasCut != solidCut) || this->holdsConductorCell(a_boxes[i], a_level);
+      }
+
+      if (dielectric || conductor) {
+        reason = SplitReason::Depth;
       }
     }
 
@@ -2308,7 +2428,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 6 : 7]++;
+      m_splitCounts[lvl][tagged ? 7 : 8]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -2462,10 +2582,10 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial/doubled/twist " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2]
-           << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5]
-           << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting " << m_splitCounts[lvl][6] << "/"
-           << m_splitCounts[lvl][7] << endl;
+           << "; split interior/ring/medial/doubled/twist/depth " << m_splitCounts[lvl][1] << "/"
+           << m_splitCounts[lvl][2] << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/"
+           << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << " (leaves " << m_splitCounts[lvl][0]
+           << "); tiles tagged/nesting " << m_splitCounts[lvl][7] << "/" << m_splitCounts[lvl][8] << endl;
   }
 }
 

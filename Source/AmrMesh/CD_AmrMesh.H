@@ -1596,18 +1596,6 @@ public:
   regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /**
-   * @brief Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than
-   * generated.
-   * @details a_boxes[lvl] are the boxes on level lvl; level 0 is ignored and always the domain split of the
-   * coarsest domain. The finest level is the last level with boxes, capped by the AMR and simulation depths. The
-   * boxes must be disjoint on each level and properly nested; nothing here checks that.
-   * @param[in] a_boxes Boxes per level.
-   * @param[in] a_lmin  Coarsest grid level allowed to change.
-   */
-  void
-  regridAmr(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
-
-  /**
    * @brief Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.
    * @param[in] a_realm Realm name
    * @param[in] a_procs Processor IDs
@@ -1664,18 +1652,29 @@ public:
   getFinestLevel() const;
 
   /**
-   * @brief Get maximum permitted amr depth.
-   * @return Maximum AMR depth
+   * @brief Get the finest level the geometry is resolved on, AmrMesh.max_eb_depth.
+   * @details Levels finer than this, up to max_sim_depth, have their geometry cut from the resolved levels.
+   * @return Finest level the geometry is resolved on
    */
   int
-  getMaxAmrDepth() const;
+  getMaxEbDepth() const;
 
   /**
    * @brief Get maximum permitted simulation depth.
+   * @details It may be finer than max_eb_depth, the finest level the geometry is resolved on. The geometry of the
+   * finer levels is then cut from the resolved ones.
    * @return Maximum simulation depth
    */
   int
   getMaxSimulationDepth() const;
+
+  /**
+   * @brief Get the finest level AmrMesh has a domain for.
+   * @details The larger of max_eb_depth and max_sim_depth as they were when the domains were built. No level is finer.
+   * @return Finest level with a domain
+   */
+  int
+  getMaxDomainDepth() const;
 
   /**
    * @brief Get the minimum block size (i.e. the smallest possible box / tile size).
@@ -1759,8 +1758,8 @@ public:
   getNumberOfEbGhostCells() const;
 
   /**
-   * @brief Get resolution on the finest grid level.
-   * @return Grid spacing on finest level
+   * @brief Get resolution on level max_eb_depth, the finest level the geometry is resolved on.
+   * @return Grid spacing on level max_eb_depth
    */
   Real
   getFinestDx() const;
@@ -1780,8 +1779,8 @@ public:
   getProbHi() const;
 
   /**
-   * @brief Get finest domain
-   * @return Problem domain on the finest level
+   * @brief Get the domain of level max_eb_depth, the finest level the geometry is resolved on.
+   * @return Problem domain on level max_eb_depth
    */
   ProblemDomain
   getFinestDomain() const;
@@ -1874,6 +1873,31 @@ public:
    */
   void
   registerParticleGhostMask(const std::string& a_realm, const int a_width);
+
+  /**
+   * @brief Register a particle ghost-mask width on a realm and build its masks now if they do not exist yet.
+   * @details See Realm::defineParticleGhostMask.
+   * @param[in] a_realm Realm name
+   * @param[in] a_width Ghost width (cells). Must be > 0.
+   */
+  void
+  defineParticleGhostMask(const std::string& a_realm, const int a_width);
+
+  /**
+   * @brief Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs.
+   * @details Halo and Transition deposition copy coarser particles into the finer patches through these masks, with
+   * widths that depend on the deposition kernel and the refinement ratios (see
+   * EBAMRParticleMesh::getCoarseToFineMaskWidths). Interp and HaloNGP need none. Call before regridding, with the
+   * settings the deposits will use. Aborts if a width is not smaller than min_block_size, and on a periodic domain
+   * whenever masks are needed, since the masks do not wrap around periodic boundaries.
+   * @param[in] a_realm                Realm name
+   * @param[in] a_depositionType       Deposition kernel.
+   * @param[in] a_coarseFineDeposition Coarse-fine handling.
+   */
+  void
+  registerParticleDeposition(const std::string&         a_realm,
+                             const DepositionType       a_depositionType,
+                             const CoarseFineDeposition a_coarseFineDeposition);
 
   /**
    * @brief Get the same-level particle ghost mask on a realm for a registered width.
@@ -1982,16 +2006,6 @@ public:
   getMultigridLevelGrids(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels for a Realm and phase.
-   * @details See Realm::getMultigridLevelGridsCoFi().
-   * @param[in] a_realm Realm name
-   * @param[in] a_phase Phase (gas or solid)
-   * @return The coarsened grids between consecutive multigrid levels.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi(const std::string& a_realm, const phase::which_phase a_phase) const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels for a Realm and phase.
    * @details See Realm::getMultigridCoarseAverage().
    * @param[in] a_realm Realm name
@@ -2002,6 +2016,56 @@ public:
   getMultigridCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a Realm and phase.
+   * @details See Realm::getFinerVoFs(). Entry lvl lives on getEBLevelGridCoFi()[lvl] and is defined after regridBase.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels for a Realm and phase.
+   * @details See Realm::getMultigridRestriction().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels for a Realm and phase.
+   * @details See Realm::getMultigridProlongation().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelRestriction().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels for a Realm and phase.
+   * @details See Realm::getMultigridLevelProlongation().
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
    * @brief Get the multifluid multigrid levels for a Realm.
    * @details See Realm::getMultigridMFLevelGrids().
    * @param[in] a_realm Realm name
@@ -2009,15 +2073,6 @@ public:
    */
   const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
   getMultigridMFLevelGrids(const std::string& a_realm) const;
-
-  /**
-   * @brief Get the multifluid coarsened grids between consecutive multigrid levels for a Realm.
-   * @details See Realm::getMultigridMFLevelGridsCoFi().
-   * @param[in] a_realm Realm name
-   * @return The multifluid coarsened grids between consecutive multigrid levels.
-   */
-  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-  getMultigridMFLevelGridsCoFi(const std::string& a_realm) const;
 
   /**
    * @brief Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a Realm and phase.
@@ -2423,9 +2478,9 @@ protected:
   int m_oldFinestLevel;
 
   /**
-   * @brief Maximum amr depth
+   * @brief Finest level the geometry is resolved on, AmrMesh.max_eb_depth.
    */
-  int m_maxAmrDepth;
+  int m_maxEbDepth;
 
   /**
    * @brief Maximum allowed depth for simulation
@@ -2586,16 +2641,6 @@ protected:
   buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /**
-   * @brief Build new internal AMR grids from given boxes.
-   * @details Sets m_finestLevel from the boxes and fills m_grids with them, load balanced as the generated grids
-   * are. See regridAmr(Vector<Vector<Box>>, int) for the meaning of a_boxes.
-   * @param[in] a_boxes Boxes per level.
-   * @param[in] a_lmin  Coarsest grid level which changes.
-   */
-  void
-  buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
-
-  /**
    * @brief Load balance new boxes and define m_grids from them, for levels a_lmin through m_finestLevel.
    * @param[in,out] a_boxes Boxes per level, up to at least m_finestLevel; sorted in place.
    * @param[in]     a_lmin  Coarsest grid level which changes; grids below it are kept.
@@ -2634,10 +2679,11 @@ protected:
   parseCoarsestLevelNumCells();
 
   /**
-   * @brief Parse the maximum permitted AMR depth
+   * @brief Parse the finest level the geometry is resolved on, AmrMesh.max_eb_depth.
+   * @details An input that still sets the former AmrMesh.max_amr_depth stops the run, naming the new option.
    */
   void
-  parseMaxAmrDepth();
+  parseMaxEbDepth();
 
   /**
    * @brief Set maximum simulation depth.

@@ -204,6 +204,14 @@ CdrGodunov::allocate()
       if (hasCoar) {
         coarEblg = *eblgs[lvl - 1];
         refRat   = refRatios[lvl - 1];
+
+        // EBAdvectLevelIntegrator fills ghost cells with a fill patch of radius 4 fine cells, which reads the EB ghost
+        // cells that far out on this level and as far as the coarse cells that contain them, plus one for slopes, on
+        // the coarser level.
+        constexpr int fillPatchRadius = 4;
+
+        CH_assert(eblgs[lvl]->getGhost() >= fillPatchRadius);
+        CH_assert(coarEblg.getGhost() >= (fillPatchRadius + refRat - 1) / refRat + 1);
       }
 
       // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter
