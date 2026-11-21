@@ -12,8 +12,12 @@
 
 // Std includes
 #include <algorithm>
-#include <limits>
+#include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <limits>
+#include <random>
+#include <sstream>
 
 // Chombo includes
 #include <BaseFab.H>
@@ -33,6 +37,9 @@
 #include <ComplementIF.H>
 #include <MayDay.H>
 #include <ParmParse.H>
+#ifdef CH_USE_HDF5
+#include <CH_HDF5.H>
+#endif
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -45,6 +52,7 @@
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_CutCellBody.H>
+#include <CD_DischargeIO.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -57,10 +65,14 @@ ComputationalGeometry::ComputationalGeometry()
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
+    m_electrodeLevel(0),
+    m_dielectricLevel(0),
     m_minBlockSize(0),
     m_maxBlockSize(0),
     m_profile(false),
-    m_verbose(false)
+    m_verbose(false),
+    m_readGraph(false),
+    m_graphHandle(nullptr)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -90,6 +102,8 @@ ComputationalGeometry::~ComputationalGeometry()
   if (m_verbose) {
     pout() << "ComputationalGeometry::~ComputationalGeometry()" << endl;
   }
+
+  this->closeGraphFile();
 }
 
 void
@@ -246,6 +260,7 @@ ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 
 void
 ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
+                                       const ProblemDomain& a_finestMeshDomain,
                                        const RealVect&      a_probLo,
                                        const Real           a_finestDx,
                                        const int            a_nCellMax,
@@ -260,6 +275,11 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
   // through grown grid patches when it determines if a grid patch is irregular or not.
   m_maxGhostEB = a_maxGhostEB;
+
+  if (m_generator != Generator::PolyhedralShop && a_finestMeshDomain.domainBox() != a_finestDomain.domainBox()) {
+    MayDay::Error("ComputationalGeometry::buildGeometries - only the polyhedral generator supports mesh levels finer "
+                  "than the geometry's finest level");
+  }
 
   // Build the composite implicit functions and then the GeometryService* objects which can be passed to Chombo.
   this->buildImplicitFunctions();
@@ -281,10 +301,29 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       MayDay::Error("ComputationalGeometry::buildGeometries - the geometry's finest domain is not the finest domain");
     }
 
-    Vector<ProblemDomain> domains(numLevels);
+    // The mesh levels finer than the geometry's finest domain go first, each a refinement by two of the next, so
+    // that every refinement the mesh makes of it is a level of the index space.
+    Vector<ProblemDomain> domains;
 
-    for (int lvl = 0; lvl < numLevels; lvl++) {
-      domains[numLevels - 1 - lvl] = m_domains[lvl];
+    ProblemDomain finer = a_finestDomain;
+    Real          dx    = a_finestDx;
+
+    while (finer.domainBox().size(0) < a_finestMeshDomain.domainBox().size(0)) {
+      finer.refine(2);
+      dx /= 2.0;
+
+      domains.push_back(finer);
+    }
+
+    if (finer.domainBox() != a_finestMeshDomain.domainBox()) {
+      MayDay::Error("ComputationalGeometry::buildGeometries - the finest mesh domain is not a refinement by a power of "
+                    "two of the geometry's finest domain");
+    }
+
+    std::reverse(domains.stdVector().begin(), domains.stdVector().end());
+
+    for (int lvl = numLevels - 1; lvl >= 0; lvl--) {
+      domains.push_back(m_domains[lvl]);
     }
 
     Vector<EBISLayout::Filler> fillers(2);
@@ -306,7 +345,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       };
     }
 
-    m_multifluidIndexSpace->define(domains, a_probLo, a_finestDx, fillers);
+    m_multifluidIndexSpace->define(domains, a_probLo, dx, fillers);
   }
   else {
     // Define the multifluid index space.
@@ -327,6 +366,9 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       delete geoServices[i];
     }
   }
+
+  // The shops have written their graphs to the graph file, or read them from it.
+  this->closeGraphFile();
 }
 
 void
@@ -376,6 +418,8 @@ ComputationalGeometry::buildImplicitFunctions()
 void
 ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const ProblemDomain& a_stopDomain,
+                                 const ProblemDomain& a_electrodeDomain,
+                                 const ProblemDomain& a_dielectricDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_startDx,
                                  const Real           a_refineAngle,
@@ -388,29 +432,76 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     pout() << "ComputationalGeometry::makeGrids" << endl;
   }
 
+  if (m_readGraph) {
+    this->readGrids(a_startDomain,
+                    a_stopDomain,
+                    a_electrodeDomain,
+                    a_dielectricDomain,
+                    a_probLo,
+                    a_startDx,
+                    a_refineAngle,
+                    a_maxGhostEB,
+                    a_minBlockSize,
+                    a_maxBlockSize);
+  }
+  else {
+    this->generateGrids(a_startDomain,
+                        a_stopDomain,
+                        a_electrodeDomain,
+                        a_dielectricDomain,
+                        a_probLo,
+                        a_startDx,
+                        a_refineAngle,
+                        a_maxGhostEB,
+                        a_minBlockSize,
+                        a_maxBlockSize);
+
+    if (!m_graphFile.empty()) {
+      this->writeGrids();
+    }
+  }
+}
+
+void
+ComputationalGeometry::generateGrids(const ProblemDomain& a_startDomain,
+                                     const ProblemDomain& a_stopDomain,
+                                     const ProblemDomain& a_electrodeDomain,
+                                     const ProblemDomain& a_dielectricDomain,
+                                     const RealVect&      a_probLo,
+                                     const Real           a_startDx,
+                                     const Real           a_refineAngle,
+                                     const int            a_maxGhostEB,
+                                     const int            a_minBlockSize,
+                                     const int            a_maxBlockSize)
+{
+  CH_TIME("ComputationalGeometry::generateGrids");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::generateGrids" << endl;
+  }
+
   // Preconditions. Hard aborts rather than assertions: a violation here produces grids the index space would
   // serve silently wrong, and the cost of the check is nothing.
   if (a_startDomain.domainBox().isEmpty()) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the start domain is empty");
+    MayDay::Error("ComputationalGeometry::generateGrids - the start domain is empty");
   }
   if (a_startDx <= 0.0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the grid spacing must be positive");
+    MayDay::Error("ComputationalGeometry::generateGrids - the grid spacing must be positive");
   }
   if (a_refineAngle < 0.0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the refinement angle must not be negative");
+    MayDay::Error("ComputationalGeometry::generateGrids - the refinement angle must not be negative");
   }
   if (a_maxGhostEB < 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the ghost width must not be negative");
+    MayDay::Error("ComputationalGeometry::generateGrids - the ghost width must not be negative");
   }
   if (a_minBlockSize <= 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - AmrMesh.eb_min_block_size must be positive");
+    MayDay::Error("ComputationalGeometry::generateGrids - AmrMesh.eb_min_block_size must be positive");
   }
   if (a_maxBlockSize <= 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - AmrMesh.eb_max_block_size must be positive");
+    MayDay::Error("ComputationalGeometry::generateGrids - AmrMesh.eb_max_block_size must be positive");
   }
   if (a_maxBlockSize % a_minBlockSize != 0) {
     MayDay::Error(
-      "ComputationalGeometry::makeGrids - AmrMesh.eb_max_block_size must be a whole number of eb_min_block_size");
+      "ComputationalGeometry::generateGrids - AmrMesh.eb_max_block_size must be a whole number of eb_min_block_size");
   }
 
   m_minBlockSize = a_minBlockSize;
@@ -418,7 +509,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   // The one-tile nesting buffer between levels has to cover the ghost cells.
   if (m_minBlockSize < 2 * a_maxGhostEB) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the tile size must be at least twice the ghost width");
+    MayDay::Error("ComputationalGeometry::generateGrids - the tile size must be at least twice the ghost width");
   }
 
   // The start domain and every level above it are tiled, so they must decompose into whole tiles. The levels
@@ -426,7 +517,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   // tile; nothing is required of them.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_startDomain.domainBox().size(dir) % m_minBlockSize != 0) {
-      MayDay::Error("ComputationalGeometry::makeGrids - the start domain does not decompose into whole tiles");
+      MayDay::Error("ComputationalGeometry::generateGrids - the start domain does not decompose into whole tiles");
     }
   }
 
@@ -434,50 +525,20 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   m_maxGhostEB  = a_maxGhostEB;
   m_refineAngle = a_refineAngle;
 
-  // The levels are every factor-two coarsening of the start domain down to the coarsest domain that can still be
-  // coarsened by two, the start domain itself, and every factor-two refinement of it up to the stop domain.
-  // Level 0 is the coarsest domain.
-  m_startLevel = 0;
-
-  for (ProblemDomain coarDomain = a_startDomain; coarDomain.domainBox().coarsenable(2); coarDomain.coarsen(2)) {
-    m_startLevel++;
-  }
-
-  m_stopLevel = m_startLevel;
-
-  for (ProblemDomain fineDomain = a_startDomain; fineDomain.domainBox().size(0) < a_stopDomain.domainBox().size(0);
-       fineDomain.refine(2)) {
-    m_stopLevel++;
-  }
-
-  if (refine(a_startDomain, static_cast<int>(std::pow(2, m_stopLevel - m_startLevel))) != a_stopDomain) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the stop domain is not a refinement by two of the start domain");
-  }
+  this->defineLevels(a_startDomain, a_stopDomain, a_startDx);
 
   const int numLevels = 1 + m_stopLevel;
 
-  m_domains.resize(numLevels);
-  m_dx.resize(numLevels);
+  m_electrodeLevel  = this->getLevel(a_electrodeDomain);
+  m_dielectricLevel = this->getLevel(a_dielectricDomain);
 
-  m_domains[m_startLevel] = a_startDomain;
-  m_dx[m_startLevel]      = a_startDx;
-
-  for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
-    m_domains[lvl] = coarsen(m_domains[lvl + 1], 2);
-    m_dx[lvl]      = 2.0 * m_dx[lvl + 1];
+  if (m_electrodeLevel < 0 || m_dielectricLevel < 0) {
+    MayDay::Error("ComputationalGeometry::generateGrids - the electrode or dielectric domain is not one of the levels");
   }
-
-  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
-    m_domains[lvl] = refine(m_domains[lvl - 1], 2);
-    m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
-  }
-
-  CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
-  CH_assert(m_domains.size() == m_dx.size());
 
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(8, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(9, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -508,7 +569,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //      normal turns by more than m_refineAngle between neighbouring cells near the surface; otherwise it is a
   //      leaf and nothing is built above it (buildFinerLevels, exceedsCurvature).
   //   2. Tiles, once: the boxes irregular in either phase on every level are tiled by TiledMeshRefine into a
-  //      properly nested set (makeTiles). This is the coverage the simulation regrids onto.
+  //      properly nested set (makeTiles). The graph of each level is built on them.
   //   3. Every tile lies inside a box or above a leaf; per phase it inherits a regular or covered box's tag and
   //      is otherwise classified by that phase's implicit function at its own level (classifyTiles).
   //   4. Every hit box is cut down to what the tiles left of it (decimateBoxes).
@@ -573,10 +634,484 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   }
 }
 
+void
+ComputationalGeometry::defineLevels(const ProblemDomain& a_startDomain,
+                                    const ProblemDomain& a_stopDomain,
+                                    const Real           a_startDx)
+{
+  CH_TIME("ComputationalGeometry::defineLevels");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::defineLevels" << endl;
+  }
+
+  // The levels are every factor-two coarsening of the start domain down to the coarsest domain that can still be
+  // coarsened by two, the start domain itself, and every factor-two refinement of it up to the stop domain.
+  // Level 0 is the coarsest domain.
+  m_startLevel = 0;
+
+  for (ProblemDomain coarDomain = a_startDomain; coarDomain.domainBox().coarsenable(2); coarDomain.coarsen(2)) {
+    m_startLevel++;
+  }
+
+  m_stopLevel = m_startLevel;
+
+  for (ProblemDomain fineDomain = a_startDomain; fineDomain.domainBox().size(0) < a_stopDomain.domainBox().size(0);
+       fineDomain.refine(2)) {
+    m_stopLevel++;
+  }
+
+  if (refine(a_startDomain, static_cast<int>(std::pow(2, m_stopLevel - m_startLevel))) != a_stopDomain) {
+    MayDay::Error(
+      "ComputationalGeometry::defineLevels - the stop domain is not a refinement by two of the start domain");
+  }
+
+  const int numLevels = 1 + m_stopLevel;
+
+  m_domains.resize(numLevels);
+  m_dx.resize(numLevels);
+
+  m_domains[m_startLevel] = a_startDomain;
+  m_dx[m_startLevel]      = a_startDx;
+
+  for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
+    m_domains[lvl] = coarsen(m_domains[lvl + 1], 2);
+    m_dx[lvl]      = 2.0 * m_dx[lvl + 1];
+  }
+
+  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+    m_domains[lvl] = refine(m_domains[lvl - 1], 2);
+    m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
+  }
+
+  CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
+  CH_assert(m_domains.size() == m_dx.size());
+}
+
+void
+ComputationalGeometry::writeGraphTo(const std::string& a_file)
+{
+  CH_TIME("ComputationalGeometry::writeGraphTo");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::writeGraphTo" << endl;
+  }
+
+  m_graphFile = a_file;
+  m_readGraph = false;
+
+  // Made afresh for every file, so that a checkpoint can tell its own graph file from one another run wrote over it.
+  uint64_t id = 0;
+
+  if (procID() == 0) {
+    std::random_device device;
+
+    id = (static_cast<uint64_t>(device()) << 32) ^ static_cast<uint64_t>(device()) ^
+         static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count());
+  }
+
+#ifdef CH_MPI
+  MPI_Bcast(&id, 1, MPI_UINT64_T, 0, Chombo_MPI::comm);
+#endif
+
+  std::stringstream ss;
+
+  ss << std::hex << id;
+
+  m_graphId = ss.str();
+}
+
+void
+ComputationalGeometry::readGraphFrom(const std::string& a_file, const std::string& a_id)
+{
+  CH_TIME("ComputationalGeometry::readGraphFrom");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::readGraphFrom" << endl;
+  }
+
+  m_graphFile = a_file;
+  m_graphId   = a_id;
+  m_readGraph = true;
+}
+
+const std::string&
+ComputationalGeometry::getGraphFile() const noexcept
+{
+  return m_graphFile;
+}
+
+const std::string&
+ComputationalGeometry::getGraphId() const noexcept
+{
+  return m_graphId;
+}
+
+bool
+ComputationalGeometry::readsGraph() const noexcept
+{
+  return m_readGraph;
+}
+
+HDF5Handle*
+ComputationalGeometry::getGraphHandle() const noexcept
+{
+  return m_graphHandle;
+}
+
+void
+ComputationalGeometry::closeGraphFile()
+{
+  CH_TIME("ComputationalGeometry::closeGraphFile");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::closeGraphFile" << endl;
+  }
+
+#ifdef CH_USE_HDF5
+  if (m_graphHandle != nullptr) {
+    m_graphHandle->close();
+
+    delete m_graphHandle;
+
+    m_graphHandle = nullptr;
+  }
+#endif
+}
+
+void
+ComputationalGeometry::writeGrids()
+{
+  CH_TIME("ComputationalGeometry::writeGrids");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::writeGrids" << endl;
+  }
+
+#ifdef CH_USE_HDF5
+  this->closeGraphFile();
+
+  m_graphHandle = new HDF5Handle();
+
+  if (m_graphHandle->open(m_graphFile, HDF5Handle::CREATE) != 0) {
+    MayDay::Error(("ComputationalGeometry::writeGrids - could not create '" + m_graphFile + "'").c_str());
+  }
+
+  HDF5HeaderData header;
+
+  header.m_string["id"]            = m_graphId;
+  header.m_int["space_dim"]        = SpaceDim;
+  header.m_box["start_domain"]     = m_domains[m_startLevel].domainBox();
+  header.m_box["stop_domain"]      = m_domains[m_stopLevel].domainBox();
+  header.m_realvect["prob_lo"]     = m_probLo;
+  header.m_real["start_dx"]        = m_dx[m_startLevel];
+  header.m_real["refine_angle"]    = m_refineAngle;
+  header.m_int["refine_saddles"]   = m_refineSaddles ? 1 : 0;
+  header.m_int["max_ghost_eb"]     = m_maxGhostEB;
+  header.m_int["min_block_size"]   = m_minBlockSize;
+  header.m_int["max_block_size"]   = m_maxBlockSize;
+  header.m_int["start_level"]      = m_startLevel;
+  header.m_int["stop_level"]       = m_stopLevel;
+  header.m_int["electrode_level"]  = m_electrodeLevel;
+  header.m_int["dielectric_level"] = m_dielectricLevel;
+  header.m_int["has_gas"]          = m_implicitFunctionGas.isNull() ? 0 : 1;
+  header.m_int["has_solid"]        = m_implicitFunctionSolid.isNull() ? 0 : 1;
+
+  m_graphHandle->setGroup("/");
+
+  header.writeToFile(*m_graphHandle);
+
+  // Each level's boxes with their types in both phases, and its cut tiles, in the order they are held here.
+  auto rowsOf = [](const Vector<Box>& a_boxes) -> std::vector<int> {
+    std::vector<int> rows;
+
+    for (int i = 0; i < a_boxes.size(); i++) {
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        rows.push_back(a_boxes[i].smallEnd(dir));
+      }
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        rows.push_back(a_boxes[i].bigEnd(dir));
+      }
+    }
+
+    return rows;
+  };
+
+  for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
+    std::vector<int> types;
+
+    for (int i = 0; i < m_boxes[lvl].size(); i++) {
+      types.push_back(static_cast<int>(m_gasTypes[lvl][i]));
+      types.push_back(static_cast<int>(m_solidTypes[lvl][i]));
+    }
+
+    m_graphHandle->setGroup("/grids_level_" + std::to_string(lvl));
+
+    DischargeIO::writeH5Table(*m_graphHandle, "boxes", rowsOf(m_boxes[lvl]), 2 * SpaceDim);
+    DischargeIO::writeH5Table(*m_graphHandle, "types", types, 2);
+    DischargeIO::writeH5Table(*m_graphHandle, "cut_tiles", rowsOf(m_cutTiles[lvl]), 2 * SpaceDim);
+  }
+#else
+  MayDay::Error("ComputationalGeometry::writeGrids - writing the graph needs HDF5");
+#endif
+}
+
+void
+ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
+                                 const ProblemDomain& a_stopDomain,
+                                 const ProblemDomain& a_electrodeDomain,
+                                 const ProblemDomain& a_dielectricDomain,
+                                 const RealVect&      a_probLo,
+                                 const Real           a_startDx,
+                                 const Real           a_refineAngle,
+                                 const int            a_maxGhostEB,
+                                 const int            a_minBlockSize,
+                                 const int            a_maxBlockSize)
+{
+  CH_TIME("ComputationalGeometry::readGrids");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::readGrids" << endl;
+  }
+
+#ifdef CH_USE_HDF5
+  this->closeGraphFile();
+
+  m_graphHandle = new HDF5Handle();
+
+  if (m_graphHandle->open(m_graphFile, HDF5Handle::OPEN_RDONLY) != 0) {
+    MayDay::Error(("ComputationalGeometry::readGrids - could not open the graph file '" + m_graphFile + "'").c_str());
+  }
+
+  m_graphHandle->setGroup("/");
+
+  HDF5HeaderData header;
+
+  header.readFromFile(*m_graphHandle);
+
+  // A missing key would otherwise read as zero or empty, and fail later with a misleading message.
+  const auto requireKey = [this](const bool a_found, const std::string& a_key) -> void {
+    if (!a_found) {
+      MayDay::Error(("ComputationalGeometry::readGrids - '" + m_graphFile + "' has no header entry '" + a_key +
+                     "'; it is not a complete graph file")
+                      .c_str());
+    }
+  };
+
+  requireKey(header.m_string.find("id") != header.m_string.end(), "id");
+
+  for (const std::string key : {"space_dim",
+                                "refine_saddles",
+                                "max_ghost_eb",
+                                "min_block_size",
+                                "max_block_size",
+                                "start_level",
+                                "stop_level",
+                                "electrode_level",
+                                "dielectric_level",
+                                "has_gas",
+                                "has_solid"}) {
+    requireKey(header.m_int.find(key) != header.m_int.end(), key);
+  }
+
+  for (const std::string key : {"start_dx", "refine_angle"}) {
+    requireKey(header.m_real.find(key) != header.m_real.end(), key);
+  }
+
+  for (const std::string key : {"start_domain", "stop_domain"}) {
+    requireKey(header.m_box.find(key) != header.m_box.end(), key);
+  }
+
+  requireKey(header.m_realvect.find("prob_lo") != header.m_realvect.end(), "prob_lo");
+
+  if (header.m_string["id"] != m_graphId) {
+    MayDay::Error(("ComputationalGeometry::readGrids - '" + m_graphFile +
+                   "' is not the graph file the checkpoint was written with: another run has written over it")
+                    .c_str());
+  }
+  if (header.m_int["space_dim"] != SpaceDim) {
+    MayDay::Error("ComputationalGeometry::readGrids - the graph file was written in another dimension");
+  }
+
+  // What the graph cannot be read into: another index space.
+  auto mustMatch = [](const bool a_same, const std::string& a_what) -> void {
+    if (!a_same) {
+      MayDay::Error(("ComputationalGeometry::readGrids - " + a_what +
+                     " differs from the one the graph file was written with, so the stored graph cannot be used")
+                      .c_str());
+    }
+  };
+
+  const Real dxTolerance = 1.E-10 * header.m_real["start_dx"];
+
+  mustMatch(header.m_box["start_domain"] == a_startDomain.domainBox(),
+            "the domain the geometry is generated on (Driver.geometry_scan_level, AmrMesh.coarsest_domain)");
+  mustMatch(header.m_box["stop_domain"] == a_stopDomain.domainBox(), "AmrMesh.max_eb_depth");
+  mustMatch(header.m_realvect["prob_lo"] == a_probLo, "AmrMesh.lo_corner");
+  mustMatch(std::abs(header.m_real["start_dx"] - a_startDx) <= dxTolerance, "the grid spacing (AmrMesh.hi_corner)");
+  if (a_maxGhostEB > header.m_int["max_ghost_eb"]) {
+    MayDay::Error("ComputationalGeometry::readGrids - the inputs ask for more EB ghost cells than the graph file was "
+                  "written with");
+  }
+
+  // What the graph was generated with: the stored value is used, and a different input is reported.
+  const bool inputSaddles = m_refineSaddles;
+
+  m_probLo        = a_probLo;
+  m_refineAngle   = header.m_real["refine_angle"];
+  m_refineSaddles = header.m_int["refine_saddles"] != 0;
+  m_maxGhostEB    = header.m_int["max_ghost_eb"];
+  m_minBlockSize  = header.m_int["min_block_size"];
+  m_maxBlockSize  = header.m_int["max_block_size"];
+
+  this->defineLevels(a_startDomain, a_stopDomain, a_startDx);
+
+  if (header.m_int["start_level"] != m_startLevel || header.m_int["stop_level"] != m_stopLevel) {
+    MayDay::Error("ComputationalGeometry::readGrids - the levels of the graph file are not those of the inputs");
+  }
+
+  m_electrodeLevel  = header.m_int["electrode_level"];
+  m_dielectricLevel = header.m_int["dielectric_level"];
+
+  auto report = [](const std::string& a_what, const std::string& a_stored, const std::string& a_input) -> void {
+    if (a_stored != a_input) {
+      pout() << "ComputationalGeometry::readGrids - " << a_what << " is " << a_input << " in the inputs but "
+             << a_stored << " in the graph file; the graph file's value is used" << endl;
+    }
+  };
+
+  auto str = [](const auto a_value) -> std::string {
+    std::stringstream ss;
+
+    ss << a_value;
+
+    return ss.str();
+  };
+
+  report("Driver.refine_angles", str(m_refineAngle), str(a_refineAngle));
+  report("ComputationalGeometry.refine_saddles", str(m_refineSaddles), str(inputSaddles));
+  report("the number of EB ghost cells", str(m_maxGhostEB), str(a_maxGhostEB));
+  report("AmrMesh.eb_min_block_size", str(m_minBlockSize), str(a_minBlockSize));
+  report("AmrMesh.eb_max_block_size", str(m_maxBlockSize), str(a_maxBlockSize));
+  report("the level electrode surfaces are resolved to (Driver.refine_electrodes)",
+         str(m_electrodeLevel),
+         str(this->getLevel(a_electrodeDomain)));
+  report("the level dielectric surfaces are resolved to (Driver.refine_dielectrics)",
+         str(m_dielectricLevel),
+         str(this->getLevel(a_dielectricDomain)));
+
+  const int numLevels = 1 + m_stopLevel;
+
+  m_cutTiles.resize(numLevels);
+  m_boxes.resize(numLevels);
+  m_splitCounts.resize(numLevels, Vector<int>(9, 0));
+  m_splitBoxes.resize(numLevels);
+  m_splitReasons.resize(numLevels);
+  m_gasTypes.resize(numLevels);
+  m_solidTypes.resize(numLevels);
+
+  this->buildImplicitFunctions();
+
+  // The file holds a graph for each phase the geometry had when it was written, and is read for each phase it has now.
+  if (header.m_int["has_gas"] != (m_implicitFunctionGas.isNull() ? 0 : 1) ||
+      header.m_int["has_solid"] != (m_implicitFunctionSolid.isNull() ? 0 : 1)) {
+    MayDay::Error("ComputationalGeometry::readGrids - the inputs give the geometry other phases than the graph file "
+                  "was written with (a dielectric added or removed)");
+  }
+
+  auto boxesOf = [](const std::vector<int>& a_rows) -> Vector<Box> {
+    Vector<Box> boxes;
+
+    for (size_t i = 0; i < a_rows.size(); i += 2 * SpaceDim) {
+      IntVect lo;
+      IntVect hi;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        lo[dir] = a_rows[i + dir];
+        hi[dir] = a_rows[i + SpaceDim + dir];
+      }
+
+      boxes.push_back(Box(lo, hi));
+    }
+
+    return boxes;
+  };
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    m_graphHandle->setGroup("/grids_level_" + std::to_string(lvl));
+
+    m_boxes[lvl]    = boxesOf(DischargeIO::readH5Table(*m_graphHandle, "boxes", 2 * SpaceDim));
+    m_cutTiles[lvl] = boxesOf(DischargeIO::readH5Table(*m_graphHandle, "cut_tiles", 2 * SpaceDim));
+
+    const std::vector<int> types = DischargeIO::readH5Table(*m_graphHandle, "types", 2);
+
+    if (types.size() != 2 * static_cast<std::size_t>(m_boxes[lvl].size())) {
+      MayDay::Error("ComputationalGeometry::readGrids - a level's boxes and types do not match");
+    }
+
+    for (int i = 0; i < m_boxes[lvl].size(); i++) {
+      m_gasTypes[lvl].push_back(static_cast<GeometryService::InOut>(types[2 * i]));
+      m_solidTypes[lvl].push_back(static_cast<GeometryService::InOut>(types[2 * i + 1]));
+    }
+  }
+
+  this->buildTileTrees();
+  this->buildBoxTrees();
+#else
+  MayDay::Error("ComputationalGeometry::readGrids - reading the graph needs HDF5");
+#endif
+}
+
 int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_domains.size();
+}
+
+bool
+ComputationalGeometry::holdsConductorCell(const Box& a_box, const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::holdsConductorCell");
+
+  const RefCountedPtr<BaseIF>& gasFunction   = this->getImplicitFunction(phase::gas);
+  const RefCountedPtr<BaseIF>& solidFunction = this->getImplicitFunction(phase::solid);
+
+  if (gasFunction.isNull() || solidFunction.isNull()) {
+    return true;
+  }
+
+  const Real dx    = m_dx[a_level];
+  const Box  valid = a_box & m_domains[a_level].domainBox();
+
+  // Whether each cell of the box is cut by a phase's surface, decided as the polyhedral shop decides it.
+  const auto cutCells = [&](BaseFab<int>& a_isCut, const BaseIF& a_function) -> void {
+    BaseFab<Real> nodeValues;
+    BaseFab<Real> intercept[SpaceDim];
+
+    PolyhedralEB::fillNodeValues(nodeValues, a_function, valid, m_probLo, dx);
+    PolyhedralEB::defineIntercepts(intercept, valid);
+
+    a_isCut.define(valid, 1);
+    a_isCut.setVal(0);
+
+    for (BoxIterator bit(valid); bit.ok(); ++bit) {
+      PolyhedralEB::CutCellSurface surface;
+
+      PolyhedralEB::buildSurface(intercept, surface, a_function, nodeValues, bit(), m_probLo, dx);
+
+      if (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Cut) {
+        a_isCut(bit(), 0) = 1;
+      }
+    }
+  };
+
+  BaseFab<int> gasCut;
+  BaseFab<int> solidCut;
+
+  cutCells(gasCut, *gasFunction);
+  cutCells(solidCut, *solidFunction);
+
+  for (BoxIterator bit(valid); bit.ok(); ++bit) {
+    if (gasCut(bit(), 0) != solidCut(bit(), 0)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 GeometryService::InOut
@@ -1042,6 +1577,11 @@ ComputationalGeometry::irregCells(const phase::which_phase a_phase, const Proble
       MayDay::Error("ComputationalGeometry::irregCells - the domain is not one of the geometry's");
     }
 
+    // A level no tile was split down to resolves no surface of its own.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return IntVectSet();
+    }
+
     const LevelData<EBGraph>& graph = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel);
     const DisjointBoxLayout&  grids = graph.disjointBoxLayout();
 
@@ -1096,7 +1636,29 @@ ComputationalGeometry::irregGrids(const phase::which_phase a_phase, const Proble
       MayDay::Error("ComputationalGeometry::irregGrids - the domain is not one of the geometry's");
     }
 
-    return m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
+    // A level no tile was split down to resolves no surface of its own, and holds no grids of it.
+    if (!m_polyhedralShops[a_phase]->hasEBGraph(geometryLevel)) {
+      return DisjointBoxLayout(Vector<Box>(), Vector<int>(), a_domain);
+    }
+
+    // The boxes of the stored level that hold cut cells, on the ranks that hold them there. The regular and covered
+    // boxes are left out: they hold no cut cell, and can be far larger than a cut one.
+    const DisjointBoxLayout& grids = m_polyhedralShops[a_phase]->getEBGraph(geometryLevel).disjointBoxLayout();
+
+    const Vector<Box> boxes = grids.boxArray();
+    const Vector<int> ranks = grids.procIDs();
+
+    Vector<Box> cutBoxes;
+    Vector<int> cutRanks;
+
+    for (int i = 0; i < boxes.size(); i++) {
+      if (this->classify(boxes[i], geometryLevel, a_phase) == GeometryService::Irregular) {
+        cutBoxes.push_back(boxes[i]);
+        cutRanks.push_back(ranks[i]);
+      }
+    }
+
+    return DisjointBoxLayout(cutBoxes, cutRanks, a_domain);
   }
 
   return ebis->getIrregGrids(a_domain);
@@ -1324,6 +1886,28 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
 
       if (gasDoubled || solidDoubled) {
         reason = SplitReason::DoubleCrossing;
+      }
+    }
+
+    // A box holding a surface the geometric tags refine further is split, so that the geometry is resolved wherever
+    // they refine. Driver::getGeometryTags tags as conductor every cell cut in exactly one phase, and as dielectric
+    // every cell cut in the solid phase. A box cut in both phases is decided cell by cell from the surfaces as they
+    // cut the cells, before the fill rule settles them; where the fill rule covers a cell in one phase, the tags can
+    // refine a surface that this rule left whole.
+    if (reason == SplitReason::None) {
+      const bool gasCut   = a_gasTypes[i] == GeometryService::Irregular;
+      const bool solidCut = a_solidTypes[i] == GeometryService::Irregular;
+
+      const bool dielectric = solidCut && a_level < m_dielectricLevel;
+
+      bool conductor = false;
+
+      if (a_level < m_electrodeLevel && (gasCut || solidCut)) {
+        conductor = (gasCut != solidCut) || this->holdsConductorCell(a_boxes[i], a_level);
+      }
+
+      if (dielectric || conductor) {
+        reason = SplitReason::Depth;
       }
     }
 
@@ -2308,7 +2892,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 6 : 7]++;
+      m_splitCounts[lvl][tagged ? 7 : 8]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -2462,10 +3046,10 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial/doubled/twist " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2]
-           << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5]
-           << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting " << m_splitCounts[lvl][6] << "/"
-           << m_splitCounts[lvl][7] << endl;
+           << "; split interior/ring/medial/doubled/twist/depth " << m_splitCounts[lvl][1] << "/"
+           << m_splitCounts[lvl][2] << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/"
+           << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << " (leaves " << m_splitCounts[lvl][0]
+           << "); tiles tagged/nesting " << m_splitCounts[lvl][7] << "/" << m_splitCounts[lvl][8] << endl;
   }
 }
 

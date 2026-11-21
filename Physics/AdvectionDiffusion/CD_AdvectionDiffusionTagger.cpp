@@ -91,7 +91,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
 
   // Never tag on finest possible AMR level.
   const int finestLevel    = m_amr->getFinestLevel();
-  const int maxLevel       = m_amr->getMaxAmrDepth();
+  const int maxLevel       = m_amr->getMaxDomainDepth();
   const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {

@@ -198,15 +198,6 @@ public:
   getMultigridLevelGrids(const phase::which_phase a_phase) const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels for a phase.
-   * @details See PhaseRealm::getMultigridLevelGridsCoFi().
-   * @param[in] a_phase Phase
-   * @return The coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi(const phase::which_phase a_phase) const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels for a phase.
    * @details See PhaseRealm::getMultigridCoarseAverage().
    * @param[in] a_phase Phase
@@ -216,20 +207,57 @@ public:
   getMultigridCoarseAverage(const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a phase.
+   * @details See PhaseRealm::getFinerVoFs().
+   * @param[in] a_phase Phase
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels for a phase.
+   * @details See PhaseRealm::getMultigridRestriction().
+   * @param[in] a_phase Phase
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels for a phase.
+   * @details See PhaseRealm::getMultigridProlongation().
+   * @param[in] a_phase Phase
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelRestriction().
+   * @param[in] a_phase Phase
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels for a phase.
+   * @details See PhaseRealm::getMultigridLevelProlongation().
+   * @param[in] a_phase Phase
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation(const phase::which_phase a_phase) const;
+
+  /**
    * @brief Get the multifluid multigrid levels.
    * @details Composed from the phases' multigrid levels, with the same indexing as getMultigridLevelGrids().
    * @return The multifluid multigrid levels under each AMR level.
    */
   const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
   getMultigridMFLevelGrids() const;
-
-  /**
-   * @brief Get the multifluid coarsened grids between consecutive multigrid levels.
-   * @details Composed from the phases' coarsened grids, with the same indexing as getMultigridLevelGridsCoFi().
-   * @return The multifluid coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>&
-  getMultigridMFLevelGridsCoFi() const;
 
   /**
    * @brief Query if an AMR operator has been registered
@@ -590,6 +618,15 @@ public:
   registerParticleGhostMask(const int a_width) noexcept;
 
   /**
+   * @brief Register a particle ghost-mask width and build its masks now if they do not exist yet.
+   * @details For consumers whose widths depend on settings that can change at run time. Later regrids rebuild the
+   * masks like those of any registered width. Before the first regrid this only registers the width.
+   * @param[in] a_width Ghost width (cells). Must be > 0 and < min_block_size.
+   */
+  void
+  defineParticleGhostMask(const int a_width) noexcept;
+
+  /**
    * @brief Get the same-level particle ghost mask for a registered width.
    * @param[in] a_width Registered ghost width.
    * @return The per-level same-level mask for a_width. Aborts if the width was not registered.
@@ -743,12 +780,6 @@ protected:
    * @brief Multifluid multigrid levels, with the same indexing as PhaseRealm::m_mgLevelGrids.
    */
   Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflg;
-
-  /**
-   * @brief Multifluid coarsened grids between consecutive multigrid levels, with the same indexing as
-   * PhaseRealm::m_mgLevelGridsCoFi.
-   */
-  Vector<Vector<RefCountedPtr<MFLevelGrid>>> m_mgMflgCoFi;
 
   /**
    * @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
@@ -995,6 +1026,14 @@ protected:
    */
   void
   defineParticleGhostMasks() noexcept;
+
+  /**
+   * @brief Build the same-level, fine-to-coarse and coarse-to-fine particle ghost masks, and the exposure mask, for
+   * one width.
+   * @param[in] a_ghost Ghost width (cells). Must be < min_block_size.
+   */
+  void
+  defineParticleGhostMasks(const int a_ghost) noexcept;
 
   /**
    * @brief Define the SAME-level particle ghost mask on one level.

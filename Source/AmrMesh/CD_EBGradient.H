@@ -75,7 +75,11 @@ public:
    * @brief Full constructor. Calsl the define function.
    * @param[in] a_eblg         Grids
    * @param[in] a_eblgFine     Fine grids
-   * @param[in] a_eblgFiCo     Refinement of coarse grids
+   * @param[in] a_eblgFiCo     Refined coarse grids, with geometry copied from the fine level (see
+   * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach the fine cells of every coarse cell within two
+   * cells of a coarse box.
+   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a
+   * fine level and in release builds).
    * @param[in] a_hasFine      Has fine level or not
    * @param[in] a_dx           Resolution
    * @param[in] a_refRat       Refinement ratio
@@ -83,15 +87,16 @@ public:
    * @param[in] a_weighting    Weighting factor least squares.
    * @param[in] a_ghostVector Ghost vector
    */
-  EBGradient(const EBLevelGrid& a_eblg,
-             const EBLevelGrid& a_eblgFine,
-             const EBLevelGrid& a_eblgFiCo,
-             const bool         a_hasFine,
-             const Real         a_dx,
-             const int          a_refRat,
-             const int          a_order,
-             const int          a_weighting,
-             const IntVect      a_ghostVector) noexcept;
+  EBGradient(const EBLevelGrid&                             a_eblg,
+             const EBLevelGrid&                             a_eblgFine,
+             const EBLevelGrid&                             a_eblgFiCo,
+             const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fiCoFineCells,
+             const bool                                     a_hasFine,
+             const Real                                     a_dx,
+             const int                                      a_refRat,
+             const int                                      a_order,
+             const int                                      a_weighting,
+             const IntVect                                  a_ghostVector) noexcept;
 
   /**
    * @brief Destructor (does nothing)
@@ -102,7 +107,11 @@ public:
    * @brief Define function.
    * @param[in] a_eblg         Grids
    * @param[in] a_eblgFine     Fine grids
-   * @param[in] a_eblgFiCo     Refinement of coarse grids
+   * @param[in] a_eblgFiCo     Refined coarse grids, with geometry copied from the fine level (see
+   * PhaseRealm::defineEBLevelGridFiCo). Their ghost cells must reach the fine cells of every coarse cell within two
+   * cells of a coarse box.
+   * @param[in] a_fiCoFineCells Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a
+   * fine level and in release builds).
    * @param[in] a_hasFine      Has fine level or not
    * @param[in] a_dx           Resolution
    * @param[in] a_refRat       Refinement ratio
@@ -111,15 +120,16 @@ public:
    * @param[in] a_ghostVector Ghost vector
    */
   virtual void
-  define(const EBLevelGrid& a_eblg,
-         const EBLevelGrid& a_eblgFine,
-         const EBLevelGrid& a_eblgFiCo,
-         const bool         a_hasFine,
-         const Real         a_dx,
-         const int          a_refRat,
-         const int          a_order,
-         const int          a_weighting,
-         const IntVect      a_ghostVector) noexcept;
+  define(const EBLevelGrid&                             a_eblg,
+         const EBLevelGrid&                             a_eblgFine,
+         const EBLevelGrid&                             a_eblgFiCo,
+         const RefCountedPtr<LevelData<BaseFab<bool>>>& a_fiCoFineCells,
+         const bool                                     a_hasFine,
+         const Real                                     a_dx,
+         const int                                      a_refRat,
+         const int                                      a_order,
+         const int                                      a_weighting,
+         const IntVect                                  a_ghostVector) noexcept;
 
   /**
    * @brief Compute gradient using data on the input level only.
@@ -181,6 +191,11 @@ protected:
    * @brief Refined coarse grids
    */
   EBLevelGrid m_eblgFiCo;
+
+  /**
+   * @brief Cells of m_eblgFiCo that hold the fine level's geometry.
+   */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_fiCoFineCells;
 
   /**
    * @brief Is defined or not

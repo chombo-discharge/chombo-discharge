@@ -93,7 +93,7 @@ DischargeInceptionTagger::tagCells(EBAMRTags& a_tags)
   int foundTags = 0;
 
   const int finestLevel    = m_amr->getFinestLevel();
-  const int maxLevel       = m_amr->getMaxAmrDepth();
+  const int maxLevel       = m_amr->getMaxDomainDepth();
   const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
   const RealVect probLo = m_amr->getProbLo();

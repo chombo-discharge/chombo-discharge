@@ -384,7 +384,19 @@ AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
-  particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_irregularDeposition);
+  // Masks for deposition settings that changed at run time are built on first use.
+  const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
+    return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
+  };
+
+  particleMesh.depositWeight(a_meshData,
+                             a_particles,
+                             a_depositionType,
+                             a_coarseFineDeposition,
+                             a_irregularDeposition,
+                             coarToFineMasks);
 }
 
 template <typename P, typename Traits, typename CellGather>
@@ -405,12 +417,20 @@ AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
+  // Masks for deposition settings that changed at run time are built on first use.
+  const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
+    return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
+  };
+
   particleMesh.depositGathered(a_meshData,
                                a_particles,
                                a_depositionType,
                                a_coarseFineDeposition,
                                a_irregularDeposition,
-                               a_cellGather);
+                               a_cellGather,
+                               coarToFineMasks);
 }
 
 template <auto... Members, typename P, typename Traits>
@@ -430,11 +450,19 @@ AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
+  // Masks for deposition settings that changed at run time are built on first use.
+  const auto coarToFineMasks = [&](const int a_width) -> const AMRParticleGhostMask& {
+    this->defineParticleGhostMask(a_realm, a_width);
+
+    return this->getParticleGhostMaskCoarToFine(a_realm, a_width);
+  };
+
   particleMesh.template deposit<Members...>(a_meshData,
                                             a_particles,
                                             a_depositionType,
                                             a_coarseFineDeposition,
-                                            a_irregularDeposition);
+                                            a_irregularDeposition,
+                                            coarToFineMasks);
 }
 
 template <typename P, typename Traits>

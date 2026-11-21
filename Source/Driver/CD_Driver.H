@@ -541,25 +541,39 @@ protected:
 
   /**
    * @brief Build the grids the index space is generated over, from the start domain to the finest domain.
-   * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the domain on level max_amr_depth
-   * as the stop domain, and the simulation's EB ghost count and refinement angle. Runs before the geometry is built,
-   * since the generators read the grids it makes.
+   * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the domain on level max_eb_depth
+   * as the stop domain, the domains the geometric tags refine electrode and dielectric surfaces down to
+   * (Driver.refine_electrodes and Driver.refine_dielectrics, at most max_eb_depth), and the simulation's EB ghost count
+   * and refinement angle. Runs before the geometry is built, since the generators read the grids it makes.
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
    */
   void
   buildGeometryGrids(const ProblemDomain& a_startDomain);
 
   /**
-   * @brief The grids ComputationalGeometry::makeGrids built, per AMR level.
-   * @details Level lvl holds the geometry's cut tiles on the AMR domain of that level, found through
-   * ComputationalGeometry::getLevel, or the whole domain split as AmrMesh splits its coarsest level when that domain
-   * is at or below the geometry's start level (Driver.geometry_scan_level above zero). Level 0 is left empty, AmrMesh
-   * always splits the coarsest domain itself. The levels the geometry did not reach are empty, and AmrMesh stops at
-   * the first empty level.
-   * @return Boxes per AMR level, 1 + max_amr_depth entries.
+   * @brief The domain the geometry is generated from, from Driver.geometry_scan_level.
+   * @details A negative level coarsens the coarsest AMR level that many times, stopping before a side would drop
+   * below two cells; a non-negative level is that AMR level, at most max_eb_depth.
+   * @return The domain.
    */
-  Vector<Vector<Box>>
-  getGeometryGrids() const;
+  ProblemDomain
+  getScanDomain() const;
+
+  /**
+   * @brief The file a polyhedral geometry's graph is written to, beside the checkpoints.
+   * @return The file name.
+   */
+  std::string
+  getGraphFileName() const;
+
+  /**
+   * @brief Find the graph file a checkpoint was written with, and have the geometry read from it.
+   * @details A checkpoint without one, written before graph files existed or by another generator, has the geometry
+   * generated from the inputs, and written to a new graph file if this run checkpoints.
+   * @param[in] a_restartFile The checkpoint.
+   */
+  void
+  findGraphFile(const std::string& a_restartFile);
 
   /**
    * @brief Setup function for fresh (non-restart) simulations.

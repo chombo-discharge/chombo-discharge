@@ -19,6 +19,9 @@
 #include <CH_Timer.H>
 #include <Copier.H>
 #include <MayDay.H>
+#ifdef CH_USE_HDF5
+#include <CH_HDF5.H>
+#endif
 
 // Our includes
 #include <CD_PolyhedralEBGraph.H>
@@ -48,7 +51,8 @@ PolyhedralEBGraph::define(const BaseIF&            a_function,
                           const int                a_numGhost,
                           const Vector<Box>&       a_covered,
                           const PolyhedralEBGraph* a_coarser,
-                          const bool               a_fillSplitFluid)
+                          const bool               a_fillSplitFluid,
+                          HDF5Handle* const        a_handle)
 {
   CH_TIME("PolyhedralEBGraph::define");
 
@@ -80,11 +84,187 @@ PolyhedralEBGraph::define(const BaseIF&            a_function,
     this->markCoarserFilled(coarserFilled, *a_coarser, 1);
   }
 
-  this->defineCells(a_function, carried, (a_coarser != nullptr) ? &coarserFilled : nullptr, a_fillSplitFluid);
+  this->defineCells(a_function, carried, (a_coarser != nullptr) ? &coarserFilled : nullptr, a_fillSplitFluid, a_handle);
   this->defineOuterFaces(carried);
 
   m_isDefined = true;
 }
+
+void
+PolyhedralEBGraph::define(HDF5Handle&          a_handle,
+                          const Vector<Box>&   a_cutTiles,
+                          const ProblemDomain& a_domain,
+                          const RealVect&      a_probLo,
+                          const Real           a_dx,
+                          const int            a_numGhost,
+                          const Vector<Box>&   a_covered)
+{
+  CH_TIME("PolyhedralEBGraph::define(file)");
+
+  using PolyhedralEB::CutCellSurface;
+
+  if (a_dx <= 0.0) {
+    MayDay::Error("PolyhedralEBGraph::define(file) - the grid spacing must be positive");
+  }
+  if (a_numGhost < 1) {
+    MayDay::Error("PolyhedralEBGraph::define(file) - at least one ghost cell is needed to see across a box boundary");
+  }
+
+  m_domain   = a_domain;
+  m_probLo   = a_probLo;
+  m_dx       = a_dx;
+  m_numGhost = a_numGhost;
+  m_covered  = a_covered;
+
+  this->defineGrids(a_cutTiles);
+  this->markRefined();
+
+  LevelData<BaseFab<signed char>> carried;
+
+  this->markCarried(carried);
+
+  LayoutData<Vector<CutCellSurface>> kept(m_grids);
+
+#ifdef CH_USE_HDF5
+  this->readCells(a_handle, kept);
+#else
+  MayDay::Error("PolyhedralEBGraph::define(file) - reading the graph needs HDF5");
+#endif
+
+  this->finishCells(carried, kept);
+  this->defineOuterFaces(carried);
+
+  m_isDefined = true;
+}
+
+#ifdef CH_USE_HDF5
+void
+PolyhedralEBGraph::writeCells(HDF5Handle&                                             a_handle,
+                              const LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept) const
+{
+  CH_TIME("PolyhedralEBGraph::writeCells");
+
+  using PolyhedralEB::CutCellSurface;
+
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+  // One record per cell: its state, whether a surface is kept for it, and its face states. The states come with the
+  // ghost cells, which hold what the function says of the cells no tile carries.
+  LevelData<BaseFab<signed char>> cells(m_grids, s_numCellRecords, m_numGhost * IntVect::Unit);
+
+  // The surfaces of the valid cells; the sets hold no ghost cells yet.
+  LevelData<IVSFAB<CutCellSurface>> surfaces(m_grids, 1, IntVect::Zero, IVSFABFactory<CutCellSurface>(m_surfaceCells));
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box = m_grids[din];
+
+    BaseFab<signed char>& record = cells[din];
+
+    record.setVal(0);
+    record.copy(m_cellStates[din], 0, 0, 1);
+    record.copy(m_faceStates[din], 0, 2, 2 * SpaceDim);
+
+    const IntVectSet&             withSurface = m_surfaceCells[din];
+    const Vector<CutCellSurface>& kept        = a_kept[din];
+
+    IVSFAB<CutCellSurface>& stored = surfaces[din];
+
+    int next = 0;
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (withSurface.contains(iv)) {
+        record(iv, 1) = 1;
+        stored(iv, 0) = kept[next++];
+      }
+    }
+
+    CH_assert(next == kept.size());
+  }
+
+  write(a_handle, cells, "cells", m_numGhost * IntVect::Unit);
+  write(a_handle, surfaces, "surfaces", IntVect::Zero);
+}
+
+void
+PolyhedralEBGraph::readCells(HDF5Handle& a_handle, LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept)
+{
+  CH_TIME("PolyhedralEBGraph::readCells");
+
+  using PolyhedralEB::CutCellSurface;
+
+  LevelData<BaseFab<signed char>> cells;
+
+  if (read(a_handle, cells, "cells", m_grids, Interval(), true) != 0) {
+    MayDay::Error("PolyhedralEBGraph::readCells - could not read the cells");
+  }
+  if (cells.nComp() != s_numCellRecords || cells.ghostVect() != m_numGhost * IntVect::Unit) {
+    MayDay::Error("PolyhedralEBGraph::readCells - the cells were written with another layout of records or ghosts");
+  }
+
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box = m_grids[din];
+
+    const BaseFab<signed char>& record  = cells[din];
+    const BaseFab<signed char>& refined = m_refined[din];
+
+    m_cellStates[din].copy(record, 0, 0, 1);
+    m_faceStates[din].copy(record, 2, 0, 2 * SpaceDim);
+
+    IntVectSet& cut         = m_cutCells[din];
+    IntVectSet& withSurface = m_surfaceCells[din];
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (record(iv, 0) == s_cut && refined(iv, 0) == 0) {
+        cut |= iv;
+      }
+      if (record(iv, 1) != 0) {
+        withSurface |= iv;
+      }
+    }
+  }
+
+  LevelData<IVSFAB<CutCellSurface>> surfaces(m_grids, 1, IntVect::Zero, IVSFABFactory<CutCellSurface>(m_surfaceCells));
+
+  if (read(a_handle, surfaces, "surfaces", m_grids, Interval(), false) != 0) {
+    MayDay::Error("PolyhedralEBGraph::readCells - could not read the surfaces");
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box               box         = m_grids[din];
+    const IntVectSet&       withSurface = m_surfaceCells[din];
+    IVSFAB<CutCellSurface>& stored      = surfaces[din];
+
+    Vector<CutCellSurface>& kept = a_kept[din];
+
+    kept.resize(0);
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (withSurface.contains(iv)) {
+        kept.push_back(stored(iv, 0));
+      }
+    }
+  }
+}
+#endif
 
 void
 PolyhedralEBGraph::defineGrids(const Vector<Box>& a_cutTiles)
@@ -367,7 +547,8 @@ void
 PolyhedralEBGraph::defineCells(const BaseIF&                          a_function,
                                const LevelData<BaseFab<signed char>>& a_carried,
                                const LevelData<BaseFab<signed char>>* a_coarserFilled,
-                               const bool                             a_fillSplitFluid)
+                               const bool                             a_fillSplitFluid,
+                               HDF5Handle* const                      a_handle)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -581,15 +762,10 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     }
   }
 
-  // ghost cells another tile carries take that tile's state, the rest are classified from the function, and the
-  // ghost cut cells enter the sets
+  // ghost cells another tile carries take that tile's state, the rest are classified from the function
   m_cellStates.exchange();
 
   this->defineGhostCells(a_function, a_carried);
-
-  this->beginAnchoring(a_carried);
-
-  this->addGhostSurfaceCells();
 
   const long long totalFilled = ParallelOps::sum(numFilled);
 
@@ -598,7 +774,39 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
            << " cells holding a feature thinner than themselves" << endl;
   }
 
+  // Everything this level reads from the function is known here, and nothing after this point reads it.
+#ifdef CH_USE_HDF5
+  if (a_handle != nullptr) {
+    this->writeCells(*a_handle, kept);
+  }
+#else
+  if (a_handle != nullptr) {
+    MayDay::Error("PolyhedralEBGraph::defineCells - writing the graph needs HDF5");
+  }
+#endif
+
+  this->finishCells(a_carried, kept);
+}
+
+void
+PolyhedralEBGraph::finishCells(const LevelData<BaseFab<signed char>>&                  a_carried,
+                               const LayoutData<Vector<PolyhedralEB::CutCellSurface>>& a_kept)
+{
+  CH_TIME("PolyhedralEBGraph::finishCells");
+
+  using PolyhedralEB::CutCellSurface;
+
+  // the ghost cut cells some tile carries enter the sets
+  this->addCarriedGhostCutCells(a_carried);
+
+  this->beginAnchoring(a_carried);
+
+  this->addGhostSurfaceCells();
+
   m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
+
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -606,7 +814,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
 
     const Box         box         = m_grids[din];
     const IntVectSet& withSurface = m_surfaceCells[din];
-    const auto&       surfaces    = kept[din];
+    const auto&       surfaces    = a_kept[din];
 
     IVSFAB<CutCellSurface>& stored = m_surfaces[din];
 
@@ -1024,9 +1232,6 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
 
     BaseFab<signed char>&       states  = m_cellStates[din];
     const BaseFab<signed char>& carried = a_carried[din];
-    const BaseFab<signed char>& refined = m_refined[din];
-
-    IntVectSet& cut = m_cutCells[din];
 
     // A ghost cell no tile carries is classified from its corners alone: regular or covered where the tiles end
     // because the surface does, and possibly cut where they end because the coarser level describes the cells
@@ -1090,10 +1295,40 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
         }
         }
       }
-      else if (states(iv, 0) == s_cut && refined(iv, 0) == 0) {
-        // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as
-        // well: each box's set takes in the ghost cells that are cut and that some tile carries, which is exactly
-        // the set the owning tiles hold in that region, and an exchange fills them.
+    }
+  }
+}
+
+void
+PolyhedralEBGraph::addCarriedGhostCutCells(const LevelData<BaseFab<signed char>>& a_carried)
+{
+  CH_TIME("PolyhedralEBGraph::addCarriedGhostCutCells");
+
+  const Box& domainBox = m_domain.domainBox();
+
+  const DataIterator& dit  = m_grids.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box box   = m_grids[din];
+    const Box grown = grow(box, m_numGhost) & domainBox;
+
+    const BaseFab<signed char>& states  = m_cellStates[din];
+    const BaseFab<signed char>& carried = a_carried[din];
+    const BaseFab<signed char>& refined = m_refined[din];
+
+    IntVectSet& cut = m_cutCells[din];
+
+    // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as well: each
+    // box's set takes in the ghost cells that are cut and that some tile carries, which is exactly the set the owning
+    // tiles hold in that region, and an exchange fills them.
+    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (!box.contains(iv) && carried(iv, 0) != 0 && states(iv, 0) == s_cut && refined(iv, 0) == 0) {
         cut |= iv;
       }
     }
@@ -1206,6 +1441,7 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   }
 
   this->defineGhostCells(a_function, carried);
+  this->addCarriedGhostCutCells(carried);
 
   this->addGhostSurfaceCells();
 
