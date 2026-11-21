@@ -367,6 +367,7 @@ Where, and how far, these geometric tags refine can be restricted with boxes in 
    ComputationalGeometry.tag_box2_hi    =  0.1  0.1  0.1
    ComputationalGeometry.tag_box2_depth = 5
 
+The corners take two components in 2D and three in 3D, and every high corner must lie above its low corner in each direction.
 A geometric tag on level :math:`l` is kept only if :math:`l` is less than the depth at the tag's cell center.
 Where boxes overlap, the largest depth among them applies.
 Outside every box the depth is zero, so geometric tags do not refine there at all; without any boxes they are not restricted.
