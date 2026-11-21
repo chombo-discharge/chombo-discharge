@@ -1756,6 +1756,11 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
     // nothing, and EBISBox would read any face beside a regular cell as fully open.
     EBISBox data;
 
+    // A box the geometry classifies as regular or covered has no cut-box slot, and its graph must then be whole.
+    if (slot < 0) {
+      MayDay::Error("PolyhedralGeometryShop::coarsenLevel - a box that is not cut holds cut cells");
+    }
+
     const DataIndex& dinFine = ditFine[slot];
 
     data.define(fineGraph[dinFine], fineData[dinFine], dinFine);
@@ -2359,7 +2364,9 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
     };
 
     if (haveFiner) {
-      CH_assert(cutSlot[mybox] >= 0);
+      if (cutSlot[mybox] < 0) {
+        MayDay::Error("PolyhedralGeometryShop::assembleLevel - a box with finer geometry has no cut-box slot");
+      }
 
       const DataIndex& dinCut = cutIndex[cutSlot[mybox]];
 

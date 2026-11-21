@@ -883,6 +883,41 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
 
   header.readFromFile(*m_graphHandle);
 
+  // A missing key would otherwise read as zero or empty, and fail later with a misleading message.
+  const auto requireKey = [this](const bool a_found, const std::string& a_key) -> void {
+    if (!a_found) {
+      MayDay::Error(("ComputationalGeometry::readGrids - '" + m_graphFile + "' has no header entry '" + a_key +
+                     "'; it is not a complete graph file")
+                      .c_str());
+    }
+  };
+
+  requireKey(header.m_string.find("id") != header.m_string.end(), "id");
+
+  for (const std::string key : {"space_dim",
+                                "refine_saddles",
+                                "max_ghost_eb",
+                                "min_block_size",
+                                "max_block_size",
+                                "start_level",
+                                "stop_level",
+                                "electrode_level",
+                                "dielectric_level",
+                                "has_gas",
+                                "has_solid"}) {
+    requireKey(header.m_int.find(key) != header.m_int.end(), key);
+  }
+
+  for (const std::string key : {"start_dx", "refine_angle"}) {
+    requireKey(header.m_real.find(key) != header.m_real.end(), key);
+  }
+
+  for (const std::string key : {"start_domain", "stop_domain"}) {
+    requireKey(header.m_box.find(key) != header.m_box.end(), key);
+  }
+
+  requireKey(header.m_realvect.find("prob_lo") != header.m_realvect.end(), "prob_lo");
+
   if (header.m_string["id"] != m_graphId) {
     MayDay::Error(("ComputationalGeometry::readGrids - '" + m_graphFile +
                    "' is not the graph file the checkpoint was written with: another run has written over it")
@@ -1004,7 +1039,7 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
 
     const std::vector<int> types = DischargeIO::readH5Table(*m_graphHandle, "types", 2);
 
-    if (types.size() != 2 * m_boxes[lvl].size()) {
+    if (types.size() != 2 * static_cast<std::size_t>(m_boxes[lvl].size())) {
       MayDay::Error("ComputationalGeometry::readGrids - a level's boxes and types do not match");
     }
 
