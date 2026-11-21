@@ -915,6 +915,12 @@ PolyhedralGeometryShop::buildMoments()
     MayDay::Error("PolyhedralGeometryShop::buildMoments - the geometry's boxes were classified with no EB ghost cell");
   }
 
+  // The extension cache holds tiles cut from the geometry built here, so it starts empty with each build.
+  m_extensionGrids.resize(0);
+  m_extensionGraphs.resize(0);
+  m_extensionData.resize(0);
+  m_extensionCutTiles.resize(0);
+
   const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
 
   Timer timer("PolyhedralGeometryShop::buildMoments (" + phaseName + ")");
