@@ -459,7 +459,9 @@ DischargeIO::writeH5Table(HDF5Handle&             a_handle,
   }
 
   if (procID() == 0) {
-    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, a_values.data());
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, a_values.data()) < 0) {
+      MayDay::Error(("DischargeIO::writeH5Table - could not write dataset '" + a_name + "'").c_str());
+    }
   }
 
   H5Dclose(dataset);
@@ -478,7 +480,16 @@ DischargeIO::readH5Table(HDF5Handle& a_handle, const std::string& a_name, const 
   }
 
   const hid_t dataset = H5Dopen2(a_handle.groupID(), a_name.c_str(), H5P_DEFAULT);
-  const hid_t space   = H5Dget_space(dataset);
+
+  if (dataset < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not open dataset '" + a_name + "'").c_str());
+  }
+
+  const hid_t space = H5Dget_space(dataset);
+
+  if (space < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not read the shape of dataset '" + a_name + "'").c_str());
+  }
 
   hsize_t dims[2] = {0, 0};
 
@@ -494,7 +505,9 @@ DischargeIO::readH5Table(HDF5Handle& a_handle, const std::string& a_name, const 
 
   values.resize(dims[0] * dims[1]);
 
-  H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data());
+  if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data()) < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not read dataset '" + a_name + "'").c_str());
+  }
 
   H5Sclose(space);
   H5Dclose(dataset);
