@@ -89,6 +89,10 @@ ComputationalGeometry::ComputationalGeometry()
 
   pp.query("num_tag_boxes", numTagBoxes);
 
+  if (numTagBoxes < 0) {
+    MayDay::Error("ComputationalGeometry::ComputationalGeometry - num_tag_boxes is negative");
+  }
+
   m_tagBoxes.resize(0);
 
   for (int ibox = 1; ibox <= numTagBoxes; ibox++) {
@@ -103,9 +107,9 @@ ComputationalGeometry::ComputationalGeometry()
     pp.get((prefix + "_depth").c_str(), depth);
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      if (hi[dir] < lo[dir]) {
+      if (!(hi[dir] > lo[dir])) {
         MayDay::Error(
-          ("ComputationalGeometry::ComputationalGeometry - " + prefix + "_hi is below " + prefix + "_lo").c_str());
+          ("ComputationalGeometry::ComputationalGeometry - " + prefix + "_hi is not above " + prefix + "_lo").c_str());
       }
     }
 

@@ -373,6 +373,7 @@ Driver::getGeometryTags()
       const Real     dx     = m_amr->getDx()[lvl];
 
       IntVectSet rejected;
+
       for (IVSIterator ivsIt(geomTags); ivsIt.ok(); ++ivsIt) {
         const IntVect  iv  = ivsIt();
         const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
