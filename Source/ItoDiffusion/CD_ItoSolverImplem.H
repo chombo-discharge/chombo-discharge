@@ -74,6 +74,10 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
   m_amr
     ->depositWeight(a_phi, m_realm, m_phase, a_particles, a_deposition, a_coarseFineDeposition, m_irregularDeposition);
 
+  // With mirror deposition, a cut cell holds kappa*n after the real particles alone, and the density n only once
+  // mirrorPass has added the images. The coarse-fine steps of both deposits treat cut cells as holding the density
+  // and do not rescale them by kappa. That is right for the sum, because the coarse-fine steps are linear, and only
+  // for the sum.
   if (m_irregularDeposition == IrregularDeposition::Mirror) {
     this->mirrorPass(a_phi,
                      a_particles,
@@ -310,14 +314,15 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
   // the coarse level puts it outside the coarse-fine band where it would simply be discarded.
   m_mirrorImages.remap();
 
-  // Native, because the images are the cut-cell treatment; asking for another one here would apply it twice.
+  // Mirror, like the real particles: the deposit itself treats it as Native, since the images are the cut-cell
+  // treatment, but the coarse-fine steps must know that the summed field holds the density in cut cells.
   m_amr->depositWeight(m_mirrorScratch,
                        m_realm,
                        m_phase,
                        m_mirrorImages,
                        a_deposition,
                        a_coarseFineDeposition,
-                       IrregularDeposition::Native);
+                       IrregularDeposition::Mirror);
 
   // No covered-cell reset. Every image is inside the solid by construction -- that is what reflection means -- and
   // the density is only defined where kappa > 0. The deposit's contract is that the field is correct where it is

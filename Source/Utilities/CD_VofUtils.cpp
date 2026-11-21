@@ -10,6 +10,17 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <algorithm>
+#include <cstddef>
+#include <utility>
+#include <vector>
+
+// Chombo includes
+#include <BoxIterator.H>
+#include <parstream.H>
+
+// Our includes
 #include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -332,6 +343,598 @@ VofUtils::onlyUnique(Vector<VolIndex>& a_vofs)
   a_vofs.resize(0);
   for (const auto& v : setVofs) {
     a_vofs.push_back(v);
+  }
+}
+
+Vector<VolIndex>
+VofUtils::getFinerVoFs(const VolIndex&   a_coarVoF,
+                       const EBISLayout& a_ebislFine,
+                       const DataIndex&  a_din,
+                       const int         a_refRat)
+{
+  CH_TIME("VofUtils::getFinerVoFs");
+
+  const Vector<VolIndex> finer = VofUtils::gatherFinerVoFs(a_coarVoF, a_ebislFine, a_din, a_refRat);
+
+  if (finer.size() == 0) {
+    return finer;
+  }
+
+  return VofUtils::orderFinerVoFs(finer, a_ebislFine, a_din, a_refRat);
+}
+
+Vector<FaceIndex>
+VofUtils::getFinerFaces(const FaceIndex&  a_coarFace,
+                        const EBISLayout& a_ebislFine,
+                        const DataIndex&  a_din,
+                        const int         a_refRat)
+{
+  CH_TIME("VofUtils::getFinerFaces");
+
+  const int dir = a_coarFace.direction();
+
+  Vector<FaceIndex> faces;
+
+  if (a_coarFace.isBoundary()) {
+    const Side::LoHiSide outside = (a_coarFace.cellIndex(Side::Hi) < 0) ? Side::Hi : Side::Lo;
+
+    const Vector<VolIndex> finer = VofUtils::gatherFinerVoFs(a_coarFace.getVoF(flip(outside)),
+                                                             a_ebislFine,
+                                                             a_din,
+                                                             a_refRat);
+
+    if (finer.size() > 0) {
+      VofUtils::appendFinerBoundaryFaces(faces, finer, a_ebislFine, a_din, a_refRat, dir, outside);
+    }
+  }
+  else {
+    const Vector<VolIndex> finerLo = VofUtils::gatherFinerVoFs(a_coarFace.getVoF(Side::Lo),
+                                                               a_ebislFine,
+                                                               a_din,
+                                                               a_refRat);
+    const Vector<VolIndex> finerHi = VofUtils::gatherFinerVoFs(a_coarFace.getVoF(Side::Hi),
+                                                               a_ebislFine,
+                                                               a_din,
+                                                               a_refRat);
+
+    if (finerLo.size() > 0 && finerHi.size() > 0) {
+      VofUtils::appendFinerFaces(faces, finerLo, finerHi, a_ebislFine, a_din, a_refRat, dir);
+    }
+  }
+
+  return faces;
+}
+
+Vector<VolIndex>
+VofUtils::gatherFinerVoFs(const VolIndex&   a_coarVoF,
+                          const EBISLayout& a_ebislFine,
+                          const DataIndex&  a_din,
+                          const int         a_refRat)
+{
+  CH_assert(a_refRat >= 2);
+  CH_assert((a_refRat & (a_refRat - 1)) == 0);
+  CH_assert(a_ebislFine.getMaxCoarseningRatio() >= a_refRat);
+
+  const EBISBox& ebisBoxFine = a_ebislFine[a_din];
+  const IntVect& coarCell    = a_coarVoF.gridIndex();
+  const Box      fineCells   = refine(Box(coarCell, coarCell), a_refRat);
+
+  CH_assert(ebisBoxFine.getRegion().contains(fineCells));
+
+  Vector<VolIndex> finer;
+
+  for (BoxIterator bit(fineCells); bit.ok(); ++bit) {
+    const Vector<VolIndex> vofs = ebisBoxFine.getVoFs(bit());
+
+    for (int i = 0; i < vofs.size(); i++) {
+      if (a_ebislFine.coarsen(vofs[i], a_refRat, a_din) == a_coarVoF) {
+        finer.push_back(vofs[i]);
+      }
+    }
+  }
+
+  return finer;
+}
+
+Vector<VolIndex>
+VofUtils::getStoredFinerVoFs(const VolIndex&                    a_coarVoF,
+                             const EBISBox&                     a_ebisBoxCoar,
+                             const BaseIVFAB<Vector<VolIndex>>& a_finerVoFs,
+                             const int                          a_refRat)
+{
+  CH_assert(a_refRat >= 2);
+
+  const IntVect& coarCell = a_coarVoF.gridIndex();
+
+  Vector<VolIndex> finer;
+
+  if (a_ebisBoxCoar.isRegular(coarCell)) {
+    // In EBISLayout::refine's order: refined by two at a time, each cell's children in BoxIterator order.
+    Vector<IntVect> cells(1, coarCell);
+
+    for (int ratio = 2; ratio <= a_refRat; ratio *= 2) {
+      Vector<IntVect> children;
+
+      for (int i = 0; i < cells.size(); i++) {
+        for (BoxIterator bit(refine(Box(cells[i], cells[i]), 2)); bit.ok(); ++bit) {
+          children.push_back(bit());
+        }
+      }
+
+      cells = children;
+    }
+
+    for (int i = 0; i < cells.size(); i++) {
+      finer.push_back(VolIndex(cells[i], 0));
+    }
+  }
+  else if (!(a_ebisBoxCoar.isCovered(coarCell))) {
+    if (!(a_finerVoFs.getIVS().contains(coarCell))) {
+      MayDay::Abort("VofUtils::getStoredFinerVoFs -- no stored finer VoFs for this irregular coarse cell");
+    }
+
+    finer = a_finerVoFs(a_coarVoF, 0);
+  }
+
+  return finer;
+}
+
+Vector<FaceIndex>
+VofUtils::getStoredFinerFaces(const FaceIndex&                   a_coarFace,
+                              const EBISBox&                     a_ebisBoxCoar,
+                              const BaseIVFAB<Vector<VolIndex>>& a_finerVoFs,
+                              const EBISLayout&                  a_ebislFine,
+                              const DataIndex&                   a_din,
+                              const int                          a_refRat)
+{
+  CH_assert(a_refRat >= 2);
+
+  const EBISBox& ebisBoxFine = a_ebislFine[a_din];
+  const Box&     regionCoar  = a_ebisBoxCoar.getRegion();
+  const Box&     regionFine  = ebisBoxFine.getRegion();
+  const int      dir         = a_coarFace.direction();
+  const IntVect& ivLoCoar    = a_coarFace.gridIndex(Side::Lo);
+  const IntVect& ivHiCoar    = a_coarFace.gridIndex(Side::Hi);
+
+  // Coarse cells whose finer cells all lie in the finer EBISBox.
+  const Box cellsWithAllFiner = VofUtils::getCoarseCellsWithAllFinerCells(regionFine, a_refRat);
+
+  auto hasAllFinerCells = [&](const IntVect& a_ivCoar) -> bool {
+    return cellsWithAllFiner.contains(a_ivCoar);
+  };
+
+  Vector<FaceIndex> finer;
+
+  if (regionCoar.contains(ivLoCoar) && regionCoar.contains(ivHiCoar)) {
+    const bool allLo = hasAllFinerCells(ivLoCoar);
+    const bool allHi = hasAllFinerCells(ivHiCoar);
+
+    if (allLo && allHi) {
+      if (a_refRat > 2) {
+        return VofUtils::getFinerFaces(a_coarFace, a_ebislFine, a_din, a_refRat);
+      }
+
+      const Vector<VolIndex> loFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Lo),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+      const Vector<VolIndex> hiFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Hi),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+
+      for (int ilo = 0; ilo < loFine.size(); ilo++) {
+        for (int ihi = 0; ihi < hiFine.size(); ihi++) {
+          if (ebisBoxFine.getEBGraph().isConnected(loFine[ilo], hiFine[ihi])) {
+            finer.push_back(FaceIndex(loFine[ilo], hiFine[ihi], dir));
+          }
+        }
+      }
+    }
+    else if (allLo) {
+      const Vector<VolIndex> loFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Lo),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+
+      finer = VofUtils::getFinerFacesFromSide(a_coarFace, Side::Lo, loFine, a_ebislFine, a_din, a_refRat);
+    }
+    else if (allHi) {
+      const Vector<VolIndex> hiFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Hi),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+
+      finer = VofUtils::getFinerFacesFromSide(a_coarFace, Side::Hi, hiFine, a_ebislFine, a_din, a_refRat);
+    }
+    else {
+      MayDay::Abort("VofUtils::getStoredFinerFaces -- neither VoF of the face has all its finer cells");
+    }
+  }
+  else {
+    // Face on the boundary of the coarse region, as in EBGraph::refine, which EBISLayout::refine applies at every
+    // factor of two. The cell outside the region has no finer cells to pair with, so the faces are those of the inside
+    // cell's finer VoFs that open onto cells outside the refined region.
+    const Box refinedRegionCoar = refine(regionCoar, a_refRat);
+
+    if (regionCoar.contains(ivLoCoar)) {
+      const Vector<VolIndex> loFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Lo),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+
+      for (int ivof = 0; ivof < loFine.size(); ivof++) {
+        if (!(refinedRegionCoar.contains(loFine[ivof].gridIndex() + BASISV(dir)))) {
+          finer.append(ebisBoxFine.getFaces(loFine[ivof], dir, Side::Hi));
+        }
+      }
+    }
+    else if (regionCoar.contains(ivHiCoar)) {
+      const Vector<VolIndex> hiFine = getStoredFinerVoFs(a_coarFace.getVoF(Side::Hi),
+                                                         a_ebisBoxCoar,
+                                                         a_finerVoFs,
+                                                         a_refRat);
+
+      for (int ivof = 0; ivof < hiFine.size(); ivof++) {
+        if (!(refinedRegionCoar.contains(hiFine[ivof].gridIndex() - BASISV(dir)))) {
+          finer.append(ebisBoxFine.getFaces(hiFine[ivof], dir, Side::Lo));
+        }
+      }
+    }
+    else {
+      MayDay::Abort("VofUtils::getStoredFinerFaces -- neither VoF of the face lies in the coarse region");
+    }
+  }
+
+  return finer;
+}
+
+Box
+VofUtils::getCoarseCellsWithAllFinerCells(const Box& a_fineRegion, const int a_refRat)
+{
+  CH_assert(a_refRat >= 1);
+
+  // Floor division, also for negative indices.
+  auto floorDiv = [](const int a_num, const int a_den) -> int {
+    return (a_num >= 0) ? a_num / a_den : -((-a_num + a_den - 1) / a_den);
+  };
+
+  IntVect lo;
+  IntVect hi;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    lo[dir] = -floorDiv(-a_fineRegion.smallEnd(dir), a_refRat);
+    hi[dir] = floorDiv(a_fineRegion.bigEnd(dir) + 1, a_refRat) - 1;
+  }
+
+  return Box(lo, hi);
+}
+
+Vector<FaceIndex>
+VofUtils::getFinerFacesFromSide(const FaceIndex&        a_coarFace,
+                                const Side::LoHiSide    a_side,
+                                const Vector<VolIndex>& a_finerVoFs,
+                                const EBISLayout&       a_ebislFine,
+                                const DataIndex&        a_din,
+                                const int               a_refRat)
+{
+  CH_TIME("VofUtils::getFinerFacesFromSide");
+
+  const EBISBox&       ebisBoxFine  = a_ebislFine[a_din];
+  const int            dir          = a_coarFace.direction();
+  const Side::LoHiSide otherSide    = flip(a_side);
+  const VolIndex&      otherCoarVoF = a_coarFace.getVoF(otherSide);
+
+  // Index, in the face direction, of the layer of finer cells of the a_side cell next to the face.
+  const int layer = (a_side == Side::Lo) ? (a_coarFace.gridIndex(Side::Lo)[dir] + 1) * a_refRat - 1
+                                         : a_coarFace.gridIndex(Side::Hi)[dir] * a_refRat;
+
+  Vector<FaceIndex> faces;
+
+  for (int ivof = 0; ivof < a_finerVoFs.size(); ivof++) {
+    const VolIndex& finerVoF = a_finerVoFs[ivof];
+
+    if (finerVoF.gridIndex()[dir] == layer) {
+      const IntVect otherCell = finerVoF.gridIndex() + sign(otherSide) * BASISV(dir);
+
+      if (!(ebisBoxFine.getRegion().contains(otherCell))) {
+        MayDay::Abort(
+          "VofUtils::getFinerFacesFromSide -- the finer cells across the face are outside the finer EBISBox");
+      }
+
+      const Vector<FaceIndex> finerFaces = ebisBoxFine.getFaces(finerVoF, dir, otherSide);
+
+      for (int iface = 0; iface < finerFaces.size(); iface++) {
+        const FaceIndex& finerFace = finerFaces[iface];
+
+        if (!(finerFace.isBoundary())) {
+          const VolIndex& otherFinerVoF = finerFace.getVoF(otherSide);
+
+          if (a_ebislFine.coarsen(otherFinerVoF, a_refRat, a_din) == otherCoarVoF) {
+            faces.push_back(finerFace);
+          }
+        }
+      }
+    }
+  }
+
+  return faces;
+}
+
+Vector<Vector<VolIndex>>
+VofUtils::orderFinerGroups(const Vector<VolIndex>& a_finest,
+                           const EBISLayout&       a_ebislFine,
+                           const DataIndex&        a_din,
+                           const int               a_ratio)
+{
+  CH_assert(a_ratio >= 2);
+  CH_assert(a_finest.size() > 0);
+
+  const EBISBox& ebisBoxFine = a_ebislFine[a_din];
+  const int      childRatio  = a_ratio / 2;
+
+  // The ancestor of each finest VoF one factor of two finer than the VoF they all coarsen to.
+  Vector<VolIndex> ancestors(a_finest.size());
+
+  for (int i = 0; i < a_finest.size(); i++) {
+    ancestors[i] = (childRatio == 1) ? a_finest[i] : a_ebislFine.coarsen(a_finest[i], childRatio, a_din);
+  }
+
+  // The distinct ancestors are the children, gathered in BoxIterator order of their cells and then by cell index. The
+  // children's cells refine one cell by two, so BoxIterator order is the binary number whose bit d is the offset along
+  // direction d.
+  const IntVect firstCell = 2 * coarsen(ancestors[0].gridIndex(), 2);
+
+#ifndef NDEBUG
+  for (int i = 0; i < ancestors.size(); i++) {
+    const IntVect offset = ancestors[i].gridIndex() - firstCell;
+
+    CH_assert(offset.min() >= 0 && offset.max() <= 1);
+  }
+#endif
+
+  const auto gatherKey = [&](const VolIndex& a_child) -> std::pair<int, int> {
+    int rank = 0;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      rank += (a_child.gridIndex()[dir] - firstCell[dir]) << dir;
+    }
+
+    return std::make_pair(rank, a_child.cellIndex());
+  };
+
+  Vector<VolIndex> children;
+
+  for (int i = 0; i < ancestors.size(); i++) {
+    bool known = false;
+
+    for (int c = 0; c < children.size() && !known; c++) {
+      known = children[c] == ancestors[i];
+    }
+
+    if (!known) {
+      children.push_back(ancestors[i]);
+    }
+  }
+
+  std::sort(children.stdVector().begin(),
+            children.stdVector().end(),
+            [&](const VolIndex& a_left, const VolIndex& a_right) -> bool {
+              return gatherKey(a_left) < gatherKey(a_right);
+            });
+
+  const int numChildren = children.size();
+
+  Vector<Vector<VolIndex>> groups(numChildren);
+
+  for (int i = 0; i < ancestors.size(); i++) {
+    for (int c = 0; c < numChildren; c++) {
+      if (children[c] == ancestors[i]) {
+        groups[c].push_back(a_finest[i]);
+      }
+    }
+  }
+
+  const auto connected = [&](const int a_first, const int a_second) -> bool {
+    for (int i = 0; i < groups[a_first].size(); i++) {
+      for (int j = 0; j < groups[a_second].size(); j++) {
+        if (ebisBoxFine.isConnected(groups[a_first][i], groups[a_second][j])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // List the children in the order the connected set grows from the first one, as EBGraph::getVoFSets does: sweep the
+  // children in gathering order and add every one connected to a child already listed, until a sweep adds none.
+  std::vector<int>  order(1, 0);
+  std::vector<bool> listed(numChildren, false);
+
+  listed[0] = true;
+
+  bool doneAdding = false;
+
+  while (!doneAdding) {
+    const std::size_t oldSize = order.size();
+
+    for (int j = 1; j < numChildren; j++) {
+      for (std::size_t k = 0; k < order.size() && !listed[j]; k++) {
+        if (connected(order[k], j)) {
+          order.push_back(j);
+
+          listed[j] = true;
+        }
+      }
+    }
+
+    doneAdding = order.size() == oldSize;
+  }
+
+  // The children are the VoFs one level finer that coarsen to a single VoF, so a path joins every one of them to the
+  // first one. A graph that breaks this has no order EBISLayout::refine would agree with. The report names the cell
+  // and the connected pieces its children fall into.
+  if (static_cast<int>(order.size()) < numChildren) {
+    std::vector<int> piece(numChildren, -1);
+
+    int numPieces = 0;
+
+    for (int first = 0; first < numChildren; first++) {
+      if (piece[first] >= 0) {
+        continue;
+      }
+
+      std::vector<int> members(1, first);
+
+      piece[first] = numPieces;
+
+      for (std::size_t k = 0; k < members.size(); k++) {
+        for (int j = 0; j < numChildren; j++) {
+          if (piece[j] < 0 && connected(members[k], j)) {
+            piece[j] = numPieces;
+
+            members.push_back(j);
+          }
+        }
+      }
+
+      numPieces++;
+    }
+
+    const IntVect coarseCell = coarsen(a_finest[0].gridIndex(), a_ratio);
+
+    pout() << "VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected" << endl;
+    pout() << "  finer domain " << a_ebislFine.getDomain().domainBox() << ", refinement ratio " << a_ratio
+           << ", coarse cell " << coarseCell << ", " << numChildren << " children in " << numPieces << " pieces"
+           << endl;
+
+    for (int c = 0; c < numChildren; c++) {
+      Real volume = 0.0;
+
+      for (int i = 0; i < groups[c].size(); i++) {
+        volume += ebisBoxFine.volFrac(groups[c][i]);
+      }
+
+      pout() << "  child " << c << ": cell " << children[c].gridIndex() << ", VoF " << children[c].cellIndex()
+             << ", piece " << piece[c] << ", " << groups[c].size() << " finest VoFs with volume fractions summing to "
+             << volume << endl;
+    }
+
+    MayDay::Error("VofUtils::orderFinerGroups -- the children of a coarse VoF are not connected");
+  }
+
+  Vector<Vector<VolIndex>> ordered;
+
+  for (std::size_t k = 0; k < order.size(); k++) {
+    ordered.push_back(groups[order[k]]);
+  }
+
+  return ordered;
+}
+
+Vector<VolIndex>
+VofUtils::orderFinerVoFs(const Vector<VolIndex>& a_finest,
+                         const EBISLayout&       a_ebislFine,
+                         const DataIndex&        a_din,
+                         const int               a_ratio)
+{
+  if (a_ratio == 1) {
+    CH_assert(a_finest.size() == 1);
+
+    return a_finest;
+  }
+
+  const Vector<Vector<VolIndex>> groups = VofUtils::orderFinerGroups(a_finest, a_ebislFine, a_din, a_ratio);
+
+  Vector<VolIndex> ordered;
+
+  for (int g = 0; g < groups.size(); g++) {
+    ordered.append(VofUtils::orderFinerVoFs(groups[g], a_ebislFine, a_din, a_ratio / 2));
+  }
+
+  return ordered;
+}
+
+void
+VofUtils::appendFinerFaces(Vector<FaceIndex>&      a_faces,
+                           const Vector<VolIndex>& a_finestLo,
+                           const Vector<VolIndex>& a_finestHi,
+                           const EBISLayout&       a_ebislFine,
+                           const DataIndex&        a_din,
+                           const int               a_ratio,
+                           const int               a_dir)
+{
+  if (a_ratio == 1) {
+    CH_assert(a_finestLo.size() == 1);
+    CH_assert(a_finestHi.size() == 1);
+
+    a_faces.push_back(FaceIndex(a_finestLo[0], a_finestHi[0], a_dir));
+
+    return;
+  }
+
+  const EBISBox& ebisBoxFine = a_ebislFine[a_din];
+
+  const Vector<Vector<VolIndex>> groupsLo = VofUtils::orderFinerGroups(a_finestLo, a_ebislFine, a_din, a_ratio);
+  const Vector<Vector<VolIndex>> groupsHi = VofUtils::orderFinerGroups(a_finestHi, a_ebislFine, a_din, a_ratio);
+
+  // A low and a high child share a face when some pair of their finest VoFs does. Pairs are visited as
+  // EBGraph::refine(FaceIndex) visits them: low children outer, high children inner.
+  for (int lo = 0; lo < groupsLo.size(); lo++) {
+    for (int hi = 0; hi < groupsHi.size(); hi++) {
+      bool connected = false;
+
+      for (int i = 0; i < groupsLo[lo].size() && !connected; i++) {
+        for (int j = 0; j < groupsHi[hi].size() && !connected; j++) {
+          connected = ebisBoxFine.isConnected(groupsLo[lo][i], groupsHi[hi][j]);
+        }
+      }
+
+      if (connected) {
+        VofUtils::appendFinerFaces(a_faces, groupsLo[lo], groupsHi[hi], a_ebislFine, a_din, a_ratio / 2, a_dir);
+      }
+    }
+  }
+}
+
+void
+VofUtils::appendFinerBoundaryFaces(Vector<FaceIndex>&      a_faces,
+                                   const Vector<VolIndex>& a_finest,
+                                   const EBISLayout&       a_ebislFine,
+                                   const DataIndex&        a_din,
+                                   const int               a_ratio,
+                                   const int               a_dir,
+                                   const Side::LoHiSide    a_side)
+{
+  const EBISBox& ebisBoxFine = a_ebislFine[a_din];
+
+  if (a_ratio == 1) {
+    CH_assert(a_finest.size() == 1);
+
+    a_faces.append(ebisBoxFine.getFaces(a_finest[0], a_dir, a_side));
+
+    return;
+  }
+
+  const ProblemDomain& domain = ebisBoxFine.getDomain();
+  const IntVect        shift  = sign(a_side) * BASISV(a_dir);
+
+  const Vector<Vector<VolIndex>> groups = VofUtils::orderFinerGroups(a_finest, a_ebislFine, a_din, a_ratio);
+
+  // A child has a boundary face when one of its finest VoFs against the boundary does.
+  for (int g = 0; g < groups.size(); g++) {
+    bool hasFace = false;
+
+    for (int i = 0; i < groups[g].size() && !hasFace; i++) {
+      const VolIndex& vof = groups[g][i];
+
+      hasFace = !domain.contains(vof.gridIndex() + shift) && ebisBoxFine.getFaces(vof, a_dir, a_side).size() > 0;
+    }
+
+    if (hasFace) {
+      VofUtils::appendFinerBoundaryFaces(a_faces, groups[g], a_ebislFine, a_din, a_ratio / 2, a_dir, a_side);
+    }
   }
 }
 

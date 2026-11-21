@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_EBReflux.H>
+#include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
@@ -26,14 +27,15 @@ EBReflux::EBReflux() noexcept : m_isDefined(false)
   CH_TIME("EBReflux::EBReflux(weak)");
 }
 
-EBReflux::EBReflux(const EBLevelGrid& a_eblg,
-                   const EBLevelGrid& a_eblgFine,
-                   const EBLevelGrid& a_eblgCoFi,
-                   const int          a_refRat) noexcept
+EBReflux::EBReflux(const EBLevelGrid&                             a_eblg,
+                   const EBLevelGrid&                             a_eblgFine,
+                   const EBLevelGrid&                             a_eblgCoFi,
+                   const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                   const int                                      a_refRat) noexcept
 {
   CH_TIME("EBReflux::EBReflux(full)");
 
-  this->define(a_eblg, a_eblgFine, a_eblgCoFi, a_refRat);
+  this->define(a_eblg, a_eblgFine, a_eblgCoFi, a_finerVoFs, a_refRat);
 }
 
 EBReflux::~EBReflux() noexcept
@@ -42,10 +44,11 @@ EBReflux::~EBReflux() noexcept
 }
 
 void
-EBReflux::define(const EBLevelGrid& a_eblg,
-                 const EBLevelGrid& a_eblgFine,
-                 const EBLevelGrid& a_eblgCoFi,
-                 const int          a_refRat) noexcept
+EBReflux::define(const EBLevelGrid&                             a_eblg,
+                 const EBLevelGrid&                             a_eblgFine,
+                 const EBLevelGrid&                             a_eblgCoFi,
+                 const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                 const int                                      a_refRat) noexcept
 {
   CH_TIME("EBReflux::define");
 
@@ -55,7 +58,7 @@ EBReflux::define(const EBLevelGrid& a_eblg,
   m_refRat   = a_refRat;
 
   this->defineRegionsCF();
-  this->defineStencils();
+  this->defineStencils(a_finerVoFs);
   this->defineBuffers();
 
   m_isDefined = true;
@@ -199,7 +202,7 @@ EBReflux::defineRegionsCF() noexcept
 }
 
 void
-EBReflux::defineStencils() noexcept
+EBReflux::defineStencils(const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs) noexcept
 {
   CH_TIME("EBReflux::defineStencils");
 
@@ -253,7 +256,12 @@ EBReflux::defineStencils() noexcept
 
           if (areaCoar > 0.0) {
 
-            const Vector<FaceIndex>& fineFaces = ebislCoar.refine(coarFace, m_refRat, din);
+            const Vector<FaceIndex> fineFaces = VofUtils::getStoredFinerFaces(coarFace,
+                                                                              ebisBoxCoar,
+                                                                              a_finerVoFs[din],
+                                                                              ebislFine,
+                                                                              din,
+                                                                              m_refRat);
             for (int iface = 0; iface < fineFaces.size(); iface++) {
               const FaceIndex& fineFace   = fineFaces[iface];
               const Real       fineWeight = ebisBoxFine.areaFrac(fineFace) * dxFactor / areaCoar;

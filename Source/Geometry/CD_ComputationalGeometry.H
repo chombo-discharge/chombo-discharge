@@ -188,6 +188,10 @@ public:
    * constructor.
    * @param[in] a_startDomain  Domain the upward pass starts from.
    * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
+   * @param[in] a_electrodeDomain  Domain the geometric tags refine electrode surfaces down to, one of the levels. A box
+   * on a coarser level that holds an electrode surface is split.
+   * @param[in] a_dielectricDomain Domain the geometric tags refine dielectric surfaces down to, one of the levels. A
+   * box on a coarser level that holds a dielectric surface is split.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
@@ -199,6 +203,8 @@ public:
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
             const ProblemDomain& a_stopDomain,
+            const ProblemDomain& a_electrodeDomain,
+            const ProblemDomain& a_dielectricDomain,
             const RealVect&      a_probLo,
             const Real           a_startDx,
             const Real           a_refineAngle,
@@ -335,9 +341,8 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
-   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what
-   * a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below
-   * it.
+   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, on which the
+   * level's graph is built. On the start level, its boxes irregular in either phase; empty below it.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The cut tiles.
    */
@@ -374,7 +379,8 @@ public:
   /**
    * @brief The cut cells of a phase on a domain that this rank holds.
    * @details Read from the polyhedral generator's stored level when it built the phase, and from the phase's index
-   * space otherwise. Empty when the phase has none.
+   * space otherwise. Empty when the phase has none, and with the polyhedral generator when no tile was split down to
+   * the level, which then resolves no surface of its own.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The cut cells in the boxes this rank holds.
@@ -385,7 +391,8 @@ public:
   /**
    * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
    * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
-   * irregular grids otherwise. The phase must have an index space.
+   * irregular grids otherwise. With the polyhedral generator, a level no tile was split down to has an empty layout.
+   * The phase must have an index space.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
    * @return The layout.
@@ -403,7 +410,10 @@ public:
 
   /**
    * @brief Build geometries and the MFIndexSpace.
-   * @param[in] a_finestDomain Finest domain
+   * @param[in] a_finestDomain     Finest domain the geometry is resolved on
+   * @param[in] a_finestMeshDomain Finest domain the mesh may refine to, a_finestDomain refined by a power of two. It is
+   * finer than a_finestDomain only with the polyhedral generator, whose index space cuts those levels from the finest
+   * resolved one.
    * @param[in] a_probLo       Lower-left corner
    * @param[in] a_finestDx     Finest grid resolution
    * @param[in] a_nCellMax     Patch size
@@ -415,6 +425,7 @@ public:
    */
   virtual void
   buildGeometries(const ProblemDomain& a_finestDomain,
+                  const ProblemDomain& a_finestMeshDomain,
                   const RealVect&      a_probLo,
                   const Real           a_finestDx,
                   const int            a_nCellMax,
@@ -529,6 +540,16 @@ protected:
    * @brief Level of the stop domain, the finest level.
    */
   int m_stopLevel;
+
+  /**
+   * @brief Level the geometric tags refine electrode surfaces down to; a box on a coarser level holding one is split.
+   */
+  int m_electrodeLevel;
+
+  /**
+   * @brief Level the geometric tags refine dielectric surfaces down to; a box on a coarser level holding one is split.
+   */
+  int m_dielectricLevel;
 
   /**
    * @brief Tile size, in cells. ComputationalGeometry.min_block_size, 8 when not given.
@@ -742,8 +763,9 @@ protected:
   /**
    * @brief Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair
    * reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than
-   * the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle.
-   * @details Only None against anything else decides whether a box splits. Which of the five reasons it is, is
+   * the band), an edge the level above would cross twice, a cut cell whose interface is twisted into a saddle, or a
+   * surface the geometric tags refine below the box's level (Driver.refine_electrodes, Driver.refine_dielectrics).
+   * @details Only None against anything else decides whether a box splits. Which of the six reasons it is, is
    * recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it
    * is a diagnostic rather than a part of the generator.
    */
@@ -754,7 +776,8 @@ protected:
     Ring,
     Medial,
     DoubleCrossing,
-    Twist
+    Twist,
+    Depth
   };
 
   /**
@@ -818,6 +841,19 @@ protected:
    */
   SplitReason
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Whether a box holds a cell cut in exactly one phase, which Driver::getGeometryTags tags as conductor.
+   * @details A cell is cut in a phase when that phase's surface crosses it, decided as the polyhedral shop decides it,
+   * from the implicit function at the cell's nodes and edges. Without one of the two implicit functions every cut cell
+   * is cut in one phase only, and the answer is true. The tags are taken from the finished graph, after the fill rule,
+   * so a cell the fill rule covers in one phase is cut in one phase for the tags but in both here.
+   * @param[in] a_box   The box, on a_level.
+   * @param[in] a_level Level of the box.
+   * @return True if some cell of the box is cut in one phase and not the other.
+   */
+  bool
+  holdsConductorCell(const Box& a_box, const int a_level) const;
 
   /**
    * @brief Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it.
