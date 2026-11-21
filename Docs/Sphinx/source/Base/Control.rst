@@ -323,7 +323,7 @@ The grid tags still use the values in the input file, since they may change duri
 The restart aborts if
 
 * the graph file is missing, or carries another identifier, which happens when another simulation with the same ``Driver.output_names`` has written over it;
-* the graph file lacks part of its header or of a table, so it is not a complete graph file;
+* the graph file lacks part of its header, or its tables are inconsistent, so it is not a complete graph file;
 * the input file adds or removes a dielectric, so that the geometry has other phases than the file holds;
 * the domain, its lower corner, the grid spacing or ``AmrMesh.max_eb_depth`` differ from those the file was written with, since the stored geometry does not fit another index space;
 * the input file asks for more EB ghost cells than the file was written with.
