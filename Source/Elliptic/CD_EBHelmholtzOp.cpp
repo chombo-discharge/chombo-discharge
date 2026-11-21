@@ -40,12 +40,15 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblg,
                              const EBLevelGrid&                               a_eblgCoFi,
                              const EBLevelGrid&                               a_eblgCoar,
-                             const EBLevelGrid&                               a_eblgCoFiMG,
                              const EBLevelGrid&                               a_eblgCoarMG,
                              const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                              const RefCountedPtr<EBReflux>&                   a_fluxReg,
                              const RefCountedPtr<EBCoarAve>&                  a_coarAve,
+                             const RefCountedPtr<EBMGRestrict>&               a_restrictOp,
+                             const RefCountedPtr<EBMGProlong>&                a_prolongOp,
+                             const RefCountedPtr<EBMGRestrict>&               a_restrictOpMG,
+                             const RefCountedPtr<EBMGProlong>&                a_prolongOpMG,
                              const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBc,
                              const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBc,
                              const RealVect&                                  a_probLo,
@@ -150,17 +153,20 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_eblgCoFi = a_eblgCoFi;
     m_eblgCoar = a_eblgCoar;
 
-    m_restrictOp.define(m_eblg, m_eblgCoFi, m_eblgCoFi, m_refToCoar);
-    m_prolongOp.define(m_eblg, m_eblgCoFi, m_eblgCoar, m_refToCoar);
+    m_restrictOp = a_restrictOp;
+    m_prolongOp  = a_prolongOp;
+
+    CH_assert(!(m_restrictOp.isNull()));
+    CH_assert(!(m_prolongOp.isNull()));
   }
 
   if (m_hasMGObjects) {
-    constexpr int mgRef = 2;
+    m_eblgCoarMG   = a_eblgCoarMG;
+    m_restrictOpMG = a_restrictOpMG;
+    m_prolongOpMG  = a_prolongOpMG;
 
-    m_eblgCoarMG = a_eblgCoarMG;
-
-    m_restrictOpMG.define(m_eblg, a_eblgCoFiMG, m_eblgCoarMG, mgRef);
-    m_prolongOpMG.define(m_eblg, a_eblgCoFiMG, m_eblgCoarMG, mgRef);
+    CH_assert(!(m_restrictOpMG.isNull()));
+    CH_assert(!(m_prolongOpMG.isNull()));
   }
 
   // Define BC objects.
@@ -922,7 +928,7 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   this->residual(res, a_phi, a_rhs, true);
 
   // Restrict it onto the coarse level.
-  m_restrictOpMG.restrictResidual(a_resCoar, res, m_interval);
+  m_restrictOpMG->restrictResidual(a_resCoar, res, m_interval);
 }
 
 void
@@ -930,7 +936,7 @@ EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBC
 {
   CH_TIME("EBHelmholtzOp::prolongIncrement(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_prolongOpMG.prolongResidual(a_phi, a_correctCoarse, m_interval);
+  m_prolongOpMG->prolongResidual(a_phi, a_correctCoarse, m_interval);
 }
 
 int
@@ -1248,7 +1254,7 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->scale(resThisLevel, -1.0);
 
   // Restrict residual.
-  m_restrictOp.restrictResidual(a_residualCoarse, resThisLevel, m_interval);
+  m_restrictOp->restrictResidual(a_residualCoarse, resThisLevel, m_interval);
 }
 
 void
@@ -1256,7 +1262,7 @@ EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EB
 {
   CH_TIME("EBHelmholtzOp::AMRProlong(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_prolongOp.prolongResidual(a_correction, a_coarseCorrection, m_interval);
+  m_prolongOp->prolongResidual(a_correction, a_coarseCorrection, m_interval);
 }
 
 void

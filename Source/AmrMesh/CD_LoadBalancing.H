@@ -159,10 +159,18 @@ protected:
   shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /**
+   * @brief Number of tiles per direction an SFC index can hold (21 bits per direction in a 64-bit index).
+   */
+  static constexpr uint32_t s_sfcMaxCoordinate = 1U << 21;
+
+  /**
    * @brief Generic SFC sorting function
+   * @details The curve is laid over tiles, not cells. The tile size is the largest power of two that divides the
+   * corners of all the boxes, and a box's position on the curve is that of the tile at its lower corner. Aborts if a
+   * box has a negative corner, or if a tile coordinate does not fit in 21 bits.
    * @param[in,out] a_boxes Grid boxes to be sorted
    * @param[in,out] a_loads Computational loads to be sorted along with the boxes.
-   * @param[in]    a_sfcEncoder Function for turning a grid index into an SFC index.
+   * @param[in]    a_sfcEncoder Function for turning a tile index into an SFC index.
    */
   template <class T, int DIM>
   static void
@@ -173,7 +181,7 @@ protected:
 public:
   /**
    * @brief Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction.
-   * @param[in] a_coords Integer coordinates (each < 2^21).
+   * @param[in] a_coords Integer coordinates (each < 2^21). Aborts otherwise.
    * @return The interleaved Morton index.
    */
   template <int DIM>
@@ -182,7 +190,7 @@ public:
 
   /**
    * @brief Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.
-   * @param[in] a_coords Integer coordinates (each < 2^21).
+   * @param[in] a_coords Integer coordinates (each < 2^21). Aborts otherwise.
    * @return The Hilbert index.
    */
   template <int DIM>

@@ -18,6 +18,7 @@
 #include <CD_BoxLoops.H>
 #include <CD_DataOps.H>
 #include <CD_EBMGRestrict.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 EBMGRestrict::EBMGRestrict() noexcept : m_isDefined(false)
@@ -25,15 +26,16 @@ EBMGRestrict::EBMGRestrict() noexcept : m_isDefined(false)
   CH_TIME("EBMGRestrict::EBMGRestrict(default)");
 }
 
-EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine,
-                           const EBLevelGrid& a_eblgCoFi,
-                           const EBLevelGrid& a_eblgCoar,
-                           const int&         a_refRat) noexcept
+EBMGRestrict::EBMGRestrict(const EBLevelGrid&                             a_eblgFine,
+                           const EBLevelGrid&                             a_eblgCoFi,
+                           const EBLevelGrid&                             a_eblgCoar,
+                           const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                           const int&                                     a_refRat) noexcept
   : m_isDefined(false)
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(full)");
 
-  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
+  this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_finerVoFs, a_refRat);
 }
 
 EBMGRestrict::~EBMGRestrict() noexcept
@@ -42,10 +44,11 @@ EBMGRestrict::~EBMGRestrict() noexcept
 }
 
 void
-EBMGRestrict::define(const EBLevelGrid& a_eblgFine,
-                     const EBLevelGrid& a_eblgCoFi,
-                     const EBLevelGrid& a_eblgCoar,
-                     const int&         a_refRat) noexcept
+EBMGRestrict::define(const EBLevelGrid&                             a_eblgFine,
+                     const EBLevelGrid&                             a_eblgCoFi,
+                     const EBLevelGrid&                             a_eblgCoar,
+                     const LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                     const int&                                     a_refRat) noexcept
 {
   CH_TIME("EBMGRestrict::define");
 
@@ -65,7 +68,6 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine,
 
   CH_assert(m_eblgCoFi.getDomain() == coarsen(m_eblgFine.getDomain(), m_refRat));
   CH_assert(m_eblgCoFi.getDBL().compatible(m_eblgFine.getDBL()));
-  CH_assert(m_eblgCoFi.getMaxRefinementRatio() >= m_refRat);
 
   // Define buffer data.
   const DisjointBoxLayout& dblCoFi   = m_eblgCoFi.getDBL();
@@ -101,7 +103,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine,
 
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
-      const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, din);
+      const Vector<VolIndex> fineVoFs    = VofUtils::getStoredFinerVoFs(coarVoF, ebisBox, a_finerVoFs[din], m_refRat);
       const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);

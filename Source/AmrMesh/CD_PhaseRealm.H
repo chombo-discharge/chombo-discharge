@@ -26,6 +26,8 @@
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
+#include <CD_EBMGRestrict.H>
+#include <CD_EBMGProlong.H>
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
@@ -195,8 +197,9 @@ public:
    * @brief Define the multigrid levels on the given grids.
    * @details Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k > 0 are defined on
    * a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of
-   * consecutive multigrid levels are defined as well. The coarse averaging between them is defined in
-   * regridOperators. Empty inputs clear the multigrid levels.
+   * consecutive multigrid levels are defined as well. The finer-VoF lists, coarse averaging, restriction and
+   * prolongation between them are defined in regridOperators, when the multigrid operator is registered. Empty inputs
+   * clear the multigrid levels.
    * @param[in] a_mgGrids   Grids on each multigrid level. a_mgGrids[lvl][0] must be the grids on AMR level lvl.
    * @param[in] a_mgDomains Domains on each multigrid level, with the same indexing as a_mgGrids.
    */
@@ -301,21 +304,69 @@ public:
   getMultigridLevelGrids() const;
 
   /**
-   * @brief Get the coarsened grids between consecutive multigrid levels.
-   * @details Entry [lvl][k] is entry [lvl][k] of getMultigridLevelGrids() coarsened by 2, for k + 1 smaller than
-   * the number of multigrid levels under AMR level lvl.
-   * @return The coarsened grids of each multigrid level pair.
-   */
-  const Vector<Vector<RefCountedPtr<EBLevelGrid>>>&
-  getMultigridLevelGridsCoFi() const;
-
-  /**
    * @brief Get the coarse averaging between consecutive multigrid levels.
-   * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl.
+   * @details Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when
+   * the multigrid operator is registered.
    * @return The coarse averaging of each multigrid level pair.
    */
   const Vector<Vector<RefCountedPtr<EBCoarAve>>>&
   getMultigridCoarseAverage() const;
+
+  /**
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened fine grids.
+   * @details Entry [lvl] lives on getEBLevelGridCoFi()[lvl], for lvl smaller than the finest level. For every irregular
+   * cell whose finer cells all lie in the finer EBISBox, it holds the VoFs on level lvl+1 that coarsen to each coarse
+   * VoF, in the order of EBISLayout::refine.
+   * @return The finer-VoF lists of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>&
+  getFinerVoFs() const;
+
+  /**
+   * @brief Get the finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @details Entry [lvl][k] lives on getMultigridLevelGrids()[lvl][k] coarsened by 2 and holds the VoFs on multigrid
+   * level k under AMR level lvl, as getFinerVoFs() does for AMR levels. Defined when the multigrid operator is
+   * registered.
+   * @return The finer-VoF lists of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>>&
+  getMultigridFinerVoFs() const;
+
+  /**
+   * @brief Get the multigrid restriction between AMR levels.
+   * @details Entry [lvl] restricts from AMR level lvl onto getEBLevelGridCoFi()[lvl-1], for lvl > 0. Defined when the
+   * multigrid operator is registered.
+   * @return The restriction of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGRestrict>>&
+  getMultigridRestriction() const;
+
+  /**
+   * @brief Get the multigrid prolongation between AMR levels.
+   * @details Entry [lvl] prolongs from AMR level lvl-1 onto AMR level lvl, for lvl > 0. Defined when the multigrid
+   * operator is registered.
+   * @return The prolongation of each AMR level pair.
+   */
+  const Vector<RefCountedPtr<EBMGProlong>>&
+  getMultigridProlongation() const;
+
+  /**
+   * @brief Get the restriction between consecutive multigrid levels.
+   * @details Entry [lvl][k] restricts from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when
+   * the multigrid operator is registered.
+   * @return The restriction of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGRestrict>>>&
+  getMultigridLevelRestriction() const;
+
+  /**
+   * @brief Get the prolongation between consecutive multigrid levels.
+   * @details Entry [lvl][k] prolongs from multigrid level k+1 onto multigrid level k under AMR level lvl. Defined when
+   * the multigrid operator is registered.
+   * @return The prolongation of each multigrid level pair.
+   */
+  const Vector<Vector<RefCountedPtr<EBMGProlong>>>&
+  getMultigridLevelProlongation() const;
 
   /**
    * @brief Get refined grids
@@ -705,10 +756,70 @@ protected:
   Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgCoarAve;
 
   /**
+   * @brief Finer VoFs of the coarse VoFs of the coarsened fine grids.
+   * @details m_finerVoFs[lvl] lives on m_eblgCoFi[lvl] and holds the VoFs on level lvl+1 that coarsen to its irregular
+   * VoFs.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>> m_finerVoFs;
+
+  /**
+   * @brief Finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.
+   * @details m_mgFinerVoFs[lvl][k] lives on m_mgLevelGridsCoFi[lvl][k] and holds the VoFs on m_mgLevelGrids[lvl][k]
+   * that coarsen to its irregular VoFs.
+   */
+  Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<Vector<VolIndex>>>>>> m_mgFinerVoFs;
+
+  /**
+   * @brief Multigrid restriction between AMR levels.
+   * @details m_mgRestrict[lvl] restricts from m_eblg[lvl] onto m_eblgCoFi[lvl-1].
+   */
+  Vector<RefCountedPtr<EBMGRestrict>> m_mgRestrict;
+
+  /**
+   * @brief Multigrid prolongation between AMR levels.
+   * @details m_mgProlong[lvl] prolongs from m_eblg[lvl-1] onto m_eblg[lvl].
+   */
+  Vector<RefCountedPtr<EBMGProlong>> m_mgProlong;
+
+  /**
+   * @brief Restriction between consecutive multigrid levels.
+   * @details m_mgLevelRestrict[lvl][k] restricts from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1].
+   */
+  Vector<Vector<RefCountedPtr<EBMGRestrict>>> m_mgLevelRestrict;
+
+  /**
+   * @brief Prolongation between consecutive multigrid levels.
+   * @details m_mgLevelProlong[lvl][k] prolongs from m_mgLevelGrids[lvl][k+1] onto m_mgLevelGrids[lvl][k].
+   */
+  Vector<Vector<RefCountedPtr<EBMGProlong>>> m_mgLevelProlong;
+
+  /**
    * @brief Coarsened fine-level EB grids.
    * @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
    */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
+
+  /**
+   * @brief Filler-mode index space whose layouts are copied from this realm's levels instead of generated.
+   * @details m_eblgFiCo is defined through it, so the fine geometry is copied onto the coarse layout at fine
+   * resolution. Its filler reads this realm's level grids when a layout is filled, so a layout of it is valid only
+   * until the next regrid, when the index space is rebuilt.
+   */
+  RefCountedPtr<EBIndexSpace> m_ebisFiCo;
+
+  /**
+   * @brief Cells of m_eblgFiCo, valid and ghost, that hold geometry copied from the finer level.
+   * @details Entry lvl+1 lives on m_eblgFiCo[lvl+1], with its ghost cells, and is true in the cells of level lvl+1.
+   * The geometry of every other cell of m_eblgFiCo carries no meaning. Only the consumers' assertions read it, so it is
+   * built in DEBUG builds only, and is null otherwise and on level 0.
+   */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fiCoFineCells;
+
+  /**
+   * @brief Level lvl coarsened by 2, for levels whose coarser level is 4 times coarser (null otherwise).
+   * @details Source of the half-resolution layout that coarsening the copied geometry by 4 steps through.
+   */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgFineHalf;
 
   /**
    * @brief Level-set function
@@ -876,6 +987,36 @@ protected:
   defineEBLevelGrid(const int a_lmin);
 
   /**
+   * @brief Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.
+   * @details m_eblgFiCo[lvl+1] has the layout of level lvl refined by the refinement ratio, so it shares DataIndex with
+   * level lvl. Its graph and data are copied from level lvl+1 through the filler-mode index space m_ebisFiCo; they
+   * are meaningful only in the cells of level lvl+1, which m_fiCoFineCells marks. Its ghost cells reach as far as the
+   * refined coarse cells that the gradient stencils and the mass redistribution use.
+   */
+  void
+  defineEBLevelGridFiCo();
+
+  /**
+   * @brief Filler of m_ebisFiCo: copy the graph and data of the realm level on a_domain onto a_grids.
+   * @details Each box is classified from the source boxes first. A box that receives no source cell is set all
+   * covered, a box that lies entirely in all-regular source boxes is set all regular, and only the other boxes receive
+   * the copied graph. The data is then built over the graph and copied.
+   * @param[out] a_graph      Graph over a_grids.
+   * @param[out] a_data       Data over a_grids.
+   * @param[in]  a_grids      Grids.
+   * @param[in]  a_domain     Domain. Must be the domain of a realm level, or of a level in m_eblgFineHalf.
+   * @param[in]  a_graphGhost Ghost cells of the graph.
+   * @param[in]  a_dataGhost  Ghost cells of the data.
+   */
+  void
+  fillCopiedLayout(LevelData<EBGraph>&      a_graph,
+                   LevelData<EBData>&       a_data,
+                   const DisjointBoxLayout& a_grids,
+                   const ProblemDomain&     a_domain,
+                   const int                a_graphGhost,
+                   const int                a_dataGhost) const;
+
+  /**
    * @brief Define vof iterators
    * @param[in] a_lmin Coarsest grid level that changes
    */
@@ -894,6 +1035,41 @@ protected:
    */
   void
   defineMultigridCoarseAverage();
+
+  /**
+   * @brief Define the restriction and prolongation between consecutive multigrid levels.
+   */
+  void
+  defineMultigridLevelTransfer();
+
+  /**
+   * @brief Define the finer-VoF lists of the coarsened fine grids.
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
+  void
+  defineFinerVoFs(const int a_lmin);
+
+  /**
+   * @brief Define the finer-VoF lists of the coarsened grids between consecutive multigrid levels.
+   */
+  void
+  defineMultigridFinerVoFs();
+
+  /**
+   * @brief Fill the finer-VoF lists of one pair of grids.
+   * @details Covers the irregular cells whose finer cells all lie in the finer EBISBox: the coarsened grids, and the
+   * ghost cells around them as far as the finer EB ghost cells reach. The lists come from the finer graph's coarsening
+   * links (VofUtils::getFinerVoFs).
+   * @param[out] a_finerVoFs Finer-VoF lists, defined on the coarsened grids.
+   * @param[in]  a_eblgCoFi  Coarsened fine grids.
+   * @param[in]  a_eblgFine  Fine grids.
+   * @param[in]  a_refRat    Refinement ratio between the two.
+   */
+  void
+  fillFinerVoFs(LayoutData<BaseIVFAB<Vector<VolIndex>>>& a_finerVoFs,
+                const EBLevelGrid&                       a_eblgCoFi,
+                const EBLevelGrid&                       a_eblgFine,
+                const int                                a_refRat) const;
 
   /**
    * @brief Define multigrid interpolation utility

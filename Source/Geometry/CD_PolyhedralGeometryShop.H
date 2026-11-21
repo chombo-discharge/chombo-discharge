@@ -244,6 +244,16 @@ public:
   buildMoments();
 
   /**
+   * @brief Whether buildMoments made an index-space graph for a level.
+   * @details A level no tile was split down to has none: its cells are all cut from coarser leaves when a layout asks
+   * for them.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return True if getEBGraph and getEBData can be called for the level.
+   */
+  bool
+  hasEBGraph(const int a_level) const noexcept;
+
+  /**
    * @brief The index-space graph buildMoments made for a level.
    * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
    * @return The graph, over the level's boxes.
@@ -263,9 +273,9 @@ public:
    * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
    * @details A cell in the geometry's boxes on the level takes what buildMoments made there. The cells outside them,
    * which a leaf of a coarser level covers or which are finer than the finest stored level, are cut from their
-   * ancestors on tiles of their own (extensionTiles), balanced over the ranks with one unit of load per tile, or by the
-   * work of cutting them (extensionLoads) under PolyhedralGeometryShop.extension_cut_cell_loads, and computed there
-   * (extendLevel). The stored level and the tiles hold disjoint cells, and both are copied onto the layout. A stored
+   * ancestors on tiles of their own (extensionTiles). The extension cache keeps every tile once it is cut, so a fill
+   * cuts only the tiles no earlier fill asked for (cacheExtension). The stored level and the tiles hold disjoint cells,
+   * and both are copied onto the layout. A stored
    * cell carries the links to the coarser and finer levels buildMoments gave it; a cell cut from an ancestor is linked
    * to the ancestor's only VoF and to no finer cell. Nothing evaluates the implicit function. This is the shape of
    * EBISLayout::Filler. Collective: every rank calls it for the same layouts in the same order, since the tiles are
@@ -627,16 +637,43 @@ public:
    * regular cell beside a multi-valued one is written as a full cut cell. Each VoF is linked to the only VoF of its
    * coarser cell when the domain coarsens by two, and to no finer cell. A cut cell a finer level owns stops the run.
    * Collective.
-   * @param[out] a_graph The graph, defined here over the tiles with one ghost cell.
-   * @param[out] a_data  The moments, defined here over the tiles.
-   * @param[in]  a_tiles The tiles, balanced over the ranks.
-   * @param[in]  a_domain Their domain.
+   * @param[out] a_graph      The graph, defined here over the tiles with one ghost cell.
+   * @param[out] a_data       The moments, defined here over the tiles.
+   * @param[in]  a_tiles      The tiles, balanced over the ranks.
+   * @param[in]  a_domain     Their domain.
+   * @param[in]  a_skipUncut  Whether a tile whose ancestors have no surface over it or its ghost cell is set whole,
+   * regular or covered as they are, instead of being cut from them.
    */
   void
   extendLevel(LevelData<EBGraph>&      a_graph,
               LevelData<EBData>&       a_data,
               const DisjointBoxLayout& a_tiles,
-              const ProblemDomain&     a_domain) const;
+              const ProblemDomain&     a_domain,
+              const bool               a_skipUncut) const;
+
+  /**
+   * @brief Whether a surface crosses its cell: an edge has a crossing, or the corners are not all strictly on one side.
+   * @details A corner on the surface counts as a crossing.
+   * @param[in] a_surface The cell's surface.
+   * @return True if the surface crosses the cell.
+   */
+  static bool
+  isCrossed(const PolyhedralEB::CutCellSurface& a_surface) noexcept;
+
+  /**
+   * @brief Make sure the extension cache of a level holds the given tiles.
+   * @details The tiles it does not hold yet are balanced among themselves by count and cut from their ancestors
+   * (extendLevel, with the tiles that have no surface over them set whole). They are then given owners so that every
+   * rank owns about as many cut tiles of the level as the others: a cut tile stays on the rank that cut it while that
+   * rank owns fewer than its share, and is copied to the next rank short of it otherwise. A tile that is not cut stays
+   * where it was cut. The tiles the cache held keep their ranks and are not cut again. The geometry does not change
+   * while the shop lives, so a tile is cut once. Collective: every rank passes the same tiles.
+   * @param[in] a_tiles  The tiles a fill needs, on the destination level, the same on every rank.
+   * @param[in] a_domain Their domain.
+   * @param[in] a_level  The geometry level of the domain (destinationLevel).
+   */
+  void
+  cacheExtension(const Vector<Box>& a_tiles, const ProblemDomain& a_domain, const int a_level) const;
 
   /**
    * @brief Count the cut cells of every tile on every level, for extensionLoads.
@@ -673,6 +710,23 @@ public:
                const std::vector<DisjointBoxLayout>& a_grids,
                const std::vector<ProblemDomain>&     a_domains,
                const int                             a_fineLevel) const;
+
+  /**
+   * @brief The boxes of a level of the geometry's grids that hold this phase's cut cells, on the ranks that own them.
+   * @details A copy of a graph with cut cells into a box that is all regular or all covered stores the box's whole
+   * graph a cell at a time, and a regular or covered box of the geometry's grids can be far larger than a cut one.
+   * Containers that only the cut boxes read are therefore defined over this layout.
+   * @param[out] a_cutGrids The cut boxes of a_grids, each on the rank that owns it in a_grids.
+   * @param[out] a_cutSlot  For each box of a_grids on this rank, in the order of its data iterator, the position of the
+   * same box in the data iterator of a_cutGrids, or -1 for a box that is not cut.
+   * @param[in]  a_grids    A level of the geometry's grids.
+   * @param[in]  a_level    The level.
+   */
+  void
+  makeCutGrids(DisjointBoxLayout&       a_cutGrids,
+               std::vector<int>&        a_cutSlot,
+               const DisjointBoxLayout& a_grids,
+               const int                a_level) const;
 
   /**
    * @brief Build a level of the index space from its own cells and the cells coarsened from the next finer level.
@@ -876,6 +930,34 @@ protected:
    * load each (false). PolyhedralGeometryShop.extension_cut_cell_loads, off by default.
    */
   bool m_extensionLoadByCutCells;
+
+  /**
+   * @brief The multi-valued cells of every stored level, the same on every rank. Set by buildMoments.
+   */
+  Vector<IntVectSet> m_multiValuedCells;
+
+  /**
+   * @brief The extension tiles cut so far, per geometry level as destinationLevel numbers them, on the ranks that cut
+   * them. Undefined for a level no fill has needed tiles of.
+   */
+  mutable Vector<DisjointBoxLayout> m_extensionGrids;
+
+  /**
+   * @brief The graphs of the extension tiles, over m_extensionGrids with one ghost cell; null for a level with none.
+   */
+  mutable Vector<RefCountedPtr<LevelData<EBGraph>>> m_extensionGraphs;
+
+  /**
+   * @brief The moments of the extension tiles, over m_extensionGrids; null for a level with none.
+   */
+  mutable Vector<RefCountedPtr<LevelData<EBData>>> m_extensionData;
+
+  /**
+   * @brief How many cut extension tiles each rank owns, per geometry level, the same on every rank.
+   * @details A tile is cut when its graph holds its cells rather than a whole regular or covered tag. The cut tiles
+   * hold nearly all of the cache's memory, and cacheExtension gives them owners so that every rank owns about as many.
+   */
+  mutable Vector<std::vector<long long>> m_extensionCutTiles;
 
   /**
    * @brief The number of cut cells of every tile, indexed [level][tile] as ComputationalGeometry::getCutTiles lists

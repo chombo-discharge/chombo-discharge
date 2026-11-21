@@ -700,6 +700,7 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_mass_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
+    m_amr->registerParticleDeposition(m_realm, m_deposition, m_coarseFineDeposition);
   }
 }
 
