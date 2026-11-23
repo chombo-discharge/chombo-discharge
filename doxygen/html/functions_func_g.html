@@ -85,6 +85,7 @@ $(function() {
 <li>gatherBoxes()&#160;:&#160;<a class="el" href="classLoadBalancing.html#a35ddeb39b2ed9589f44d486b3a269c3e">LoadBalancing</a></li>
 <li>gatherBoxesAndLoads()&#160;:&#160;<a class="el" href="classLoadBalancing.html#a3d9f9b7dd45e05f80ebb5769d3a71d1e">LoadBalancing</a></li>
 <li>gatherDistinctReactants()&#160;:&#160;<a class="el" href="classKMCSolver.html#a9aec435c7b5d6a24c2d6fc373b6b7fda">KMCSolver&lt; R, State, T &gt;</a></li>
+<li>gatherFinerVoFs()&#160;:&#160;<a class="el" href="classVofUtils.html#a9a32ae910b502474fad04caa56b0bc3c">VofUtils</a></li>
 <li>gatherGhostsFromMasks()&#160;:&#160;<a class="el" href="classParticleContainer.html#aec5c8dabea7fd0f167d6ef8999f14e6a">ParticleContainer&lt; P, Traits &gt;</a></li>
 <li>gatherLoads()&#160;:&#160;<a class="el" href="classLoadBalancing.html#a2aa85f403df34bc3c1120e13dc406dfd">LoadBalancing</a></li>
 <li>gatherMoversToPool()&#160;:&#160;<a class="el" href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">ParticleContainer&lt; P, Traits &gt;</a></li>
@@ -154,6 +155,7 @@ $(function() {
 <li>getCircularProfiles()&#160;:&#160;<a class="el" href="classMechanicalShaft.html#a1e91aeaeef1333d597cb052e69172b59">MechanicalShaft</a></li>
 <li>getClosestTriangles()&#160;:&#160;<a class="el" href="classTriangleCollection.html#a779bcdf8b39439d28f8f5f7375bd1bb8">TriangleCollection</a></li>
 <li>getCoarseAverage()&#160;:&#160;<a class="el" href="classAmrMesh.html#a1e29001ac7576c55db5034128231bee1">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a3a109beac91ba05315ddbc61c68d1f6f">PhaseRealm</a>, <a class="el" href="classRealm.html#a80cba39fb3ae21a94cf416e6efec508b">Realm</a></li>
+<li>getCoarseCellsWithAllFinerCells()&#160;:&#160;<a class="el" href="classVofUtils.html#abd687b727084a1dce960eeb3b84c1b46">VofUtils</a></li>
 <li>getCoarseFineDeposition()&#160;:&#160;<a class="el" href="classItoSolver.html#a19a624b17f9df51c9164fd5e81daa766">ItoSolver</a></li>
 <li>getCoarseFineDepositionType()&#160;:&#160;<a class="el" href="classTracerParticleSolver.html#a05dc0fc64a74eeeb34f3764210fc7a15">TracerParticleSolver&lt; P &gt;</a></li>
 <li>getCoarserMultigridLayout()&#160;:&#160;<a class="el" href="classRealm.html#a73be533af8c1760253fa18d3d9bdbaa5">Realm</a></li>
@@ -255,6 +257,9 @@ $(function() {
 <li>getFD()&#160;:&#160;<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1CdrStorage.html#a9f894841abf832849b08a8026b1ff466">Physics::CdrPlasma::CdrPlasmaImExSdcStepper::CdrStorage</a></li>
 <li>getFineCoarseFineBoxes()&#160;:&#160;<a class="el" href="classEBReflux.html#a7b1b4493450b2aa19d3d43463d391068">EBReflux</a></li>
 <li>getFineInterp()&#160;:&#160;<a class="el" href="classAmrMesh.html#ad79c6df55bc4ee0b55fca049098cdbdc">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a039dce8556d380230a3b045cbcd21a45">PhaseRealm</a>, <a class="el" href="classRealm.html#a18d2006aab8d36d78940aea3d102c7b6">Realm</a></li>
+<li>getFinerFaces()&#160;:&#160;<a class="el" href="classVofUtils.html#a802629735c869169e744154c75f6227a">VofUtils</a></li>
+<li>getFinerFacesFromSide()&#160;:&#160;<a class="el" href="classVofUtils.html#a4a5110d89bb22e42d2e856f515918955">VofUtils</a></li>
+<li>getFinerVoFs()&#160;:&#160;<a class="el" href="classAmrMesh.html#a7aa5b7338ee0c0d31b82b51892e6aaee">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#abc6b3494a5acd4a0865709ec3a495008">PhaseRealm</a>, <a class="el" href="classRealm.html#a9ec52f36fe3374e4be58d512686f6fff">Realm</a>, <a class="el" href="classVofUtils.html#a8d28290771301ccdbb8b0359c1e5da49">VofUtils</a></li>
 <li>getFinestDomain()&#160;:&#160;<a class="el" href="classAmrMesh.html#a1dec51dbb9d0a3aa8023d63d538a8dc7">AmrMesh</a></li>
 <li>getFinestDx()&#160;:&#160;<a class="el" href="classAmrMesh.html#a13dad5645ed0341ada0681607da1d600">AmrMesh</a></li>
 <li>getFinestLevel()&#160;:&#160;<a class="el" href="classAmrMesh.html#aff00899eeda16c714410146ecc2c8af7">AmrMesh</a>, <a class="el" href="classParticleContainer.html#a5f8af8d0aece940c7e14692009bf9917">ParticleContainer&lt; P, Traits &gt;</a></li>
@@ -363,11 +368,14 @@ $(function() {
 <li>getMultiCutFaceIterator()&#160;:&#160;<a class="el" href="classAmrMesh.html#aaa79f8e2cd38cf894cfa5fb844f966cb">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a3b6f388395b8c6f30d201589611352e4">PhaseRealm</a>, <a class="el" href="classRealm.html#a62a5fe7cb062b895197a6e7ed16fcd5a">Realm</a></li>
 <li>getMultiCutVofIterator()&#160;:&#160;<a class="el" href="classAmrMesh.html#a50a10b1b441f82724ff1d49606d732b8">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#ac26cbe3fa353e0909c5168beb9463f2b">PhaseRealm</a>, <a class="el" href="classRealm.html#a6a66ad1244084e844b021b4d22c2d0a0">Realm</a></li>
 <li>getMultigridCoarseAverage()&#160;:&#160;<a class="el" href="classAmrMesh.html#a89a3e824d91dcef909216030a32fa694">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a26c6941cef439ff1ab129a1bd87be830">PhaseRealm</a>, <a class="el" href="classRealm.html#a1c86bd0de62bbf9b2b552edd115d33ab">Realm</a></li>
+<li>getMultigridFinerVoFs()&#160;:&#160;<a class="el" href="classPhaseRealm.html#a0c0fe148dbdfc50db58fa48cefc83d02">PhaseRealm</a></li>
 <li>getMultigridInterpolator()&#160;:&#160;<a class="el" href="classAmrMesh.html#abcc49aab94ff2ec3a541ce0a9cb4f067">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a83001d6d24388b62b7858f4264b5d424">PhaseRealm</a>, <a class="el" href="classRealm.html#a78ddeade8cee84d4515c2df0bc9e4277">Realm</a></li>
 <li>getMultigridLevelGrids()&#160;:&#160;<a class="el" href="classAmrMesh.html#a4134b979475d88f78dfe972d40a61d38">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a033f07a40489b78878942120251da540">PhaseRealm</a>, <a class="el" href="classRealm.html#a9d38afe7cad3b0b8b1e2a528dea3eb0d">Realm</a></li>
-<li>getMultigridLevelGridsCoFi()&#160;:&#160;<a class="el" href="classAmrMesh.html#a41212aeb5cce01fec1df2142daa1d296">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#aad7fab010d628b479b4d5711d8e9b05f">PhaseRealm</a>, <a class="el" href="classRealm.html#a7c71a581bc083508f31b8bda83ccbbc5">Realm</a></li>
+<li>getMultigridLevelProlongation()&#160;:&#160;<a class="el" href="classAmrMesh.html#af144349c2188e431204608d6a578c763">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a5e8b667486a42e5fe8ec0e1ad0648837">PhaseRealm</a>, <a class="el" href="classRealm.html#a59acf73557cdad02c0b3d9d8d0da7efd">Realm</a></li>
+<li>getMultigridLevelRestriction()&#160;:&#160;<a class="el" href="classAmrMesh.html#a4c86cd95c71ebdca7cc714896ad3f7dc">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#ae1224d7e0bbf92d3bef40329685542e2">PhaseRealm</a>, <a class="el" href="classRealm.html#a993a8036a9d3c498694617ec5bfc40aa">Realm</a></li>
 <li>getMultigridMFLevelGrids()&#160;:&#160;<a class="el" href="classAmrMesh.html#a9852f829c18c660bdfbc478dc285aabb">AmrMesh</a>, <a class="el" href="classRealm.html#a32d8d294e84821c5ff4605ed5de9975f">Realm</a></li>
-<li>getMultigridMFLevelGridsCoFi()&#160;:&#160;<a class="el" href="classAmrMesh.html#a898ae64303fd33ab80361130bb09f42e">AmrMesh</a>, <a class="el" href="classRealm.html#aca69e5abe062c9c573f16a41bebf741c">Realm</a></li>
+<li>getMultigridProlongation()&#160;:&#160;<a class="el" href="classAmrMesh.html#ae2692d270b60371f4a5404aed6a8f9bc">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a618017e16bbd89e58fdf62dd8bf05f7e">PhaseRealm</a>, <a class="el" href="classRealm.html#a375b54bf01e646af0efff242c64a69e8">Realm</a></li>
+<li>getMultigridRestriction()&#160;:&#160;<a class="el" href="classAmrMesh.html#ad7a372f3a86cfedc702a2e7c1ba775f8">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a538bfa669db4f9fa418fcdc4658808ed">PhaseRealm</a>, <a class="el" href="classRealm.html#aae0f364fbc5e2843688e12e0c1d81161">Realm</a></li>
 <li>getMultiIndex()&#160;:&#160;<a class="el" href="classMultiIndex.html#a68ad8ac310d6dee6295f50194bf618dc">MultiIndex</a></li>
 <li>getMultiPhaseVofs()&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#a902c8cd3e699d4182a4a22cff105c207">MFHelmholtzJumpBC</a></li>
 <li>getMyGrids()&#160;:&#160;<a class="el" href="classLevelTiles.html#acc1a8c262d886137ba317fe35b6c8c1c">LevelTiles</a></li>
@@ -511,6 +519,8 @@ $(function() {
 <li>getStationaryPlotVariableNames()&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a92fdd0826fb93e13be542a78d7cddb1a">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>getStencil()&#160;:&#160;<a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a9366f7514603405d99032492dda37ab7">EBLeastSquaresMultigridInterpolator</a>, <a class="el" href="classEBMultigridInterpolator.html#af6260211e3ca7427577ce6977c95ff89">EBMultigridInterpolator</a></li>
 <li>getStep()&#160;:&#160;<a class="el" href="classSurfaceODESolver.html#a3e49e12924876744b384f84667a7a211">SurfaceODESolver&lt; N &gt;</a></li>
+<li>getStoredFinerFaces()&#160;:&#160;<a class="el" href="classVofUtils.html#aec1974e5258005ab923da0bc7a8f0bdd">VofUtils</a></li>
+<li>getStoredFinerVoFs()&#160;:&#160;<a class="el" href="classVofUtils.html#a195e712018cae1d70f7e648ab29ebd5b">VofUtils</a></li>
 <li>getStructuredData()&#160;:&#160;<a class="el" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">LookupTable1D&lt; T, N, I &gt;</a></li>
 <li>getSurfaceCells()&#160;:&#160;<a class="el" href="classAMRPolyhedralEBGraph.html#ad3f416f6c240a2e30bf08fb57ccb0288">AMRPolyhedralEBGraph</a>, <a class="el" href="classPolyhedralEBGraph.html#ad7ab30bbf13f8a7ca17285f57ccfc12c">PolyhedralEBGraph</a></li>
 <li>getSurfaceDeposition()&#160;:&#160;<a class="el" href="classAmrMesh.html#a0ffd711ce9cc504fd8154c3210001dea">AmrMesh</a>, <a class="el" href="classPhaseRealm.html#a7290bfa8bbeffe6455591d1828dde3b8">PhaseRealm</a>, <a class="el" href="classRealm.html#ae64a06acbef1316eaa6f278ff1d9937e">Realm</a></li>

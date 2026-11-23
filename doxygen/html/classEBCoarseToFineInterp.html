@@ -112,8 +112,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af4660d0266ec8f514bfc0df0de26778b" id="r_af4660d0266ec8f514bfc0df0de26778b"><td class="memItemLeft" align="right" valign="top"><a id="af4660d0266ec8f514bfc0df0de26778b" name="af4660d0266ec8f514bfc0df0de26778b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBCoarseToFineInterp</b> () noexcept</td></tr>
 <tr class="memdesc:af4660d0266ec8f514bfc0df0de26778b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must subsequently call the define method. <br /></td></tr>
-<tr class="memitem:afa3423542018e9ac551113d785e5923d" id="r_afa3423542018e9ac551113d785e5923d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa3423542018e9ac551113d785e5923d">EBCoarseToFineInterp</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:afa3423542018e9ac551113d785e5923d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Constructs a valid object which can be used for regridding.  <br /></td></tr>
+<tr class="memitem:a2338f05f6074d9f954dadd0fa3885c1f" id="r_a2338f05f6074d9f954dadd0fa3885c1f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2338f05f6074d9f954dadd0fa3885c1f">EBCoarseToFineInterp</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:a2338f05f6074d9f954dadd0fa3885c1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Constructs a valid object which can be used for regridding.  <br /></td></tr>
 <tr class="memitem:ad139971bc3a6a462c962432d045c1606" id="r_ad139971bc3a6a462c962432d045c1606"><td class="memItemLeft" align="right" valign="top"><a id="ad139971bc3a6a462c962432d045c1606" name="ad139971bc3a6a462c962432d045c1606"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBCoarseToFineInterp</b> (const <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &amp;)=delete</td></tr>
 <tr class="memdesc:ad139971bc3a6a462c962432d045c1606"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
@@ -129,8 +129,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBCoarseToFineInt
 <tr class="memitem:ad10b35e751096d8eeae8b448b95c1008" id="r_ad10b35e751096d8eeae8b448b95c1008"><td class="memItemLeft" align="right" valign="top"><a id="ad10b35e751096d8eeae8b448b95c1008" name="ad10b35e751096d8eeae8b448b95c1008"></a>
 <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classEBCoarseToFineInterp.html">EBCoarseToFineInterp</a> &amp;&amp;)=delete</td></tr>
 <tr class="memdesc:ad10b35e751096d8eeae8b448b95c1008"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move operator. <br /></td></tr>
-<tr class="memitem:a85834557cba5e137e459af35f35e25a0" id="r_a85834557cba5e137e459af35f35e25a0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85834557cba5e137e459af35f35e25a0">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:a85834557cba5e137e459af35f35e25a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define operation. Puts object in usable state.  <br /></td></tr>
+<tr class="memitem:a9eeaf6b470054c7cb43e45a4bdf3e672" id="r_a9eeaf6b470054c7cb43e45a4bdf3e672"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9eeaf6b470054c7cb43e45a4bdf3e672">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:a9eeaf6b470054c7cb43e45a4bdf3e672"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define operation. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:a7d590f3552f2c26a86d63f93431b56c8" id="r_a7d590f3552f2c26a86d63f93431b56c8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d590f3552f2c26a86d63f93431b56c8">interpolate</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const Interval &amp;a_variables, const <a class="el" href="#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a> &amp;a_interpType) const noexcept</td></tr>
 <tr class="memdesc:a7d590f3552f2c26a86d63f93431b56c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate to the fine grid using the specified method.  <br /></td></tr>
 <tr class="memitem:a125cb21b225cc1621e7357bc889c3b11" id="r_a125cb21b225cc1621e7357bc889c3b11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a125cb21b225cc1621e7357bc889c3b11">interpolate</a> (LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_fineData, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_coarData, const Interval &amp;a_variables, const <a class="el" href="#a7da81d645a467200cc6ad9b2667c1c08">EBCoarseToFineInterp::Type</a> &amp;a_interpType) const noexcept</td></tr>
@@ -187,6 +187,9 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b>
 <tr class="memitem:a51b9dd870e83420087908368ef320d44" id="r_a51b9dd870e83420087908368ef320d44"><td class="memItemLeft" align="right" valign="top"><a id="a51b9dd870e83420087908368ef320d44" name="a51b9dd870e83420087908368ef320d44"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoFi</b></td></tr>
 <tr class="memdesc:a51b9dd870e83420087908368ef320d44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine grid (i.e., has same ProblemDomain as m_eblgCoar);. <br /></td></tr>
+<tr class="memitem:a37fa43fc67d0a1d27a0a740da94d878c" id="r_a37fa43fc67d0a1d27a0a740da94d878c"><td class="memItemLeft" align="right" valign="top"><a id="a37fa43fc67d0a1d27a0a740da94d878c" name="a37fa43fc67d0a1d27a0a740da94d878c"></a>
+RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_finerVoFs</b></td></tr>
+<tr class="memdesc:a37fa43fc67d0a1d27a0a740da94d878c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finer VoFs of the irregular VoFs of the coarsened fine grid. <br /></td></tr>
 <tr class="memitem:a40e22787d64b2f92ed1ad2aca76fdce0" id="r_a40e22787d64b2f92ed1ad2aca76fdce0"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40e22787d64b2f92ed1ad2aca76fdce0">m_volumeWeights</a></td></tr>
 <tr class="memdesc:a40e22787d64b2f92ed1ad2aca76fdce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weights in cut-cells when regridding conservatively.  <br /></td></tr>
 <tr class="memitem:a8dbc6f73e6ac24d9423b8a0ecaa92264" id="r_a8dbc6f73e6ac24d9423b8a0ecaa92264"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dbc6f73e6ac24d9423b8a0ecaa92264">m_areaWeights</a></td></tr>
@@ -203,8 +206,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 <div class="textblock"><p>Class for interpolating data to fine grids. Can use constant interpolation or include limiters. </p>
 <p>This class should be used through the interpolate methods. The methods will switch between various supported interpolation methods for the data types. For EBCellFAB-type data we support PWC, ConservativePWC, ConservativeMinMod, ConservativeMonotonizedCentral, ConservativeSuperbee For BASEIVFAB-type data we support PWC and ConservativePWC </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="afa3423542018e9ac551113d785e5923d" name="afa3423542018e9ac551113d785e5923d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa3423542018e9ac551113d785e5923d">&#9670;&#160;</a></span>EBCoarseToFineInterp()</h2>
+<a id="a2338f05f6074d9f954dadd0fa3885c1f" name="a2338f05f6074d9f954dadd0fa3885c1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2338f05f6074d9f954dadd0fa3885c1f">&#9670;&#160;</a></span>EBCoarseToFineInterp()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -230,6 +233,11 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -246,6 +254,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>The fine grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>The coarse grid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grid, on its grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between fine and coarse. </td></tr>
   </table>
   </dd>
@@ -366,8 +375,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 
 </div>
 </div>
-<a id="a85834557cba5e137e459af35f35e25a0" name="a85834557cba5e137e459af35f35e25a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a85834557cba5e137e459af35f35e25a0">&#9670;&#160;</a></span>define()</h2>
+<a id="a9eeaf6b470054c7cb43e45a4bdf3e672" name="a9eeaf6b470054c7cb43e45a4bdf3e672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9eeaf6b470054c7cb43e45a4bdf3e672">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -393,6 +402,11 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -409,6 +423,7 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>The fine grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>The coarse grid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grid, on its grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between fine and coarse. </td></tr>
   </table>
   </dd>

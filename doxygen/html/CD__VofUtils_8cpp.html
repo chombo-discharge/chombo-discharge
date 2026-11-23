@@ -88,7 +88,13 @@ $(function() {
 
 <p>Implementation of <a class="el" href="CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut-cells.">CD_VofUtils.H</a>.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;<a class="el" href="CD__VofUtils_8H_source.html">CD_VofUtils.H</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;utility&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;BoxIterator.H&gt;</code><br />
+<code>#include &lt;parstream.H&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__VofUtils_8H_source.html">CD_VofUtils.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__BoxLoops_8H_source.html">CD_BoxLoops.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
@@ -97,63 +103,81 @@ Include dependency graph for CD_VofUtils.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__VofUtils_8cpp__incl.png" border="0" usemap="#aSource_2Utilities_2CD__VofUtils_8cpp" loading="lazy" alt=""/></div>
 <map name="aSource_2Utilities_2CD__VofUtils_8cpp" id="aSource_2Utilities_2CD__VofUtils_8cpp">
-<area shape="rect" title="Implementation of CD_VofUtils.H." alt="" coords="865,5,1009,50"/>
-<area shape="rect" href="CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="566,98,678,126"/>
-<area shape="poly" title=" " alt="" coords="862,49,688,96,687,91,867,47"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="334,325,518,353"/>
-<area shape="poly" title=" " alt="" coords="862,30,666,37,542,45,412,57,287,75,175,100,127,116,85,133,52,153,27,175,14,193,9,210,9,225,15,238,26,251,42,262,84,283,138,299,198,311,321,329,316,331,198,317,137,304,83,288,39,267,23,255,11,241,4,226,4,209,10,191,23,172,48,149,83,129,125,111,174,95,286,70,412,52,541,39,666,32,867,28"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="905,325,1083,353"/>
-<area shape="poly" title=" " alt="" coords="1009,34,1244,66,1388,90,1531,119,1658,152,1711,170,1754,190,1787,210,1807,232,1812,255,1799,279,1785,288,1763,296,1698,310,1610,320,1508,328,1289,337,1099,340,1099,335,1289,332,1508,323,1610,315,1697,305,1761,291,1782,284,1795,275,1806,254,1802,234,1784,214,1752,194,1709,175,1656,157,1530,124,1387,95,1243,71,1009,40"/>
-<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="1164,174,1288,201"/>
-<area shape="poly" title=" " alt="" coords="977,48,1192,166,1186,166,976,53"/>
-<area shape="rect" title=" " alt="" coords="474,174,560,201"/>
-<area shape="poly" title=" " alt="" coords="606,125,549,167,547,162,601,127"/>
-<area shape="rect" title=" " alt="" coords="179,249,268,277"/>
-<area shape="poly" title=" " alt="" coords="563,116,512,124,450,134,384,151,322,176,279,206,245,239,242,235,276,202,320,171,383,146,449,129,511,118,568,115"/>
-<area shape="rect" title=" " alt="" coords="800,249,901,277"/>
-<area shape="poly" title=" " alt="" coords="635,123,674,160,725,199,764,222,805,243,800,242,762,226,722,204,671,164,634,128"/>
-<area shape="rect" title=" " alt="" coords="736,174,828,201"/>
-<area shape="poly" title=" " alt="" coords="651,124,743,167,737,167,650,129"/>
-<area shape="rect" title=" " alt="" coords="852,174,992,201"/>
-<area shape="poly" title=" " alt="" coords="676,124,856,169,851,170,676,129"/>
-<area shape="rect" title=" " alt="" coords="1017,174,1108,201"/>
-<area shape="poly" title=" " alt="" coords="679,118,822,140,1004,173,998,173,821,145,679,124"/>
-<area shape="rect" title=" " alt="" coords="37,174,130,201"/>
-<area shape="poly" title=" " alt="" coords="563,120,380,144,149,176,146,177,144,172,148,171,380,139,568,118"/>
-<area shape="rect" title=" " alt="" coords="634,249,776,277"/>
-<area shape="poly" title=" " alt="" coords="631,124,693,236,688,235,628,128"/>
-<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="333,174,450,201"/>
-<area shape="poly" title=" " alt="" coords="578,127,448,171,446,166,583,125"/>
-<area shape="poly" title=" " alt="" coords="563,116,505,124,432,134,354,151,278,176,213,202,189,220,169,251,164,264,168,275,191,291,227,305,321,326,316,326,225,310,188,296,164,279,159,264,164,248,186,217,210,198,276,171,352,146,431,129,504,119,568,115"/>
-<area shape="poly" title=" " alt="" coords="619,124,611,157,604,197,607,239,613,258,624,275,641,288,665,300,733,317,812,327,893,335,887,335,811,332,732,322,664,305,638,293,620,279,608,260,602,240,599,196,606,156,615,128"/>
-<area shape="poly" title=" " alt="" coords="364,201,268,245,266,240,359,203"/>
-<area shape="poly" title=" " alt="" coords="374,200,356,219,340,237,331,256,331,266,334,276,353,298,378,318,373,317,349,302,329,278,325,267,326,255,335,234,352,215,370,203"/>
-<area shape="poly" title=" " alt="" coords="420,199,522,247,550,262,579,274,659,295,741,311,892,331,887,331,740,316,658,300,577,280,548,267,520,252,419,205"/>
-<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="343,249,509,277"/>
-<area shape="poly" title=" " alt="" coords="392,200,408,237,403,235,389,204"/>
-<area shape="poly" title=" " alt="" coords="425,248,411,217,414,213,430,250"/>
-<area shape="poly" title=" " alt="" coords="428,276,428,311,424,308,424,279"/>
-<area shape="poly" title=" " alt="" coords="510,273,892,323,887,325,510,278"/>
-<area shape="poly" title=" " alt="" coords="1166,200,917,251,916,246,1161,201"/>
-<area shape="poly" title=" " alt="" coords="1166,197,792,251,791,246,1161,198"/>
-<area shape="poly" title=" " alt="" coords="1289,186,1382,190,1475,202,1512,214,1536,230,1542,240,1543,252,1539,265,1528,279,1490,287,1403,295,1126,311,534,336,534,331,1126,305,1402,289,1490,281,1525,275,1534,262,1538,251,1537,242,1532,234,1510,219,1474,208,1381,195,1289,191"/>
-<area shape="poly" title=" " alt="" coords="1288,187,1440,191,1616,204,1692,215,1750,230,1769,240,1781,251,1784,264,1776,279,1763,288,1741,296,1679,309,1595,319,1496,327,1284,336,1099,340,1099,334,1284,331,1496,322,1594,314,1678,304,1740,291,1760,283,1772,275,1779,264,1777,254,1766,244,1748,235,1691,220,1615,209,1440,196,1289,192"/>
-<area shape="rect" title=" " alt="" coords="1088,249,1148,277"/>
-<area shape="poly" title=" " alt="" coords="1209,201,1151,243,1149,238,1204,203"/>
-<area shape="rect" title=" " alt="" coords="1173,249,1279,277"/>
-<area shape="poly" title=" " alt="" coords="1228,200,1228,235,1224,232,1224,204"/>
-<area shape="rect" title=" " alt="" coords="1304,249,1415,277"/>
-<area shape="poly" title=" " alt="" coords="1251,199,1326,242,1320,241,1249,204"/>
-<area shape="rect" title=" " alt="" coords="1439,249,1515,277"/>
-<area shape="poly" title=" " alt="" coords="1271,199,1427,247,1421,246,1271,205"/>
-<area shape="rect" href="CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="925,249,1064,277"/>
-<area shape="poly" title=" " alt="" coords="1187,201,1051,247,1050,242,1182,202"/>
-<area shape="rect" href="CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="1588,249,1763,277"/>
-<area shape="poly" title=" " alt="" coords="1289,196,1582,246,1577,246,1289,202"/>
-<area shape="poly" title=" " alt="" coords="927,275,913,280,534,328,533,322,913,274,921,276"/>
-<area shape="poly" title=" " alt="" coords="996,276,996,311,992,308,992,279"/>
-<area shape="poly" title=" " alt="" coords="1591,275,1570,280,1277,301,986,318,534,337,534,331,985,313,1276,296,1570,274,1586,275"/>
-<area shape="poly" title=" " alt="" coords="1591,275,1571,280,1099,330,1098,324,1570,274,1586,275"/>
+<area shape="rect" title="Implementation of CD_VofUtils.H." alt="" coords="424,5,567,50"/>
+<area shape="rect" title=" " alt="" coords="5,98,90,126"/>
+<area shape="poly" title=" " alt="" coords="423,43,106,100,104,95,424,38"/>
+<area shape="rect" title=" " alt="" coords="114,98,184,126"/>
+<area shape="poly" title=" " alt="" coords="422,47,200,100,198,95,425,43"/>
+<area shape="rect" title=" " alt="" coords="207,98,266,126"/>
+<area shape="poly" title=" " alt="" coords="425,52,283,99,280,94,429,49"/>
+<area shape="rect" title=" " alt="" coords="291,98,353,126"/>
+<area shape="poly" title=" " alt="" coords="447,52,365,93,363,89,452,49"/>
+<area shape="rect" title=" " alt="" coords="378,98,485,126"/>
+<area shape="poly" title=" " alt="" coords="481,49,453,87,449,83,477,52"/>
+<area shape="rect" title=" " alt="" coords="510,98,612,126"/>
+<area shape="poly" title=" " alt="" coords="513,48,544,86,538,85,512,53"/>
+<area shape="rect" href="CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="1377,98,1489,126"/>
+<area shape="poly" title=" " alt="" coords="567,33,1363,102,1360,107,567,38"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1538,325,1722,353"/>
+<area shape="poly" title=" " alt="" coords="553,48,591,69,625,96,643,124,650,151,657,176,664,188,676,199,704,217,740,233,832,261,942,284,1065,301,1316,323,1526,335,1520,335,1315,328,1064,306,942,289,830,266,738,238,702,222,673,203,660,191,652,178,644,152,638,126,622,100,588,73,553,53"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2160,325,2338,353"/>
+<area shape="poly" title=" " alt="" coords="568,27,1092,36,1468,48,1872,67,2264,95,2445,112,2609,133,2751,156,2868,183,2953,213,2983,230,3004,248,3011,263,3004,279,2991,288,2971,295,2911,308,2830,318,2735,326,2532,336,2353,339,2353,334,2531,330,2735,321,2829,313,2910,303,2969,290,2989,283,3000,275,3006,263,3000,251,2980,234,2951,218,2866,188,2750,162,2608,138,2444,118,2264,100,1872,72,1468,53,1091,41,568,32"/>
+<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="2368,174,2492,201"/>
+<area shape="poly" title=" " alt="" coords="567,31,965,56,1501,95,1986,139,2355,178,2350,178,1985,144,1501,101,965,61,568,36"/>
+<area shape="rect" title=" " alt="" coords="1695,174,1781,201"/>
+<area shape="poly" title=" " alt="" coords="1488,124,1682,172,1677,172,1488,129"/>
+<area shape="rect" title=" " alt="" coords="1383,249,1472,277"/>
+<area shape="poly" title=" " alt="" coords="1453,124,1471,139,1487,158,1496,179,1494,202,1480,224,1462,242,1459,237,1476,221,1489,200,1491,180,1482,161,1467,143,1451,129"/>
+<area shape="rect" title=" " alt="" coords="1856,174,1964,201"/>
+<area shape="poly" title=" " alt="" coords="1489,119,1837,171,1844,174,1838,174,1836,176,1489,124"/>
+<area shape="rect" title=" " alt="" coords="686,174,790,201"/>
+<area shape="poly" title=" " alt="" coords="1373,117,1132,139,972,155,806,176,805,171,971,150,1132,133,1379,116"/>
+<area shape="rect" title=" " alt="" coords="815,174,915,201"/>
+<area shape="poly" title=" " alt="" coords="1374,119,1181,144,935,176,931,177,930,172,934,171,1180,138,1379,119"/>
+<area shape="rect" title=" " alt="" coords="1788,249,1889,277"/>
+<area shape="poly" title=" " alt="" coords="1490,114,1568,121,1657,132,1739,148,1771,159,1794,172,1808,185,1820,201,1834,236,1829,234,1815,204,1804,188,1791,176,1769,164,1737,154,1656,137,1568,126,1490,119"/>
+<area shape="rect" title=" " alt="" coords="991,174,1083,201"/>
+<area shape="poly" title=" " alt="" coords="1379,122,1098,176,1098,170,1374,123"/>
+<area shape="rect" title=" " alt="" coords="1107,174,1247,201"/>
+<area shape="poly" title=" " alt="" coords="1390,126,1238,172,1236,166,1384,127"/>
+<area shape="rect" title=" " alt="" coords="1271,174,1362,201"/>
+<area shape="poly" title=" " alt="" coords="1415,125,1351,168,1349,163,1410,127"/>
+<area shape="rect" title=" " alt="" coords="1387,174,1479,201"/>
+<area shape="poly" title=" " alt="" coords="1435,124,1435,160,1431,156,1431,128"/>
+<area shape="rect" title=" " alt="" coords="1963,249,2105,277"/>
+<area shape="poly" title=" " alt="" coords="1489,112,1626,119,1794,130,1942,147,1994,158,2023,172,2033,186,2038,202,2040,236,2036,232,2033,203,2028,188,2019,176,1992,163,1941,153,1793,135,1626,124,1490,118"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1555,174,1671,201"/>
+<area shape="poly" title=" " alt="" coords="1465,124,1570,168,1564,167,1465,129"/>
+<area shape="poly" title=" " alt="" coords="1373,117,1144,140,1035,156,999,166,980,175,975,187,980,200,995,214,1015,228,1069,252,1137,273,1213,290,1377,314,1525,331,1520,331,1376,320,1212,295,1135,278,1067,257,1013,233,992,218,976,203,970,187,976,172,997,161,1034,151,1143,134,1379,116"/>
+<area shape="poly" title=" " alt="" coords="1490,122,1496,123,1544,126,1605,126,1749,123,1821,125,1887,132,1941,147,1962,158,1979,172,1986,186,1985,200,1967,226,1950,251,1948,263,1954,275,1965,285,1982,294,2029,309,2086,320,2147,330,2142,330,2085,325,2028,314,1980,299,1962,290,1949,279,1943,264,1945,249,1963,223,1980,199,1981,187,1975,175,1959,162,1939,152,1886,137,1821,130,1749,128,1605,131,1544,132,1495,128,1489,127"/>
+<area shape="poly" title=" " alt="" coords="1582,201,1475,246,1474,241,1577,202"/>
+<area shape="poly" title=" " alt="" coords="1589,201,1566,218,1546,236,1535,255,1534,265,1538,276,1557,298,1582,318,1577,317,1553,302,1533,278,1529,266,1530,254,1542,232,1563,214,1584,203"/>
+<area shape="poly" title=" " alt="" coords="1637,199,1726,247,1751,262,1776,274,1872,300,1969,317,2063,327,2146,335,2141,335,2062,332,1969,322,1870,305,1775,280,1748,267,1723,252,1636,204"/>
+<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="1547,249,1713,277"/>
+<area shape="poly" title=" " alt="" coords="1610,200,1617,236,1613,233,1607,204"/>
+<area shape="poly" title=" " alt="" coords="1632,247,1626,218,1630,214,1636,250"/>
+<area shape="poly" title=" " alt="" coords="1632,276,1632,311,1628,307,1628,279"/>
+<area shape="poly" title=" " alt="" coords="1714,272,1732,274,2147,325,2141,325,1731,280,1714,278"/>
+<area shape="poly" title=" " alt="" coords="2370,196,1905,256,1904,251,2365,197"/>
+<area shape="poly" title=" " alt="" coords="2370,200,2121,249,2120,243,2365,201"/>
+<area shape="poly" title=" " alt="" coords="2370,198,2273,220,2169,252,2144,266,2118,279,2019,305,1918,323,1822,333,1738,338,1738,333,1822,328,1917,317,2018,300,2116,275,2141,261,2166,247,2272,215,2365,199"/>
+<area shape="poly" title=" " alt="" coords="2493,187,2645,191,2821,204,2897,215,2955,230,2975,240,2987,251,2990,264,2981,279,2969,287,2949,295,2892,308,2723,325,2527,335,2354,339,2354,334,2526,330,2723,320,2891,302,2948,290,2967,283,2978,275,2984,264,2982,254,2972,244,2953,235,2896,220,2820,209,2644,196,2493,192"/>
+<area shape="rect" title=" " alt="" coords="2541,249,2602,277"/>
+<area shape="poly" title=" " alt="" coords="2456,199,2535,242,2530,241,2455,204"/>
+<area shape="rect" title=" " alt="" coords="2626,249,2733,277"/>
+<area shape="poly" title=" " alt="" coords="2475,199,2623,245,2618,244,2474,205"/>
+<area shape="rect" title=" " alt="" coords="2757,249,2868,277"/>
+<area shape="poly" title=" " alt="" coords="2493,198,2745,249,2740,248,2493,203"/>
+<area shape="rect" title=" " alt="" coords="2892,249,2968,277"/>
+<area shape="poly" title=" " alt="" coords="2493,192,2663,212,2880,249,2875,249,2662,218,2493,198"/>
+<area shape="rect" href="CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="2179,249,2318,277"/>
+<area shape="poly" title=" " alt="" coords="2400,201,2296,246,2294,241,2395,202"/>
+<area shape="rect" href="CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="2343,249,2517,277"/>
+<area shape="poly" title=" " alt="" coords="2432,200,2432,235,2428,232,2428,204"/>
+<area shape="poly" title=" " alt="" coords="2181,274,2161,280,1738,329,1737,323,2161,274,2176,275"/>
+<area shape="poly" title=" " alt="" coords="2251,276,2251,311,2247,307,2247,279"/>
+<area shape="poly" title=" " alt="" coords="2345,275,2330,280,2007,310,1738,332,1737,327,2007,305,2330,274,2340,276"/>
+<area shape="poly" title=" " alt="" coords="2400,277,2296,322,2294,316,2395,278"/>
 </map>
 </div>
 </div><a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>

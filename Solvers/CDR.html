@@ -723,9 +723,10 @@ With <code class="docutils literal notranslate"><span class="pre">outflow</span>
 <section id="cdrgodunov">
 <span id="chap-cdrgodunov"></span><h2>CdrGodunov<a class="headerlink" href="#cdrgodunov" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> inherits from <code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> and adds advection code for Godunov methods.
-This class borrows from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> internals (specifically, <code class="docutils literal notranslate"><span class="pre">EBLevelAdvectIntegrator</span></code>) and can do second-order advection with time-extrapolation.</p>
+This class borrows from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> internals (specifically, <code class="docutils literal notranslate"><span class="pre">EBAdvectLevelIntegrator</span></code>) and can do second-order advection with time-extrapolation.</p>
 <p><code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> supplies (almost) the same discretization as <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> with the exception that the underlying discretization can also be used for the incompressible Navier-Stokes equation.
 However, it only supports the monotonized central difference limiter.</p>
+<p>With AMR, <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> requires <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code> <span class="math notranslate nohighlight">\(\geq 4\)</span>, because <code class="docutils literal notranslate"><span class="pre">EBAdvectLevelIntegrator</span></code> fills ghost cells four cells out from each finer grid.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p><code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> will be removed from future versions of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>

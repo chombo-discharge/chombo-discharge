@@ -109,15 +109,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a92eae1f8b9a996224dff85eb2f1fe309" id="r_a92eae1f8b9a996224dff85eb2f1fe309"><td class="memItemLeft" align="right" valign="top"><a id="a92eae1f8b9a996224dff85eb2f1fe309" name="a92eae1f8b9a996224dff85eb2f1fe309"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBCoarAve</b> (const <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a92eae1f8b9a996224dff85eb2f1fe309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor not allowed. <br /></td></tr>
-<tr class="memitem:af6b6318f893dd71a8511b8933a3edd85" id="r_af6b6318f893dd71a8511b8933a3edd85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6b6318f893dd71a8511b8933a3edd85">EBCoarAve</a> (const DisjointBoxLayout &amp;a_dblFine, const DisjointBoxLayout &amp;a_dblCoar, const EBISLayout &amp;a_ebislFine, const EBISLayout &amp;a_ebislCoar, const ProblemDomain &amp;a_domainCoar, const int &amp;a_refRat, const EBIndexSpace *a_ebisPtr) noexcept</td></tr>
-<tr class="memdesc:af6b6318f893dd71a8511b8933a3edd85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor.  <br /></td></tr>
-<tr class="memitem:a8a442f12d0899cc4cfd282235970d600" id="r_a8a442f12d0899cc4cfd282235970d600"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a442f12d0899cc4cfd282235970d600">EBCoarAve</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:a8a442f12d0899cc4cfd282235970d600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor. Calls the define function.  <br /></td></tr>
+<tr class="memitem:a312d9ad7882fbd7f67f298a35c4844f5" id="r_a312d9ad7882fbd7f67f298a35c4844f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a312d9ad7882fbd7f67f298a35c4844f5">EBCoarAve</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:a312d9ad7882fbd7f67f298a35c4844f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defining constructor. Calls the define function.  <br /></td></tr>
 <tr class="memitem:ac7b40c4822be50ce1466c5261df1ef0f" id="r_ac7b40c4822be50ce1466c5261df1ef0f"><td class="memItemLeft" align="right" valign="top"><a id="ac7b40c4822be50ce1466c5261df1ef0f" name="ac7b40c4822be50ce1466c5261df1ef0f"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBCoarAve</b> () noexcept</td></tr>
 <tr class="memdesc:ac7b40c4822be50ce1466c5261df1ef0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="memitem:a2f498c611d22502e1aec6910c38f5cb4" id="r_a2f498c611d22502e1aec6910c38f5cb4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f498c611d22502e1aec6910c38f5cb4">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:a2f498c611d22502e1aec6910c38f5cb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function &ndash; puts operator in usable state.  <br /></td></tr>
+<tr class="memitem:afb32a6c0a70831aa90da67b84ee6b9ef" id="r_afb32a6c0a70831aa90da67b84ee6b9ef"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb32a6c0a70831aa90da67b84ee6b9ef">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFi, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:afb32a6c0a70831aa90da67b84ee6b9ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function &ndash; puts operator in usable state.  <br /></td></tr>
 <tr class="memitem:a00983438d13b51d4012984fa4864d0cb" id="r_a00983438d13b51d4012984fa4864d0cb"><td class="memItemLeft" align="right" valign="top"><a id="a00983438d13b51d4012984fa4864d0cb" name="a00983438d13b51d4012984fa4864d0cb"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &amp;fabin)=delete</td></tr>
 <tr class="memdesc:a00983438d13b51d4012984fa4864d0cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment not allowed. <br /></td></tr>
@@ -130,15 +128,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a0adee89505630772065bc74e36ae3b35" id="r_a0adee89505630772065bc74e36ae3b35"><td class="memItemLeft" align="right" valign="top"><a id="a0adee89505630772065bc74e36ae3b35" name="a0adee89505630772065bc74e36ae3b35"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineCellStencils</b> () noexcept</td></tr>
-<tr class="memdesc:a0adee89505630772065bc74e36ae3b35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of cell data. <br /></td></tr>
-<tr class="memitem:a4d163effbccc38c0555737b3af987e7a" id="r_a4d163effbccc38c0555737b3af987e7a"><td class="memItemLeft" align="right" valign="top"><a id="a4d163effbccc38c0555737b3af987e7a" name="a4d163effbccc38c0555737b3af987e7a"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineFaceStencils</b> () noexcept</td></tr>
-<tr class="memdesc:a4d163effbccc38c0555737b3af987e7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of face data. <br /></td></tr>
-<tr class="memitem:a6af7cd0c31843484e0163e7b2d251593" id="r_a6af7cd0c31843484e0163e7b2d251593"><td class="memItemLeft" align="right" valign="top"><a id="a6af7cd0c31843484e0163e7b2d251593" name="a6af7cd0c31843484e0163e7b2d251593"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineEBStencils</b> () noexcept</td></tr>
-<tr class="memdesc:a6af7cd0c31843484e0163e7b2d251593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of EB data. <br /></td></tr>
+<tr class="memitem:a8f40327bb83ffb029e23a817a1a63b11" id="r_a8f40327bb83ffb029e23a817a1a63b11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8f40327bb83ffb029e23a817a1a63b11">defineCellStencils</a> (const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs) noexcept</td></tr>
+<tr class="memdesc:a8f40327bb83ffb029e23a817a1a63b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of cell data.  <br /></td></tr>
+<tr class="memitem:a8cb322508de5d6cea9e43c8b97aeab80" id="r_a8cb322508de5d6cea9e43c8b97aeab80"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8cb322508de5d6cea9e43c8b97aeab80">defineFaceStencils</a> (const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs) noexcept</td></tr>
+<tr class="memdesc:a8cb322508de5d6cea9e43c8b97aeab80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of face data.  <br /></td></tr>
+<tr class="memitem:ac6d4a8545ca6677281e875e46ce17002" id="r_ac6d4a8545ca6677281e875e46ce17002"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6d4a8545ca6677281e875e46ce17002">defineEBStencils</a> (const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs) noexcept</td></tr>
+<tr class="memdesc:ac6d4a8545ca6677281e875e46ce17002"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define stencils for the various coarsening functions of EB data.  <br /></td></tr>
 <tr class="memitem:af31116766596f0839d21a1e791374bff" id="r_af31116766596f0839d21a1e791374bff"><td class="memItemLeft" align="right" valign="top"><a id="af31116766596f0839d21a1e791374bff" name="af31116766596f0839d21a1e791374bff"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineBuffers</b> () noexcept</td></tr>
 <tr class="memdesc:af31116766596f0839d21a1e791374bff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffer storage. <br /></td></tr>
@@ -227,76 +222,8 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
 <div class="textblock"><p>Class which replaces data at coarse level of refinement with average at fine level of refinement. </p>
 <p>When defining this class, use the EBLevelGrid-based constructors if the coarsened grids are available. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="af6b6318f893dd71a8511b8933a3edd85" name="af6b6318f893dd71a8511b8933a3edd85"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6b6318f893dd71a8511b8933a3edd85">&#9670;&#160;</a></span>EBCoarAve() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBCoarAve::EBCoarAve </td>
-          <td>(</td>
-          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dblFine</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dblCoar</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislCoar</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domainCoar</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBIndexSpace *</td>          <td class="paramname"><span class="paramname"><em>a_ebisPtr</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Defining constructor. </p>
-<p>This version creates it's own coarsened grids </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dblFine</td><td>Fine grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dblCoar</td><td>Coarse grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Fine EBISL </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislCoar</td><td>Coarse EBISL </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainCoar</td><td>Coarse domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisPtr</td><td>EBIS pointer. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a8a442f12d0899cc4cfd282235970d600" name="a8a442f12d0899cc4cfd282235970d600"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a442f12d0899cc4cfd282235970d600">&#9670;&#160;</a></span>EBCoarAve() <span class="overload">[2/2]</span></h2>
+<a id="a312d9ad7882fbd7f67f298a35c4844f5" name="a312d9ad7882fbd7f67f298a35c4844f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a312d9ad7882fbd7f67f298a35c4844f5">&#9670;&#160;</a></span>EBCoarAve()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -322,6 +249,11 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -338,6 +270,7 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between coarse and level </td></tr>
   </table>
   </dd>
@@ -844,8 +777,8 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
 
 </div>
 </div>
-<a id="a2f498c611d22502e1aec6910c38f5cb4" name="a2f498c611d22502e1aec6910c38f5cb4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f498c611d22502e1aec6910c38f5cb4">&#9670;&#160;</a></span>define()</h2>
+<a id="afb32a6c0a70831aa90da67b84ee6b9ef" name="afb32a6c0a70831aa90da67b84ee6b9ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb32a6c0a70831aa90da67b84ee6b9ef">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -871,6 +804,11 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -887,7 +825,107 @@ LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRi
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between coarse and level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8f40327bb83ffb029e23a817a1a63b11" name="a8f40327bb83ffb029e23a817a1a63b11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f40327bb83ffb029e23a817a1a63b11">&#9670;&#160;</a></span>defineCellStencils()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBCoarAve::defineCellStencils </td>
+          <td>(</td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define stencils for the various coarsening functions of cell data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac6d4a8545ca6677281e875e46ce17002" name="ac6d4a8545ca6677281e875e46ce17002"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6d4a8545ca6677281e875e46ce17002">&#9670;&#160;</a></span>defineEBStencils()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBCoarAve::defineEBStencils </td>
+          <td>(</td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define stencils for the various coarsening functions of EB data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8cb322508de5d6cea9e43c8b97aeab80" name="a8cb322508de5d6cea9e43c8b97aeab80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cb322508de5d6cea9e43c8b97aeab80">&#9670;&#160;</a></span>defineFaceStencils()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBCoarAve::defineFaceStencils </td>
+          <td>(</td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define stencils for the various coarsening functions of face data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids. </td></tr>
   </table>
   </dd>
 </dl>

@@ -158,10 +158,20 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a3bd7ac21a1e323ebbe89416c4709725b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get coarsened fine grids.  <br /></td></tr>
 <tr class="memitem:a033f07a40489b78878942120251da540" id="r_a033f07a40489b78878942120251da540"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a033f07a40489b78878942120251da540">getMultigridLevelGrids</a> () const</td></tr>
 <tr class="memdesc:a033f07a40489b78878942120251da540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid levels.  <br /></td></tr>
-<tr class="memitem:aad7fab010d628b479b4d5711d8e9b05f" id="r_aad7fab010d628b479b4d5711d8e9b05f"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad7fab010d628b479b4d5711d8e9b05f">getMultigridLevelGridsCoFi</a> () const</td></tr>
-<tr class="memdesc:aad7fab010d628b479b4d5711d8e9b05f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened grids between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:a26c6941cef439ff1ab129a1bd87be830" id="r_a26c6941cef439ff1ab129a1bd87be830"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26c6941cef439ff1ab129a1bd87be830">getMultigridCoarseAverage</a> () const</td></tr>
 <tr class="memdesc:a26c6941cef439ff1ab129a1bd87be830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarse averaging between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:abc6b3494a5acd4a0865709ec3a495008" id="r_abc6b3494a5acd4a0865709ec3a495008"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc6b3494a5acd4a0865709ec3a495008">getFinerVoFs</a> () const</td></tr>
+<tr class="memdesc:abc6b3494a5acd4a0865709ec3a495008"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer VoFs of the coarse VoFs of the coarsened fine grids.  <br /></td></tr>
+<tr class="memitem:a0c0fe148dbdfc50db58fa48cefc83d02" id="r_a0c0fe148dbdfc50db58fa48cefc83d02"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0c0fe148dbdfc50db58fa48cefc83d02">getMultigridFinerVoFs</a> () const</td></tr>
+<tr class="memdesc:a0c0fe148dbdfc50db58fa48cefc83d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:a538bfa669db4f9fa418fcdc4658808ed" id="r_a538bfa669db4f9fa418fcdc4658808ed"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a538bfa669db4f9fa418fcdc4658808ed">getMultigridRestriction</a> () const</td></tr>
+<tr class="memdesc:a538bfa669db4f9fa418fcdc4658808ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid restriction between AMR levels.  <br /></td></tr>
+<tr class="memitem:a618017e16bbd89e58fdf62dd8bf05f7e" id="r_a618017e16bbd89e58fdf62dd8bf05f7e"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a618017e16bbd89e58fdf62dd8bf05f7e">getMultigridProlongation</a> () const</td></tr>
+<tr class="memdesc:a618017e16bbd89e58fdf62dd8bf05f7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid prolongation between AMR levels.  <br /></td></tr>
+<tr class="memitem:ae1224d7e0bbf92d3bef40329685542e2" id="r_ae1224d7e0bbf92d3bef40329685542e2"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae1224d7e0bbf92d3bef40329685542e2">getMultigridLevelRestriction</a> () const</td></tr>
+<tr class="memdesc:ae1224d7e0bbf92d3bef40329685542e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the restriction between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:a5e8b667486a42e5fe8ec0e1ad0648837" id="r_a5e8b667486a42e5fe8ec0e1ad0648837"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e8b667486a42e5fe8ec0e1ad0648837">getMultigridLevelProlongation</a> () const</td></tr>
+<tr class="memdesc:a5e8b667486a42e5fe8ec0e1ad0648837"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the prolongation between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:aade764263141d96833e6c9bdfd2b5653" id="r_aade764263141d96833e6c9bdfd2b5653"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aade764263141d96833e6c9bdfd2b5653">getEBLevelGridFiCo</a> () const</td></tr>
 <tr class="memdesc:aade764263141d96833e6c9bdfd2b5653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get refined grids.  <br /></td></tr>
 <tr class="memitem:a4a6c82b907a8db5574b0d5f9dbe85a8b" id="r_a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a6c82b907a8db5574b0d5f9dbe85a8b">getVofIterator</a> () const</td></tr>
@@ -230,6 +240,16 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ac5db77d14fb5dccb6a704fb86ba9ceec" id="r_ac5db77d14fb5dccb6a704fb86ba9ceec"><td class="memItemLeft" align="right" valign="top"><a id="ac5db77d14fb5dccb6a704fb86ba9ceec" name="ac5db77d14fb5dccb6a704fb86ba9ceec"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineMultigridCoarseAverage</b> ()</td></tr>
 <tr class="memdesc:ac5db77d14fb5dccb6a704fb86ba9ceec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the coarse averaging between consecutive multigrid levels. <br /></td></tr>
+<tr class="memitem:a8e1a81226de5d1f840b1bd484661ce65" id="r_a8e1a81226de5d1f840b1bd484661ce65"><td class="memItemLeft" align="right" valign="top"><a id="a8e1a81226de5d1f840b1bd484661ce65" name="a8e1a81226de5d1f840b1bd484661ce65"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineMultigridLevelTransfer</b> ()</td></tr>
+<tr class="memdesc:a8e1a81226de5d1f840b1bd484661ce65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the restriction and prolongation between consecutive multigrid levels. <br /></td></tr>
+<tr class="memitem:a21f8d5c8fc7aedbf64e99b5e0d12affe" id="r_a21f8d5c8fc7aedbf64e99b5e0d12affe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a21f8d5c8fc7aedbf64e99b5e0d12affe">defineFinerVoFs</a> (const int a_lmin)</td></tr>
+<tr class="memdesc:a21f8d5c8fc7aedbf64e99b5e0d12affe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the finer-VoF lists of the coarsened fine grids.  <br /></td></tr>
+<tr class="memitem:a113b2c691a3ea7147c8162b3fb619c16" id="r_a113b2c691a3ea7147c8162b3fb619c16"><td class="memItemLeft" align="right" valign="top"><a id="a113b2c691a3ea7147c8162b3fb619c16" name="a113b2c691a3ea7147c8162b3fb619c16"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineMultigridFinerVoFs</b> ()</td></tr>
+<tr class="memdesc:a113b2c691a3ea7147c8162b3fb619c16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the finer-VoF lists of the coarsened grids between consecutive multigrid levels. <br /></td></tr>
+<tr class="memitem:ac8c46130f3512df7656c0320faaf012d" id="r_ac8c46130f3512df7656c0320faaf012d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8c46130f3512df7656c0320faaf012d">fillFinerVoFs</a> (LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgFine, const int a_refRat) const</td></tr>
+<tr class="memdesc:ac8c46130f3512df7656c0320faaf012d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the finer-VoF lists of one pair of grids.  <br /></td></tr>
 <tr class="memitem:a3c62834f6d3371339ced5ab3e783a5ba" id="r_a3c62834f6d3371339ced5ab3e783a5ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c62834f6d3371339ced5ab3e783a5ba">defineEBMultigrid</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a3c62834f6d3371339ced5ab3e783a5ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define multigrid interpolation utility.  <br /></td></tr>
 <tr class="memitem:ab05aedd32d7f6c1bed5aeceef65eba82" id="r_ab05aedd32d7f6c1bed5aeceef65eba82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab05aedd32d7f6c1bed5aeceef65eba82">defineFillPatch</a> (const int a_lmin)</td></tr>
@@ -352,6 +372,18 @@ Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemR
 <tr class="memdesc:abcd5bfcad0358b10ebc104bf3661b1ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened grids between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:abf311151c6c3391d7979abf193dd4327" id="r_abf311151c6c3391d7979abf193dd4327"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf311151c6c3391d7979abf193dd4327">m_mgCoarAve</a></td></tr>
 <tr class="memdesc:abf311151c6c3391d7979abf193dd4327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse averaging between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:ab2bcb668a32d147467ec000d8acd7175" id="r_ab2bcb668a32d147467ec000d8acd7175"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2bcb668a32d147467ec000d8acd7175">m_finerVoFs</a></td></tr>
+<tr class="memdesc:ab2bcb668a32d147467ec000d8acd7175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finer VoFs of the coarse VoFs of the coarsened fine grids.  <br /></td></tr>
+<tr class="memitem:ab615d3b9256384c781004eb838828705" id="r_ab615d3b9256384c781004eb838828705"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab615d3b9256384c781004eb838828705">m_mgFinerVoFs</a></td></tr>
+<tr class="memdesc:ab615d3b9256384c781004eb838828705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:a3ac9af729a6b10e7340b404a3c3e3bdc" id="r_a3ac9af729a6b10e7340b404a3c3e3bdc"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ac9af729a6b10e7340b404a3c3e3bdc">m_mgRestrict</a></td></tr>
+<tr class="memdesc:a3ac9af729a6b10e7340b404a3c3e3bdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid restriction between AMR levels.  <br /></td></tr>
+<tr class="memitem:ad9f8fd07560123584446d9d1472af4d2" id="r_ad9f8fd07560123584446d9d1472af4d2"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad9f8fd07560123584446d9d1472af4d2">m_mgProlong</a></td></tr>
+<tr class="memdesc:ad9f8fd07560123584446d9d1472af4d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid prolongation between AMR levels.  <br /></td></tr>
+<tr class="memitem:a44c74d9e6b5ea43635facc289302ba31" id="r_a44c74d9e6b5ea43635facc289302ba31"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44c74d9e6b5ea43635facc289302ba31">m_mgLevelRestrict</a></td></tr>
+<tr class="memdesc:a44c74d9e6b5ea43635facc289302ba31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction between consecutive multigrid levels.  <br /></td></tr>
+<tr class="memitem:a6dfd90e5e93c29bb49cf7e189844d2df" id="r_a6dfd90e5e93c29bb49cf7e189844d2df"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6dfd90e5e93c29bb49cf7e189844d2df">m_mgLevelProlong</a></td></tr>
+<tr class="memdesc:a6dfd90e5e93c29bb49cf7e189844d2df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:a03464ade19278214a5e4c672d552eaba" id="r_a03464ade19278214a5e4c672d552eaba"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03464ade19278214a5e4c672d552eaba">m_eblgFiCo</a></td></tr>
 <tr class="memdesc:a03464ade19278214a5e4c672d552eaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <br /></td></tr>
 <tr class="memitem:a318b7e957a7c1cbbfe11b58e149ec85c" id="r_a318b7e957a7c1cbbfe11b58e149ec85c"><td class="memItemLeft" align="right" valign="top"><a id="a318b7e957a7c1cbbfe11b58e149ec85c" name="a318b7e957a7c1cbbfe11b58e149ec85c"></a>
@@ -901,6 +933,39 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a21f8d5c8fc7aedbf64e99b5e0d12affe" name="a21f8d5c8fc7aedbf64e99b5e0d12affe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21f8d5c8fc7aedbf64e99b5e0d12affe">&#9670;&#160;</a></span>defineFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the finer-VoF lists of the coarsened fine grids. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac55244613140327fe2e992090e39d144" name="ac55244613140327fe2e992090e39d144"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac55244613140327fe2e992090e39d144">&#9670;&#160;</a></span>defineFineToCoarRedistOper()</h2>
 
@@ -1213,7 +1278,7 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div><div class="memdoc">
 
 <p>Define the multigrid levels on the given grids. </p>
-<p>Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k &gt; 0 are defined on a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of consecutive multigrid levels are defined as well. The coarse averaging between them is defined in regridOperators. Empty inputs clear the multigrid levels. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Entry 0 of each AMR level is that AMR level's EBLevelGrid, and entries k &gt; 0 are defined on a_mgGrids[lvl][k] with the ghost width of the data holders. The coarsened grids between each pair of consecutive multigrid levels are defined as well. The finer-VoF lists, coarse averaging, restriction and prolongation between them are defined in regridOperators, when the multigrid operator is registered. Empty inputs clear the multigrid levels. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgGrids</td><td>Grids on each multigrid level. a_mgGrids[lvl][0] must be the grids on AMR level lvl. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgDomains</td><td>Domains on each multigrid level, with the same indexing as a_mgGrids. </td></tr>
@@ -1313,6 +1378,56 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac8c46130f3512df7656c0320faaf012d" name="ac8c46130f3512df7656c0320faaf012d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8c46130f3512df7656c0320faaf012d">&#9670;&#160;</a></span>fillFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::fillFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgCoFi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill the finer-VoF lists of one pair of grids. </p>
+<p>Covers the irregular cells whose finer cells all lie in the finer EBISBox: the coarsened grids, and the ghost cells around them as far as the finer EB ghost cells reach. The lists come from the finer graph's coarsening links (<a class="el" href="classVofUtils.html#a8d28290771301ccdbb8b0359c1e5da49" title="Get the VoFs on a finer layout that coarsen to a coarse VoF.">VofUtils::getFinerVoFs</a>). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_finerVoFs</td><td>Finer-VoF lists, defined on the coarsened grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1639,6 +1754,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="abc6b3494a5acd4a0865709ec3a495008" name="abc6b3494a5acd4a0865709ec3a495008"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc6b3494a5acd4a0865709ec3a495008">&#9670;&#160;</a></span>getFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp; PhaseRealm::getFinerVoFs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the finer VoFs of the coarse VoFs of the coarsened fine grids. </p>
+<p>Entry [lvl] lives on <a class="el" href="#a3bd7ac21a1e323ebbe89416c4709725b" title="Get coarsened fine grids.">getEBLevelGridCoFi()</a>[lvl], for lvl smaller than the finest level. For every irregular cell whose finer cells all lie in the finer EBISBox, it holds the VoFs on level lvl+1 that coarsen to each coarse VoF, in the order of EBISLayout::refine. </p><dl class="section return"><dt>Returns</dt><dd>The finer-VoF lists of each AMR level pair. </dd></dl>
+
+</div>
+</div>
 <a id="a3e4edb23dcc3d7d1320b7d8162f77c64" name="a3e4edb23dcc3d7d1320b7d8162f77c64"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3e4edb23dcc3d7d1320b7d8162f77c64">&#9670;&#160;</a></span>getFluxRegister()</h2>
 
@@ -1875,7 +2010,27 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div><div class="memdoc">
 
 <p>Get the coarse averaging between consecutive multigrid levels. </p>
-<p>Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl. </p><dl class="section return"><dt>Returns</dt><dd>The coarse averaging of each multigrid level pair. </dd></dl>
+<p>Entry [lvl][k] averages from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The coarse averaging of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
+<a id="a0c0fe148dbdfc50db58fa48cefc83d02" name="a0c0fe148dbdfc50db58fa48cefc83d02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c0fe148dbdfc50db58fa48cefc83d02">&#9670;&#160;</a></span>getMultigridFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &gt; &amp; PhaseRealm::getMultigridFinerVoFs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels. </p>
+<p>Entry [lvl][k] lives on <a class="el" href="#a033f07a40489b78878942120251da540" title="Get the multigrid levels.">getMultigridLevelGrids()</a>[lvl][k] coarsened by 2 and holds the VoFs on multigrid level k under AMR level lvl, as <a class="el" href="#abc6b3494a5acd4a0865709ec3a495008" title="Get the finer VoFs of the coarse VoFs of the coarsened fine grids.">getFinerVoFs()</a> does for AMR levels. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The finer-VoF lists of each multigrid level pair. </dd></dl>
 
 </div>
 </div>
@@ -1919,14 +2074,14 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
-<a id="aad7fab010d628b479b4d5711d8e9b05f" name="aad7fab010d628b479b4d5711d8e9b05f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad7fab010d628b479b4d5711d8e9b05f">&#9670;&#160;</a></span>getMultigridLevelGridsCoFi()</h2>
+<a id="a5e8b667486a42e5fe8ec0e1ad0648837" name="a5e8b667486a42e5fe8ec0e1ad0648837"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e8b667486a42e5fe8ec0e1ad0648837">&#9670;&#160;</a></span>getMultigridLevelProlongation()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; PhaseRealm::getMultigridLevelGridsCoFi </td>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &gt; &amp; PhaseRealm::getMultigridLevelProlongation </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -1934,8 +2089,68 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
       </table>
 </div><div class="memdoc">
 
-<p>Get the coarsened grids between consecutive multigrid levels. </p>
-<p>Entry [lvl][k] is entry [lvl][k] of <a class="el" href="#a033f07a40489b78878942120251da540" title="Get the multigrid levels.">getMultigridLevelGrids()</a> coarsened by 2, for k + 1 smaller than the number of multigrid levels under AMR level lvl. </p><dl class="section return"><dt>Returns</dt><dd>The coarsened grids of each multigrid level pair. </dd></dl>
+<p>Get the prolongation between consecutive multigrid levels. </p>
+<p>Entry [lvl][k] prolongs from multigrid level k+1 onto multigrid level k under AMR level lvl. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The prolongation of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
+<a id="ae1224d7e0bbf92d3bef40329685542e2" name="ae1224d7e0bbf92d3bef40329685542e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1224d7e0bbf92d3bef40329685542e2">&#9670;&#160;</a></span>getMultigridLevelRestriction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &gt; &amp; PhaseRealm::getMultigridLevelRestriction </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the restriction between consecutive multigrid levels. </p>
+<p>Entry [lvl][k] restricts from multigrid level k onto multigrid level k+1 under AMR level lvl. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The restriction of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
+<a id="a618017e16bbd89e58fdf62dd8bf05f7e" name="a618017e16bbd89e58fdf62dd8bf05f7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a618017e16bbd89e58fdf62dd8bf05f7e">&#9670;&#160;</a></span>getMultigridProlongation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &amp; PhaseRealm::getMultigridProlongation </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multigrid prolongation between AMR levels. </p>
+<p>Entry [lvl] prolongs from AMR level lvl-1 onto AMR level lvl, for lvl &gt; 0. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The prolongation of each AMR level pair. </dd></dl>
+
+</div>
+</div>
+<a id="a538bfa669db4f9fa418fcdc4658808ed" name="a538bfa669db4f9fa418fcdc4658808ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a538bfa669db4f9fa418fcdc4658808ed">&#9670;&#160;</a></span>getMultigridRestriction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &amp; PhaseRealm::getMultigridRestriction </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multigrid restriction between AMR levels. </p>
+<p>Entry [lvl] restricts from AMR level lvl onto <a class="el" href="#a3bd7ac21a1e323ebbe89416c4709725b" title="Get coarsened fine grids.">getEBLevelGridCoFi()</a>[lvl-1], for lvl &gt; 0. Defined when the multigrid operator is registered. </p><dl class="section return"><dt>Returns</dt><dd>The restriction of each AMR level pair. </dd></dl>
 
 </div>
 </div>
@@ -2401,6 +2616,31 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="ab2bcb668a32d147467ec000d8acd7175" name="ab2bcb668a32d147467ec000d8acd7175"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2bcb668a32d147467ec000d8acd7175">&#9670;&#160;</a></span>m_finerVoFs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;LayoutData&lt;BaseIVFAB&lt;Vector&lt;VolIndex&gt; &gt; &gt; &gt; &gt; PhaseRealm::m_finerVoFs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Finer VoFs of the coarse VoFs of the coarsened fine grids. </p>
+<p>m_finerVoFs[lvl] lives on m_eblgCoFi[lvl] and holds the VoFs on level lvl+1 that coarsen to its irregular VoFs. </p>
+
+</div>
+</div>
 <a id="abf311151c6c3391d7979abf193dd4327" name="abf311151c6c3391d7979abf193dd4327"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abf311151c6c3391d7979abf193dd4327">&#9670;&#160;</a></span>m_mgCoarAve</h2>
 
@@ -2423,6 +2663,31 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Coarse averaging between consecutive multigrid levels. </p>
 <p>m_mgCoarAve[lvl][k] averages from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1]. </p>
+
+</div>
+</div>
+<a id="ab615d3b9256384c781004eb838828705" name="ab615d3b9256384c781004eb838828705"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab615d3b9256384c781004eb838828705">&#9670;&#160;</a></span>m_mgFinerVoFs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;LayoutData&lt;BaseIVFAB&lt;Vector&lt;VolIndex&gt; &gt; &gt; &gt; &gt; &gt; PhaseRealm::m_mgFinerVoFs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Finer VoFs of the coarse VoFs of the coarsened grids between consecutive multigrid levels. </p>
+<p>m_mgFinerVoFs[lvl][k] lives on m_mgLevelGridsCoFi[lvl][k] and holds the VoFs on m_mgLevelGrids[lvl][k] that coarsen to its irregular VoFs. </p>
 
 </div>
 </div>
@@ -2473,6 +2738,106 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Coarsened grids between consecutive multigrid levels. </p>
 <p>m_mgLevelGridsCoFi[lvl][k] is m_mgLevelGrids[lvl][k] coarsened by 2. </p>
+
+</div>
+</div>
+<a id="a6dfd90e5e93c29bb49cf7e189844d2df" name="a6dfd90e5e93c29bb49cf7e189844d2df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dfd90e5e93c29bb49cf7e189844d2df">&#9670;&#160;</a></span>m_mgLevelProlong</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&gt; &gt; &gt; PhaseRealm::m_mgLevelProlong</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Prolongation between consecutive multigrid levels. </p>
+<p>m_mgLevelProlong[lvl][k] prolongs from m_mgLevelGrids[lvl][k+1] onto m_mgLevelGrids[lvl][k]. </p>
+
+</div>
+</div>
+<a id="a44c74d9e6b5ea43635facc289302ba31" name="a44c74d9e6b5ea43635facc289302ba31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44c74d9e6b5ea43635facc289302ba31">&#9670;&#160;</a></span>m_mgLevelRestrict</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&gt; &gt; &gt; PhaseRealm::m_mgLevelRestrict</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restriction between consecutive multigrid levels. </p>
+<p>m_mgLevelRestrict[lvl][k] restricts from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1]. </p>
+
+</div>
+</div>
+<a id="ad9f8fd07560123584446d9d1472af4d2" name="ad9f8fd07560123584446d9d1472af4d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9f8fd07560123584446d9d1472af4d2">&#9670;&#160;</a></span>m_mgProlong</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&gt; &gt; PhaseRealm::m_mgProlong</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Multigrid prolongation between AMR levels. </p>
+<p>m_mgProlong[lvl] prolongs from m_eblg[lvl-1] onto m_eblg[lvl]. </p>
+
+</div>
+</div>
+<a id="a3ac9af729a6b10e7340b404a3c3e3bdc" name="a3ac9af729a6b10e7340b404a3c3e3bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ac9af729a6b10e7340b404a3c3e3bdc">&#9670;&#160;</a></span>m_mgRestrict</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&gt; &gt; PhaseRealm::m_mgRestrict</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Multigrid restriction between AMR levels. </p>
+<p>m_mgRestrict[lvl] restricts from m_eblg[lvl] onto m_eblgCoFi[lvl-1]. </p>
 
 </div>
 </div>

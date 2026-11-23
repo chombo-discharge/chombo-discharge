@@ -138,9 +138,31 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7ce0c30c75859b2d5d95e7fa62750a5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies a_vofs so it only includes cells in a box.  <br /></td></tr>
 <tr class="memitem:a2b3062114f036422f279efe7529afcac" id="r_a2b3062114f036422f279efe7529afcac"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b3062114f036422f279efe7529afcac">onlyUnique</a> (Vector&lt; VolIndex &gt; &amp;a_vofs)</td></tr>
 <tr class="memdesc:a2b3062114f036422f279efe7529afcac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discard duplicates.  <br /></td></tr>
+<tr class="memitem:a8d28290771301ccdbb8b0359c1e5da49" id="r_a8d28290771301ccdbb8b0359c1e5da49"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d28290771301ccdbb8b0359c1e5da49">getFinerVoFs</a> (const VolIndex &amp;a_coarVoF, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_refRat)</td></tr>
+<tr class="memdesc:a8d28290771301ccdbb8b0359c1e5da49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the VoFs on a finer layout that coarsen to a coarse VoF.  <br /></td></tr>
+<tr class="memitem:a802629735c869169e744154c75f6227a" id="r_a802629735c869169e744154c75f6227a"><td class="memItemLeft" align="right" valign="top">static Vector&lt; FaceIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a802629735c869169e744154c75f6227a">getFinerFaces</a> (const FaceIndex &amp;a_coarFace, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_refRat)</td></tr>
+<tr class="memdesc:a802629735c869169e744154c75f6227a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the faces on a finer layout that coarsen to a coarse face.  <br /></td></tr>
+<tr class="memitem:a195e712018cae1d70f7e648ab29ebd5b" id="r_a195e712018cae1d70f7e648ab29ebd5b"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a195e712018cae1d70f7e648ab29ebd5b">getStoredFinerVoFs</a> (const VolIndex &amp;a_coarVoF, const EBISBox &amp;a_ebisBoxCoar, const BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &amp;a_finerVoFs, const int a_refRat)</td></tr>
+<tr class="memdesc:a195e712018cae1d70f7e648ab29ebd5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer VoFs of a coarse VoF from stored finer-VoF lists.  <br /></td></tr>
+<tr class="memitem:abd687b727084a1dce960eeb3b84c1b46" id="r_abd687b727084a1dce960eeb3b84c1b46"><td class="memItemLeft" align="right" valign="top">static Box&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd687b727084a1dce960eeb3b84c1b46">getCoarseCellsWithAllFinerCells</a> (const Box &amp;a_fineRegion, const int a_refRat)</td></tr>
+<tr class="memdesc:abd687b727084a1dce960eeb3b84c1b46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarse cells whose finer cells all lie in a finer region.  <br /></td></tr>
+<tr class="memitem:aec1974e5258005ab923da0bc7a8f0bdd" id="r_aec1974e5258005ab923da0bc7a8f0bdd"><td class="memItemLeft" align="right" valign="top">static Vector&lt; FaceIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec1974e5258005ab923da0bc7a8f0bdd">getStoredFinerFaces</a> (const FaceIndex &amp;a_coarFace, const EBISBox &amp;a_ebisBoxCoar, const BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &amp;a_finerVoFs, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_refRat)</td></tr>
+<tr class="memdesc:aec1974e5258005ab923da0bc7a8f0bdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer faces of a coarse face from stored finer-VoF lists.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-static-methods" class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a4a5110d89bb22e42d2e856f515918955" id="r_a4a5110d89bb22e42d2e856f515918955"><td class="memItemLeft" align="right" valign="top">static Vector&lt; FaceIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a5110d89bb22e42d2e856f515918955">getFinerFacesFromSide</a> (const FaceIndex &amp;a_coarFace, const Side::LoHiSide a_side, const Vector&lt; VolIndex &gt; &amp;a_finerVoFs, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_refRat)</td></tr>
+<tr class="memdesc:a4a5110d89bb22e42d2e856f515918955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer faces of a coarse face from the finer VoFs of one of its coarse VoFs.  <br /></td></tr>
+<tr class="memitem:a9a32ae910b502474fad04caa56b0bc3c" id="r_a9a32ae910b502474fad04caa56b0bc3c"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a32ae910b502474fad04caa56b0bc3c">gatherFinerVoFs</a> (const VolIndex &amp;a_coarVoF, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_refRat)</td></tr>
+<tr class="memdesc:a9a32ae910b502474fad04caa56b0bc3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the VoFs on a finer layout that coarsen to a coarse VoF, in gathering order.  <br /></td></tr>
+<tr class="memitem:ae96fd51adc8eb575c1724b7245100788" id="r_ae96fd51adc8eb575c1724b7245100788"><td class="memItemLeft" align="right" valign="top">static Vector&lt; Vector&lt; VolIndex &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae96fd51adc8eb575c1724b7245100788">orderFinerGroups</a> (const Vector&lt; VolIndex &gt; &amp;a_finest, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_ratio)</td></tr>
+<tr class="memdesc:ae96fd51adc8eb575c1724b7245100788"><td class="mdescLeft">&#160;</td><td class="mdescRight">Group the finest VoFs of one VoF by their ancestor one factor of two finer than it, and order the groups.  <br /></td></tr>
+<tr class="memitem:a9d1df51820cf71899f6217baa1072c6b" id="r_a9d1df51820cf71899f6217baa1072c6b"><td class="memItemLeft" align="right" valign="top">static Vector&lt; VolIndex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d1df51820cf71899f6217baa1072c6b">orderFinerVoFs</a> (const Vector&lt; VolIndex &gt; &amp;a_finest, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_ratio)</td></tr>
+<tr class="memdesc:a9d1df51820cf71899f6217baa1072c6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Order the finest VoFs of one VoF as EBISLayout::refine lists them.  <br /></td></tr>
+<tr class="memitem:a77fea1cf0a62b87cf858b2e21fdeae2f" id="r_a77fea1cf0a62b87cf858b2e21fdeae2f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77fea1cf0a62b87cf858b2e21fdeae2f">appendFinerFaces</a> (Vector&lt; FaceIndex &gt; &amp;a_faces, const Vector&lt; VolIndex &gt; &amp;a_finestLo, const Vector&lt; VolIndex &gt; &amp;a_finestHi, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_ratio, const int a_dir)</td></tr>
+<tr class="memdesc:a77fea1cf0a62b87cf858b2e21fdeae2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Append the finest faces between the finest VoFs of two VoFs that share an interior face.  <br /></td></tr>
+<tr class="memitem:aa2361b68491ee553ade0881786c04769" id="r_aa2361b68491ee553ade0881786c04769"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2361b68491ee553ade0881786c04769">appendFinerBoundaryFaces</a> (Vector&lt; FaceIndex &gt; &amp;a_faces, const Vector&lt; VolIndex &gt; &amp;a_finest, const EBISLayout &amp;a_ebislFine, const DataIndex &amp;a_din, const int a_ratio, const int a_dir, const Side::LoHiSide a_side)</td></tr>
+<tr class="memdesc:aa2361b68491ee553ade0881786c04769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Append the finest boundary faces of a VoF's face on the domain boundary.  <br /></td></tr>
 <tr class="memitem:a453012fcac498faa934fa9f74829c5bf" id="r_a453012fcac498faa934fa9f74829c5bf"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a453012fcac498faa934fa9f74829c5bf">isQuadrantWellDefined</a> (const RealVect &amp;a_normal)</td></tr>
 <tr class="memdesc:a453012fcac498faa934fa9f74829c5bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a quadrant is well-defined for a direction in space.  <br /></td></tr>
 <tr class="memitem:ab0884fe48a4cd79122b49a5d5745b021" id="r_ab0884fe48a4cd79122b49a5d5745b021"><td class="memItemLeft" align="right" valign="top">static std::pair&lt; int, Side::LoHiSide &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0884fe48a4cd79122b49a5d5745b021">getCardinalDirection</a> (const RealVect &amp;a_normal)</td></tr>
@@ -225,6 +247,142 @@ Static Protected Member Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="aa2361b68491ee553ade0881786c04769" name="aa2361b68491ee553ade0881786c04769"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2361b68491ee553ade0881786c04769">&#9670;&#160;</a></span>appendFinerBoundaryFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void VofUtils::appendFinerBoundaryFaces </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; FaceIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ratio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide</td>          <td class="paramname"><span class="paramname"><em>a_side</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Append the finest boundary faces of a VoF's face on the domain boundary. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_faces</td><td>Faces, appended to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finest</td><td>The finest VoFs of the VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finest layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Ratio between the level of the VoF and the finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Side of the VoF on which the domain boundary lies. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a77fea1cf0a62b87cf858b2e21fdeae2f" name="a77fea1cf0a62b87cf858b2e21fdeae2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77fea1cf0a62b87cf858b2e21fdeae2f">&#9670;&#160;</a></span>appendFinerFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void VofUtils::appendFinerFaces </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; FaceIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finestLo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finestHi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ratio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Append the finest faces between the finest VoFs of two VoFs that share an interior face. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_faces</td><td>Faces, appended to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLo</td><td>The finest VoFs of the low VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestHi</td><td>The finest VoFs of the high VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finest layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Ratio between the level of the two VoFs and the finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9bb6c4c6ff3f5c79ea0175c803681227" name="a9bb6c4c6ff3f5c79ea0175c803681227"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9bb6c4c6ff3f5c79ea0175c803681227">&#9670;&#160;</a></span>connectedVofsOnly()</h2>
 
@@ -346,6 +504,57 @@ Static Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a9a32ae910b502474fad04caa56b0bc3c" name="a9a32ae910b502474fad04caa56b0bc3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a32ae910b502474fad04caa56b0bc3c">&#9670;&#160;</a></span>gatherFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; VolIndex &gt; VofUtils::gatherFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarVoF</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the VoFs on a finer layout that coarsen to a coarse VoF, in gathering order. </p>
+<p>Gathering order is BoxIterator order of the cells of refine(coarse cell, a_refRat), then cell index. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVoF</td><td>Coarse VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finer layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on both layouts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two layouts. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer VoFs that coarsen to a_coarVoF. </dd></dl>
+
+</div>
+</div>
 <a id="af7395cb846e45e298121683fa3f9d936" name="af7395cb846e45e298121683fa3f9d936"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af7395cb846e45e298121683fa3f9d936">&#9670;&#160;</a></span>getAllVofsInRadius()</h2>
 
@@ -431,6 +640,45 @@ Static Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="abd687b727084a1dce960eeb3b84c1b46" name="abd687b727084a1dce960eeb3b84c1b46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd687b727084a1dce960eeb3b84c1b46">&#9670;&#160;</a></span>getCoarseCellsWithAllFinerCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Box VofUtils::getCoarseCellsWithAllFinerCells </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineRegion</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the coarse cells whose finer cells all lie in a finer region. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineRegion</td><td>Finer region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the coarse and the finer cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The coarse cells whose refinement by a_refRat lies in a_fineRegion. May be empty. </dd></dl>
+
+</div>
+</div>
 <a id="a72b8764ce9111c65e6de400d363ad1f4" name="a72b8764ce9111c65e6de400d363ad1f4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a72b8764ce9111c65e6de400d363ad1f4">&#9670;&#160;</a></span>getConnectedVofsInRadius()</h2>
 
@@ -479,6 +727,171 @@ Static Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns all Vofs within radius a_radius from a_startVof </dd></dl>
+
+</div>
+</div>
+<a id="a802629735c869169e744154c75f6227a" name="a802629735c869169e744154c75f6227a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a802629735c869169e744154c75f6227a">&#9670;&#160;</a></span>getFinerFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; FaceIndex &gt; VofUtils::getFinerFaces </td>
+          <td>(</td>
+          <td class="paramtype">const FaceIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarFace</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the faces on a finer layout that coarsen to a coarse face. </p>
+<p>For an interior face, lists the faces between the finer VoFs of its low and high VoFs, pairing them in the order of getFinerVoFs at each factor of two as EBISLayout::refine does. For a face on the domain boundary, lists the boundary faces of the finer VoFs of its interior VoF that lie against the boundary. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarFace</td><td>Coarse face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finer layout. Shares DataIndex with the layout of a_coarFace, holds every cell of the refined cells on both sides of the face, and has a maximum coarsening ratio of at least a_refRat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on both layouts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two layouts. A power of two. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer faces that coarsen to a_coarFace. </dd></dl>
+
+</div>
+</div>
+<a id="a4a5110d89bb22e42d2e856f515918955" name="a4a5110d89bb22e42d2e856f515918955"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a5110d89bb22e42d2e856f515918955">&#9670;&#160;</a></span>getFinerFacesFromSide()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; FaceIndex &gt; VofUtils::getFinerFacesFromSide </td>
+          <td>(</td>
+          <td class="paramtype">const FaceIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarFace</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide</td>          <td class="paramname"><span class="paramname"><em>a_side</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the finer faces of a coarse face from the finer VoFs of one of its coarse VoFs. </p>
+<p>Takes the finer VoFs of the a_side coarse VoF in the layer of cells next to the face, and keeps their faces across the face whose other VoF coarsens to the other coarse VoF. Listed in the order of a_finerVoFs, then of the faces of each finer VoF. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarFace</td><td>Coarse face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Side of the face whose coarse VoF a_finerVoFs belong to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>The finer VoFs of the a_side coarse VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finer layout, with a maximum coarsening ratio of at least a_refRat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on both layouts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two layouts. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer faces of a_coarFace. </dd></dl>
+
+</div>
+</div>
+<a id="a8d28290771301ccdbb8b0359c1e5da49" name="a8d28290771301ccdbb8b0359c1e5da49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d28290771301ccdbb8b0359c1e5da49">&#9670;&#160;</a></span>getFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; VolIndex &gt; VofUtils::getFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarVoF</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the VoFs on a finer layout that coarsen to a coarse VoF. </p>
+<p>Finds the VoFs among the cells of refine(coarse cell, a_refRat) whose coarsening by a_refRat is a_coarVoF. They are listed in the order EBISLayout::refine lists them for a graph that Chombo coarsened: at each factor of two, the VoFs one level finer are gathered in BoxIterator order of their cells, and each connected set is listed in the order it grows from its first VoF, as in EBGraph::getVoFSets. VoFs on intermediate levels are identified through coarsening, and two of them are connected when some pair of their finer VoFs shares a face. Only coarsening links are read, so the coarse graph needs no links to the finer level. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVoF</td><td>Coarse VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finer layout. Shares DataIndex with the layout of a_coarVoF, holds every cell of refine(coarse cell, a_refRat), and has a maximum coarsening ratio of at least a_refRat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on both layouts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two layouts. A power of two. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer VoFs that coarsen to a_coarVoF. </dd></dl>
 
 </div>
 </div>
@@ -535,6 +948,120 @@ Static Protected Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aec1974e5258005ab923da0bc7a8f0bdd" name="aec1974e5258005ab923da0bc7a8f0bdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec1974e5258005ab923da0bc7a8f0bdd">&#9670;&#160;</a></span>getStoredFinerFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; FaceIndex &gt; VofUtils::getStoredFinerFaces </td>
+          <td>(</td>
+          <td class="paramtype">const FaceIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarFace</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisBoxCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the finer faces of a coarse face from stored finer-VoF lists. </p>
+<p>When every finer cell of both coarse cells lies in the finer EBISBox, this gives EBISLayout::refine's result: with a refinement ratio of 2 it pairs the finer VoFs of the low and high VoFs that are connected on the finer graph, as EBGraph::refine does, and with a larger ratio it calls getFinerFaces. Otherwise it starts from the coarse cell whose finer cells all lie in the finer EBISBox, and keeps the faces of its finer VoFs next to the face whose other VoF coarsens to the other coarse VoF; this needs one finer ghost cell. A face on the boundary of the coarse region takes the boundary faces of the finer VoFs of its interior VoF. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarFace</td><td>Coarse face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBoxCoar</td><td>Coarse EBISBox holding a_coarFace. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Stored finer-VoF lists of the irregular coarse cells, on the same grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finer layout, sharing DataIndex with the coarse layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on both layouts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the coarse and the finer layout. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer faces of a_coarFace. </dd></dl>
+
+</div>
+</div>
+<a id="a195e712018cae1d70f7e648ab29ebd5b" name="a195e712018cae1d70f7e648ab29ebd5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a195e712018cae1d70f7e648ab29ebd5b">&#9670;&#160;</a></span>getStoredFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; VolIndex &gt; VofUtils::getStoredFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarVoF</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisBoxCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the finer VoFs of a coarse VoF from stored finer-VoF lists. </p>
+<p>A regular coarse cell gives every cell of refine(coarse cell, a_refRat) with VoF index 0, in the order EBISLayout::refine gives them: refined by two at a time, each cell's children in BoxIterator order. A covered coarse cell gives no VoFs. An irregular coarse cell gives its stored list, which must exist. The result equals EBISLayout::refine on a graph that Chombo coarsened. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVoF</td><td>Coarse VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBoxCoar</td><td>Coarse EBISBox holding a_coarVoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Stored finer-VoF lists of the irregular coarse cells, on the same grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the coarse and the finer layout. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer VoFs of a_coarVoF. </dd></dl>
 
 </div>
 </div>
@@ -1219,6 +1746,108 @@ Static Protected Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae96fd51adc8eb575c1724b7245100788" name="ae96fd51adc8eb575c1724b7245100788"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae96fd51adc8eb575c1724b7245100788">&#9670;&#160;</a></span>orderFinerGroups()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; Vector&lt; VolIndex &gt; &gt; VofUtils::orderFinerGroups </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ratio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Group the finest VoFs of one VoF by their ancestor one factor of two finer than it, and order the groups. </p>
+<p>The groups are ordered as EBGraph::getVoFSets lists the VoFs of one connected set: gathered in BoxIterator order of the ancestors' cells, then cell index, and listed in the order the set grows from its first member. Two groups are connected when some pair of their finest VoFs shares a face. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finest</td><td>The finest VoFs of one VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finest layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Ratio between the level of the VoF the finest VoFs coarsen to and the finest level. At least two. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finest VoFs of each group, groups in order. </dd></dl>
+
+</div>
+</div>
+<a id="a9d1df51820cf71899f6217baa1072c6b" name="a9d1df51820cf71899f6217baa1072c6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d1df51820cf71899f6217baa1072c6b">&#9670;&#160;</a></span>orderFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; VolIndex &gt; VofUtils::orderFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; VolIndex &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebislFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ratio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Order the finest VoFs of one VoF as EBISLayout::refine lists them. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finest</td><td>The finest VoFs of one VoF. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebislFine</td><td>Finest layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Ratio between the level of the VoF the finest VoFs coarsen to and the finest level. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a_finest in order. </dd></dl>
 
 </div>
 </div>

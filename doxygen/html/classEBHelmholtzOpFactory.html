@@ -135,6 +135,12 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxRegisters</b>
 <tr class="memitem:a5f3db5b270f0e5115804f992b41d3413" id="r_a5f3db5b270f0e5115804f992b41d3413"><td class="memItemLeft" align="right" valign="top"><a id="a5f3db5b270f0e5115804f992b41d3413" name="a5f3db5b270f0e5115804f992b41d3413"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCoarseners</b> = Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBCoarAve.html">EBCoarAve</a>&gt;&gt;</td></tr>
 <tr class="memdesc:a5f3db5b270f0e5115804f992b41d3413"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
+<tr class="memitem:a894d524286a61373ffae3ee8558ce807" id="r_a894d524286a61373ffae3ee8558ce807"><td class="memItemLeft" align="right" valign="top"><a id="a894d524286a61373ffae3ee8558ce807" name="a894d524286a61373ffae3ee8558ce807"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrRestrictions</b> = Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&gt;&gt;</td></tr>
+<tr class="memdesc:a894d524286a61373ffae3ee8558ce807"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operators between AMR levels, one per level. <br /></td></tr>
+<tr class="memitem:ae68427373f1a7c1dd8a185f2220fd8ce" id="r_ae68427373f1a7c1dd8a185f2220fd8ce"><td class="memItemLeft" align="right" valign="top"><a id="ae68427373f1a7c1dd8a185f2220fd8ce" name="ae68427373f1a7c1dd8a185f2220fd8ce"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrProlongations</b> = Vector&lt;RefCountedPtr&lt;<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&gt;&gt;</td></tr>
+<tr class="memdesc:ae68427373f1a7c1dd8a185f2220fd8ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operators between AMR levels, one per level. <br /></td></tr>
 <tr class="memitem:a9706156c123716bf62a1c3f496209a25" id="r_a9706156c123716bf62a1c3f496209a25"><td class="memItemLeft" align="right" valign="top"><a id="a9706156c123716bf62a1c3f496209a25" name="a9706156c123716bf62a1c3f496209a25"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCellData</b> = Vector&lt;RefCountedPtr&lt;LevelData&lt;EBCellFAB&gt;&gt;&gt;</td></tr>
 <tr class="memdesc:a9706156c123716bf62a1c3f496209a25"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
@@ -168,8 +174,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3539c32f24dd602b9ef16b60b76e4a76" id="r_a3539c32f24dd602b9ef16b60b76e4a76"><td class="memItemLeft" align="right" valign="top"><a id="a3539c32f24dd602b9ef16b60b76e4a76" name="a3539c32f24dd602b9ef16b60b76e4a76"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBHelmholtzOpFactory</b> (const <a class="el" href="classEBHelmholtzOpFactory.html">EBHelmholtzOpFactory</a> &amp;&amp;a_otherFactory)=delete</td></tr>
 <tr class="memdesc:a3539c32f24dd602b9ef16b60b76e4a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor. Use the full constructor. <br /></td></tr>
-<tr class="memitem:a57ba54dcca55cad2018fa02f3d70adab" id="r_a57ba54dcca55cad2018fa02f3d70adab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57ba54dcca55cad2018fa02f3d70adab">EBHelmholtzOpFactory</a> (<a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const Real &amp;a_alpha, const Real &amp;a_beta, const RealVect &amp;a_probLo, const <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &amp;a_amrLevelGrids, const <a class="el" href="#af7e0bc744fba56c5910bae0dfc7dc7fd">AmrMask</a> &amp;a_validCells, const <a class="el" href="#a1f2c8d3f4415048b743295bf9139b5f2">AmrInterpolators</a> &amp;a_amrInterpolators, const <a class="el" href="#aaf0f3eded69caac695b1ac903a671d67">AmrFluxRegisters</a> &amp;a_amrFluxRegisters, const <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &amp;a_amrCoarseners, const <a class="el" href="#afbbeaa5bc2a2887c20f89a4bbae26f84">AmrRefRatios</a> &amp;a_amrRefRatios, const <a class="el" href="#afa036e0de6897d7eeb557585317774fa">AmrResolutions</a> &amp;a_amrResolutions, const <a class="el" href="#a9706156c123716bf62a1c3f496209a25">AmrCellData</a> &amp;a_amrAcoef, const <a class="el" href="#a94a2ddc4b47d9baa13d86bc5e3f704b6">AmrFluxData</a> &amp;a_amrBcoef, const <a class="el" href="#a5d5628362694be4ee042eb055035e535">AmrIrreData</a> &amp;a_amrBcoefIrreg, const <a class="el" href="#afa6dae0ece6bd1d972f51905307844b4">DomainBCFactory</a> &amp;a_domainBcFactory, const <a class="el" href="#a800e01668cc72f0cd73221d797a8774b">EBBCFactory</a> &amp;a_ebbcFactory, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRHS, const <a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGrids, const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGridsCoFi, const Vector&lt; <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &gt; &amp;a_mgCoarseners, const <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &amp;a_amrLevelGridsCoFi, const ProblemDomain &amp;a_bottomDomain, const bool a_refluxFree)</td></tr>
-<tr class="memdesc:a57ba54dcca55cad2018fa02f3d70adab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="memitem:a39137c887e745fd12e7b82c6186823fc" id="r_a39137c887e745fd12e7b82c6186823fc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a39137c887e745fd12e7b82c6186823fc">EBHelmholtzOpFactory</a> (<a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const Real &amp;a_alpha, const Real &amp;a_beta, const RealVect &amp;a_probLo, const <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &amp;a_amrLevelGrids, const <a class="el" href="#af7e0bc744fba56c5910bae0dfc7dc7fd">AmrMask</a> &amp;a_validCells, const <a class="el" href="#a1f2c8d3f4415048b743295bf9139b5f2">AmrInterpolators</a> &amp;a_amrInterpolators, const <a class="el" href="#aaf0f3eded69caac695b1ac903a671d67">AmrFluxRegisters</a> &amp;a_amrFluxRegisters, const <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &amp;a_amrCoarseners, const <a class="el" href="#afbbeaa5bc2a2887c20f89a4bbae26f84">AmrRefRatios</a> &amp;a_amrRefRatios, const <a class="el" href="#afa036e0de6897d7eeb557585317774fa">AmrResolutions</a> &amp;a_amrResolutions, const <a class="el" href="#a9706156c123716bf62a1c3f496209a25">AmrCellData</a> &amp;a_amrAcoef, const <a class="el" href="#a94a2ddc4b47d9baa13d86bc5e3f704b6">AmrFluxData</a> &amp;a_amrBcoef, const <a class="el" href="#a5d5628362694be4ee042eb055035e535">AmrIrreData</a> &amp;a_amrBcoefIrreg, const <a class="el" href="#afa6dae0ece6bd1d972f51905307844b4">DomainBCFactory</a> &amp;a_domainBcFactory, const <a class="el" href="#a800e01668cc72f0cd73221d797a8774b">EBBCFactory</a> &amp;a_ebbcFactory, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRHS, const <a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGrids, const Vector&lt; <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &gt; &amp;a_mgRestrictions, const Vector&lt; <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &gt; &amp;a_mgProlongations, const Vector&lt; <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &gt; &amp;a_mgCoarseners, const <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &amp;a_amrLevelGridsCoFi, const <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &amp;a_amrRestrictions, const <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &amp;a_amrProlongations, const ProblemDomain &amp;a_bottomDomain, const bool a_refluxFree)</td></tr>
+<tr class="memdesc:a39137c887e745fd12e7b82c6186823fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="memitem:aa2afd29f38e7199af54772c4b0b5d038" id="r_aa2afd29f38e7199af54772c4b0b5d038"><td class="memItemLeft" align="right" valign="top"><a id="aa2afd29f38e7199af54772c4b0b5d038" name="aa2afd29f38e7199af54772c4b0b5d038"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzOpFactory</b> () override</td></tr>
 <tr class="memdesc:aa2afd29f38e7199af54772c4b0b5d038"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
@@ -191,8 +197,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>coarsenCoefficientsMG
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a2b99c45272725f57ed2844eb714113fc" id="r_a2b99c45272725f57ed2844eb714113fc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b99c45272725f57ed2844eb714113fc">defineMultigridLevels</a> (const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGrids, const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGridsCoFi, const Vector&lt; <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &gt; &amp;a_mgCoarseners)</td></tr>
-<tr class="memdesc:a2b99c45272725f57ed2844eb714113fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the multigrid levels for this operator factory, and the coefficients on them.  <br /></td></tr>
+<tr class="memitem:a889c08e65f19ca8db80536262f6abfc2" id="r_a889c08e65f19ca8db80536262f6abfc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a889c08e65f19ca8db80536262f6abfc2">defineMultigridLevels</a> (const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;a_mgLevelGrids, const Vector&lt; <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &gt; &amp;a_mgRestrictions, const Vector&lt; <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &gt; &amp;a_mgProlongations, const Vector&lt; <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &gt; &amp;a_mgCoarseners)</td></tr>
+<tr class="memdesc:a889c08e65f19ca8db80536262f6abfc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the multigrid levels for this operator factory, and the coefficients on them.  <br /></td></tr>
 <tr class="memitem:a2c30095f596d9ab8ef2e9f0c5b172be8" id="r_a2c30095f596d9ab8ef2e9f0c5b172be8"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c30095f596d9ab8ef2e9f0c5b172be8">findAmrLevel</a> (const ProblemDomain &amp;a_domain) const</td></tr>
 <tr class="memdesc:a2c30095f596d9ab8ef2e9f0c5b172be8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find level corresponding to amr level.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -259,6 +265,12 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td>
 <tr class="memitem:a0fd6e47286a8fc35add739a6676d6c9e" id="r_a0fd6e47286a8fc35add739a6676d6c9e"><td class="memItemLeft" align="right" valign="top"><a id="a0fd6e47286a8fc35add739a6676d6c9e" name="a0fd6e47286a8fc35add739a6676d6c9e"></a>
 <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrCoarseners</b></td></tr>
 <tr class="memdesc:a0fd6e47286a8fc35add739a6676d6c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data coarseners. <br /></td></tr>
+<tr class="memitem:a8a4766edde184806ae09bbf1d1f1bcfd" id="r_a8a4766edde184806ae09bbf1d1f1bcfd"><td class="memItemLeft" align="right" valign="top"><a id="a8a4766edde184806ae09bbf1d1f1bcfd" name="a8a4766edde184806ae09bbf1d1f1bcfd"></a>
+<a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrRestrictions</b></td></tr>
+<tr class="memdesc:a8a4766edde184806ae09bbf1d1f1bcfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction between AMR levels. Entry lvl restricts AMR level lvl onto m_amrLevelGridsCoFi[lvl-1]. <br /></td></tr>
+<tr class="memitem:a30169a9b5f37241d84b8153c560a2e7a" id="r_a30169a9b5f37241d84b8153c560a2e7a"><td class="memItemLeft" align="right" valign="top"><a id="a30169a9b5f37241d84b8153c560a2e7a" name="a30169a9b5f37241d84b8153c560a2e7a"></a>
+<a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrProlongations</b></td></tr>
+<tr class="memdesc:a30169a9b5f37241d84b8153c560a2e7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation between AMR levels. Entry lvl prolongs from AMR level lvl-1 onto AMR level lvl. <br /></td></tr>
 <tr class="memitem:ae617fe034c25df22d2fc330b96a62ee0" id="r_ae617fe034c25df22d2fc330b96a62ee0"><td class="memItemLeft" align="right" valign="top"><a id="ae617fe034c25df22d2fc330b96a62ee0" name="ae617fe034c25df22d2fc330b96a62ee0"></a>
 <a class="el" href="#afbbeaa5bc2a2887c20f89a4bbae26f84">AmrRefRatios</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrRefRatios</b></td></tr>
 <tr class="memdesc:ae617fe034c25df22d2fc330b96a62ee0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratios. <br /></td></tr>
@@ -304,9 +316,12 @@ Vector&lt; <a class="el" href="#a5d5628362694be4ee042eb055035e535">AmrIrreData</
 <tr class="memitem:aef14ba295ca48618f46691e5d37964db" id="r_aef14ba295ca48618f46691e5d37964db"><td class="memItemLeft" align="right" valign="top"><a id="aef14ba295ca48618f46691e5d37964db" name="aef14ba295ca48618f46691e5d37964db"></a>
 Vector&lt; <a class="el" href="#a5f3db5b270f0e5115804f992b41d3413">AmrCoarseners</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgCoarseners</b></td></tr>
 <tr class="memdesc:aef14ba295ca48618f46691e5d37964db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse averaging between consecutive multigrid levels. m_mgCoarseners[lvl][k] averages from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1]. <br /></td></tr>
-<tr class="memitem:a0abbb4d5960af048246e599abb97fc5d" id="r_a0abbb4d5960af048246e599abb97fc5d"><td class="memItemLeft" align="right" valign="top"><a id="a0abbb4d5960af048246e599abb97fc5d" name="a0abbb4d5960af048246e599abb97fc5d"></a>
-Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgLevelGridsCoFi</b></td></tr>
-<tr class="memdesc:a0abbb4d5960af048246e599abb97fc5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened grids between consecutive multigrid levels. m_mgLevelGridsCoFi[lvl][k] is m_mgLevelGrids[lvl][k] coarsened by 2. <br /></td></tr>
+<tr class="memitem:a69eb5005752e4bf0dbcf0566eb125a68" id="r_a69eb5005752e4bf0dbcf0566eb125a68"><td class="memItemLeft" align="right" valign="top"><a id="a69eb5005752e4bf0dbcf0566eb125a68" name="a69eb5005752e4bf0dbcf0566eb125a68"></a>
+Vector&lt; <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgRestrictions</b></td></tr>
+<tr class="memdesc:a69eb5005752e4bf0dbcf0566eb125a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction between consecutive multigrid levels. m_mgRestrictions[lvl][k] restricts from m_mgLevelGrids[lvl][k] onto m_mgLevelGrids[lvl][k+1]. <br /></td></tr>
+<tr class="memitem:a3298e2795c22f34906558c2d702f1c98" id="r_a3298e2795c22f34906558c2d702f1c98"><td class="memItemLeft" align="right" valign="top"><a id="a3298e2795c22f34906558c2d702f1c98" name="a3298e2795c22f34906558c2d702f1c98"></a>
+Vector&lt; <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgProlongations</b></td></tr>
+<tr class="memdesc:a3298e2795c22f34906558c2d702f1c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation between consecutive multigrid levels. m_mgProlongations[lvl][k] prolongs from m_mgLevelGrids[lvl][k+1] onto m_mgLevelGrids[lvl][k]. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -323,8 +338,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dd>
 This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to an externally updated time. </dd></dl>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a57ba54dcca55cad2018fa02f3d70adab" name="a57ba54dcca55cad2018fa02f3d70adab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57ba54dcca55cad2018fa02f3d70adab">&#9670;&#160;</a></span>EBHelmholtzOpFactory()</h2>
+<a id="a39137c887e745fd12e7b82c6186823fc" name="a39137c887e745fd12e7b82c6186823fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39137c887e745fd12e7b82c6186823fc">&#9670;&#160;</a></span>EBHelmholtzOpFactory()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -452,7 +467,12 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgLevelGridsCoFi</em></span>, </td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgRestrictions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgProlongations</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -463,6 +483,16 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_amrLevelGridsCoFi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_amrRestrictions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_amrProlongations</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -499,9 +529,12 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
     <tr><td class="paramdir">[in]</td><td class="paramname">a_chebyEigRatio</td><td>Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_rasInnerSweeps</td><td>Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgLevelGrids</td><td>Multigrid levels under each AMR level, as built by the realm (see <a class="el" href="classPhaseRealm.html#a033f07a40489b78878942120251da540" title="Get the multigrid levels.">PhaseRealm::getMultigridLevelGrids</a>). The factory uses the entries that are not coarser than a_bottomDomain. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgLevelGridsCoFi</td><td>Coarsened grids between consecutive multigrid levels, as built by the realm (see <a class="el" href="classPhaseRealm.html#aad7fab010d628b479b4d5711d8e9b05f" title="Get the coarsened grids between consecutive multigrid levels.">PhaseRealm::getMultigridLevelGridsCoFi</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgRestrictions</td><td>Restriction between consecutive multigrid levels, as built by the realm (see <a class="el" href="classPhaseRealm.html#ae1224d7e0bbf92d3bef40329685542e2" title="Get the restriction between consecutive multigrid levels.">PhaseRealm::getMultigridLevelRestriction</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgProlongations</td><td>Prolongation between consecutive multigrid levels, as built by the realm (see <a class="el" href="classPhaseRealm.html#a5e8b667486a42e5fe8ec0e1ad0648837" title="Get the prolongation between consecutive multigrid levels.">PhaseRealm::getMultigridLevelProlongation</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgCoarseners</td><td>Coarse averaging between consecutive multigrid levels, as built by the realm (see <a class="el" href="classPhaseRealm.html#a26c6941cef439ff1ab129a1bd87be830" title="Get the coarse averaging between consecutive multigrid levels.">PhaseRealm::getMultigridCoarseAverage</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amrLevelGridsCoFi</td><td>Coarsened grids between AMR levels. Entry lvl is AMR level lvl+1 coarsened to AMR level lvl (see <a class="el" href="classPhaseRealm.html#a3bd7ac21a1e323ebbe89416c4709725b" title="Get coarsened fine grids.">PhaseRealm::getEBLevelGridCoFi</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrRestrictions</td><td>Restriction between AMR levels. Entry lvl restricts AMR level lvl onto a_amrLevelGridsCoFi[lvl-1] (see <a class="el" href="classPhaseRealm.html#a538bfa669db4f9fa418fcdc4658808ed" title="Get the multigrid restriction between AMR levels.">PhaseRealm::getMultigridRestriction</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrProlongations</td><td>Prolongation between AMR levels. Entry lvl prolongs from AMR level lvl-1 onto AMR level lvl (see <a class="el" href="classPhaseRealm.html#a618017e16bbd89e58fdf62dd8bf05f7e" title="Get the multigrid prolongation between AMR levels.">PhaseRealm::getMultigridProlongation</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bottomDomain</td><td>Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refluxFree</td><td>If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing) </td></tr>
   </table>
@@ -556,8 +589,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 
 </div>
 </div>
-<a id="a2b99c45272725f57ed2844eb714113fc" name="a2b99c45272725f57ed2844eb714113fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2b99c45272725f57ed2844eb714113fc">&#9670;&#160;</a></span>defineMultigridLevels()</h2>
+<a id="a889c08e65f19ca8db80536262f6abfc2" name="a889c08e65f19ca8db80536262f6abfc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a889c08e65f19ca8db80536262f6abfc2">&#9670;&#160;</a></span>defineMultigridLevels()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -573,7 +606,12 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector&lt; <a class="el" href="#aa6f6908d1486af7a265ed0c9284ef490">AmrLevelGrids</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgLevelGridsCoFi</em></span>, </td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="#a894d524286a61373ffae3ee8558ce807">AmrRestrictions</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgRestrictions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="#ae68427373f1a7c1dd8a185f2220fd8ce">AmrProlongations</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mgProlongations</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -592,7 +630,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 <p>Takes the entries of the realm's multigrid levels that are not coarser than the bottom domain. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgLevelGrids</td><td>Multigrid levels under each AMR level, as built by the realm. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgLevelGridsCoFi</td><td>Coarsened grids between consecutive multigrid levels, as built by the realm. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgRestrictions</td><td>Restriction between consecutive multigrid levels, as built by the realm. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mgProlongations</td><td>Prolongation between consecutive multigrid levels, as built by the realm. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgCoarseners</td><td>Coarse averaging between consecutive multigrid levels, as built by the realm. </td></tr>
   </table>
   </dd>

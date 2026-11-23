@@ -496,10 +496,12 @@ CdrGodunov
 ----------
 
 ``CdrGodunov`` inherits from ``CdrMultigrid`` and adds advection code for Godunov methods.
-This class borrows from ``Chombo`` internals (specifically, ``EBLevelAdvectIntegrator``) and can do second-order advection with time-extrapolation.
+This class borrows from ``Chombo`` internals (specifically, ``EBAdvectLevelIntegrator``) and can do second-order advection with time-extrapolation.
 
 ``CdrGodunov`` supplies (almost) the same discretization as ``CdrCTU`` with the exception that the underlying discretization can also be used for the incompressible Navier-Stokes equation.
 However, it only supports the monotonized central difference limiter. 
+
+With AMR, ``CdrGodunov`` requires ``AmrMesh.eb_ghost`` :math:`\geq 4`, because ``EBAdvectLevelIntegrator`` fills ghost cells four cells out from each finer grid.
 
 .. caution::
    

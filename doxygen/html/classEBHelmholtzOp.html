@@ -110,15 +110,11 @@ Collaboration diagram for EBHelmholtzOp:</div>
 <div class="dyncontent">
 <div class="center"><img src="classEBHelmholtzOp__coll__graph.png" border="0" usemap="#aEBHelmholtzOp_coll__map" loading="lazy" alt="Collaboration graph"/></div>
 <map name="aEBHelmholtzOp_coll__map" id="aEBHelmholtzOp_coll__map">
-<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="266,145,389,173"/>
+<area shape="rect" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="134,123,257,151"/>
 <area shape="rect" title=" " alt="" coords="5,5,223,50"/>
-<area shape="poly" title=" " alt="" coords="163,56,308,144,303,146,162,61"/>
+<area shape="poly" title=" " alt="" coords="141,60,188,123,183,123,138,65"/>
 <area shape="rect" href="classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="247,14,306,42"/>
-<area shape="poly" title=" " alt="" coords="276,55,280,88,289,120,310,146,305,144,285,123,274,89,273,59"/>
-<area shape="rect" href="classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="331,14,441,42"/>
-<area shape="poly" title=" " alt="" coords="379,55,352,123,338,147,335,143,348,120,375,58"/>
-<area shape="rect" href="classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="470,14,579,42"/>
-<area shape="poly" title=" " alt="" coords="523,55,514,92,504,109,492,123,475,133,450,141,390,153,389,147,448,136,472,128,488,119,500,106,509,90,519,58"/>
+<area shape="poly" title=" " alt="" coords="260,53,207,124,204,120,255,55"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -150,8 +146,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:acf2e306910bfd82381d4c263ae18241e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor.  <br /></td></tr>
 <tr class="memitem:a8e8b97e874d4af3ddf9f2b50aa55f504" id="r_a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e8b97e874d4af3ddf9f2b50aa55f504">EBHelmholtzOp</a> (const <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <br /></td></tr>
-<tr class="memitem:a613fb51021875d0a2ef7d4ee3d05e241" id="r_a613fb51021875d0a2ef7d4ee3d05e241"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a613fb51021875d0a2ef7d4ee3d05e241">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoFiMG, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const bool a_refluxFree=false)</td></tr>
-<tr class="memdesc:a613fb51021875d0a2ef7d4ee3d05e241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="memitem:a62f9f45281f7c1b2afaa246cdaf0dd77" id="r_a62f9f45281f7c1b2afaa246cdaf0dd77"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62f9f45281f7c1b2afaa246cdaf0dd77">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &amp;a_restrictOp, const RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &amp;a_prolongOp, const RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &amp;a_restrictOpMG, const RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &amp;a_prolongOpMG, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const bool a_refluxFree=false)</td></tr>
+<tr class="memdesc:a62f9f45281f7c1b2afaa246cdaf0dd77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="memitem:a2d728e76605bb07ea19198787f6ade65" id="r_a2d728e76605bb07ea19198787f6ade65"><td class="memItemLeft" align="right" valign="top"><a id="a2d728e76605bb07ea19198787f6ade65" name="a2d728e76605bb07ea19198787f6ade65"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzOp</b> ()</td></tr>
 <tr class="memdesc:a2d728e76605bb07ea19198787f6ade65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dtor. <br /></td></tr>
@@ -455,18 +451,18 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b>
 <tr class="memitem:af97169e501ec2753602a17a036965d41" id="r_af97169e501ec2753602a17a036965d41"><td class="memItemLeft" align="right" valign="top"><a id="af97169e501ec2753602a17a036965d41" name="af97169e501ec2753602a17a036965d41"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoarMG</b></td></tr>
 <tr class="memdesc:af97169e501ec2753602a17a036965d41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarser grids (multigrid level). <br /></td></tr>
-<tr class="memitem:a42a88482a371edd69315efd0a2eace72" id="r_a42a88482a371edd69315efd0a2eace72"><td class="memItemLeft" align="right" valign="top"><a id="a42a88482a371edd69315efd0a2eace72" name="a42a88482a371edd69315efd0a2eace72"></a>
-<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_restrictOp</b></td></tr>
-<tr class="memdesc:a42a88482a371edd69315efd0a2eace72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator for AMR levels. <br /></td></tr>
-<tr class="memitem:ade2af3c7ffaec567f4c36cc136e51b95" id="r_ade2af3c7ffaec567f4c36cc136e51b95"><td class="memItemLeft" align="right" valign="top"><a id="ade2af3c7ffaec567f4c36cc136e51b95" name="ade2af3c7ffaec567f4c36cc136e51b95"></a>
-<a class="el" href="classEBMGRestrict.html">EBMGRestrict</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_restrictOpMG</b></td></tr>
-<tr class="memdesc:ade2af3c7ffaec567f4c36cc136e51b95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator if this is an MG level. <br /></td></tr>
-<tr class="memitem:a74b2ee58b9ddea7e0c2459a80921d5d9" id="r_a74b2ee58b9ddea7e0c2459a80921d5d9"><td class="memItemLeft" align="right" valign="top"><a id="a74b2ee58b9ddea7e0c2459a80921d5d9" name="a74b2ee58b9ddea7e0c2459a80921d5d9"></a>
-<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_prolongOp</b></td></tr>
-<tr class="memdesc:a74b2ee58b9ddea7e0c2459a80921d5d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for AMR levels. <br /></td></tr>
-<tr class="memitem:a8263d9cdaf26393e567b4c9c7d02a83f" id="r_a8263d9cdaf26393e567b4c9c7d02a83f"><td class="memItemLeft" align="right" valign="top"><a id="a8263d9cdaf26393e567b4c9c7d02a83f" name="a8263d9cdaf26393e567b4c9c7d02a83f"></a>
-<a class="el" href="classEBMGProlong.html">EBMGProlong</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_prolongOpMG</b></td></tr>
-<tr class="memdesc:a8263d9cdaf26393e567b4c9c7d02a83f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for MG levels. <br /></td></tr>
+<tr class="memitem:a88bdc379bb8b932b2dc2d6c77f467b1a" id="r_a88bdc379bb8b932b2dc2d6c77f467b1a"><td class="memItemLeft" align="right" valign="top"><a id="a88bdc379bb8b932b2dc2d6c77f467b1a" name="a88bdc379bb8b932b2dc2d6c77f467b1a"></a>
+RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_restrictOp</b></td></tr>
+<tr class="memdesc:a88bdc379bb8b932b2dc2d6c77f467b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator for AMR levels. <br /></td></tr>
+<tr class="memitem:a1e6bcf7362d5ead7e9363f116a5a690a" id="r_a1e6bcf7362d5ead7e9363f116a5a690a"><td class="memItemLeft" align="right" valign="top"><a id="a1e6bcf7362d5ead7e9363f116a5a690a" name="a1e6bcf7362d5ead7e9363f116a5a690a"></a>
+RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_restrictOpMG</b></td></tr>
+<tr class="memdesc:a1e6bcf7362d5ead7e9363f116a5a690a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restriction operator if this is an MG level. <br /></td></tr>
+<tr class="memitem:ae36ddc53c8da36138cc5dae6f06d4bc3" id="r_ae36ddc53c8da36138cc5dae6f06d4bc3"><td class="memItemLeft" align="right" valign="top"><a id="ae36ddc53c8da36138cc5dae6f06d4bc3" name="ae36ddc53c8da36138cc5dae6f06d4bc3"></a>
+RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_prolongOp</b></td></tr>
+<tr class="memdesc:ae36ddc53c8da36138cc5dae6f06d4bc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for AMR levels. <br /></td></tr>
+<tr class="memitem:ad19a0a25e0fe77dbfa5c693617b7a07b" id="r_ad19a0a25e0fe77dbfa5c693617b7a07b"><td class="memItemLeft" align="right" valign="top"><a id="ad19a0a25e0fe77dbfa5c693617b7a07b" name="ad19a0a25e0fe77dbfa5c693617b7a07b"></a>
+RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_prolongOpMG</b></td></tr>
+<tr class="memdesc:ad19a0a25e0fe77dbfa5c693617b7a07b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation operator for MG levels. <br /></td></tr>
 <tr class="memitem:ab18ea15d6c903e4e1ae30f96b9fc6ab8" id="r_ab18ea15d6c903e4e1ae30f96b9fc6ab8"><td class="memItemLeft" align="right" valign="top"><a id="ab18ea15d6c903e4e1ae30f96b9fc6ab8" name="ab18ea15d6c903e4e1ae30f96b9fc6ab8"></a>
 RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_validCells</b></td></tr>
 <tr class="memdesc:ab18ea15d6c903e4e1ae30f96b9fc6ab8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid grid cells (might be nullptr on MG levels). <br /></td></tr>
@@ -621,8 +617,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
-<a id="a613fb51021875d0a2ef7d4ee3d05e241" name="a613fb51021875d0a2ef7d4ee3d05e241"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a613fb51021875d0a2ef7d4ee3d05e241">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
+<a id="a62f9f45281f7c1b2afaa246cdaf0dd77" name="a62f9f45281f7c1b2afaa246cdaf0dd77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62f9f45281f7c1b2afaa246cdaf0dd77">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -655,11 +651,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgCoFiMG</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgCoarMG</em></span>, </td>
         </tr>
         <tr>
@@ -681,6 +672,26 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarAve</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_restrictOp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_prolongOp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_restrictOpMG</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_prolongOpMG</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -803,12 +814,15 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids on this level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsening of fine level grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFiMG</td><td>Grids on this level coarsened by 2. Only used if a_hasMGObjects is true. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoarMG</td><td>Multigrid-grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validCells</td><td>Valid grid cells </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_interpolator</td><td>Interpolator </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fluxReg</td><td>Flux register </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarAve</td><td>Coarsener </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_restrictOp</td><td>Restriction onto a_eblgCoFi. Only used if a_hasCoar is true. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_prolongOp</td><td>Prolongation from a_eblgCoar. Only used if a_hasCoar is true. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_restrictOpMG</td><td>Restriction onto a_eblgCoarMG. Only used if a_hasMGObjects is true. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_prolongOpMG</td><td>Prolongation from a_eblgCoarMG. Only used if a_hasMGObjects is true. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainBC</td><td>Domain BC </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebBC</td><td>Boundary conditions on EBs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of computational domain </td></tr>

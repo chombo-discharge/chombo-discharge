@@ -100,13 +100,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9dd65a2f04a9e2a83b3e71c319e14f0a" id="r_a9dd65a2f04a9e2a83b3e71c319e14f0a"><td class="memItemLeft" align="right" valign="top"><a id="a9dd65a2f04a9e2a83b3e71c319e14f0a" name="a9dd65a2f04a9e2a83b3e71c319e14f0a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBReflux</b> (const <a class="el" href="classEBReflux.html">EBReflux</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a9dd65a2f04a9e2a83b3e71c319e14f0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
-<tr class="memitem:a3986b7f905a53341e393bdd56c5c5b35" id="r_a3986b7f905a53341e393bdd56c5c5b35"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3986b7f905a53341e393bdd56c5c5b35">EBReflux</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const int a_refRat) noexcept</td></tr>
-<tr class="memdesc:a3986b7f905a53341e393bdd56c5c5b35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
+<tr class="memitem:a5512319650ed40af26aa4c6c7ed70bc8" id="r_a5512319650ed40af26aa4c6c7ed70bc8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5512319650ed40af26aa4c6c7ed70bc8">EBReflux</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:a5512319650ed40af26aa4c6c7ed70bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
 <tr class="memitem:ab5332d20ba49a880ddfe5208bcad2de4" id="r_ab5332d20ba49a880ddfe5208bcad2de4"><td class="memItemLeft" align="right" valign="top"><a id="ab5332d20ba49a880ddfe5208bcad2de4" name="ab5332d20ba49a880ddfe5208bcad2de4"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBReflux</b> () noexcept</td></tr>
 <tr class="memdesc:ab5332d20ba49a880ddfe5208bcad2de4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="memitem:a15297578586adb374b8736527db48093" id="r_a15297578586adb374b8736527db48093"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15297578586adb374b8736527db48093">define</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const int a_refRat) noexcept</td></tr>
-<tr class="memdesc:a15297578586adb374b8736527db48093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define method. Puts object in usable state.  <br /></td></tr>
+<tr class="memitem:a98d6f380988e621752fa183fc390f5f1" id="r_a98d6f380988e621752fa183fc390f5f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a98d6f380988e621752fa183fc390f5f1">define</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:a98d6f380988e621752fa183fc390f5f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define method. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:a7d81ed09af06eef461a237a117f065eb" id="r_a7d81ed09af06eef461a237a117f065eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d81ed09af06eef461a237a117f065eb">reflux</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineFlux, const Interval a_variables, const Real a_scaleCoarFlux, const Real a_scaleFineFlux) const noexcept</td></tr>
 <tr class="memdesc:a7d81ed09af06eef461a237a117f065eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflux into the coarse data.  <br /></td></tr>
 <tr class="memitem:a6f2fb27dc88eb0695f55cdce872a1fb8" id="r_a6f2fb27dc88eb0695f55cdce872a1fb8"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, DenseIntVectSet &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f2fb27dc88eb0695f55cdce872a1fb8">getRegularCoarseFineRegions</a> () const noexcept</td></tr>
@@ -121,9 +121,8 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:aebd837ddb164139443d45212c5813ccd" id="r_aebd837ddb164139443d45212c5813ccd"><td class="memItemLeft" align="right" valign="top"><a id="aebd837ddb164139443d45212c5813ccd" name="aebd837ddb164139443d45212c5813ccd"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineRegionsCF</b> () noexcept</td></tr>
 <tr class="memdesc:aebd837ddb164139443d45212c5813ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define coarse-fine interface regions so that we can compute things later. <br /></td></tr>
-<tr class="memitem:a3d73e784ea643a893e1f4ab46f845db6" id="r_a3d73e784ea643a893e1f4ab46f845db6"><td class="memItemLeft" align="right" valign="top"><a id="a3d73e784ea643a893e1f4ab46f845db6" name="a3d73e784ea643a893e1f4ab46f845db6"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencils</b> () noexcept</td></tr>
-<tr class="memdesc:a3d73e784ea643a893e1f4ab46f845db6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the stencils required for coarsening the fine-grid fluxes onto the coarse grid. <br /></td></tr>
+<tr class="memitem:a9cb1c2331faebed49fe752cc0bbf9705" id="r_a9cb1c2331faebed49fe752cc0bbf9705"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9cb1c2331faebed49fe752cc0bbf9705">defineStencils</a> (const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs) noexcept</td></tr>
+<tr class="memdesc:a9cb1c2331faebed49fe752cc0bbf9705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the stencils required for coarsening the fine-grid fluxes onto the coarse grid.  <br /></td></tr>
 <tr class="memitem:a676a0159046c5d92e162293fa2ae800c" id="r_a676a0159046c5d92e162293fa2ae800c"><td class="memItemLeft" align="right" valign="top"><a id="a676a0159046c5d92e162293fa2ae800c" name="a676a0159046c5d92e162293fa2ae800c"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>defineBuffers</b> () noexcept</td></tr>
 <tr class="memdesc:a676a0159046c5d92e162293fa2ae800c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define buffers. <br /></td></tr>
@@ -177,8 +176,8 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
 <p>This is like Chombos <a class="el" href="classEBReflux.html" title="Class which can do refluxing across a coarse-fine interface.">EBReflux</a>, but trimmed for being faster &amp; cheaper. This class will only reflux on the coarse-fine interface. If the user wants to accumulate fluxes, he/she should do it outside of this routine and only call the reflux method at the very end (only relevant for subcycling).</p>
 <p>This reflux method operates slightly different from Chombo in that the coarse-grid fluxes are first constructed by conservatively coarsening the fine-grid fluxes. Then we do as we always do, subtracting the originan coarse-grid fluxes and adding in the corresponding fine-grid fluxes. Standard scaling factor for scaling the coarse/fine flux contributions are present, as always. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3986b7f905a53341e393bdd56c5c5b35" name="a3986b7f905a53341e393bdd56c5c5b35"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3986b7f905a53341e393bdd56c5c5b35">&#9670;&#160;</a></span>EBReflux()</h2>
+<a id="a5512319650ed40af26aa4c6c7ed70bc8" name="a5512319650ed40af26aa4c6c7ed70bc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5512319650ed40af26aa4c6c7ed70bc8">&#9670;&#160;</a></span>EBReflux()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -204,6 +203,11 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -220,6 +224,7 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between grids. </td></tr>
   </table>
   </dd>
@@ -278,8 +283,8 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
 
 </div>
 </div>
-<a id="a15297578586adb374b8736527db48093" name="a15297578586adb374b8736527db48093"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15297578586adb374b8736527db48093">&#9670;&#160;</a></span>define()</h2>
+<a id="a98d6f380988e621752fa183fc390f5f1" name="a98d6f380988e621752fa183fc390f5f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98d6f380988e621752fa183fc390f5f1">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -305,6 +310,11 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -321,7 +331,41 @@ LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids on this level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between coarse and fine grids. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9cb1c2331faebed49fe752cc0bbf9705" name="a9cb1c2331faebed49fe752cc0bbf9705"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cb1c2331faebed49fe752cc0bbf9705">&#9670;&#160;</a></span>defineStencils()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBReflux::defineStencils </td>
+          <td>(</td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the stencils required for coarsening the fine-grid fluxes onto the coarse grid. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids. </td></tr>
   </table>
   </dd>
 </dl>

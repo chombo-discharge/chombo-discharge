@@ -96,13 +96,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6e62a9756c4433518d75024e50414179" id="r_a6e62a9756c4433518d75024e50414179"><td class="memItemLeft" align="right" valign="top"><a id="a6e62a9756c4433518d75024e50414179" name="a6e62a9756c4433518d75024e50414179"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBMGRestrict</b> () noexcept</td></tr>
 <tr class="memdesc:a6e62a9756c4433518d75024e50414179"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. User must subsequently call the define function. <br /></td></tr>
-<tr class="memitem:ac6cde03fee3ccbb240f57422d05669fd" id="r_ac6cde03fee3ccbb240f57422d05669fd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6cde03fee3ccbb240f57422d05669fd">EBMGRestrict</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:ac6cde03fee3ccbb240f57422d05669fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
+<tr class="memitem:ae26bea3678c95015a44596ea1be9197b" id="r_ae26bea3678c95015a44596ea1be9197b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae26bea3678c95015a44596ea1be9197b">EBMGRestrict</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:ae26bea3678c95015a44596ea1be9197b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
 <tr class="memitem:ae8c17183d8225d755c581f959fa87074" id="r_ae8c17183d8225d755c581f959fa87074"><td class="memItemLeft" align="right" valign="top"><a id="ae8c17183d8225d755c581f959fa87074" name="ae8c17183d8225d755c581f959fa87074"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBMGRestrict</b> () noexcept</td></tr>
 <tr class="memdesc:ae8c17183d8225d755c581f959fa87074"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
-<tr class="memitem:aa6eb9d04ffa521800ac5bba93fcc07a4" id="r_aa6eb9d04ffa521800ac5bba93fcc07a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6eb9d04ffa521800ac5bba93fcc07a4">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const int &amp;a_refRat) noexcept</td></tr>
-<tr class="memdesc:aa6eb9d04ffa521800ac5bba93fcc07a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
+<tr class="memitem:aa1b6a6e3f531ce6de4a8011d5b39456d" id="r_aa1b6a6e3f531ce6de4a8011d5b39456d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1b6a6e3f531ce6de4a8011d5b39456d">define</a> (const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;a_finerVoFs, const int &amp;a_refRat) noexcept</td></tr>
+<tr class="memdesc:aa1b6a6e3f531ce6de4a8011d5b39456d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="memitem:af4e2ab5f883cec003ccb98d3108a912f" id="r_af4e2ab5f883cec003ccb98d3108a912f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4e2ab5f883cec003ccb98d3108a912f">restrictResidual</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const Interval a_variables) const noexcept</td></tr>
 <tr class="memdesc:af4e2ab5f883cec003ccb98d3108a912f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restrict residual onto the coarse grid.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -139,8 +139,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 <div class="textblock"><p>Class for restricting multigrid residual onto a coarser grid. </p>
 <p>This class defines an operator for setting phiC = 1/Nref^D * sum(phiFine). This assumes that the input data has already been scaled by the volume fraction (which is what the EB multigrid operators do anyways). </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ac6cde03fee3ccbb240f57422d05669fd" name="ac6cde03fee3ccbb240f57422d05669fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6cde03fee3ccbb240f57422d05669fd">&#9670;&#160;</a></span>EBMGRestrict()</h2>
+<a id="ae26bea3678c95015a44596ea1be9197b" name="ae26bea3678c95015a44596ea1be9197b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae26bea3678c95015a44596ea1be9197b">&#9670;&#160;</a></span>EBMGRestrict()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -166,6 +166,11 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -180,8 +185,9 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Fine level coarsened by a_refRat. Its EBISLayout must allow refinement by a_refRat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Fine level coarsened by a_refRat. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement factor between levels. </td></tr>
   </table>
   </dd>
@@ -190,8 +196,8 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="aa6eb9d04ffa521800ac5bba93fcc07a4" name="aa6eb9d04ffa521800ac5bba93fcc07a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6eb9d04ffa521800ac5bba93fcc07a4">&#9670;&#160;</a></span>define()</h2>
+<a id="aa1b6a6e3f531ce6de4a8011d5b39456d" name="aa1b6a6e3f531ce6de4a8011d5b39456d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1b6a6e3f531ce6de4a8011d5b39456d">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -217,6 +223,11 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
@@ -231,8 +242,9 @@ LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="botto
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Fine level coarsened by a_refRat. Its EBISLayout must allow refinement by a_refRat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Fine level coarsened by a_refRat. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of a_eblgCoFi, on a_eblgCoFi's grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement factor between levels. </td></tr>
   </table>
   </dd>

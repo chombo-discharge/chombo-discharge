@@ -478,14 +478,20 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:ad396a3f143e878df9ce4ba1d5f66635c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multifluid coarsened grids between AMR levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <br /></td></tr>
 <tr class="memitem:a4134b979475d88f78dfe972d40a61d38" id="r_a4134b979475d88f78dfe972d40a61d38"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4134b979475d88f78dfe972d40a61d38">getMultigridLevelGrids</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a4134b979475d88f78dfe972d40a61d38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
-<tr class="memitem:a41212aeb5cce01fec1df2142daa1d296" id="r_a41212aeb5cce01fec1df2142daa1d296"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41212aeb5cce01fec1df2142daa1d296">getMultigridLevelGridsCoFi</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
-<tr class="memdesc:a41212aeb5cce01fec1df2142daa1d296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened grids between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
 <tr class="memitem:a89a3e824d91dcef909216030a32fa694" id="r_a89a3e824d91dcef909216030a32fa694"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89a3e824d91dcef909216030a32fa694">getMultigridCoarseAverage</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a89a3e824d91dcef909216030a32fa694"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarse averaging between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="memitem:a7aa5b7338ee0c0d31b82b51892e6aaee" id="r_a7aa5b7338ee0c0d31b82b51892e6aaee"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7aa5b7338ee0c0d31b82b51892e6aaee">getFinerVoFs</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a7aa5b7338ee0c0d31b82b51892e6aaee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="memitem:ad7a372f3a86cfedc702a2e7c1ba775f8" id="r_ad7a372f3a86cfedc702a2e7c1ba775f8"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7a372f3a86cfedc702a2e7c1ba775f8">getMultigridRestriction</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:ad7a372f3a86cfedc702a2e7c1ba775f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid restriction between AMR levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="memitem:ae2692d270b60371f4a5404aed6a8f9bc" id="r_ae2692d270b60371f4a5404aed6a8f9bc"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2692d270b60371f4a5404aed6a8f9bc">getMultigridProlongation</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:ae2692d270b60371f4a5404aed6a8f9bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multigrid prolongation between AMR levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="memitem:a4c86cd95c71ebdca7cc714896ad3f7dc" id="r_a4c86cd95c71ebdca7cc714896ad3f7dc"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c86cd95c71ebdca7cc714896ad3f7dc">getMultigridLevelRestriction</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a4c86cd95c71ebdca7cc714896ad3f7dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the restriction between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="memitem:af144349c2188e431204608d6a578c763" id="r_af144349c2188e431204608d6a578c763"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af144349c2188e431204608d6a578c763">getMultigridLevelProlongation</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:af144349c2188e431204608d6a578c763"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the prolongation between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
 <tr class="memitem:a9852f829c18c660bdfbc478dc285aabb" id="r_a9852f829c18c660bdfbc478dc285aabb"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9852f829c18c660bdfbc478dc285aabb">getMultigridMFLevelGrids</a> (const std::string &amp;a_realm) const</td></tr>
 <tr class="memdesc:a9852f829c18c660bdfbc478dc285aabb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multifluid multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <br /></td></tr>
-<tr class="memitem:a898ae64303fd33ab80361130bb09f42e" id="r_a898ae64303fd33ab80361130bb09f42e"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a898ae64303fd33ab80361130bb09f42e">getMultigridMFLevelGridsCoFi</a> (const std::string &amp;a_realm) const</td></tr>
-<tr class="memdesc:a898ae64303fd33ab80361130bb09f42e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the multifluid coarsened grids between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>.  <br /></td></tr>
 <tr class="memitem:acd22486cec01014d92951f6d8065c1cc" id="r_acd22486cec01014d92951f6d8065c1cc"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd22486cec01014d92951f6d8065c1cc">getVofIterator</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:acd22486cec01014d92951f6d8065c1cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
 <tr class="memitem:a50a10b1b441f82724ff1d49606d732b8" id="r_a50a10b1b441f82724ff1d49606d732b8"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50a10b1b441f82724ff1d49606d732b8">getMultiCutVofIterator</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
@@ -3972,6 +3978,37 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
+<a id="a7aa5b7338ee0c0d31b82b51892e6aaee" name="a7aa5b7338ee0c0d31b82b51892e6aaee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7aa5b7338ee0c0d31b82b51892e6aaee">&#9670;&#160;</a></span>getFinerVoFs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp; AmrMesh::getFinerVoFs </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>See <a class="el" href="classRealm.html#a9ec52f36fe3374e4be58d512686f6fff" title="Get the finer VoFs of the coarse VoFs of the coarsened fine grids, for a phase.">Realm::getFinerVoFs()</a>. Entry lvl lives on <a class="el" href="#a868a2a6589ded64a6ccb13ae351e381b" title="Get the coarsened fine EBLevelGrid for a Realm and phase.">getEBLevelGridCoFi()</a>[lvl] and is defined after regridBase. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The finer-VoF lists of each AMR level pair. </dd></dl>
+
+</div>
+</div>
 <a id="a1dec51dbb9d0a3aa8023d63d538a8dc7" name="a1dec51dbb9d0a3aa8023d63d538a8dc7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1dec51dbb9d0a3aa8023d63d538a8dc7">&#9670;&#160;</a></span>getFinestDomain()</h2>
 
@@ -4683,14 +4720,14 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="a41212aeb5cce01fec1df2142daa1d296" name="a41212aeb5cce01fec1df2142daa1d296"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41212aeb5cce01fec1df2142daa1d296">&#9670;&#160;</a></span>getMultigridLevelGridsCoFi()</h2>
+<a id="af144349c2188e431204608d6a578c763" name="af144349c2188e431204608d6a578c763"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af144349c2188e431204608d6a578c763">&#9670;&#160;</a></span>getMultigridLevelProlongation()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &gt; &amp; AmrMesh::getMultigridLevelGridsCoFi </td>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &gt; &amp; AmrMesh::getMultigridLevelProlongation </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
         </tr>
@@ -4702,15 +4739,46 @@ template&lt;typename P, typename Traits&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Get the coarsened grids between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
-<p>See <a class="el" href="classRealm.html#a7c71a581bc083508f31b8bda83ccbbc5" title="Get the coarsened grids between consecutive multigrid levels for a phase.">Realm::getMultigridLevelGridsCoFi()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the prolongation between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>See <a class="el" href="classRealm.html#a59acf73557cdad02c0b3d9d8d0da7efd" title="Get the prolongation between consecutive multigrid levels for a phase.">Realm::getMultigridLevelProlongation()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The coarsened grids between consecutive multigrid levels. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The prolongation of each multigrid level pair. </dd></dl>
+
+</div>
+</div>
+<a id="a4c86cd95c71ebdca7cc714896ad3f7dc" name="a4c86cd95c71ebdca7cc714896ad3f7dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c86cd95c71ebdca7cc714896ad3f7dc">&#9670;&#160;</a></span>getMultigridLevelRestriction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &gt; &amp; AmrMesh::getMultigridLevelRestriction </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the restriction between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>See <a class="el" href="classRealm.html#a993a8036a9d3c498694617ec5bfc40aa" title="Get the restriction between consecutive multigrid levels for a phase.">Realm::getMultigridLevelRestriction()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The restriction of each multigrid level pair. </dd></dl>
 
 </div>
 </div>
@@ -4740,29 +4808,65 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="a898ae64303fd33ab80361130bb09f42e" name="a898ae64303fd33ab80361130bb09f42e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a898ae64303fd33ab80361130bb09f42e">&#9670;&#160;</a></span>getMultigridMFLevelGridsCoFi()</h2>
+<a id="ae2692d270b60371f4a5404aed6a8f9bc" name="ae2692d270b60371f4a5404aed6a8f9bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2692d270b60371f4a5404aed6a8f9bc">&#9670;&#160;</a></span>getMultigridProlongation()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const Vector&lt; Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &gt; &amp; AmrMesh::getMultigridMFLevelGridsCoFi </td>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGProlong.html">EBMGProlong</a> &gt; &gt; &amp; AmrMesh::getMultigridProlongation </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span></td><td>)</td>
-          <td> const</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Get the multifluid coarsened grids between consecutive multigrid levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a>. </p>
-<p>See <a class="el" href="classRealm.html#aca69e5abe062c9c573f16a41bebf741c" title="Get the multifluid coarsened grids between consecutive multigrid levels.">Realm::getMultigridMFLevelGridsCoFi()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Get the multigrid prolongation between AMR levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>See <a class="el" href="classRealm.html#a375b54bf01e646af0efff242c64a69e8" title="Get the multigrid prolongation between AMR levels for a phase.">Realm::getMultigridProlongation()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The multifluid coarsened grids between consecutive multigrid levels. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The prolongation of each AMR level pair. </dd></dl>
+
+</div>
+</div>
+<a id="ad7a372f3a86cfedc702a2e7c1ba775f8" name="ad7a372f3a86cfedc702a2e7c1ba775f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7a372f3a86cfedc702a2e7c1ba775f8">&#9670;&#160;</a></span>getMultigridRestriction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMGRestrict.html">EBMGRestrict</a> &gt; &gt; &amp; AmrMesh::getMultigridRestriction </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the multigrid restriction between AMR levels for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>See <a class="el" href="classRealm.html#aae0f364fbc5e2843688e12e0c1d81161" title="Get the multigrid restriction between AMR levels for a phase.">Realm::getMultigridRestriction()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The restriction of each AMR level pair. </dd></dl>
 
 </div>
 </div>
