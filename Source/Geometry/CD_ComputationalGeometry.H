@@ -35,6 +35,11 @@
 #include <CD_Electrode.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_RealBox.H>
+// Chombo's own namespace, which HDF5Handle lives in whether or not HDF5 is used
+#include <NamespaceHeader.H>
+class HDF5Handle;
+#include <NamespaceFooter.H>
+
 #include <CD_NamespaceHeader.H>
 
 class PolyhedralGeometryShop;
@@ -199,6 +204,9 @@ public:
    * @param[in] a_minBlockSize Tile the grids are built with, from AmrMesh.eb_min_block_size.
    * @param[in] a_maxBlockSize Super-tile the boxes are cut to, a whole number of a_minBlockSize, from
    * AmrMesh.eb_max_block_size.
+   * @note After writeGraphTo the grids are also written to that file, and the file is kept open for the polyhedral
+   * shops until buildGeometries has run. After readGraphFrom they are read from the file instead of built; see
+   * readGrids.
    */
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
@@ -211,6 +219,54 @@ public:
             const int            a_maxGhostEB,
             const int            a_minBlockSize,
             const int            a_maxBlockSize);
+
+  /**
+   * @brief Write the grids, and the polyhedral graph built over them, to a file, once, as makeGrids and buildGeometries
+   * build them.
+   * @details Makes a new identifier for the file, which getGraphId returns. A checkpoint that records it can be
+   * restarted on exactly this geometry with readGraphFrom. Call before makeGrids. Collective.
+   * @param[in] a_file The file. One that exists is written over.
+   */
+  void
+  writeGraphTo(const std::string& a_file);
+
+  /**
+   * @brief Read the grids, and the polyhedral graph built over them, from a file that writeGraphTo wrote, instead of
+   * generating them.
+   * @details Call before makeGrids. The run stops if the file's identifier is not a_id. Collective.
+   * @param[in] a_file The file.
+   * @param[in] a_id   The identifier the file must carry.
+   */
+  void
+  readGraphFrom(const std::string& a_file, const std::string& a_id);
+
+  /**
+   * @brief The file the graph is written to or read from.
+   * @return The file, empty if there is none.
+   */
+  const std::string&
+  getGraphFile() const noexcept;
+
+  /**
+   * @brief The identifier of the graph file.
+   * @return The identifier, empty if there is no file.
+   */
+  const std::string&
+  getGraphId() const noexcept;
+
+  /**
+   * @brief Whether the graph is read from a file rather than built.
+   * @return True after readGraphFrom.
+   */
+  bool
+  readsGraph() const noexcept;
+
+  /**
+   * @brief The graph file, open between makeGrids and the end of buildGeometries.
+   * @return The open file, or null.
+   */
+  HDF5Handle*
+  getGraphHandle() const noexcept;
 
   /**
    * @brief Number of levels makeGrids built.
@@ -390,8 +446,9 @@ public:
 
   /**
    * @brief A layout of a phase on a domain whose boxes hold every cut cell of the phase there.
-   * @details The polyhedral generator's stored layout of the level when it built the phase, and the index space's
-   * irregular grids otherwise. With the polyhedral generator, a level no tile was split down to has an empty layout.
+   * @details With the polyhedral generator, the boxes of its stored layout of the level that the geometry classifies
+   * as irregular in the phase, on the ranks that hold them there, and the index space's irregular grids otherwise.
+   * With the polyhedral generator, a level no tile was split down to has an empty layout.
    * The phase must have an index space.
    * @param[in] a_phase  Phase.
    * @param[in] a_domain Domain, one of the index space's.
@@ -574,6 +631,26 @@ protected:
   bool m_verbose;
 
   /**
+   * @brief File the grids and the polyhedral graph are written to or read from, empty for neither.
+   */
+  std::string m_graphFile;
+
+  /**
+   * @brief Identifier of the graph file: made when it is written, required of it when it is read.
+   */
+  std::string m_graphId;
+
+  /**
+   * @brief Whether the grids and the graph are read from m_graphFile rather than written to it.
+   */
+  bool m_readGraph;
+
+  /**
+   * @brief The graph file while the geometry is built into or from it, null otherwise.
+   */
+  HDF5Handle* m_graphHandle;
+
+  /**
    * @brief Domains of the levels makeGrids builds, coarsest first.
    */
   Vector<ProblemDomain> m_domains;
@@ -660,6 +737,83 @@ protected:
    */
   const Vector<Vector<GeometryService::InOut>>&
   types(const phase::which_phase a_phase) const noexcept;
+
+  /**
+   * @brief Build the grids from the implicit functions, as makeGrids describes.
+   * @param[in] a_startDomain      Domain the upward pass starts from.
+   * @param[in] a_stopDomain       Finest domain built.
+   * @param[in] a_electrodeDomain  Domain the geometric tags refine electrode surfaces down to.
+   * @param[in] a_dielectricDomain Domain the geometric tags refine dielectric surfaces down to.
+   * @param[in] a_probLo           Lower-left corner of the domain.
+   * @param[in] a_startDx          Grid spacing on a_startDomain.
+   * @param[in] a_refineAngle      Angle, in degrees, between neighbouring normals above which a box is split.
+   * @param[in] a_maxGhostEB       Ghost cells a box is grown by when it is classified.
+   * @param[in] a_minBlockSize     Tile size.
+   * @param[in] a_maxBlockSize     Super-tile size.
+   */
+  void
+  generateGrids(const ProblemDomain& a_startDomain,
+                const ProblemDomain& a_stopDomain,
+                const ProblemDomain& a_electrodeDomain,
+                const ProblemDomain& a_dielectricDomain,
+                const RealVect&      a_probLo,
+                const Real           a_startDx,
+                const Real           a_refineAngle,
+                const int            a_maxGhostEB,
+                const int            a_minBlockSize,
+                const int            a_maxBlockSize);
+
+  /**
+   * @brief Read the grids generateGrids built from the graph file.
+   * @details The domains, the lower corner and the grid spacing must be those the file was written with, and the
+   * inputs may not ask for more EB ghost cells; the run stops otherwise. The settings the grids were generated with --
+   * the refinement angle, the saddle refinement, the tile sizes, the ghost cells and the levels electrode and
+   * dielectric surfaces are resolved to -- are taken from the file, and each one that differs in the inputs is
+   * reported. Leaves the file open for buildGeometries. Collective.
+   * @param[in] a_startDomain      Domain the upward pass started from.
+   * @param[in] a_stopDomain       Finest domain built.
+   * @param[in] a_electrodeDomain  Domain the inputs refine electrode surfaces down to.
+   * @param[in] a_dielectricDomain Domain the inputs refine dielectric surfaces down to.
+   * @param[in] a_probLo           Lower-left corner of the domain.
+   * @param[in] a_startDx          Grid spacing on a_startDomain.
+   * @param[in] a_refineAngle      Refinement angle of the inputs.
+   * @param[in] a_maxGhostEB       EB ghost cells of the inputs.
+   * @param[in] a_minBlockSize     Tile size of the inputs.
+   * @param[in] a_maxBlockSize     Super-tile size of the inputs.
+   */
+  void
+  readGrids(const ProblemDomain& a_startDomain,
+            const ProblemDomain& a_stopDomain,
+            const ProblemDomain& a_electrodeDomain,
+            const ProblemDomain& a_dielectricDomain,
+            const RealVect&      a_probLo,
+            const Real           a_startDx,
+            const Real           a_refineAngle,
+            const int            a_maxGhostEB,
+            const int            a_minBlockSize,
+            const int            a_maxBlockSize);
+
+  /**
+   * @brief Write the grids, the settings they were generated with and the graph file's identifier to the graph file,
+   * and leave it open for buildGeometries. Collective.
+   */
+  void
+  writeGrids();
+
+  /**
+   * @brief Close the graph file, if it is open. Collective.
+   */
+  void
+  closeGraphFile();
+
+  /**
+   * @brief Set the levels, their domains and grid spacings from the start and stop domains.
+   * @param[in] a_startDomain Domain the upward pass starts from.
+   * @param[in] a_stopDomain  Finest domain, a factor-two refinement of a_startDomain some number of times.
+   * @param[in] a_startDx     Grid spacing on a_startDomain.
+   */
+  void
+  defineLevels(const ProblemDomain& a_startDomain, const ProblemDomain& a_stopDomain, const Real a_startDx);
 
   /**
    * @brief Step 0: build and classify the start level.

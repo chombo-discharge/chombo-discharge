@@ -426,6 +426,96 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 
 #ifdef CH_USE_HDF5
 void
+DischargeIO::writeH5Table(HDF5Handle&             a_handle,
+                          const std::string&      a_name,
+                          const std::vector<int>& a_values,
+                          const int               a_columns)
+{
+  CH_TIME("DischargeIO::writeH5Table");
+
+  if (a_columns <= 0 || a_values.size() % a_columns != 0) {
+    MayDay::Error("DischargeIO::writeH5Table - the values are not a whole number of rows");
+  }
+
+  const hsize_t numRows = a_values.size() / a_columns;
+
+  if (numRows == 0) {
+    return;
+  }
+
+  const hsize_t dims[2] = {numRows, static_cast<hsize_t>(a_columns)};
+
+  const hid_t space   = H5Screate_simple(2, dims, nullptr);
+  const hid_t dataset = H5Dcreate2(a_handle.groupID(),
+                                   a_name.c_str(),
+                                   H5T_NATIVE_INT,
+                                   space,
+                                   H5P_DEFAULT,
+                                   H5P_DEFAULT,
+                                   H5P_DEFAULT);
+
+  if (dataset < 0) {
+    MayDay::Error(("DischargeIO::writeH5Table - could not create dataset '" + a_name + "'").c_str());
+  }
+
+  if (procID() == 0) {
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, a_values.data()) < 0) {
+      MayDay::Error(("DischargeIO::writeH5Table - could not write dataset '" + a_name + "'").c_str());
+    }
+  }
+
+  H5Dclose(dataset);
+  H5Sclose(space);
+}
+
+std::vector<int>
+DischargeIO::readH5Table(HDF5Handle& a_handle, const std::string& a_name, const int a_columns)
+{
+  CH_TIME("DischargeIO::readH5Table");
+
+  std::vector<int> values;
+
+  if (H5Lexists(a_handle.groupID(), a_name.c_str(), H5P_DEFAULT) <= 0) {
+    return values;
+  }
+
+  const hid_t dataset = H5Dopen2(a_handle.groupID(), a_name.c_str(), H5P_DEFAULT);
+
+  if (dataset < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not open dataset '" + a_name + "'").c_str());
+  }
+
+  const hid_t space = H5Dget_space(dataset);
+
+  if (space < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not read the shape of dataset '" + a_name + "'").c_str());
+  }
+
+  hsize_t dims[2] = {0, 0};
+
+  if (H5Sget_simple_extent_ndims(space) != 2) {
+    MayDay::Error(("DischargeIO::readH5Table - dataset '" + a_name + "' is not a table").c_str());
+  }
+
+  H5Sget_simple_extent_dims(space, dims, nullptr);
+
+  if (dims[1] != static_cast<hsize_t>(a_columns)) {
+    MayDay::Error(("DischargeIO::readH5Table - dataset '" + a_name + "' has another number of columns").c_str());
+  }
+
+  values.resize(dims[0] * dims[1]);
+
+  if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data()) < 0) {
+    MayDay::Error(("DischargeIO::readH5Table - could not read dataset '" + a_name + "'").c_str());
+  }
+
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  return values;
+}
+
+void
 DischargeIO::writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file)
 {
   CH_TIME("DischargeIO::writeEBHDF5(debug)");

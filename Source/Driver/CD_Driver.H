@@ -551,6 +551,31 @@ protected:
   buildGeometryGrids(const ProblemDomain& a_startDomain);
 
   /**
+   * @brief The domain the geometry is generated from, from Driver.geometry_scan_level.
+   * @details A negative level coarsens the coarsest AMR level that many times, stopping before a side would drop
+   * below two cells; a non-negative level is that AMR level, at most max_eb_depth.
+   * @return The domain.
+   */
+  ProblemDomain
+  getScanDomain() const;
+
+  /**
+   * @brief The file a polyhedral geometry's graph is written to, beside the checkpoints.
+   * @return The file name.
+   */
+  std::string
+  getGraphFileName() const;
+
+  /**
+   * @brief Find the graph file a checkpoint was written with, and have the geometry read from it.
+   * @details A checkpoint without one, written before graph files existed or by another generator, has the geometry
+   * generated from the inputs, and written to a new graph file if this run checkpoints.
+   * @param[in] a_restartFile The checkpoint.
+   */
+  void
+  findGraphFile(const std::string& a_restartFile);
+
+  /**
    * @brief Setup function for fresh (non-restart) simulations.
    * @param[in] a_initialRegrids Number of initial regrids to perform during setup.
    */
