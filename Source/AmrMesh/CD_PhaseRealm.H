@@ -800,6 +800,28 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
 
   /**
+   * @brief Filler-mode index space whose layouts are copied from this realm's levels instead of generated.
+   * @details m_eblgFiCo is defined through it, so the fine geometry is copied onto the coarse layout at fine
+   * resolution. Its filler reads this realm's level grids when a layout is filled, so a layout of it is valid only
+   * until the next regrid, when the index space is rebuilt.
+   */
+  RefCountedPtr<EBIndexSpace> m_ebisFiCo;
+
+  /**
+   * @brief Cells of m_eblgFiCo, valid and ghost, that hold geometry copied from the finer level.
+   * @details Entry lvl+1 lives on m_eblgFiCo[lvl+1], with its ghost cells, and is true in the cells of level lvl+1.
+   * The geometry of every other cell of m_eblgFiCo carries no meaning. Only the consumers' assertions read it, so it is
+   * built in DEBUG builds only, and is null otherwise and on level 0.
+   */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fiCoFineCells;
+
+  /**
+   * @brief Level lvl coarsened by 2, for levels whose coarser level is 4 times coarser (null otherwise).
+   * @details Source of the half-resolution layout that coarsening the copied geometry by 4 steps through.
+   */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgFineHalf;
+
+  /**
    * @brief Level-set function
    */
   EBAMRFAB m_levelset;
@@ -963,6 +985,36 @@ protected:
    */
   void
   defineEBLevelGrid(const int a_lmin);
+
+  /**
+   * @brief Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.
+   * @details m_eblgFiCo[lvl+1] has the layout of level lvl refined by the refinement ratio, so it shares DataIndex with
+   * level lvl. Its graph and data are copied from level lvl+1 through the filler-mode index space m_ebisFiCo; they
+   * are meaningful only in the cells of level lvl+1, which m_fiCoFineCells marks. Its ghost cells reach as far as the
+   * refined coarse cells that the gradient stencils and the mass redistribution use.
+   */
+  void
+  defineEBLevelGridFiCo();
+
+  /**
+   * @brief Filler of m_ebisFiCo: copy the graph and data of the realm level on a_domain onto a_grids.
+   * @details Each box is classified from the source boxes first. A box that receives no source cell is set all
+   * covered, a box that lies entirely in all-regular source boxes is set all regular, and only the other boxes receive
+   * the copied graph. The data is then built over the graph and copied.
+   * @param[out] a_graph      Graph over a_grids.
+   * @param[out] a_data       Data over a_grids.
+   * @param[in]  a_grids      Grids.
+   * @param[in]  a_domain     Domain. Must be the domain of a realm level, or of a level in m_eblgFineHalf.
+   * @param[in]  a_graphGhost Ghost cells of the graph.
+   * @param[in]  a_dataGhost  Ghost cells of the data.
+   */
+  void
+  fillCopiedLayout(LevelData<EBGraph>&      a_graph,
+                   LevelData<EBData>&       a_data,
+                   const DisjointBoxLayout& a_grids,
+                   const ProblemDomain&     a_domain,
+                   const int                a_graphGhost,
+                   const int                a_dataGhost) const;
 
   /**
    * @brief Define vof iterators

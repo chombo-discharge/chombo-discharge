@@ -21,6 +21,9 @@
 #include <BaseIVFactory.H>
 #include <EBCellFactory.H>
 #include <EBFluxFactory.H>
+#include <EBIndexSpace.H>
+#include <EBGraphFactory.H>
+#include <EBDataFactory.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -143,6 +146,9 @@ PhaseRealm::preRegrid()
   m_eblg.resize(0);
   m_eblgCoFi.resize(0);
   m_eblgFiCo.resize(0);
+  m_eblgFineHalf.resize(0);
+  m_fiCoFineCells.resize(0);
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(nullptr);
   m_mgLevelGrids.resize(0);
   m_mgLevelGridsCoFi.resize(0);
   m_mgCoarAve.resize(0);
@@ -498,14 +504,9 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
       new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis)));
 
     const bool hasCoar = lvl > 0;
-    const bool hasFine = lvl < m_finestLevel;
 
     if (hasCoar) {
       m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl - 1], &(*m_ebis));
-    }
-
-    if (hasFine) {
-      m_eblg[lvl]->setMaxRefinementRatio(m_refinementRatios[lvl]);
     }
 
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
@@ -516,15 +517,288 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
 
       coarsen(*m_eblgCoFi[lvl - 1], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
     }
+  }
 
-    // Define the refined grids. Here m_eblgFiCo contains grids on level lvl
-    if (lvl < m_finestLevel) {
-      m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+  this->defineEBLevelGridFiCo();
+}
 
-      refine(*m_eblgFiCo[lvl + 1], *m_eblg[lvl], m_refinementRatios[lvl]);
-      m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(m_refinementRatios[lvl], m_eblg[lvl]->getEBIS());
+void
+PhaseRealm::defineEBLevelGridFiCo()
+{
+  CH_TIME("PhaseRealm::defineEBLevelGridFiCo");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineEBLevelGridFiCo" << endl;
+  }
+
+  m_eblgFiCo.resize(1 + m_finestLevel);
+  m_eblgFineHalf.resize(1 + m_finestLevel);
+  m_fiCoFineCells.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    m_eblgFiCo[lvl]      = RefCountedPtr<EBLevelGrid>(nullptr);
+    m_eblgFineHalf[lvl]  = RefCountedPtr<EBLevelGrid>(nullptr);
+    m_fiCoFineCells[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+  }
+
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(nullptr);
+
+  if (m_finestLevel == 0) {
+    return;
+  }
+
+  // Sources of the half-resolution layouts that coarsening the copied geometry by 4 steps through.
+  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
+    const int refRat = m_refinementRatios[lvl - 1];
+
+    if (refRat != 2 && refRat != 4) {
+      MayDay::Abort("PhaseRealm::defineEBLevelGridFiCo - refinement ratios must be 2 or 4");
+    }
+
+    if (refRat == 4) {
+      m_eblgFineHalf[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+
+      coarsen(*m_eblgFineHalf[lvl], *m_eblg[lvl], 2);
     }
   }
+
+  // The copying index space spans the realm's domains, finest first, each a coarsening by two of the one before.
+  Vector<ProblemDomain> domains;
+
+  ProblemDomain domain = m_domains[m_finestLevel];
+  domains.push_back(domain);
+
+  while (domain.domainBox() != m_domains[0].domainBox()) {
+    domain.coarsen(2);
+    domains.push_back(domain);
+  }
+
+  m_ebisFiCo = RefCountedPtr<EBIndexSpace>(new EBIndexSpace());
+
+  m_ebisFiCo->define(domains,
+                     m_probLo,
+                     m_dx[m_finestLevel],
+                     [this](LevelData<EBGraph>&      a_graph,
+                            LevelData<EBData>&       a_data,
+                            const DisjointBoxLayout& a_grids,
+                            const ProblemDomain&     a_domain,
+                            const int                a_graphGhost,
+                            const int                a_dataGhost) -> void {
+                       this->fillCopiedLayout(a_graph, a_data, a_grids, a_domain, a_graphGhost, a_dataGhost);
+                     });
+
+  m_fiCoFineCells.resize(1 + m_finestLevel);
+  m_fiCoFineCells[0] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    const int refRat = m_refinementRatios[lvl];
+
+    // The gradient stencils refine coarse cells up to two cells outside the coarse box, and the mass redistribution
+    // up to the redistribution radius. A copy costs no geometry work, so the ghost cells reach both.
+    constexpr int gradientStencilWidth = 2;
+
+    const int ghostFiCo = std::max(std::max(m_numEbGhostsCells, m_numGhostCells),
+                                   refRat * std::max(gradientStencilWidth, s_redistributionRadius));
+
+    DisjointBoxLayout dblFiCo;
+    refine(dblFiCo, m_grids[lvl], refRat);
+
+    m_eblgFiCo[lvl + 1] = RefCountedPtr<EBLevelGrid>(
+      new EBLevelGrid(dblFiCo, m_domains[lvl + 1], ghostFiCo, &(*m_ebisFiCo)));
+
+    m_eblgFiCo[lvl + 1]->getEBISL().setMaxCoarseningRatio(refRat, &(*m_ebisFiCo));
+
+#ifndef NDEBUG
+    // Mark the cells of level lvl+1, which only the consumers' assertions read.
+    m_fiCoFineCells[lvl + 1] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+      new LevelData<BaseFab<bool>>(dblFiCo, 1, ghostFiCo * IntVect::Unit));
+
+    LevelData<BaseFab<bool>> fineCells(m_grids[lvl + 1], 1, IntVect::Zero);
+
+    const DataIterator& ditFine  = m_grids[lvl + 1].dataIterator();
+    const DataIterator& ditFiCo  = dblFiCo.dataIterator();
+    const int           nboxFine = ditFine.size();
+    const int           nboxFiCo = ditFiCo.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxFine; mybox++) {
+      fineCells[ditFine[mybox]].setVal(true);
+    }
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+      (*m_fiCoFineCells[lvl + 1])[ditFiCo[mybox]].setVal(false);
+    }
+
+    fineCells.copyTo(Interval(0, 0), *m_fiCoFineCells[lvl + 1], Interval(0, 0));
+#endif
+  }
+}
+
+void
+PhaseRealm::fillCopiedLayout(LevelData<EBGraph>&      a_graph,
+                             LevelData<EBData>&       a_data,
+                             const DisjointBoxLayout& a_grids,
+                             const ProblemDomain&     a_domain,
+                             const int                a_graphGhost,
+                             const int                a_dataGhost) const
+{
+  CH_TIME("PhaseRealm::fillCopiedLayout");
+  if (m_verbose) {
+    pout() << "PhaseRealm::fillCopiedLayout" << endl;
+  }
+
+  // Every data cell lies in the region the boxes are classified over.
+  CH_assert(a_dataGhost <= a_graphGhost);
+
+  const EBLevelGrid* source = nullptr;
+
+  // Any of the realm's levels can be the source, the coarsest included, although the copied layouts are only ever
+  // filled on the domains of the finer levels and of the half steps between ratio-4 levels.
+  for (int lvl = 0; lvl <= m_finestLevel && source == nullptr; lvl++) {
+    if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
+      source = &(*m_eblg[lvl]);
+    }
+    else if (!m_eblgFineHalf[lvl].isNull() && m_eblgFineHalf[lvl]->getDomain().domainBox() == a_domain.domainBox()) {
+      source = &(*m_eblgFineHalf[lvl]);
+    }
+  }
+
+  if (source == nullptr) {
+    MayDay::Abort("PhaseRealm::fillCopiedLayout - no level to copy from on the requested domain");
+  }
+
+  const DisjointBoxLayout& dblSrc   = source->getDBL();
+  const EBISLayout&        ebislSrc = source->getEBISL();
+  const Interval           interv(0, 0);
+  const IntVect            graphGhost = a_graphGhost * IntVect::Unit;
+  const IntVect            dataGhost  = a_dataGhost * IntVect::Unit;
+
+  const DataIterator& ditSrc  = dblSrc.dataIterator();
+  const DataIterator& ditDst  = a_grids.dataIterator();
+  const int           nboxSrc = ditSrc.size();
+  const int           nboxDst = ditDst.size();
+
+  // Classify each destination cell from the source boxes: 0 where no source cell lands, 1 under all-regular source
+  // boxes, 3 under all-covered ones, 2 under the others.
+  LevelData<BaseFab<int>> classSrc(dblSrc, 1, IntVect::Zero);
+  LevelData<BaseFab<int>> classDst(a_grids, 1, graphGhost);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    const EBISBox& ebisBox = ebislSrc[din];
+
+    classSrc[din].setVal(ebisBox.isAllRegular() ? 1 : (ebisBox.isAllCovered() ? 3 : 2));
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    classDst[ditDst[mybox]].setVal(0);
+  }
+
+  classSrc.copyTo(interv, classDst, interv);
+
+  // The source graph, aliased box by box.
+  EBGraphFactory graphFact(a_domain);
+
+  LevelData<EBGraph> graphSrc(dblSrc, 1, IntVect::Zero, graphFact);
+  LevelData<EBGraph> graphCopy(a_grids, 1, graphGhost, graphFact);
+
+  a_graph.define(a_grids, 1, graphGhost, graphFact);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    graphSrc[din] = ebislSrc[din].getEBGraph();
+  }
+
+  // Each destination box is whole and covered when no regular or cut source cell lands in it, whole and regular when
+  // regular source cells fill it, and copied cell by cell otherwise. The cells no source reaches lie outside the finer
+  // level, where the copy is not read.
+  constexpr int wholeCovered = 0;
+  constexpr int wholeRegular = 1;
+  constexpr int copied       = 2;
+
+  std::vector<int> boxKind(nboxDst, copied);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    const Box           region = grow(a_grids[din], a_graphGhost) & a_domain;
+    const BaseFab<int>& cls    = classDst[din];
+
+    bool anyOpen    = false;
+    bool allRegular = true;
+
+    for (BoxIterator bit(region); bit.ok(); ++bit) {
+      const int c = cls(bit(), 0);
+
+      anyOpen    = anyOpen || (c == 1) || (c == 2);
+      allRegular = allRegular && (c == 1);
+    }
+
+    boxKind[mybox] = !anyOpen ? wholeCovered : (allRegular ? wholeRegular : copied);
+  }
+
+  // A box copied cell by cell starts all regular. EBGraph::copy skips a covered source while the destination is all
+  // covered, and the per-cell graph that a later cut source makes it allocate starts out regular, which would turn the
+  // skipped cells regular. From an all-regular start every copy order gives the source's states. A whole covered box
+  // starts covered, so that the covered sources copied into it change nothing and store nothing a cell at a time.
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    if (boxKind[mybox] == wholeCovered) {
+      graphCopy[ditDst[mybox]].setToAllCovered();
+    }
+    else {
+      graphCopy[ditDst[mybox]].setToAllRegular();
+    }
+  }
+
+  graphSrc.copyTo(interv, graphCopy, interv);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    if (boxKind[mybox] == wholeCovered) {
+      a_graph[din].setToAllCovered();
+    }
+    else if (boxKind[mybox] == wholeRegular) {
+      a_graph[din].setToAllRegular();
+    }
+    else {
+      a_graph[din] = graphCopy[din];
+    }
+  }
+
+  // The data, built over the graph and copied.
+  EBDataFactory dataFact;
+
+  LevelData<EBData> dataSrc(dblSrc, 1, IntVect::Zero, dataFact);
+
+  a_data.define(a_grids, 1, dataGhost, dataFact);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxSrc; mybox++) {
+    const DataIndex& din = ditSrc[mybox];
+
+    dataSrc[din] = ebislSrc[din].getEBData();
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxDst; mybox++) {
+    const DataIndex& din = ditDst[mybox];
+
+    const Box localBox = grow(a_grids[din], a_dataGhost) & a_domain;
+
+    a_data[din].defineVoFData(a_graph[din], localBox);
+    a_data[din].defineFaceData(a_graph[din], localBox);
+  }
+
+  dataSrc.copyTo(interv, a_data, interv);
 }
 
 void
@@ -1201,6 +1475,7 @@ PhaseRealm::defineMassRedistOper(const int a_lmin, const int /*a_regsize*/)
                                  eblgCoarsened,
                                  eblg,
                                  eblgRefined,
+                                 hasFine ? m_fiCoFineCells[lvl + 1] : RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr),
                                  eblgFine,
                                  refToCoar,
                                  refToFine,
@@ -1916,15 +2191,17 @@ PhaseRealm::defineGradSten(const int /*a_lmin*/)
       const int order  = 2;
       const int weight = 1;
 
-      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(new EBGradient(eblg,
-                                                                   eblgFine,
-                                                                   eblgFiCo,
-                                                                   hasFine,
-                                                                   m_dx[lvl],
-                                                                   refRat,
-                                                                   order,
-                                                                   weight,
-                                                                   m_numGhostCells * IntVect::Unit));
+      m_gradientOp[lvl] = RefCountedPtr<EBGradient>(
+        new EBGradient(eblg,
+                       eblgFine,
+                       eblgFiCo,
+                       hasFine ? m_fiCoFineCells[lvl + 1] : RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr),
+                       hasFine,
+                       m_dx[lvl],
+                       refRat,
+                       order,
+                       weight,
+                       m_numGhostCells * IntVect::Unit));
     }
   }
 }
