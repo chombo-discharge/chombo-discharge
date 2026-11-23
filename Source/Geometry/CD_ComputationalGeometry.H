@@ -595,7 +595,7 @@ protected:
   Real m_refineAngle;
 
   /**
-   * @brief Angle, in degrees, the grids are built with, from ComputationalGeometry.refine_angle.
+   * @brief Angle, in degrees, the grids are built with, from ComputationalGeometry.refine_angles.
    * @details Optional. Negative, the default, means the grids are built with the angle the Driver tags with,
    * Driver.refine_angles.
    */

@@ -360,7 +360,7 @@ It can be given its own angle with
 
 .. code-block:: text
 
-   ComputationalGeometry.refine_angle = 45   # Angle (degrees) the geometry splits boxes at. Negative, the default, uses Driver.refine_angles.
+   ComputationalGeometry.refine_angles = 45  # Angle (degrees) the geometry splits boxes at. Negative, the default, uses Driver.refine_angles.
 
 A larger angle than the Driver's makes the geometry cheaper to generate.
 Where the Driver then refines further than the geometry was resolved, the finer cells are cut from the coarser cells' polyhedra rather than from the implicit function.

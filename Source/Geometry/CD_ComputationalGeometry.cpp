@@ -83,7 +83,7 @@ ComputationalGeometry::ComputationalGeometry()
 
   pp.query("verbose", m_verbose);
   pp.query("refine_saddles", m_refineSaddles);
-  pp.query("refine_angle", m_inputRefineAngle);
+  pp.query("refine_angles", m_inputRefineAngle);
   pp.query("profile", m_profile);
 
   // Boxes restricting where geometric tags may refine, and how far.
@@ -1042,7 +1042,7 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
     return ss.str();
   };
 
-  report("the refinement angle (ComputationalGeometry.refine_angle, otherwise Driver.refine_angles)",
+  report("the refinement angle (ComputationalGeometry.refine_angles, otherwise Driver.refine_angles)",
          str(m_refineAngle),
          str(a_refineAngle));
   report("ComputationalGeometry.refine_saddles", str(m_refineSaddles), str(inputSaddles));
@@ -2444,7 +2444,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
     }
   }
 
-  // The angle the grids are built with: ComputationalGeometry.refine_angle if set, otherwise Driver.refine_angles.
+  // The angle the grids are built with: ComputationalGeometry.refine_angles if set, otherwise Driver.refine_angles.
   const Real cosThreshold = std::cos(m_refineAngle * Units::pi / 180.0);
 
   SplitReason ring = SplitReason::None;
