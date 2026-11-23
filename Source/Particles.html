@@ -899,6 +899,13 @@ This method operates by extracting the coarse-grid particles that live around th
 <p>Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
 The <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Transition</span></code> method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.</p>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">Halo</span></code> and <code class="docutils literal notranslate"><span class="pre">Transition</span></code> copy the coarse-grid particles whose clouds reach the fine grid into the fine patches as ghost particles (see <a class="reference internal" href="#chap-ghostparticles"><span class="std std-ref">Ghost particles</span></a>), which deposit there.
+The copies go through the realm’s coarse-to-fine particle ghost masks, whose widths in fine cells depend on the deposition kernel and the refinement ratio <span class="math notranslate nohighlight">\(r\)</span>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Halo</span></code>: <span class="math notranslate nohighlight">\(r/2\)</span> for CIC and <span class="math notranslate nohighlight">\(r\)</span> for TSC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Transition</span></code>: <span class="math notranslate nohighlight">\(r/2 + 1\)</span> for CIC and <span class="math notranslate nohighlight">\(r + 1\)</span> for TSC.</p></li>
+</ul>
+<p>Every width must be smaller than <code class="docutils literal notranslate"><span class="pre">AmrMesh.min_block_size</span></code>, which is checked when a solver registers its deposition.</p>
 </section>
 <section id="cut-cell-deposition">
 <span id="chap-irregulardeposition"></span><h4>Cut-cell deposition<a class="headerlink" href="#cut-cell-deposition" title="Permalink to this heading"></a></h4>

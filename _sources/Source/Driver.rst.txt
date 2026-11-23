@@ -63,6 +63,7 @@ ______________________
 If a simulation uses the restart functionality (i.e., *does not start* from the first time step), ``Driver`` will execute the following steps in ``setupAndRun(...)``.
 
 #. Ask ``ComputationalGeometry`` to generate the cut-cell moments.
+   With polyhedral geometry, the geometry is read from the graph file the checkpoint names, if it names one (see :ref:`Chap:RestartingSimulations`).
 #. Read a checkpoint file that contains the grids and all the data that have been checkpointed by the solvers.
    ``Driver`` will issue an error and abort if the checkpoint file does not exist.
 #. Ask ``TimeStepper`` to perform a *post-checkpoint* step.

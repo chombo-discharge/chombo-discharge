@@ -233,6 +233,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a562ed6816530335b95ea2f54ee8d5c1a" id="r_a562ed6816530335b95ea2f54ee8d5c1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a562ed6816530335b95ea2f54ee8d5c1a">defineEBLevelGrid</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a562ed6816530335b95ea2f54ee8d5c1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define EBLevelGrids.  <br /></td></tr>
+<tr class="memitem:a62d6a36f4e4d8f285d4110d8ed1321fb" id="r_a62d6a36f4e4d8f285d4110d8ed1321fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62d6a36f4e4d8f285d4110d8ed1321fb">defineEBLevelGridFiCo</a> ()</td></tr>
+<tr class="memdesc:a62d6a36f4e4d8f285d4110d8ed1321fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.  <br /></td></tr>
+<tr class="memitem:af24bdf350a6a2ef060c4add377bfea66" id="r_af24bdf350a6a2ef060c4add377bfea66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af24bdf350a6a2ef060c4add377bfea66">fillCopiedLayout</a> (LevelData&lt; EBGraph &gt; &amp;a_graph, LevelData&lt; EBData &gt; &amp;a_data, const DisjointBoxLayout &amp;a_grids, const ProblemDomain &amp;a_domain, const int a_graphGhost, const int a_dataGhost) const</td></tr>
+<tr class="memdesc:af24bdf350a6a2ef060c4add377bfea66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filler of m_ebisFiCo: copy the graph and data of the realm level on a_domain onto a_grids.  <br /></td></tr>
 <tr class="memitem:af096f4bf383d166b40391a9ea17b1e49" id="r_af096f4bf383d166b40391a9ea17b1e49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af096f4bf383d166b40391a9ea17b1e49">defineVofIterator</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:af096f4bf383d166b40391a9ea17b1e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define vof iterators.  <br /></td></tr>
 <tr class="memitem:a2234f52cd42f490265227f495ed915fd" id="r_a2234f52cd42f490265227f495ed915fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2234f52cd42f490265227f495ed915fd">defineEBCoarAve</a> (const int a_lmin)</td></tr>
@@ -386,6 +390,12 @@ Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemR
 <tr class="memdesc:a6dfd90e5e93c29bb49cf7e189844d2df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation between consecutive multigrid levels.  <br /></td></tr>
 <tr class="memitem:a03464ade19278214a5e4c672d552eaba" id="r_a03464ade19278214a5e4c672d552eaba"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03464ade19278214a5e4c672d552eaba">m_eblgFiCo</a></td></tr>
 <tr class="memdesc:a03464ade19278214a5e4c672d552eaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened fine-level EB grids.  <br /></td></tr>
+<tr class="memitem:a2048db3d3c131d7a292fb43eb05facee" id="r_a2048db3d3c131d7a292fb43eb05facee"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; EBIndexSpace &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2048db3d3c131d7a292fb43eb05facee">m_ebisFiCo</a></td></tr>
+<tr class="memdesc:a2048db3d3c131d7a292fb43eb05facee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filler-mode index space whose layouts are copied from this realm's levels instead of generated.  <br /></td></tr>
+<tr class="memitem:a762f858e6ef4500ce6b29c31d2bec9a7" id="r_a762f858e6ef4500ce6b29c31d2bec9a7"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a762f858e6ef4500ce6b29c31d2bec9a7">m_fiCoFineCells</a></td></tr>
+<tr class="memdesc:a762f858e6ef4500ce6b29c31d2bec9a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of m_eblgFiCo, valid and ghost, that hold geometry copied from the finer level.  <br /></td></tr>
+<tr class="memitem:a9e1b3a0675e8bf602ba6aab9cf468248" id="r_a9e1b3a0675e8bf602ba6aab9cf468248"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e1b3a0675e8bf602ba6aab9cf468248">m_eblgFineHalf</a></td></tr>
+<tr class="memdesc:a9e1b3a0675e8bf602ba6aab9cf468248"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level lvl coarsened by 2, for levels whose coarser level is 4 times coarser (null otherwise).  <br /></td></tr>
 <tr class="memitem:a318b7e957a7c1cbbfe11b58e149ec85c" id="r_a318b7e957a7c1cbbfe11b58e149ec85c"><td class="memItemLeft" align="right" valign="top"><a id="a318b7e957a7c1cbbfe11b58e149ec85c" name="a318b7e957a7c1cbbfe11b58e149ec85c"></a>
 EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelset</b></td></tr>
 <tr class="memdesc:a318b7e957a7c1cbbfe11b58e149ec85c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level-set function. <br /></td></tr>
@@ -864,6 +874,34 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a62d6a36f4e4d8f285d4110d8ed1321fb" name="a62d6a36f4e4d8f285d4110d8ed1321fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62d6a36f4e4d8f285d4110d8ed1321fb">&#9670;&#160;</a></span>defineEBLevelGridFiCo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineEBLevelGridFiCo </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level. </p>
+<p>m_eblgFiCo[lvl+1] has the layout of level lvl refined by the refinement ratio, so it shares DataIndex with level lvl. Its graph and data are copied from level lvl+1 through the filler-mode index space m_ebisFiCo; they are meaningful only in the cells of level lvl+1, which m_fiCoFineCells marks. Its ghost cells reach as far as the refined coarse cells that the gradient stencils and the mass redistribution use. </p>
 
 </div>
 </div>
@@ -1378,6 +1416,68 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af24bdf350a6a2ef060c4add377bfea66" name="af24bdf350a6a2ef060c4add377bfea66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af24bdf350a6a2ef060c4add377bfea66">&#9670;&#160;</a></span>fillCopiedLayout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::fillCopiedLayout </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBGraph &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; EBData &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;</td>          <td class="paramname"><span class="paramname"><em>a_grids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_graphGhost</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dataGhost</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Filler of m_ebisFiCo: copy the graph and data of the realm level on a_domain onto a_grids. </p>
+<p>Each box is classified from the source boxes first. A box that receives no source cell is set all covered, a box that lies entirely in all-regular source boxes is set all regular, and only the other boxes receive the copied graph. The data is then built over the graph and copied. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_graph</td><td>Graph over a_grids. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Data over a_grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Grids. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain. Must be the domain of a realm level, or of a level in m_eblgFineHalf. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_graphGhost</td><td>Ghost cells of the graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataGhost</td><td>Ghost cells of the data. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2516,6 +2616,31 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a2048db3d3c131d7a292fb43eb05facee" name="a2048db3d3c131d7a292fb43eb05facee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2048db3d3c131d7a292fb43eb05facee">&#9670;&#160;</a></span>m_ebisFiCo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RefCountedPtr&lt;EBIndexSpace&gt; PhaseRealm::m_ebisFiCo</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Filler-mode index space whose layouts are copied from this realm's levels instead of generated. </p>
+<p>m_eblgFiCo is defined through it, so the fine geometry is copied onto the coarse layout at fine resolution. Its filler reads this realm's level grids when a layout is filled, so a layout of it is valid only until the next regrid, when the index space is rebuilt. </p>
+
+</div>
+</div>
 <a id="a18918564d9538c935b1c3686bcab9e09" name="a18918564d9538c935b1c3686bcab9e09"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a18918564d9538c935b1c3686bcab9e09">&#9670;&#160;</a></span>m_eblgCoFi</h2>
 
@@ -2566,6 +2691,31 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a9e1b3a0675e8bf602ba6aab9cf468248" name="a9e1b3a0675e8bf602ba6aab9cf468248"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e1b3a0675e8bf602ba6aab9cf468248">&#9670;&#160;</a></span>m_eblgFineHalf</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;EBLevelGrid&gt; &gt; PhaseRealm::m_eblgFineHalf</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Level lvl coarsened by 2, for levels whose coarser level is 4 times coarser (null otherwise). </p>
+<p>Source of the half-resolution layout that coarsening the copied geometry by 4 steps through. </p>
+
+</div>
+</div>
 <a id="a0781ef18736c05c56c6fc47cce252f7d" name="a0781ef18736c05c56c6fc47cce252f7d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0781ef18736c05c56c6fc47cce252f7d">&#9670;&#160;</a></span>m_faceIterNoBoundary</h2>
 
@@ -2613,6 +2763,31 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer. </p>
 <p>For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1 in the two directions tangential to dir; the dir extent stays at the valid-box boundary. Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary). </p>
+
+</div>
+</div>
+<a id="a762f858e6ef4500ce6b29c31d2bec9a7" name="a762f858e6ef4500ce6b29c31d2bec9a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a762f858e6ef4500ce6b29c31d2bec9a7">&#9670;&#160;</a></span>m_fiCoFineCells</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;LevelData&lt;BaseFab&lt;bool&gt; &gt; &gt; &gt; PhaseRealm::m_fiCoFineCells</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cells of m_eblgFiCo, valid and ghost, that hold geometry copied from the finer level. </p>
+<p>Entry lvl+1 lives on m_eblgFiCo[lvl+1], with its ghost cells, and is true in the cells of level lvl+1. The geometry of every other cell of m_eblgFiCo carries no meaning. Only the consumers' assertions read it, so it is built in DEBUG builds only, and is null otherwise and on level 0. </p>
 
 </div>
 </div>

@@ -226,6 +226,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:a9413bfe2cf7f117b1c96d270c43a097f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all valid cells.  <br /></td></tr>
 <tr class="memitem:acd85c797a3461052b9c44d47e6fb2ad8" id="r_acd85c797a3461052b9c44d47e6fb2ad8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd85c797a3461052b9c44d47e6fb2ad8">registerParticleGhostMask</a> (const int a_width) noexcept</td></tr>
 <tr class="memdesc:acd85c797a3461052b9c44d47e6fb2ad8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a particle ghost-mask width so it is (re)built at every regrid.  <br /></td></tr>
+<tr class="memitem:ac3ee50539dc6426b92041a1e33dcbee4" id="r_ac3ee50539dc6426b92041a1e33dcbee4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3ee50539dc6426b92041a1e33dcbee4">defineParticleGhostMask</a> (const int a_width) noexcept</td></tr>
+<tr class="memdesc:ac3ee50539dc6426b92041a1e33dcbee4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a particle ghost-mask width and build its masks now if they do not exist yet.  <br /></td></tr>
 <tr class="memitem:abe4c3e6f786d78dd388b2e2e69e30040" id="r_abe4c3e6f786d78dd388b2e2e69e30040"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe4c3e6f786d78dd388b2e2e69e30040">getParticleGhostMask</a> (const int a_width) const noexcept</td></tr>
 <tr class="memdesc:abe4c3e6f786d78dd388b2e2e69e30040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the same-level particle ghost mask for a registered width.  <br /></td></tr>
 <tr class="memitem:a8416dd21a190801f33653bfeff152b52" id="r_a8416dd21a190801f33653bfeff152b52"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8416dd21a190801f33653bfeff152b52">getParticleGhostMaskFineToCoar</a> (const int a_width) const noexcept</td></tr>
@@ -288,6 +290,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevelTiles</b> 
 <tr class="memdesc:aa61cd4d4a88072855181c04e81bd7f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the tiled space. <br /></td></tr>
 <tr class="memitem:a83051d56bb141d76cf700a12c772711e" id="r_a83051d56bb141d76cf700a12c772711e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83051d56bb141d76cf700a12c772711e">defineParticleGhostMasks</a> () noexcept</td></tr>
 <tr class="memdesc:a83051d56bb141d76cf700a12c772711e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level.  <br /></td></tr>
+<tr class="memitem:a415bffb909b3b3dda3ff975cc32b3bbd" id="r_a415bffb909b3b3dda3ff975cc32b3bbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a415bffb909b3b3dda3ff975cc32b3bbd">defineParticleGhostMasks</a> (const int a_ghost) noexcept</td></tr>
+<tr class="memdesc:a415bffb909b3b3dda3ff975cc32b3bbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the same-level, fine-to-coarse and coarse-to-fine particle ghost masks, and the exposure mask, for one width.  <br /></td></tr>
 <tr class="memitem:a29563a32ad0672f3636e0bd3343644f6" id="r_a29563a32ad0672f3636e0bd3343644f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29563a32ad0672f3636e0bd3343644f6">defineParticleGhostMaskSameLevel</a> (LayoutData&lt; <a class="el" href="classParticleGhostMask.html">ParticleGhostMask</a> &gt; &amp;a_mask, const DisjointBoxLayout &amp;a_dbl, const ProblemDomain &amp;a_domain, const int a_ghost) noexcept</td></tr>
 <tr class="memdesc:a29563a32ad0672f3636e0bd3343644f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the SAME-level particle ghost mask on one level.  <br /></td></tr>
 <tr class="memitem:a5f33047fe3306990e77b16e136d38f8a" id="r_a5f33047fe3306990e77b16e136d38f8a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f33047fe3306990e77b16e136d38f8a">defineParticleGhostMaskFineToCoar</a> (LayoutData&lt; <a class="el" href="classParticleGhostMask.html">ParticleGhostMask</a> &gt; &amp;a_mask, const DisjointBoxLayout &amp;a_thisLayout, const DisjointBoxLayout &amp;a_coarLayout, const ProblemDomain &amp;a_coarDomain, const int a_refRat, const int a_ghost) noexcept</td></tr>
@@ -1141,6 +1145,39 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
+<a id="ac3ee50539dc6426b92041a1e33dcbee4" name="ac3ee50539dc6426b92041a1e33dcbee4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3ee50539dc6426b92041a1e33dcbee4">&#9670;&#160;</a></span>defineParticleGhostMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineParticleGhostMask </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_width</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Register a particle ghost-mask width and build its masks now if they do not exist yet. </p>
+<p>For consumers whose widths depend on settings that can change at run time. Later regrids rebuild the masks like those of any registered width. Before the first regrid this only registers the width. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_width</td><td>Ghost width (cells). Must be &gt; 0 and &lt; min_block_size. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a73729b75ce39283e58b07764daa357aa" name="a73729b75ce39283e58b07764daa357aa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73729b75ce39283e58b07764daa357aa">&#9670;&#160;</a></span>defineParticleGhostMaskCoarToFine()</h2>
 
@@ -1272,7 +1309,7 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <a id="a83051d56bb141d76cf700a12c772711e" name="a83051d56bb141d76cf700a12c772711e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83051d56bb141d76cf700a12c772711e">&#9670;&#160;</a></span>defineParticleGhostMasks()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a83051d56bb141d76cf700a12c772711e">&#9670;&#160;</a></span>defineParticleGhostMasks() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1296,6 +1333,39 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 <p>Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level. </p>
 <p>Allocates and fills the three per-level masks (m_particleGhostMask, m_particleGhostMaskFineToCoar, m_particleGhostMaskCoarToFine) by delegating to defineParticleGhostMaskSameLevel and defineParticleGhostMaskCrossLevel. Each mask records, per source cell, the target boxes (grid index + receiving rank) that a particle in that cell must be scattered to in that direction. Called from regridBase after the valid-cell and level-tile structures exist. The ghost width is m_numGhost. Periodic boundaries are not handled. </p>
+
+</div>
+</div>
+<a id="a415bffb909b3b3dda3ff975cc32b3bbd" name="a415bffb909b3b3dda3ff975cc32b3bbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a415bffb909b3b3dda3ff975cc32b3bbd">&#9670;&#160;</a></span>defineParticleGhostMasks() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineParticleGhostMasks </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the same-level, fine-to-coarse and coarse-to-fine particle ghost masks, and the exposure mask, for one width. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width (cells). Must be &lt; min_block_size. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

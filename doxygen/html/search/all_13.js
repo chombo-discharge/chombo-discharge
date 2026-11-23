@@ -47,7 +47,7 @@ var searchData=
   ['transfercoveredparticlesvoxels_44',['transferCoveredParticlesVoxels',['../classAmrMesh.html#ae66b3b90cac867112d99b3b1336fbe0b',1,'AmrMesh']]],
   ['transferirregularparticles_45',['transferIrregularParticles',['../classAmrMesh.html#a7a79161a8d66ae773c4b09ef495e4241',1,'AmrMesh']]],
   ['transfermaskparticles_46',['transferMaskParticles',['../classParticleContainer.html#a2c5aa826fa8ed13cdfbc390838c41d40',1,'ParticleContainer::transferMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_mask)'],['../classParticleContainer.html#a2397eda58082392223a9b8a32d6ced77',1,'ParticleContainer::transferMaskParticles(const int a_level, const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_mask)']]],
-  ['transfermaskparticlestransition_47',['transferMaskParticlesTransition',['../classEBAMRParticleMesh.html#a4da4e775ddafcb0f6fc17041cfaf3e1c',1,'EBAMRParticleMesh']]],
+  ['transfermaskparticlescoartofine_47',['transferMaskParticlesCoarToFine',['../classParticleContainer.html#a280f3bc5e2d37bd192018d46b135b84e',1,'ParticleContainer']]],
   ['transferparticles_48',['transferParticles',['../classParticleContainer.html#ad6300088ad6554bd177e6917227b5189',1,'ParticleContainer']]],
   ['transient_49',['Transient',['../CD__DischargeInceptionStepper_8H.html#a04c05612d839d4ea68a98f2ded8d05bbab1f023eff9a6b5308d6024e4c6b3d475',1,'Physics::DischargeInception']]],
   ['transportalgorithm_50',['TransportAlgorithm',['../CD__DischargeInceptionStepper_8H.html#a318232b1ed77f6e6c51b498f1643c96e',1,'Physics::DischargeInception']]],

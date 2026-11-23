@@ -64,7 +64,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#simulation-inputs">Simulation inputs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simulation-outputs">Simulation outputs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parallel-processor-verbosity">Parallel processor verbosity</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#restarting-simulations">Restarting simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restarting-simulations">Restarting simulations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#restarting-with-polyhedral-geometry">Restarting with polyhedral geometry</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#run-time-configurations">Run-time configurations</a></li>
 </ul>
 </li>
@@ -422,6 +425,25 @@ This also implies that you cannot change the <code class="docutils literal notra
 <p class="admonition-title">Note</p>
 <p>If you set <code class="docutils literal notranslate"><span class="pre">Driver.restart=0</span></code>, you will get a fresh simulation.</p>
 </div>
+<section id="restarting-with-polyhedral-geometry">
+<h4>Restarting with polyhedral geometry<a class="headerlink" href="#restarting-with-polyhedral-geometry" title="Permalink to this heading"></a></h4>
+<p>With <code class="docutils literal notranslate"><span class="pre">Driver.geometry_generation</span> <span class="pre">=</span> <span class="pre">polyhedral</span></code>, a simulation that writes checkpoints (<code class="docutils literal notranslate"><span class="pre">Driver.checkpoint_interval</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>) also writes the geometry, once, to <code class="file docutils literal notranslate"><span class="pre">chk/&lt;output_names&gt;.graph.&lt;dim&gt;d.hdf5</span></code>.
+The file holds the grids the geometry was generated on and, for every cell the implicit function was evaluated in, what it gave: the cell and face states and the surface of every cut cell.
+Every checkpoint records the file, relative to its own directory, together with an identifier the file carries.
+Any simulation that generates its geometry – a new one, or a restart from a checkpoint without a graph file – writes a new graph file and replaces one of the same name.</p>
+<p>A restart reads the geometry from that file instead of generating it, so the simulation continues on exactly the geometry it was checkpointed with, on any number of MPI ranks.
+The settings the geometry was generated with – <code class="docutils literal notranslate"><span class="pre">Driver.refine_angles</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver.refine_electrodes</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver.refine_dielectrics</span></code>, <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry.refine_saddles</span></code>, and the EB tile sizes and ghost cells – are then taken from the file for the geometry, and each one that differs in the input file is reported in <code class="file docutils literal notranslate"><span class="pre">pout.0</span></code>.
+The grid tags still use the values in the input file, since they may change during a run; only the geometry is fixed by the file.
+The restart aborts if</p>
+<ul class="simple">
+<li><p>the graph file is missing, or carries another identifier, which happens when another simulation with the same <code class="docutils literal notranslate"><span class="pre">Driver.output_names</span></code> has written over it;</p></li>
+<li><p>the graph file lacks part of its header, or its tables are inconsistent, so it is not a complete graph file;</p></li>
+<li><p>the input file adds or removes a dielectric, so that the geometry has other phases than the file holds;</p></li>
+<li><p>the domain, its lower corner, the grid spacing or <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_eb_depth</span></code> differ from those the file was written with, since the stored geometry does not fit another index space;</p></li>
+<li><p>the input file asks for more EB ghost cells than the file was written with.</p></li>
+</ul>
+<p>A checkpoint written without a graph file, by an older version or by another geometry generator, is restarted with the geometry generated from the input file, as before.</p>
+</section>
 </section>
 <section id="run-time-configurations">
 <span id="chap-runtimeconfig"></span><h3>Run-time configurations<a class="headerlink" href="#run-time-configurations" title="Permalink to this heading"></a></h3>

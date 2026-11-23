@@ -384,8 +384,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memdesc:ace51b171107edeb5a8d901f8869a16ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run pre-regrid operations. <br /></td></tr>
 <tr class="memitem:a9a8897dc00f6ac738080aba2ec29ad7a" id="r_a9a8897dc00f6ac738080aba2ec29ad7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a8897dc00f6ac738080aba2ec29ad7a">regridAmr</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid AMR. This versions generates the grids and Realms, but not the operator.  <br /></td></tr>
-<tr class="memitem:ab1b09b50021e75430449ea2679c4b2f2" id="r_ab1b09b50021e75430449ea2679c4b2f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1b09b50021e75430449ea2679c4b2f2">regridAmr</a> (const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
-<tr class="memdesc:ab1b09b50021e75430449ea2679c4b2f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than generated.  <br /></td></tr>
 <tr class="memitem:a94ed201d01ee2d7256b7d5599a5721e5" id="r_a94ed201d01ee2d7256b7d5599a5721e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94ed201d01ee2d7256b7d5599a5721e5">regridRealm</a> (const std::string &amp;a_realm, const Vector&lt; Vector&lt; int &gt; &gt; &amp;a_procs, const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
 <tr class="memdesc:a94ed201d01ee2d7256b7d5599a5721e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.  <br /></td></tr>
 <tr class="memitem:a275a50e9c39fca6ad59cf5eaa7a0ca40" id="r_a275a50e9c39fca6ad59cf5eaa7a0ca40"><td class="memItemLeft" align="right" valign="top"><a id="a275a50e9c39fca6ad59cf5eaa7a0ca40" name="a275a50e9c39fca6ad59cf5eaa7a0ca40"></a>
@@ -402,10 +400,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:a673a01e951aa1b355b60416c3ea3f55f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a sanity check to make sure everything is set up correctly. <br /></td></tr>
 <tr class="memitem:aff00899eeda16c714410146ecc2c8af7" id="r_aff00899eeda16c714410146ecc2c8af7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff00899eeda16c714410146ecc2c8af7">getFinestLevel</a> () const</td></tr>
 <tr class="memdesc:aff00899eeda16c714410146ecc2c8af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get finest grid level.  <br /></td></tr>
-<tr class="memitem:ae65edfcba2c19e22298dce39d524cfc5" id="r_ae65edfcba2c19e22298dce39d524cfc5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae65edfcba2c19e22298dce39d524cfc5">getMaxAmrDepth</a> () const</td></tr>
-<tr class="memdesc:ae65edfcba2c19e22298dce39d524cfc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum permitted amr depth.  <br /></td></tr>
+<tr class="memitem:a189ffa43134ba825e4f864177d5b60b1" id="r_a189ffa43134ba825e4f864177d5b60b1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a189ffa43134ba825e4f864177d5b60b1">getMaxEbDepth</a> () const</td></tr>
+<tr class="memdesc:a189ffa43134ba825e4f864177d5b60b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finest level the geometry is resolved on, AmrMesh.max_eb_depth.  <br /></td></tr>
 <tr class="memitem:a3a22db83d03132b22c64dbe04918d6c0" id="r_a3a22db83d03132b22c64dbe04918d6c0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a22db83d03132b22c64dbe04918d6c0">getMaxSimulationDepth</a> () const</td></tr>
 <tr class="memdesc:a3a22db83d03132b22c64dbe04918d6c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum permitted simulation depth.  <br /></td></tr>
+<tr class="memitem:af73daf1ec48062d3ebbb21b8618cdf86" id="r_af73daf1ec48062d3ebbb21b8618cdf86"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af73daf1ec48062d3ebbb21b8618cdf86">getMaxDomainDepth</a> () const</td></tr>
+<tr class="memdesc:af73daf1ec48062d3ebbb21b8618cdf86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the finest level <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> has a domain for.  <br /></td></tr>
 <tr class="memitem:a4793dc9636f182d9b48dd9169761864d" id="r_a4793dc9636f182d9b48dd9169761864d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4793dc9636f182d9b48dd9169761864d">getMinBlockSize</a> () const</td></tr>
 <tr class="memdesc:a4793dc9636f182d9b48dd9169761864d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum block size (i.e. the smallest possible box / tile size).  <br /></td></tr>
 <tr class="memitem:ac41d05854bb69a10ac374a1c785a8142" id="r_ac41d05854bb69a10ac374a1c785a8142"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac41d05854bb69a10ac374a1c785a8142">getBlockingFactor</a> () const</td></tr>
@@ -427,13 +427,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memitem:af6a363c78f0c85f9c8d0a66da2b40d37" id="r_af6a363c78f0c85f9c8d0a66da2b40d37"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6a363c78f0c85f9c8d0a66da2b40d37">getNumberOfEbGhostCells</a> () const</td></tr>
 <tr class="memdesc:af6a363c78f0c85f9c8d0a66da2b40d37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of ghost cells used for EB grid generation.  <br /></td></tr>
 <tr class="memitem:a13dad5645ed0341ada0681607da1d600" id="r_a13dad5645ed0341ada0681607da1d600"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a13dad5645ed0341ada0681607da1d600">getFinestDx</a> () const</td></tr>
-<tr class="memdesc:a13dad5645ed0341ada0681607da1d600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get resolution on the finest grid level.  <br /></td></tr>
+<tr class="memdesc:a13dad5645ed0341ada0681607da1d600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get resolution on level max_eb_depth, the finest level the geometry is resolved on.  <br /></td></tr>
 <tr class="memitem:a7e22af33b0bc2737eb911562b2796ee4" id="r_a7e22af33b0bc2737eb911562b2796ee4"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e22af33b0bc2737eb911562b2796ee4">getProbLo</a> () const</td></tr>
 <tr class="memdesc:a7e22af33b0bc2737eb911562b2796ee4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get lower-left corner of computational domain.  <br /></td></tr>
 <tr class="memitem:a10e8e100d4851aa4088ac38c857a6882" id="r_a10e8e100d4851aa4088ac38c857a6882"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10e8e100d4851aa4088ac38c857a6882">getProbHi</a> () const</td></tr>
 <tr class="memdesc:a10e8e100d4851aa4088ac38c857a6882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get upper-right corner of computational domain.  <br /></td></tr>
 <tr class="memitem:a1dec51dbb9d0a3aa8023d63d538a8dc7" id="r_a1dec51dbb9d0a3aa8023d63d538a8dc7"><td class="memItemLeft" align="right" valign="top">ProblemDomain&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1dec51dbb9d0a3aa8023d63d538a8dc7">getFinestDomain</a> () const</td></tr>
-<tr class="memdesc:a1dec51dbb9d0a3aa8023d63d538a8dc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get finest domain.  <br /></td></tr>
+<tr class="memdesc:a1dec51dbb9d0a3aa8023d63d538a8dc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the domain of level max_eb_depth, the finest level the geometry is resolved on.  <br /></td></tr>
 <tr class="memitem:aa8dc8db2ef220a83ac5dc391d1a1ce79" id="r_aa8dc8db2ef220a83ac5dc391d1a1ce79"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Real &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8dc8db2ef220a83ac5dc391d1a1ce79">getDx</a> () const</td></tr>
 <tr class="memdesc:aa8dc8db2ef220a83ac5dc391d1a1ce79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get spatial resolutions.  <br /></td></tr>
 <tr class="memitem:aea9e442e363ef5f63143d438619cd334" id="r_aea9e442e363ef5f63143d438619cd334"><td class="memItemLeft" align="right" valign="top">const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea9e442e363ef5f63143d438619cd334">getRefinementRatios</a> () const</td></tr>
@@ -456,6 +456,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memdesc:a1ff953ec0fcbff3b9fbef1228f30e8e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiled space representation.  <br /></td></tr>
 <tr class="memitem:a2a417fbc6790fdb11f759bf88f066405" id="r_a2a417fbc6790fdb11f759bf88f066405"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a417fbc6790fdb11f759bf88f066405">registerParticleGhostMask</a> (const std::string &amp;a_realm, const int a_width)</td></tr>
 <tr class="memdesc:a2a417fbc6790fdb11f759bf88f066405"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a particle ghost-mask width on a realm so it is (re)built at every regrid.  <br /></td></tr>
+<tr class="memitem:a36628a3f0989de73a9c7acfe72df596b" id="r_a36628a3f0989de73a9c7acfe72df596b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36628a3f0989de73a9c7acfe72df596b">defineParticleGhostMask</a> (const std::string &amp;a_realm, const int a_width)</td></tr>
+<tr class="memdesc:a36628a3f0989de73a9c7acfe72df596b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a particle ghost-mask width on a realm and build its masks now if they do not exist yet.  <br /></td></tr>
+<tr class="memitem:aa31953abca4d7f560f4ce2b025598455" id="r_aa31953abca4d7f560f4ce2b025598455"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa31953abca4d7f560f4ce2b025598455">registerParticleDeposition</a> (const std::string &amp;a_realm, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition)</td></tr>
+<tr class="memdesc:aa31953abca4d7f560f4ce2b025598455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs.  <br /></td></tr>
 <tr class="memitem:a441a5e5724ed0d2b6abc316fe4624607" id="r_a441a5e5724ed0d2b6abc316fe4624607"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a441a5e5724ed0d2b6abc316fe4624607">getParticleGhostMask</a> (const std::string &amp;a_realm, const int a_width) const</td></tr>
 <tr class="memdesc:a441a5e5724ed0d2b6abc316fe4624607"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the same-level particle ghost mask on a realm for a registered width.  <br /></td></tr>
 <tr class="memitem:a5cc19959c2779cb1f85d75d95915e8a5" id="r_a5cc19959c2779cb1f85d75d95915e8a5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5cc19959c2779cb1f85d75d95915e8a5">getParticleGhostMaskFineToCoar</a> (const std::string &amp;a_realm, const int a_width) const</td></tr>
@@ -563,8 +567,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>defineRealms</b> ()</
 <tr class="memdesc:a82b28bf393e8ff6ed5cc544a48ea75ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define Realms. <br /></td></tr>
 <tr class="memitem:a69e4f0db7383a8a926a9bcb59defb67e" id="r_a69e4f0db7383a8a926a9bcb59defb67e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69e4f0db7383a8a926a9bcb59defb67e">buildGrids</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a69e4f0db7383a8a926a9bcb59defb67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids.  <br /></td></tr>
-<tr class="memitem:aa39b0efcbb152eeb690f5ac96c86ab6f" id="r_aa39b0efcbb152eeb690f5ac96c86ab6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa39b0efcbb152eeb690f5ac96c86ab6f">buildGrids</a> (const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
-<tr class="memdesc:aa39b0efcbb152eeb690f5ac96c86ab6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids from given boxes.  <br /></td></tr>
 <tr class="memitem:aab280a996a9b56dec364cea5276dab6a" id="r_aab280a996a9b56dec364cea5276dab6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab280a996a9b56dec364cea5276dab6a">defineGrids</a> (Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
 <tr class="memdesc:aab280a996a9b56dec364cea5276dab6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance new boxes and define m_grids from them, for levels a_lmin through m_finestLevel.  <br /></td></tr>
 <tr class="memitem:a7d384fb87bd71ccdc5ee53673685ce48" id="r_a7d384fb87bd71ccdc5ee53673685ce48"><td class="memItemLeft" align="right" valign="top"><a id="a7d384fb87bd71ccdc5ee53673685ce48" name="a7d384fb87bd71ccdc5ee53673685ce48"></a>
@@ -582,9 +584,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbosity</b> ()
 <tr class="memitem:a9e128ab04f54e27a3372f1296de58252" id="r_a9e128ab04f54e27a3372f1296de58252"><td class="memItemLeft" align="right" valign="top"><a id="a9e128ab04f54e27a3372f1296de58252" name="a9e128ab04f54e27a3372f1296de58252"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCoarsestLevelNumCells</b> ()</td></tr>
 <tr class="memdesc:a9e128ab04f54e27a3372f1296de58252"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the coarsest domain grid. <br /></td></tr>
-<tr class="memitem:a2862782a7c22f1f38543d7d21cf9b65c" id="r_a2862782a7c22f1f38543d7d21cf9b65c"><td class="memItemLeft" align="right" valign="top"><a id="a2862782a7c22f1f38543d7d21cf9b65c" name="a2862782a7c22f1f38543d7d21cf9b65c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMaxAmrDepth</b> ()</td></tr>
-<tr class="memdesc:a2862782a7c22f1f38543d7d21cf9b65c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the maximum permitted AMR depth. <br /></td></tr>
+<tr class="memitem:a4645e3c8649fc83e711e4e8f3f6e95f0" id="r_a4645e3c8649fc83e711e4e8f3f6e95f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4645e3c8649fc83e711e4e8f3f6e95f0">parseMaxEbDepth</a> ()</td></tr>
+<tr class="memdesc:a4645e3c8649fc83e711e4e8f3f6e95f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the finest level the geometry is resolved on, AmrMesh.max_eb_depth.  <br /></td></tr>
 <tr class="memitem:a37af95890a678148aee6107045c7d43b" id="r_a37af95890a678148aee6107045c7d43b"><td class="memItemLeft" align="right" valign="top"><a id="a37af95890a678148aee6107045c7d43b" name="a37af95890a678148aee6107045c7d43b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMaxSimulationDepth</b> ()</td></tr>
 <tr class="memdesc:a37af95890a678148aee6107045c7d43b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set maximum simulation depth. <br /></td></tr>
@@ -693,9 +694,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td>
 <tr class="memitem:a234e7a64df9cdfe0cba4bc8375c9c9f2" id="r_a234e7a64df9cdfe0cba4bc8375c9c9f2"><td class="memItemLeft" align="right" valign="top"><a id="a234e7a64df9cdfe0cba4bc8375c9c9f2" name="a234e7a64df9cdfe0cba4bc8375c9c9f2"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_oldFinestLevel</b></td></tr>
 <tr class="memdesc:a234e7a64df9cdfe0cba4bc8375c9c9f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest level before a regrid. <br /></td></tr>
-<tr class="memitem:a82395aa042ef543322cbfee5b05be1d3" id="r_a82395aa042ef543322cbfee5b05be1d3"><td class="memItemLeft" align="right" valign="top"><a id="a82395aa042ef543322cbfee5b05be1d3" name="a82395aa042ef543322cbfee5b05be1d3"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxAmrDepth</b></td></tr>
-<tr class="memdesc:a82395aa042ef543322cbfee5b05be1d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum amr depth. <br /></td></tr>
+<tr class="memitem:a06324413344dbdcbff54ab454a015563" id="r_a06324413344dbdcbff54ab454a015563"><td class="memItemLeft" align="right" valign="top"><a id="a06324413344dbdcbff54ab454a015563" name="a06324413344dbdcbff54ab454a015563"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxEbDepth</b></td></tr>
+<tr class="memdesc:a06324413344dbdcbff54ab454a015563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest level the geometry is resolved on, AmrMesh.max_eb_depth. <br /></td></tr>
 <tr class="memitem:a3cdd7ea7c8886171bd2533b6ec39c7f3" id="r_a3cdd7ea7c8886171bd2533b6ec39c7f3"><td class="memItemLeft" align="right" valign="top"><a id="a3cdd7ea7c8886171bd2533b6ec39c7f3" name="a3cdd7ea7c8886171bd2533b6ec39c7f3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxSimulationDepth</b></td></tr>
 <tr class="memdesc:a3cdd7ea7c8886171bd2533b6ec39c7f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed depth for simulation. <br /></td></tr>
@@ -2287,7 +2288,7 @@ template&lt;typename T&gt; </div>
 </div>
 </div>
 <a id="a69e4f0db7383a8a926a9bcb59defb67e" name="a69e4f0db7383a8a926a9bcb59defb67e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a69e4f0db7383a8a926a9bcb59defb67e">&#9670;&#160;</a></span>buildGrids() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a69e4f0db7383a8a926a9bcb59defb67e">&#9670;&#160;</a></span>buildGrids()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2328,44 +2329,6 @@ template&lt;typename T&gt; </div>
   </dd>
 </dl>
 <p>This will call the specified grid generation method and fill m_grids with the new grids. </p>
-
-</div>
-</div>
-<a id="aa39b0efcbb152eeb690f5ac96c86ab6f" name="aa39b0efcbb152eeb690f5ac96c86ab6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa39b0efcbb152eeb690f5ac96c86ab6f">&#9670;&#160;</a></span>buildGrids() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::buildGrids </td>
-          <td>(</td>
-          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_boxes</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Build new internal AMR grids from given boxes. </p>
-<p>Sets m_finestLevel from the boxes and fills m_grids with them, load balanced as the generated grids are. See regridAmr(Vector&lt;Vector&lt;Box&gt;&gt;, int) for the meaning of a_boxes. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Boxes per level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level which changes. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -3189,6 +3152,36 @@ template&lt;typename T&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_boxes</td><td>Boxes per level, up to at least m_finestLevel; sorted in place. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level which changes; grids below it are kept. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a36628a3f0989de73a9c7acfe72df596b" name="a36628a3f0989de73a9c7acfe72df596b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36628a3f0989de73a9c7acfe72df596b">&#9670;&#160;</a></span>defineParticleGhostMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::defineParticleGhostMask </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_width</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register a particle ghost-mask width on a realm and build its masks now if they do not exist yet. </p>
+<p>See <a class="el" href="classRealm.html#ac3ee50539dc6426b92041a1e33dcbee4" title="Register a particle ghost-mask width and build its masks now if they do not exist yet.">Realm::defineParticleGhostMask</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_width</td><td>Ghost width (cells). Must be &gt; 0. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4024,8 +4017,8 @@ template&lt;typename P, typename Traits&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Get finest domain. </p>
-<dl class="section return"><dt>Returns</dt><dd>Problem domain on the finest level </dd></dl>
+<p>Get the domain of level max_eb_depth, the finest level the geometry is resolved on. </p>
+<dl class="section return"><dt>Returns</dt><dd>Problem domain on level max_eb_depth </dd></dl>
 
 </div>
 </div>
@@ -4044,8 +4037,8 @@ template&lt;typename P, typename Traits&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Get resolution on the finest grid level. </p>
-<dl class="section return"><dt>Returns</dt><dd>Grid spacing on finest level </dd></dl>
+<p>Get resolution on level max_eb_depth, the finest level the geometry is resolved on. </p>
+<dl class="section return"><dt>Returns</dt><dd>Grid spacing on level max_eb_depth </dd></dl>
 
 </div>
 </div>
@@ -4282,26 +4275,6 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="ae65edfcba2c19e22298dce39d524cfc5" name="ae65edfcba2c19e22298dce39d524cfc5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae65edfcba2c19e22298dce39d524cfc5">&#9670;&#160;</a></span>getMaxAmrDepth()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int AmrMesh::getMaxAmrDepth </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get maximum permitted amr depth. </p>
-<dl class="section return"><dt>Returns</dt><dd>Maximum AMR depth </dd></dl>
-
-</div>
-</div>
 <a id="a1596e2aec3ae3aa7895c1d68072939d2" name="a1596e2aec3ae3aa7895c1d68072939d2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1596e2aec3ae3aa7895c1d68072939d2">&#9670;&#160;</a></span>getMaxBlockSize()</h2>
 
@@ -4351,6 +4324,46 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
+<a id="af73daf1ec48062d3ebbb21b8618cdf86" name="af73daf1ec48062d3ebbb21b8618cdf86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af73daf1ec48062d3ebbb21b8618cdf86">&#9670;&#160;</a></span>getMaxDomainDepth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int AmrMesh::getMaxDomainDepth </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the finest level <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> has a domain for. </p>
+<p>The larger of max_eb_depth and max_sim_depth as they were when the domains were built. No level is finer. </p><dl class="section return"><dt>Returns</dt><dd>Finest level with a domain </dd></dl>
+
+</div>
+</div>
+<a id="a189ffa43134ba825e4f864177d5b60b1" name="a189ffa43134ba825e4f864177d5b60b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a189ffa43134ba825e4f864177d5b60b1">&#9670;&#160;</a></span>getMaxEbDepth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int AmrMesh::getMaxEbDepth </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the finest level the geometry is resolved on, AmrMesh.max_eb_depth. </p>
+<p>Levels finer than this, up to max_sim_depth, have their geometry cut from the resolved levels. </p><dl class="section return"><dt>Returns</dt><dd>Finest level the geometry is resolved on </dd></dl>
+
+</div>
+</div>
 <a id="aaee371b14070e14d0a7624b943ff2441" name="aaee371b14070e14d0a7624b943ff2441"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaee371b14070e14d0a7624b943ff2441">&#9670;&#160;</a></span>getMaxEbisBoxSize()</h2>
 
@@ -4387,7 +4400,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Get maximum permitted simulation depth. </p>
-<dl class="section return"><dt>Returns</dt><dd>Maximum simulation depth </dd></dl>
+<p>It may be finer than max_eb_depth, the finest level the geometry is resolved on. The geometry of the finer levels is then cut from the resolved ones. </p><dl class="section return"><dt>Returns</dt><dd>Maximum simulation depth </dd></dl>
 
 </div>
 </div>
@@ -6976,6 +6989,34 @@ template&lt;auto... OldPosition, typename P, typename Traits&gt; </div>
 
 </div>
 </div>
+<a id="a4645e3c8649fc83e711e4e8f3f6e95f0" name="a4645e3c8649fc83e711e4e8f3f6e95f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4645e3c8649fc83e711e4e8f3f6e95f0">&#9670;&#160;</a></span>parseMaxEbDepth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::parseMaxEbDepth </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse the finest level the geometry is resolved on, AmrMesh.max_eb_depth. </p>
+<p>An input that still sets the former AmrMesh.max_amr_depth stops the run, naming the new option. </p>
+
+</div>
+</div>
 <a id="add290a067d272d1e544cdedd2c54a896" name="add290a067d272d1e544cdedd2c54a896"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#add290a067d272d1e544cdedd2c54a896">&#9670;&#160;</a></span>parseMaxEbisBoxSize()</h2>
 
@@ -7483,6 +7524,42 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
 
 </div>
 </div>
+<a id="aa31953abca4d7f560f4ce2b025598455" name="aa31953abca4d7f560f4ce2b025598455"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa31953abca4d7f560f4ce2b025598455">&#9670;&#160;</a></span>registerParticleDeposition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::registerParticleDeposition </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_coarseFineDeposition</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs. </p>
+<p>Halo and Transition deposition copy coarser particles into the finer patches through these masks, with widths that depend on the deposition kernel and the refinement ratios (see <a class="el" href="classEBAMRParticleMesh.html#a5ba60b2d217c0291a0ff52cfd0fd6083" title="The coarse-to-fine particle ghost-mask widths a deposition needs between two levels.">EBAMRParticleMesh::getCoarseToFineMaskWidths</a>). Interp and HaloNGP need none. Call before regridding, with the settings the deposits will use. Aborts if a width is not smaller than min_block_size, and on a periodic domain whenever masks are needed, since the masks do not wrap around periodic boundaries. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a2a417fbc6790fdb11f759bf88f066405" name="a2a417fbc6790fdb11f759bf88f066405"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2a417fbc6790fdb11f759bf88f066405">&#9670;&#160;</a></span>registerParticleGhostMask()</h2>
 
@@ -7540,7 +7617,7 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
 </div>
 </div>
 <a id="a9a8897dc00f6ac738080aba2ec29ad7a" name="a9a8897dc00f6ac738080aba2ec29ad7a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a8897dc00f6ac738080aba2ec29ad7a">&#9670;&#160;</a></span>regridAmr() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a8897dc00f6ac738080aba2ec29ad7a">&#9670;&#160;</a></span>regridAmr()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -7569,36 +7646,6 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_tags</td><td>Cell tags which will generate the grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level allowed to change. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hardcap</td><td>Grid generation hardcap. If &lt; 0 there are no limitations to grid depth. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ab1b09b50021e75430449ea2679c4b2f2" name="ab1b09b50021e75430449ea2679c4b2f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab1b09b50021e75430449ea2679c4b2f2">&#9670;&#160;</a></span>regridAmr() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::regridAmr </td>
-          <td>(</td>
-          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_boxes</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_lmin</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than generated. </p>
-<p>a_boxes[lvl] are the boxes on level lvl; level 0 is ignored and always the domain split of the coarsest domain. The finest level is the last level with boxes, capped by the AMR and simulation depths. The boxes must be disjoint on each level and properly nested; nothing here checks that. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Boxes per level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level allowed to change. </td></tr>
   </table>
   </dd>
 </dl>

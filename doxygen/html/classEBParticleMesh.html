@@ -116,6 +116,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9c1d6340e5211aa67858c85fdb6a896c" id="r_a9c1d6340e5211aa67858c85fdb6a896c"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename GatherFunc&gt; </td></tr>
 <tr class="memitem:a9c1d6340e5211aa67858c85fdb6a896c template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c1d6340e5211aa67858c85fdb6a896c">depositGathered</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale, const bool a_forceIrregNGP, GatherFunc &amp;&amp;a_gather) const</td></tr>
 <tr class="memdesc:a9c1d6340e5211aa67858c85fdb6a896c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (computed by a_gather) onto mesh component a_comp.  <br /></td></tr>
+<tr class="memitem:a7802ec7a461a48e04da341ec400c9ccf" id="r_a7802ec7a461a48e04da341ec400c9ccf"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits&gt; </td></tr>
+<tr class="memitem:a7802ec7a461a48e04da341ec400c9ccf template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7802ec7a461a48e04da341ec400c9ccf">depositCoarseGhostsWeight</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale) const</td></tr>
+<tr class="memdesc:a7802ec7a461a48e04da341ec400c9ccf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the weight column of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh component a_comp, in the valid box.  <br /></td></tr>
+<tr class="memitem:aea373cf60ea4bcf151e68fcbcadd7259" id="r_aea373cf60ea4bcf151e68fcbcadd7259"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P, typename Traits&gt; </td></tr>
+<tr class="memitem:aea373cf60ea4bcf151e68fcbcadd7259 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea373cf60ea4bcf151e68fcbcadd7259">depositCoarseGhosts</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale) const</td></tr>
+<tr class="memdesc:aea373cf60ea4bcf151e68fcbcadd7259"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit payload columns of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh components [a_comp, a_comp + nColumns), in the valid box.  <br /></td></tr>
+<tr class="memitem:acf7a175dc68cb2c2cb7027beb3072434" id="r_acf7a175dc68cb2c2cb7027beb3072434"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename GatherFunc&gt; </td></tr>
+<tr class="memitem:acf7a175dc68cb2c2cb7027beb3072434 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf7a175dc68cb2c2cb7027beb3072434">depositCoarseGhostsGathered</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale, GatherFunc &amp;&amp;a_gather) const</td></tr>
+<tr class="memdesc:acf7a175dc68cb2c2cb7027beb3072434"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh component a_comp, in the valid box.  <br /></td></tr>
 <tr class="memitem:a2f07d16c1cf5b4f3857aa50f6a4fc93a" id="r_a2f07d16c1cf5b4f3857aa50f6a4fc93a"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P, typename Traits&gt; </td></tr>
 <tr class="memitem:a2f07d16c1cf5b4f3857aa50f6a4fc93a template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f07d16c1cf5b4f3857aa50f6a4fc93a">interpolate</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:a2f07d16c1cf5b4f3857aa50f6a4fc93a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mesh components [a_comp, a_comp + nColumns) onto one or more payload columns.  <br /></td></tr>
@@ -131,9 +140,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a148c275f8f459d37b35cfb3a8c21b60b" id="r_a148c275f8f459d37b35cfb3a8c21b60b"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename StrengthFn&gt; </td></tr>
-<tr class="memitem:a148c275f8f459d37b35cfb3a8c21b60b template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a148c275f8f459d37b35cfb3a8c21b60b">depositCore</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numComp, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale, const bool a_forceIrregNGP, StrengthFn a_gather) const</td></tr>
-<tr class="memdesc:a148c275f8f459d37b35cfb3a8c21b60b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared deposition loop: gathers each particle's strength via a_gather, then calls the storage-agnostic per-particle kernel for the selected deposition type.  <br /></td></tr>
+<tr class="memitem:aacd9e3c93c837f3f19ff70bc20026324" id="r_aacd9e3c93c837f3f19ff70bc20026324"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename StrengthFn&gt; </td></tr>
+<tr class="memitem:aacd9e3c93c837f3f19ff70bc20026324 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aacd9e3c93c837f3f19ff70bc20026324">depositCore</a> (EBCellFAB &amp;a_meshData, const int a_comp, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numComp, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const Real a_widthScale, const bool a_forceIrregNGP, const bool a_coarseGhosts, StrengthFn a_gather) const</td></tr>
+<tr class="memdesc:aacd9e3c93c837f3f19ff70bc20026324"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared deposition loop: gathers each particle's strength via a_gather, then calls the storage-agnostic per-particle kernel for the selected deposition type.  <br /></td></tr>
 <tr class="memitem:a9eb7f67b32441ccc91b3c4b3b96aae1c" id="r_a9eb7f67b32441ccc91b3c4b3b96aae1c"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename ScatterFn&gt; </td></tr>
 <tr class="memitem:a9eb7f67b32441ccc91b3c4b3b96aae1c template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9eb7f67b32441ccc91b3c4b3b96aae1c">interpolateCore</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const EBCellFAB &amp;a_meshData, const int a_comp, const int a_numComp, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP, ScatterFn a_scatter) const</td></tr>
 <tr class="memdesc:a9eb7f67b32441ccc91b3c4b3b96aae1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared interpolation loop: calls the storage-agnostic per-particle kernel into a stack scratch, then scatters the result into the selected column(s) via a_scatter.  <br /></td></tr>
@@ -141,10 +150,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a2f43bda525d8841bdd9ef5329e36ac29"><td class="mdescLeft">&#160;</td><td class="mdescRight">NGP deposition of one particle.  <br /></td></tr>
 <tr class="memitem:aee2a71166ad500be99d9017135a20c8b" id="r_aee2a71166ad500be99d9017135a20c8b"><td class="memItemLeft" align="right" valign="top">Box&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee2a71166ad500be99d9017135a20c8b">cloudBox</a> (const RealVect &amp;a_position, const RealVect &amp;a_particleWidth) const noexcept</td></tr>
 <tr class="memdesc:aee2a71166ad500be99d9017135a20c8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell box that exactly covers the support of a cloud of the given per-direction width.  <br /></td></tr>
-<tr class="memitem:a1796fafaf1c73b2160942e6b7446be9e" id="r_a1796fafaf1c73b2160942e6b7446be9e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1796fafaf1c73b2160942e6b7446be9e">depositParticleCIC</a> (EBCellFAB &amp;a_rho, const int a_comp, const RealVect &amp;a_position, const RealVect &amp;a_particleWidth, const Real &amp;a_volumeFactor, const Real *a_strength, const int &amp;a_numComp, const bool a_forceIrregNGP) const noexcept</td></tr>
-<tr class="memdesc:a1796fafaf1c73b2160942e6b7446be9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">CIC deposition of one particle.  <br /></td></tr>
-<tr class="memitem:a88a58d7e9430b3d8270c511d93babaaa" id="r_a88a58d7e9430b3d8270c511d93babaaa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88a58d7e9430b3d8270c511d93babaaa">depositParticleTSC</a> (EBCellFAB &amp;a_rho, const int a_comp, const RealVect &amp;a_position, const RealVect &amp;a_particleWidth, const Real &amp;a_volumeFactor, const Real *a_strength, const int &amp;a_numComp, const bool a_forceIrregNGP) const noexcept</td></tr>
-<tr class="memdesc:a88a58d7e9430b3d8270c511d93babaaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">TSC deposition of one particle.  <br /></td></tr>
+<tr class="memitem:a58f1ac6fc7f6ca2b2fba82a48b8c0242" id="r_a58f1ac6fc7f6ca2b2fba82a48b8c0242"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58f1ac6fc7f6ca2b2fba82a48b8c0242">depositParticleCIC</a> (EBCellFAB &amp;a_rho, const int a_comp, const RealVect &amp;a_position, const RealVect &amp;a_particleWidth, const Real &amp;a_volumeFactor, const Real *a_strength, const int &amp;a_numComp, const bool a_forceIrregNGP, const Box &amp;a_clipBox) const noexcept</td></tr>
+<tr class="memdesc:a58f1ac6fc7f6ca2b2fba82a48b8c0242"><td class="mdescLeft">&#160;</td><td class="mdescRight">CIC deposition of one particle.  <br /></td></tr>
+<tr class="memitem:a080cb37e71f869e6721c4658ab65c41c" id="r_a080cb37e71f869e6721c4658ab65c41c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a080cb37e71f869e6721c4658ab65c41c">depositParticleTSC</a> (EBCellFAB &amp;a_rho, const int a_comp, const RealVect &amp;a_position, const RealVect &amp;a_particleWidth, const Real &amp;a_volumeFactor, const Real *a_strength, const int &amp;a_numComp, const bool a_forceIrregNGP, const Box &amp;a_clipBox) const noexcept</td></tr>
+<tr class="memdesc:a080cb37e71f869e6721c4658ab65c41c"><td class="mdescLeft">&#160;</td><td class="mdescRight">TSC deposition of one particle.  <br /></td></tr>
 <tr class="memitem:af97df79d636589e0cf92eb26d45d9493" id="r_af97df79d636589e0cf92eb26d45d9493"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af97df79d636589e0cf92eb26d45d9493">interpolateParticleNGP</a> (Real *a_particleField, const EBCellFAB &amp;a_meshData, const int a_comp, const RealVect &amp;a_position, const int &amp;a_numComp) const noexcept</td></tr>
 <tr class="memdesc:af97df79d636589e0cf92eb26d45d9493"><td class="mdescLeft">&#160;</td><td class="mdescRight">NGP interpolation onto one particle.  <br /></td></tr>
 <tr class="memitem:a9cc9de2ad7affba551f4804735678d30" id="r_a9cc9de2ad7affba551f4804735678d30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9cc9de2ad7affba551f4804735678d30">interpolateParticleCIC</a> (Real *a_particleField, const EBCellFAB &amp;a_meshData, const int a_comp, const Box &amp;a_validBox, const Box &amp;a_gatherBox, const RealVect &amp;a_position, const int &amp;a_numComp, const bool a_forceIrregNGP) const noexcept</td></tr>
@@ -465,8 +474,211 @@ template&lt;auto... Members, typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="a148c275f8f459d37b35cfb3a8c21b60b" name="a148c275f8f459d37b35cfb3a8c21b60b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a148c275f8f459d37b35cfb3a8c21b60b">&#9670;&#160;</a></span>depositCore()</h2>
+<a id="aea373cf60ea4bcf151e68fcbcadd7259" name="aea373cf60ea4bcf151e68fcbcadd7259"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea373cf60ea4bcf151e68fcbcadd7259">&#9670;&#160;</a></span>depositCoarseGhosts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;auto... Members, typename P, typename Traits&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBParticleMesh::depositCoarseGhosts </td>
+          <td>(</td>
+          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_meshData</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_comp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_particles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_widthScale</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit payload columns of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh components [a_comp, a_comp + nColumns), in the valid box. </p>
+<p>As depositCoarseGhostsWeight, for the columns selected by Members. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Members</td><td>Pack of payload data-member pointers selecting the column(s) to deposit. </td></tr>
+    <tr><td class="paramname">P</td><td>Payload type (deduced). </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor (deduced). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>Mesh data (INCREMENTED). Needs at least a_comp+sizeof...(Members) components. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>First destination mesh component. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles; only the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ones deposit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (NGP/CIC/TSC). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_widthScale</td><td>Particle-width multiplier. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acf7a175dc68cb2c2cb7027beb3072434" name="acf7a175dc68cb2c2cb7027beb3072434"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf7a175dc68cb2c2cb7027beb3072434">&#9670;&#160;</a></span>depositCoarseGhostsGathered()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBParticleMesh::depositCoarseGhostsGathered </td>
+          <td>(</td>
+          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_meshData</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_comp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_particles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_widthScale</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GatherFunc &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>a_gather</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit a custom per-particle scalar of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh component a_comp, in the valid box. </p>
+<p>As depositCoarseGhostsWeight, with the value computed by a_gather. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>Payload type of the <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor of P. </td></tr>
+    <tr><td class="paramname">GatherFunc</td><td>Callable (std::size_t a_i, Real* a_out) writing the particle's deposited value. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>Mesh data (INCREMENTED). Must have at least a_comp+1 components. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Destination mesh component. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles; only the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ones deposit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (NGP/CIC/TSC). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_widthScale</td><td>Particle-width multiplier. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-particle value gatherer. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7802ec7a461a48e04da341ec400c9ccf" name="a7802ec7a461a48e04da341ec400c9ccf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7802ec7a461a48e04da341ec400c9ccf">&#9670;&#160;</a></span>depositCoarseGhostsWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBParticleMesh::depositCoarseGhostsWeight </td>
+          <td>(</td>
+          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_meshData</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_comp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_particles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_widthScale</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit the weight column of the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles onto mesh component a_comp, in the valid box. </p>
+<p>The coarse ghosts are copies of coarser-level particles near this patch (see <a class="el" href="classParticleContainer.html#ae86ddc38e8cdd85eb6fa99d876e14769" title="Copy each level&#39;s mask-holder particles into the valid leaves of the next-finer level&#39;s patches,...">ParticleContainer::fillCoarseGhostParticlesFromMask</a>). Their clouds are clipped to the valid box, and they never deposit by NGP: an NGP cloud of a particle outside the valid box has no part in it, and copies are only made of particles whose coarser cell is not cut when NGP is forced in cut cells. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>Payload type of the <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor of P. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>Mesh data (INCREMENTED). Must have at least a_comp+1 components. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Destination mesh component. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles; only the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ones deposit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (NGP/CIC/TSC). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_widthScale</td><td>Particle-width multiplier. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aacd9e3c93c837f3f19ff70bc20026324" name="aacd9e3c93c837f3f19ff70bc20026324"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacd9e3c93c837f3f19ff70bc20026324">&#9670;&#160;</a></span>depositCore()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -514,6 +726,11 @@ template&lt;typename P, typename Traits, typename StrengthFn&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_coarseGhosts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">StrengthFn</td>          <td class="paramname"><span class="paramname"><em>a_gather</em></span>&#160;) const</td>
         </tr>
       </table>
@@ -542,6 +759,7 @@ template&lt;typename P, typename Traits, typename StrengthFn&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_widthScale</td><td>Particle-width multiplier. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseGhosts</td><td>If false, deposit the owned particles into the whole data holder; if true, deposit only the <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> particles, clipped to the valid box (NGP deposits nothing). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Strength gatherer (promotes column values to Real). </td></tr>
   </table>
   </dd>
@@ -604,7 +822,7 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
 </div><div class="memdoc">
 
 <p>Deposit a custom per-particle scalar (computed by a_gather) onto mesh component a_comp. </p>
-<p>Generalizes <a class="el" href="#a4e20de60e2df33783b0a80a8be2a3830" title="Deposit the container-owned weight column onto mesh component a_comp.">depositWeight()</a> to an arbitrary per-particle value &ndash; e.g. a product of columns such as weight*mobility (conductivity), which is not a single payload column. a_gather is the same (index, out) functor <a class="el" href="#a148c275f8f459d37b35cfb3a8c21b60b" title="Shared deposition loop: gathers each particle&#39;s strength via a_gather, then calls the storage-agnosti...">depositCore()</a> uses internally; exactly one component is deposited. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Generalizes <a class="el" href="#a4e20de60e2df33783b0a80a8be2a3830" title="Deposit the container-owned weight column onto mesh component a_comp.">depositWeight()</a> to an arbitrary per-particle value &ndash; e.g. a product of columns such as weight*mobility (conductivity), which is not a single payload column. a_gather is the same (index, out) functor <a class="el" href="#aacd9e3c93c837f3f19ff70bc20026324" title="Shared deposition loop: gathers each particle&#39;s strength via a_gather, then calls the storage-agnosti...">depositCore()</a> uses internally; exactly one component is deposited. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type of the <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor of P. </td></tr>
@@ -627,8 +845,8 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
 
 </div>
 </div>
-<a id="a1796fafaf1c73b2160942e6b7446be9e" name="a1796fafaf1c73b2160942e6b7446be9e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1796fafaf1c73b2160942e6b7446be9e">&#9670;&#160;</a></span>depositParticleCIC()</h2>
+<a id="a58f1ac6fc7f6ca2b2fba82a48b8c0242" name="a58f1ac6fc7f6ca2b2fba82a48b8c0242"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58f1ac6fc7f6ca2b2fba82a48b8c0242">&#9670;&#160;</a></span>depositParticleCIC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -674,7 +892,12 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>&#160;) const</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_clipBox</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
@@ -694,7 +917,8 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_volumeFactor</td><td>Volume factor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_strength</td><td>Per-component strength to deposit. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numComp</td><td>Number of components. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. Requires the particle's cell to be in the EBISBox. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_clipBox</td><td>Cells the cloud may deposit into. </td></tr>
   </table>
   </dd>
 </dl>
@@ -763,8 +987,8 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
 
 </div>
 </div>
-<a id="a88a58d7e9430b3d8270c511d93babaaa" name="a88a58d7e9430b3d8270c511d93babaaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88a58d7e9430b3d8270c511d93babaaa">&#9670;&#160;</a></span>depositParticleTSC()</h2>
+<a id="a080cb37e71f869e6721c4658ab65c41c" name="a080cb37e71f869e6721c4658ab65c41c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a080cb37e71f869e6721c4658ab65c41c">&#9670;&#160;</a></span>depositParticleTSC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -810,7 +1034,12 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>&#160;) const</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_clipBox</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
@@ -830,7 +1059,8 @@ template&lt;typename P, typename Traits, typename GatherFunc&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_volumeFactor</td><td>Volume factor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_strength</td><td>Per-component strength to deposit. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numComp</td><td>Number of components. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. Requires the particle's cell to be in the EBISBox. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_clipBox</td><td>Cells the cloud may deposit into. </td></tr>
   </table>
   </dd>
 </dl>

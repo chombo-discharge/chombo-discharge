@@ -194,8 +194,20 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memdesc:aeb2586e7730fc615abba83e1e0e027b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the implicit function used to generate the solid-phase EBIS.  <br /></td></tr>
 <tr class="memitem:a14fac993fadbb22d52969cc2256a3c2f" id="r_a14fac993fadbb22d52969cc2256a3c2f"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a14fac993fadbb22d52969cc2256a3c2f">getImplicitFunction</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a14fac993fadbb22d52969cc2256a3c2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get implicit function for the specified phase.  <br /></td></tr>
-<tr class="memitem:a1e158685c21420ce4df34df3e8b96828" id="r_a1e158685c21420ce4df34df3e8b96828"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e158685c21420ce4df34df3e8b96828">makeGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB, const int a_minBlockSize, const int a_maxBlockSize)</td></tr>
-<tr class="memdesc:a1e158685c21420ce4df34df3e8b96828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids the index space is generated over.  <br /></td></tr>
+<tr class="memitem:a7722d8dc20a8f38149639da8c43a09a4" id="r_a7722d8dc20a8f38149639da8c43a09a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7722d8dc20a8f38149639da8c43a09a4">makeGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const ProblemDomain &amp;a_electrodeDomain, const ProblemDomain &amp;a_dielectricDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB, const int a_minBlockSize, const int a_maxBlockSize)</td></tr>
+<tr class="memdesc:a7722d8dc20a8f38149639da8c43a09a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids the index space is generated over.  <br /></td></tr>
+<tr class="memitem:a3c29068bf4ee96107c9ff66e5a33462a" id="r_a3c29068bf4ee96107c9ff66e5a33462a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c29068bf4ee96107c9ff66e5a33462a">writeGraphTo</a> (const std::string &amp;a_file)</td></tr>
+<tr class="memdesc:a3c29068bf4ee96107c9ff66e5a33462a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the grids, and the polyhedral graph built over them, to a file, once, as makeGrids and buildGeometries build them.  <br /></td></tr>
+<tr class="memitem:a6a9293b31d6e9c44faca039d1fc12fdd" id="r_a6a9293b31d6e9c44faca039d1fc12fdd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a9293b31d6e9c44faca039d1fc12fdd">readGraphFrom</a> (const std::string &amp;a_file, const std::string &amp;a_id)</td></tr>
+<tr class="memdesc:a6a9293b31d6e9c44faca039d1fc12fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the grids, and the polyhedral graph built over them, from a file that writeGraphTo wrote, instead of generating them.  <br /></td></tr>
+<tr class="memitem:aad47926930c93c3a56961df8ced0c8fd" id="r_aad47926930c93c3a56961df8ced0c8fd"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad47926930c93c3a56961df8ced0c8fd">getGraphFile</a> () const noexcept</td></tr>
+<tr class="memdesc:aad47926930c93c3a56961df8ced0c8fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">The file the graph is written to or read from.  <br /></td></tr>
+<tr class="memitem:a4be7a4c5184fb44859fa29738fd3585f" id="r_a4be7a4c5184fb44859fa29738fd3585f"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4be7a4c5184fb44859fa29738fd3585f">getGraphId</a> () const noexcept</td></tr>
+<tr class="memdesc:a4be7a4c5184fb44859fa29738fd3585f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The identifier of the graph file.  <br /></td></tr>
+<tr class="memitem:a0fb8a315ff8ea7329c35448e8fc96d3f" id="r_a0fb8a315ff8ea7329c35448e8fc96d3f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fb8a315ff8ea7329c35448e8fc96d3f">readsGraph</a> () const noexcept</td></tr>
+<tr class="memdesc:a0fb8a315ff8ea7329c35448e8fc96d3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the graph is read from a file rather than built.  <br /></td></tr>
+<tr class="memitem:af550663fb5ed0e92142264e314eff536" id="r_af550663fb5ed0e92142264e314eff536"><td class="memItemLeft" align="right" valign="top">HDF5Handle *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af550663fb5ed0e92142264e314eff536">getGraphHandle</a> () const noexcept</td></tr>
+<tr class="memdesc:af550663fb5ed0e92142264e314eff536"><td class="mdescLeft">&#160;</td><td class="mdescRight">The graph file, open between makeGrids and the end of buildGeometries.  <br /></td></tr>
 <tr class="memitem:a205e78c7378834da34336adc02e0009b" id="r_a205e78c7378834da34336adc02e0009b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a205e78c7378834da34336adc02e0009b">getNumGridLevels</a> () const noexcept</td></tr>
 <tr class="memdesc:a205e78c7378834da34336adc02e0009b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of levels makeGrids built.  <br /></td></tr>
 <tr class="memitem:a640e3245c84120f86bac89cafeb67e28" id="r_a640e3245c84120f86bac89cafeb67e28"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a640e3245c84120f86bac89cafeb67e28">classify</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
@@ -221,7 +233,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:aaaa2d8ddb68dd20d127ebf89b9abccfe" id="r_aaaa2d8ddb68dd20d127ebf89b9abccfe"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Box &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaaa2d8ddb68dd20d127ebf89b9abccfe">getBoxes</a> (const int a_level) const noexcept</td></tr>
 <tr class="memdesc:aaaa2d8ddb68dd20d127ebf89b9abccfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Every box on a level, both phases' boxes being the same.  <br /></td></tr>
 <tr class="memitem:ada0c8496f0c73dcf94ab705963a4751c" id="r_ada0c8496f0c73dcf94ab705963a4751c"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Box &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada0c8496f0c73dcf94ab705963a4751c">getCutTiles</a> (const int a_level) const noexcept</td></tr>
-<tr class="memdesc:ada0c8496f0c73dcf94ab705963a4751c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below it.  <br /></td></tr>
+<tr class="memdesc:ada0c8496f0c73dcf94ab705963a4751c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, on which the level's graph is built. On the start level, its boxes irregular in either phase; empty below it.  <br /></td></tr>
 <tr class="memitem:ae99f414fa344ab3411a42c048625ae13" id="r_ae99f414fa344ab3411a42c048625ae13"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Box &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae99f414fa344ab3411a42c048625ae13">getSplitBoxes</a> (Vector&lt; int &gt; &amp;a_reasons, const int a_level) const noexcept</td></tr>
 <tr class="memdesc:ae99f414fa344ab3411a42c048625ae13"><td class="mdescLeft">&#160;</td><td class="mdescRight">The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair reaching into the ring outside it, 3 two surfaces facing each other across the band.  <br /></td></tr>
 <tr class="memitem:a6d1df383d52e89d0ac70e75fe2230df4" id="r_a6d1df383d52e89d0ac70e75fe2230df4"><td class="memItemLeft" align="right" valign="top">const Vector&lt; GeometryService::InOut &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d1df383d52e89d0ac70e75fe2230df4">getTypes</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_level) const noexcept</td></tr>
@@ -234,8 +246,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memdesc:af9206b423e98b4f240ec2389e435ea1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A layout of a phase on a domain whose boxes hold every cut cell of the phase there.  <br /></td></tr>
 <tr class="memitem:ae176529cd1b025ff4ac34e76dd835dfd" id="r_ae176529cd1b025ff4ac34e76dd835dfd"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae176529cd1b025ff4ac34e76dd835dfd">getDx</a> (const int a_level) const noexcept</td></tr>
 <tr class="memdesc:ae176529cd1b025ff4ac34e76dd835dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid spacing of a level.  <br /></td></tr>
-<tr class="memitem:a01a9788004e72269e1b6a1421090bd0d" id="r_a01a9788004e72269e1b6a1421090bd0d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01a9788004e72269e1b6a1421090bd0d">buildGeometries</a> (const ProblemDomain &amp;a_finestDomain, const RealVect &amp;a_probLo, const Real a_finestDx, const int a_nCellMax, const int a_maxGhostEB, const int a_maxCoarsen=-1)</td></tr>
-<tr class="memdesc:a01a9788004e72269e1b6a1421090bd0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build geometries and the MFIndexSpace.  <br /></td></tr>
+<tr class="memitem:a715aab42968e7289a29351bab24f2803" id="r_a715aab42968e7289a29351bab24f2803"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a715aab42968e7289a29351bab24f2803">buildGeometries</a> (const ProblemDomain &amp;a_finestDomain, const ProblemDomain &amp;a_finestMeshDomain, const RealVect &amp;a_probLo, const Real a_finestDx, const int a_nCellMax, const int a_maxGhostEB, const int a_maxCoarsen=-1)</td></tr>
+<tr class="memdesc:a715aab42968e7289a29351bab24f2803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build geometries and the MFIndexSpace.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -258,9 +270,10 @@ Protected Types</h2></td></tr>
 , <br />
 &#160;&#160;<b>DoubleCrossing</b>
 , <b>Twist</b>
+, <b>Depth</b>
 <br />
  }</td></tr>
-<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle.  <a href="#a792936c26593c02ee047eb7e890e5486">More...</a><br /></td></tr>
+<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, a cut cell whose interface is twisted into a saddle, or a surface the geometric tags refine below the box's level (Driver.refine_electrodes, Driver.refine_dielectrics).  <a href="#a792936c26593c02ee047eb7e890e5486">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -273,6 +286,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memdesc:a1401bde54bee8ffc160ad309ddce660a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The per-level classifications of one phase.  <br /></td></tr>
 <tr class="memitem:afc8899d690e4c7cf39322bc18cca8beb" id="r_afc8899d690e4c7cf39322bc18cca8beb"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Vector&lt; GeometryService::InOut &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afc8899d690e4c7cf39322bc18cca8beb">types</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const noexcept</td></tr>
 <tr class="memdesc:afc8899d690e4c7cf39322bc18cca8beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The per-level classifications of one phase.  <br /></td></tr>
+<tr class="memitem:aed646a6a5fe51d8d224141da2acc2aed" id="r_aed646a6a5fe51d8d224141da2acc2aed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed646a6a5fe51d8d224141da2acc2aed">generateGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const ProblemDomain &amp;a_electrodeDomain, const ProblemDomain &amp;a_dielectricDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB, const int a_minBlockSize, const int a_maxBlockSize)</td></tr>
+<tr class="memdesc:aed646a6a5fe51d8d224141da2acc2aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids from the implicit functions, as makeGrids describes.  <br /></td></tr>
+<tr class="memitem:acbc3259ec26b3a7a3815eb2d0cf83561" id="r_acbc3259ec26b3a7a3815eb2d0cf83561"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acbc3259ec26b3a7a3815eb2d0cf83561">readGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const ProblemDomain &amp;a_electrodeDomain, const ProblemDomain &amp;a_dielectricDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB, const int a_minBlockSize, const int a_maxBlockSize)</td></tr>
+<tr class="memdesc:acbc3259ec26b3a7a3815eb2d0cf83561"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the grids generateGrids built from the graph file.  <br /></td></tr>
+<tr class="memitem:a1c2f3bb7246c1f0eafbeaf81c27faad7" id="r_a1c2f3bb7246c1f0eafbeaf81c27faad7"><td class="memItemLeft" align="right" valign="top"><a id="a1c2f3bb7246c1f0eafbeaf81c27faad7" name="a1c2f3bb7246c1f0eafbeaf81c27faad7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>writeGrids</b> ()</td></tr>
+<tr class="memdesc:a1c2f3bb7246c1f0eafbeaf81c27faad7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the grids, the settings they were generated with and the graph file's identifier to the graph file, and leave it open for buildGeometries. Collective. <br /></td></tr>
+<tr class="memitem:a6cea361bb378d3e642a1ef70fe24328c" id="r_a6cea361bb378d3e642a1ef70fe24328c"><td class="memItemLeft" align="right" valign="top"><a id="a6cea361bb378d3e642a1ef70fe24328c" name="a6cea361bb378d3e642a1ef70fe24328c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>closeGraphFile</b> ()</td></tr>
+<tr class="memdesc:a6cea361bb378d3e642a1ef70fe24328c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the graph file, if it is open. Collective. <br /></td></tr>
+<tr class="memitem:a2bb1c7d97b477e50882100df831b2538" id="r_a2bb1c7d97b477e50882100df831b2538"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2bb1c7d97b477e50882100df831b2538">defineLevels</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const Real a_startDx)</td></tr>
+<tr class="memdesc:a2bb1c7d97b477e50882100df831b2538"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the levels, their domains and grid spacings from the start and stop domains.  <br /></td></tr>
 <tr class="memitem:a89cbc9190bdd946678c0a6f1ac9bcb29" id="r_a89cbc9190bdd946678c0a6f1ac9bcb29"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89cbc9190bdd946678c0a6f1ac9bcb29">buildStartLevel</a> ()</td></tr>
 <tr class="memdesc:a89cbc9190bdd946678c0a6f1ac9bcb29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step 0: build and classify the start level.  <br /></td></tr>
 <tr class="memitem:a8571c47ab61c69f7bce65f02dc156411" id="r_a8571c47ab61c69f7bce65f02dc156411"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8571c47ab61c69f7bce65f02dc156411">buildFinerLevels</a> (Vector&lt; Vector&lt; int &gt; &gt; &amp;a_firstChild, Vector&lt; Vector&lt; int &gt; &gt; &amp;a_numChildren)</td></tr>
@@ -287,6 +312,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memdesc:a063577eaa5d317ff3790b53edc235bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether any cut cell of the box holds an interface patch that is twisted about its own centre.  <br /></td></tr>
 <tr class="memitem:a9b358ae5520ec4f91d8c3c04d60b1e65" id="r_a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a792936c26593c02ee047eb7e890e5486">SplitReason</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b358ae5520ec4f91d8c3c04d60b1e65">exceedsCurvature</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.  <br /></td></tr>
+<tr class="memitem:a9cc1010568d707fecc9ddd0e7d9667ad" id="r_a9cc1010568d707fecc9ddd0e7d9667ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9cc1010568d707fecc9ddd0e7d9667ad">holdsConductorCell</a> (const Box &amp;a_box, const int a_level) const</td></tr>
+<tr class="memdesc:a9cc1010568d707fecc9ddd0e7d9667ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a box holds a cell cut in exactly one phase, which <a class="el" href="classDriver.html#a79d453ef518210bbb882d105dad0e76c" title="Get geometric tags.">Driver::getGeometryTags</a> tags as conductor.  <br /></td></tr>
 <tr class="memitem:a109774bb75d4e965056d3632166e539c" id="r_a109774bb75d4e965056d3632166e539c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a109774bb75d4e965056d3632166e539c">doublyCrossedEdge</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a109774bb75d4e965056d3632166e539c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it.  <br /></td></tr>
 <tr class="memitem:a47ab2b3886e2bd20dc43c731bc52fa19" id="r_a47ab2b3886e2bd20dc43c731bc52fa19"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47ab2b3886e2bd20dc43c731bc52fa19">piercedSeamFace</a> (const IntVect &amp;a_cell, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const BaseFab&lt; bool &gt; &amp;a_refined) const</td></tr>
@@ -373,6 +400,12 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_startLevel</b></td><
 <tr class="memitem:ad62109e08842a9c023d47b3d0cbfaa1c" id="r_ad62109e08842a9c023d47b3d0cbfaa1c"><td class="memItemLeft" align="right" valign="top"><a id="ad62109e08842a9c023d47b3d0cbfaa1c" name="ad62109e08842a9c023d47b3d0cbfaa1c"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_stopLevel</b></td></tr>
 <tr class="memdesc:ad62109e08842a9c023d47b3d0cbfaa1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of the stop domain, the finest level. <br /></td></tr>
+<tr class="memitem:a1695a9366347fd1209f9c866b975e52c" id="r_a1695a9366347fd1209f9c866b975e52c"><td class="memItemLeft" align="right" valign="top"><a id="a1695a9366347fd1209f9c866b975e52c" name="a1695a9366347fd1209f9c866b975e52c"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_electrodeLevel</b></td></tr>
+<tr class="memdesc:a1695a9366347fd1209f9c866b975e52c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level the geometric tags refine electrode surfaces down to; a box on a coarser level holding one is split. <br /></td></tr>
+<tr class="memitem:a608700a8cc2792ad6b68af85a22fd0bf" id="r_a608700a8cc2792ad6b68af85a22fd0bf"><td class="memItemLeft" align="right" valign="top"><a id="a608700a8cc2792ad6b68af85a22fd0bf" name="a608700a8cc2792ad6b68af85a22fd0bf"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_dielectricLevel</b></td></tr>
+<tr class="memdesc:a608700a8cc2792ad6b68af85a22fd0bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level the geometric tags refine dielectric surfaces down to; a box on a coarser level holding one is split. <br /></td></tr>
 <tr class="memitem:ae05e7cdb0c5d9868221dabb91cf08815" id="r_ae05e7cdb0c5d9868221dabb91cf08815"><td class="memItemLeft" align="right" valign="top"><a id="ae05e7cdb0c5d9868221dabb91cf08815" name="ae05e7cdb0c5d9868221dabb91cf08815"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
 <tr class="memdesc:ae05e7cdb0c5d9868221dabb91cf08815"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile size, in cells. ComputationalGeometry.min_block_size, 8 when not given. <br /></td></tr>
@@ -385,6 +418,18 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></t
 <tr class="memitem:ae0cd84e83dee71c20bc5944ba3c7b27e" id="r_ae0cd84e83dee71c20bc5944ba3c7b27e"><td class="memItemLeft" align="right" valign="top"><a id="ae0cd84e83dee71c20bc5944ba3c7b27e" name="ae0cd84e83dee71c20bc5944ba3c7b27e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbose</b></td></tr>
 <tr class="memdesc:ae0cd84e83dee71c20bc5944ba3c7b27e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether every member function announces itself in pout. ComputationalGeometry.verbose, off by default. <br /></td></tr>
+<tr class="memitem:aca0897d531882bdda98cd1845e6c7b9c" id="r_aca0897d531882bdda98cd1845e6c7b9c"><td class="memItemLeft" align="right" valign="top"><a id="aca0897d531882bdda98cd1845e6c7b9c" name="aca0897d531882bdda98cd1845e6c7b9c"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_graphFile</b></td></tr>
+<tr class="memdesc:aca0897d531882bdda98cd1845e6c7b9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">File the grids and the polyhedral graph are written to or read from, empty for neither. <br /></td></tr>
+<tr class="memitem:a8e4dc788d1149ff6c5678db40bdf5166" id="r_a8e4dc788d1149ff6c5678db40bdf5166"><td class="memItemLeft" align="right" valign="top"><a id="a8e4dc788d1149ff6c5678db40bdf5166" name="a8e4dc788d1149ff6c5678db40bdf5166"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_graphId</b></td></tr>
+<tr class="memdesc:a8e4dc788d1149ff6c5678db40bdf5166"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifier of the graph file: made when it is written, required of it when it is read. <br /></td></tr>
+<tr class="memitem:ace9cd63c2815262eada535874cb6bf20" id="r_ace9cd63c2815262eada535874cb6bf20"><td class="memItemLeft" align="right" valign="top"><a id="ace9cd63c2815262eada535874cb6bf20" name="ace9cd63c2815262eada535874cb6bf20"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_readGraph</b></td></tr>
+<tr class="memdesc:ace9cd63c2815262eada535874cb6bf20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the grids and the graph are read from m_graphFile rather than written to it. <br /></td></tr>
+<tr class="memitem:a6ce4573f0573ca8eadae0358de0bf8d6" id="r_a6ce4573f0573ca8eadae0358de0bf8d6"><td class="memItemLeft" align="right" valign="top"><a id="a6ce4573f0573ca8eadae0358de0bf8d6" name="a6ce4573f0573ca8eadae0358de0bf8d6"></a>
+HDF5Handle *&#160;</td><td class="memItemRight" valign="bottom"><b>m_graphHandle</b></td></tr>
+<tr class="memdesc:a6ce4573f0573ca8eadae0358de0bf8d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The graph file while the geometry is built into or from it, null otherwise. <br /></td></tr>
 <tr class="memitem:aeb14cf1668bfcfe167128ae65c69bcd1" id="r_aeb14cf1668bfcfe167128ae65c69bcd1"><td class="memItemLeft" align="right" valign="top"><a id="aeb14cf1668bfcfe167128ae65c69bcd1" name="aeb14cf1668bfcfe167128ae65c69bcd1"></a>
 Vector&lt; ProblemDomain &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domains</b></td></tr>
 <tr class="memdesc:aeb14cf1668bfcfe167128ae65c69bcd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domains of the levels makeGrids builds, coarsest first. <br /></td></tr>
@@ -482,8 +527,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </table>
 </div><div class="memdoc">
 
-<p>Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle. </p>
-<p>Only None against anything else decides whether a box splits. Which of the five reasons it is, is recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it is a diagnostic rather than a part of the generator. </p>
+<p>Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, a cut cell whose interface is twisted into a saddle, or a surface the geometric tags refine below the box's level (Driver.refine_electrodes, Driver.refine_dielectrics). </p>
+<p>Only None against anything else decides whether a box splits. Which of the six reasons it is, is recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it is a diagnostic rather than a part of the generator. </p>
 
 </div>
 </div>
@@ -745,8 +790,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
-<a id="a01a9788004e72269e1b6a1421090bd0d" name="a01a9788004e72269e1b6a1421090bd0d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01a9788004e72269e1b6a1421090bd0d">&#9670;&#160;</a></span>buildGeometries()</h2>
+<a id="a715aab42968e7289a29351bab24f2803" name="a715aab42968e7289a29351bab24f2803"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a715aab42968e7289a29351bab24f2803">&#9670;&#160;</a></span>buildGeometries()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -758,6 +803,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
           <td class="memname">void ComputationalGeometry::buildGeometries </td>
           <td>(</td>
           <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finestDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finestMeshDomain</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -795,7 +845,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 <p>Build geometries and the MFIndexSpace. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDomain</td><td>Finest domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDomain</td><td>Finest domain the geometry is resolved on </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestMeshDomain</td><td>Finest domain the mesh may refine to, a_finestDomain refined by a power of two. It is finer than a_finestDomain only with the polyhedral generator, whose index space cuts those levels from the finest resolved one. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDx</td><td>Finest grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_nCellMax</td><td>Patch size </td></tr>
@@ -1328,6 +1379,50 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a2bb1c7d97b477e50882100df831b2538" name="a2bb1c7d97b477e50882100df831b2538"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bb1c7d97b477e50882100df831b2538">&#9670;&#160;</a></span>defineLevels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::defineLevels </td>
+          <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_startDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stopDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_startDx</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the levels, their domains and grid spacings from the start and stop domains. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDomain</td><td>Domain the upward pass starts from. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stopDomain</td><td>Finest domain, a factor-two refinement of a_startDomain some number of times. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDx</td><td>Grid spacing on a_startDomain. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a109774bb75d4e965056d3632166e539c" name="a109774bb75d4e965056d3632166e539c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a109774bb75d4e965056d3632166e539c">&#9670;&#160;</a></span>doublyCrossedEdge()</h2>
 
@@ -1419,6 +1514,92 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The reason the box must be split, or None if it need not be. </dd></dl>
+
+</div>
+</div>
+<a id="aed646a6a5fe51d8d224141da2acc2aed" name="aed646a6a5fe51d8d224141da2acc2aed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed646a6a5fe51d8d224141da2acc2aed">&#9670;&#160;</a></span>generateGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::generateGrids </td>
+          <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_startDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stopDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electrodeDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dielectricDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_probLo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_startDx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_refineAngle</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_maxGhostEB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_minBlockSize</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_maxBlockSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the grids from the implicit functions, as makeGrids describes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDomain</td><td>Domain the upward pass starts from. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stopDomain</td><td>Finest domain built. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_electrodeDomain</td><td>Domain the geometric tags refine electrode surfaces down to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dielectricDomain</td><td>Domain the geometric tags refine dielectric surfaces down to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDx</td><td>Grid spacing on a_startDomain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refineAngle</td><td>Angle, in degrees, between neighbouring normals above which a box is split. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxGhostEB</td><td>Ghost cells a box is grown by when it is classified. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Tile size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxBlockSize</td><td>Super-tile size. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1524,7 +1705,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </table>
 </div><div class="memdoc">
 
-<p>The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below it. </p>
+<p>The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, on which the level's graph is built. On the start level, its boxes irregular in either phase; empty below it. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>
@@ -1680,6 +1861,90 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>Get the background gas permittivity. </p>
 <dl class="section return"><dt>Returns</dt><dd>Background gas permittivity </dd></dl>
+
+</div>
+</div>
+<a id="aad47926930c93c3a56961df8ced0c8fd" name="aad47926930c93c3a56961df8ced0c8fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad47926930c93c3a56961df8ced0c8fd">&#9670;&#160;</a></span>getGraphFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; ComputationalGeometry::getGraphFile </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The file the graph is written to or read from. </p>
+<dl class="section return"><dt>Returns</dt><dd>The file, empty if there is none. </dd></dl>
+
+</div>
+</div>
+<a id="af550663fb5ed0e92142264e314eff536" name="af550663fb5ed0e92142264e314eff536"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af550663fb5ed0e92142264e314eff536">&#9670;&#160;</a></span>getGraphHandle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">HDF5Handle * ComputationalGeometry::getGraphHandle </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The graph file, open between makeGrids and the end of buildGeometries. </p>
+<dl class="section return"><dt>Returns</dt><dd>The open file, or null. </dd></dl>
+
+</div>
+</div>
+<a id="a4be7a4c5184fb44859fa29738fd3585f" name="a4be7a4c5184fb44859fa29738fd3585f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4be7a4c5184fb44859fa29738fd3585f">&#9670;&#160;</a></span>getGraphId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; ComputationalGeometry::getGraphId </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The identifier of the graph file. </p>
+<dl class="section return"><dt>Returns</dt><dd>The identifier, empty if there is no file. </dd></dl>
 
 </div>
 </div>
@@ -2022,6 +2287,45 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a9cc1010568d707fecc9ddd0e7d9667ad" name="a9cc1010568d707fecc9ddd0e7d9667ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cc1010568d707fecc9ddd0e7d9667ad">&#9670;&#160;</a></span>holdsConductorCell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::holdsConductorCell </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether a box holds a cell cut in exactly one phase, which <a class="el" href="classDriver.html#a79d453ef518210bbb882d105dad0e76c" title="Get geometric tags.">Driver::getGeometryTags</a> tags as conductor. </p>
+<p>A cell is cut in a phase when that phase's surface crosses it, decided as the polyhedral shop decides it, from the implicit function at the cell's nodes and edges. Without one of the two implicit functions every cut cell is cut in one phase only, and the answer is true. The tags are taken from the finished graph, after the fill rule, so a cell the fill rule covers in one phase is cut in one phase for the tags but in both here. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>The box, on a_level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level of the box. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if some cell of the box is cut in one phase and not the other. </dd></dl>
+
+</div>
+</div>
 <a id="a4707a1ca2d137d28abf33ee0627a1d2b" name="a4707a1ca2d137d28abf33ee0627a1d2b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4707a1ca2d137d28abf33ee0627a1d2b">&#9670;&#160;</a></span>irregCells()</h2>
 
@@ -2042,7 +2346,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </div><div class="memdoc">
 
 <p>The cut cells of a phase on a domain that this rank holds. </p>
-<p>Read from the polyhedral generator's stored level when it built the phase, and from the phase's index space otherwise. Empty when the phase has none. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Read from the polyhedral generator's stored level when it built the phase, and from the phase's index space otherwise. Empty when the phase has none, and with the polyhedral generator when no tile was split down to the level, which then resolves no surface of its own. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain, one of the index space's. </td></tr>
@@ -2073,7 +2377,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </div><div class="memdoc">
 
 <p>A layout of a phase on a domain whose boxes hold every cut cell of the phase there. </p>
-<p>The polyhedral generator's stored layout of the level when it built the phase, and the index space's irregular grids otherwise. The phase must have an index space. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>With the polyhedral generator, the boxes of its stored layout of the level that the geometry classifies as irregular in the phase, on the ranks that hold them there, and the index space's irregular grids otherwise. With the polyhedral generator, a level no tile was split down to has an empty layout. The phase must have an index space. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain, one of the index space's. </td></tr>
@@ -2084,8 +2388,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
-<a id="a1e158685c21420ce4df34df3e8b96828" name="a1e158685c21420ce4df34df3e8b96828"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e158685c21420ce4df34df3e8b96828">&#9670;&#160;</a></span>makeGrids()</h2>
+<a id="a7722d8dc20a8f38149639da8c43a09a4" name="a7722d8dc20a8f38149639da8c43a09a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7722d8dc20a8f38149639da8c43a09a4">&#9670;&#160;</a></span>makeGrids()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2102,6 +2406,16 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stopDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electrodeDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dielectricDomain</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2146,6 +2460,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_startDomain</td><td>Domain the upward pass starts from. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_stopDomain</td><td>Finest domain built; a factor-two refinement of a_startDomain some number of times. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_electrodeDomain</td><td>Domain the geometric tags refine electrode surfaces down to, one of the levels. A box on a coarser level that holds an electrode surface is split. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dielectricDomain</td><td>Domain the geometric tags refine dielectric surfaces down to, one of the levels. A box on a coarser level that holds a dielectric surface is split. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_startDx</td><td>Grid spacing on a_startDomain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refineAngle</td><td>Angle, in degrees, between neighbouring normals above which a box is split. </td></tr>
@@ -2155,6 +2471,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>After writeGraphTo the grids are also written to that file, and the file is kept open for the polyhedral shops until buildGeometries has run. After readGraphFrom they are read from the file instead of built; see readGrids. </dd></dl>
 
 </div>
 </div>
@@ -2355,6 +2672,150 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if some face of a_cell toward a refined neighbour is pierced at its middle. </dd></dl>
+
+</div>
+</div>
+<a id="a6a9293b31d6e9c44faca039d1fc12fdd" name="a6a9293b31d6e9c44faca039d1fc12fdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a9293b31d6e9c44faca039d1fc12fdd">&#9670;&#160;</a></span>readGraphFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::readGraphFrom </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_file</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_id</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read the grids, and the polyhedral graph built over them, from a file that writeGraphTo wrote, instead of generating them. </p>
+<p>Call before makeGrids. The run stops if the file's identifier is not a_id. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>The file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_id</td><td>The identifier the file must carry. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acbc3259ec26b3a7a3815eb2d0cf83561" name="acbc3259ec26b3a7a3815eb2d0cf83561"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbc3259ec26b3a7a3815eb2d0cf83561">&#9670;&#160;</a></span>readGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::readGrids </td>
+          <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_startDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stopDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electrodeDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dielectricDomain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_probLo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_startDx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_refineAngle</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_maxGhostEB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_minBlockSize</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_maxBlockSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read the grids generateGrids built from the graph file. </p>
+<p>The domains, the lower corner and the grid spacing must be those the file was written with, and the inputs may not ask for more EB ghost cells; the run stops otherwise. The settings the grids were generated with &ndash; the refinement angle, the saddle refinement, the tile sizes, the ghost cells and the levels electrode and dielectric surfaces are resolved to &ndash; are taken from the file, and each one that differs in the inputs is reported. Leaves the file open for buildGeometries. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDomain</td><td>Domain the upward pass started from. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stopDomain</td><td>Finest domain built. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_electrodeDomain</td><td>Domain the inputs refine electrode surfaces down to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dielectricDomain</td><td>Domain the inputs refine dielectric surfaces down to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDx</td><td>Grid spacing on a_startDomain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refineAngle</td><td>Refinement angle of the inputs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxGhostEB</td><td>EB ghost cells of the inputs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Tile size of the inputs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxBlockSize</td><td>Super-tile size of the inputs. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0fb8a315ff8ea7329c35448e8fc96d3f" name="a0fb8a315ff8ea7329c35448e8fc96d3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fb8a315ff8ea7329c35448e8fc96d3f">&#9670;&#160;</a></span>readsGraph()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::readsGraph </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the graph is read from a file rather than built. </p>
+<dl class="section return"><dt>Returns</dt><dd>True after readGraphFrom. </dd></dl>
 
 </div>
 </div>
@@ -2672,6 +3133,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_beginDomain</td><td>Coarse domain where <a class="el" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves.">ScanShop</a> begins the load balancing recursion process. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3c29068bf4ee96107c9ff66e5a33462a" name="a3c29068bf4ee96107c9ff66e5a33462a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c29068bf4ee96107c9ff66e5a33462a">&#9670;&#160;</a></span>writeGraphTo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::writeGraphTo </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_file</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Write the grids, and the polyhedral graph built over them, to a file, once, as makeGrids and buildGeometries build them. </p>
+<p>Makes a new identifier for the file, which getGraphId returns. A checkpoint that records it can be restarted on exactly this geometry with readGraphFrom. Call before makeGrids. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>The file. One that exists is written over. </td></tr>
   </table>
   </dd>
 </dl>

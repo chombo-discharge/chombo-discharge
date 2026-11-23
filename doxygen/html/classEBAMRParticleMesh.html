@@ -114,16 +114,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a444fa9f347000492832a2d294f60cccc" id="r_a444fa9f347000492832a2d294f60cccc"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits&gt; </td></tr>
 <tr class="memitem:a444fa9f347000492832a2d294f60cccc template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a444fa9f347000492832a2d294f60cccc">interpolateWeight</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const EBAMRCellData &amp;a_meshData, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:a444fa9f347000492832a2d294f60cccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a mesh field onto the container-owned weight column, across all levels.  <br /></td></tr>
-<tr id="pub-methods-2" class="groupHeader"><td colspan="2"><div class="groupHeader">Deposition (all coarse-fine strategies)</div></td></tr>
-<tr class="memitem:ab93c8ab527b294ba16e35f647f84138a" id="r_ab93c8ab527b294ba16e35f647f84138a"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits&gt; </td></tr>
-<tr class="memitem:ab93c8ab527b294ba16e35f647f84138a template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab93c8ab527b294ba16e35f647f84138a">depositWeight</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition)</td></tr>
-<tr class="memdesc:ab93c8ab527b294ba16e35f647f84138a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the container-owned weight onto the AMR mesh.  <br /></td></tr>
-<tr class="memitem:ad81e46e64b75c767e58bfe6bc33babfa" id="r_ad81e46e64b75c767e58bfe6bc33babfa"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename CellGather&gt; </td></tr>
-<tr class="memitem:ad81e46e64b75c767e58bfe6bc33babfa template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad81e46e64b75c767e58bfe6bc33babfa">depositGathered</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition, CellGather a_cellGather)</td></tr>
-<tr class="memdesc:ad81e46e64b75c767e58bfe6bc33babfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.  <br /></td></tr>
-<tr class="memitem:a8c1f280abf1e4bdac57c641f80fe3e66" id="r_a8c1f280abf1e4bdac57c641f80fe3e66"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P, typename Traits&gt; </td></tr>
-<tr class="memitem:a8c1f280abf1e4bdac57c641f80fe3e66 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c1f280abf1e4bdac57c641f80fe3e66">deposit</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition)</td></tr>
-<tr class="memdesc:a8c1f280abf1e4bdac57c641f80fe3e66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit one or more payload columns onto the AMR mesh.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -132,34 +122,33 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>errorUnsupported</b> 
 <tr class="memdesc:a6955f939755a6d78d95be24256b83d16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort on an unrecognized coarse-fine deposition strategy. <br /></td></tr>
 <tr class="memitem:a6d1da335a1ae9076481b3365f0d35ae9" id="r_a6d1da335a1ae9076481b3365f0d35ae9"><td class="memItemLeft" align="right" valign="top"><a id="a6d1da335a1ae9076481b3365f0d35ae9" name="a6d1da335a1ae9076481b3365f0d35ae9"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineEBParticleMesh</b> ()</td></tr>
-<tr class="memdesc:a6d1da335a1ae9076481b3365f0d35ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level per-patch <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a> leaves (valid grids + refined-coarse grids). <br /></td></tr>
+<tr class="memdesc:a6d1da335a1ae9076481b3365f0d35ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level per-patch <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a> leaves. <br /></td></tr>
 <tr class="memitem:af7078bfe1729f10b1739edd264749101" id="r_af7078bfe1729f10b1739edd264749101"><td class="memItemLeft" align="right" valign="top"><a id="af7078bfe1729f10b1739edd264749101" name="af7078bfe1729f10b1739edd264749101"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevelMotion</b> ()</td></tr>
 <tr class="memdesc:af7078bfe1729f10b1739edd264749101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level valid+ghost -&gt; valid Copiers. <br /></td></tr>
 <tr class="memitem:af42bd65a697b9fe12d4637b13df2cd24" id="r_af42bd65a697b9fe12d4637b13df2cd24"><td class="memItemLeft" align="right" valign="top"><a id="af42bd65a697b9fe12d4637b13df2cd24" name="af42bd65a697b9fe12d4637b13df2cd24"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineCoarseFineMotion</b> ()</td></tr>
 <tr class="memdesc:af42bd65a697b9fe12d4637b13df2cd24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level coarse-fine mesh operators (null on level 0). <br /></td></tr>
-<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363" id="r_ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memTemplParams" colspan="2">template&lt;typename Container, typename PatchDeposit&gt; </td></tr>
-<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6a4d0bf7c6f34ec411b8513ed159363">depositInterpCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const int a_numComp, PatchDeposit a_patchDeposit) const</td></tr>
-<tr class="memdesc:ae6a4d0bf7c6f34ec411b8513ed159363"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Interp deposition algorithm, parameterized by the per-patch deposit.  <br /></td></tr>
+<tr class="memitem:a217633e1f02f3723c2583f3ba13ccee4" id="r_a217633e1f02f3723c2583f3ba13ccee4"><td class="memTemplParams" colspan="2">template&lt;typename Container, typename PatchDeposit&gt; </td></tr>
+<tr class="memitem:a217633e1f02f3723c2583f3ba13ccee4 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a217633e1f02f3723c2583f3ba13ccee4">depositInterpCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const int a_numComp, const bool a_cutCellsHoldDensity, PatchDeposit a_patchDeposit) const</td></tr>
+<tr class="memdesc:a217633e1f02f3723c2583f3ba13ccee4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Interp deposition algorithm, parameterized by the per-patch deposit.  <br /></td></tr>
 <tr class="memitem:a7b4b35f75c3d4c7d8cc0ad55a5281266" id="r_a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b4b35f75c3d4c7d8cc0ad55a5281266">defineOuterHaloMasks</a> ()</td></tr>
 <tr class="memdesc:a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-width outer-halo masks: per level, the coarse cells just outside the fine patch.  <br /></td></tr>
-<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703" id="r_aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </td></tr>
-<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef4c8e93c1b5608dac5ee07ecd3b8703">depositHaloCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, PatchDeposit a_patchDeposit) const</td></tr>
-<tr class="memdesc:aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Halo deposition algorithm.  <br /></td></tr>
+<tr class="memitem:acf9303b437d076e729baaf5029c65f2e" id="r_acf9303b437d076e729baaf5029c65f2e"><td class="memTemplParams" colspan="2">template&lt;typename MaskGetter, typename WidthFn&gt; </td></tr>
+<tr class="memitem:acf9303b437d076e729baaf5029c65f2e template"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf9303b437d076e729baaf5029c65f2e">getCoarToFineMask</a> (const MaskGetter &amp;a_coarToFineMasks, const WidthFn &amp;a_width) const</td></tr>
+<tr class="memdesc:acf9303b437d076e729baaf5029c65f2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assemble a per-level coarse-to-fine particle ghost mask from the realm's masks.  <br /></td></tr>
+<tr class="memitem:acbef5f91618b86cb5cfc7eaa12e82280" id="r_acbef5f91618b86cb5cfc7eaa12e82280"><td class="memTemplParams" colspan="2">template&lt;typename Container&gt; </td></tr>
+<tr class="memitem:acbef5f91618b86cb5cfc7eaa12e82280 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acbef5f91618b86cb5cfc7eaa12e82280">fillCoarseGhosts</a> (Container &amp;a_particles, const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_coarToFine, const bool a_forceIrregNGP) const</td></tr>
+<tr class="memdesc:acbef5f91618b86cb5cfc7eaa12e82280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the mask-holder particles into the finer patches as coarse ghosts.  <br /></td></tr>
+<tr class="memitem:a5ec81daecec819f800ad5e3b12fb8811" id="r_a5ec81daecec819f800ad5e3b12fb8811"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts&gt; </td></tr>
+<tr class="memitem:a5ec81daecec819f800ad5e3b12fb8811 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ec81daecec819f800ad5e3b12fb8811">depositHaloCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const bool a_forceIrregNGP, const MaskGetter &amp;a_coarToFineMasks, PatchDeposit a_patchDeposit, PatchGhosts a_patchGhosts) const</td></tr>
+<tr class="memdesc:a5ec81daecec819f800ad5e3b12fb8811"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Halo deposition algorithm.  <br /></td></tr>
 <tr class="memitem:a7d1cf402dee91611338549efd608e0d0" id="r_a7d1cf402dee91611338549efd608e0d0"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container, typename PatchDeposit, typename PatchDepositNGP&gt; </td></tr>
 <tr class="memitem:a7d1cf402dee91611338549efd608e0d0 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d1cf402dee91611338549efd608e0d0">depositHaloNGPCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, PatchDeposit a_patch, PatchDepositNGP a_patchNGP) const</td></tr>
 <tr class="memdesc:a7d1cf402dee91611338549efd608e0d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::HaloNGP deposition algorithm.  <br /></td></tr>
-<tr class="memitem:a4c532d3e483268c2317422f1cee0fcf3" id="r_a4c532d3e483268c2317422f1cee0fcf3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c532d3e483268c2317422f1cee0fcf3">getTransitionMaskWidth</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const int a_refRat) const</td></tr>
-<tr class="memdesc:a4c532d3e483268c2317422f1cee0fcf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition-mask width for a kernel: CIC -&gt; refRat/2, TSC -&gt; refRat (NGP is handled upstream).  <br /></td></tr>
-<tr class="memitem:a16971bd2ceb59b1cdb6bf556d31ffca7" id="r_a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a16971bd2ceb59b1cdb6bf556d31ffca7">defineTransitionMasks</a> ()</td></tr>
-<tr class="memdesc:a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.  <br /></td></tr>
-<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c" id="r_a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memTemplParams" colspan="2">template&lt;typename Container&gt; </td></tr>
-<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4da4e775ddafcb0f6fc17041cfaf3e1c">transferMaskParticlesTransition</a> (Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType) const</td></tr>
-<tr class="memdesc:a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the coarse-side transition particles into the container mask holder (using the FiCo mask).  <br /></td></tr>
-<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db" id="r_ad94e8663a7eedbb71b434f484124b1db"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </td></tr>
-<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad94e8663a7eedbb71b434f484124b1db">depositTransitionCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, PatchDeposit a_patch) const</td></tr>
-<tr class="memdesc:ad94e8663a7eedbb71b434f484124b1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Transition deposition algorithm.  <br /></td></tr>
+<tr class="memitem:ace40d7a9a595918dcf34a5b3d9a0c0cb" id="r_ace40d7a9a595918dcf34a5b3d9a0c0cb"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts&gt; </td></tr>
+<tr class="memitem:ace40d7a9a595918dcf34a5b3d9a0c0cb template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace40d7a9a595918dcf34a5b3d9a0c0cb">depositTransitionCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const bool a_forceIrregNGP, const bool a_cutCellsHoldDensity, const MaskGetter &amp;a_coarToFineMasks, PatchDeposit a_patch, PatchGhosts a_patchGhosts) const</td></tr>
+<tr class="memdesc:ace40d7a9a595918dcf34a5b3d9a0c0cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Transition deposition algorithm.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -193,35 +182,49 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_l
 <tr class="memitem:a5c5b9dff0fa365dbd0b5727b2c7388fb" id="r_a5c5b9dff0fa365dbd0b5727b2c7388fb"><td class="memItemLeft" align="right" valign="top"><a id="a5c5b9dff0fa365dbd0b5727b2c7388fb" name="a5c5b9dff0fa365dbd0b5727b2c7388fb"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseFineParticleMesh.html">EBCoarseFineParticleMesh</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarseFinePM</b></td></tr>
 <tr class="memdesc:a5c5b9dff0fa365dbd0b5727b2c7388fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level coarse-fine mesh operators (null on level 0). <br /></td></tr>
-<tr class="memitem:aef1ac124f7d261d7d87132d14ec231bb" id="r_aef1ac124f7d261d7d87132d14ec231bb"><td class="memItemLeft" align="right" valign="top"><a id="aef1ac124f7d261d7d87132d14ec231bb" name="aef1ac124f7d261d7d87132d14ec231bb"></a>
-Vector&lt; RefCountedPtr&lt; LayoutData&lt; <a class="el" href="classEBParticleMesh.html">EBParticleMesh</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebParticleMeshFiCo</b></td></tr>
-<tr class="memdesc:aef1ac124f7d261d7d87132d14ec231bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0). <br /></td></tr>
 <tr class="memitem:a5a2d9a81eaab5921f102d42c8124289f" id="r_a5a2d9a81eaab5921f102d42c8124289f"><td class="memItemLeft" align="right" valign="top"><a id="a5a2d9a81eaab5921f102d42c8124289f" name="a5a2d9a81eaab5921f102d42c8124289f"></a>
 std::map&lt; int, Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_outerHaloMasks</b></td></tr>
 <tr class="memdesc:a5a2d9a81eaab5921f102d42c8124289f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch. <br /></td></tr>
-<tr class="memitem:aaf49cb7c475601f8016d46db47baeb44" id="r_aaf49cb7c475601f8016d46db47baeb44"><td class="memItemLeft" align="right" valign="top"><a id="aaf49cb7c475601f8016d46db47baeb44" name="aaf49cb7c475601f8016d46db47baeb44"></a>
-std::map&lt; int, Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_transitionMasks</b></td></tr>
-<tr class="memdesc:aaf49cb7c475601f8016d46db47baeb44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-member-group" class="groupheader"><a id="member-group" name="member-group"></a>
+Deposition (all coarse-fine strategies)</h2></td></tr>
+<tr class="memitem:acf7e220d5ec9e27edc09465546d1c0bc" id="r_acf7e220d5ec9e27edc09465546d1c0bc"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename MaskGetter&gt; </td></tr>
+<tr class="memitem:acf7e220d5ec9e27edc09465546d1c0bc template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf7e220d5ec9e27edc09465546d1c0bc">depositWeight</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition, const MaskGetter &amp;a_coarToFineMasks)</td></tr>
+<tr class="memdesc:acf7e220d5ec9e27edc09465546d1c0bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the container-owned weight onto the AMR mesh.  <br /></td></tr>
+<tr class="memitem:a2cf6098b3566f083a13f933a1bb56046" id="r_a2cf6098b3566f083a13f933a1bb56046"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits, typename CellGather, typename MaskGetter&gt; </td></tr>
+<tr class="memitem:a2cf6098b3566f083a13f933a1bb56046 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cf6098b3566f083a13f933a1bb56046">depositGathered</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition, CellGather a_cellGather, const MaskGetter &amp;a_coarToFineMasks)</td></tr>
+<tr class="memdesc:a2cf6098b3566f083a13f933a1bb56046"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.  <br /></td></tr>
+<tr class="memitem:ae19ba99276f38fa7d091528dd1acd6ba" id="r_ae19ba99276f38fa7d091528dd1acd6ba"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P, typename Traits, typename MaskGetter&gt; </td></tr>
+<tr class="memitem:ae19ba99276f38fa7d091528dd1acd6ba template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae19ba99276f38fa7d091528dd1acd6ba">deposit</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition, const MaskGetter &amp;a_coarToFineMasks)</td></tr>
+<tr class="memdesc:ae19ba99276f38fa7d091528dd1acd6ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit one or more payload columns onto the AMR mesh.  <br /></td></tr>
+<tr class="memitem:a3f29b4b743836572010e2db8dea5e584" id="r_a3f29b4b743836572010e2db8dea5e584"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f29b4b743836572010e2db8dea5e584">getHaloGhostWidth</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:a3f29b4b743836572010e2db8dea5e584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width, in finer cells, of the coarse-to-fine particle ghost mask that Halo deposition fills with.  <br /></td></tr>
+<tr class="memitem:a863e97b2fdab3ac708976c017798bd25" id="r_a863e97b2fdab3ac708976c017798bd25"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a863e97b2fdab3ac708976c017798bd25">getTransitionMaskWidth</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:a863e97b2fdab3ac708976c017798bd25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition band width, in finer cells: the coarser particles within this distance of the finer grid deposit with the finer-level width.  <br /></td></tr>
+<tr class="memitem:af18ad2c3bfc5cbecd29cfbbaf1030779" id="r_af18ad2c3bfc5cbecd29cfbbaf1030779"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af18ad2c3bfc5cbecd29cfbbaf1030779">getTransitionGhostWidth</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:af18ad2c3bfc5cbecd29cfbbaf1030779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width, in finer cells, of the coarse-to-fine particle ghost mask that Transition deposition fills with.  <br /></td></tr>
+<tr class="memitem:a5ba60b2d217c0291a0ff52cfd0fd6083" id="r_a5ba60b2d217c0291a0ff52cfd0fd6083"><td class="memItemLeft" align="right" valign="top">static std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ba60b2d217c0291a0ff52cfd0fd6083">getCoarseToFineMaskWidths</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const int a_refRat) noexcept</td></tr>
+<tr class="memdesc:a5ba60b2d217c0291a0ff52cfd0fd6083"><td class="mdescLeft">&#160;</td><td class="mdescRight">The coarse-to-fine particle ghost-mask widths a deposition needs between two levels.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>AMR driver that deposits/interpolates <a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> particles across the hierarchy. </p>
-<p><a class="el" href="classEBAMRParticleMesh.html" title="AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.">EBAMRParticleMesh</a> deposits the particles of a <a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> onto AMR mesh data and interpolates mesh data back onto particle columns, by driving the per-patch <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a> leaf on every box of every level. <a class="el" href="#a3ce62438bb19cb2c2363b262643c9e59" title="Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.">define()</a> builds the per-level leaves (on the valid grids and the refined-coarse grids), the level valid+ghost -&gt; valid Copiers, the <a class="el" href="classEBCoarseFineParticleMesh.html" title="A class for handling particle deposition clouds that hang over refinement boundaries....">EBCoarseFineParticleMesh</a> operators, and the halo/transition masks; it must be called before any deposit or interpolate.</p>
+<p><a class="el" href="classEBAMRParticleMesh.html" title="AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.">EBAMRParticleMesh</a> deposits the particles of a <a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> onto AMR mesh data and interpolates mesh data back onto particle columns, by driving the per-patch <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a> leaf on every box of every level. <a class="el" href="#a3ce62438bb19cb2c2363b262643c9e59" title="Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.">define()</a> builds the per-level leaves, the level valid+ghost -&gt; valid Copiers, the <a class="el" href="classEBCoarseFineParticleMesh.html" title="A class for moving deposited particle mass between two levels across a refinement boundary....">EBCoarseFineParticleMesh</a> operators, and the outer-halo masks; it must be called before any deposit or interpolate.</p>
 <h3>Interpolation</h3>
 <p><a class="el" href="#a2729b63b78685329d4763efc533b43a2" title="Interpolate a mesh field onto one or more payload columns, across all levels.">interpolate()</a> and <a class="el" href="#a444fa9f347000492832a2d294f60cccc" title="Interpolate a mesh field onto the container-owned weight column, across all levels.">interpolateWeight()</a> are purely per-level/per-patch: the mesh is assumed to be valid+ghosted by the caller, so no coarse-fine coupling is needed.</p>
 <h3>Deposition</h3>
-<p><a class="el" href="#a8c1f280abf1e4bdac57c641f80fe3e66" title="Deposit one or more payload columns onto the AMR mesh.">deposit()</a>, <a class="el" href="#ab93c8ab527b294ba16e35f647f84138a" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a>, and <a class="el" href="#ad81e46e64b75c767e58bfe6bc33babfa" title="Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.">depositGathered()</a> conserve mass across refinement boundaries, and select how the coarse-fine overlap is handled through <code><a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c" title="Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).">CoarseFineDeposition</a>:</code> </p><ul>
+<p><a class="el" href="#ae19ba99276f38fa7d091528dd1acd6ba" title="Deposit one or more payload columns onto the AMR mesh.">deposit()</a>, <a class="el" href="#acf7e220d5ec9e27edc09465546d1c0bc" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a>, and <a class="el" href="#a2cf6098b3566f083a13f933a1bb56046" title="Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.">depositGathered()</a> conserve mass across refinement boundaries, and select how the coarse-fine overlap is handled through <code><a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c" title="Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).">CoarseFineDeposition</a>:</code> </p><ul>
 <li><b>Interp</b> &ndash; move the over-boundary mass between levels with the coarse-fine mesh operators.</li>
-<li><b>Halo</b> &ndash; re-deposit the coarse-side halo particles on the refined-coarse grid (via the container's mask holder and the FiCo buffer) and add them to the fine level.</li>
-<li><b>HaloNGP</b> &ndash; deposit the near-boundary halo particles with NGP so their clouds do not spread across the boundary (no refined-coarse buffer is needed).</li>
-<li><b>Transition</b> &ndash; deposit the coarse-side transition particles on the refined-coarse grid at the fine-grid width, distributing the result to both levels. Halo, HaloNGP, and Transition require at least one ghost cell.</li>
+<li><b>Halo</b> &ndash; copy the coarse-side halo particles into the finer patches their clouds reach, as coarse ghost particles, and deposit them there with the coarse width.</li>
+<li><b>HaloNGP</b> &ndash; deposit the near-boundary halo particles with NGP so their clouds do not spread across the boundary.</li>
+<li><b>Transition</b> &ndash; deposit the coarse-side transition particles with the fine-grid width, on their own level and as coarse ghost particles on the finer one. Halo, HaloNGP, and Transition require at least one ghost cell. Halo and Transition need the realm's coarse-to-fine particle ghost masks (see getCoarseToFineMaskWidths).</li>
 </ul>
 <h3>Cut cells, and what this class does NOT do</h3>
 <p>The deposition routines take an <code><a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50" title="How a deposition scheme treats the cut cells.">IrregularDeposition</a></code>, but this class only implements the part of it that the leaf kernels can answer: NGP in a cut cell, yes or no. Everything else is the CALLER's responsibility.</p><ul>
 <li><b>Native</b>, <b>NGP</b> &ndash; handled here. These are the two kernel behaviours.</li>
-<li><b>Mirror</b> &ndash; NOT handled here. It is a second pass that reflects each band particle across the embedded boundary and deposits the image, so it needs an image container, a scratch field and a collective remap, none of which this class owns. See <code><a class="el" href="classItoSolver.html#a3fc409ca117efce969d2f7c3ffa1fa03" title="Add the mirrored contribution of the band particles to an already-deposited field.">ItoSolver::mirrorPass</a></code>.</li>
+<li><b>Mirror</b> &ndash; NOT handled here. It is a second pass that reflects each band particle across the embedded boundary and deposits the image, so it needs an image container, a scratch field and a collective remap, none of which this class owns. See <code><a class="el" href="classItoSolver.html#a3fc409ca117efce969d2f7c3ffa1fa03" title="Add the mirrored contribution of the band particles to an already-deposited field.">ItoSolver::mirrorPass</a></code>. The one part handled here: Interp's coarse-to-fine step does not rescale cut cells by volume fraction, because with the mirror they hold the density rather than kappa times it.</li>
 <li><b>Redistribute</b>, <b>RedistributeBlended</b> &ndash; NOT handled here. They act on the field AFTER the deposit. See <code><a class="el" href="classItoSolver.html#ad599086b015754fd8dc25f94ba0b686d" title="Redistribute mass in an AMR context.">ItoSolver::redistributeAMR</a></code> and <code><a class="el" href="classMcPhoto.html#a4a7b596b600325893c7495ddff055a51" title="Shared hybrid-divergence tail for the deposition routines.">McPhoto::depositHybridDivergence</a></code>.</li>
 </ul>
-<p>The consequence is worth stating plainly, because it is silent: passing <code>Mirror</code> or <code>Redistribute</code> to a deposition routine here and then omitting the caller's half produces <code>Native</code> behaviour, with no error and no diagnostic. The run completes and the output is bit-for-bit what <code>Native</code> would have given. A caller that selects one of those values owns the rest of its meaning.</p>
+<p>The consequence is worth stating plainly, because it is silent: passing <code>Mirror</code> or <code>Redistribute</code> to a deposition routine here and then omitting the caller's half produces <code>Native</code> behaviour (for <code>Mirror</code> with Interp, Native without the volume-fraction rescaling), with no error and no diagnostic. A caller that selects one of those values owns the rest of its meaning.</p>
 <p>This split is deliberate but not ideal &ndash; the enum is named in one place and interpreted in three, so there is no single source of truth for what a selector means. Centralizing the mirror and the redistribution here is the natural end state; it needs <code><a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">ParticleContainer::define</a>'s</code> minimum block size, level tiles, valid cells and realm name, which this class is not currently given. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a3ce62438bb19cb2c2363b262643c9e59" name="a3ce62438bb19cb2c2363b262643c9e59"></a>
@@ -314,41 +317,13 @@ std::map&lt; int, Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &g
 
 </div>
 </div>
-<a id="a16971bd2ceb59b1cdb6bf556d31ffca7" name="a16971bd2ceb59b1cdb6bf556d31ffca7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16971bd2ceb59b1cdb6bf556d31ffca7">&#9670;&#160;</a></span>defineTransitionMasks()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBAMRParticleMesh::defineTransitionMasks </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid. </p>
-<p>For each width in [1, m_ghost] and each level with a finer level, builds the fine-grid coarse-fine interface band (fine ghost cells just outside the fine boxes), transfers it to the refined-coarse (FiCo) grid of the finer level, and stores it as a boolean mask there. Storage- agnostic. Empty BaseFabs are undefined. </p>
-
-</div>
-</div>
-<a id="a8c1f280abf1e4bdac57c641f80fe3e66" name="a8c1f280abf1e4bdac57c641f80fe3e66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c1f280abf1e4bdac57c641f80fe3e66">&#9670;&#160;</a></span>deposit()</h2>
+<a id="ae19ba99276f38fa7d091528dd1acd6ba" name="ae19ba99276f38fa7d091528dd1acd6ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae19ba99276f38fa7d091528dd1acd6ba">&#9670;&#160;</a></span>deposit()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;auto... Members, typename P, typename Traits&gt; </div>
+template&lt;auto... Members, typename P, typename Traits, typename MaskGetter&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -376,7 +351,12 @@ template&lt;auto... Members, typename P, typename Traits&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_irregularDeposition</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_irregularDeposition</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -392,6 +372,7 @@ template&lt;auto... Members, typename P, typename Traits&gt; </div>
     <tr><td class="paramname">Members</td><td>Pack of payload data-member pointers selecting the column(s) to deposit. </td></tr>
     <tr><td class="paramname">P</td><td>Payload type (deduced). </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor (deduced). </td></tr>
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
   </table>
   </dd>
 </dl>
@@ -402,19 +383,20 @@ template&lt;auto... Members, typename P, typename Traits&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (NGP/CIC/TSC). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling (Interp / Halo / HaloNGP / Transition). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td>Callable int -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;, giving the realm's coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths). </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ad81e46e64b75c767e58bfe6bc33babfa" name="ad81e46e64b75c767e58bfe6bc33babfa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad81e46e64b75c767e58bfe6bc33babfa">&#9670;&#160;</a></span>depositGathered()</h2>
+<a id="a2cf6098b3566f083a13f933a1bb56046" name="a2cf6098b3566f083a13f933a1bb56046"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cf6098b3566f083a13f933a1bb56046">&#9670;&#160;</a></span>depositGathered()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename P, typename Traits, typename CellGather&gt; </div>
+template&lt;typename P, typename Traits, typename CellGather, typename MaskGetter&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -447,7 +429,12 @@ template&lt;typename P, typename Traits, typename CellGather&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">CellGather</td>          <td class="paramname"><span class="paramname"><em>a_cellGather</em></span>&#160;)</td>
+          <td class="paramtype">CellGather</td>          <td class="paramname"><span class="paramname"><em>a_cellGather</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -458,11 +445,12 @@ template&lt;typename P, typename Traits, typename CellGather&gt; </div>
 </div><div class="memdoc">
 
 <p>Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh. </p>
-<p>Generalizes <a class="el" href="#ab93c8ab527b294ba16e35f647f84138a" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a> to an arbitrary per-particle value (a product of columns such as weight*mobility), dispatching on the coarse-fine strategy exactly like <a class="el" href="#ab93c8ab527b294ba16e35f647f84138a" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a>. Deposits one mesh component. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Generalizes <a class="el" href="#acf7e220d5ec9e27edc09465546d1c0bc" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a> to an arbitrary per-particle value (a product of columns such as weight*mobility), dispatching on the coarse-fine strategy exactly like <a class="el" href="#acf7e220d5ec9e27edc09465546d1c0bc" title="Deposit the container-owned weight onto the AMR mesh.">depositWeight()</a>. Deposits one mesh component. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type (deduced). </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor (deduced). </td></tr>
     <tr><td class="paramname">CellGather</td><td>Callable (const <a class="el" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&amp; a_leaf, std::size_t a_i) -&gt; Real. </td></tr>
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
   </table>
   </dd>
 </dl>
@@ -474,19 +462,20 @@ template&lt;typename P, typename Traits, typename CellGather&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling (Interp / Halo / HaloNGP / Transition). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellGather</td><td>Per-particle value gatherer (leaf, index) -&gt; Real. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td>Callable int -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;, giving the realm's coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths). </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="aef4c8e93c1b5608dac5ee07ecd3b8703" name="aef4c8e93c1b5608dac5ee07ecd3b8703"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef4c8e93c1b5608dac5ee07ecd3b8703">&#9670;&#160;</a></span>depositHaloCore()</h2>
+<a id="a5ec81daecec819f800ad5e3b12fb8811" name="a5ec81daecec819f800ad5e3b12fb8811"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ec81daecec819f800ad5e3b12fb8811">&#9670;&#160;</a></span>depositHaloCore()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
+template&lt;int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -504,7 +493,27 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">PatchDeposit</td>          <td class="paramname"><span class="paramname"><em>a_patchDeposit</em></span>&#160;) const</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PatchDeposit</td>          <td class="paramname"><span class="paramname"><em>a_patchDeposit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PatchGhosts</td>          <td class="paramname"><span class="paramname"><em>a_patchGhosts</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
@@ -515,19 +524,25 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
 </div><div class="memdoc">
 
 <p>The CoarseFineDeposition::Halo deposition algorithm. </p>
-<p>Like Interp for the on-level deposit + fine-ghost-&gt;coarse transfer, but instead of interpolating the coarse mass under the fine grid, it re-deposits the coarse-side halo particles (selected by the width-1 outer-halo mask, copied into the container mask holder) on the refined-coarse grid with widthScale = refinement ratio, and adds that to the fine level. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Like Interp for the on-level deposit and the fine-ghost transfer to the coarse level, but instead of interpolating the coarse mass under the fine grid, the coarse-side halo particles (width-1 outer-halo mask) are copied into the finer patches as coarse ghosts and deposit there with the coarse width, clipped to the valid box. Their coarse-level deposit is unchanged; its part under the finer grid is invalid. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">NCOMP</td><td>Number of mesh components (compile-time; selects the FiCo buffer). </td></tr>
+    <tr><td class="paramname">NCOMP</td><td>Number of mesh components (compile-time). </td></tr>
     <tr><td class="paramname">Container</td><td><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> type (deduced). </td></tr>
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
     <tr><td class="paramname">PatchDeposit</td><td>Callable (const <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a>&amp;, EBCellFAB&amp;, const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&amp;, Real widthScale). </td></tr>
+    <tr><td class="paramname">PatchGhosts</td><td>Same signature, depositing only the coarse ghosts. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>AMR mesh data (RESET then filled). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container (its mask holder is filled then cleared). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container (its mask holder and ghosts are filled then cleared). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> coarse-to-fine mask getter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_patchDeposit</td><td>Per-patch deposition functor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_patchGhosts</td><td>Per-patch coarse-ghost deposition functor. </td></tr>
   </table>
   </dd>
 </dl>
@@ -574,7 +589,7 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit, typename Patch
 </div><div class="memdoc">
 
 <p>The CoarseFineDeposition::HaloNGP deposition algorithm. </p>
-<p>Moves the coarse-side halo particles (width-1 mask) out of the valid holder, deposits the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement boundary, so no refined-coarse buffer is needed. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Moves the coarse-side halo particles (width-1 mask) out of the valid holder, deposits the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement boundary. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">NCOMP</td><td>Number of mesh components (compile-time). </td></tr>
     <tr><td class="paramname">Container</td><td><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> type (deduced). </td></tr>
@@ -595,8 +610,8 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit, typename Patch
 
 </div>
 </div>
-<a id="ae6a4d0bf7c6f34ec411b8513ed159363" name="ae6a4d0bf7c6f34ec411b8513ed159363"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6a4d0bf7c6f34ec411b8513ed159363">&#9670;&#160;</a></span>depositInterpCore()</h2>
+<a id="a217633e1f02f3723c2583f3ba13ccee4" name="a217633e1f02f3723c2583f3ba13ccee4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217633e1f02f3723c2583f3ba13ccee4">&#9670;&#160;</a></span>depositInterpCore()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -624,6 +639,11 @@ template&lt;typename Container, typename PatchDeposit&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_cutCellsHoldDensity</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">PatchDeposit</td>          <td class="paramname"><span class="paramname"><em>a_patchDeposit</em></span>&#160;) const</td>
         </tr>
       </table>
@@ -647,6 +667,7 @@ template&lt;typename Container, typename PatchDeposit&gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>AMR mesh data (RESET then filled). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numComp</td><td>Number of mesh components written. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cutCellsHoldDensity</td><td>True if the cut cells hold the density rather than kappa times it (mirror deposition). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_patchDeposit</td><td>Per-patch deposition functor. </td></tr>
   </table>
   </dd>
@@ -654,13 +675,13 @@ template&lt;typename Container, typename PatchDeposit&gt; </div>
 
 </div>
 </div>
-<a id="ad94e8663a7eedbb71b434f484124b1db" name="ad94e8663a7eedbb71b434f484124b1db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad94e8663a7eedbb71b434f484124b1db">&#9670;&#160;</a></span>depositTransitionCore()</h2>
+<a id="ace40d7a9a595918dcf34a5b3d9a0c0cb" name="ace40d7a9a595918dcf34a5b3d9a0c0cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace40d7a9a595918dcf34a5b3d9a0c0cb">&#9670;&#160;</a></span>depositTransitionCore()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
+template&lt;int NCOMP, typename Container, typename MaskGetter, typename PatchDeposit, typename PatchGhosts&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -683,7 +704,27 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">PatchDeposit</td>          <td class="paramname"><span class="paramname"><em>a_patch</em></span>&#160;) const</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_cutCellsHoldDensity</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PatchDeposit</td>          <td class="paramname"><span class="paramname"><em>a_patch</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PatchGhosts</td>          <td class="paramname"><span class="paramname"><em>a_patchGhosts</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
@@ -694,11 +735,13 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
 </div><div class="memdoc">
 
 <p>The CoarseFineDeposition::Transition deposition algorithm. </p>
-<p>NGP short-circuits to the Interp result. Otherwise: moves the coarse-side transition particles out of the valid holder; deposits the remaining particles with the kernel and folds fine-ghost mass to coarse; then deposits the transition particles on the refined-coarse grid with the fine-grid width and distributes that buffer to both the fine level (addFiCoDataToFine + exchangeAndAddFiCoData) and the coarse level (restrictAndAddFiCoDataToCoar); finally returns the transition particles to the valid holder. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>NGP short-circuits to the Interp result. Otherwise, the coarser particles within the transition band of a finer grid deposit with the finer-level width: on their own level, into the same data as the other particles, and as coarse ghosts in the finer patches their clouds reach, clipped to the valid box. The part of the coarse-level deposit under the finer grid is invalid, so the composite mass is conserved. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">NCOMP</td><td>Number of mesh components (compile-time). </td></tr>
     <tr><td class="paramname">Container</td><td><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> type (deduced). </td></tr>
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
     <tr><td class="paramname">PatchDeposit</td><td>Per-patch deposit with the requested kernel. </td></tr>
+    <tr><td class="paramname">PatchGhosts</td><td>Per-patch coarse-ghost deposit with the requested kernel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -707,20 +750,24 @@ template&lt;int NCOMP, typename Container, typename PatchDeposit&gt; </div>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>AMR mesh data (RESET then filled). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle container. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cutCellsHoldDensity</td><td>True if the cut cells hold the density (mirror deposition); passed to the Interp fallback for NGP. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> coarse-to-fine mask getter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_patch</td><td>Per-patch deposit functor (requested kernel). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_patchGhosts</td><td>Per-patch coarse-ghost deposit functor. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ab93c8ab527b294ba16e35f647f84138a" name="ab93c8ab527b294ba16e35f647f84138a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab93c8ab527b294ba16e35f647f84138a">&#9670;&#160;</a></span>depositWeight()</h2>
+<a id="acf7e220d5ec9e27edc09465546d1c0bc" name="acf7e220d5ec9e27edc09465546d1c0bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf7e220d5ec9e27edc09465546d1c0bc">&#9670;&#160;</a></span>depositWeight()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename P, typename Traits&gt; </div>
+template&lt;typename P, typename Traits, typename MaskGetter&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -748,7 +795,12 @@ template&lt;typename P, typename Traits&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_irregularDeposition</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_irregularDeposition</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -763,6 +815,7 @@ template&lt;typename P, typename Traits&gt; </div>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type (deduced). </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor (deduced). </td></tr>
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
   </table>
   </dd>
 </dl>
@@ -773,14 +826,238 @@ template&lt;typename P, typename Traits&gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (NGP/CIC/TSC). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling (Interp / Halo / HaloNGP / Transition). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td>Callable int -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;, giving the realm's coarse-to-fine particle ghost mask of a width (see getCoarseToFineMaskWidths). </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a4c532d3e483268c2317422f1cee0fcf3" name="a4c532d3e483268c2317422f1cee0fcf3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c532d3e483268c2317422f1cee0fcf3">&#9670;&#160;</a></span>getTransitionMaskWidth()</h2>
+<a id="acbef5f91618b86cb5cfc7eaa12e82280" name="acbef5f91618b86cb5cfc7eaa12e82280"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbef5f91618b86cb5cfc7eaa12e82280">&#9670;&#160;</a></span>fillCoarseGhosts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Container&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBAMRParticleMesh::fillCoarseGhosts </td>
+          <td>(</td>
+          <td class="paramtype">Container &amp;</td>          <td class="paramname"><span class="paramname"><em>a_particles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_forceIrregNGP</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy the mask-holder particles into the finer patches as coarse ghosts. </p>
+<p>When NGP is forced in cut cells, particles in cut cells deposit by NGP on their own level only, so they are not copied. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Container</td><td><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> type (deduced). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particle container. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFine</td><td>Per-level coarse-to-fine particle ghost mask. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP in cut cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5ba60b2d217c0291a0ff52cfd0fd6083" name="a5ba60b2d217c0291a0ff52cfd0fd6083"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ba60b2d217c0291a0ff52cfd0fd6083">&#9670;&#160;</a></span>getCoarseToFineMaskWidths()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; EBAMRParticleMesh::getCoarseToFineMaskWidths </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a></td>          <td class="paramname"><span class="paramname"><em>a_coarseFineDeposition</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The coarse-to-fine particle ghost-mask widths a deposition needs between two levels. </p>
+<p>Callers register these through <a class="el" href="classAmrMesh.html#aa31953abca4d7f560f4ce2b025598455" title="Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs.">AmrMesh::registerParticleDeposition</a> before regridding. Interp and HaloNGP need none; Halo needs getHaloGhostWidth; Transition needs getTransitionMaskWidth and getTransitionGhostWidth. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the level and the finer one. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The widths (all &gt; 0). </dd></dl>
+
+</div>
+</div>
+<a id="acf9303b437d076e729baaf5029c65f2e" name="acf9303b437d076e729baaf5029c65f2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf9303b437d076e729baaf5029c65f2e">&#9670;&#160;</a></span>getCoarToFineMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename MaskGetter, typename WidthFn&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> EBAMRParticleMesh::getCoarToFineMask </td>
+          <td>(</td>
+          <td class="paramtype">const MaskGetter &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFineMasks</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const WidthFn &amp;</td>          <td class="paramname"><span class="paramname"><em>a_width</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assemble a per-level coarse-to-fine particle ghost mask from the realm's masks. </p>
+<p>Entry lvl, for each level with a finer level, is entry lvl of the realm's mask of width a_width(m_refRat[lvl]); it is null where that width is 0 and on the finest level. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MaskGetter</td><td>Callable (int width) -&gt; const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815" title="AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.">AMRParticleGhostMask</a>&amp;. </td></tr>
+    <tr><td class="paramname">WidthFn</td><td>Callable (int refRat) -&gt; int. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFineMasks</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> mask getter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_width</td><td>Mask width of a level pair, from its refinement ratio. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The per-level mask. </dd></dl>
+
+</div>
+</div>
+<a id="a3f29b4b743836572010e2db8dea5e584" name="a3f29b4b743836572010e2db8dea5e584"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f29b4b743836572010e2db8dea5e584">&#9670;&#160;</a></span>getHaloGhostWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int EBAMRParticleMesh::getHaloGhostWidth </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Width, in finer cells, of the coarse-to-fine particle ghost mask that Halo deposition fills with. </p>
+<p>The reach into the finer level of a coarser-width cloud: refRat/2 for CIC, refRat for TSC, and 0 for NGP, whose cloud never leaves the particle's own cell. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the level and the finer one. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The mask width. </dd></dl>
+
+</div>
+</div>
+<a id="af18ad2c3bfc5cbecd29cfbbaf1030779" name="af18ad2c3bfc5cbecd29cfbbaf1030779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af18ad2c3bfc5cbecd29cfbbaf1030779">&#9670;&#160;</a></span>getTransitionGhostWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int EBAMRParticleMesh::getTransitionGhostWidth </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Width, in finer cells, of the coarse-to-fine particle ghost mask that Transition deposition fills with. </p>
+<p>The band width plus the one cell that a finer-width CIC or TSC cloud reaches. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the level and the finer one. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The mask width, or 0 for NGP. </dd></dl>
+
+</div>
+</div>
+<a id="a863e97b2fdab3ac708976c017798bd25" name="a863e97b2fdab3ac708976c017798bd25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a863e97b2fdab3ac708976c017798bd25">&#9670;&#160;</a></span>getTransitionMaskWidth()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -796,25 +1073,25 @@ template&lt;typename P, typename Traits&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;) const</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_refRat</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Transition-mask width for a kernel: CIC -&gt; refRat/2, TSC -&gt; refRat (NGP is handled upstream). </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Transition band width, in finer cells: the coarser particles within this distance of the finer grid deposit with the finer-level width. </p>
+<p>refRat/2 for CIC and refRat for TSC. NGP has no band (Transition with NGP deposits as Interp). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the level and the finer one. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The transition band width (in fine cells). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The band width. </dd></dl>
 
 </div>
 </div>
@@ -962,52 +1239,6 @@ template&lt;typename P, typename Traits&gt; </div>
 
 <p>Copy assignment is deleted. </p>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this. </dd></dl>
-
-</div>
-</div>
-<a id="a4da4e775ddafcb0f6fc17041cfaf3e1c" name="a4da4e775ddafcb0f6fc17041cfaf3e1c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4da4e775ddafcb0f6fc17041cfaf3e1c">&#9670;&#160;</a></span>transferMaskParticlesTransition()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Container&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBAMRParticleMesh::transferMaskParticlesTransition </td>
-          <td>(</td>
-          <td class="paramtype">Container &amp;</td>          <td class="paramname"><span class="paramname"><em>a_particles</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></td>          <td class="paramname"><span class="paramname"><em>a_depositionType</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Move the coarse-side transition particles into the container mask holder (using the FiCo mask). </p>
-<p>The transition mask lives on the refined-coarse grid, so this is done directly here (the container's transferMaskParticles works on the valid grids). Coarse particles whose fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Container</td><td><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> type (deduced). </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particle container. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (selects the mask width; NGP is a no-op). </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

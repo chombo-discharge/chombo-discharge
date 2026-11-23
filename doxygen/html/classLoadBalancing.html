@@ -81,6 +81,7 @@ $(function() {
   <div class="summary">
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
+<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classLoadBalancing-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">LoadBalancing Class Reference</div></div>
 </div><!--header-->
@@ -141,6 +142,12 @@ Static Protected Member Functions</h2></td></tr>
 <tr class="memitem:aa42e270b7cadb0c4a5a5855c24c536e1" id="r_aa42e270b7cadb0c4a5a5855c24c536e1"><td class="memTemplParams" colspan="2">template&lt;class T, int DIM&gt; </td></tr>
 <tr class="memitem:aa42e270b7cadb0c4a5a5855c24c536e1 template"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa42e270b7cadb0c4a5a5855c24c536e1">sortSFC</a> (Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads, const std::function&lt; uint64_t(const std::array&lt; uint32_t, DIM &gt;)&gt; &amp;a_sfcEncoder) noexcept</td></tr>
 <tr class="memdesc:aa42e270b7cadb0c4a5a5855c24c536e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic SFC sorting function.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
+<tr class="memitem:a9d283116aa72a6cb499859b96a6169de" id="r_a9d283116aa72a6cb499859b96a6169de"><td class="memItemLeft" align="right" valign="top"><a id="a9d283116aa72a6cb499859b96a6169de" name="a9d283116aa72a6cb499859b96a6169de"></a>
+static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>s_sfcMaxCoordinate</b> = 1U &lt;&lt; 21</td></tr>
+<tr class="memdesc:a9d283116aa72a6cb499859b96a6169de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of tiles per direction an SFC index can hold (21 bits per direction in a 64-bit index). <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Static class which contains various load balancing routines. </p>
@@ -343,7 +350,7 @@ template&lt;int DIM&gt; </div>
 <p>Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). Aborts otherwise. </td></tr>
   </table>
   </dd>
 </dl>
@@ -477,7 +484,7 @@ template&lt;int DIM&gt; </div>
 <p>Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). Aborts otherwise. </td></tr>
   </table>
   </dd>
 </dl>
@@ -732,11 +739,11 @@ template&lt;class T, int DIM&gt; </div>
 </div><div class="memdoc">
 
 <p>Generic SFC sorting function. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>The curve is laid over tiles, not cells. The tile size is the largest power of two that divides the corners of all the boxes, and a box's position on the curve is that of the tile at its lower corner. Aborts if a box has a negative corner, or if a tile coordinate does not fit in 21 bits. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_boxes</td><td>Grid boxes to be sorted </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_loads</td><td>Computational loads to be sorted along with the boxes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_sfcEncoder</td><td>Function for turning a grid index into an SFC index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sfcEncoder</td><td>Function for turning a tile index into an SFC index. </td></tr>
   </table>
   </dd>
 </dl>

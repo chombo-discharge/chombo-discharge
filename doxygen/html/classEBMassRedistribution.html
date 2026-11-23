@@ -100,13 +100,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9a367b6a0b7c139370aec08f02d9b615" id="r_a9a367b6a0b7c139370aec08f02d9b615"><td class="memItemLeft" align="right" valign="top"><a id="a9a367b6a0b7c139370aec08f02d9b615" name="a9a367b6a0b7c139370aec08f02d9b615"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBMassRedistribution</b> (const <a class="el" href="classEBMassRedistribution.html">EBMassRedistribution</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a9a367b6a0b7c139370aec08f02d9b615"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor is not allowed. <br /></td></tr>
-<tr class="memitem:a7599ae82a8945f750fd8221bda63f40a" id="r_a7599ae82a8945f750fd8221bda63f40a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7599ae82a8945f750fd8221bda63f40a">EBMassRedistribution</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
-<tr class="memdesc:a7599ae82a8945f750fd8221bda63f40a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function and puts object in usable state.  <br /></td></tr>
+<tr class="memitem:a3bea068aedd9918463361cc8652ba178" id="r_a3bea068aedd9918463361cc8652ba178"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bea068aedd9918463361cc8652ba178">EBMassRedistribution</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_fineCellsRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
+<tr class="memdesc:a3bea068aedd9918463361cc8652ba178"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function and puts object in usable state.  <br /></td></tr>
 <tr class="memitem:ac90260c06e14ecb6e8631e84aafdaf9d" id="r_ac90260c06e14ecb6e8631e84aafdaf9d"><td class="memItemLeft" align="right" valign="top"><a id="ac90260c06e14ecb6e8631e84aafdaf9d" name="ac90260c06e14ecb6e8631e84aafdaf9d"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBMassRedistribution</b> () noexcept</td></tr>
 <tr class="memdesc:ac90260c06e14ecb6e8631e84aafdaf9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="memitem:a61d1eed48dd993a451c064bf94798383" id="r_a61d1eed48dd993a451c064bf94798383"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61d1eed48dd993a451c064bf94798383">define</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
-<tr class="memdesc:a61d1eed48dd993a451c064bf94798383"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
+<tr class="memitem:aa0d205b7c9bb2d1597fb9b31871fee82" id="r_aa0d205b7c9bb2d1597fb9b31871fee82"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0d205b7c9bb2d1597fb9b31871fee82">define</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarsened, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgRefined, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_fineCellsRefined, const EBLevelGrid &amp;a_eblgFine, const int a_refToCoar, const int a_refToFine, const int a_redistRadius) noexcept</td></tr>
+<tr class="memdesc:aa0d205b7c9bb2d1597fb9b31871fee82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:ac88c4347752d5052370fe50ecefb34f0" id="r_ac88c4347752d5052370fe50ecefb34f0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac88c4347752d5052370fe50ecefb34f0">redistributeCoar</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real &amp;a_scaleCoar, const Interval &amp;a_variables) const noexcept</td></tr>
 <tr class="memdesc:ac88c4347752d5052370fe50ecefb34f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute the input quantity to the coarse level.  <br /></td></tr>
 <tr class="memitem:ae18ca253ca3f0080bc29df356c8293f5" id="r_ae18ca253ca3f0080bc29df356c8293f5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae18ca253ca3f0080bc29df356c8293f5">redistributeLevel</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_deltaM, const Real &amp;a_scale, const Interval &amp;a_variables) const noexcept</td></tr>
@@ -158,7 +158,10 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblg</b></td
 <tr class="memdesc:a4ef071adc44f969f2b5595881dacba18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids on this level. <br /></td></tr>
 <tr class="memitem:a16dff9fa59b6280a190e4cf18a765c80" id="r_a16dff9fa59b6280a190e4cf18a765c80"><td class="memItemLeft" align="right" valign="top"><a id="a16dff9fa59b6280a190e4cf18a765c80" name="a16dff9fa59b6280a190e4cf18a765c80"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgRefined</b></td></tr>
-<tr class="memdesc:a16dff9fa59b6280a190e4cf18a765c80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids on this level that are a coarsening of the fine level. <br /></td></tr>
+<tr class="memdesc:a16dff9fa59b6280a190e4cf18a765c80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids on this level refined to the fine level's resolution, with the fine level's geometry copied on. <br /></td></tr>
+<tr class="memitem:a5cf18c9e105cd149d0900cc198e7d7ff" id="r_a5cf18c9e105cd149d0900cc198e7d7ff"><td class="memItemLeft" align="right" valign="top"><a id="a5cf18c9e105cd149d0900cc198e7d7ff" name="a5cf18c9e105cd149d0900cc198e7d7ff"></a>
+RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fineCellsRefined</b></td></tr>
+<tr class="memdesc:a5cf18c9e105cd149d0900cc198e7d7ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of m_eblgRefined that hold the fine level's geometry. <br /></td></tr>
 <tr class="memitem:ad8b660bea3cad749cd0862e1e754cd09" id="r_ad8b660bea3cad749cd0862e1e754cd09"><td class="memItemLeft" align="right" valign="top"><a id="ad8b660bea3cad749cd0862e1e754cd09" name="ad8b660bea3cad749cd0862e1e754cd09"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFine</b></td></tr>
 <tr class="memdesc:ad8b660bea3cad749cd0862e1e754cd09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine grids. <br /></td></tr>
@@ -198,8 +201,8 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
 <p>Every cell in the neighborhood of cell i gets a weight 1/totalVolume. Note that proper division by the grid resolution is not made here; the user will have to ensure proper scaling of his/her variables when calling the actual redistribution functions. The scaling factors depend on what is actually being redistributed, and the user will need to work this out on paper.</p>
 <p>The code has only been verified and validated for a redistribution radius of 1, which is what chombo-discharge uses. Larger radii are accepted but untested; with radius 2, mass is known to be lost across a refinement ratio of 4. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7599ae82a8945f750fd8221bda63f40a" name="a7599ae82a8945f750fd8221bda63f40a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7599ae82a8945f750fd8221bda63f40a">&#9670;&#160;</a></span>EBMassRedistribution()</h2>
+<a id="a3bea068aedd9918463361cc8652ba178" name="a3bea068aedd9918463361cc8652ba178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bea068aedd9918463361cc8652ba178">&#9670;&#160;</a></span>EBMassRedistribution()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -226,6 +229,11 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgRefined</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineCellsRefined</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -265,7 +273,8 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement factor between this level and the coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement factor between this level and the fine level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_redistRadius</td><td>Radius of the redistribution neighbourhood, in cells. Only verified and validated for 1. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgRefined</td><td>Eblg refined </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgRefined</td><td>Refined grids, with geometry copied from the fine level (see <a class="el" href="classPhaseRealm.html#a62d6a36f4e4d8f285d4110d8ed1321fb" title="Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.">PhaseRealm::defineEBLevelGridFiCo</a>). Their ghost cells must reach a_refToFine * a_redistRadius cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineCellsRefined</td><td>Cells of a_eblgRefined that hold the fine level's geometry, for assertions (null without a fine level and in release builds). </td></tr>
   </table>
   </dd>
 </dl>
@@ -273,8 +282,8 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a61d1eed48dd993a451c064bf94798383" name="a61d1eed48dd993a451c064bf94798383"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61d1eed48dd993a451c064bf94798383">&#9670;&#160;</a></span>define()</h2>
+<a id="aa0d205b7c9bb2d1597fb9b31871fee82" name="aa0d205b7c9bb2d1597fb9b31871fee82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0d205b7c9bb2d1597fb9b31871fee82">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -301,6 +310,11 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgRefined</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineCellsRefined</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -336,7 +350,8 @@ LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarser grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoarsened</td><td>Coarsened grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids on this level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgRefined</td><td>Refined grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgRefined</td><td>Refined grids, with geometry copied from the fine level (see <a class="el" href="classPhaseRealm.html#a62d6a36f4e4d8f285d4110d8ed1321fb" title="Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.">PhaseRealm::defineEBLevelGridFiCo</a>). Their ghost cells must reach a_refToFine * a_redistRadius cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineCellsRefined</td><td>Cells of a_eblgRefined that hold the fine level's geometry, for assertions (null without a fine level and in release builds). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement factor between this level and the coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement factor between this level and the fine level </td></tr>

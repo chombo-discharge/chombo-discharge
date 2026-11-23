@@ -214,7 +214,8 @@ After the regrid, the solvers are re-filled with initial data. I.e., initial dat
 <h3>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading"></a></h3>
 <p>If a simulation uses the restart functionality (i.e., <em>does not start</em> from the first time step), <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will execute the following steps in <code class="docutils literal notranslate"><span class="pre">setupAndRun(...)</span></code>.</p>
 <ol class="arabic simple">
-<li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.</p></li>
+<li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.
+With polyhedral geometry, the geometry is read from the graph file the checkpoint names, if it names one (see <a class="reference internal" href="../Base/Control.html#chap-restartingsimulations"><span class="std std-ref">Restarting simulations</span></a>).</p></li>
 <li><p>Read a checkpoint file that contains the grids and all the data that have been checkpointed by the solvers.
 <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will issue an error and abort if the checkpoint file does not exist.</p></li>
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> to perform a <em>post-checkpoint</em> step.

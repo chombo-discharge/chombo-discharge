@@ -108,13 +108,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a12350349cfc0fcbe47f1e8bba6968ac1" id="r_a12350349cfc0fcbe47f1e8bba6968ac1"><td class="memItemLeft" align="right" valign="top"><a id="a12350349cfc0fcbe47f1e8bba6968ac1" name="a12350349cfc0fcbe47f1e8bba6968ac1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBGradient</b> (const <a class="el" href="classEBGradient.html">EBGradient</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a12350349cfc0fcbe47f1e8bba6968ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
-<tr class="memitem:a3713430dc2df53b36ba45c8bc64e67ef" id="r_a3713430dc2df53b36ba45c8bc64e67ef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3713430dc2df53b36ba45c8bc64e67ef">EBGradient</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
-<tr class="memdesc:a3713430dc2df53b36ba45c8bc64e67ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calsl the define function.  <br /></td></tr>
+<tr class="memitem:a0276b1e6c8b826615b1bd54064b21eac" id="r_a0276b1e6c8b826615b1bd54064b21eac"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0276b1e6c8b826615b1bd54064b21eac">EBGradient</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_fiCoFineCells, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
+<tr class="memdesc:a0276b1e6c8b826615b1bd54064b21eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calsl the define function.  <br /></td></tr>
 <tr class="memitem:a0399a518e78fe4c6a7e5ada3614e855f" id="r_a0399a518e78fe4c6a7e5ada3614e855f"><td class="memItemLeft" align="right" valign="top"><a id="a0399a518e78fe4c6a7e5ada3614e855f" name="a0399a518e78fe4c6a7e5ada3614e855f"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBGradient</b> () noexcept</td></tr>
 <tr class="memdesc:a0399a518e78fe4c6a7e5ada3614e855f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
-<tr class="memitem:a305b9c6e9ec0256f28dd17ec6f159822" id="r_a305b9c6e9ec0256f28dd17ec6f159822"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a305b9c6e9ec0256f28dd17ec6f159822">define</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
-<tr class="memdesc:a305b9c6e9ec0256f28dd17ec6f159822"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
+<tr class="memitem:ac43295fa7a1b8ab13b28b939a81067e1" id="r_ac43295fa7a1b8ab13b28b939a81067e1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac43295fa7a1b8ab13b28b939a81067e1">define</a> (const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblgFiCo, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_fiCoFineCells, const bool a_hasFine, const Real a_dx, const int a_refRat, const int a_order, const int a_weighting, const IntVect a_ghostVector) noexcept</td></tr>
+<tr class="memdesc:ac43295fa7a1b8ab13b28b939a81067e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="memitem:a2eb1e4369073b7b115033a806c03c0c5" id="r_a2eb1e4369073b7b115033a806c03c0c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2eb1e4369073b7b115033a806c03c0c5">computeLevelGradient</a> (LevelData&lt; EBCellFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const noexcept</td></tr>
 <tr class="memdesc:a2eb1e4369073b7b115033a806c03c0c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gradient using data on the input level only.  <br /></td></tr>
 <tr class="memitem:aca26e228269ae4f3b8659977c905be64" id="r_aca26e228269ae4f3b8659977c905be64"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca26e228269ae4f3b8659977c905be64">computeNormalDerivative</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_gradient, const LevelData&lt; EBCellFAB &gt; &amp;a_phi) const noexcept</td></tr>
@@ -160,6 +160,9 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFine</b>
 <tr class="memitem:a31e74b2dba5598fce244a622ad5f93ba" id="r_a31e74b2dba5598fce244a622ad5f93ba"><td class="memItemLeft" align="right" valign="top"><a id="a31e74b2dba5598fce244a622ad5f93ba" name="a31e74b2dba5598fce244a622ad5f93ba"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFiCo</b></td></tr>
 <tr class="memdesc:a31e74b2dba5598fce244a622ad5f93ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined coarse grids. <br /></td></tr>
+<tr class="memitem:a65c31ebca532c592e01f744efd39dbfb" id="r_a65c31ebca532c592e01f744efd39dbfb"><td class="memItemLeft" align="right" valign="top"><a id="a65c31ebca532c592e01f744efd39dbfb" name="a65c31ebca532c592e01f744efd39dbfb"></a>
+RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fiCoFineCells</b></td></tr>
+<tr class="memdesc:a65c31ebca532c592e01f744efd39dbfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of m_eblgFiCo that hold the fine level's geometry. <br /></td></tr>
 <tr class="memitem:a3bb6e9028b04754dba16f94a28f68d19" id="r_a3bb6e9028b04754dba16f94a28f68d19"><td class="memItemLeft" align="right" valign="top"><a id="a3bb6e9028b04754dba16f94a28f68d19" name="a3bb6e9028b04754dba16f94a28f68d19"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:a3bb6e9028b04754dba16f94a28f68d19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
@@ -226,8 +229,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dd>
 The second order one-sided differences are only as accurate as the data near the EB. With a first order EB boundary condition in the solver that produced the data (e.g. <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> with gmg_bc_order = 1), they can amplify its error; second order boundary conditions give the most accurate gradients. </dd></dl>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3713430dc2df53b36ba45c8bc64e67ef" name="a3713430dc2df53b36ba45c8bc64e67ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3713430dc2df53b36ba45c8bc64e67ef">&#9670;&#160;</a></span>EBGradient()</h2>
+<a id="a0276b1e6c8b826615b1bd54064b21eac" name="a0276b1e6c8b826615b1bd54064b21eac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0276b1e6c8b826615b1bd54064b21eac">&#9670;&#160;</a></span>EBGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -249,6 +252,11 @@ The second order one-sided differences are only as accurate as the data near the
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgFiCo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fiCoFineCells</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -293,7 +301,8 @@ The second order one-sided differences are only as accurate as the data near the
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refinement of coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refined coarse grids, with geometry copied from the fine level (see <a class="el" href="classPhaseRealm.html#a62d6a36f4e4d8f285d4110d8ed1321fb" title="Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.">PhaseRealm::defineEBLevelGridFiCo</a>). Their ghost cells must reach the fine cells of every coarse cell within two cells of a coarse box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fiCoFineCells</td><td>Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a fine level and in release builds). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hasFine</td><td>Has fine level or not </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>
@@ -427,8 +436,8 @@ The second order one-sided differences are only as accurate as the data near the
 
 </div>
 </div>
-<a id="a305b9c6e9ec0256f28dd17ec6f159822" name="a305b9c6e9ec0256f28dd17ec6f159822"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a305b9c6e9ec0256f28dd17ec6f159822">&#9670;&#160;</a></span>define()</h2>
+<a id="ac43295fa7a1b8ab13b28b939a81067e1" name="ac43295fa7a1b8ab13b28b939a81067e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac43295fa7a1b8ab13b28b939a81067e1">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -450,6 +459,11 @@ The second order one-sided differences are only as accurate as the data near the
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;</td>          <td class="paramname"><span class="paramname"><em>a_eblgFiCo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fiCoFineCells</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -494,7 +508,8 @@ The second order one-sided differences are only as accurate as the data near the
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refinement of coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFiCo</td><td>Refined coarse grids, with geometry copied from the fine level (see <a class="el" href="classPhaseRealm.html#a62d6a36f4e4d8f285d4110d8ed1321fb" title="Define the refined coarse grids m_eblgFiCo, with geometry copied from the finer level.">PhaseRealm::defineEBLevelGridFiCo</a>). Their ghost cells must reach the fine cells of every coarse cell within two cells of a coarse box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fiCoFineCells</td><td>Cells of a_eblgFiCo that hold the fine level's geometry, for assertions (null without a fine level and in release builds). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hasFine</td><td>Has fine level or not </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>

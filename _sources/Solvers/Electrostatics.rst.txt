@@ -570,7 +570,10 @@ Limitations
 ___________
 
 * Periodic domains are not supported.
-* Multi-valued cells are not supported, and abort.
+* A multi-valued cell cannot be a row: ``FieldSolverAMG`` aborts if a multi-valued cell is not covered by a finer grid.
+  Such cells occur where a feature of the geometry, such as a thin plate or a narrow gap, is thinner than the cell.
+  Refining the grid until the feature is resolved removes them from the rows, e.g. through ``Driver.refine_electrodes`` and ``Driver.refine_dielectrics``.
+  ``FieldSolverGMG`` supports multi-valued cells.
 * With the saturation charge condition, the AMG solve can converge slowly on complex geometries.
 * As in ``FieldSolverGMG``, a cut cell where no least-squares fit is accepted (see :ref:`Chap:LinearSolverDirichletBC`) has no flux through its EB face, and its potential is determined by its other faces only. With ``verbosity`` above 0, ``FieldSolverAMG`` prints the number of such cells, counted per phase, when it sets up the solver.
 * With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.

@@ -79,7 +79,6 @@ $(function() {
 <div id="doc-content">
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
@@ -89,18 +88,11 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides buffers for moving mass between two levels.  
+<p>A class for moving deposited particle mass between two levels across a refinement boundary. This class does not include any deposition functionality.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__EBCoarseFineParticleMesh_8H_source.html">CD_EBCoarseFineParticleMesh.H</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-types" class="groupheader"><a id="pub-types" name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:ac28322de791a075d85bc98414056a268" id="r_ac28322de791a075d85bc98414056a268"><td class="memItemLeft" align="right" valign="top"><a id="ac28322de791a075d85bc98414056a268" name="ac28322de791a075d85bc98414056a268"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac28322de791a075d85bc98414056a268">Average</a> { <b>Arithmetic</b>
-, <b>Conservative</b>
- }</td></tr>
-<tr class="memdesc:ac28322de791a075d85bc98414056a268"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple enum for switch between arithmetic and conservative averaging. <br /></td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa9223e5ce668dfa37a71bb655f7a1962" id="r_aa9223e5ce668dfa37a71bb655f7a1962"><td class="memItemLeft" align="right" valign="top"><a id="aa9223e5ce668dfa37a71bb655f7a1962" name="aa9223e5ce668dfa37a71bb655f7a1962"></a>
@@ -115,35 +107,14 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBCoarseFineParti
 <tr class="memdesc:a9e351ed56180a1bb49aaf58a4edc092e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="memitem:a1e17e413892b84ba2c803d663a622fd9" id="r_a1e17e413892b84ba2c803d663a622fd9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e17e413892b84ba2c803d663a622fd9">addFineGhostsToCoarse</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData) const noexcept</td></tr>
 <tr class="memdesc:a1e17e413892b84ba2c803d663a622fd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the fine-level ghost cells and add them to the coarse level.  <br /></td></tr>
-<tr class="memitem:a3ca611ee336353314986a5fbacf3fa86" id="r_a3ca611ee336353314986a5fbacf3fa86"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ca611ee336353314986a5fbacf3fa86">addFiCoDataToFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData) const noexcept</td></tr>
-<tr class="memdesc:a3ca611ee336353314986a5fbacf3fa86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.  <br /></td></tr>
-<tr class="memitem:a944fef2f990d97c5262048872770c437" id="r_a944fef2f990d97c5262048872770c437"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a944fef2f990d97c5262048872770c437">addInvalidCoarseToFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_coarData) const noexcept</td></tr>
-<tr class="memdesc:a944fef2f990d97c5262048872770c437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.  <br /></td></tr>
-<tr class="memitem:aab7101521c28e5b7bc01a8a0d7b65985" id="r_aab7101521c28e5b7bc01a8a0d7b65985"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab7101521c28e5b7bc01a8a0d7b65985">exchangeAndAddFiCoData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData) const noexcept</td></tr>
-<tr class="memdesc:aab7101521c28e5b7bc01a8a0d7b65985"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which performs an exchange+add operation on the refined coarse data.  <br /></td></tr>
-<tr class="memitem:a7d0a508fb112f92fcf0da434ac23a0fd" id="r_a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d0a508fb112f92fcf0da434ac23a0fd">restrictAndAddFiCoDataToCoar</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData, const <a class="el" href="#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a> a_average) const noexcept</td></tr>
-<tr class="memdesc:a7d0a508fb112f92fcf0da434ac23a0fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout.  <br /></td></tr>
-<tr class="memitem:af6454aafec98aaf102858f3d7f9c2af9" id="r_af6454aafec98aaf102858f3d7f9c2af9"><td class="memItemLeft" align="right" valign="top">const EBLevelGrid &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6454aafec98aaf102858f3d7f9c2af9">getEblgFiCo</a> () const</td></tr>
-<tr class="memdesc:af6454aafec98aaf102858f3d7f9c2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined version of the coarse eblevelgrid.  <br /></td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355" id="r_adced6795096224a7297dca938acf1355"><td class="memTemplParams" colspan="2">template&lt;int NCOMP&gt; </td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355 template"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adced6795096224a7297dca938acf1355">getBufferFiCo</a> () const noexcept</td></tr>
-<tr class="memdesc:adced6795096224a7297dca938acf1355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer storage on the refined coarse level.  <br /></td></tr>
+<tr class="memitem:ae7c923a3761a196b73dbea62c88d0553" id="r_ae7c923a3761a196b73dbea62c88d0553"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae7c923a3761a196b73dbea62c88d0553">addInvalidCoarseToFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const bool a_cutCellsHoldDensity) const noexcept</td></tr>
+<tr class="memdesc:ae7c923a3761a196b73dbea62c88d0553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a2bad69ac0ae797e12ea4c833abcbf969" id="r_a2bad69ac0ae797e12ea4c833abcbf969"><td class="memItemLeft" align="right" valign="top"><a id="a2bad69ac0ae797e12ea4c833abcbf969" name="a2bad69ac0ae797e12ea4c833abcbf969"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineVoFIterators</b> () noexcept</td></tr>
 <tr class="memdesc:a2bad69ac0ae797e12ea4c833abcbf969"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the vof iterators. <br /></td></tr>
-<tr class="memitem:a50a6a2433945eac71eca174dcbdd2cde" id="r_a50a6a2433945eac71eca174dcbdd2cde"><td class="memItemLeft" align="right" valign="top"><a id="a50a6a2433945eac71eca174dcbdd2cde" name="a50a6a2433945eac71eca174dcbdd2cde"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencils</b> () noexcept</td></tr>
-<tr class="memdesc:a50a6a2433945eac71eca174dcbdd2cde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the vof iterators. <br /></td></tr>
-<tr class="memitem:a5504d0a3709d7a568f1f09a2428f64a2" id="r_a5504d0a3709d7a568f1f09a2428f64a2"><td class="memItemLeft" align="right" valign="top"><a id="a5504d0a3709d7a568f1f09a2428f64a2" name="a5504d0a3709d7a568f1f09a2428f64a2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>defineBufferFiCo</b> () noexcept</td></tr>
-<tr class="memdesc:a5504d0a3709d7a568f1f09a2428f64a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the buffer storages. <br /></td></tr>
-<tr class="memitem:ad8861139131f1f9c33abe5ad4b4229ec" id="r_ad8861139131f1f9c33abe5ad4b4229ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8861139131f1f9c33abe5ad4b4229ec">conservativeAverageAndAdd</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_din) const noexcept</td></tr>
-<tr class="memdesc:ad8861139131f1f9c33abe5ad4b4229ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservatively average and add data from the refined coarse data to the coarse data.  <br /></td></tr>
-<tr class="memitem:a0d38b0ee1721ad89393ec4a9e0c80376" id="r_a0d38b0ee1721ad89393ec4a9e0c80376"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d38b0ee1721ad89393ec4a9e0c80376">arithmeticAverageAndAdd</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_din) const noexcept</td></tr>
-<tr class="memdesc:a0d38b0ee1721ad89393ec4a9e0c80376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetically average and add data from the refined coarse data to the coarse data.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -159,38 +130,20 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b>
 <tr class="memitem:a0b3fc6d6fb7d54cfa4fae27c41200bec" id="r_a0b3fc6d6fb7d54cfa4fae27c41200bec"><td class="memItemLeft" align="right" valign="top"><a id="a0b3fc6d6fb7d54cfa4fae27c41200bec" name="a0b3fc6d6fb7d54cfa4fae27c41200bec"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFine</b></td></tr>
 <tr class="memdesc:a0b3fc6d6fb7d54cfa4fae27c41200bec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine EBLevelGrid. <br /></td></tr>
-<tr class="memitem:a17f73d4365044ac8ce7949e410b28341" id="r_a17f73d4365044ac8ce7949e410b28341"><td class="memItemLeft" align="right" valign="top"><a id="a17f73d4365044ac8ce7949e410b28341" name="a17f73d4365044ac8ce7949e410b28341"></a>
-EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFiCo</b></td></tr>
-<tr class="memdesc:a17f73d4365044ac8ce7949e410b28341"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined coarse EBLevelGrid. <br /></td></tr>
 <tr class="memitem:aa07deafe2adb100b56f3ba10a18a620c" id="r_aa07deafe2adb100b56f3ba10a18a620c"><td class="memItemLeft" align="right" valign="top"><a id="aa07deafe2adb100b56f3ba10a18a620c" name="aa07deafe2adb100b56f3ba10a18a620c"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoFi</b></td></tr>
 <tr class="memdesc:aa07deafe2adb100b56f3ba10a18a620c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsening of m_eblgFine. <br /></td></tr>
-<tr class="memitem:ac9211bfc013382b810698c50a5354c00" id="r_ac9211bfc013382b810698c50a5354c00"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9211bfc013382b810698c50a5354c00">m_copierFiCoToFineIncludeGhosts</a></td></tr>
-<tr class="memdesc:ac9211bfc013382b810698c50a5354c00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the refined coarse level to the fine level.  <br /></td></tr>
+<tr class="memitem:aec2a9b93227b8468c2b2bafa3930c8e3" id="r_aec2a9b93227b8468c2b2bafa3930c8e3"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec2a9b93227b8468c2b2bafa3930c8e3">m_copierCoarToCoFi</a></td></tr>
+<tr class="memdesc:aec2a9b93227b8468c2b2bafa3930c8e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the coarse level to the coarsened fine level.  <br /></td></tr>
 <tr class="memitem:ab512f78862bdbcdcf41e92044e3202e9" id="r_ab512f78862bdbcdcf41e92044e3202e9"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab512f78862bdbcdcf41e92044e3202e9">m_copierCoFiToCoarIncludeGhosts</a></td></tr>
 <tr class="memdesc:ab512f78862bdbcdcf41e92044e3202e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the coarsened fine level to the coarse level.  <br /></td></tr>
-<tr class="memitem:a3b2ae91259ed0805342c094a03fab095" id="r_a3b2ae91259ed0805342c094a03fab095"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b2ae91259ed0805342c094a03fab095">m_copierFiCoToFineNoGhosts</a></td></tr>
-<tr class="memdesc:a3b2ae91259ed0805342c094a03fab095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the refined coarse level to the fine level.  <br /></td></tr>
-<tr class="memitem:a04011529740977e46120ded8bb9132fe" id="r_a04011529740977e46120ded8bb9132fe"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04011529740977e46120ded8bb9132fe">m_copierFiCoToFiCo</a></td></tr>
-<tr class="memdesc:a04011529740977e46120ded8bb9132fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for that moves data from valid+ghost -&gt; valid on the refined coarse level.  <br /></td></tr>
-<tr class="memitem:a9c11e44c5ee44f05b815b1897507deb6" id="r_a9c11e44c5ee44f05b815b1897507deb6"><td class="memItemLeft" align="right" valign="top"><a id="a9c11e44c5ee44f05b815b1897507deb6" name="a9c11e44c5ee44f05b815b1897507deb6"></a>
-LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoReal</b></td></tr>
-<tr class="memdesc:a9c11e44c5ee44f05b815b1897507deb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer storage on the refined coarse level. One component only. <br /></td></tr>
-<tr class="memitem:a4808afe0da004c819a3944018b42e199" id="r_a4808afe0da004c819a3944018b42e199"><td class="memItemLeft" align="right" valign="top"><a id="a4808afe0da004c819a3944018b42e199" name="a4808afe0da004c819a3944018b42e199"></a>
-LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoRealVect</b></td></tr>
-<tr class="memdesc:a4808afe0da004c819a3944018b42e199"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer storage on the refined coarse level. One component only. <br /></td></tr>
 <tr class="memitem:a7c7c87ef2159ba2f65db66a0f8c64e61" id="r_a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="memItemLeft" align="right" valign="top"><a id="a7c7c87ef2159ba2f65db66a0f8c64e61" name="a7c7c87ef2159ba2f65db66a0f8c64e61"></a>
 LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterFineGhosts</b></td></tr>
-<tr class="memdesc:a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for fine-grid irregular ghost cells. <br /></td></tr>
+<tr class="memdesc:a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator over the fine ghost cells in the coarse cells of m_vofIterCoFiGhosts. <br /></td></tr>
 <tr class="memitem:a3b82a4278f576bea1ff299fc1a4b7e8b" id="r_a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b82a4278f576bea1ff299fc1a4b7e8b">m_vofIterCoFiGhosts</a></td></tr>
-<tr class="memdesc:a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.  <br /></td></tr>
-<tr class="memitem:a091cc3e010dd371ce485b0ab635a055e" id="r_a091cc3e010dd371ce485b0ab635a055e"><td class="memItemLeft" align="right" valign="top"><a id="a091cc3e010dd371ce485b0ab635a055e" name="a091cc3e010dd371ce485b0ab635a055e"></a>
-LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterCoar</b></td></tr>
-<tr class="memdesc:a091cc3e010dd371ce485b0ab635a055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for coarse cells. <br /></td></tr>
-<tr class="memitem:a463f22539ab7078d62097e60d9546dce" id="r_a463f22539ab7078d62097e60d9546dce"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a463f22539ab7078d62097e60d9546dce">m_cellArithmeticStencils</a></td></tr>
-<tr class="memdesc:a463f22539ab7078d62097e60d9546dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for arithmetic coarsening of volume data.  <br /></td></tr>
-<tr class="memitem:a2603d1be91ee3fedda76a60db1ce2ebf" id="r_a2603d1be91ee3fedda76a60db1ce2ebf"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2603d1be91ee3fedda76a60db1ce2ebf">m_cellConservativeStencils</a></td></tr>
-<tr class="memdesc:a2603d1be91ee3fedda76a60db1ce2ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservative coarsening of volume data.  <br /></td></tr>
+<tr class="memdesc:a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator over the coarse cells, on the coarsened fine grids, that are multi-valued or contain a multi-valued fine ghost cell.  <br /></td></tr>
+<tr class="memitem:abebfd013c627efcf5fcda66b2e972122" id="r_abebfd013c627efcf5fcda66b2e972122"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abebfd013c627efcf5fcda66b2e972122">m_vofIterFineCut</a></td></tr>
+<tr class="memdesc:abebfd013c627efcf5fcda66b2e972122"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator over the valid fine cells that lie in cut coarse cells.  <br /></td></tr>
 <tr class="memitem:acde53eb0d4b97c9274cb7fe39dee2308" id="r_acde53eb0d4b97c9274cb7fe39dee2308"><td class="memItemLeft" align="right" valign="top"><a id="acde53eb0d4b97c9274cb7fe39dee2308" name="acde53eb0d4b97c9274cb7fe39dee2308"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
 <tr class="memdesc:acde53eb0d4b97c9274cb7fe39dee2308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratio between the two levels. <br /></td></tr>
@@ -208,12 +161,10 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <tr class="memdesc:a89014d36cfe624cda9ff7866d2415cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of components. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides buffers for moving mass between two levels. </p>
-<p>To use this class, the user can directly some functions:</p><ol type="1">
-<li>addFineGhostsToCoarse which adds the contribution of the fine level's particles to the coarse level. This will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for getting a temporary data holder on which he can use special deposition procedures.</li>
-<li>addFiCoDataToFine where the user will have deposited coarse-level particles on a fine-grid buffer, and he/she wants to add the result back to the fine grid.</li>
-<li>addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when e.g. the coarse-grid clouds deposit underneath the fine level but the mass should end up on the fine level.</li>
-<li>exchangeAndAddFiCoData where deposited particles on the refined coarse grids have their masses synchronized (ghost cells are added across patches). </li>
+<div class="textblock"><p>A class for moving deposited particle mass between two levels across a refinement boundary. This class does not include any deposition functionality. </p>
+<p>Both operations go through the coarsened fine grids:</p><ol type="1">
+<li>addFineGhostsToCoarse adds the part of the fine level's particle clouds that hangs over the refinement boundary (the fine ghost cells) to the coarse level.</li>
+<li>addInvalidCoarseToFine interpolates the coarse-level deposit under the fine grid to the fine level, for when the coarse-grid clouds deposit under the fine level but the mass should end up on the fine level. </li>
 </ol>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a651430c6a68bf11e14d98fccf9143d1a" name="a651430c6a68bf11e14d98fccf9143d1a"></a>
@@ -267,44 +218,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a3ca611ee336353314986a5fbacf3fa86" name="a3ca611ee336353314986a5fbacf3fa86"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ca611ee336353314986a5fbacf3fa86">&#9670;&#160;</a></span>addFiCoDataToFine()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBCoarseFineParticleMesh::addFiCoDataToFine </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fiCoData</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level. </p>
-<p>This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -&gt; valid, which is what we want. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fineData</td><td>Fine mesh data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fiCoData</td><td>Refined coarse data buffer. Users will have deposited the mesh data onto this </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a1e17e413892b84ba2c803d663a622fd9" name="a1e17e413892b84ba2c803d663a622fd9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1e17e413892b84ba2c803d663a622fd9">&#9670;&#160;</a></span>addFineGhostsToCoarse()</h2>
 
@@ -333,7 +246,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div><div class="memdoc">
 
 <p>Coarsen the fine-level ghost cells and add them to the coarse level. </p>
-<p>On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement boundary. This routine coarsens that data and adds the mass to the coarse level. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement boundary. This routine coarsens that data and adds the mass to the coarse level. The data is mass per cell volume, so each coarse VoF gets the sum of the fine ghost VoFs that coarsen to it, divided by refRat^SpaceDim, which conserves mass. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse mesh data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine mesh data. </td></tr>
@@ -343,8 +256,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="a944fef2f990d97c5262048872770c437" name="a944fef2f990d97c5262048872770c437"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a944fef2f990d97c5262048872770c437">&#9670;&#160;</a></span>addInvalidCoarseToFine()</h2>
+<a id="ae7c923a3761a196b73dbea62c88d0553" name="ae7c923a3761a196b73dbea62c88d0553"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c923a3761a196b73dbea62c88d0553">&#9670;&#160;</a></span>addInvalidCoarseToFine()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -360,7 +273,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarData</em></span>&#160;) const</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarData</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_cutCellsHoldDensity</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
@@ -371,98 +289,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div><div class="memdoc">
 
 <p>Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. </p>
-<p>The data-motion plan is to use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. However, the buffers' ghost regions are set to zero so this should only add non-ghosted data between the levels. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Every valid fine VoF gets the density of the coarse VoF it coarsens to. When the data is mass per cell volume (kappa times the density in cut cells), the coarse value is scaled by the ratio of the fine to the coarse volume fraction in cut cells, which conserves mass. When the cut cells already hold the density, as with mirror deposition, the coarse value is used as is. The coarse valid data is copied onto the coarsened fine grids first, so no geometry finer than the fine level's is needed. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fineData</td><td>Fine-level data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarData</td><td>Coarse-level data. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0d38b0ee1721ad89393ec4a9e0c80376" name="a0d38b0ee1721ad89393ec4a9e0c80376"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d38b0ee1721ad89393ec4a9e0c80376">&#9670;&#160;</a></span>arithmeticAverageAndAdd()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBCoarseFineParticleMesh::arithmeticAverageAndAdd </td>
-          <td>(</td>
-          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Arithmetically average and add data from the refined coarse data to the coarse data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse-grid data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine-grid data (must be on a refined layout of the coarse grid) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid idnex </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ad8861139131f1f9c33abe5ad4b4229ec" name="ad8861139131f1f9c33abe5ad4b4229ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8861139131f1f9c33abe5ad4b4229ec">&#9670;&#160;</a></span>conservativeAverageAndAdd()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBCoarseFineParticleMesh::conservativeAverageAndAdd </td>
-          <td>(</td>
-          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fineData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Conservatively average and add data from the refined coarse data to the coarse data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse-grid data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine-grid data (must be on a refined layout of the coarse grid) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cutCellsHoldDensity</td><td>True if the cut cells hold the density rather than kappa times it. </td></tr>
   </table>
   </dd>
 </dl>
@@ -519,136 +350,9 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="aab7101521c28e5b7bc01a8a0d7b65985" name="aab7101521c28e5b7bc01a8a0d7b65985"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab7101521c28e5b7bc01a8a0d7b65985">&#9670;&#160;</a></span>exchangeAndAddFiCoData()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBCoarseFineParticleMesh::exchangeAndAddFiCoData </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fiCoData</em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Function which performs an exchange+add operation on the refined coarse data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fiCoData</td><td>Description </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="adced6795096224a7297dca938acf1355" name="adced6795096224a7297dca938acf1355"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adced6795096224a7297dca938acf1355">&#9670;&#160;</a></span>getBufferFiCo()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;int NCOMP&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LevelData&lt; EBCellFAB &gt; &amp; EBCoarseFineParticleMesh::getBufferFiCo </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get buffer storage on the refined coarse level. </p>
-<dl class="section return"><dt>Returns</dt><dd>Buffer fi co </dd></dl>
-
-</div>
-</div>
-<a id="af6454aafec98aaf102858f3d7f9c2af9" name="af6454aafec98aaf102858f3d7f9c2af9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6454aafec98aaf102858f3d7f9c2af9">&#9670;&#160;</a></span>getEblgFiCo()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const EBLevelGrid &amp; EBCoarseFineParticleMesh::getEblgFiCo </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the refined version of the coarse eblevelgrid. </p>
-<dl class="section return"><dt>Returns</dt><dd>Eblg fi co </dd></dl>
-
-</div>
-</div>
-<a id="a7d0a508fb112f92fcf0da434ac23a0fd" name="a7d0a508fb112f92fcf0da434ac23a0fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d0a508fb112f92fcf0da434ac23a0fd">&#9670;&#160;</a></span>restrictAndAddFiCoDataToCoar()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_fiCoData</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a></td>          <td class="paramname"><span class="paramname"><em>a_average</em></span>&#160;) const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse-grid data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method. Either arithmetic or conservative. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fiCoData</td><td>Fi co data </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a463f22539ab7078d62097e60d9546dce" name="a463f22539ab7078d62097e60d9546dce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a463f22539ab7078d62097e60d9546dce">&#9670;&#160;</a></span>m_cellArithmeticStencils</h2>
+<a id="aec2a9b93227b8468c2b2bafa3930c8e3" name="aec2a9b93227b8468c2b2bafa3930c8e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec2a9b93227b8468c2b2bafa3930c8e3">&#9670;&#160;</a></span>m_copierCoarToCoFi</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -657,7 +361,7 @@ template&lt;int NCOMP&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBCoarseFineParticleMesh::m_cellArithmeticStencils</td>
+          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierCoarToCoFi</td>
         </tr>
       </table>
   </td>
@@ -667,33 +371,8 @@ template&lt;int NCOMP&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Stencils for arithmetic coarsening of volume data. </p>
-<p>This is defined on the coarse grid, and indexes into the refined coarse grid. </p>
-
-</div>
-</div>
-<a id="a2603d1be91ee3fedda76a60db1ce2ebf" name="a2603d1be91ee3fedda76a60db1ce2ebf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2603d1be91ee3fedda76a60db1ce2ebf">&#9670;&#160;</a></span>m_cellConservativeStencils</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBCoarseFineParticleMesh::m_cellConservativeStencils</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Stencils for conservative coarsening of volume data. </p>
-<p>This is defined on the coarse grid, and indexes into the refined coarse grid. </p>
+<p>Copier for copying data from the coarse level to the coarsened fine level. </p>
+<dl class="section note"><dt>Note</dt><dd>This copier moves from valid in the source to valid in the destination. </dd></dl>
 
 </div>
 </div>
@@ -722,81 +401,6 @@ template&lt;int NCOMP&gt; </div>
 
 </div>
 </div>
-<a id="a04011529740977e46120ded8bb9132fe" name="a04011529740977e46120ded8bb9132fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a04011529740977e46120ded8bb9132fe">&#9670;&#160;</a></span>m_copierFiCoToFiCo</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFiCo</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Copier for that moves data from valid+ghost -&gt; valid on the refined coarse level. </p>
-<p>Needed for some of the deposition methods that deposit on the refined coarse level and then later needs to synchronize their data </p>
-
-</div>
-</div>
-<a id="ac9211bfc013382b810698c50a5354c00" name="ac9211bfc013382b810698c50a5354c00"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac9211bfc013382b810698c50a5354c00">&#9670;&#160;</a></span>m_copierFiCoToFineIncludeGhosts</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFineIncludeGhosts</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Copier for copying data from the refined coarse level to the fine level. </p>
-<dl class="section note"><dt>Note</dt><dd>This copier moves from valid+ghost in the source to valid+ghost in the destination. </dd></dl>
-
-</div>
-</div>
-<a id="a3b2ae91259ed0805342c094a03fab095" name="a3b2ae91259ed0805342c094a03fab095"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b2ae91259ed0805342c094a03fab095">&#9670;&#160;</a></span>m_copierFiCoToFineNoGhosts</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFineNoGhosts</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Copier for copying data from the refined coarse level to the fine level. </p>
-<p>This copier moves from valid+ghost in the source to valid in the destination (as opposed to m_copierCOFiToCoarIncludeGhosts which adds mass into the ghost cells). </p>
-
-</div>
-</div>
 <a id="a3b82a4278f576bea1ff299fc1a4b7e8b" name="a3b82a4278f576bea1ff299fc1a4b7e8b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3b82a4278f576bea1ff299fc1a4b7e8b">&#9670;&#160;</a></span>m_vofIterCoFiGhosts</h2>
 
@@ -817,8 +421,33 @@ template&lt;int NCOMP&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells. </p>
-<p>Essentially a coarsening of m_vofIterFineGhosts. </p>
+<p>VoFIterator over the coarse cells, on the coarsened fine grids, that are multi-valued or contain a multi-valued fine ghost cell. </p>
+<p>addFineGhostsToCoarse sums these per VoF; every other coarse cell takes the regular-cell sum. </p>
+
+</div>
+</div>
+<a id="abebfd013c627efcf5fcda66b2e972122" name="abebfd013c627efcf5fcda66b2e972122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abebfd013c627efcf5fcda66b2e972122">&#9670;&#160;</a></span>m_vofIterFineCut</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt;VoFIterator&gt; EBCoarseFineParticleMesh::m_vofIterFineCut</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>VoFIterator over the valid fine cells that lie in cut coarse cells. </p>
+<p>addInvalidCoarseToFine interpolates these per VoF; every other fine cell takes the regular-cell value. </p>
 
 </div>
 </div>

@@ -195,8 +195,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()
 <tr id="pub-methods-7" class="groupHeader"><td colspan="2"><div class="groupHeader">Ghost particles</div></td></tr>
 <tr class="memitem:a04c20c602a6b1670451440e21d5ce87b" id="r_a04c20c602a6b1670451440e21d5ce87b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04c20c602a6b1670451440e21d5ce87b">fillGhostParticles</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_maskSame, const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_maskCoarToFine, const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_maskFineToCoar)</td></tr>
 <tr class="memdesc:a04c20c602a6b1670451440e21d5ce87b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill each patch's ghost halo from prebuilt <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> particle ghost masks.  <br /></td></tr>
+<tr class="memitem:ae86ddc38e8cdd85eb6fa99d876e14769" id="r_ae86ddc38e8cdd85eb6fa99d876e14769"><td class="memTemplParams" colspan="2">template&lt;typename Keep&gt; </td></tr>
+<tr class="memitem:ae86ddc38e8cdd85eb6fa99d876e14769 template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae86ddc38e8cdd85eb6fa99d876e14769">fillCoarseGhostParticlesFromMask</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_coarToFine, const Keep &amp;a_keep)</td></tr>
+<tr class="memdesc:ae86ddc38e8cdd85eb6fa99d876e14769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy each level's mask-holder particles into the valid leaves of the next-finer level's patches, as <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ghosts.  <br /></td></tr>
 <tr class="memitem:a4e9dd5a2f8637551bb1dfbc7d5239380" id="r_a4e9dd5a2f8637551bb1dfbc7d5239380"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e9dd5a2f8637551bb1dfbc7d5239380">clearGhostParticles</a> ()</td></tr>
 <tr class="memdesc:a4e9dd5a2f8637551bb1dfbc7d5239380"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove every ghost particle (any non-Valid <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f" title="Ghost designation of a particle (container-owned metadata column).">GhostType</a>) from all levels and patches.  <br /></td></tr>
+<tr class="memitem:ae7954576e04b0c52679a517a7a97fa04" id="r_ae7954576e04b0c52679a517a7a97fa04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae7954576e04b0c52679a517a7a97fa04">clearGhostParticles</a> (const <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f">GhostType</a> a_type)</td></tr>
+<tr class="memdesc:ae7954576e04b0c52679a517a7a97fa04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the ghost particles of one <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f" title="Ghost designation of a particle (container-owned metadata column).">GhostType</a> from all levels and patches.  <br /></td></tr>
 <tr class="memitem:a70dca850979d671abcb3990e6b77cf2b" id="r_a70dca850979d671abcb3990e6b77cf2b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70dca850979d671abcb3990e6b77cf2b">claimOwnership</a> (const bool a_onlyValidRegion)</td></tr>
 <tr class="memdesc:a70dca850979d671abcb3990e6b77cf2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).  <br /></td></tr>
 <tr class="memitem:aa18fe48ab05c6389d89f829285cf80bf" id="r_aa18fe48ab05c6389d89f829285cf80bf"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa18fe48ab05c6389d89f829285cf80bf">resetParticleIDs</a> (const bool a_onlyValidRegion, const <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> a_startID)</td></tr>
@@ -210,6 +215,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()
 <tr class="memdesc:a2c5aa826fa8ed13cdfbc390838c41d40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the valid particles selected by a per-cell mask into the mask holder, all levels.  <br /></td></tr>
 <tr class="memitem:a2397eda58082392223a9b8a32d6ced77" id="r_a2397eda58082392223a9b8a32d6ced77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2397eda58082392223a9b8a32d6ced77">transferMaskParticles</a> (const int a_level, const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:a2397eda58082392223a9b8a32d6ced77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the valid particles whose cell the mask marks true into the mask holder, one level.  <br /></td></tr>
+<tr class="memitem:a280f3bc5e2d37bd192018d46b135b84e" id="r_a280f3bc5e2d37bd192018d46b135b84e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a280f3bc5e2d37bd192018d46b135b84e">transferMaskParticlesCoarToFine</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_coarToFine)</td></tr>
+<tr class="memdesc:a280f3bc5e2d37bd192018d46b135b84e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an acceptance box of a_coarToFine into the mask holder.  <br /></td></tr>
 <tr class="memitem:ab4ffb9e6f805669ca04061e64501b286" id="r_ab4ffb9e6f805669ca04061e64501b286"><td class="memItemLeft" align="right" valign="top"><a id="ab4ffb9e6f805669ca04061e64501b286" name="ab4ffb9e6f805669ca04061e64501b286"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>clearMaskParticles</b> ()</td></tr>
 <tr class="memdesc:ab4ffb9e6f805669ca04061e64501b286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all mask/halo particles on every level (keeps capacity). <br /></td></tr>
@@ -485,7 +492,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div>
 </div>
 <a id="a4e9dd5a2f8637551bb1dfbc7d5239380" name="a4e9dd5a2f8637551bb1dfbc7d5239380"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e9dd5a2f8637551bb1dfbc7d5239380">&#9670;&#160;</a></span>clearGhostParticles()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e9dd5a2f8637551bb1dfbc7d5239380">&#9670;&#160;</a></span>clearGhostParticles() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -511,6 +518,41 @@ template&lt;typename P, typename Traits&gt; </div>
 
 <p>Remove every ghost particle (any non-Valid <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f" title="Ghost designation of a particle (container-owned metadata column).">GhostType</a>) from all levels and patches. </p>
 <p>Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle order within a leaf is not preserved. Keeps leaf capacity. </p>
+
+</div>
+</div>
+<a id="ae7954576e04b0c52679a517a7a97fa04" name="ae7954576e04b0c52679a517a7a97fa04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7954576e04b0c52679a517a7a97fa04">&#9670;&#160;</a></span>clearGhostParticles() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::clearGhostParticles </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f">GhostType</a></td>          <td class="paramname"><span class="paramname"><em>a_type</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Remove the ghost particles of one <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f" title="Ghost designation of a particle (container-owned metadata column).">GhostType</a> from all levels and patches. </p>
+<p>Like <a class="el" href="#a4e9dd5a2f8637551bb1dfbc7d5239380" title="Remove every ghost particle (any non-Valid GhostType) from all levels and patches.">clearGhostParticles()</a>, but every other particle, owned or ghost, is left untouched. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Ghost type to remove. Must not be <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d" title="Owned, valid particle of this patch (not a ghost).">GhostType::Valid</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -544,7 +586,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Copy the valid particles whose cell the mask marks true into the mask holder, one level. </p>
-<p>Clears the level's mask leaves, then COPIES (keeps in the valid holder) every valid particle whose cell is true in the mask. Ids/rank are preserved. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Clears the level's mask leaves, then COPIES (keeps in the valid holder) every valid particle whose cell is true in the mask. Ghost particles are never copied. Ids/rank are preserved. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level to fill. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>Per-cell boolean mask over that level's valid grids (box == grid box). </td></tr>
@@ -711,6 +753,54 @@ template&lt;typename P, typename Traits&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pool</td><td>Per-rank pool (consumed). Same-rank bins are catenated into the destination leaf; cross-rank bins are linearized and Alltoallv'd. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_setOwnerToReceiver</td><td>If true, every cross-rank particle's rankID is set to the receiving rank (remap/regrid ownership). If false, the rankID carried in the pool is preserved (ghost particles keep their owner). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae86ddc38e8cdd85eb6fa99d876e14769" name="ae86ddc38e8cdd85eb6fa99d876e14769"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae86ddc38e8cdd85eb6fa99d876e14769">&#9670;&#160;</a></span>fillCoarseGhostParticlesFromMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<div class="memtemplate">
+template&lt;typename Keep&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::fillCoarseGhostParticlesFromMask </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Keep &amp;</td>          <td class="paramname"><span class="paramname"><em>a_keep</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy each level's mask-holder particles into the valid leaves of the next-finer level's patches, as <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ghosts. </p>
+<p>The targets come from a_coarToFine: a particle is copied to a target only if its cell on the finer level lies in that target's acceptance box, and only if a_keep accepts it. Same-rank copies are appended directly, the rest go through one Alltoallv. Existing <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" title="Ghost from the next-coarser level (level l-1).">GhostType::Coarse</a> ghosts are cleared first; other ghosts are left alone. Ghosts are transient and are dropped by <a class="el" href="#a4e9dd5a2f8637551bb1dfbc7d5239380" title="Remove every ghost particle (any non-Valid GhostType) from all levels and patches.">clearGhostParticles()</a>, <a class="el" href="#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> and <a class="el" href="#a0d300b45ec1be0ec77b4350653429d1f" title="Rebuild over a new AMR layout and redistribute the preRegrid()-cached particles onto it.">regrid()</a>. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Keep</td><td>Callable bool(int level, const DataIndex&amp; din, const IntVect&amp; cell), where cell is the particle's cell on the mask holder's level. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFine</td><td>Coarse-to-fine particle ghost mask (<a class="el" href="classRealm.html#a1899e25e33de0ef01078ad785f18b7cc" title="Get the coarse-to-fine particle ghost mask for a registered width.">Realm::getParticleGhostMaskCoarToFine</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_keep</td><td>Per-particle selection. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1943,6 +2033,41 @@ template&lt;typename P, typename Traits&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>Per-level cell masks (skipped where null). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a280f3bc5e2d37bd192018d46b135b84e" name="a280f3bc5e2d37bd192018d46b135b84e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a280f3bc5e2d37bd192018d46b135b84e">&#9670;&#160;</a></span>transferMaskParticlesCoarToFine()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::transferMaskParticlesCoarToFine </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarToFine</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an acceptance box of a_coarToFine into the mask holder. </p>
+<p>Particles are selected at the finer level's cell granularity: those within the mask's width of a finer patch. Like transferMaskParticles, this accumulates into the mask holder and preserves ids and ranks. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFine</td><td>Coarse-to-fine particle ghost mask (<a class="el" href="classRealm.html#a1899e25e33de0ef01078ad785f18b7cc" title="Get the coarse-to-fine particle ghost mask for a registered width.">Realm::getParticleGhostMaskCoarToFine</a>). </td></tr>
   </table>
   </dd>
 </dl>

@@ -887,7 +887,9 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">d
 <li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition</span></code> for the base deposition scheme.
 Valid options are <code class="docutils literal notranslate"><span class="pre">ngp</span></code>, <code class="docutils literal notranslate"><span class="pre">cic</span></code>, and <code class="docutils literal notranslate"><span class="pre">tsc</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition_cf</span></code> for the coarse-fine deposition strategy.
-Valid options are <code class="docutils literal notranslate"><span class="pre">interp</span></code>, <code class="docutils literal notranslate"><span class="pre">halo</span></code>, or <code class="docutils literal notranslate"><span class="pre">halo_ngp</span></code>.</p></li>
+Valid options are <code class="docutils literal notranslate"><span class="pre">interp</span></code>, <code class="docutils literal notranslate"><span class="pre">halo</span></code>, <code class="docutils literal notranslate"><span class="pre">halo_ngp</span></code>, or <code class="docutils literal notranslate"><span class="pre">transition</span></code>.
+<code class="docutils literal notranslate"><span class="pre">halo</span></code> and <code class="docutils literal notranslate"><span class="pre">transition</span></code> copy coarser particles into the finer patches through particle ghost masks, which do not wrap around periodic boundaries.
+On a periodic domain the run stops when these are selected; use <code class="docutils literal notranslate"><span class="pre">interp</span></code> or <code class="docutils literal notranslate"><span class="pre">halo_ngp</span></code> there.</p></li>
 </ul>
 <p>How the cut cells are treated when depositing is selected with a single flag,</p>
 <ul class="simple">

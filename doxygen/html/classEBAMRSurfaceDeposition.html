@@ -97,13 +97,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a268496e4b9369c6f13741516a3b69b18" id="r_a268496e4b9369c6f13741516a3b69b18"><td class="memItemLeft" align="right" valign="top"><a id="a268496e4b9369c6f13741516a3b69b18" name="a268496e4b9369c6f13741516a3b69b18"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBAMRSurfaceDeposition</b> () noexcept</td></tr>
 <tr class="memdesc:a268496e4b9369c6f13741516a3b69b18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Leaves the object in undefined state and requires the user to call the define function. <br /></td></tr>
-<tr class="memitem:a700f5d63da3f149e17b1e73734dcc7b4" id="r_a700f5d63da3f149e17b1e73734dcc7b4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a700f5d63da3f149e17b1e73734dcc7b4">EBAMRSurfaceDeposition</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGrids, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsCoarsenedFine, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsRefinedCoar, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_radius) noexcept</td></tr>
-<tr class="memdesc:a700f5d63da3f149e17b1e73734dcc7b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
+<tr class="memitem:aeaaf745583661785f6402a90055ded13" id="r_aeaaf745583661785f6402a90055ded13"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeaaf745583661785f6402a90055ded13">EBAMRSurfaceDeposition</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGrids, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsCoarsenedFine, const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;a_finerVoFs, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_radius) noexcept</td></tr>
+<tr class="memdesc:aeaaf745583661785f6402a90055ded13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
 <tr class="memitem:a8c66bf4e6de485d99b394acaa9c46761" id="r_a8c66bf4e6de485d99b394acaa9c46761"><td class="memItemLeft" align="right" valign="top"><a id="a8c66bf4e6de485d99b394acaa9c46761" name="a8c66bf4e6de485d99b394acaa9c46761"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBAMRSurfaceDeposition</b> () noexcept</td></tr>
 <tr class="memdesc:a8c66bf4e6de485d99b394acaa9c46761"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
-<tr class="memitem:aa58649d909e05dd7ce9b52b7f4d0026d" id="r_aa58649d909e05dd7ce9b52b7f4d0026d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa58649d909e05dd7ce9b52b7f4d0026d">define</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGrids, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsCoarsenedFine, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsRefinedCoar, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_radius) noexcept</td></tr>
-<tr class="memdesc:aa58649d909e05dd7ce9b52b7f4d0026d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts objects in usable state.  <br /></td></tr>
+<tr class="memitem:a0eb17f6e2569a05d6ada36c78360ec60" id="r_a0eb17f6e2569a05d6ada36c78360ec60"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0eb17f6e2569a05d6ada36c78360ec60">define</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGrids, const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_ebGridsCoarsenedFine, const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;a_finerVoFs, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_radius) noexcept</td></tr>
+<tr class="memdesc:a0eb17f6e2569a05d6ada36c78360ec60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts objects in usable state.  <br /></td></tr>
 <tr class="memitem:ac2b43678028e76d9cd175eeff6f7e4bc" id="r_ac2b43678028e76d9cd175eeff6f7e4bc"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits&gt; </td></tr>
 <tr class="memitem:ac2b43678028e76d9cd175eeff6f7e4bc template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2b43678028e76d9cd175eeff6f7e4bc">deposit</a> (EBAMRIVData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles) const noexcept</td></tr>
 <tr class="memdesc:ac2b43678028e76d9cd175eeff6f7e4bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the container-owned weight column of an SoA particle container onto the surface.  <br /></td></tr>
@@ -155,8 +155,8 @@ Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemR
 <tr class="memdesc:ad41900afb7dea04785c98ab65b6f848a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids on each level. <br /></td></tr>
 <tr class="memitem:aa25eeb7cbf65a2a923119bf8648b2b58" id="r_aa25eeb7cbf65a2a923119bf8648b2b58"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa25eeb7cbf65a2a923119bf8648b2b58">m_ebGridsCoarsenedFine</a></td></tr>
 <tr class="memdesc:aa25eeb7cbf65a2a923119bf8648b2b58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened grids.  <br /></td></tr>
-<tr class="memitem:a26e15c3e258c7a057f4856cde22c56ea" id="r_a26e15c3e258c7a057f4856cde22c56ea"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26e15c3e258c7a057f4856cde22c56ea">m_ebGridsRefinedCoar</a></td></tr>
-<tr class="memdesc:a26e15c3e258c7a057f4856cde22c56ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined grids.  <br /></td></tr>
+<tr class="memitem:a7a1f8209125fd59523494c645d1de2de" id="r_a7a1f8209125fd59523494c645d1de2de"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a1f8209125fd59523494c645d1de2de">m_finerVoFs</a></td></tr>
+<tr class="memdesc:a7a1f8209125fd59523494c645d1de2de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finer VoFs of the irregular VoFs of the coarsened fine grids.  <br /></td></tr>
 <tr class="memitem:a772f978749e7a4c2c6f3772c9afd3a65" id="r_a772f978749e7a4c2c6f3772c9afd3a65"><td class="memItemLeft" align="right" valign="top"><a id="a772f978749e7a4c2c6f3772c9afd3a65" name="a772f978749e7a4c2c6f3772c9afd3a65"></a>
 Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
 <tr class="memdesc:a772f978749e7a4c2c6f3772c9afd3a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratios between levels. <br /></td></tr>
@@ -172,20 +172,16 @@ Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &
 <tr class="memdesc:a9864594509a62a34f60fa434e1af9725"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservatively coarsening fine-grid data (in ghost cells) to the coarse grid.  <br /></td></tr>
 <tr class="memitem:adae39b2fb0496ed244f7ebe3e3a88007" id="r_adae39b2fb0496ed244f7ebe3e3a88007"><td class="memItemLeft" align="right" valign="top">EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adae39b2fb0496ed244f7ebe3e3a88007">m_data</a></td></tr>
 <tr class="memdesc:adae39b2fb0496ed244f7ebe3e3a88007"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data on each level.  <br /></td></tr>
-<tr class="memitem:aded3c9758c6df1a1d840dbf5839a5b75" id="r_aded3c9758c6df1a1d840dbf5839a5b75"><td class="memItemLeft" align="right" valign="top"><a id="aded3c9758c6df1a1d840dbf5839a5b75" name="aded3c9758c6df1a1d840dbf5839a5b75"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_refinedCoarData</b></td></tr>
-<tr class="memdesc:aded3c9758c6df1a1d840dbf5839a5b75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data defined on a refinement of the coarse grid. <br /></td></tr>
-<tr class="memitem:a22257248be665897fd9c2e1339e267a1" id="r_a22257248be665897fd9c2e1339e267a1"><td class="memItemLeft" align="right" valign="top"><a id="a22257248be665897fd9c2e1339e267a1" name="a22257248be665897fd9c2e1339e267a1"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarsenedFineData</b></td></tr>
-<tr class="memdesc:a22257248be665897fd9c2e1339e267a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsening of the fine-grid data. <br /></td></tr>
+<tr class="memitem:a22257248be665897fd9c2e1339e267a1" id="r_a22257248be665897fd9c2e1339e267a1"><td class="memItemLeft" align="right" valign="top">EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22257248be665897fd9c2e1339e267a1">m_coarsenedFineData</a></td></tr>
+<tr class="memdesc:a22257248be665897fd9c2e1339e267a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data on the coarsened fine grids.  <br /></td></tr>
 <tr class="memitem:a1d6c5b28ee3f5b63ce7fdf30bfdd993a" id="r_a1d6c5b28ee3f5b63ce7fdf30bfdd993a"><td class="memItemLeft" align="right" valign="top"><a id="a1d6c5b28ee3f5b63ce7fdf30bfdd993a" name="a1d6c5b28ee3f5b63ce7fdf30bfdd993a"></a>
 Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_validToValidCopiers</b></td></tr>
 <tr class="memdesc:a1d6c5b28ee3f5b63ce7fdf30bfdd993a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid to valid copiers. <br /></td></tr>
 <tr class="memitem:ab5db875a2773caaf03c70111c9d48394" id="r_ab5db875a2773caaf03c70111c9d48394"><td class="memItemLeft" align="right" valign="top">Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab5db875a2773caaf03c70111c9d48394">m_copierLevel</a></td></tr>
 <tr class="memdesc:ab5db875a2773caaf03c70111c9d48394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level copier for adding data from valid+ghost -&gt; valid.  <br /></td></tr>
-<tr class="memitem:a3999871beac53af30dccb005d1fe4071" id="r_a3999871beac53af30dccb005d1fe4071"><td class="memItemLeft" align="right" valign="top"><a id="a3999871beac53af30dccb005d1fe4071" name="a3999871beac53af30dccb005d1fe4071"></a>
-Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_copierRefinedCoarToFineNoGhosts</b></td></tr>
-<tr class="memdesc:a3999871beac53af30dccb005d1fe4071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the refined coarse level to the fine level. <br /></td></tr>
+<tr class="memitem:a6de1e060ae34aa26104632cbf7131490" id="r_a6de1e060ae34aa26104632cbf7131490"><td class="memItemLeft" align="right" valign="top"><a id="a6de1e060ae34aa26104632cbf7131490" name="a6de1e060ae34aa26104632cbf7131490"></a>
+Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_copierCoarToCoarsenedFine</b></td></tr>
+<tr class="memdesc:a6de1e060ae34aa26104632cbf7131490"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying valid data from the coarse level to the valid cells of the coarsened fine level. <br /></td></tr>
 <tr class="memitem:afc596fb99998ebde5fcf385746812e7a" id="r_afc596fb99998ebde5fcf385746812e7a"><td class="memItemLeft" align="right" valign="top"><a id="afc596fb99998ebde5fcf385746812e7a" name="afc596fb99998ebde5fcf385746812e7a"></a>
 Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_copierCoarsenedFineToCoar</b></td></tr>
 <tr class="memdesc:afc596fb99998ebde5fcf385746812e7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the coarsened fine level to the coarse level. <br /></td></tr>
@@ -193,8 +189,8 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>class for handling surface deposition of particles with EB and AMR. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a700f5d63da3f149e17b1e73734dcc7b4" name="a700f5d63da3f149e17b1e73734dcc7b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a700f5d63da3f149e17b1e73734dcc7b4">&#9670;&#160;</a></span>EBAMRSurfaceDeposition()</h2>
+<a id="aeaaf745583661785f6402a90055ded13" name="aeaaf745583661785f6402a90055ded13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeaaf745583661785f6402a90055ded13">&#9670;&#160;</a></span>EBAMRSurfaceDeposition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -215,7 +211,7 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebGridsRefinedCoar</em></span>, </td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -254,13 +250,13 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGrids</td><td>Grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsCoarsenedFine</td><td>Coarsened fine grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsRefinedCoar</td><td>Refined coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsCoarsenedFine</td><td>Coarsened fine grids. Entry lvl is level lvl+1 coarsened to level lvl. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids (see <a class="el" href="classPhaseRealm.html#abc6b3494a5acd4a0865709ec3a495008" title="Get the finer VoFs of the coarse VoFs of the coarsened fine grids.">PhaseRealm::getFinerVoFs</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement factory between levels </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. @πaram[in] a_probLo Lower-left corner of physical domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of physical domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Deposition radius </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -320,12 +316,12 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
 </div><div class="memdoc">
 
 <p>Add the invalid coarse data (i.e., underneath the fine grid) to the fine level. </p>
-<p>This does conservative interpolation to the fine grid. This all takes place on our buffer storage. </p>
+<p>This does conservative interpolation to the fine grid. The coarse data is copied onto the coarsened fine grids, and each valid fine cut cell reads the coarse VoF it coarsens to. </p>
 
 </div>
 </div>
-<a id="aa58649d909e05dd7ce9b52b7f4d0026d" name="aa58649d909e05dd7ce9b52b7f4d0026d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa58649d909e05dd7ce9b52b7f4d0026d">&#9670;&#160;</a></span>define()</h2>
+<a id="a0eb17f6e2569a05d6ada36c78360ec60" name="a0eb17f6e2569a05d6ada36c78360ec60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eb17f6e2569a05d6ada36c78360ec60">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -346,7 +342,7 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebGridsRefinedCoar</em></span>, </td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; LayoutData&lt; BaseIVFAB&lt; Vector&lt; VolIndex &gt; &gt; &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_finerVoFs</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -385,13 +381,13 @@ Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_c
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGrids</td><td>Grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsCoarsenedFine</td><td>Coarsened fine grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsRefinedCoar</td><td>Refined coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGridsCoarsenedFine</td><td>Coarsened fine grids. Entry lvl is level lvl+1 coarsened to level lvl. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerVoFs</td><td>Finer VoFs of the irregular VoFs of the coarsened fine grids, on their grids (see <a class="el" href="classPhaseRealm.html#abc6b3494a5acd4a0865709ec3a495008" title="Get the finer VoFs of the coarse VoFs of the coarsened fine grids.">PhaseRealm::getFinerVoFs</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement factory between levels </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. @πaram[in] a_probLo Lower-left corner of physical domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of physical domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Deposition radius </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -447,6 +443,31 @@ template&lt;typename P, typename Traits&gt; </div>
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a22257248be665897fd9c2e1339e267a1" name="a22257248be665897fd9c2e1339e267a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22257248be665897fd9c2e1339e267a1">&#9670;&#160;</a></span>m_coarsenedFineData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRIVData EBAMRSurfaceDeposition::m_coarsenedFineData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Data on the coarsened fine grids. </p>
+<p>Scratch for both directions between levels: addInvalidCoarseDataToFineData copies the coarse data here, and addFineGhostDataToValidCoarData coarsens the fine data here. </p>
+
+</div>
+</div>
 <a id="ae1768294eeea8995a81bf9ebfc557bd2" name="ae1768294eeea8995a81bf9ebfc557bd2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae1768294eeea8995a81bf9ebfc557bd2">&#9670;&#160;</a></span>m_coarseToFineStencils</h2>
 
@@ -468,7 +489,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Stencils for interpolating coarse-grid data to the fine grid. </p>
-<p>This is defined on the coarse grid but reaches into the refined coarse grid. </p>
+<p>Entry lvl is defined on the valid cut cells of level lvl, and each stencil reads the coarse VoF on m_ebGridsCoarsenedFine[lvl-1] that the fine VoF coarsens to. </p>
 
 </div>
 </div>
@@ -547,8 +568,8 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="a26e15c3e258c7a057f4856cde22c56ea" name="a26e15c3e258c7a057f4856cde22c56ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26e15c3e258c7a057f4856cde22c56ea">&#9670;&#160;</a></span>m_ebGridsRefinedCoar</h2>
+<a id="a7a1f8209125fd59523494c645d1de2de" name="a7a1f8209125fd59523494c645d1de2de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a1f8209125fd59523494c645d1de2de">&#9670;&#160;</a></span>m_finerVoFs</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -557,7 +578,7 @@ template&lt;typename P, typename Traits&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt;RefCountedPtr&lt;EBLevelGrid&gt; &gt; EBAMRSurfaceDeposition::m_ebGridsRefinedCoar</td>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;LayoutData&lt;BaseIVFAB&lt;Vector&lt;VolIndex&gt; &gt; &gt; &gt; &gt; EBAMRSurfaceDeposition::m_finerVoFs</td>
         </tr>
       </table>
   </td>
@@ -567,8 +588,8 @@ template&lt;typename P, typename Traits&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Refined grids. </p>
-<dl class="section note"><dt>Note</dt><dd>m_ebGridsCoarsenedFine[i] contains the refinement of m_ebGrids[i] and m_ebGridsCoarsenedFine[m_finestLevel-1] contains the nullpointer </dd></dl>
+<p>Finer VoFs of the irregular VoFs of the coarsened fine grids. </p>
+<p>Entry lvl lives on m_ebGridsCoarsenedFine[lvl]. </p>
 
 </div>
 </div>
@@ -593,7 +614,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Stencils for conservatively coarsening fine-grid data (in ghost cells) to the coarse grid. </p>
-<p>Defined on the fine grid but reaches into the refined coarse grid. </p>
+<p>Defined on the fine grid, for the cut cells of its ghost cells that no fine box holds. Each maps such a VoF to the VoF it coarsens to on the coarsened fine grid. </p>
 
 </div>
 </div>

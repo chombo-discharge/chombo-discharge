@@ -741,7 +741,10 @@ Options without a value, e.g. <code class="docutils literal notranslate"><span c
 <h3>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Periodic domains are not supported.</p></li>
-<li><p>Multi-valued cells are not supported, and abort.</p></li>
+<li><p>A multi-valued cell cannot be a row: <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> aborts if a multi-valued cell is not covered by a finer grid.
+Such cells occur where a feature of the geometry, such as a thin plate or a narrow gap, is thinner than the cell.
+Refining the grid until the feature is resolved removes them from the rows, e.g. through <code class="docutils literal notranslate"><span class="pre">Driver.refine_electrodes</span></code> and <code class="docutils literal notranslate"><span class="pre">Driver.refine_dielectrics</span></code>.
+<code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> supports multi-valued cells.</p></li>
 <li><p>With the saturation charge condition, the AMG solve can converge slowly on complex geometries.</p></li>
 <li><p>As in <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, a cut cell where no least-squares fit is accepted (see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolverdirichletbc"><span class="std std-ref">Dirichlet</span></a>) has no flux through its EB face, and its potential is determined by its other faces only. With <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> above 0, <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> prints the number of such cells, counted per phase, when it sets up the solver.</p></li>
 <li><p>With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.</p></li>

@@ -102,8 +102,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a454d2e1b2af1523c21f157d6d36f1949" id="r_a454d2e1b2af1523c21f157d6d36f1949"><td class="memItemLeft" align="right" valign="top"><a id="a454d2e1b2af1523c21f157d6d36f1949" name="a454d2e1b2af1523c21f157d6d36f1949"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PolyhedralEBGraph</b> ()</td></tr>
 <tr class="memdesc:a454d2e1b2af1523c21f157d6d36f1949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
-<tr class="memitem:a65846baf5886ba265b977caebddf6e16" id="r_a65846baf5886ba265b977caebddf6e16"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65846baf5886ba265b977caebddf6e16">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *a_coarser, const bool a_fillSplitFluid)</td></tr>
-<tr class="memdesc:a65846baf5886ba265b977caebddf6e16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
+<tr class="memitem:a7bb3d9d160431b309df82e0c3706eb0a" id="r_a7bb3d9d160431b309df82e0c3706eb0a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bb3d9d160431b309df82e0c3706eb0a">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *a_coarser, const bool a_fillSplitFluid, HDF5Handle *const a_handle)</td></tr>
+<tr class="memdesc:a7bb3d9d160431b309df82e0c3706eb0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
+<tr class="memitem:ad178acfade8b0945163ca6969f1dbdc1" id="r_ad178acfade8b0945163ca6969f1dbdc1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad178acfade8b0945163ca6969f1dbdc1">define</a> (HDF5Handle &amp;a_handle, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered)</td></tr>
+<tr class="memdesc:ad178acfade8b0945163ca6969f1dbdc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level from what the other define wrote, without the implicit function.  <br /></td></tr>
 <tr class="memitem:a284af359802a73b084806c4d0aa970c1" id="r_a284af359802a73b084806c4d0aa970c1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a284af359802a73b084806c4d0aa970c1">define</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_source, const DisjointBoxLayout &amp;a_grids, const BaseIF &amp;a_function)</td></tr>
 <tr class="memdesc:a284af359802a73b084806c4d0aa970c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of a level over a given layout, from another graph of the same level.  <br /></td></tr>
 <tr class="memitem:a6cef05c900f0d5c65e241a92c1e8bda7" id="r_a6cef05c900f0d5c65e241a92c1e8bda7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6cef05c900f0d5c65e241a92c1e8bda7">equals</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_other) const</td></tr>
@@ -196,6 +198,9 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_fil
 <tr class="memitem:a83a527bab50635427e7b384f0e2d561a" id="r_a83a527bab50635427e7b384f0e2d561a"><td class="memItemLeft" align="right" valign="top"><a id="a83a527bab50635427e7b384f0e2d561a" name="a83a527bab50635427e7b384f0e2d561a"></a>
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_filledGap</b> = 2</td></tr>
 <tr class="memdesc:a83a527bab50635427e7b384f0e2d561a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a cell was filled: its one piece of fluid is the smaller part of it, a gap between pieces of solid. <br /></td></tr>
+<tr class="memitem:aadb39816d0a42c1bfce70468be13d5ab" id="r_aadb39816d0a42c1bfce70468be13d5ab"><td class="memItemLeft" align="right" valign="top"><a id="aadb39816d0a42c1bfce70468be13d5ab" name="aadb39816d0a42c1bfce70468be13d5ab"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_numCellRecords</b> = 2 + 2 * SpaceDim</td></tr>
+<tr class="memdesc:aadb39816d0a42c1bfce70468be13d5ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records per cell in a written graph: the cell state, whether a surface is kept for the cell, and one state per face. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -207,14 +212,18 @@ Protected Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineData</b> ()</td></tr>
 <tr class="memdesc:adfc65c1656c4b639542064a4cec76010"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate the per-cell containers over m_grids: the cut-cell sets, the cell states, the face states and the refined mask. The surfaces wait for the sets. <br /></td></tr>
 <tr class="memitem:a562bf685a14e4a2d51ead94a1b794419" id="r_a562bf685a14e4a2d51ead94a1b794419"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a562bf685a14e4a2d51ead94a1b794419">defineGhostCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
-<tr class="memdesc:a562bf685a14e4a2d51ead94a1b794419"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells some tile carries into each box's cut-cell set.  <br /></td></tr>
+<tr class="memdesc:a562bf685a14e4a2d51ead94a1b794419"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify the ghost cells no tile of this level carries from their corners.  <br /></td></tr>
+<tr class="memitem:a54019bc4448122fd0b64ce77201de8ac" id="r_a54019bc4448122fd0b64ce77201de8ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54019bc4448122fd0b64ce77201de8ac">addCarriedGhostCutCells</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
+<tr class="memdesc:a54019bc4448122fd0b64ce77201de8ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Take the ghost cut cells some tile carries into each box's cut-cell set.  <br /></td></tr>
+<tr class="memitem:a24e9e659819679741c5ba56123cfc1d9" id="r_a24e9e659819679741c5ba56123cfc1d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a24e9e659819679741c5ba56123cfc1d9">finishCells</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried, const LayoutData&lt; Vector&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;a_kept)</td></tr>
+<tr class="memdesc:a24e9e659819679741c5ba56123cfc1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Complete the cells once the valid cells, their faces and surfaces, and the ghost cells no tile carries are known: the ghost cut cells, the anchors, the ghost surface cells, and the surfaces themselves.  <br /></td></tr>
 <tr class="memitem:a010b12e1f50b6d34fdd8d3ec34d2dc1f" id="r_a010b12e1f50b6d34fdd8d3ec34d2dc1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a010b12e1f50b6d34fdd8d3ec34d2dc1f">beginAnchoring</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
 <tr class="memdesc:a010b12e1f50b6d34fdd8d3ec34d2dc1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record which cells anchor fluid before any of it is spread, for fillSealedCells.  <br /></td></tr>
 <tr class="memitem:a95fe13cfcf23608b5a48c2dfeeb8f015" id="r_a95fe13cfcf23608b5a48c2dfeeb8f015"><td class="memItemLeft" align="right" valign="top"><a id="a95fe13cfcf23608b5a48c2dfeeb8f015" name="a95fe13cfcf23608b5a48c2dfeeb8f015"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>markRefined</b> ()</td></tr>
 <tr class="memdesc:a95fe13cfcf23608b5a48c2dfeeb8f015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set m_refined from m_covered, over every box and its ghost cells. <br /></td></tr>
-<tr class="memitem:a764c117ebd93414ee8f6754d40e9e6ef" id="r_a764c117ebd93414ee8f6754d40e9e6ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a764c117ebd93414ee8f6754d40e9e6ef">defineCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; *a_coarserFilled, const bool a_fillSplitFluid)</td></tr>
-<tr class="memdesc:a764c117ebd93414ee8f6754d40e9e6ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with ghost cells, and set the face states the apertures decide.  <br /></td></tr>
+<tr class="memitem:aa7622091baaa1929c84e69b1299d1f81" id="r_aa7622091baaa1929c84e69b1299d1f81"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa7622091baaa1929c84e69b1299d1f81">defineCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; *a_coarserFilled, const bool a_fillSplitFluid, HDF5Handle *const a_handle)</td></tr>
+<tr class="memdesc:aa7622091baaa1929c84e69b1299d1f81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with ghost cells, and set the face states the apertures decide.  <br /></td></tr>
 <tr class="memitem:a18b3b33398922a3a64a8be5672d99335" id="r_a18b3b33398922a3a64a8be5672d99335"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18b3b33398922a3a64a8be5672d99335">defineOuterFaces</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
 <tr class="memdesc:a18b3b33398922a3a64a8be5672d99335"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -270,6 +279,39 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
 <p>The graph covers the cut tiles only. A cell outside every tile is regular or covered, never cut, and which of the two is the geometry's box classification rather than the graph's business.</p>
 <p>Built in two steps: define makes one level from its implicit function and its tiles, and knows about the domain boundary and about faces that open onto no tile of its own level; link, given two adjacent levels, marks the coarse cells the fine level carries and the coarse faces that open onto them. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a54019bc4448122fd0b64ce77201de8ac" name="a54019bc4448122fd0b64ce77201de8ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54019bc4448122fd0b64ce77201de8ac">&#9670;&#160;</a></span>addCarriedGhostCutCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::addCarriedGhostCutCells </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_carried</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Take the ghost cut cells some tile carries into each box's cut-cell set. </p>
+<p>The cells another tile carries are expected to hold that tile's state already, by exchange. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a09eb9f1b9eb8979ef65dc0233df64ee2" name="a09eb9f1b9eb8979ef65dc0233df64ee2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a09eb9f1b9eb8979ef65dc0233df64ee2">&#9670;&#160;</a></span>addGhostSurfaceCells()</h2>
 
@@ -370,8 +412,8 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
 
 </div>
 </div>
-<a id="a65846baf5886ba265b977caebddf6e16" name="a65846baf5886ba265b977caebddf6e16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65846baf5886ba265b977caebddf6e16">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
+<a id="a7bb3d9d160431b309df82e0c3706eb0a" name="a7bb3d9d160431b309df82e0c3706eb0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bb3d9d160431b309df82e0c3706eb0a">&#9670;&#160;</a></span>define() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -422,7 +464,12 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_fillSplitFluid</em></span>&#160;)</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_fillSplitFluid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HDF5Handle *const</td>          <td class="paramname"><span class="paramname"><em>a_handle</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -444,6 +491,7 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
     <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells of this level the finer level will carry, coarsened onto this level. A cell in them is described up there and is not filled down here. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarser</td><td>Graph of the coarser level, already defined, or null where there is none. A face onto a cell it filled is closed here, and a cell with such a face is kept cut, as beside a cell this level fills. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fillSplitFluid</td><td>Whether a cell whose fluid falls into more than one piece is always filled, or only when its fluid is the larger part of it; see findUnresolvedCells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_handle</td><td>File to write what the level reads from the implicit function to, at the handle's current group, or null to write nothing. The other define reads it back. Collective when not null. </td></tr>
   </table>
   </dd>
 </dl>
@@ -451,7 +499,7 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
 </div>
 </div>
 <a id="a284af359802a73b084806c4d0aa970c1" name="a284af359802a73b084806c4d0aa970c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a284af359802a73b084806c4d0aa970c1">&#9670;&#160;</a></span>define() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a284af359802a73b084806c4d0aa970c1">&#9670;&#160;</a></span>define() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -494,8 +542,76 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
 
 </div>
 </div>
-<a id="a764c117ebd93414ee8f6754d40e9e6ef" name="a764c117ebd93414ee8f6754d40e9e6ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a764c117ebd93414ee8f6754d40e9e6ef">&#9670;&#160;</a></span>defineCells()</h2>
+<a id="ad178acfade8b0945163ca6969f1dbdc1" name="ad178acfade8b0945163ca6969f1dbdc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad178acfade8b0945163ca6969f1dbdc1">&#9670;&#160;</a></span>define() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::define </td>
+          <td>(</td>
+          <td class="paramtype">HDF5Handle &amp;</td>          <td class="paramname"><span class="paramname"><em>a_handle</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cutTiles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;</td>          <td class="paramname"><span class="paramname"><em>a_domain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_probLo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_numGhost</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_covered</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the graph of one level from what the other define wrote, without the implicit function. </p>
+<p>Reads the cell states, with the ghost cells no tile carries, the face states and the surfaces that the other define computed from the implicit function, and does everything else as that define does, so that the graph is the one it built, bit for bit. The tiles, covered cells, domain, spacing and ghost cells must be those it was built with. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_handle</td><td>File the other define wrote to, at the group it wrote this level to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cutTiles</td><td>The level's cut tiles, identical on every rank. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain of the level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing of the level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Ghost cells the cell states are kept for. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells of this level the finer level will carry, coarsened onto this level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa7622091baaa1929c84e69b1299d1f81" name="aa7622091baaa1929c84e69b1299d1f81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7622091baaa1929c84e69b1299d1f81">&#9670;&#160;</a></span>defineCells()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -521,7 +637,12 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_fillSplitFluid</em></span>&#160;)</td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_fillSplitFluid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">HDF5Handle *const</td>          <td class="paramname"><span class="paramname"><em>a_handle</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -538,6 +659,7 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
     <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarserFilled</td><td>The marker from markCoarserFilled, with one ghost cell, or null where there is no coarser level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fillSplitFluid</td><td>Whether a cell whose fluid falls into more than one piece is always filled. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_handle</td><td>File to write what is read from the implicit function to, or null. </td></tr>
   </table>
   </dd>
 </dl>
@@ -571,8 +693,8 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
 </table>
 </div><div class="memdoc">
 
-<p>Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells some tile carries into each box's cut-cell set. </p>
-<p>The cells another tile carries are expected to hold that tile's state already, by exchange. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Classify the ghost cells no tile of this level carries from their corners. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
@@ -764,6 +886,44 @@ LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.htm
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fillSplitFluid</td><td>True to fill every cell whose fluid falls into more than one piece. False to fill such a cell only when its fluid is the larger part of it &ndash; a thin solid sheet between fluid, which has to stay a barrier &ndash; and otherwise keep it as one body of several pieces. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a24e9e659819679741c5ba56123cfc1d9" name="a24e9e659819679741c5ba56123cfc1d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24e9e659819679741c5ba56123cfc1d9">&#9670;&#160;</a></span>finishCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::finishCells </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_carried</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LayoutData&lt; Vector&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_kept</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Complete the cells once the valid cells, their faces and surfaces, and the ghost cells no tile carries are known: the ghost cut cells, the anchors, the ghost surface cells, and the surfaces themselves. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kept</td><td>The surfaces of each box's valid surface cells, in the order a BoxIterator meets them. </td></tr>
   </table>
   </dd>
 </dl>

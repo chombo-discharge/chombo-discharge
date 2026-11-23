@@ -423,133 +423,162 @@ $(function() {
 <div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>    buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});</div>
 <div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>  }</div>
 <div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>  <span class="comment">// Compute Hilbert keys</span></div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; n; ++i) {</div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; b  = std::get&lt;0&gt;(buf[i]);</div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    <span class="keyword">const</span> <span class="keyword">auto</span>  iv = b.smallEnd();</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    std::array&lt;uint32_t, SpaceDim&gt; c;</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>  <span class="comment">// The curve runs over tiles, not cells. The tile size is the largest power of two that divides every corner, so</span></div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>  <span class="comment">// tile coordinates are the corners shifted right by that many bits.</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>  uint32_t allCorners = 0;</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span> </div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; n; ++i) {</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="keyword">const</span> IntVect&amp; corner = std::get&lt;0&gt;(buf[i]).smallEnd();</div>
 <div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> d = 0; d &lt; SpaceDim; ++d) {</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>      c[d] = <span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(iv[d]);</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    }</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>    std::get&lt;2&gt;(buf[i]) = a_sfcEncoder(c);</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>  }</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span> </div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>  <span class="comment">// 3) Sort by hilbert key.</span></div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>  std::sort(buf.begin(), buf.end(), [](<span class="keyword">const</span> Bundle&amp; a, <span class="keyword">const</span> Bundle&amp; b) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    return std::get&lt;2&gt;(a) &lt; std::get&lt;2&gt;(b);</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>  });</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>  <span class="comment">// Unpack into original containers.</span></div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; n; ++i) {</div>
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>    a_boxes[i] = std::move(std::get&lt;0&gt;(buf[i]));</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    a_loads[i] = std::move(std::get&lt;1&gt;(buf[i]));</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  }</div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>}</div>
-</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> DIM&gt;</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>uint64_t</div>
-<div class="foldopen" id="foldopen00362" data-start="{" data-end="}">
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno"><a class="line" href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">  362</a></span><a class="code hl_function" href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">LoadBalancing::mortonIndex</a>(<span class="keyword">const</span> std::array&lt;uint32_t, DIM&gt;&amp; a_coords) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>{</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  uint64_t code = 0;</div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>  <span class="comment">// If this fails then we can&#39;t compute a Morton code using a 64-bit integer. We must either scale back the boxes</span></div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  <span class="comment">// by their blocking factors, or switch to 128/256 bit integers.</span></div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> maxDim = 1 &lt;&lt; 21;</div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span> </div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    <span class="keywordflow">if</span> (a_coords[dir] &gt; maxDim) {</div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>      MayDay::Abort(<span class="stringliteral">&quot;LoadBalancing::mortonIndex - logic bust&quot;</span>);</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    }</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  }</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> bit = 20; bit &gt;= 0; --bit) {</div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = CH_SPACEDIM - 1; dir &gt;= 0; --dir) {</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>      <span class="keyword">const</span> uint64_t b = (<span class="keyword">static_cast&lt;</span>uint64_t<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(a_coords[dir])) &gt;&gt; bit) &amp; 1ULL;</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>      <span class="keywordflow">if</span> (corner[dir] &lt; 0) {</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        MayDay::Abort(<span class="stringliteral">&quot;LoadBalancing::sortSFC - boxes must have non-negative corners&quot;</span>);</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>      }</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>      allCorners |= <span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(corner[dir]);</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>    }</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>  }</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  <span class="keywordtype">int</span> shift = 0;</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>  <span class="keywordflow">if</span> (allCorners != 0) {</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    <span class="keywordflow">while</span> (((allCorners &gt;&gt; shift) &amp; 1U) == 0U) {</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>      shift++;</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>    }</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>  }</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  <span class="comment">// Compute the SFC keys from the tile coordinates.</span></div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; n; ++i) {</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>    <span class="keyword">const</span> IntVect&amp; corner = std::get&lt;0&gt;(buf[i]).smallEnd();</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span> </div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>    std::array&lt;uint32_t, SpaceDim&gt; c;</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>      c[dir] = <span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(corner[dir]) &gt;&gt; shift;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>      <span class="keywordflow">if</span> (c[dir] &gt;= <a class="code hl_variable" href="classLoadBalancing.html#a9d283116aa72a6cb499859b96a6169de">s_sfcMaxCoordinate</a>) {</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        MayDay::Abort(<span class="stringliteral">&quot;LoadBalancing::sortSFC - a level spans more than 2^21 tiles in one direction&quot;</span>);</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>      }</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    }</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    std::get&lt;2&gt;(buf[i]) = a_sfcEncoder(c);</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  }</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span> </div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>  <span class="comment">// Sort by the SFC key.</span></div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>  std::sort(buf.begin(), buf.end(), [](<span class="keyword">const</span> Bundle&amp; a, <span class="keyword">const</span> Bundle&amp; b) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    return std::get&lt;2&gt;(a) &lt; std::get&lt;2&gt;(b);</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  });</div>
 <div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>      code = (code &lt;&lt; 1) | b;</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    }</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>  }</div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  <span class="keywordflow">return</span> code;</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="comment">// Unpack into original containers.</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; n; ++i) {</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    a_boxes[i] = std::move(std::get&lt;0&gt;(buf[i]));</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    a_loads[i] = std::move(std::get&lt;1&gt;(buf[i]));</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  }</div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>}</div>
 </div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span> </div>
 <div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> DIM&gt;</div>
 <div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>uint64_t</div>
 <div class="foldopen" id="foldopen00389" data-start="{" data-end="}">
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno"><a class="line" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">  389</a></span><a class="code hl_function" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">LoadBalancing::hilbertIndex</a>(<span class="keyword">const</span> std::array&lt;uint32_t, DIM&gt;&amp; a_coords)</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno"><a class="line" href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">  389</a></span><a class="code hl_function" href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">LoadBalancing::mortonIndex</a>(<span class="keyword">const</span> std::array&lt;uint32_t, DIM&gt;&amp; a_coords) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>{</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>  CH_TIME(<span class="stringliteral">&quot;LoadBalancing::hilbertIndex&quot;</span>);</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>  uint64_t code = 0;</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  <span class="keyword">constexpr</span> <span class="keywordtype">int</span> nbits = 21;</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  uint32_t x[DIM];</div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    x[i] = a_coords[i];</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>  }</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>  <span class="keyword">const</span> uint32_t M = 1U &lt;&lt; (nbits - 1);</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>  <span class="keywordflow">for</span> (uint32_t Q = M; Q &gt; 1; Q &gt;&gt;= 1) {</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>    <span class="keyword">const</span> uint32_t P = Q - 1;</div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>      <span class="keywordflow">if</span> (x[i] &amp; Q) {</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        x[0] ^= P;</div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>      }</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>      <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        <span class="keyword">const</span> uint32_t t = (x[0] ^ x[i]) &amp; P;</div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span> </div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>        x[0] ^= t;</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        x[i] ^= t;</div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>      }</div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    }</div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>  }</div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 1; i &lt; DIM; ++i) {</div>
-<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>    x[i] ^= x[i - 1];</div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>  }</div>
-<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span> </div>
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>  uint32_t t = 0;</div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>  <span class="keywordflow">for</span> (uint32_t Q = M; Q &gt; 1; Q &gt;&gt;= 1) {</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    <span class="keywordflow">if</span> (x[DIM - 1] &amp; Q) {</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>      t ^= (Q - 1);</div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    }</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>  }</div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span> </div>
-<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
-<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>    x[i] ^= t;</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>  }</div>
-<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>  uint64_t idx = 0;</div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> b = nbits - 1; b &gt;= 0; --b) {</div>
-<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
-<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>      idx = (idx &lt;&lt; 1) | ((x[i] &gt;&gt; b) &amp; 1U);</div>
-<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>    }</div>
-<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>  }</div>
-<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span> </div>
-<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>  <span class="keywordflow">return</span> idx;</div>
-<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>}</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  <span class="comment">// A 64-bit code holds 21 bits per direction.</span></div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="keywordflow">if</span> (a_coords[dir] &gt;= <a class="code hl_variable" href="classLoadBalancing.html#a9d283116aa72a6cb499859b96a6169de">s_sfcMaxCoordinate</a>) {</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>      MayDay::Abort(<span class="stringliteral">&quot;LoadBalancing::mortonIndex - coordinate does not fit in 21 bits&quot;</span>);</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    }</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>  }</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span> </div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> bit = 20; bit &gt;= 0; --bit) {</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = CH_SPACEDIM - 1; dir &gt;= 0; --dir) {</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>      <span class="keyword">const</span> uint64_t b = (<span class="keyword">static_cast&lt;</span>uint64_t<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span>uint32_t<span class="keyword">&gt;</span>(a_coords[dir])) &gt;&gt; bit) &amp; 1ULL;</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span> </div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>      code = (code &lt;&lt; 1) | b;</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    }</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>  }</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span> </div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>  <span class="keywordflow">return</span> code;</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>}</div>
 </div>
-<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span> </div>
-<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span> </div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> DIM&gt;</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>uint64_t</div>
+<div class="foldopen" id="foldopen00413" data-start="{" data-end="}">
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno"><a class="line" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">  413</a></span><a class="code hl_function" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">LoadBalancing::hilbertIndex</a>(<span class="keyword">const</span> std::array&lt;uint32_t, DIM&gt;&amp; a_coords)</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>{</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>  CH_TIME(<span class="stringliteral">&quot;LoadBalancing::hilbertIndex&quot;</span>);</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>  <span class="keyword">constexpr</span> <span class="keywordtype">int</span> nbits = 21;</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>  uint32_t x[DIM];</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>    <span class="keywordflow">if</span> (a_coords[i] &gt;= <a class="code hl_variable" href="classLoadBalancing.html#a9d283116aa72a6cb499859b96a6169de">s_sfcMaxCoordinate</a>) {</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>      MayDay::Abort(<span class="stringliteral">&quot;LoadBalancing::hilbertIndex - coordinate does not fit in 21 bits&quot;</span>);</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>    }</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span> </div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>    x[i] = a_coords[i];</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>  }</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>  <span class="keyword">const</span> uint32_t M = 1U &lt;&lt; (nbits - 1);</div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span> </div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>  <span class="keywordflow">for</span> (uint32_t Q = M; Q &gt; 1; Q &gt;&gt;= 1) {</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>    <span class="keyword">const</span> uint32_t P = Q - 1;</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>      <span class="keywordflow">if</span> (x[i] &amp; Q) {</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        x[0] ^= P;</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>      }</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        <span class="keyword">const</span> uint32_t t = (x[0] ^ x[i]) &amp; P;</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span> </div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>        x[0] ^= t;</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>        x[i] ^= t;</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>      }</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>    }</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>  }</div>
 <div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span> </div>
-<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 1; i &lt; DIM; ++i) {</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>    x[i] ^= x[i - 1];</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>  }</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span> </div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>  uint32_t t = 0;</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>  <span class="keywordflow">for</span> (uint32_t Q = M; Q &gt; 1; Q &gt;&gt;= 1) {</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>    <span class="keywordflow">if</span> (x[DIM - 1] &amp; Q) {</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>      t ^= (Q - 1);</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>    }</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>  }</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span> </div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>    x[i] ^= t;</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>  }</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span> </div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>  uint64_t idx = 0;</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span> </div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> b = nbits - 1; b &gt;= 0; --b) {</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; DIM; ++i) {</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>      idx = (idx &lt;&lt; 1) | ((x[i] &gt;&gt; b) &amp; 1U);</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>    }</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>  }</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span> </div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>  <span class="keywordflow">return</span> idx;</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>}</div>
+</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span> </div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span> </div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__BoxSorting_8H_html_ab5db8b3a96e3a04473aaa898f7eb2128"><div class="ttname"><a href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a></div><div class="ttdeci">BoxSorting</div><div class="ttdoc">Enum for sorting boxes.</div><div class="ttdef"><b>Definition</b> CD_BoxSorting.H:22</div></div>
 <div class="ttc" id="aCD__LoadBalancing_8H_html"><div class="ttname"><a href="CD__LoadBalancing_8H.html">CD_LoadBalancing.H</a></div><div class="ttdoc">Declaration of a static class for various load balancing operations.</div></div>
-<div class="ttc" id="aclassLoadBalancing_html_a224032c704030dc5a035280e79072282"><div class="ttname"><a href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">LoadBalancing::mortonIndex</a></div><div class="ttdeci">static uint64_t mortonIndex(const std::array&lt; uint32_t, DIM &gt; &amp;a_coords) noexcept</div><div class="ttdoc">Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:362</div></div>
+<div class="ttc" id="aclassLoadBalancing_html_a224032c704030dc5a035280e79072282"><div class="ttname"><a href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">LoadBalancing::mortonIndex</a></div><div class="ttdeci">static uint64_t mortonIndex(const std::array&lt; uint32_t, DIM &gt; &amp;a_coords) noexcept</div><div class="ttdoc">Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:389</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_a4cef3b9e67877b6719d14014b00265ea"><div class="ttname"><a href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">LoadBalancing::makeBalance</a></div><div class="ttdeci">static void makeBalance(Vector&lt; int &gt; &amp;a_ranks, const Vector&lt; T &gt; &amp;a_loads, const Vector&lt; Box &gt; &amp;a_boxes)</div><div class="ttdoc">Load balancing, assigning ranks to boxes.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:36</div></div>
-<div class="ttc" id="aclassLoadBalancing_html_a5768e457d7b8c1730dd17228eda9f0dd"><div class="ttname"><a href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">LoadBalancing::hilbertIndex</a></div><div class="ttdeci">static uint64_t hilbertIndex(const std::array&lt; uint32_t, DIM &gt; &amp;a_coords)</div><div class="ttdoc">Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:389</div></div>
+<div class="ttc" id="aclassLoadBalancing_html_a5768e457d7b8c1730dd17228eda9f0dd"><div class="ttname"><a href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">LoadBalancing::hilbertIndex</a></div><div class="ttdeci">static uint64_t hilbertIndex(const std::array&lt; uint32_t, DIM &gt; &amp;a_coords)</div><div class="ttdoc">Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:413</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_a71c9944ddc058f84c2a093b78360a2c1"><div class="ttname"><a href="classLoadBalancing.html#a71c9944ddc058f84c2a093b78360a2c1">LoadBalancing::standardSort</a></div><div class="ttdeci">static void standardSort(Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads)</div><div class="ttdoc">Standard box sorting, calls C++ std::sort.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:276</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_a8565b69bd91b645c158df0de0e45ba98"><div class="ttname"><a href="classLoadBalancing.html#a8565b69bd91b645c158df0de0e45ba98">LoadBalancing::sort</a></div><div class="ttdeci">static void sort(Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, Vector&lt; Vector&lt; T &gt; &gt; &amp;a_loads, const BoxSorting a_whichSorting)</div><div class="ttdoc">Sorts boxes and loads over a hierarchy according to some sorting criterion.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:227</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_a8b6b26703fdad5abaa8968dcf7346dec"><div class="ttname"><a href="classLoadBalancing.html#a8b6b26703fdad5abaa8968dcf7346dec">LoadBalancing::unpackPairs</a></div><div class="ttdeci">static void unpackPairs(Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads, const std::vector&lt; std::pair&lt; Box, T &gt; &gt; &amp;a_pairs)</div><div class="ttdoc">Splits vector pair into separate boxes and loads.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:211</div></div>
+<div class="ttc" id="aclassLoadBalancing_html_a9d283116aa72a6cb499859b96a6169de"><div class="ttname"><a href="classLoadBalancing.html#a9d283116aa72a6cb499859b96a6169de">LoadBalancing::s_sfcMaxCoordinate</a></div><div class="ttdeci">static constexpr uint32_t s_sfcMaxCoordinate</div><div class="ttdoc">Number of tiles per direction an SFC index can hold (21 bits per direction in a 64-bit index).</div><div class="ttdef"><b>Definition</b> CD_LoadBalancing.H:164</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_aa42e270b7cadb0c4a5a5855c24c536e1"><div class="ttname"><a href="classLoadBalancing.html#aa42e270b7cadb0c4a5a5855c24c536e1">LoadBalancing::sortSFC</a></div><div class="ttdeci">static void sortSFC(Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads, const std::function&lt; uint64_t(const std::array&lt; uint32_t, DIM &gt;)&gt; &amp;a_sfcEncoder) noexcept</div><div class="ttdoc">Generic SFC sorting function.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:314</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_ac66a17e5b5fce6fe16513d695028c5fd"><div class="ttname"><a href="classLoadBalancing.html#ac66a17e5b5fce6fe16513d695028c5fd">LoadBalancing::packPairs</a></div><div class="ttdeci">static std::vector&lt; std::pair&lt; Box, T &gt; &gt; packPairs(const Vector&lt; Box &gt; &amp;a_boxes, const Vector&lt; T &gt; &amp;a_loads)</div><div class="ttdoc">Utility function which packs boxes and loads into a vector of pairs.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:197</div></div>
 <div class="ttc" id="aclassLoadBalancing_html_added9f95925f735d0e4933060e4b96a1"><div class="ttname"><a href="classLoadBalancing.html#added9f95925f735d0e4933060e4b96a1">LoadBalancing::shuffleSort</a></div><div class="ttdeci">static void shuffleSort(Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads)</div><div class="ttdoc">Randomly shuffles boxes and loads.</div><div class="ttdef"><b>Definition</b> CD_LoadBalancingImplem.H:292</div></div>

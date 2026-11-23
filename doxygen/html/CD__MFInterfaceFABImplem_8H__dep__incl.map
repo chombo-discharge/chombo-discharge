@@ -102,6 +102,6 @@
 <area shape="poly" id="edge53_Node000070_Node000122" title=" " alt="" coords="5422,313,6207,317,7430,329,8060,339,8624,352,9065,369,9221,379,9325,390,9363,401,9357,401,9324,396,9221,385,9065,375,8624,358,8059,344,7430,335,6207,323,5422,318"/>
 <area shape="rect" id="Node000172" href="$CD__EBAMRSurfaceDepositionImplem_8H.html" title="Implementation of CD_EBAMRSurfaceDeposition.H." alt="" coords="9534,402,9792,446"/>
 <area shape="poly" id="edge54_Node000070_Node000172" title=" " alt="" coords="5422,313,6242,321,7526,336,8783,359,9248,374,9413,382,9522,390,9574,401,9569,401,9521,396,9412,387,9248,379,8783,364,7526,341,6242,326,5422,319"/>
-<area shape="rect" id="Node000175" href="$CD__EBCoarseFineParticleMesh_8cpp.html" title="Implementation of CD_EBCoarseFineParticleMesh.H." alt="" coords="9816,402,10043,446"/>
-<area shape="poly" id="edge55_Node000070_Node000175" title=" " alt="" coords="5423,313,6291,319,7665,332,8375,342,9013,355,9511,371,9688,380,9805,390,9852,401,9847,401,9804,396,9687,386,9511,376,9012,360,8375,347,7665,337,6291,324,5423,319"/>
+<area shape="rect" id="Node000056" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="9817,402,10000,446"/>
+<area shape="poly" id="edge55_Node000070_Node000056" title=" " alt="" coords="5423,313,6292,316,7665,327,8376,337,9013,350,9512,368,9688,379,9805,390,9844,401,9839,401,9804,396,9688,384,9511,373,9013,356,8376,342,7665,333,6292,322,5423,318"/>
 </map>

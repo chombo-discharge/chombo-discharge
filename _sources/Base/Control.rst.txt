@@ -309,6 +309,27 @@ This also implies that you cannot change the ``Driver.output_names`` or ``Driver
 
    If you set ``Driver.restart=0``, you will get a fresh simulation.
 
+Restarting with polyhedral geometry
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+With ``Driver.geometry_generation = polyhedral``, a simulation that writes checkpoints (``Driver.checkpoint_interval > 0``) also writes the geometry, once, to :file:`chk/<output_names>.graph.<dim>d.hdf5`.
+The file holds the grids the geometry was generated on and, for every cell the implicit function was evaluated in, what it gave: the cell and face states and the surface of every cut cell.
+Every checkpoint records the file, relative to its own directory, together with an identifier the file carries.
+Any simulation that generates its geometry -- a new one, or a restart from a checkpoint without a graph file -- writes a new graph file and replaces one of the same name.
+
+A restart reads the geometry from that file instead of generating it, so the simulation continues on exactly the geometry it was checkpointed with, on any number of MPI ranks.
+The settings the geometry was generated with -- ``Driver.refine_angles``, ``Driver.refine_electrodes``, ``Driver.refine_dielectrics``, ``ComputationalGeometry.refine_saddles``, and the EB tile sizes and ghost cells -- are then taken from the file for the geometry, and each one that differs in the input file is reported in :file:`pout.0`.
+The grid tags still use the values in the input file, since they may change during a run; only the geometry is fixed by the file.
+The restart aborts if
+
+* the graph file is missing, or carries another identifier, which happens when another simulation with the same ``Driver.output_names`` has written over it;
+* the graph file lacks part of its header, or its tables are inconsistent, so it is not a complete graph file;
+* the input file adds or removes a dielectric, so that the geometry has other phases than the file holds;
+* the domain, its lower corner, the grid spacing or ``AmrMesh.max_eb_depth`` differ from those the file was written with, since the stored geometry does not fit another index space;
+* the input file asks for more EB ghost cells than the file was written with.
+
+A checkpoint written without a graph file, by an older version or by another geometry generator, is restarted with the geometry generated from the input file, as before.
+
 .. _Chap:RuntimeConfig:
 
 Run-time configurations
