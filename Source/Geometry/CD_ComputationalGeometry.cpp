@@ -61,6 +61,7 @@ ComputationalGeometry::ComputationalGeometry()
     m_probLo(RealVect::Zero),
     m_eps0(1.0),
     m_refineAngle(0.0),
+    m_inputRefineAngle(-1.0),
     m_refineSaddles(false),
     m_maxGhostEB(0),
     m_startLevel(0),
@@ -82,6 +83,7 @@ ComputationalGeometry::ComputationalGeometry()
 
   pp.query("verbose", m_verbose);
   pp.query("refine_saddles", m_refineSaddles);
+  pp.query("refine_angle", m_inputRefineAngle);
   pp.query("profile", m_profile);
 
   // Boxes restricting where geometric tags may refine, and how far.
@@ -487,6 +489,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     pout() << "ComputationalGeometry::makeGrids" << endl;
   }
 
+  // The grids are split by the geometry's own angle if it has one, otherwise by the angle the Driver tags with.
+  const Real refineAngle = (m_inputRefineAngle >= 0.0) ? m_inputRefineAngle : a_refineAngle;
+
   if (m_readGraph) {
     this->readGrids(a_startDomain,
                     a_stopDomain,
@@ -494,7 +499,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                     a_dielectricDomain,
                     a_probLo,
                     a_startDx,
-                    a_refineAngle,
+                    refineAngle,
                     a_maxGhostEB,
                     a_minBlockSize,
                     a_maxBlockSize);
@@ -506,7 +511,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                         a_dielectricDomain,
                         a_probLo,
                         a_startDx,
-                        a_refineAngle,
+                        refineAngle,
                         a_maxGhostEB,
                         a_minBlockSize,
                         a_maxBlockSize);
@@ -1037,7 +1042,9 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
     return ss.str();
   };
 
-  report("Driver.refine_angles", str(m_refineAngle), str(a_refineAngle));
+  report("the refinement angle (ComputationalGeometry.refine_angle, otherwise Driver.refine_angles)",
+         str(m_refineAngle),
+         str(a_refineAngle));
   report("ComputationalGeometry.refine_saddles", str(m_refineSaddles), str(inputSaddles));
   report("the number of EB ghost cells", str(m_maxGhostEB), str(a_maxGhostEB));
   report("AmrMesh.eb_min_block_size", str(m_minBlockSize), str(a_minBlockSize));

@@ -213,7 +213,7 @@ public:
    * box on a coarser level that holds a dielectric surface is split.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
-   * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
+   * @param[in] a_refineAngle  Driver's tag angle, in degrees; boxes split by it unless refine_angle is set.
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified. At most half the tile size.
    * @param[in] a_minBlockSize Tile the grids are built with, from AmrMesh.eb_min_block_size.
    * @param[in] a_maxBlockSize Super-tile the boxes are cut to, a whole number of a_minBlockSize, from
@@ -589,8 +589,17 @@ protected:
 
   /**
    * @brief Angle, in degrees, between neighbouring normals above which an irregular box is split.
+   * @details The angle the grids are built or were read with: m_inputRefineAngle if that is set, otherwise the angle
+   * the Driver tags with.
    */
   Real m_refineAngle;
+
+  /**
+   * @brief Angle, in degrees, the grids are built with, from ComputationalGeometry.refine_angle.
+   * @details Optional. Negative, the default, means the grids are built with the angle the Driver tags with,
+   * Driver.refine_angles.
+   */
+  Real m_inputRefineAngle;
 
   /**
    * @brief Whether a box holding a saddle -- an interface patch twisted about its own centre -- is split.

@@ -352,7 +352,20 @@ Given two normal vectors :math:`\mathbf{n}` and :math:`\mathbf{n}^\prime`, the c
 
    \mathbf{n}\cdot\mathbf{n}^\prime \geq \cos\theta_c,
 
-where :math:`\theta_c` is a threshold angle for grid refinement.
+where :math:`\theta_c` is a threshold angle for grid refinement, ``Driver.refine_angles``.
+
+The geometry itself is resolved by the same test: when it is generated, a box holding the surface is split into finer boxes where neighbouring normals turn by more than the angle.
+By default it uses ``Driver.refine_angles``, so the geometry is resolved where the Driver refines.
+It can be given its own angle with
+
+.. code-block:: text
+
+   ComputationalGeometry.refine_angle = 45   # Angle (degrees) the geometry splits boxes at. Negative, the default, uses Driver.refine_angles.
+
+A larger angle than the Driver's makes the geometry cheaper to generate.
+Where the Driver then refines further than the geometry was resolved, the finer cells are cut from the coarser cells' polyhedra rather than from the implicit function.
+The surface there is therefore no more accurate than on the level where the geometry stopped, and cutting the cells costs time when the grids are made.
+A smaller angle resolves the geometry where the Driver does not refine, which costs time and memory and gains nothing.
 
 Multi-valued cells are refined as well.
 Where, and how far, these geometric tags refine can be restricted with boxes in physical space, each with a depth:
