@@ -2444,6 +2444,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
     }
   }
 
+  // The angle the grids are built with: ComputationalGeometry.refine_angle if set, otherwise Driver.refine_angles.
   const Real cosThreshold = std::cos(m_refineAngle * Units::pi / 180.0);
 
   SplitReason ring = SplitReason::None;

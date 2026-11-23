@@ -1259,6 +1259,9 @@ Driver::parseGeometryRefinement()
   pp.get("refine_electrodes", m_conductorTagsDepth);
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
 
+  if (m_refineAngle < 0.0) {
+    MayDay::Error("Driver::parseGeometryRefinement - Driver.refine_angles must not be negative");
+  }
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxEbDepth();
   }
