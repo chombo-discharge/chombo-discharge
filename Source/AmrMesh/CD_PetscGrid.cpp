@@ -702,7 +702,13 @@ PetscGrid::definePetscRows() noexcept
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (!(amrToPetsc(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
-              MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted!");
+              std::stringstream ss;
+
+              ss << "PetscGrid::definePetscRows -- cell " << iv << " on level " << lvl << " (phase " << iphase
+                 << ") is multi-valued and not covered by a finer grid. Multi-valued cells cannot be rows. Refine the "
+                 << "grid over the cell, or use FieldSolverGMG";
+
+              MayDay::Abort(ss.str().c_str());
             }
             if (ebisBox.isIrregular(iv)) {
               irregIVS |= iv;

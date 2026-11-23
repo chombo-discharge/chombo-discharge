@@ -1139,24 +1139,6 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
 }
 
 void
-AmrMesh::regridAmr(const Vector<Vector<Box>>& a_boxes, const int a_lmin)
-{
-  CH_TIME("AmrMesh::regridAmr(Vector<Vector<Box>>, int)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::regridAmr(Vector<Vector<Box>>, int)" << endl;
-  }
-
-  CH_assert(a_lmin >= 0);
-
-  this->buildGrids(a_boxes, a_lmin);
-  this->defineRealms();
-
-  for (auto& r : m_realms) {
-    r.second->regridBase(a_lmin);
-  }
-}
-
-void
 AmrMesh::regridOperators(const int a_lmin)
 {
   CH_TIME("AmrMesh::regridOperators(int)");
@@ -1282,39 +1264,6 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // because the blocking factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
     domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
-  }
-
-  this->defineGrids(newBoxes, a_lmin);
-}
-
-void
-AmrMesh::buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin)
-{
-  CH_TIME("AmrMesh::buildGrids(Vector<Vector<Box>>, int)");
-  if (m_verbosity > 2) {
-    pout() << "AmrMesh::buildGrids(Vector<Vector<Box>>, int)" << endl;
-  }
-
-  // The finest level is the last one with boxes, within the depths AmrMesh allows.
-  m_finestLevel = 0;
-
-  for (int lvl = 1; lvl < a_boxes.size(); lvl++) {
-    if (a_boxes[lvl].size() == 0) {
-      break;
-    }
-
-    m_finestLevel = lvl;
-  }
-
-  m_finestLevel = std::min(m_finestLevel, this->getMaxDomainDepth());
-  m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth);
-
-  Vector<Vector<Box>> newBoxes(1 + m_finestLevel);
-
-  domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
-
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    newBoxes[lvl] = a_boxes[lvl];
   }
 
   this->defineGrids(newBoxes, a_lmin);
