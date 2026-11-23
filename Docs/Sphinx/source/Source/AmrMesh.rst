@@ -81,9 +81,18 @@ It may happen for very large simulations that one has to increase the box size (
 ``AmrMesh.ref_rat`` determines the refinement ratio between grid levels, and factors of 2 and 4 are supported.
 We want to point out that mixed refinement factors are supported.
 
+Two depths bound the grid levels:
+
+* ``AmrMesh.max_eb_depth`` is the finest level the geometry is resolved on.
+  The cut-cell geometry is generated down to this level, and geometric refinement (``Driver.refine_electrodes`` and ``Driver.refine_dielectrics``) reaches at most one level finer.
+* ``AmrMesh.max_sim_depth`` is the finest level the simulation may refine to, and equals ``AmrMesh.max_eb_depth`` when set to -1.
+  With the polyhedral geometry generator (``Driver.geometry_generation = polyhedral``) it may be finer than ``AmrMesh.max_eb_depth``.
+  The geometry of the finer levels is then cut from the resolved levels where a level needs it, and kept for the rest of the run.
+  The other generators require ``AmrMesh.max_sim_depth`` to be at most ``AmrMesh.max_eb_depth``.
+
 .. tip::
 
-   If ``AmrMesh.max_amr_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement everywhere if ``AmrMesh.ref_rat = 2``.
+   If the deeper of ``AmrMesh.max_eb_depth`` and ``AmrMesh.max_sim_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement everywhere if ``AmrMesh.ref_rat = 2``.
 
 Two gridding algorithms are supported, called Tiled mesh refinement and the classical Berger-Rigoutsos refinement algorithm.
 These are discussed in :ref:`Chap:MeshGeneration`, and the user can specify which one to use by setting ``AmrMesh.grid_algorithm`` accordingly.
