@@ -2688,7 +2688,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
   // With surface species, the charge of a charged Ito species that hits a dielectric goes into the surface charge but
   // is unassigned, unless a dielectric emission reaction gives it to, or takes it against, a surface species.
-  if (a_surface == "dielectric" && !(m_surfaceSpecies.empty())) {
+  if (a_surface == "dielectric" && m_surfaceSpecies.size() > 0) {
     for (int i = 0; i < m_itoSpecies.size(); i++) {
       if (m_itoSpecies[i]->getChargeNumber() != 0 && !(assignedToSurface[i])) {
         this->throwParserWarning(baseError + " - charged species '" + m_itoSpecies[i]->getName() +
