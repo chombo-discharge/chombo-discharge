@@ -88,6 +88,20 @@ public:
   virtual ~ComputationalGeometry();
 
   /**
+   * @brief Get the depth that geometric tags may refine to at a position.
+   * @details Driver::getGeometryTags() keeps a geometric tag (angle-based, multi-valued, or depth-based) on level
+   * lvl only where lvl is less than this depth at the cell center, before the tags are grown by
+   * Driver.grow_geo_tags. The default reads the boxes ComputationalGeometry.tag_box<n>_lo/hi/depth. Without boxes it
+   * permits every depth. With boxes, a position inside one or more boxes gets the largest depth among them, and a
+   * position outside every box gets depth zero, so the grid there stays on the coarsest level. Only the simulation
+   * grids are restricted; the geometry itself is still resolved to the EB depth along every surface.
+   * @param[in] a_pos Position in physical space.
+   * @return The number of levels geometric tags may refine to at a_pos.
+   */
+  virtual int
+  getMaxGeometricTagDepth(const RealVect& a_pos) const;
+
+  /**
    * @brief Get dielectrics
    * @return Dielectrics (m_dielectrics)
    */
@@ -199,7 +213,7 @@ public:
    * box on a coarser level that holds a dielectric surface is split.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
-   * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
+   * @param[in] a_refineAngle  Driver's tag angle, in degrees; boxes split by it unless refine_angle is set.
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified. At most half the tile size.
    * @param[in] a_minBlockSize Tile the grids are built with, from AmrMesh.eb_min_block_size.
    * @param[in] a_maxBlockSize Super-tile the boxes are cut to, a whole number of a_minBlockSize, from
@@ -567,9 +581,25 @@ protected:
   Real m_eps0;
 
   /**
+   * @brief Boxes in physical space, each with the depth that geometric tags may refine to inside it.
+   * @details Read from ComputationalGeometry.num_tag_boxes and ComputationalGeometry.tag_box<n>_lo/hi/depth. Empty
+   * means geometric tags are not restricted.
+   */
+  std::vector<std::pair<RealBox, int>> m_tagBoxes;
+
+  /**
    * @brief Angle, in degrees, between neighbouring normals above which an irregular box is split.
+   * @details The angle the grids are built or were read with: m_inputRefineAngle if that is set, otherwise the angle
+   * the Driver tags with.
    */
   Real m_refineAngle;
+
+  /**
+   * @brief Angle, in degrees, the grids are built with, from ComputationalGeometry.refine_angles.
+   * @details Optional. Negative, the default, means the grids are built with the angle the Driver tags with,
+   * Driver.refine_angles.
+   */
+  Real m_inputRefineAngle;
 
   /**
    * @brief Whether a box holding a saddle -- an interface patch twisted about its own centre -- is split.

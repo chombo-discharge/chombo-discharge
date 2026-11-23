@@ -366,6 +366,25 @@ Driver::getGeometryTags()
     // Things from depth specifications
     geomTags |= dielTags;
     geomTags |= condTags;
+
+    // Let the geometry restrict where, and how far, geometric tags refine.
+    if (!geomTags.isEmpty()) {
+      const RealVect probLo = m_amr->getProbLo();
+      const Real     dx     = m_amr->getDx()[lvl];
+
+      IntVectSet rejected;
+
+      for (IVSIterator ivsIt(geomTags); ivsIt.ok(); ++ivsIt) {
+        const IntVect  iv  = ivsIt();
+        const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+
+        if (lvl >= m_computationalGeometry->getMaxGeometricTagDepth(pos)) {
+          rejected |= iv;
+        }
+      }
+
+      geomTags -= rejected;
+    }
   }
 
   // Grow tags with specified factor.
@@ -1240,6 +1259,9 @@ Driver::parseGeometryRefinement()
   pp.get("refine_electrodes", m_conductorTagsDepth);
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
 
+  if (m_refineAngle < 0.0) {
+    MayDay::Error("Driver::parseGeometryRefinement - Driver.refine_angles must not be negative");
+  }
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxEbDepth();
   }
