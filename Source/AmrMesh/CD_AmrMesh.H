@@ -1876,6 +1876,31 @@ public:
   registerParticleGhostMask(const std::string& a_realm, const int a_width);
 
   /**
+   * @brief Register a particle ghost-mask width on a realm and build its masks now if they do not exist yet.
+   * @details See Realm::defineParticleGhostMask.
+   * @param[in] a_realm Realm name
+   * @param[in] a_width Ghost width (cells). Must be > 0.
+   */
+  void
+  defineParticleGhostMask(const std::string& a_realm, const int a_width);
+
+  /**
+   * @brief Register on a realm the coarse-to-fine particle ghost masks that a particle deposition needs.
+   * @details Halo and Transition deposition copy coarser particles into the finer patches through these masks, with
+   * widths that depend on the deposition kernel and the refinement ratios (see
+   * EBAMRParticleMesh::getCoarseToFineMaskWidths). Interp and HaloNGP need none. Call before regridding, with the
+   * settings the deposits will use. Aborts if a width is not smaller than min_block_size, and on a periodic domain
+   * whenever masks are needed, since the masks do not wrap around periodic boundaries.
+   * @param[in] a_realm                Realm name
+   * @param[in] a_depositionType       Deposition kernel.
+   * @param[in] a_coarseFineDeposition Coarse-fine handling.
+   */
+  void
+  registerParticleDeposition(const std::string&         a_realm,
+                             const DepositionType       a_depositionType,
+                             const CoarseFineDeposition a_coarseFineDeposition);
+
+  /**
    * @brief Get the same-level particle ghost mask on a realm for a registered width.
    * @param[in] a_realm Realm name
    * @param[in] a_width Registered ghost width.

@@ -603,6 +603,41 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
 
 template <typename P, typename Traits>
 inline void
+ParticleContainer<P, Traits>::clearGhostParticles(const GhostType a_type)
+{
+  CH_TIME("ParticleContainer::clearGhostParticles(GhostType)");
+
+  CH_assert(m_isDefined);
+  CH_assert(a_type != GhostType::Valid);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&     level = *m_particles[lvl];
+    const DataIterator& dit   = m_grids[lvl].dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      Leaf& leaf = level[dit[mybox]];
+
+      // Swap-and-pop; the swapped-in particle now occupies index i, so do NOT advance on a hit.
+      std::size_t i = 0;
+      while (i < leaf.size()) {
+        if (leaf.ghost(i) == a_type) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+
+  m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+inline void
 ParticleContainer<P, Traits>::clearGhostParticles()
 {
   CH_TIME("ParticleContainer::clearGhostParticles");
@@ -951,6 +986,10 @@ ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelDa
     Leaf&       dst = maskLevel[din];
 
     for (std::size_t i = 0; i < src.size(); i++) {
+      if (src.isGhost(i)) {
+        continue;
+      }
+
       const IntVect iv = this->cellIndex(a_level, src.position(i));
 
       if (maskBox.contains(iv) && mask(iv, 0)) {
@@ -1025,6 +1064,154 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
       }
       else {
         ++i;
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+template <typename Keep>
+inline void
+ParticleContainer<P, Traits>::fillCoarseGhostParticlesFromMask(const AMRParticleGhostMask& a_coarToFine,
+                                                               const Keep&                 a_keep)
+{
+  CH_TIME("ParticleContainer::fillCoarseGhostParticlesFromMask");
+
+  CH_assert(m_isDefined);
+
+  this->clearGhostParticles(GhostType::Coarse);
+
+  MoverPool pool(numProc());
+
+  // Bin one mask-holder leaf's particles as ghosts of the finer patches whose acceptance box holds the particle's cell
+  // on the finer level.
+  auto binLeaf = [&](MoverPool& a_target, const Leaf& a_leaf, const int a_lvl, const DataIndex& a_din) {
+    const ParticleGhostMask& mask = (*a_coarToFine[a_lvl])[a_din];
+
+    for (std::size_t i = 0; i < a_leaf.size(); i++) {
+      const RealVect pos = a_leaf.position(i);
+      const IntVect  iv  = this->cellIndex(a_lvl, pos);
+
+      if (!mask.box().contains(iv) || !a_keep(a_lvl, a_din, iv)) {
+        continue;
+      }
+
+      const IntVect fineCell = this->cellIndex(a_lvl + 1, pos);
+
+      for (int k = 0; k < mask.numTargets(iv); k++) {
+        if (!mask.targetBox(iv, k).contains(fineCell)) {
+          continue;
+        }
+
+        Leaf& bin = a_target[mask.targetRank(iv, k)][PoolKey(a_lvl + 1, mask.targetGridIndex(iv, k))];
+
+        bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
+        const std::size_t j = bin.size() - 1;
+
+        bin.particleID(j) = a_leaf.particleID(i);
+        bin.rankID(j)     = procID(); // the mask holder's particles are owned by this rank
+        bin.ghost(j)      = GhostType::Coarse;
+      }
+    }
+  };
+
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    if (lvl >= a_coarToFine.size() || a_coarToFine[lvl].isNull()) {
+      continue;
+    }
+
+    const LevelParticles& level = *m_maskParticles[lvl];
+    const DataIterator&   dit   = m_grids[lvl].dataIterator();
+    const int             nbox  = dit.size();
+
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+      MoverPool threadPool(numProc());
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        binLeaf(threadPool, level[dit[mybox]], lvl, dit[mybox]);
+      }
+
+#pragma omp critical(ParticleContainer_fillCoarseGhostParticlesFromMaskMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
+        }
+      }
+    }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      binLeaf(pool, level[dit[mybox]], lvl, dit[mybox]);
+    }
+#endif
+  }
+
+  // a_setOwnerToReceiver == false, so the copies keep the rankID set above, the owner's.
+  this->distributeFromPool(pool, false);
+
+  m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleGhostMask& a_coarToFine)
+{
+  CH_TIME("ParticleContainer::transferMaskParticlesCoarToFine");
+
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    if (lvl >= a_coarToFine.size() || a_coarToFine[lvl].isNull()) {
+      continue;
+    }
+
+    LevelParticles& maskLevel = *m_maskParticles[lvl];
+    LevelParticles& srcLevel  = *m_particles[lvl];
+
+    const DataIterator& dit  = m_grids[lvl].dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&         din  = dit[mybox];
+      const ParticleGhostMask& mask = (*a_coarToFine[lvl])[din];
+
+      Leaf& src = srcLevel[din];
+      Leaf& dst = maskLevel[din];
+
+      std::size_t i = 0;
+      while (i < src.size()) {
+        const RealVect pos = src.position(i);
+        const IntVect  iv  = this->cellIndex(lvl, pos);
+
+        bool select = false;
+
+        if (!src.isGhost(i) && mask.box().contains(iv)) {
+          const IntVect fineCell = this->cellIndex(lvl + 1, pos);
+
+          for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
+            select = mask.targetBox(iv, k).contains(fineCell);
+          }
+        }
+
+        if (select) {
+          dst.append(pos, src.weight(i), src.gather(i));
+
+          const std::size_t k = dst.size() - 1;
+
+          dst.particleID(k) = src.particleID(i);
+          dst.rankID(k)     = src.rankID(i);
+
+          src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
+        }
+        else {
+          ++i;
+        }
       }
     }
   }

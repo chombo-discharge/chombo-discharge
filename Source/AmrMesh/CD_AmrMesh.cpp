@@ -3589,6 +3589,67 @@ AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width
   m_realms[a_realm]->registerParticleGhostMask(a_width);
 }
 
+void
+AmrMesh::defineParticleGhostMask(const std::string& a_realm, const int a_width)
+{
+  CH_TIME("AmrMesh::defineParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::defineParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::defineParticleGhostMask - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->defineParticleGhostMask(a_width);
+}
+
+void
+AmrMesh::registerParticleDeposition(const std::string&         a_realm,
+                                    const DepositionType       a_depositionType,
+                                    const CoarseFineDeposition a_coarseFineDeposition)
+{
+  CH_TIME("AmrMesh::registerParticleDeposition");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::registerParticleDeposition" << endl;
+  }
+
+  // the ratios between the levels a run can have; the list may be longer
+  const int numRatios = std::min(m_maxAmrDepth, static_cast<int>(m_refinementRatios.size()));
+
+  // The particle ghost masks do not wrap around periodic boundaries.
+  bool isPeriodic = false;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    isPeriodic = isPeriodic || m_domains[0].isPeriodic(dir);
+  }
+
+  for (int lvl = 0; lvl < numRatios; lvl++) {
+    const std::vector<int> widths = EBAMRParticleMesh::getCoarseToFineMaskWidths(a_depositionType,
+                                                                                 a_coarseFineDeposition,
+                                                                                 m_refinementRatios[lvl]);
+
+    if (isPeriodic && !widths.empty()) {
+      MayDay::Abort("AmrMesh::registerParticleDeposition - Halo and Transition coarse-fine deposition use particle "
+                    "ghost masks, which do not support periodic domains. Use Interp or HaloNGP on a periodic domain");
+    }
+
+    for (const int width : widths) {
+      if (width >= m_minBlockSize) {
+        const std::string
+          str = "AmrMesh::registerParticleDeposition - this coarse-fine deposition needs particle ghost "
+                "masks of width " +
+                std::to_string(width) + " at refinement ratio " + std::to_string(m_refinementRatios[lvl]) +
+                ", which must be smaller than min_block_size = " + std::to_string(m_minBlockSize);
+        MayDay::Abort(str.c_str());
+      }
+
+      this->registerParticleGhostMask(a_realm, width);
+    }
+  }
+}
+
 const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
 {

@@ -618,6 +618,15 @@ public:
   registerParticleGhostMask(const int a_width) noexcept;
 
   /**
+   * @brief Register a particle ghost-mask width and build its masks now if they do not exist yet.
+   * @details For consumers whose widths depend on settings that can change at run time. Later regrids rebuild the
+   * masks like those of any registered width. Before the first regrid this only registers the width.
+   * @param[in] a_width Ghost width (cells). Must be > 0 and < min_block_size.
+   */
+  void
+  defineParticleGhostMask(const int a_width) noexcept;
+
+  /**
    * @brief Get the same-level particle ghost mask for a registered width.
    * @param[in] a_width Registered ghost width.
    * @return The per-level same-level mask for a_width. Aborts if the width was not registered.
@@ -1017,6 +1026,14 @@ protected:
    */
   void
   defineParticleGhostMasks() noexcept;
+
+  /**
+   * @brief Build the same-level, fine-to-coarse and coarse-to-fine particle ghost masks, and the exposure mask, for
+   * one width.
+   * @param[in] a_ghost Ghost width (cells). Must be < min_block_size.
+   */
+  void
+  defineParticleGhostMasks(const int a_ghost) noexcept;
 
   /**
    * @brief Define the SAME-level particle ghost mask on one level.
