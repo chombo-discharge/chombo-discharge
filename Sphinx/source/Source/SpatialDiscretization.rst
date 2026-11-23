@@ -352,6 +352,40 @@ Given two normal vectors :math:`\mathbf{n}` and :math:`\mathbf{n}^\prime`, the c
 
    \mathbf{n}\cdot\mathbf{n}^\prime \geq \cos\theta_c,
 
-where :math:`\theta_c` is a threshold angle for grid refinement.
+where :math:`\theta_c` is a threshold angle for grid refinement, ``Driver.refine_angles``.
+
+The geometry itself is resolved by the same test: when it is generated, a box holding the surface is split into finer boxes where neighbouring normals turn by more than the angle.
+By default it uses ``Driver.refine_angles``, so the geometry is resolved where the Driver refines.
+It can be given its own angle with
+
+.. code-block:: text
+
+   ComputationalGeometry.refine_angles = 45  # Angle (degrees) the geometry splits boxes at. Negative, the default, uses Driver.refine_angles.
+
+A larger angle than the Driver's makes the geometry cheaper to generate.
+Where the Driver then refines further than the geometry was resolved, the finer cells are cut from the coarser cells' polyhedra rather than from the implicit function.
+The surface there is therefore no more accurate than on the level where the geometry stopped, and cutting the cells costs time when the grids are made.
+A smaller angle resolves the geometry where the Driver does not refine, which costs time and memory and gains nothing.
+
+Multi-valued cells are refined as well.
+Where, and how far, these geometric tags refine can be restricted with boxes in physical space, each with a depth:
+
+.. code-block:: text
+
+   ComputationalGeometry.num_tag_boxes = 2               # Number of boxes. 0, the default, restricts nothing.
+   ComputationalGeometry.tag_box1_lo    = -1.0 -1.0 -1.0  # Low corner of the first box
+   ComputationalGeometry.tag_box1_hi    =  1.0  1.0  1.0  # High corner of the first box
+   ComputationalGeometry.tag_box1_depth = 2               # Geometric tags refine at most 2 levels inside it
+   ComputationalGeometry.tag_box2_lo    = -0.1 -0.1 -0.1
+   ComputationalGeometry.tag_box2_hi    =  0.1  0.1  0.1
+   ComputationalGeometry.tag_box2_depth = 5
+
+The corners take two components in 2D and three in 3D, and every high corner must lie above its low corner in each direction.
+A geometric tag on level :math:`l` is kept only if :math:`l` is less than the depth at the tag's cell center.
+Where boxes overlap, the largest depth among them applies.
+Outside every box the depth is zero, so geometric tags do not refine there at all; without any boxes they are not restricted.
+The tags are restricted before they are grown by ``Driver.grow_geo_tags``.
+A geometry can replace the boxes with its own rule by overriding ``ComputationalGeometry::getMaxGeometricTagDepth``.
+Only the simulation grids are restricted: with polyhedral geometry generation the geometry itself is still resolved to ``AmrMesh.max_eb_depth`` along every surface.
 
 The other two cases are more complicated, and are covered by the :ref:`Chap:CellTagger` classes.
