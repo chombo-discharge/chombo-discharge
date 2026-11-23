@@ -2469,6 +2469,10 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 
   const bool isDomain = (a_surface == "domain");
 
+  // Whether a dielectric emission reaction gives the charge of an impinging Ito species to, or takes it against, a
+  // surface species.
+  std::vector<bool> assignedToSurface(m_itoSpecies.size(), false);
+
   for (const auto& reactionJSON : m_json[reactionSpecifier]) {
     if (!(reactionJSON.contains("reaction"))) {
       this->throwParserError(baseError + " but one of the reactions is missing the field 'reaction'");
@@ -2634,6 +2638,10 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
         }
 
         this->checkSurfaceChargeConservation(chargeIn, chargeOut, baseErrorID);
+
+        if (isPlasma) {
+          assignedToSurface[reactantIndex] = true;
+        }
       }
 
       // Create the reaction and append it to the set.
@@ -2674,6 +2682,18 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
                                reaction,
                                ItoKMCSurfaceReactionSet::Surface::Electrode,
                                ItoKMCSurfaceReactionSet::Species::Photon);
+      }
+    }
+  }
+
+  // With surface species, the charge of a charged Ito species that hits a dielectric goes into the surface charge but
+  // is unassigned, unless a dielectric emission reaction gives it to, or takes it against, a surface species.
+  if (a_surface == "dielectric" && !(m_surfaceSpecies.empty())) {
+    for (int i = 0; i < m_itoSpecies.size(); i++) {
+      if (m_itoSpecies[i]->getChargeNumber() != 0 && !(assignedToSurface[i])) {
+        this->throwParserWarning(baseError + " - charged species '" + m_itoSpecies[i]->getName() +
+                                 "' has no dielectric emission reaction with surface species. Its charge goes into "
+                                 "the surface charge but no surface species accounts for it");
       }
     }
   }

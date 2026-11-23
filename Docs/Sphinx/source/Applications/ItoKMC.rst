@@ -2454,6 +2454,32 @@ The surface charge density :math:`\sigma` remains the record of the charge on th
 The surface species are a breakdown of :math:`\sigma`, and the step report lists the charge of each surface species together with the part of the surface charge that no surface species accounts for, :math:`\sigma - \sum_s Z_s q_\text{e} n_s` integrated over the surface.
 This unassigned charge stays at round-off when every charged species that reaches a dielectric is captured by a reaction that conserves charge.
 
+Surface species are optional, and so is a surface species for every charge carrier.
+A charged particle that hits a dielectric is absorbed whether or not a reaction names it, so its charge always goes into :math:`\sigma`; without a reaction that involves a surface species, that charge is unassigned.
+The unassigned charge is part of :math:`\sigma` and acts on the field, but it is not a species: no reaction can consume it.
+When surface species are defined, a warning is therefore issued at start-up for every charged Ito species that has no ``dielectric emission`` reaction with a surface species.
+
+With only trapped electrons defined, for example, a positive ion that lands on them does not neutralise them unless a reaction says so.
+The ion's charge is unassigned, and the trapped electrons remain, free to desorb or be detached.
+The total charge is right, but the number of trapped electrons is too high.
+Neutralisation is written as a reaction that consumes a surface electron, and a negative ion can leave its electron on the surface:
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "O2+ + e(s) -> (null)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "O- -> e(s)",
+	 "efficiency": 1.0
+      }
+   ]
+
+The first pathway fires only where a surface electron is present; elsewhere the ion is absorbed and its charge is unassigned.
+
 Surface species may appear in ``dielectric emission`` reactions, on both sides, next to the one impinging particle or photon species.
 They are not permitted in ``electrode emission`` or ``domain emission``.
 Typical reactions are capture, neutralisation, and photodetachment:

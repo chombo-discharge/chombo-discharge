@@ -381,6 +381,18 @@
 	    "efficiency": 1.0
 	},
 	{
+	    "reaction": "O- -> e(s)",	// Negative ions that hit the dielectric leave their electron on the surface.
+	    "efficiency": 1.0
+	},
+	{
+	    "reaction": "O2+ + e(s) -> (null)",	// Positive ions are neutralised by a surface electron. Without one, their charge is unassigned.
+	    "efficiency": 1.0
+	},
+	{
+	    "reaction": "N2+ + e(s) -> (null)",
+	    "efficiency": 1.0
+	},
+	{
 	    "reaction": "Y + e(s) -> e",	// Photodetachment of a surface electron. Fires only if a surface electron is present.
 	    "efficiency": 1E-2
 	},
