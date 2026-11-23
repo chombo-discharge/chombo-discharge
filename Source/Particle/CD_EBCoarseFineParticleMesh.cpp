@@ -73,6 +73,10 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 
   // Make the coarsened and refine grids.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
+
+  // addFineGhostsToCoarse refines coarse VoFs on the coarsened grids.
+  m_eblgCoFi.getEBISL().setMaxRefinementRatio(m_refRat, m_eblgFine.getEBIS());
+
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
 
   // valid+ghost -> valid

@@ -717,6 +717,9 @@ FieldSolverGMG::setupHelmholtzFactory()
   Vector<MFReflux>                mfFluxReg(1 + finestLevel);
   Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
 
+  Vector<Vector<RefCountedPtr<EBMGRestrict>>> amrRestrictions(1 + finestLevel);
+  Vector<Vector<RefCountedPtr<EBMGProlong>>>  amrProlongations(1 + finestLevel);
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     Vector<RefCountedPtr<EBMultigridInterpolator>> interpPhases(numPhases);
     Vector<RefCountedPtr<EBReflux>>                fluxRegPhases(numPhases);
@@ -743,22 +746,34 @@ FieldSolverGMG::setupHelmholtzFactory()
       avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
     }
 
+    amrRestrictions[lvl].resize(numPhases);
+    amrProlongations[lvl].resize(numPhases);
+
+    if (!ebisGas.isNull()) {
+      amrRestrictions[lvl][phase::gas]  = m_amr->getMultigridRestriction(m_realm, phase::gas)[lvl];
+      amrProlongations[lvl][phase::gas] = m_amr->getMultigridProlongation(m_realm, phase::gas)[lvl];
+    }
+    if (!ebisSol.isNull()) {
+      amrRestrictions[lvl][phase::solid]  = m_amr->getMultigridRestriction(m_realm, phase::solid)[lvl];
+      amrProlongations[lvl][phase::solid] = m_amr->getMultigridProlongation(m_realm, phase::solid)[lvl];
+    }
+
     mflg[lvl] = *(m_amr->getMFLevelGrid(m_realm)[lvl]);
     mfInterp[lvl].define(interpPhases);
     mfFluxReg[lvl].define(fluxRegPhases);
     mfCoarAve[lvl].define(avePhases);
   }
 
-  // The multigrid levels, the coarsened grids and coarse averaging between them, and the coarsened grids between AMR
-  // levels, all from the realm. The coarse averaging is wrapped per phase in the same way as the AMR operators above.
+  // The multigrid levels, the restriction, prolongation and coarse averaging between them, and the coarsened grids
+  // between AMR levels, all from the realm. The coarse averaging is wrapped per phase in the same way as the AMR
+  // operators above, and the restriction and prolongation are listed per phase.
   const Vector<Vector<RefCountedPtr<MFLevelGrid>>>& realmMgLevels = m_amr->getMultigridMFLevelGrids(m_realm);
 
-  const Vector<Vector<RefCountedPtr<MFLevelGrid>>>& realmMgLevelsCoFi = m_amr->getMultigridMFLevelGridsCoFi(m_realm);
-
-  Vector<Vector<MFLevelGrid>> mgLevelGrids(1 + finestLevel);
-  Vector<Vector<MFLevelGrid>> mgLevelGridsCoFi(1 + finestLevel);
-  Vector<Vector<MFCoarAve>>   mgCoarAve(1 + finestLevel);
-  Vector<MFLevelGrid>         mflgCoFi(1 + finestLevel);
+  Vector<Vector<MFLevelGrid>>                         mgLevelGrids(1 + finestLevel);
+  Vector<Vector<Vector<RefCountedPtr<EBMGRestrict>>>> mgRestrictions(1 + finestLevel);
+  Vector<Vector<Vector<RefCountedPtr<EBMGProlong>>>>  mgProlongations(1 + finestLevel);
+  Vector<Vector<MFCoarAve>>                           mgCoarAve(1 + finestLevel);
+  Vector<MFLevelGrid>                                 mflgCoFi(1 + finestLevel);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const int numMgLevels = static_cast<int>(realmMgLevels[lvl].size());
@@ -768,18 +783,24 @@ FieldSolverGMG::setupHelmholtzFactory()
     }
 
     for (int img = 0; img < numMgLevels - 1; img++) {
-      mgLevelGridsCoFi[lvl].push_back(*realmMgLevelsCoFi[lvl][img]);
-
-      Vector<RefCountedPtr<EBCoarAve>> avePhases(numPhases);
+      Vector<RefCountedPtr<EBCoarAve>>    avePhases(numPhases);
+      Vector<RefCountedPtr<EBMGRestrict>> restrictPhases(numPhases);
+      Vector<RefCountedPtr<EBMGProlong>>  prolongPhases(numPhases);
 
       if (!ebisGas.isNull()) {
-        avePhases[phase::gas] = m_amr->getMultigridCoarseAverage(m_realm, phase::gas)[lvl][img];
+        avePhases[phase::gas]      = m_amr->getMultigridCoarseAverage(m_realm, phase::gas)[lvl][img];
+        restrictPhases[phase::gas] = m_amr->getMultigridLevelRestriction(m_realm, phase::gas)[lvl][img];
+        prolongPhases[phase::gas]  = m_amr->getMultigridLevelProlongation(m_realm, phase::gas)[lvl][img];
       }
       if (!ebisSol.isNull()) {
-        avePhases[phase::solid] = m_amr->getMultigridCoarseAverage(m_realm, phase::solid)[lvl][img];
+        avePhases[phase::solid]      = m_amr->getMultigridCoarseAverage(m_realm, phase::solid)[lvl][img];
+        restrictPhases[phase::solid] = m_amr->getMultigridLevelRestriction(m_realm, phase::solid)[lvl][img];
+        prolongPhases[phase::solid]  = m_amr->getMultigridLevelProlongation(m_realm, phase::solid)[lvl][img];
       }
 
       mgCoarAve[lvl].push_back(MFCoarAve(avePhases));
+      mgRestrictions[lvl].push_back(restrictPhases);
+      mgProlongations[lvl].push_back(prolongPhases);
     }
 
     if (lvl < finestLevel) {
@@ -873,9 +894,12 @@ FieldSolverGMG::setupHelmholtzFactory()
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
                              mgLevelGrids,
-                             mgLevelGridsCoFi,
+                             mgRestrictions,
+                             mgProlongations,
                              mgCoarAve,
                              mflgCoFi,
+                             amrRestrictions,
+                             amrProlongations,
                              bottomDomain,
                              m_multigridRefluxFree));
 }
