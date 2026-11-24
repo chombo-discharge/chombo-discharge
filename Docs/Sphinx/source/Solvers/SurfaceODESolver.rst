@@ -75,7 +75,7 @@ In order to set the right-hand side of the equation, functions exist that are en
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 236-263
+   :lines: 227-254
    :dedent: 2
 
 Resetting cells
@@ -88,7 +88,7 @@ The function signatures are
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 310-346
+   :lines: 301-337
    :dedent: 2
 
 Note that one can always call ``SurfaceODESolver<N>::getPhi()`` to iterate over other types of cell subsets and set the values from there.
@@ -100,7 +100,7 @@ When regridding the ``SurfaceODESolver<N>``, one must first call
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 291-298
+   :lines: 282-289
    :dedent: 2
 
 This must be done *before* :ref:`Chap:AmrMesh` creates the new grids, and will store :math:`\vec{\phi}` on the old mesh.
@@ -108,7 +108,7 @@ After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 300-308
+   :lines: 291-299
    :dedent: 2
 
 Note that when interpolating to the new grids one can choose to initialize data in the new cells using the value in the underlying coarse cells, i.e.
