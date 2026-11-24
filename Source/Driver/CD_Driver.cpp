@@ -1398,6 +1398,17 @@ Driver::setup(const std::string& a_inputFile,
 
   this->createOutputDirectories();
 
+  // The levels finer than max_eb_depth have their cut cells cut from the polyhedra of the resolved levels. The
+  // geometry generator refines every cell that would fall into more than one piece when cut to max_eb_depth, but
+  // it cannot see further than that.
+  if (m_geometryGeneration == "polyhedral" && m_amr->getMaxSimulationDepth() > m_amr->getMaxEbDepth() &&
+      procID() == 0) {
+    MayDay::Warning("Driver::setup - AmrMesh.max_sim_depth is finer than AmrMesh.max_eb_depth. The cut cells of the "
+                    "finer levels are cut from the polyhedra of the coarser ones, and a cell whose fluid falls into "
+                    "more than one piece there is not refined away. PolyhedralGeometryShop.max_refinement counts "
+                    "such cells; raise AmrMesh.max_eb_depth to remove them");
+  }
+
   if (m_geometryOnly) {
     this->setupGeometryOnly();
   }

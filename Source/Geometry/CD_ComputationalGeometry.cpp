@@ -62,7 +62,6 @@ ComputationalGeometry::ComputationalGeometry()
     m_eps0(1.0),
     m_refineAngle(0.0),
     m_inputRefineAngle(-1.0),
-    m_refineSaddles(false),
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
@@ -82,7 +81,11 @@ ComputationalGeometry::ComputationalGeometry()
   ParmParse pp("ComputationalGeometry");
 
   pp.query("verbose", m_verbose);
-  pp.query("refine_saddles", m_refineSaddles);
+  if (pp.contains("refine_saddles")) {
+    MayDay::Error(
+      "ComputationalGeometry::ComputationalGeometry - refine_saddles has been removed; every box whose cells "
+      "would fall into more than one piece when cut to AmrMesh.max_eb_depth is now refined");
+  }
   pp.query("refine_angles", m_inputRefineAngle);
   pp.query("profile", m_profile);
 
@@ -861,7 +864,6 @@ ComputationalGeometry::writeGrids()
   header.m_realvect["prob_lo"]     = m_probLo;
   header.m_real["start_dx"]        = m_dx[m_startLevel];
   header.m_real["refine_angle"]    = m_refineAngle;
-  header.m_int["refine_saddles"]   = m_refineSaddles ? 1 : 0;
   header.m_int["max_ghost_eb"]     = m_maxGhostEB;
   header.m_int["min_block_size"]   = m_minBlockSize;
   header.m_int["max_block_size"]   = m_maxBlockSize;
@@ -955,7 +957,6 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
   requireKey(header.m_string.find("id") != header.m_string.end(), "id");
 
   for (const std::string key : {"space_dim",
-                                "refine_saddles",
                                 "max_ghost_eb",
                                 "min_block_size",
                                 "max_block_size",
@@ -1009,14 +1010,11 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
   }
 
   // What the graph was generated with: the stored value is used, and a different input is reported.
-  const bool inputSaddles = m_refineSaddles;
-
-  m_probLo        = a_probLo;
-  m_refineAngle   = header.m_real["refine_angle"];
-  m_refineSaddles = header.m_int["refine_saddles"] != 0;
-  m_maxGhostEB    = header.m_int["max_ghost_eb"];
-  m_minBlockSize  = header.m_int["min_block_size"];
-  m_maxBlockSize  = header.m_int["max_block_size"];
+  m_probLo       = a_probLo;
+  m_refineAngle  = header.m_real["refine_angle"];
+  m_maxGhostEB   = header.m_int["max_ghost_eb"];
+  m_minBlockSize = header.m_int["min_block_size"];
+  m_maxBlockSize = header.m_int["max_block_size"];
 
   this->defineLevels(a_startDomain, a_stopDomain, a_startDx);
 
@@ -1045,7 +1043,6 @@ ComputationalGeometry::readGrids(const ProblemDomain& a_startDomain,
   report("the refinement angle (ComputationalGeometry.refine_angles, otherwise Driver.refine_angles)",
          str(m_refineAngle),
          str(a_refineAngle));
-  report("ComputationalGeometry.refine_saddles", str(m_refineSaddles), str(inputSaddles));
   report("the number of EB ghost cells", str(m_maxGhostEB), str(a_maxGhostEB));
   report("AmrMesh.eb_min_block_size", str(m_minBlockSize), str(a_minBlockSize));
   report("AmrMesh.eb_max_block_size", str(m_maxBlockSize), str(a_maxBlockSize));
@@ -1973,19 +1970,19 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
       }
     }
 
-    // A box no other rule splits may still hold a twisted patch, which is the one shape whose fluid can fall
-    // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
-    // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
-    // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
-    if (reason == SplitReason::None && m_refineSaddles) {
-      const bool gasTwist = (a_gasTypes[i] == GeometryService::Irregular) &&
-                            this->hasTwistedPatch(a_boxes[i], a_level, phase::gas);
+    // A box no other rule splits is a leaf, and the finer cells over it are cut from its cells. A cell that falls
+    // into more than one piece on the way to the stop level is refined, so that the finer cells are reconstructed
+    // instead. Both phases are asked: a fold of the interface that is sharp for one phase is not for the other.
+    // This rule runs last because it is the costliest.
+    if (reason == SplitReason::None) {
+      const bool gasApart = (a_gasTypes[i] == GeometryService::Irregular) &&
+                            this->fallsApartWhenCut(a_boxes[i], a_level, phase::gas);
 
-      const bool solidTwist = (a_solidTypes[i] == GeometryService::Irregular) &&
-                              this->hasTwistedPatch(a_boxes[i], a_level, phase::solid);
+      const bool solidApart = !gasApart && (a_solidTypes[i] == GeometryService::Irregular) &&
+                              this->fallsApartWhenCut(a_boxes[i], a_level, phase::solid);
 
-      if (gasTwist || solidTwist) {
-        reason = SplitReason::Twist;
+      if (gasApart || solidApart) {
+        reason = SplitReason::MultiValued;
       }
     }
 
@@ -2283,17 +2280,16 @@ ComputationalGeometry::piercedSeamFace(const IntVect&           a_cell,
 }
 
 bool
-ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+ComputationalGeometry::fallsApartWhenCut(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
-  CH_TIME("ComputationalGeometry::hasTwistedPatch");
+  CH_TIME("ComputationalGeometry::fallsApartWhenCut");
 
   if (m_verbose) {
-    pout() << "ComputationalGeometry::hasTwistedPatch" << endl;
+    pout() << "ComputationalGeometry::fallsApartWhenCut" << endl;
   }
 
-  CH_assert(a_level >= 0 && a_level < m_domains.size());
+  CH_assert(a_level >= 0 && a_level < m_stopLevel);
 
-#if CH_SPACEDIM == 3
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
 
@@ -2305,26 +2301,16 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
 
   const BaseIF& f = *implicitFunction;
 
-  const Real dx = m_dx[a_level];
+  const Real dx       = m_dx[a_level];
+  const int  refRatio = 1 << (m_stopLevel - a_level);
 
   const Box valid = a_box & m_domains[a_level].domainBox();
-  const Box grown = grow(a_box, 1) & m_domains[a_level].domainBox();
 
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralEB::fillNodeValues(nodeValues, f, grown, m_probLo, dx);
-  PolyhedralEB::defineIntercepts(intercept, grown);
-
-  constexpr int perDir = CutCellSurface::s_numEdges / SpaceDim;
-
-  // The smallest twist that is a twist rather than rounding. The crossings are solved to about 1e-10 of the edge,
-  // so four of them combine to noise of a few times that, and a flat face aligned with the grid -- where the four
-  // crossings agree to the last bit -- comes out with a twist of one unit in the last place and slopes the same
-  // size. Dividing one rounding error by another then puts the saddle anywhere, inside the square as often as
-  // not, and a flat disk gets refined as though it were rough. Real saddles sit many orders of magnitude above
-  // this; one this small could in any case only split a child lying within a quarter of it of the octant plane.
-  constexpr Real twistFloor = 1.0E-8;
+  PolyhedralEB::fillNodeValues(nodeValues, f, valid, m_probLo, dx);
+  PolyhedralEB::defineIntercepts(intercept, valid);
 
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     CutCellSurface surface;
@@ -2335,42 +2321,16 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
       continue;
     }
 
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      const int base = dir * perDir;
+    CutCellBody body;
 
-      bool all = true;
+    if (!body.define(surface)) {
+      continue;
+    }
 
-      for (int k = 0; k < 4; k++) {
-        all = all && (surface.m_crossing[base + k] != CutCellSurface::s_noCrossing);
-      }
-
-      if (!all) {
-        continue;
-      }
-
-      const Real f00 = surface.m_crossing[base + 0];
-      const Real f10 = surface.m_crossing[base + 1];
-      const Real f01 = surface.m_crossing[base + 2];
-      const Real f11 = surface.m_crossing[base + 3];
-
-      const Real twist = f00 + f11 - f01 - f10;
-
-      if (std::abs(twist) <= twistFloor) {
-        continue;
-      }
-
-      // The saddle of the patch through the four crossings. Outside its own square the patch rises or falls
-      // monotonically across the cell in one direction, and no sub-box of it can hold two pieces of fluid at
-      // any refinement; inside, it can.
-      const Real saddleT0 = -(f01 - f00) / twist;
-      const Real saddleT1 = -(f10 - f00) / twist;
-
-      if (saddleT0 >= 0.0 && saddleT0 <= 1.0 && saddleT1 >= 0.0 && saddleT1 <= 1.0) {
-        return true;
-      }
+    if (body.hasMultiValuedChildren(refRatio)) {
+      return true;
     }
   }
-#endif
 
   return false;
 }
@@ -3109,7 +3069,7 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial/doubled/twist/depth " << m_splitCounts[lvl][1] << "/"
+           << "; split interior/ring/medial/doubled/multivalued/depth " << m_splitCounts[lvl][1] << "/"
            << m_splitCounts[lvl][2] << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/"
            << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << " (leaves " << m_splitCounts[lvl][0]
            << "); tiles tagged/nesting " << m_splitCounts[lvl][7] << "/" << m_splitCounts[lvl][8] << endl;

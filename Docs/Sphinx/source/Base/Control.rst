@@ -318,7 +318,7 @@ Every checkpoint records the file, relative to its own directory, together with 
 Any simulation that generates its geometry -- a new one, or a restart from a checkpoint without a graph file -- writes a new graph file and replaces one of the same name.
 
 A restart reads the geometry from that file instead of generating it, so the simulation continues on exactly the geometry it was checkpointed with, on any number of MPI ranks.
-The settings the geometry was generated with -- the refinement angle (``ComputationalGeometry.refine_angles``, or ``Driver.refine_angles``), ``Driver.refine_electrodes``, ``Driver.refine_dielectrics``, ``ComputationalGeometry.refine_saddles``, and the EB tile sizes and ghost cells -- are then taken from the file for the geometry, and each one that differs in the input file is reported in :file:`pout.0`.
+The settings the geometry was generated with -- the refinement angle (``ComputationalGeometry.refine_angles``, or ``Driver.refine_angles``), ``Driver.refine_electrodes``, ``Driver.refine_dielectrics``, and the EB tile sizes and ghost cells -- are then taken from the file for the geometry, and each one that differs in the input file is reported in :file:`pout.0`.
 The grid tags still use the values in the input file, since they may change during a run; only the geometry is fixed by the file.
 The restart aborts if
 
