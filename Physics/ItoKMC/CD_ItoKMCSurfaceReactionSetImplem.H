@@ -77,6 +77,60 @@ ItoKMCSurfaceReactionSet::addDomain(const size_t                            a_sp
   }
 }
 
+inline void
+ItoKMCSurfaceReactionSet::addSurfaceSpeciesReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept
+{
+  const size_t surfaceIndex = a_reaction.getReactant();
+
+  if (m_surfaceSpeciesReactions.size() <= surfaceIndex) {
+    m_surfaceSpeciesReactions.resize(surfaceIndex + 1);
+  }
+
+  m_surfaceSpeciesReactions[surfaceIndex].add(a_reaction);
+}
+
+inline const std::vector<ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getSurfaceSpeciesReactions() const noexcept
+{
+  return m_surfaceSpeciesReactions;
+}
+
+inline void
+ItoKMCSurfaceReactionSet::addSolidInjectionReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept
+{
+  const size_t surfaceIndex = a_reaction.getReactant();
+
+  if (m_solidInjectionReactions.size() <= surfaceIndex) {
+    m_solidInjectionReactions.resize(surfaceIndex + 1);
+  }
+
+  m_solidInjectionReactions[surfaceIndex].add(a_reaction);
+}
+
+inline const std::vector<ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getSolidInjectionReactions() const noexcept
+{
+  return m_solidInjectionReactions;
+}
+
+inline void
+ItoKMCSurfaceReactionSet::addSolidArrivalReaction(const ItoKMCSurfaceReaction& a_reaction) noexcept
+{
+  const size_t solidIndex = a_reaction.getReactant();
+
+  if (m_solidArrivalReactions.size() <= solidIndex) {
+    m_solidArrivalReactions.resize(solidIndex + 1);
+  }
+
+  m_solidArrivalReactions[solidIndex].add(a_reaction);
+}
+
+inline const std::vector<ItoKMCSurfaceReactions>&
+ItoKMCSurfaceReactionSet::getSolidArrivalReactions() const noexcept
+{
+  return m_solidArrivalReactions;
+}
+
 inline const std::map<size_t, ItoKMCSurfaceReactions>&
 ItoKMCSurfaceReactionSet::getDielectricPlasmaReactions() const noexcept
 {

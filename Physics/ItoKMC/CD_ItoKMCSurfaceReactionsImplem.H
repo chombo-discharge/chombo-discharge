@@ -48,6 +48,8 @@ ItoKMCSurfaceReactions::add(const ItoKMCSurfaceReaction& a_surfaceReaction) noex
   }
 
   m_products.emplace_back(a_surfaceReaction.getProducts());
+  m_surfaceReactants.emplace_back(a_surfaceReaction.getSurfaceReactants());
+  m_surfaceProducts.emplace_back(a_surfaceReaction.getSurfaceProducts());
   m_efficiencies.emplace_back(a_surfaceReaction.getEfficiency());
 
   m_distribution = std::discrete_distribution<int>(std::begin(m_efficiencies), std::end(m_efficiencies));
@@ -60,6 +62,8 @@ ItoKMCSurfaceReactions::reset() noexcept
 {
   m_reactant = 0;
   m_products.clear();
+  m_surfaceReactants.clear();
+  m_surfaceProducts.clear();
   m_efficiencies.clear();
 
   m_isDefined = false;
@@ -75,6 +79,18 @@ inline const std::vector<ItoKMCSurfaceReactions::Products>&
 ItoKMCSurfaceReactions::getProducts() const noexcept
 {
   return m_products;
+}
+
+inline const std::vector<ItoKMCSurfaceReactions::Products>&
+ItoKMCSurfaceReactions::getSurfaceReactants() const noexcept
+{
+  return m_surfaceReactants;
+}
+
+inline const std::vector<ItoKMCSurfaceReactions::Products>&
+ItoKMCSurfaceReactions::getSurfaceProducts() const noexcept
+{
+  return m_surfaceProducts;
 }
 
 inline const std::vector<Real>&
