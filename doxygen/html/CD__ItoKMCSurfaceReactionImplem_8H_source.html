@@ -104,83 +104,128 @@ $(function() {
 </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">   29</a></span><span class="keyword">inline</span> <a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction</a>() noexcept</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{}</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ab4003e2556ca5935867f9b2ad10a54eb">   29</a></span><span class="keyword">inline</span> <a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a8329b8fb0eb5c2ad7a2964a5f14911f9">ItoKMCSurfaceReaction::ItoKMCSurfaceReaction</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>            a_reactant,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>                                                    <span class="keyword">const</span> std::list&lt;size_t&gt; a_products,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>                                                    <span class="keyword">const</span> std::list&lt;size_t&gt; a_surfaceReactants,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>                                                    <span class="keyword">const</span> std::list&lt;size_t&gt; a_surfaceProducts,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>                                                    <span class="keyword">const</span> Real              a_efficiency) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  this-&gt;<a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">define</a>(a_reactant, a_products, a_surfaceReactants, a_surfaceProducts, a_efficiency);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
 </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">   33</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">ItoKMCSurfaceReaction::define</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>            a_reactant,</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>                              <span class="keyword">const</span> std::list&lt;size_t&gt; a_products,</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>                              <span class="keyword">const</span> Real              a_efficiency) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>   = a_reactant;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>   = a_products;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a> = a_efficiency;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="}">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">   38</a></span><span class="keyword">inline</span> <a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction</a>() noexcept</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{}</div>
 </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp;</div>
-<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">   43</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">ItoKMCSurfaceReaction::getReactant</a>() const noexcept</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>{</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00042" data-start="{" data-end="}">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">   42</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">ItoKMCSurfaceReaction::define</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>            a_reactant,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                              <span class="keyword">const</span> std::list&lt;size_t&gt; a_products,</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>                              <span class="keyword">const</span> Real              a_efficiency) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  this-&gt;<a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">define</a>(a_reactant, a_products, std::list&lt;size_t&gt;(), std::list&lt;size_t&gt;(), a_efficiency);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>}</div>
 </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">inline</span> <span class="keywordtype">size_t</span>&amp;</div>
-<div class="foldopen" id="foldopen00049" data-start="{" data-end="}">
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#abd6fa5d4b33abc846add7e40e656c438">   49</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">ItoKMCSurfaceReaction::getReactant</a>() noexcept</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>{</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a48a991f9dfdd8342a03f0bf870e535e9">   50</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">ItoKMCSurfaceReaction::define</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>            a_reactant,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                              <span class="keyword">const</span> std::list&lt;size_t&gt; a_products,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                              <span class="keyword">const</span> std::list&lt;size_t&gt; a_surfaceReactants,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                              <span class="keyword">const</span> std::list&lt;size_t&gt; a_surfaceProducts,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                              <span class="keyword">const</span> Real              a_efficiency) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>         = a_reactant;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>         = a_products;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a2011273da2c6093fb55d948bb89387fc">m_surfaceReactants</a> = a_surfaceReactants;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a5917a0af88c519ba362da878807e6251">m_surfaceProducts</a>  = a_surfaceProducts;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a>       = a_efficiency;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>}</div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">inline</span> <span class="keyword">const</span> std::list&lt;size_t&gt;&amp;</div>
-<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">   55</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">ItoKMCSurfaceReaction::getProducts</a>() const noexcept</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp;</div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">   64</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">ItoKMCSurfaceReaction::getReactant</a>() const noexcept</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>{</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}</div>
 </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">inline</span> std::list&lt;size_t&gt;&amp;</div>
-<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae6514a9ee77de7c52523961883e088ce">   61</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">ItoKMCSurfaceReaction::getProducts</a>() noexcept</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>{</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">inline</span> <span class="keywordtype">size_t</span>&amp;</div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#abd6fa5d4b33abc846add7e40e656c438">   70</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">ItoKMCSurfaceReaction::getReactant</a>() noexcept</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>{</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">m_reactant</a>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
 </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">   67</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">ItoKMCSurfaceReaction::getEfficiency</a>() const noexcept</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="keyword">inline</span> <span class="keyword">const</span> std::list&lt;size_t&gt;&amp;</div>
+<div class="foldopen" id="foldopen00076" data-start="{" data-end="}">
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">   76</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">ItoKMCSurfaceReaction::getProducts</a>() const noexcept</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>{</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
 </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="keyword">inline</span> Real&amp;</div>
-<div class="foldopen" id="foldopen00073" data-start="{" data-end="}">
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a72648e8b790fe32ac99f4d112292bc50">   73</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">ItoKMCSurfaceReaction::getEfficiency</a>() noexcept</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a>;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">inline</span> std::list&lt;size_t&gt;&amp;</div>
+<div class="foldopen" id="foldopen00082" data-start="{" data-end="}">
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae6514a9ee77de7c52523961883e088ce">   82</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">ItoKMCSurfaceReaction::getProducts</a>() noexcept</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>{</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">m_products</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
 </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="keyword">inline</span> <span class="keyword">const</span> std::list&lt;size_t&gt;&amp;</div>
+<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#aa28b04ad1c7f173d561d6bea6348e61a">   88</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#aa28b04ad1c7f173d561d6bea6348e61a">ItoKMCSurfaceReaction::getSurfaceReactants</a>() const noexcept</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>{</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a2011273da2c6093fb55d948bb89387fc">m_surfaceReactants</a>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
+</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="keyword">inline</span> <span class="keyword">const</span> std::list&lt;size_t&gt;&amp;</div>
+<div class="foldopen" id="foldopen00094" data-start="{" data-end="}">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae972ef29603a5250c7e6aca90073e9db">   94</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae972ef29603a5250c7e6aca90073e9db">ItoKMCSurfaceReaction::getSurfaceProducts</a>() const noexcept</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>{</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a5917a0af88c519ba362da878807e6251">m_surfaceProducts</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">  100</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">ItoKMCSurfaceReaction::getEfficiency</a>() const noexcept</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>{</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}</div>
+</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keyword">inline</span> Real&amp;</div>
+<div class="foldopen" id="foldopen00106" data-start="{" data-end="}">
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a72648e8b790fe32ac99f4d112292bc50">  106</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">ItoKMCSurfaceReaction::getEfficiency</a>() noexcept</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>{</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">m_efficiency</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
+</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ItoKMCSurfaceReaction_8H_html"><div class="ttname"><a href="CD__ItoKMCSurfaceReaction_8H.html">CD_ItoKMCSurfaceReaction.H</a></div><div class="ttdoc">Declaration of the Physics::ItoKMC::ItoKMCSurfaceReaction class.</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a4bb8ac5be2dcf5f61eecb3c367b836c1"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">Physics::ItoKMC::ItoKMCSurfaceReaction::getEfficiency</a></div><div class="ttdeci">const Real &amp; getEfficiency() const noexcept</div><div class="ttdoc">Get the reaction efficiency (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:67</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a529604a35d81be3f7cffa8b3fbfe09ce"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">Physics::ItoKMC::ItoKMCSurfaceReaction::m_reactant</a></div><div class="ttdeci">size_t m_reactant</div><div class="ttdoc">Source reactant index.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:111</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a65bfc2d312a7627575b203eb6f2a92ab"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">Physics::ItoKMC::ItoKMCSurfaceReaction::m_products</a></div><div class="ttdeci">std::list&lt; size_t &gt; m_products</div><div class="ttdoc">Plasma product indices.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:116</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a7ad732de65882df4e924f5320e758d58"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">Physics::ItoKMC::ItoKMCSurfaceReaction::getReactant</a></div><div class="ttdeci">const size_t &amp; getReactant() const noexcept</div><div class="ttdoc">Get the reactant species index (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:43</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a2011273da2c6093fb55d948bb89387fc"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a2011273da2c6093fb55d948bb89387fc">Physics::ItoKMC::ItoKMCSurfaceReaction::m_surfaceReactants</a></div><div class="ttdeci">std::list&lt; size_t &gt; m_surfaceReactants</div><div class="ttdoc">Surface species consumed by the reaction.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:173</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a4bb8ac5be2dcf5f61eecb3c367b836c1"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">Physics::ItoKMC::ItoKMCSurfaceReaction::getEfficiency</a></div><div class="ttdeci">const Real &amp; getEfficiency() const noexcept</div><div class="ttdoc">Get the reaction efficiency (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:100</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a529604a35d81be3f7cffa8b3fbfe09ce"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a529604a35d81be3f7cffa8b3fbfe09ce">Physics::ItoKMC::ItoKMCSurfaceReaction::m_reactant</a></div><div class="ttdeci">size_t m_reactant</div><div class="ttdoc">Source reactant index.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:163</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a5917a0af88c519ba362da878807e6251"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a5917a0af88c519ba362da878807e6251">Physics::ItoKMC::ItoKMCSurfaceReaction::m_surfaceProducts</a></div><div class="ttdeci">std::list&lt; size_t &gt; m_surfaceProducts</div><div class="ttdoc">Surface species produced by the reaction.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:178</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a65bfc2d312a7627575b203eb6f2a92ab"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a65bfc2d312a7627575b203eb6f2a92ab">Physics::ItoKMC::ItoKMCSurfaceReaction::m_products</a></div><div class="ttdeci">std::list&lt; size_t &gt; m_products</div><div class="ttdoc">Plasma product indices.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:168</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a7ad732de65882df4e924f5320e758d58"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">Physics::ItoKMC::ItoKMCSurfaceReaction::getReactant</a></div><div class="ttdeci">const size_t &amp; getReactant() const noexcept</div><div class="ttdoc">Get the reactant species index (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:64</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a8329b8fb0eb5c2ad7a2964a5f14911f9"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a8329b8fb0eb5c2ad7a2964a5f14911f9">Physics::ItoKMC::ItoKMCSurfaceReaction::ItoKMCSurfaceReaction</a></div><div class="ttdeci">ItoKMCSurfaceReaction()=default</div><div class="ttdoc">Allowed, but you need to call the define function afterwards.</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a84c1e4e17eb2de387f8edc23666b09a3"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">Physics::ItoKMC::ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction</a></div><div class="ttdeci">virtual ~ItoKMCSurfaceReaction() noexcept</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:29</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a88268eb6d0a4ef165855d282cd45b711"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">Physics::ItoKMC::ItoKMCSurfaceReaction::define</a></div><div class="ttdeci">void define(const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const Real a_efficiency) noexcept</div><div class="ttdoc">Full define function.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:33</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_adaf61bda608bfeff6b30afb6bbe09336"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">Physics::ItoKMC::ItoKMCSurfaceReaction::getProducts</a></div><div class="ttdeci">const std::list&lt; size_t &gt; &amp; getProducts() const noexcept</div><div class="ttdoc">Get the plasma product species indices (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:55</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_ae9aa9481028cbb183fb4083a91a86a5f"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">Physics::ItoKMC::ItoKMCSurfaceReaction::m_efficiency</a></div><div class="ttdeci">Real m_efficiency</div><div class="ttdoc">Reaction efficiency.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:121</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a84c1e4e17eb2de387f8edc23666b09a3"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a84c1e4e17eb2de387f8edc23666b09a3">Physics::ItoKMC::ItoKMCSurfaceReaction::~ItoKMCSurfaceReaction</a></div><div class="ttdeci">virtual ~ItoKMCSurfaceReaction() noexcept</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:38</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_a88268eb6d0a4ef165855d282cd45b711"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">Physics::ItoKMC::ItoKMCSurfaceReaction::define</a></div><div class="ttdeci">void define(const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const Real a_efficiency) noexcept</div><div class="ttdoc">Full define function.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:42</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_aa28b04ad1c7f173d561d6bea6348e61a"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#aa28b04ad1c7f173d561d6bea6348e61a">Physics::ItoKMC::ItoKMCSurfaceReaction::getSurfaceReactants</a></div><div class="ttdeci">const std::list&lt; size_t &gt; &amp; getSurfaceReactants() const noexcept</div><div class="ttdoc">Get the surface species consumed by the reaction.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:88</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_adaf61bda608bfeff6b30afb6bbe09336"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">Physics::ItoKMC::ItoKMCSurfaceReaction::getProducts</a></div><div class="ttdeci">const std::list&lt; size_t &gt; &amp; getProducts() const noexcept</div><div class="ttdoc">Get the plasma product species indices (const).</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:76</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_ae972ef29603a5250c7e6aca90073e9db"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae972ef29603a5250c7e6aca90073e9db">Physics::ItoKMC::ItoKMCSurfaceReaction::getSurfaceProducts</a></div><div class="ttdeci">const std::list&lt; size_t &gt; &amp; getSurfaceProducts() const noexcept</div><div class="ttdoc">Get the surface species produced by the reaction.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReactionImplem.H:94</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction_html_ae9aa9481028cbb183fb4083a91a86a5f"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae9aa9481028cbb183fb4083a91a86a5f">Physics::ItoKMC::ItoKMCSurfaceReaction::m_efficiency</a></div><div class="ttdeci">Real m_efficiency</div><div class="ttdoc">Reaction efficiency.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCSurfaceReaction.H:183</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

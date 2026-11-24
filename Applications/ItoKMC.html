@@ -176,6 +176,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#id15">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#emission-on-the-domain-boundary">Emission on the domain boundary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#surface-species">Surface species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#solid-species">Solid species</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
@@ -601,6 +603,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="c1">// Our includes</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoSpecies.H&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_CdrSpecies.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_CdrDomainBC.H&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_RtSpecies.H&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_Photon.H&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ItoParticle.H&gt;</span>
@@ -734,6 +737,28 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Get all surface species.</span>
+<span class="cm">   * @details Surface species are charged states bound to dielectric surfaces, stored as areal densities</span>
+<span class="cm">   * (1/m^2). Only the name, the charge number and initialData() of each species are used; initialData() gives the</span>
+<span class="cm">   * initial areal density. The stepper keeps the surface charge density as its own record and reports the</span>
+<span class="cm">   * surface species as a breakdown of it.</span>
+<span class="cm">   * @return m_surfaceSpecies</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span>
+<span class="w">  </span><span class="n">getSurfaceSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Get all solid species.</span>
+<span class="cm">   * @details Solid species are charge carriers inside dielectrics, held as volume densities (1/m^3) and transported</span>
+<span class="cm">   * by CDR solvers on the solid phase. Only the name, the charge number, the mobile and diffusive flags and</span>
+<span class="cm">   * initialData() of each species are used. The transport coefficients come from computeSolidMobilities() and</span>
+<span class="cm">   * computeSolidDiffusionCoefficients(), and the domain boundary conditions from getSolidDomainBc().</span>
+<span class="cm">   * @return m_solidSpecies</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span>
+<span class="w">  </span><span class="n">getSolidSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Get diffusion functions for all Ito species.</span>
 <span class="cm">   * @return Vector of per-species diffusion displacement functors.</span>
 <span class="cm">   */</span>
@@ -799,6 +824,20 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   */</span>
 <span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">  </span><span class="nf">getNumPhotonSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the number of surface species.</span>
+<span class="cm">   * @return Number of entries in m_surfaceSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">  </span><span class="nf">getNumSurfaceSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the number of solid species.</span>
+<span class="cm">   * @return Number of entries in m_solidSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">  </span><span class="nf">getNumSolidSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Return true if the physics model requires species density gradients.</span>
@@ -899,6 +938,46 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute the mobilities of the solid species.</span>
+<span class="cm">   * @details Called once per solid-phase grid cell. The default implementation sets every mobility to zero.</span>
+<span class="cm">   * @param[out] a_mobilities Non-negative mobility per solid species. Resized by the callee.</span>
+<span class="cm">   * @param[in]  a_time       Time</span>
+<span class="cm">   * @param[in]  a_pos        Position</span>
+<span class="cm">   * @param[in]  a_E          Electric field inside the dielectric</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">computeSolidMobilities</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">   </span><span class="n">a_mobilities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">      </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute the diffusion coefficients of the solid species.</span>
+<span class="cm">   * @details Called once per solid-phase grid cell. The default implementation sets every coefficient to zero.</span>
+<span class="cm">   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient per solid species. Resized by the callee.</span>
+<span class="cm">   * @param[in]  a_time                  Time</span>
+<span class="cm">   * @param[in]  a_pos                   Position</span>
+<span class="cm">   * @param[in]  a_E                     Electric field inside the dielectric</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">computeSolidDiffusionCoefficients</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">   </span><span class="n">a_diffusionCoefficients</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">      </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Get the domain boundary condition of a solid species on one side of the domain.</span>
+<span class="cm">   * @details The solid species do not use the domain boundary conditions of the gas-phase CDR solvers. The default</span>
+<span class="cm">   * implementation returns outflow on every side.</span>
+<span class="cm">   * @param[in] a_species Solid species index.</span>
+<span class="cm">   * @param[in] a_dir     Coordinate direction normal to the domain face.</span>
+<span class="cm">   * @param[in] a_side    Low or high side of the domain.</span>
+<span class="cm">   * @return Boundary condition type, either CdrDomainBC::BcType::Outflow or CdrDomainBC::BcType::Wall.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">CdrDomainBC</span><span class="o">::</span><span class="n">BcType</span>
+<span class="w">  </span><span class="nf">getSolidDomainBc</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_species</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_dir</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Resolve secondary emission at the EB.</span>
 <span class="cm">   * @details Routine is here to handle charge injection, secondary emission etc.</span>
 <span class="cm">   * @param[out] a_secondaryParticles Outgoing plasma species particles.</span>
@@ -935,6 +1014,100 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                              </span><span class="n">a_isDielectric</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Resolve secondary emission and surface-species kinetics at the EB.</span>
+<span class="cm">   * @details This is the EB emission entry point called by the stepper. It takes the same arguments as</span>
+<span class="cm">   * secondaryEmissionEB() plus the areal densities of the surface species in the cut cell, and returns the change</span>
+<span class="cm">   * in those densities over the time step. The default implementation sets the change to zero and calls</span>
+<span class="cm">   * secondaryEmissionEB(), so a model without surface species only needs to implement that function.</span>
+<span class="cm">   *</span>
+<span class="cm">   * The stepper keeps the surface charge density as an independent record that is updated by the charge of the</span>
+<span class="cm">   * primaries and secondaries, exactly as without surface species. Changes in the surface densities do not</span>
+<span class="cm">   * update the surface charge; they only change how it is broken down. An implementation therefore conserves the</span>
+<span class="cm">   * breakdown when every change in a surface density is matched by an absorbed primary or an emitted secondary</span>
+<span class="cm">   * of the same charge.</span>
+<span class="cm">   * @param[out] a_secondaryParticles     Outgoing plasma species particles.</span>
+<span class="cm">   * @param[out] a_cdrFluxes              CDR fluxes for CDR species.</span>
+<span class="cm">   * @param[out] a_secondaryPhotons       Photons injected through the EB.</span>
+<span class="cm">   * @param[out] a_surfaceDensityChange   Change in the areal density (1/m^2) of each surface species over the</span>
+<span class="cm">   *                                      time step. Sized to the number of surface species by the caller.</span>
+<span class="cm">   * @param[in]  a_primaryParticles       Particles that left the computational domain through the EB.</span>
+<span class="cm">   * @param[in]  a_cdrFluxesExtrap        Extrapolated CDR fluxes.</span>
+<span class="cm">   * @param[in]  a_primaryPhotons         Photons that left the computational domain through the EB.</span>
+<span class="cm">   * @param[in]  a_surfaceDensities       Areal density (1/m^2) of each surface species in this cut cell.</span>
+<span class="cm">   * @param[in]  a_E                      Electric field.</span>
+<span class="cm">   * @param[in]  a_physicalCellCenter     Physical position of the cell center.</span>
+<span class="cm">   * @param[in]  a_cellCentroid           Cell centroid relative to the cell center (not multiplied by dx).</span>
+<span class="cm">   * @param[in]  a_bndryCentroid          EB face centroid relative to the cell center (not multiplied by dx).</span>
+<span class="cm">   * @param[in]  a_bndryNormal            Cut-cell normal vector.</span>
+<span class="cm">   * @param[in]  a_bndryArea              Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).</span>
+<span class="cm">   * @param[in]  a_dx                     Grid resolution on this level.</span>
+<span class="cm">   * @param[in]  a_dt                     Time step.</span>
+<span class="cm">   * @param[in]  a_isDielectric           Dielectric or electrode.</span>
+<span class="cm">   * @param[in]  a_matIndex               Material index (taken from computationalGeometry).</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">surfaceEmissionEB</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w">       </span><span class="n">a_secondaryParticles</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                           </span><span class="n">a_cdrFluxes</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">            </span><span class="n">a_secondaryPhotons</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                           </span><span class="n">a_surfaceDensityChange</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_primaryParticles</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                     </span><span class="n">a_cdrFluxesExtrap</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&gt;&amp;</span><span class="w">      </span><span class="n">a_primaryPhotons</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                     </span><span class="n">a_surfaceDensities</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_physicalCellCenter</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_cellCentroid</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_bndryCentroid</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                         </span><span class="n">a_bndryNormal</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_bndryArea</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                              </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                              </span><span class="n">a_isDielectric</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Exchange charge between the surface species and the solid species through a dielectric surface.</span>
+<span class="cm">   * @details Called by the stepper once per time step for each cut cell on the gas side of a gas-dielectric</span>
+<span class="cm">   * interface, after the solid species have been transported. All quantities are areal densities on the gas side of</span>
+<span class="cm">   * the cut cell, i.e. numbers of particles divided by the physical boundary area of the gas-side cut cell.</span>
+<span class="cm">   *</span>
+<span class="cm">   * a_solidArrival holds the solid carriers that left the dielectric through this surface during the time step.</span>
+<span class="cm">   * They have already been removed from the solid species and the stepper adds their charge to the surface charge.</span>
+<span class="cm">   * An implementation assigns them to surface species through a_surfaceDensityChange; carriers that are not</span>
+<span class="cm">   * assigned stay in the surface charge without belonging to a surface species.</span>
+<span class="cm">   *</span>
+<span class="cm">   * a_solidInjection returns the carriers that enter the dielectric from the surface. The stepper adds them to the</span>
+<span class="cm">   * solid species and subtracts their charge from the surface charge, so an implementation must take the same</span>
+<span class="cm">   * charge out of the surface species through a_surfaceDensityChange for the breakdown of the surface charge to</span>
+<span class="cm">   * remain exact.</span>
+<span class="cm">   *</span>
+<span class="cm">   * The default implementation assigns nothing and injects nothing.</span>
+<span class="cm">   * @param[out] a_surfaceDensityChange Change in the areal density (1/m^2) of each surface species. Sized to the</span>
+<span class="cm">   *                                    number of surface species by the caller.</span>
+<span class="cm">   * @param[out] a_solidInjection       Areal density (1/m^2) of each solid species injected into the dielectric.</span>
+<span class="cm">   *                                    Sized to the number of solid species by the caller.</span>
+<span class="cm">   * @param[in]  a_surfaceDensities     Areal density (1/m^2) of each surface species in this cut cell.</span>
+<span class="cm">   * @param[in]  a_solidArrival         Areal density (1/m^2) of each solid species that arrived at the surface.</span>
+<span class="cm">   * @param[in]  a_E                    Electric field on the gas side.</span>
+<span class="cm">   * @param[in]  a_physicalCellCenter   Physical position of the cell center.</span>
+<span class="cm">   * @param[in]  a_bndryNormal          Gas-side cut-cell normal vector, pointing into the gas.</span>
+<span class="cm">   * @param[in]  a_bndryArea            Gas-side cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D).</span>
+<span class="cm">   * @param[in]  a_dx                   Grid resolution on this level.</span>
+<span class="cm">   * @param[in]  a_dt                   Time step.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">surfaceSolidExchangeEB</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">       </span><span class="n">a_surfaceDensityChange</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">       </span><span class="n">a_solidInjection</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_surfaceDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_solidArrival</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_physicalCellCenter</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_bndryNormal</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_bndryArea</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Resolve secondary emission on one face of the computational domain.</span>
@@ -1280,6 +1453,19 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   * @brief List of solver-tracked photon species.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief List of surface species, bound to dielectric surfaces.</span>
+<span class="cm">   * @details Only the name, charge number and initial data are used. Empty unless the subclass fills it.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_surfaceSpecies</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief List of solid species, transported inside dielectrics.</span>
+<span class="cm">   * @details Only the name, charge number, mobile and diffusive flags and initial data are used. Empty unless the</span>
+<span class="cm">   * subclass fills it.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_solidSpecies</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief An internal integer describing which species is the "ionizing" species.</span>
@@ -3171,6 +3357,7 @@ Specification of secondary emission is done separately on dielectrics, electrode
 The internal specification for these are identical (see <a class="reference internal" href="#chap-itokmcdomainemission"><span class="std std-ref">Emission on the domain boundary</span></a> for the one addition for the domain), so all examples below use <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code>.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+On dielectrics, surface species can also appear on either side (see <a class="reference internal" href="#chap-itokmcsurfacespecies"><span class="std std-ref">Surface species</span></a>).
 Wildcards <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> are supported, as is the <code class="docutils literal notranslate"><span class="pre">(null)</span></code> species which enables null-reactions, as further discussed below.
 An example JSON specification that enables secondary electron emission due to photons and ion impact is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"dielectric emission"</span><span class="p">:</span>
@@ -3235,6 +3422,154 @@ A primary that leaves through a cell on an edge or corner of the domain is assig
 Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
 CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver’s boundary conditions.
 Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.</p>
+</section>
+<section id="surface-species">
+<span id="chap-itokmcsurfacespecies"></span><h4>Surface species<a class="headerlink" href="#surface-species" title="Permalink to this heading"></a></h4>
+<p>Charged states bound to dielectric surfaces, such as trapped electrons or adsorbed ions, can be tracked as surface species.
+They are declared in a top-level <code class="docutils literal notranslate"><span class="pre">surface</span> <span class="pre">species</span></code> array, where each entry has an <code class="docutils literal notranslate"><span class="pre">id</span></code>, a charge number <code class="docutils literal notranslate"><span class="pre">Z</span></code>, and an optional <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">density</span></code> (in <span class="math notranslate nohighlight">\(\text{m}^{-2}\)</span>, zero by default).
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"surface species"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e(s)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Z"</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2+(s)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Z"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"initial density"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E10</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Each surface species is stored as an areal density on the dielectric cut cells, with its own <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code>.
+The surface charge density <span class="math notranslate nohighlight">\(\sigma\)</span> remains the record of the charge on the surface: it is updated by the charge of the primaries that hit the surface and of the secondaries that leave it, exactly as without surface species, and the initial surface species densities are added to the initial <span class="math notranslate nohighlight">\(\sigma\)</span>.
+The surface species are a breakdown of <span class="math notranslate nohighlight">\(\sigma\)</span>, and the step report lists the charge of each surface species together with the part of the surface charge that no surface species accounts for, <span class="math notranslate nohighlight">\(\sigma - \sum_s Z_s q_\text{e} n_s\)</span> integrated over the surface.
+This unassigned charge stays at round-off when every charged species that reaches a dielectric is captured by a reaction that conserves charge.</p>
+<p>Surface species are optional, and so is a surface species for every charge carrier.
+A charged particle that hits a dielectric is absorbed whether or not a reaction names it, so its charge always goes into <span class="math notranslate nohighlight">\(\sigma\)</span>; without a reaction that involves a surface species, that charge is unassigned.
+The unassigned charge is part of <span class="math notranslate nohighlight">\(\sigma\)</span> and acts on the field, but it is not a species: no reaction can consume it.
+When surface species are defined, a warning is therefore issued at start-up for every charged Ito species that has no <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code> reaction with a surface species.</p>
+<p>With only trapped electrons defined, for example, a positive ion that lands on them does not neutralise them unless a reaction says so.
+The ion’s charge is unassigned, and the trapped electrons remain, free to desorb or be detached.
+The total charge is right, but the number of trapped electrons is too high.
+Neutralisation is written as a reaction that consumes a surface electron, and a negative ion can leave its electron on the surface:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"dielectric emission"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2+ + e(s) -&gt; (null)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O- -&gt; e(s)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The first pathway fires only where a surface electron is present; elsewhere the ion is absorbed and its charge is unassigned.</p>
+<p>Surface species may appear in <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">emission</span></code> reactions, on both sides, next to the one impinging particle or photon species.
+They are not permitted in <code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">emission</span></code> or <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">emission</span></code>.
+Typical reactions are capture, neutralisation, and photodetachment:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"dielectric emission"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e -&gt; e(s)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O2+ -&gt; O2+(s)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Y + e(s) -&gt; e"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Y -&gt; (null)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"efficiency"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.99</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The pathways are drawn exactly as for other secondary emission reactions.
+In each cut cell the surface densities are converted to whole numbers of surface particles, and a pathway that consumes surface species fires at most as many times as those are available.
+The primary is absorbed either way, so its charge goes into <span class="math notranslate nohighlight">\(\sigma\)</span>; if the pathway did not fire, that charge is unassigned.
+A pathway that involves surface species only fires if all its charged products can be released, i.e. if the field pushes them away from the surface.
+A reaction with surface species must conserve charge, or the run stops with an error.</p>
+<p>First-order reactions of surface species, such as desorption, are given in a top-level <code class="docutils literal notranslate"><span class="pre">surface</span> <span class="pre">reactions</span></code> array.
+Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or <code class="docutils literal notranslate"><span class="pre">(null)</span></code>) on the right-hand side, and a <code class="docutils literal notranslate"><span class="pre">rate</span></code> in <span class="math notranslate nohighlight">\(\text{s}^{-1}\)</span>.
+Entries that involve solid species are described in <a class="reference internal" href="#chap-itokmcsolidspecies"><span class="std std-ref">Solid species</span></a>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"surface reactions"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e(s) -&gt; e"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"rate"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E3</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>These reactions are sampled exactly over the time step.
+For a surface species with <span class="math notranslate nohighlight">\(N\)</span> surface particles in a cut cell and reactions with rates <span class="math notranslate nohighlight">\(k_1, k_2, \ldots\)</span>, the number of particles that react is drawn from a binomial distribution with <span class="math notranslate nohighlight">\(N\)</span> trials and probability <span class="math notranslate nohighlight">\(1 - \exp\left(-K\Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(K = \sum_i k_i\)</span>, and the reacting particles are distributed over the reactions by a multinomial draw with probabilities <span class="math notranslate nohighlight">\(k_i/K\)</span>.
+As for the impact reactions, a reaction whose charged products the field would push back onto the surface does not fire.
+Surface reactions do not restrict the time step.</p>
+<p>When restarting from a checkpoint file that was written without surface species, the surface species densities are set to zero and a warning is issued; the surface charge is kept but is unassigned.</p>
+</section>
+<section id="solid-species">
+<span id="chap-itokmcsolidspecies"></span><h4>Solid species<a class="headerlink" href="#solid-species" title="Permalink to this heading"></a></h4>
+<p>Charge carriers inside dielectrics, such as electrons or holes in a polymer, can be tracked as solid species.
+They are declared in a top-level <code class="docutils literal notranslate"><span class="pre">solid</span> <span class="pre">species</span></code> array, where each entry has an <code class="docutils literal notranslate"><span class="pre">id</span></code>, a charge number <code class="docutils literal notranslate"><span class="pre">Z</span></code>, a <code class="docutils literal notranslate"><span class="pre">mobility</span></code> and a <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> coefficient, an optional <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">density</span></code> (in <span class="math notranslate nohighlight">\(\text{m}^{-3}\)</span>, zero by default), and optional <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">bc</span></code> entries.
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
+The mobility and diffusion coefficient must be of type <code class="docutils literal notranslate"><span class="pre">constant</span></code>; a zero mobility or diffusion coefficient turns that kind of transport off.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"solid species"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e(d)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Z"</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"mobility"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E-10</span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"diffusion"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"constant"</span><span class="p">,</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"initial density"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"domain bc"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"y.lo"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wall"</span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Each solid species is transported by its own CDR solver on the solid phase, with the drift velocity <span class="math notranslate nohighlight">\(\text{sgn}(Z)\mu\mathbf{E}\)</span> where <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> is the electric field inside the dielectric.
+The update is explicit, and the solid species restrict the time step through their CFL condition and through their dielectric relaxation time <span class="math notranslate nohighlight">\(\epsilon_0/\sigma_s\)</span> with <span class="math notranslate nohighlight">\(\sigma_s = \sum_s |Z_s| q_\text{e}\mu_s n_s\)</span>.
+The diffusive flux is zero through the embedded boundaries and the domain boundaries.</p>
+<p>The domain boundary conditions of the solid species do not use the <code class="docutils literal notranslate"><span class="pre">bc</span></code> options of the CDR solver class (e.g. <code class="docutils literal notranslate"><span class="pre">CdrCTU.bc.x.lo</span></code>), which only apply to the CDR species in the gas.
+Instead, each solid species gives its own boundary conditions in <code class="docutils literal notranslate"><span class="pre">domain</span> <span class="pre">bc</span></code>, with keys <code class="docutils literal notranslate"><span class="pre">x.lo</span></code>, <code class="docutils literal notranslate"><span class="pre">x.hi</span></code>, <code class="docutils literal notranslate"><span class="pre">y.lo</span></code>, <code class="docutils literal notranslate"><span class="pre">y.hi</span></code> (and <code class="docutils literal notranslate"><span class="pre">z.lo</span></code>, <code class="docutils literal notranslate"><span class="pre">z.hi</span></code> in 3D) and values <code class="docutils literal notranslate"><span class="pre">outflow</span></code> or <code class="docutils literal notranslate"><span class="pre">wall</span></code>.
+A side that is not given is <code class="docutils literal notranslate"><span class="pre">outflow</span></code>.</p>
+<p>The space charge of the solid species enters the field solve on the solid side.
+Their conductivity is not part of the semi-implicit field solve.</p>
+<p>Solid species exchange charge with the plasma only through the surface species.
+A solid species is injected from the surface by a <code class="docutils literal notranslate"><span class="pre">surface</span> <span class="pre">reactions</span></code> entry with a surface species on the left-hand side and solid species (and optionally surface species, but no Ito species) on the right-hand side:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"surface reactions"</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e(s) -&gt; e(d)"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"rate"</span><span class="p">:</span><span class="w"> </span><span class="mf">1E3</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"reaction"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e(d) -&gt; e(s)"</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Injection reactions are sampled as the other first-order surface reactions, on the whole surface particles of the cut cell, and their charge is moved from the surface charge to the solid species.
+Solid species that drift out of the dielectric where it meets the gas arrive at the surface and their charge is added to the surface charge.
+An arrival entry, with a solid species on the left-hand side and surface species on the right-hand side and no <code class="docutils literal notranslate"><span class="pre">rate</span></code>, assigns the arriving charge to surface species; without one it stays in the surface charge without being assigned to a surface species.
+Each solid species can have at most one arrival entry.
+Solid species that drift out of the dielectric elsewhere, e.g. into an electrode or through a domain boundary with <code class="docutils literal notranslate"><span class="pre">outflow</span></code>, leave the simulation.
+In a cut cell that holds more than one volume of the gas or the solid phase, the surface exchanges with the first one of each.
+Injection and arrival reactions must conserve charge, or the run stops with an error, and every exchange takes as much charge out of the surface charge as it adds to the solid species, or the other way around.
+The step report lists the charge of each solid species, <code class="docutils literal notranslate"><span class="pre">Qsolid</span></code>, and includes it in <code class="docutils literal notranslate"><span class="pre">Qtot</span></code>.
+The densities are written to plot files as <code class="docutils literal notranslate"><span class="pre">&lt;id&gt;</span> <span class="pre">phi</span></code>.</p>
+<p>Solid species are only solved for when the geometry has dielectrics.
+Cells inside dielectrics are not tagged for refinement by the solid species.
+When restarting from a checkpoint file that was written without solid species, the solid species densities are set to zero and a warning is issued.</p>
 </section>
 </section>
 <section id="field-emission">

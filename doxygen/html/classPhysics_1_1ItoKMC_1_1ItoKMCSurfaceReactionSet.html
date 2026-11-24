@@ -120,6 +120,18 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCSurfaceReac
 <tr class="memdesc:a79c7553f090519bc7c6d17276692185a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a surface reaction to the set.  <br /></td></tr>
 <tr class="memitem:af08ebe86d916d8d58933f9e1b482b9cd" id="r_af08ebe86d916d8d58933f9e1b482b9cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af08ebe86d916d8d58933f9e1b482b9cd">addDomain</a> (const size_t a_speciesIndex, const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;a_reaction, const int a_dir, const Side::LoHiSide a_side, const <a class="el" href="#a39c12806559a86023aa40b4de94cbb92">ItoKMCSurfaceReactionSet::Species</a> a_speciesType) noexcept</td></tr>
 <tr class="memdesc:af08ebe86d916d8d58933f9e1b482b9cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a surface reaction on one face of the computational domain.  <br /></td></tr>
+<tr class="memitem:ab4a7780e96c90a760706b00531d88b6d" id="r_ab4a7780e96c90a760706b00531d88b6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4a7780e96c90a760706b00531d88b6d">addSurfaceSpeciesReaction</a> (const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;a_reaction) noexcept</td></tr>
+<tr class="memdesc:ab4a7780e96c90a760706b00531d88b6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a first-order reaction of a surface species.  <br /></td></tr>
+<tr class="memitem:a97902bdd7afa49399adbbd276ffb8c7a" id="r_a97902bdd7afa49399adbbd276ffb8c7a"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a97902bdd7afa49399adbbd276ffb8c7a">getSurfaceSpeciesReactions</a> () const noexcept</td></tr>
+<tr class="memdesc:a97902bdd7afa49399adbbd276ffb8c7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first-order reactions of the surface species.  <br /></td></tr>
+<tr class="memitem:a84ba9245ae8741d6dd8fdb406d600299" id="r_a84ba9245ae8741d6dd8fdb406d600299"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a84ba9245ae8741d6dd8fdb406d600299">addSolidInjectionReaction</a> (const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;a_reaction) noexcept</td></tr>
+<tr class="memdesc:a84ba9245ae8741d6dd8fdb406d600299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a first-order reaction that injects solid species from a surface species into a dielectric.  <br /></td></tr>
+<tr class="memitem:a7ed7b9d86e77ef1b5405271efd474f68" id="r_a7ed7b9d86e77ef1b5405271efd474f68"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ed7b9d86e77ef1b5405271efd474f68">getSolidInjectionReactions</a> () const noexcept</td></tr>
+<tr class="memdesc:a7ed7b9d86e77ef1b5405271efd474f68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactions that inject solid species from the surface species.  <br /></td></tr>
+<tr class="memitem:a307f21c208da98257d9bea1a812856a6" id="r_a307f21c208da98257d9bea1a812856a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a307f21c208da98257d9bea1a812856a6">addSolidArrivalReaction</a> (const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;a_reaction) noexcept</td></tr>
+<tr class="memdesc:a307f21c208da98257d9bea1a812856a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the reaction that turns a solid species arriving at a dielectric surface into surface species.  <br /></td></tr>
+<tr class="memitem:a4d25fa923e0b3f38fe0b1af2a55b9b7b" id="r_a4d25fa923e0b3f38fe0b1af2a55b9b7b"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d25fa923e0b3f38fe0b1af2a55b9b7b">getSolidArrivalReactions</a> () const noexcept</td></tr>
+<tr class="memdesc:a4d25fa923e0b3f38fe0b1af2a55b9b7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactions of the solid species that arrive at a dielectric surface.  <br /></td></tr>
 <tr class="memitem:aa387c5bc622c80c2fd2ec99e4ef1e2ea" id="r_aa387c5bc622c80c2fd2ec99e4ef1e2ea"><td class="memItemLeft" align="right" valign="top">const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa387c5bc622c80c2fd2ec99e4ef1e2ea">getDielectricPlasmaReactions</a> () const noexcept</td></tr>
 <tr class="memdesc:aa387c5bc622c80c2fd2ec99e4ef1e2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the dielectric surface reactions where the outgoing species is a plasma species.  <br /></td></tr>
 <tr class="memitem:accc15e31df9b6464989c9bde3576006e" id="r_accc15e31df9b6464989c9bde3576006e"><td class="memItemLeft" align="right" valign="top">const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#accc15e31df9b6464989c9bde3576006e">getDielectricPhotonReactions</a> () const noexcept</td></tr>
@@ -156,6 +168,15 @@ std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurface
 <tr class="memdesc:a22f48c98c4e50b751380358f1aeca0f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain reaction sets where outgoing species is a plasma species, one per domain face.  <br /></td></tr>
 <tr class="memitem:ada06b7f39681cfb6fac9b724669d627c" id="r_ada06b7f39681cfb6fac9b724669d627c"><td class="memItemLeft" align="right" valign="top">std::array&lt; std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt;, 2 *SpaceDim &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada06b7f39681cfb6fac9b724669d627c">m_domainPhotonReactions</a></td></tr>
 <tr class="memdesc:ada06b7f39681cfb6fac9b724669d627c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain reaction sets where outgoing species is a photon species, one per domain face.  <br /></td></tr>
+<tr class="memitem:ab13752b9051fb1e544c2151dcda505df" id="r_ab13752b9051fb1e544c2151dcda505df"><td class="memItemLeft" align="right" valign="top"><a id="ab13752b9051fb1e544c2151dcda505df" name="ab13752b9051fb1e544c2151dcda505df"></a>
+std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceSpeciesReactions</b></td></tr>
+<tr class="memdesc:ab13752b9051fb1e544c2151dcda505df"><td class="mdescLeft">&#160;</td><td class="mdescRight">First-order surface species reactions, indexed by the decaying surface species. <br /></td></tr>
+<tr class="memitem:adca0a70767607f6a25c91d1fb76fb97d" id="r_adca0a70767607f6a25c91d1fb76fb97d"><td class="memItemLeft" align="right" valign="top"><a id="adca0a70767607f6a25c91d1fb76fb97d" name="adca0a70767607f6a25c91d1fb76fb97d"></a>
+std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidInjectionReactions</b></td></tr>
+<tr class="memdesc:adca0a70767607f6a25c91d1fb76fb97d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reactions that inject solid species from the surface, indexed by the decaying surface species. <br /></td></tr>
+<tr class="memitem:abd34a5b068e7cfc3dbbb2f0eba326c3b" id="r_abd34a5b068e7cfc3dbbb2f0eba326c3b"><td class="memItemLeft" align="right" valign="top"><a id="abd34a5b068e7cfc3dbbb2f0eba326c3b" name="abd34a5b068e7cfc3dbbb2f0eba326c3b"></a>
+std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidArrivalReactions</b></td></tr>
+<tr class="memdesc:abd34a5b068e7cfc3dbbb2f0eba326c3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reactions of solid species arriving at the surface, indexed by the arriving solid species. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for holding a set of surface reactions. </p>
@@ -260,6 +281,105 @@ std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurface
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction normal to the domain face. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Low or high side of the domain in a_dir. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_speciesType</td><td>Whether the outgoing species is a plasma or photon species. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a307f21c208da98257d9bea1a812856a6" name="a307f21c208da98257d9bea1a812856a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a307f21c208da98257d9bea1a812856a6">&#9670;&#160;</a></span>addSolidArrivalReaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCSurfaceReactionSet::addSolidArrivalReaction </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_reaction</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add the reaction that turns a solid species arriving at a dielectric surface into surface species. </p>
+<p>The reaction's reactant is the index of the solid species and its surface products are surface species. The rate is set by the drift of the solid species to the surface, so the efficiency is not used. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reaction</td><td>Reaction to add. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a84ba9245ae8741d6dd8fdb406d600299" name="a84ba9245ae8741d6dd8fdb406d600299"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84ba9245ae8741d6dd8fdb406d600299">&#9670;&#160;</a></span>addSolidInjectionReaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCSurfaceReactionSet::addSolidInjectionReaction </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_reaction</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a first-order reaction that injects solid species from a surface species into a dielectric. </p>
+<p>The reaction's reactant is the index of the decaying surface species, its products are indices into the solid species list (not the plasma species list), its surface products are surface species, and its efficiency is the rate constant (1/s). Reactions with the same surface species compete. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reaction</td><td>Reaction to add. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab4a7780e96c90a760706b00531d88b6d" name="ab4a7780e96c90a760706b00531d88b6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4a7780e96c90a760706b00531d88b6d">&#9670;&#160;</a></span>addSurfaceSpeciesReaction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCSurfaceReactionSet::addSurfaceSpeciesReaction </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html">ItoKMCSurfaceReaction</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_reaction</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a first-order reaction of a surface species. </p>
+<p>The reaction's reactant is the index of the decaying surface species and its efficiency is the rate constant (1/s). Reactions with the same surface species compete. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reaction</td><td>Reaction to add. </td></tr>
   </table>
   </dd>
 </dl>
@@ -492,6 +612,90 @@ std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurface
 
 <p>Get the electrode surface reactions where the outgoing species is a plasma species. </p>
 <dl class="section return"><dt>Returns</dt><dd>Map from species index to reaction list for electrode plasma reactions. </dd></dl>
+
+</div>
+</div>
+<a id="a4d25fa923e0b3f38fe0b1af2a55b9b7b" name="a4d25fa923e0b3f38fe0b1af2a55b9b7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d25fa923e0b3f38fe0b1af2a55b9b7b">&#9670;&#160;</a></span>getSolidArrivalReactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp; ItoKMCSurfaceReactionSet::getSolidArrivalReactions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reactions of the solid species that arrive at a dielectric surface. </p>
+<p>Indexed by solid species. A solid species without an arrival reaction has an entry with no pathways, and solid species beyond the last one with a reaction have no entry. </p><dl class="section return"><dt>Returns</dt><dd>Solid arrival reactions, grouped by the arriving solid species. </dd></dl>
+
+</div>
+</div>
+<a id="a7ed7b9d86e77ef1b5405271efd474f68" name="a7ed7b9d86e77ef1b5405271efd474f68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ed7b9d86e77ef1b5405271efd474f68">&#9670;&#160;</a></span>getSolidInjectionReactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp; ItoKMCSurfaceReactionSet::getSolidInjectionReactions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reactions that inject solid species from the surface species. </p>
+<p>Indexed by surface species, like <a class="el" href="#a97902bdd7afa49399adbbd276ffb8c7a" title="Get the first-order reactions of the surface species.">getSurfaceSpeciesReactions()</a>. The products of these reactions are indices into the solid species list. </p><dl class="section return"><dt>Returns</dt><dd>Solid injection reactions, grouped by the decaying surface species. </dd></dl>
+
+</div>
+</div>
+<a id="a97902bdd7afa49399adbbd276ffb8c7a" name="a97902bdd7afa49399adbbd276ffb8c7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97902bdd7afa49399adbbd276ffb8c7a">&#9670;&#160;</a></span>getSurfaceSpeciesReactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp; ItoKMCSurfaceReactionSet::getSurfaceSpeciesReactions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the first-order reactions of the surface species. </p>
+<p>Indexed by surface species. A surface species without reactions has an entry with no pathways, and surface species beyond the last one with reactions have no entry. </p><dl class="section return"><dt>Returns</dt><dd>First-order surface species reactions, grouped by the decaying surface species. </dd></dl>
 
 </div>
 </div>

@@ -119,6 +119,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reset</b> () noexcept
 <tr class="memdesc:a54d6922e783e21cf123c526803d745ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant species index.  <br /></td></tr>
 <tr class="memitem:ac12b75443dd70a4435d9c2e1e810442f" id="r_ac12b75443dd70a4435d9c2e1e810442f"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac12b75443dd70a4435d9c2e1e810442f">getProducts</a> () const noexcept</td></tr>
 <tr class="memdesc:ac12b75443dd70a4435d9c2e1e810442f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma product index lists for each competing reaction pathway.  <br /></td></tr>
+<tr class="memitem:ad4fb4d270d2bdce7d5d02bfa7acba1cd" id="r_ad4fb4d270d2bdce7d5d02bfa7acba1cd"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4fb4d270d2bdce7d5d02bfa7acba1cd">getSurfaceReactants</a> () const noexcept</td></tr>
+<tr class="memdesc:ad4fb4d270d2bdce7d5d02bfa7acba1cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the surface species consumed by each competing reaction pathway.  <br /></td></tr>
+<tr class="memitem:a60657c43f8e995eccb782bc973554791" id="r_a60657c43f8e995eccb782bc973554791"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a60657c43f8e995eccb782bc973554791">getSurfaceProducts</a> () const noexcept</td></tr>
+<tr class="memdesc:a60657c43f8e995eccb782bc973554791"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the surface species produced by each competing reaction pathway.  <br /></td></tr>
 <tr class="memitem:a8668f9dd4d2e10987ca640b862b7a438" id="r_a8668f9dd4d2e10987ca640b862b7a438"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; Real &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8668f9dd4d2e10987ca640b862b7a438">getEfficiencies</a> () const noexcept</td></tr>
 <tr class="memdesc:a8668f9dd4d2e10987ca640b862b7a438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the efficiency (probability) for each competing reaction pathway.  <br /></td></tr>
 <tr class="memitem:a6ef15ce782f55b9b9fb331223d059e4c" id="r_a6ef15ce782f55b9b9fb331223d059e4c"><td class="memItemLeft" align="right" valign="top">std::discrete_distribution&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ef15ce782f55b9b9fb331223d059e4c">getDistribution</a> () const noexcept</td></tr>
@@ -135,6 +139,12 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>m_reactant</b></td>
 <tr class="memitem:a89620df2396f6aae560d2bc8671435e1" id="r_a89620df2396f6aae560d2bc8671435e1"><td class="memItemLeft" align="right" valign="top"><a id="a89620df2396f6aae560d2bc8671435e1" name="a89620df2396f6aae560d2bc8671435e1"></a>
 std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_products</b></td></tr>
 <tr class="memdesc:a89620df2396f6aae560d2bc8671435e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plasma product indices. <br /></td></tr>
+<tr class="memitem:a58eec8d9180dce8f72429efdf9bcf272" id="r_a58eec8d9180dce8f72429efdf9bcf272"><td class="memItemLeft" align="right" valign="top"><a id="a58eec8d9180dce8f72429efdf9bcf272" name="a58eec8d9180dce8f72429efdf9bcf272"></a>
+std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceReactants</b></td></tr>
+<tr class="memdesc:a58eec8d9180dce8f72429efdf9bcf272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface species consumed by each pathway. <br /></td></tr>
+<tr class="memitem:a009f8f485f654838f5537232dad0ae03" id="r_a009f8f485f654838f5537232dad0ae03"><td class="memItemLeft" align="right" valign="top"><a id="a009f8f485f654838f5537232dad0ae03" name="a009f8f485f654838f5537232dad0ae03"></a>
+std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">Products</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceProducts</b></td></tr>
+<tr class="memdesc:a009f8f485f654838f5537232dad0ae03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface species produced by each pathway. <br /></td></tr>
 <tr class="memitem:ac6d4bb38dd647282ca18b77203f2e7f3" id="r_ac6d4bb38dd647282ca18b77203f2e7f3"><td class="memItemLeft" align="right" valign="top"><a id="ac6d4bb38dd647282ca18b77203f2e7f3" name="ac6d4bb38dd647282ca18b77203f2e7f3"></a>
 std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiencies</b></td></tr>
 <tr class="memdesc:ac6d4bb38dd647282ca18b77203f2e7f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction efficiencies. <br /></td></tr>
@@ -288,6 +298,62 @@ std::discrete_distribution&lt; int &gt;&#160;</td><td class="memItemRight" valig
 
 <p>Get the reactant species index. </p>
 <dl class="section return"><dt>Returns</dt><dd>Index of the impinging species that triggers these reactions. </dd></dl>
+
+</div>
+</div>
+<a id="a60657c43f8e995eccb782bc973554791" name="a60657c43f8e995eccb782bc973554791"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60657c43f8e995eccb782bc973554791">&#9670;&#160;</a></span>getSurfaceProducts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">ItoKMCSurfaceReactions::Products</a> &gt; &amp; ItoKMCSurfaceReactions::getSurfaceProducts </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the surface species produced by each competing reaction pathway. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of surface species index lists, one per reaction pathway. </dd></dl>
+
+</div>
+</div>
+<a id="ad4fb4d270d2bdce7d5d02bfa7acba1cd" name="ad4fb4d270d2bdce7d5d02bfa7acba1cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4fb4d270d2bdce7d5d02bfa7acba1cd">&#9670;&#160;</a></span>getSurfaceReactants()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="#a38756855e8ce4a7fafb99afea390eb80">ItoKMCSurfaceReactions::Products</a> &gt; &amp; ItoKMCSurfaceReactions::getSurfaceReactants </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the surface species consumed by each competing reaction pathway. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of surface species index lists, one per reaction pathway. </dd></dl>
 
 </div>
 </div>

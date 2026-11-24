@@ -259,16 +259,15 @@ A regular neighbour of a filled cell is kept as a cut-cell holding the whole of 
 Such features resolve themselves once the mesh is fine enough to see them, so refinement is the remedy and filling is what happens where there is none left.
 
 A second case needs no filling.
-A cell holding a single sheet can still lose it when it is cut into finer cells: where the interface is twisted into a saddle, a child cell can hold its fluid in two pieces joined a cell away.
-The mesh generator can refine a box holding such a saddle, which removes the problem wherever there is refinement left to give.
-It is off by default, since the intended treatment of such a cell is to merge its pieces into one without losing conservation (not yet implemented), and it is switched on with
+A cell holding a single sheet can still lose it when it is cut into finer cells.
+Where the fan of triangles that makes up its interface folds sharply, a child cell can hold its fluid in two pieces, and that child's own children are then not joined through their faces.
+The mesh generator finds such cells as it builds the geometry: every cut-cell of a box that no other rule refines is cut, phase by phase, down to ``AmrMesh.max_eb_depth``, and a box holding a cell that falls apart on the way is refined.
+The finer cells are then rebuilt from the implicit function, where the fold is no longer there.
+This is always on.
 
-.. code-block:: text
-
-   ComputationalGeometry.refine_saddles = true    # Refine boxes holding a saddle-shaped interface. Off by default.
-
-Refinement does not remove a saddle at the finest level, since each refinement hands a smaller copy of it to one child.
-Whether any cell would still lose its single-valuedness when cut to a given ratio below the finest level can be checked with
+Refinement cannot remove such a cell on ``AmrMesh.max_eb_depth`` itself, since nothing finer is built from the implicit function.
+A simulation whose ``AmrMesh.max_sim_depth`` is finer than ``AmrMesh.max_eb_depth`` cuts its finest cut-cells from those of ``AmrMesh.max_eb_depth``, and is warned about this once when it starts.
+Whether any cell would still lose its single-valuedness when cut to a given ratio finer than ``AmrMesh.max_eb_depth`` can be checked with
 
 .. code-block:: text
 

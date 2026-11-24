@@ -173,15 +173,25 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCJSON</b> ()
 <tr class="memitem:acb6bd0aac5b21e39821950bdf4dcaaf6" id="r_acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb6bd0aac5b21e39821950bdf4dcaaf6">needGradient</a> (const int a_plasmaIndex) const noexcept override</td></tr>
 <tr class="memdesc:acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if any reaction's gradient correction names this plasma species.  <br /></td></tr>
 <tr class="memitem:a976b6b7053af969fcb939542894bfccc" id="r_a976b6b7053af969fcb939542894bfccc"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a976b6b7053af969fcb939542894bfccc">emitsWithoutPrimariesEB</a> () const noexcept override</td></tr>
-<tr class="memdesc:a976b6b7053af969fcb939542894bfccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if field emission is specified on electrodes or dielectrics.  <br /></td></tr>
+<tr class="memdesc:a976b6b7053af969fcb939542894bfccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if field emission is specified on electrodes or dielectrics, or if surface species have first-order surface reactions.  <br /></td></tr>
 <tr class="memitem:afec1b1121eeafd70dee8c186f1f5702c" id="r_afec1b1121eeafd70dee8c186f1f5702c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afec1b1121eeafd70dee8c186f1f5702c">emitsWithoutPrimariesDomain</a> () const noexcept override</td></tr>
 <tr class="memdesc:afec1b1121eeafd70dee8c186f1f5702c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if field emission is specified on any domain face.  <br /></td></tr>
 <tr class="memitem:afde437524e96ab93cc359fba2b9a0ee8" id="r_afde437524e96ab93cc359fba2b9a0ee8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afde437524e96ab93cc359fba2b9a0ee8">computeMobilities</a> (Vector&lt; Real &gt; &amp;a_mobilities, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
 <tr class="memdesc:afde437524e96ab93cc359fba2b9a0ee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
 <tr class="memitem:ae25a89ea478ba9bd32e0a91bdc8e621c" id="r_ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae25a89ea478ba9bd32e0a91bdc8e621c">computeDiffusionCoefficients</a> (Vector&lt; Real &gt; &amp;a_diffusionCoefficients, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
 <tr class="memdesc:ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
+<tr class="memitem:a231c2837bb952ffe09ef7a3223c54428" id="r_a231c2837bb952ffe09ef7a3223c54428"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a231c2837bb952ffe09ef7a3223c54428">computeSolidMobilities</a> (Vector&lt; Real &gt; &amp;a_mobilities, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
+<tr class="memdesc:a231c2837bb952ffe09ef7a3223c54428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the mobilities of the solid species.  <br /></td></tr>
+<tr class="memitem:aaaac7a886c47c6b75fb09644e9c6e361" id="r_aaaac7a886c47c6b75fb09644e9c6e361"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaaac7a886c47c6b75fb09644e9c6e361">computeSolidDiffusionCoefficients</a> (Vector&lt; Real &gt; &amp;a_diffusionCoefficients, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
+<tr class="memdesc:aaaac7a886c47c6b75fb09644e9c6e361"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusion coefficients of the solid species.  <br /></td></tr>
+<tr class="memitem:ad437cbe115f8d316d7ad63003ec6791e" id="r_ad437cbe115f8d316d7ad63003ec6791e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">CdrDomainBC::BcType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad437cbe115f8d316d7ad63003ec6791e">getSolidDomainBc</a> (const int a_species, const int a_dir, const Side::LoHiSide a_side) const noexcept override</td></tr>
+<tr class="memdesc:ad437cbe115f8d316d7ad63003ec6791e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the domain boundary condition of a solid species, from its 'domain bc' entry.  <br /></td></tr>
+<tr class="memitem:a5961c33c3a6a366b9494d27fdc298baa" id="r_a5961c33c3a6a366b9494d27fdc298baa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5961c33c3a6a366b9494d27fdc298baa">surfaceSolidExchangeEB</a> (Vector&lt; Real &gt; &amp;a_surfaceDensityChange, Vector&lt; Real &gt; &amp;a_solidInjection, const Vector&lt; Real &gt; &amp;a_surfaceDensities, const Vector&lt; Real &gt; &amp;a_solidArrival, const RealVect &amp;a_E, const RealVect &amp;a_physicalCellCenter, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt) const noexcept override</td></tr>
+<tr class="memdesc:a5961c33c3a6a366b9494d27fdc298baa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exchange charge between the surface species and the solid species through a dielectric surface.  <br /></td></tr>
 <tr class="memitem:a1e1ac5f15342141e838b766c610146d8" id="r_a1e1ac5f15342141e838b766c610146d8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e1ac5f15342141e838b766c610146d8">secondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; Real &gt; &amp;a_secondaryCDRFluxes, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; Real &gt; &amp;a_primaryCDRFluxes, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt, const bool a_isDielectric, const int a_matIndex) const noexcept override</td></tr>
 <tr class="memdesc:a1e1ac5f15342141e838b766c610146d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:a113baf6e6ff3ddc1723742ecc375f2bf" id="r_a113baf6e6ff3ddc1723742ecc375f2bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a113baf6e6ff3ddc1723742ecc375f2bf">surfaceEmissionEB</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; Real &gt; &amp;a_secondaryCDRFluxes, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, Vector&lt; Real &gt; &amp;a_surfaceDensityChange, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; Real &gt; &amp;a_primaryCDRFluxes, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const Vector&lt; Real &gt; &amp;a_surfaceDensities, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt, const bool a_isDielectric, const int a_matIndex) const noexcept override</td></tr>
+<tr class="memdesc:a113baf6e6ff3ddc1723742ecc375f2bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission and surface species kinetics at the EB.  <br /></td></tr>
 <tr class="memitem:a75ad153955d2bd7b938a11dd7340ca5f" id="r_a75ad153955d2bd7b938a11dd7340ca5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75ad153955d2bd7b938a11dd7340ca5f">secondaryEmissionDomain</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const int a_dir, const Side::LoHiSide a_side, const Real a_faceArea, const Real a_dx, const Real a_dt) const noexcept override</td></tr>
 <tr class="memdesc:a75ad153955d2bd7b938a11dd7340ca5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission on one face of the computational domain.  <br /></td></tr>
 <tr class="inherit_header pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html">Physics::ItoKMC::ItoKMCPhysics</a></td></tr>
@@ -203,6 +213,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () const 
 <tr class="memdesc:aac6f8ada47d9f65676c32289a98996b3 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all fluid drift-diffusion species.  <br /></td></tr>
 <tr class="memitem:a526dfe8eb5688788c2c31c9e1fcbe7f3 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a526dfe8eb5688788c2c31c9e1fcbe7f3"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a526dfe8eb5688788c2c31c9e1fcbe7f3">getRtSpecies</a> () const</td></tr>
 <tr class="memdesc:a526dfe8eb5688788c2c31c9e1fcbe7f3 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all photon species.  <br /></td></tr>
+<tr class="memitem:a012b3dd0bbcf6239c42fa736f4f0dca7 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a012b3dd0bbcf6239c42fa736f4f0dca7"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a012b3dd0bbcf6239c42fa736f4f0dca7">getSurfaceSpecies</a> () const</td></tr>
+<tr class="memdesc:a012b3dd0bbcf6239c42fa736f4f0dca7 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all surface species.  <br /></td></tr>
+<tr class="memitem:a6f47aada93861a310397b05fc35faaf9 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a6f47aada93861a310397b05fc35faaf9"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6f47aada93861a310397b05fc35faaf9">getSolidSpecies</a> () const</td></tr>
+<tr class="memdesc:a6f47aada93861a310397b05fc35faaf9 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all solid species.  <br /></td></tr>
 <tr class="memitem:a4ae4ba1291e0dbe35c10be5ef0e817e2 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="memItemLeft" align="right" valign="top">const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#add159391741c0289b7ef6f12843e0bdc">DiffusionFunction</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a4ae4ba1291e0dbe35c10be5ef0e817e2">getItoDiffusionFunctions</a> () const noexcept</td></tr>
 <tr class="memdesc:a4ae4ba1291e0dbe35c10be5ef0e817e2 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get diffusion functions for all Ito species.  <br /></td></tr>
 <tr class="memitem:ac5615d2d27acc18c2a4c6ce8d0032bb1 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ac5615d2d27acc18c2a4c6ce8d0032bb1">getNumItoSpecies</a> () const</td></tr>
@@ -213,6 +227,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () const 
 <tr class="memdesc:abe9cc62528566a23b974793ecf344909 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return total number of plasma species.  <br /></td></tr>
 <tr class="memitem:ab1caa896fb2b7ceb4d6e50a3acd43fde inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab1caa896fb2b7ceb4d6e50a3acd43fde">getNumPhotonSpecies</a> () const</td></tr>
 <tr class="memdesc:ab1caa896fb2b7ceb4d6e50a3acd43fde inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of RTE solvers.  <br /></td></tr>
+<tr class="memitem:a2e2550ce0d52bdd8afcfdec0a20bb96b inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a2e2550ce0d52bdd8afcfdec0a20bb96b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2e2550ce0d52bdd8afcfdec0a20bb96b">getNumSurfaceSpecies</a> () const</td></tr>
+<tr class="memdesc:a2e2550ce0d52bdd8afcfdec0a20bb96b inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of surface species.  <br /></td></tr>
+<tr class="memitem:aa4898812e133c03ac6946d8d86c3638e inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_aa4898812e133c03ac6946d8d86c3638e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa4898812e133c03ac6946d8d86c3638e">getNumSolidSpecies</a> () const</td></tr>
+<tr class="memdesc:aa4898812e133c03ac6946d8d86c3638e inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of solid species.  <br /></td></tr>
 <tr class="memitem:a7dc34c72891621ccefa995ac84d1c673 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a7dc34c72891621ccefa995ac84d1c673"><td class="memItemLeft" align="right" valign="top">const std::map&lt; int, std::pair&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731">SpeciesType</a>, int &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7dc34c72891621ccefa995ac84d1c673">getSpeciesMap</a> () const noexcept</td></tr>
 <tr class="memdesc:a7dc34c72891621ccefa995ac84d1c673 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the internal mapping from plasma-species index to solver type and solver index.  <br /></td></tr>
 <tr class="memitem:a596bb3b284dca6cf0bd0c82b100f8cdd inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a596bb3b284dca6cf0bd0c82b100f8cdd"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a596bb3b284dca6cf0bd0c82b100f8cdd">initialSigma</a> (const Real a_time, const RealVect &amp;a_pos) const</td></tr>
@@ -254,6 +272,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbose<
 <tr class="memdesc:a25fb42171d9dcc8875f70a606327ef78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if species is a plasma species.  <br /></td></tr>
 <tr class="memitem:ab7f4f8ac5b4c8a9af90c2e01e57d844f" id="r_ab7f4f8ac5b4c8a9af90c2e01e57d844f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab7f4f8ac5b4c8a9af90c2e01e57d844f">isPhotonSpecies</a> (const std::string &amp;a_name) const noexcept</td></tr>
 <tr class="memdesc:ab7f4f8ac5b4c8a9af90c2e01e57d844f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if species is a photon species.  <br /></td></tr>
+<tr class="memitem:a22303ea4fc60d5b1a6fbfe7c78bd39de" id="r_a22303ea4fc60d5b1a6fbfe7c78bd39de"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22303ea4fc60d5b1a6fbfe7c78bd39de">getSurfaceSpeciesIndex</a> (const std::string &amp;a_name) const noexcept</td></tr>
+<tr class="memdesc:a22303ea4fc60d5b1a6fbfe7c78bd39de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the index of a surface species.  <br /></td></tr>
+<tr class="memitem:a8ce808dc512880dbf3867cc0a19d6772" id="r_a8ce808dc512880dbf3867cc0a19d6772"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ce808dc512880dbf3867cc0a19d6772">getSolidSpeciesIndex</a> (const std::string &amp;a_name) const noexcept</td></tr>
+<tr class="memdesc:a8ce808dc512880dbf3867cc0a19d6772"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the index of a solid species.  <br /></td></tr>
+<tr class="memitem:a56ac6d0412b17031c95081f26706fefd" id="r_a56ac6d0412b17031c95081f26706fefd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a56ac6d0412b17031c95081f26706fefd">checkSurfaceChargeConservation</a> (const int a_chargeIn, const int a_chargeOut, const std::string &amp;a_context) const</td></tr>
+<tr class="memdesc:a56ac6d0412b17031c95081f26706fefd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the run if a reaction that involves surface species does not conserve charge.  <br /></td></tr>
 <tr class="memitem:ac313f2ab95a75794ba873ff397eb85a0" id="r_ac313f2ab95a75794ba873ff397eb85a0"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac313f2ab95a75794ba873ff397eb85a0">containsWildcard</a> (const std::string &amp;a_str) const noexcept</td></tr>
 <tr class="memdesc:ac313f2ab95a75794ba873ff397eb85a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a string contains the wildcard @ and return true if it does.  <br /></td></tr>
 <tr class="memitem:a6169683573106eb5ec4ced1f48442349" id="r_a6169683573106eb5ec4ced1f48442349"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6169683573106eb5ec4ced1f48442349">containsBracket</a> (const std::string &amp;a_str) const noexcept</td></tr>
@@ -302,6 +326,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializeTem
 <tr class="memitem:a3ef198381410273f83fe07a34f4f06ba" id="r_a3ef198381410273f83fe07a34f4f06ba"><td class="memItemLeft" align="right" valign="top"><a id="a3ef198381410273f83fe07a34f4f06ba" name="a3ef198381410273f83fe07a34f4f06ba"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePhotonSpecies</b> ()</td></tr>
 <tr class="memdesc:a3ef198381410273f83fe07a34f4f06ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the photon species. <br /></td></tr>
+<tr class="memitem:a936a599b3670895583ba8fb4cc8e5cd5" id="r_a936a599b3670895583ba8fb4cc8e5cd5"><td class="memItemLeft" align="right" valign="top"><a id="a936a599b3670895583ba8fb4cc8e5cd5" name="a936a599b3670895583ba8fb4cc8e5cd5"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializeSurfaceSpecies</b> ()</td></tr>
+<tr class="memdesc:a936a599b3670895583ba8fb4cc8e5cd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the surface species from the 'surface species' array. <br /></td></tr>
+<tr class="memitem:a3e961d5ae02459983db2fdb8a1879e3b" id="r_a3e961d5ae02459983db2fdb8a1879e3b"><td class="memItemLeft" align="right" valign="top"><a id="a3e961d5ae02459983db2fdb8a1879e3b" name="a3e961d5ae02459983db2fdb8a1879e3b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializeSurfaceReactions</b> ()</td></tr>
+<tr class="memdesc:a3e961d5ae02459983db2fdb8a1879e3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the first-order surface species reactions from the 'surface reactions' array. <br /></td></tr>
+<tr class="memitem:ad08d3e2059a24a1d77844c74a74deb51" id="r_ad08d3e2059a24a1d77844c74a74deb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad08d3e2059a24a1d77844c74a74deb51">initializeSolidSpecies</a> ()</td></tr>
+<tr class="memdesc:ad08d3e2059a24a1d77844c74a74deb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the solid species from the 'solid species' array.  <br /></td></tr>
+<tr class="memitem:a18e2ad85f078d9228ed1a4f85f4499da" id="r_a18e2ad85f078d9228ed1a4f85f4499da"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18e2ad85f078d9228ed1a4f85f4499da">parseSolidCoefficient</a> (const nlohmann::json &amp;a_json, const std::string &amp;a_context) const</td></tr>
+<tr class="memdesc:a18e2ad85f078d9228ed1a4f85f4499da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a constant transport coefficient of a solid species.  <br /></td></tr>
 <tr class="memitem:a5b5815d5be69f4f9bcf195da26ee4a94" id="r_a5b5815d5be69f4f9bcf195da26ee4a94"><td class="memItemLeft" align="right" valign="top"><a id="a5b5815d5be69f4f9bcf195da26ee4a94" name="a5b5815d5be69f4f9bcf195da26ee4a94"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePlasmaReactions</b> ()</td></tr>
 <tr class="memdesc:a5b5815d5be69f4f9bcf195da26ee4a94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize plasma reactions. <br /></td></tr>
@@ -312,8 +346,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePho
 <tr class="memdesc:a2ab6b30c6c82f40ae2fcb03170a1fafa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize surface reactions.  <br /></td></tr>
 <tr class="memitem:a272250646f21881f382513fd71527f08" id="r_a272250646f21881f382513fd71527f08"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::pair&lt; int, Side::LoHiSide &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a272250646f21881f382513fd71527f08">parseDomainBoundaries</a> (const nlohmann::json &amp;a_json, const std::string &amp;a_context) const</td></tr>
 <tr class="memdesc:a272250646f21881f382513fd71527f08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the 'boundaries' list of a domain emission entry.  <br /></td></tr>
-<tr class="memitem:a2df2e9eed8f155d7a0d736f50eee3220" id="r_a2df2e9eed8f155d7a0d736f50eee3220"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2df2e9eed8f155d7a0d736f50eee3220">sampleSurfaceEmission</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_plasmaReactions, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_photonReactions, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const std::function&lt; RealVect()&gt; &amp;a_releasePosition, const bool a_isCathode) const noexcept</td></tr>
-<tr class="memdesc:a2df2e9eed8f155d7a0d736f50eee3220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample the secondaries released by primaries that hit a surface.  <br /></td></tr>
+<tr class="memitem:aceb4ea8c27173cf91d890fe69105fde9" id="r_aceb4ea8c27173cf91d890fe69105fde9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aceb4ea8c27173cf91d890fe69105fde9">sampleSurfaceEmission</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_plasmaReactions, const std::map&lt; size_t, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html">ItoKMCSurfaceReactions</a> &gt; &amp;a_photonReactions, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, std::vector&lt; long long &gt; &amp;a_surfaceAvailable, std::vector&lt; long long &gt; &amp;a_surfaceChange, const std::function&lt; RealVect()&gt; &amp;a_releasePosition, const bool a_isCathode) const noexcept</td></tr>
+<tr class="memdesc:aceb4ea8c27173cf91d890fe69105fde9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample the secondaries released by primaries that hit a surface.  <br /></td></tr>
+<tr class="memitem:afc3197c51b502beb06f75be91e46ff87" id="r_afc3197c51b502beb06f75be91e46ff87"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afc3197c51b502beb06f75be91e46ff87">sampleSurfaceSpeciesReactions</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, std::vector&lt; long long &gt; &amp;a_surfaceAvailable, std::vector&lt; long long &gt; &amp;a_surfaceChange, const std::function&lt; RealVect()&gt; &amp;a_releasePosition, const bool a_isCathode, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:afc3197c51b502beb06f75be91e46ff87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample the first-order surface species reactions over a time step.  <br /></td></tr>
+<tr class="memitem:a02e057780aec8c3ee93e570b00c0ef6e" id="r_a02e057780aec8c3ee93e570b00c0ef6e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02e057780aec8c3ee93e570b00c0ef6e">canReleaseProducts</a> (const std::list&lt; size_t &gt; &amp;a_products, const bool a_isCathode) const noexcept</td></tr>
+<tr class="memdesc:a02e057780aec8c3ee93e570b00c0ef6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the field pushes all the plasma products of a reaction pathway away from the surface.  <br /></td></tr>
 <tr class="memitem:a75cb7033ee09c432f58411a316d22c62" id="r_a75cb7033ee09c432f58411a316d22c62"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75cb7033ee09c432f58411a316d22c62">sampleFieldEmission</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, const std::vector&lt; std::pair&lt; int, <a class="el" href="#a2533eaa4a0fa98b931d169dcaf494193">FunctionEN</a> &gt; &gt; &amp;a_fieldEmission, const RealVect &amp;a_E, const RealVect &amp;a_position, const Real a_areaFraction, const Real a_dx, const Real a_dt) const noexcept</td></tr>
 <tr class="memdesc:a75cb7033ee09c432f58411a316d22c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample field emission from a cathode surface.  <br /></td></tr>
 <tr class="memitem:ac3b9f4f3434d70a726e60f33b481e385" id="r_ac3b9f4f3434d70a726e60f33b481e385"><td class="memItemLeft" align="right" valign="top"><a id="ac3b9f4f3434d70a726e60f33b481e385" name="ac3b9f4f3434d70a726e60f33b481e385"></a>
@@ -447,6 +485,15 @@ std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">Function
 <tr class="memitem:ad2c0d89c611079db57e326ecf6bad0ce" id="r_ad2c0d89c611079db57e326ecf6bad0ce"><td class="memItemLeft" align="right" valign="top"><a id="ad2c0d89c611079db57e326ecf6bad0ce" name="ad2c0d89c611079db57e326ecf6bad0ce"></a>
 std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_plasmaTemperatures</b></td></tr>
 <tr class="memdesc:ad2c0d89c611079db57e326ecf6bad0ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plasma species temperatures. <br /></td></tr>
+<tr class="memitem:a58bfe46d480c0d9e0df4cf8d7310ed0c" id="r_a58bfe46d480c0d9e0df4cf8d7310ed0c"><td class="memItemLeft" align="right" valign="top"><a id="a58bfe46d480c0d9e0df4cf8d7310ed0c" name="a58bfe46d480c0d9e0df4cf8d7310ed0c"></a>
+std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidMobilities</b></td></tr>
+<tr class="memdesc:a58bfe46d480c0d9e0df4cf8d7310ed0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobilities of the solid species. <br /></td></tr>
+<tr class="memitem:accdaeb5258466c7e74d0fe9009c3581e" id="r_accdaeb5258466c7e74d0fe9009c3581e"><td class="memItemLeft" align="right" valign="top"><a id="accdaeb5258466c7e74d0fe9009c3581e" name="accdaeb5258466c7e74d0fe9009c3581e"></a>
+std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidDiffusionCoefficients</b></td></tr>
+<tr class="memdesc:accdaeb5258466c7e74d0fe9009c3581e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion coefficients of the solid species. <br /></td></tr>
+<tr class="memitem:aa564cdf37320e3a5cd04cb00cfc7ebb5" id="r_aa564cdf37320e3a5cd04cb00cfc7ebb5"><td class="memItemLeft" align="right" valign="top"><a id="aa564cdf37320e3a5cd04cb00cfc7ebb5" name="aa564cdf37320e3a5cd04cb00cfc7ebb5"></a>
+std::vector&lt; std::array&lt; <a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">CdrDomainBC::BcType</a>, 2 *SpaceDim &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidDomainBcs</b></td></tr>
+<tr class="memdesc:aa564cdf37320e3a5cd04cb00cfc7ebb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain boundary conditions of the solid species, one per domain face in the order x.lo, x.hi, y.lo, ... <br /></td></tr>
 <tr class="memitem:a4a346269a1ec730fbab3b007605b8585" id="r_a4a346269a1ec730fbab3b007605b8585"><td class="memItemLeft" align="right" valign="top"><a id="a4a346269a1ec730fbab3b007605b8585" name="a4a346269a1ec730fbab3b007605b8585"></a>
 std::vector&lt; <a class="el" href="#a1318b8f06f3a46eb9933e74c28c911c8">FunctionEVXTP</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcReactionRates</b></td></tr>
 <tr class="memdesc:a4a346269a1ec730fbab3b007605b8585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates. Same index as the actual reactions. <br /></td></tr>
@@ -547,6 +594,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecie
 <tr class="memitem:a0d726b3c877a846e11654c3a1a425711 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a0d726b3c877a846e11654c3a1a425711"><td class="memItemLeft" align="right" valign="top">
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_rtSpecies</b></td></tr>
 <tr class="memdesc:a0d726b3c877a846e11654c3a1a425711 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of solver-tracked photon species. <br /></td></tr>
+<tr class="memitem:a3f5af629ba7c3679ce5c470bf2d88329 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a3f5af629ba7c3679ce5c470bf2d88329"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a3f5af629ba7c3679ce5c470bf2d88329">m_surfaceSpecies</a></td></tr>
+<tr class="memdesc:a3f5af629ba7c3679ce5c470bf2d88329 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of surface species, bound to dielectric surfaces.  <br /></td></tr>
+<tr class="memitem:a530c846c2e373a3c4a08468afdba4fb0 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a530c846c2e373a3c4a08468afdba4fb0"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a530c846c2e373a3c4a08468afdba4fb0">m_solidSpecies</a></td></tr>
+<tr class="memdesc:a530c846c2e373a3c4a08468afdba4fb0 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of solid species, transported inside dielectrics.  <br /></td></tr>
 <tr class="memitem:a10c3ec02d712df46391bb95d9013d43c inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a10c3ec02d712df46391bb95d9013d43c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a10c3ec02d712df46391bb95d9013d43c">m_downstreamSpecies</a></td></tr>
 <tr class="memdesc:a10c3ec02d712df46391bb95d9013d43c inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">An internal integer describing which species is the "ionizing" species.  <br /></td></tr>
 <tr class="memitem:a03ef03148c232e01d76a7b495138994a inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a03ef03148c232e01d76a7b495138994a"><td class="memItemLeft" align="right" valign="top">
@@ -818,6 +869,45 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a02e057780aec8c3ee93e570b00c0ef6e" name="a02e057780aec8c3ee93e570b00c0ef6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02e057780aec8c3ee93e570b00c0ef6e">&#9670;&#160;</a></span>canReleaseProducts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCJSON::canReleaseProducts </td>
+          <td>(</td>
+          <td class="paramtype">const std::list&lt; size_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_products</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_isCathode</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the field pushes all the plasma products of a reaction pathway away from the surface. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_products</td><td>Plasma (Ito) product indices. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isCathode</td><td>Whether the surface is a cathode. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if every charged product would be released: negative products from a cathode, positive products from an anode. </dd></dl>
+
+</div>
+</div>
 <a id="ab3c3f4fa030cd37a710b03307648d73d" name="ab3c3f4fa030cd37a710b03307648d73d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab3c3f4fa030cd37a710b03307648d73d">&#9670;&#160;</a></span>checkKeys()</h2>
 
@@ -889,6 +979,50 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Physical coordinates </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a56ac6d0412b17031c95081f26706fefd" name="a56ac6d0412b17031c95081f26706fefd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56ac6d0412b17031c95081f26706fefd">&#9670;&#160;</a></span>checkSurfaceChargeConservation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::checkSurfaceChargeConservation </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_chargeIn</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_chargeOut</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_context</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stop the run if a reaction that involves surface species does not conserve charge. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_chargeIn</td><td>Total charge number of the reactants, including the impinging species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_chargeOut</td><td>Total charge number of the products. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_context</td><td>Reaction description used in the error. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1081,6 +1215,110 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="aaaac7a886c47c6b75fb09644e9c6e361" name="aaaac7a886c47c6b75fb09644e9c6e361"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaaac7a886c47c6b75fb09644e9c6e361">&#9670;&#160;</a></span>computeSolidDiffusionCoefficients()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::computeSolidDiffusionCoefficients </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_diffusionCoefficients</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_pos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the diffusion coefficients of the solid species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_diffusionCoefficients</td><td>Non-negative diffusion coefficient for every solid species. Resized here. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field vector inside the dielectric. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae9134c94985a121c9fd28c6776873945">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a231c2837bb952ffe09ef7a3223c54428" name="a231c2837bb952ffe09ef7a3223c54428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a231c2837bb952ffe09ef7a3223c54428">&#9670;&#160;</a></span>computeSolidMobilities()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::computeSolidMobilities </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_mobilities</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_pos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the mobilities of the solid species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mobilities</td><td>Non-negative mobility for every solid species. Resized here. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field vector inside the dielectric. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a9a84378fc05ac860b952d878d8623d90">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
 <a id="a6169683573106eb5ec4ced1f48442349" name="a6169683573106eb5ec4ced1f48442349"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6169683573106eb5ec4ced1f48442349">&#9670;&#160;</a></span>containsBracket()</h2>
 
@@ -1236,8 +1474,8 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </table>
 </div><div class="memdoc">
 
-<p>Return true if field emission is specified on electrodes or dielectrics. </p>
-<p>Field emission is the only EB emission in this model that does not need a primary particle or photon. </p><dl class="section return"><dt>Returns</dt><dd>True if the EB emission pass must run even when no primaries reached the EB. </dd></dl>
+<p>Return true if field emission is specified on electrodes or dielectrics, or if surface species have first-order surface reactions. </p>
+<p>These are the EB emission processes in this model that do not need a primary particle or photon. </p><dl class="section return"><dt>Returns</dt><dd>True if the EB emission pass must run even when no primaries reached the EB. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae205cd2b6ec870b929c3efffb00e6c37">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
@@ -1478,6 +1716,121 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="ad437cbe115f8d316d7ad63003ec6791e" name="ad437cbe115f8d316d7ad63003ec6791e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad437cbe115f8d316d7ad63003ec6791e">&#9670;&#160;</a></span>getSolidDomainBc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">CdrDomainBC::BcType</a> ItoKMCJSON::getSolidDomainBc </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_species</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide</td>          <td class="paramname"><span class="paramname"><em>a_side</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the domain boundary condition of a solid species, from its 'domain bc' entry. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_species</td><td>Solid species index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction normal to the domain face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Low or high side of the domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The boundary condition given for this side, or outflow if none was given. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8a521885200530fb8215864b8b7f0b55">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a8ce808dc512880dbf3867cc0a19d6772" name="a8ce808dc512880dbf3867cc0a19d6772"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ce808dc512880dbf3867cc0a19d6772">&#9670;&#160;</a></span>getSolidSpeciesIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ItoKMCJSON::getSolidSpeciesIndex </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_name</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the index of a solid species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Species name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Index in m_solidSpecies, or -1 if a_name is not a solid species. </dd></dl>
+
+</div>
+</div>
+<a id="a22303ea4fc60d5b1a6fbfe7c78bd39de" name="a22303ea4fc60d5b1a6fbfe7c78bd39de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22303ea4fc60d5b1a6fbfe7c78bd39de">&#9670;&#160;</a></span>getSurfaceSpeciesIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ItoKMCJSON::getSurfaceSpeciesIndex </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_name</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the index of a surface species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Species name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Index in m_surfaceSpecies, or -1 if a_name is not a surface species. </dd></dl>
+
+</div>
+</div>
 <a id="ac752a5dad72d16b29e4e1a2ef3a8f393" name="ac752a5dad72d16b29e4e1a2ef3a8f393"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac752a5dad72d16b29e4e1a2ef3a8f393">&#9670;&#160;</a></span>getTableKeys()</h2>
 
@@ -1542,6 +1895,34 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ad08d3e2059a24a1d77844c74a74deb51" name="ad08d3e2059a24a1d77844c74a74deb51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad08d3e2059a24a1d77844c74a74deb51">&#9670;&#160;</a></span>initializeSolidSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::initializeSolidSpecies </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialize the solid species from the 'solid species' array. </p>
+<p>Reads the charge number, the constant mobility and diffusion coefficient, the optional initial density and the optional domain boundary conditions of each species. </p>
 
 </div>
 </div>
@@ -2161,6 +2542,45 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="a18e2ad85f078d9228ed1a4f85f4499da" name="a18e2ad85f078d9228ed1a4f85f4499da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18e2ad85f078d9228ed1a4f85f4499da">&#9670;&#160;</a></span>parseSolidCoefficient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoKMCJSON::parseSolidCoefficient </td>
+          <td>(</td>
+          <td class="paramtype">const nlohmann::json &amp;</td>          <td class="paramname"><span class="paramname"><em>a_json</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_context</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse a constant transport coefficient of a solid species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_json</td><td>The 'mobility' or 'diffusion' object of the species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_context</td><td>Species and field name used in errors. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The coefficient, which is not negative. </dd></dl>
+
+</div>
+</div>
 <a id="a4bd500f5b50a92554482ae5b38224d1b" name="a4bd500f5b50a92554482ae5b38224d1b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4bd500f5b50a92554482ae5b38224d1b">&#9670;&#160;</a></span>parseTableEByN()</h2>
 
@@ -2306,8 +2726,8 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
-<a id="a2df2e9eed8f155d7a0d736f50eee3220" name="a2df2e9eed8f155d7a0d736f50eee3220"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2df2e9eed8f155d7a0d736f50eee3220">&#9670;&#160;</a></span>sampleSurfaceEmission()</h2>
+<a id="aceb4ea8c27173cf91d890fe69105fde9" name="aceb4ea8c27173cf91d890fe69105fde9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aceb4ea8c27173cf91d890fe69105fde9">&#9670;&#160;</a></span>sampleSurfaceEmission()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2343,6 +2763,16 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">std::vector&lt; long long &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceAvailable</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; long long &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceChange</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const std::function&lt; RealVect()&gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_releasePosition</em></span>, </td>
         </tr>
         <tr>
@@ -2366,8 +2796,72 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
     <tr><td class="paramdir">[in]</td><td class="paramname">a_photonReactions</td><td>Surface reactions triggered by photon species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that hit the surface. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that hit the surface. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surfaceAvailable</td><td>Number of surface particles of each surface species that reactions can still consume. Empty where surface species do not take part. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surfaceChange</td><td>Net number of surface particles of each surface species created. Same size as a_surfaceAvailable. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_releasePosition</td><td>Draws a release position for one group of products. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isCathode</td><td>Whether the surface is a cathode. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afc3197c51b502beb06f75be91e46ff87" name="afc3197c51b502beb06f75be91e46ff87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc3197c51b502beb06f75be91e46ff87">&#9670;&#160;</a></span>sampleSurfaceSpeciesReactions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::sampleSurfaceSpeciesReactions </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; long long &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceAvailable</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; long long &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceChange</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; RealVect()&gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_releasePosition</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_isCathode</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sample the first-order surface species reactions over a time step. </p>
+<p>Each surface particle of a species with total rate K reacts with probability 1 - exp(-K dt), drawn as one binomial over the species, and the reacting particles are split over the competing reactions by a multinomial draw weighted by the rates. A reaction whose plasma products the field would push back onto the surface does not fire. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_secondaryParticles</td><td>Secondary particles; products are appended. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surfaceAvailable</td><td>Number of surface particles of each surface species available to react. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surfaceChange</td><td>Net number of surface particles of each surface species created. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_releasePosition</td><td>Draws a release position for one group of products. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isCathode</td><td>Whether the surface is a cathode. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2672,7 +3166,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div><div class="memdoc">
 
 <p>Resolve secondary emission at the EB. </p>
-<p>Routine is here to handle charge injection, secondary emission etc. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Calls <a class="el" href="#a113baf6e6ff3ddc1723742ecc375f2bf" title="Resolve secondary emission and surface species kinetics at the EB.">surfaceEmissionEB()</a> with an empty surface and discards the change in the surface species densities. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Outgoing plasma species particles. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryCDRFluxes</td><td>Outgoing plasma species CDR fluxes </td></tr>
@@ -2695,6 +3189,230 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </dl>
 
 <p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a3072257af3148ef72b6560f167e98a82">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a113baf6e6ff3ddc1723742ecc375f2bf" name="a113baf6e6ff3ddc1723742ecc375f2bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a113baf6e6ff3ddc1723742ecc375f2bf">&#9670;&#160;</a></span>surfaceEmissionEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::surfaceEmissionEB </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryCDRFluxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceDensityChange</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryParticles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryCDRFluxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_primaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceDensities</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCenter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryCentroid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryNormal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_bndryArea</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_isDielectric</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_matIndex</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resolve secondary emission and surface species kinetics at the EB. </p>
+<p>On dielectrics, the surface species densities are converted to whole numbers of surface particles in the cut cell, floor(n*A) with A the physical boundary area, and the 'dielectric emission' reactions consume and produce surface particles alongside the gas secondaries. A pathway with surface reactants fires at most as many times as those reactants allow; the primaries are absorbed either way. A pathway with surface reactants or products only fires if all its plasma products can be released, i.e. if the field pushes them away from the surface. After the impact reactions, the first-order 'surface reactions' fire on the remaining surface particles, each one with probability 1 - exp(-K dt) where K is the sum of the rates of its reactions, and the reaction is chosen in proportion to the rates. On electrodes, and in cut cells with zero boundary area, the surface species do not change. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Outgoing plasma species particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryCDRFluxes</td><td>Outgoing plasma species CDR fluxes </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryPhotons</td><td>Photons injected through the EB </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_surfaceDensityChange</td><td>Change in the areal density (1/m^2) of each surface species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that left the computational domain through the EB </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryCDRFluxes</td><td>CDR fluxes leaving the computational domain through the EB </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that left the computational domain through the EB </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceDensities</td><td>Areal density (1/m^2) of each surface species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCenter</td><td>Physical position of the cell center. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCentroid</td><td>Cell centroid relative to the cell center (not multiplied by dx) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB face centroid relative to the cell center (not multiplied by dx) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Cut-cell normal vector. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryArea</td><td>Cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution on this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isDielectric</td><td><a class="el" href="classDielectric.html" title="dielectric class. Simple tuple.">Dielectric</a> or electrode. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_matIndex</td><td>Material index (taken from computationalGeometry) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a886499994f574d434e47c6eb5c44da3f">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+
+</div>
+</div>
+<a id="a5961c33c3a6a366b9494d27fdc298baa" name="a5961c33c3a6a366b9494d27fdc298baa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5961c33c3a6a366b9494d27fdc298baa">&#9670;&#160;</a></span>surfaceSolidExchangeEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCJSON::surfaceSolidExchangeEB </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceDensityChange</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_solidInjection</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceDensities</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_solidArrival</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_physicalCellCenter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;</td>          <td class="paramname"><span class="paramname"><em>a_bndryNormal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_bndryArea</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exchange charge between the surface species and the solid species through a dielectric surface. </p>
+<p>The surface species are first converted to whole numbers of surface particles in the cut cell, as in <a class="el" href="#a113baf6e6ff3ddc1723742ecc375f2bf" title="Resolve secondary emission and surface species kinetics at the EB.">surfaceEmissionEB()</a>, and the solid injection reactions of the 'surface reactions' fire on them: each one with probability 1 - exp(-K dt) where K is the sum of the rates of its injection reactions, split over the reactions in proportion to the rates. Then the arriving solid species become the surface products of their arrival reaction. A solid species without an arrival reaction is not assigned to any surface species. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_surfaceDensityChange</td><td>Change in the areal density (1/m^2) of each surface species. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_solidInjection</td><td>Areal density (1/m^2) of each solid species injected into the dielectric. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceDensities</td><td>Areal density (1/m^2) of each surface species in this cut cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_solidArrival</td><td>Areal density (1/m^2) of each solid species that arrived at the surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field on the gas side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_physicalCellCenter</td><td>Physical position of the cell center. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Gas-side cut-cell normal vector. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryArea</td><td>Gas-side cut-cell boundary area - not multiplied by dx (2D) or dx^2 (3D). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution on this level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a62628f4db5961129ace64279f9e3bdae">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>

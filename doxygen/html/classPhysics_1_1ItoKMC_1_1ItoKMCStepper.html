@@ -255,6 +255,19 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupPoisson<
 <tr class="memitem:a6de0d95cc5995477cde03802b9c52ec7" id="r_a6de0d95cc5995477cde03802b9c52ec7"><td class="memItemLeft" align="right" valign="top"><a id="a6de0d95cc5995477cde03802b9c52ec7" name="a6de0d95cc5995477cde03802b9c52ec7"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupSigma</b> () noexcept</td></tr>
 <tr class="memdesc:a6de0d95cc5995477cde03802b9c52ec7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the surface charge solver. <br /></td></tr>
+<tr class="memitem:a78247c7897d7c1e2d830677979df3492" id="r_a78247c7897d7c1e2d830677979df3492"><td class="memItemLeft" align="right" valign="top"><a id="a78247c7897d7c1e2d830677979df3492" name="a78247c7897d7c1e2d830677979df3492"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupSurfaceSpecies</b> () noexcept</td></tr>
+<tr class="memdesc:a78247c7897d7c1e2d830677979df3492"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up one surface density solver per surface species in the physics model. <br /></td></tr>
+<tr class="memitem:ae6c90ad7114c7be5b1a4fe3840f39962" id="r_ae6c90ad7114c7be5b1a4fe3840f39962"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6c90ad7114c7be5b1a4fe3840f39962">setupSolidCdr</a> () noexcept</td></tr>
+<tr class="memdesc:ae6c90ad7114c7be5b1a4fe3840f39962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the CDR solvers for the solid species on the solid phase.  <br /></td></tr>
+<tr class="memitem:a0b733e8071e67b17ea10c3f514c9c094" id="r_a0b733e8071e67b17ea10c3f514c9c094"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b733e8071e67b17ea10c3f514c9c094">setSolidDomainBcs</a> () noexcept</td></tr>
+<tr class="memdesc:a0b733e8071e67b17ea10c3f514c9c094"><td class="mdescLeft">&#160;</td><td class="mdescRight">Give each solid species solver the domain boundary conditions from the physics model.  <br /></td></tr>
+<tr class="memitem:a6aed8c684f02838334d44d45cc1e7f84" id="r_a6aed8c684f02838334d44d45cc1e7f84"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aed8c684f02838334d44d45cc1e7f84">computeSolidTransportCoefficients</a> () noexcept</td></tr>
+<tr class="memdesc:a6aed8c684f02838334d44d45cc1e7f84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the velocities and diffusion coefficients of the solid species.  <br /></td></tr>
+<tr class="memitem:acb36d1a3efc11714d49964d6e55d6f92" id="r_acb36d1a3efc11714d49964d6e55d6f92"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb36d1a3efc11714d49964d6e55d6f92">advanceSolidSpecies</a> (const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:acb36d1a3efc11714d49964d6e55d6f92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the solid species over one time step with an explicit update.  <br /></td></tr>
+<tr class="memitem:aa31c519664e5a6226c05af440a4f509b" id="r_aa31c519664e5a6226c05af440a4f509b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa31c519664e5a6226c05af440a4f509b">exchangeSurfaceSolid</a> (const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:aa31c519664e5a6226c05af440a4f509b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exchange charge between the surface and the solid species through the gas-dielectric interface.  <br /></td></tr>
 <tr class="memitem:a62832e4c87a89cb15f1766c5b7716692" id="r_a62832e4c87a89cb15f1766c5b7716692"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62832e4c87a89cb15f1766c5b7716692">intersectParticles</a> (const <a class="el" href="CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967">SpeciesSubset</a> a_speciesSubset, const bool a_delete, const std::function&lt; void(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;, std::size_t)&gt; a_nonDeletionModifier=[](<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;, std::size_t) -&gt; void { return;}) noexcept</td></tr>
 <tr class="memdesc:a62832e4c87a89cb15f1766c5b7716692"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intersect a subset of the particles with the domain and embedded boundary.  <br /></td></tr>
 <tr class="memitem:ad0087380ac44db1718f46a1b29403df8" id="r_ad0087380ac44db1718f46a1b29403df8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0087380ac44db1718f46a1b29403df8">intersectParticles</a> (const <a class="el" href="CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967">SpeciesSubset</a> a_speciesSubset, const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_containerBulk, const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_containerEB, const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_containerDomain, const bool a_delete, const std::function&lt; void(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;, std::size_t)&gt; a_nonDeletionModifier=[](<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;, std::size_t) -&gt; void { return;}) noexcept</td></tr>
@@ -269,6 +282,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupSigma</b
 <tr class="memdesc:a6d16f558c3df157dab69acb7451985fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfer covered particles (i.e., particles inside the EB) from the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> bulk container to EB container.  <br /></td></tr>
 <tr class="memitem:a4941ccb4d858ced5cceaf51016593ccf" id="r_a4941ccb4d858ced5cceaf51016593ccf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4941ccb4d858ced5cceaf51016593ccf">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const EBAMRCellData &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</td></tr>
 <tr class="memdesc:a4941ccb4d858ced5cceaf51016593ccf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <br /></td></tr>
+<tr class="memitem:a76325d976c7b4451ef8520d92c6b1103" id="r_a76325d976c7b4451ef8520d92c6b1103"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a76325d976c7b4451ef8520d92c6b1103">writeSolidPlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string &amp;a_outputRealm, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:a76325d976c7b4451ef8520d92c6b1103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the densities of the solid species to the output holder.  <br /></td></tr>
 <tr class="memitem:a58d7dc2984f480ae3188e45965947590" id="r_a58d7dc2984f480ae3188e45965947590"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58d7dc2984f480ae3188e45965947590">writeNumberOfParticlesPerPatch</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const noexcept</td></tr>
 <tr class="memdesc:a58d7dc2984f480ae3188e45965947590"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write number of particles per patch to output holder.  <br /></td></tr>
 <tr class="memitem:abc68455ae833da16ea7f7fc6ea4b0c83" id="r_abc68455ae833da16ea7f7fc6ea4b0c83"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc68455ae833da16ea7f7fc6ea4b0c83">getMaxMinRelativeItoDensity</a> (Real &amp;a_maxDensity, Real &amp;a_minDensity, std::string &amp;a_maxSolver, std::string &amp;a_minSolver) const noexcept</td></tr>
@@ -301,6 +316,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupSigma</b
 <tr class="memdesc:a536b7800d42de906cd940e51b08e2686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the current density.  <br /></td></tr>
 <tr class="memitem:ab21b4ef8da7c4c73ed038b628afc82ca" id="r_ab21b4ef8da7c4c73ed038b628afc82ca"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab21b4ef8da7c4c73ed038b628afc82ca">computeRelaxationTime</a> () noexcept</td></tr>
 <tr class="memdesc:ab21b4ef8da7c4c73ed038b628afc82ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the dielectric relaxation time.  <br /></td></tr>
+<tr class="memitem:ad998aa8a4367a60cec3c24bbd509e099" id="r_ad998aa8a4367a60cec3c24bbd509e099"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad998aa8a4367a60cec3c24bbd509e099">computeSolidRelaxationTime</a> () noexcept</td></tr>
+<tr class="memdesc:ad998aa8a4367a60cec3c24bbd509e099"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the dielectric relaxation time of the solid species inside the dielectrics.  <br /></td></tr>
 <tr class="memitem:a4f280ff7ba0f035b27d8d87792deac25" id="r_a4f280ff7ba0f035b27d8d87792deac25"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f280ff7ba0f035b27d8d87792deac25">solvePoisson</a> () noexcept</td></tr>
 <tr class="memdesc:a4f280ff7ba0f035b27d8d87792deac25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the electrostatic problem.  <br /></td></tr>
 <tr class="memitem:a68690c283c56311d8440a70b8008a7fa" id="r_a68690c283c56311d8440a70b8008a7fa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a68690c283c56311d8440a70b8008a7fa">depositParticles</a> (const <a class="el" href="CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967">SpeciesSubset</a> a_speciesSubset) noexcept</td></tr>
@@ -389,8 +406,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:abe1aae47c80aee7c2055a853f588863c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether anything can be emitted from the EB this step, answered globally.  <br /></td></tr>
 <tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
-<tr class="memitem:a2a162c1beb788842db855e3d8723b8b0" id="r_a2a162c1beb788842db855e3d8723b8b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a162c1beb788842db855e3d8723b8b0">fillSecondaryEmissionEB</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;a_secondaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxes, Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;a_secondaryPhotons, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxesExtrap, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_primaryPhotons, const EBAMRCellData &amp;a_electricField, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a2a162c1beb788842db855e3d8723b8b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:a22787cd04bc164bf206a1d6bad1cbad9" id="r_a22787cd04bc164bf206a1d6bad1cbad9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22787cd04bc164bf206a1d6bad1cbad9">fillSecondaryEmissionEB</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;a_secondaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxes, Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;a_secondaryPhotons, EBAMRIVData &amp;a_surfaceSpecies, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxesExtrap, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_primaryPhotons, const EBAMRCellData &amp;a_electricField, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a22787cd04bc164bf206a1d6bad1cbad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission at the EB.  <br /></td></tr>
 <tr class="memitem:a9100de38907383b414890febd188fdb6" id="r_a9100de38907383b414890febd188fdb6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9100de38907383b414890febd188fdb6">resolveSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a9100de38907383b414890febd188fdb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="memitem:a989274946d637dd8b68bb50f9a9caa18" id="r_a989274946d637dd8b68bb50f9a9caa18"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a989274946d637dd8b68bb50f9a9caa18">resolveSecondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, EBAMRIVData &amp;a_surfaceChargeDensity, const Real a_dt) noexcept</td></tr>
@@ -415,6 +432,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:a510954a255e7df5116f66b1898e16862"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute negative charge.  <br /></td></tr>
 <tr class="memitem:a8e5f843543e0bed38af051955937493d" id="r_a8e5f843543e0bed38af051955937493d"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e5f843543e0bed38af051955937493d">computeQsurf</a> () const noexcept</td></tr>
 <tr class="memdesc:a8e5f843543e0bed38af051955937493d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute surface charge.  <br /></td></tr>
+<tr class="memitem:a78fe0c5e5824a9f3a130cb5e8061af64" id="r_a78fe0c5e5824a9f3a130cb5e8061af64"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a78fe0c5e5824a9f3a130cb5e8061af64">computeQsurfSpecies</a> (const int a_species) const noexcept</td></tr>
+<tr class="memdesc:a78fe0c5e5824a9f3a130cb5e8061af64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the charge held by one surface species.  <br /></td></tr>
+<tr class="memitem:a058b584f3c5b9fcdd4604374405d85ec" id="r_a058b584f3c5b9fcdd4604374405d85ec"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a058b584f3c5b9fcdd4604374405d85ec">computeQsolid</a> (const int a_species) const noexcept</td></tr>
+<tr class="memdesc:a058b584f3c5b9fcdd4604374405d85ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the charge held by one solid species.  <br /></td></tr>
 <tr class="memitem:a74960f928b3ef23eaf19bd9ee0b1ab0f" id="r_a74960f928b3ef23eaf19bd9ee0b1ab0f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74960f928b3ef23eaf19bd9ee0b1ab0f">advancePhotons</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a74960f928b3ef23eaf19bd9ee0b1ab0f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structPhoton.html" title="SoA payload for Monte Carlo radiative-transfer photons.">Photon</a> advancement routine.  <br /></td></tr>
 <tr class="memitem:a825da516f09af56d8dea2b617dd4d63d" id="r_a825da516f09af56d8dea2b617dd4d63d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a825da516f09af56d8dea2b617dd4d63d">sortPhotonsByCell</a> (const <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a> a_which) noexcept</td></tr>
@@ -428,6 +449,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a62503850f9b5305f9389c125fa627544" id="r_a62503850f9b5305f9389c125fa627544"><td class="memItemLeft" align="right" valign="top"><a id="a62503850f9b5305f9389c125fa627544" name="a62503850f9b5305f9389c125fa627544"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initialSigma</b> () noexcept</td></tr>
 <tr class="memdesc:a62503850f9b5305f9389c125fa627544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill surface charge solver with initial data taken from the physics interface. <br /></td></tr>
+<tr class="memitem:ad5bd1bc91d02d7d9d9c08c1599a093df" id="r_ad5bd1bc91d02d7d9d9c08c1599a093df"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5bd1bc91d02d7d9d9c08c1599a093df">initialSurfaceSpecies</a> () noexcept</td></tr>
+<tr class="memdesc:ad5bd1bc91d02d7d9d9c08c1599a093df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the surface density solvers with the initial data of the surface species.  <br /></td></tr>
 <tr class="memitem:a3efd3d812369907d9d2fb6fc6c7f37fb" id="r_a3efd3d812369907d9d2fb6fc6c7f37fb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3efd3d812369907d9d2fb6fc6c7f37fb">parseVerbosity</a> () noexcept</td></tr>
 <tr class="memdesc:a3efd3d812369907d9d2fb6fc6c7f37fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse chattiness.  <br /></td></tr>
 <tr class="memitem:ac53002c898de2934bee55a06289d03e0" id="r_ac53002c898de2934bee55a06289d03e0"><td class="memItemLeft" align="right" valign="top"><a id="ac53002c898de2934bee55a06289d03e0" name="ac53002c898de2934bee55a06289d03e0"></a>
@@ -493,6 +516,14 @@ RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt
 <tr class="memitem:a0bc394d9ec6d2dff309a290435f11fec" id="r_a0bc394d9ec6d2dff309a290435f11fec"><td class="memItemLeft" align="right" valign="top"><a id="a0bc394d9ec6d2dff309a290435f11fec" name="a0bc394d9ec6d2dff309a290435f11fec"></a>
 RefCountedPtr&lt; <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sigmaSolver</b></td></tr>
 <tr class="memdesc:a0bc394d9ec6d2dff309a290435f11fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface charge solver. <br /></td></tr>
+<tr class="memitem:a265e04b9b61aa34e8063b620e2da1870" id="r_a265e04b9b61aa34e8063b620e2da1870"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; 1 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a265e04b9b61aa34e8063b620e2da1870">m_surfaceSolvers</a></td></tr>
+<tr class="memdesc:a265e04b9b61aa34e8063b620e2da1870"><td class="mdescLeft">&#160;</td><td class="mdescRight">Areal densities (1/m^2) of the surface species, one solver per species in the order of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a012b3dd0bbcf6239c42fa736f4f0dca7" title="Get all surface species.">ItoKMCPhysics::getSurfaceSpecies()</a>.  <br /></td></tr>
+<tr class="memitem:aab39bbae6f346cb303bc479578ddce9b" id="r_aab39bbae6f346cb303bc479578ddce9b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab39bbae6f346cb303bc479578ddce9b">m_checkpointSurfaceSpecies</a></td></tr>
+<tr class="memdesc:aab39bbae6f346cb303bc479578ddce9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of surface species found in the checkpoint file being restarted from.  <br /></td></tr>
+<tr class="memitem:ad4b8bae694af5e80f04636a6247a123c" id="r_ad4b8bae694af5e80f04636a6247a123c"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; <a class="el" href="classCdrSolver.html">CdrSolver</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4b8bae694af5e80f04636a6247a123c">m_cdrSolid</a></td></tr>
+<tr class="memdesc:ad4b8bae694af5e80f04636a6247a123c"><td class="mdescLeft">&#160;</td><td class="mdescRight">CDR solvers for the solid species, one per species in the order of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6f47aada93861a310397b05fc35faaf9" title="Get all solid species.">ItoKMCPhysics::getSolidSpecies()</a>.  <br /></td></tr>
+<tr class="memitem:a687661f4a3bdcbe2e0f64c9d976397f1" id="r_a687661f4a3bdcbe2e0f64c9d976397f1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a687661f4a3bdcbe2e0f64c9d976397f1">m_checkpointSolidSpecies</a></td></tr>
+<tr class="memdesc:a687661f4a3bdcbe2e0f64c9d976397f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of solid species found in the checkpoint file being restarted from.  <br /></td></tr>
 <tr class="memitem:a44efe4ce7d4905527ab286d2a2b5e439" id="r_a44efe4ce7d4905527ab286d2a2b5e439"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44efe4ce7d4905527ab286d2a2b5e439">m_secondaryParticles</a></td></tr>
 <tr class="memdesc:a44efe4ce7d4905527ab286d2a2b5e439"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of secondary particles injected through the EB.  <br /></td></tr>
 <tr class="memitem:addf999056b25403a73844a942d073f51" id="r_addf999056b25403a73844a942d073f51"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#addf999056b25403a73844a942d073f51">m_secondaryPhotons</a></td></tr>
@@ -682,6 +713,14 @@ EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratch
 <tr class="memitem:a5e0a1b8ef4446b1591e410d81d692bac" id="r_a5e0a1b8ef4446b1591e410d81d692bac"><td class="memItemLeft" align="right" valign="top"><a id="a5e0a1b8ef4446b1591e410d81d692bac" name="a5e0a1b8ef4446b1591e410d81d692bac"></a>
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratchEB</b></td></tr>
 <tr class="memdesc:a5e0a1b8ef4446b1591e410d81d692bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for EB-only data on the particle realm. One component. <br /></td></tr>
+<tr class="memitem:a06837c93073c6bbe1f265e9dc528f5b5" id="r_a06837c93073c6bbe1f265e9dc528f5b5"><td class="memItemLeft" align="right" valign="top">EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06837c93073c6bbe1f265e9dc528f5b5">m_particleSurfaceScratch</a></td></tr>
+<tr class="memdesc:a06837c93073c6bbe1f265e9dc528f5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for the surface species on the particle realm, one component per surface species.  <br /></td></tr>
+<tr class="memitem:a877cf527efc0e0283072edb89cce1c62" id="r_a877cf527efc0e0283072edb89cce1c62"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a877cf527efc0e0283072edb89cce1c62">m_solidScratchDivF</a></td></tr>
+<tr class="memdesc:a877cf527efc0e0283072edb89cce1c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage on the solid phase of the fluid realm for the advective divergence of a solid species.  <br /></td></tr>
+<tr class="memitem:a49967169a868170a50ccc1cadbd81fd1" id="r_a49967169a868170a50ccc1cadbd81fd1"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49967169a868170a50ccc1cadbd81fd1">m_solidScratchDivD</a></td></tr>
+<tr class="memdesc:a49967169a868170a50ccc1cadbd81fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage on the solid phase of the fluid realm for the diffusive divergence of a solid species.  <br /></td></tr>
+<tr class="memitem:ad45667f4b3d4d1ec21bda0460085701f" id="r_ad45667f4b3d4d1ec21bda0460085701f"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRIVData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad45667f4b3d4d1ec21bda0460085701f">m_solidScratchEB</a></td></tr>
+<tr class="memdesc:ad45667f4b3d4d1ec21bda0460085701f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm.  <br /></td></tr>
 <tr class="memitem:a7a0c46545b232af0d6b4169bf3c5f39c" id="r_a7a0c46545b232af0d6b4169bf3c5f39c"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a0c46545b232af0d6b4169bf3c5f39c">m_fluidScratchIto</a></td></tr>
 <tr class="memdesc:a7a0c46545b232af0d6b4169bf3c5f39c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-Ito-species scratch storage on the fluid realm, one component each.  <br /></td></tr>
 <tr class="inherit_header pro_attribs_classTimeStepper"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classTimeStepper')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
@@ -1073,6 +1112,41 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will only run over valid grid cells (not covered by a finer grid. </dd></dl>
+
+</div>
+</div>
+<a id="acb36d1a3efc11714d49964d6e55d6f92" name="acb36d1a3efc11714d49964d6e55d6f92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb36d1a3efc11714d49964d6e55d6f92">&#9670;&#160;</a></span>advanceSolidSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::advanceSolidSpecies </td>
+          <td>(</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Advance the solid species over one time step with an explicit update. </p>
+<p>The update is phi^(k+1) = phi^k - dt*(div(F) - div(D*grad(phi))) with the drift flux, the diffusion flux and the EB flux added as conservative divergences and stabilized together. The EB flux is the drift flux leaving the dielectric. It is set to zero where the dielectric meets the gas in a cut cell whose gas side has no boundary area, since that charge would have no surface to go to. Elsewhere on the gas-dielectric interface the carriers that leave are handed to the surface by <a class="el" href="#aa31c519664e5a6226c05af440a4f509b" title="Exchange charge between the surface and the solid species through the gas-dielectric interface.">exchangeSurfaceSolid()</a>, and on other parts of the dielectric boundary they leave the system. The diffusion flux is zero through the EB and the domain boundaries. The densities are not floored, so the update conserves the charge exactly. Does nothing without solid species. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2069,6 +2143,42 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="a058b584f3c5b9fcdd4604374405d85ec" name="a058b584f3c5b9fcdd4604374405d85ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a058b584f3c5b9fcdd4604374405d85ec">&#9670;&#160;</a></span>computeQsolid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoKMCStepper::computeQsolid </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_species</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the charge held by one solid species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_species</td><td>Solid species index. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Z q_e times the number of carriers of the species inside the dielectrics. </dd></dl>
+
+</div>
+</div>
 <a id="a8e5f843543e0bed38af051955937493d" name="a8e5f843543e0bed38af051955937493d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8e5f843543e0bed38af051955937493d">&#9670;&#160;</a></span>computeQsurf()</h2>
 
@@ -2096,6 +2206,42 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 <p>Compute surface charge. </p>
 <dl class="section return"><dt>Returns</dt><dd>Computed qsurf </dd></dl>
+
+</div>
+</div>
+<a id="a78fe0c5e5824a9f3a130cb5e8061af64" name="a78fe0c5e5824a9f3a130cb5e8061af64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78fe0c5e5824a9f3a130cb5e8061af64">&#9670;&#160;</a></span>computeQsurfSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoKMCStepper::computeQsurfSpecies </td>
+          <td>(</td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_species</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the charge held by one surface species. </p>
+<p>This is part of the surface charge returned by <a class="el" href="#a8e5f843543e0bed38af051955937493d" title="Compute surface charge.">computeQsurf()</a>, not in addition to it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_species</td><td>Surface species index. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Z q_e times the integrated areal density of the species. </dd></dl>
 
 </div>
 </div>
@@ -2537,6 +2683,66 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="ad998aa8a4367a60cec3c24bbd509e099" name="ad998aa8a4367a60cec3c24bbd509e099"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad998aa8a4367a60cec3c24bbd509e099">&#9670;&#160;</a></span>computeSolidRelaxationTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoKMCStepper::computeSolidRelaxationTime </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the dielectric relaxation time of the solid species inside the dielectrics. </p>
+<p>Computes eps0/sigma with the conductivity sigma = sum_s |Z_s| q_e mu_s n_s of the solid species, and returns its minimum over the solid phase. </p><dl class="section return"><dt>Returns</dt><dd>Minimum relaxation time inside the dielectrics, or the largest Real when there are no solid species. </dd></dl>
+
+</div>
+</div>
+<a id="a6aed8c684f02838334d44d45cc1e7f84" name="a6aed8c684f02838334d44d45cc1e7f84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6aed8c684f02838334d44d45cc1e7f84">&#9670;&#160;</a></span>computeSolidTransportCoefficients()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::computeSolidTransportCoefficients </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the velocities and diffusion coefficients of the solid species. </p>
+<p>The velocity is sgn(Z) * mu * E with the electric field inside the dielectric and the mobility from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a9a84378fc05ac860b952d878d8623d90" title="Compute the mobilities of the solid species.">ItoKMCPhysics::computeSolidMobilities()</a>. The diffusion coefficients come from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae9134c94985a121c9fd28c6776873945" title="Compute the diffusion coefficients of the solid species.">ItoKMCPhysics::computeSolidDiffusionCoefficients()</a> and are averaged to faces. Does nothing without solid species. </p>
+
+</div>
+</div>
 <a id="a29df510b0fa2c6123d026e55c0e24064" name="a29df510b0fa2c6123d026e55c0e24064"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29df510b0fa2c6123d026e55c0e24064">&#9670;&#160;</a></span>computeSpaceChargeDensity() <span class="overload">[1/2]</span></h2>
 
@@ -2755,6 +2961,41 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="aa31c519664e5a6226c05af440a4f509b" name="aa31c519664e5a6226c05af440a4f509b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa31c519664e5a6226c05af440a4f509b">&#9670;&#160;</a></span>exchangeSurfaceSolid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::exchangeSurfaceSolid </td>
+          <td>(</td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exchange charge between the surface and the solid species through the gas-dielectric interface. </p>
+<p>Must be called after <a class="el" href="#acb36d1a3efc11714d49964d6e55d6f92" title="Advance the solid species over one time step with an explicit update.">advanceSolidSpecies()</a>, which leaves the EB flux of the carriers that left the dielectric in the solvers. In each valid cut cell on the gas side of the interface, the gas VoF is paired with the solid VoF by taking the first VoF of each phase. The carriers that arrived at the surface are added to the surface charge, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a62628f4db5961129ace64279f9e3bdae" title="Exchange charge between the surface species and the solid species through a dielectric surface.">ItoKMCPhysics::surfaceSolidExchangeEB()</a> assigns them to surface species and returns the carriers injected into the dielectric, whose charge is taken out of the surface charge. The injected carriers are added to the solid species with the mass that does not fit in the cut cell redistributed to its neighbors. Every transfer moves the same charge out of one ledger and into the other. Does nothing without solid species. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a32cbacb05348a1914afa8f5e7700632e" name="a32cbacb05348a1914afa8f5e7700632e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a32cbacb05348a1914afa8f5e7700632e">&#9670;&#160;</a></span>fillNeutralDensity()</h2>
 
@@ -2921,8 +3162,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a2a162c1beb788842db855e3d8723b8b0" name="a2a162c1beb788842db855e3d8723b8b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a162c1beb788842db855e3d8723b8b0">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[2/2]</span></h2>
+<a id="a22787cd04bc164bf206a1d6bad1cbad9" name="a22787cd04bc164bf206a1d6bad1cbad9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22787cd04bc164bf206a1d6bad1cbad9">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2946,6 +3187,11 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_secondaryPhotons</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">EBAMRIVData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceSpecies</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2986,6 +3232,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryParticles</td><td>Secondary emitted (gained) particles at the EB </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_cdrFluxes</td><td>CDR fluxes for BCs. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_secondaryPhotons</td><td>Secondary emitted photons at the EB </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surfaceSpecies</td><td>Surface species on the particle realm, one component per species. On input the areal densities, on output their change over the time step. Not read or written when there are no surface species. Cells covered by a finer level are given zero change. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Primary (lost) particles at the EB </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrFluxesExtrap</td><td>Extrapolated CDR fluxes at the EB </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Primary (lost) photons at the EB </td></tr>
@@ -3395,6 +3642,36 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 <p>Fill solvers with initial data. </p>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a9faab8cb79d39cd85f1b20efc49a78ea">TimeStepper</a>.</p>
+
+</div>
+</div>
+<a id="ad5bd1bc91d02d7d9d9c08c1599a093df" name="ad5bd1bc91d02d7d9d9c08c1599a093df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5bd1bc91d02d7d9d9c08c1599a093df">&#9670;&#160;</a></span>initialSurfaceSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::initialSurfaceSpecies </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill the surface density solvers with the initial data of the surface species. </p>
+<p>The charge of the initial surface densities, sum_s Z_s q_e n_s, is added to the surface charge density so that the surface charge remains the total. Must be called after <a class="el" href="#a62503850f9b5305f9389c125fa627544" title="Fill surface charge solver with initial data taken from the physics interface.">initialSigma()</a>. Does nothing when there are no surface species. </p>
 
 </div>
 </div>
@@ -4975,13 +5252,12 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Resolve secondary emission at the EB. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Calls the other version, which updates the surface charge, and then adds the change in the surface species densities computed by <a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> to the surface species solvers. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Calls the other version. </dd></dl>
 
 </div>
 </div>
@@ -5100,6 +5376,66 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 <p>Set the Ito velocity functions. This is sgn(charge) * E. </p>
 <dl class="section note"><dt>Note</dt><dd>This should be set before <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> computes velocities. </dd></dl>
+
+</div>
+</div>
+<a id="a0b733e8071e67b17ea10c3f514c9c094" name="a0b733e8071e67b17ea10c3f514c9c094"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b733e8071e67b17ea10c3f514c9c094">&#9670;&#160;</a></span>setSolidDomainBcs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::setSolidDomainBcs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Give each solid species solver the domain boundary conditions from the physics model. </p>
+<p>The CDR solver classes read their domain boundary conditions from their input options, which the gas solvers share. This replaces them on every side with <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8a521885200530fb8215864b8b7f0b55" title="Get the domain boundary condition of a solid species on one side of the domain.">ItoKMCPhysics::getSolidDomainBc()</a>. </p>
+
+</div>
+</div>
+<a id="ae6c90ad7114c7be5b1a4fe3840f39962" name="ae6c90ad7114c7be5b1a4fe3840f39962"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6c90ad7114c7be5b1a4fe3840f39962">&#9670;&#160;</a></span>setupSolidCdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::setupSolidCdr </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set up the CDR solvers for the solid species on the solid phase. </p>
+<p>The layout gets one solver per solid species when the geometry has dielectrics, and no solvers otherwise. The domain boundary conditions are set by <a class="el" href="#a0b733e8071e67b17ea10c3f514c9c094" title="Give each solid species solver the domain boundary conditions from the physics model.">setSolidDomainBcs()</a>. </p>
 
 </div>
 </div>
@@ -5602,6 +5938,58 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="a76325d976c7b4451ef8520d92c6b1103" name="a76325d976c7b4451ef8520d92c6b1103"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76325d976c7b4451ef8520d92c6b1103">&#9670;&#160;</a></span>writeSolidPlotData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::writeSolidPlotData </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_output</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_icomp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_outputRealm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the densities of the solid species to the output holder. </p>
+<p>The output holder lives on the gas phase. Cells inside the dielectrics, which the gas phase covers, and cut cells of the solid phase get the solid density of the first solid VoF in the cell; all other cells get zero. Writes one component per solid species and nothing when there are none. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output. Incremented by the number of components written. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a185c3fa17f03a7f36e0b4dc9c5bf78cc" name="a185c3fa17f03a7f36e0b4dc9c5bf78cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a185c3fa17f03a7f36e0b4dc9c5bf78cc">&#9670;&#160;</a></span>m_cdrFluxes</h2>
@@ -5708,6 +6096,87 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 <p>Reaction products to be put in the CDR equations, as particles. </p>
 <p>Holds both the photoionization products and the production computed by the KMC advance. The containers are filled and emptied within a single call to <a class="el" href="#a36907acbc61c507c48ae84b3d06249a4" title="Chemistry advance over time a_dt.">advanceReactionNetwork()</a> and carry no state across time steps. </p><dl class="section note"><dt>Note</dt><dd>Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers' deposition machinery live. </dd></dl>
+
+</div>
+</div>
+<a id="ad4b8bae694af5e80f04636a6247a123c" name="ad4b8bae694af5e80f04636a6247a123c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4b8bae694af5e80f04636a6247a123c">&#9670;&#160;</a></span>m_cdrSolid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RefCountedPtr&lt;<a class="el" href="classCdrLayout.html">CdrLayout</a>&lt;<a class="el" href="classCdrSolver.html">CdrSolver</a>&gt; &gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_cdrSolid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CDR solvers for the solid species, one per species in the order of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6f47aada93861a310397b05fc35faaf9" title="Get all solid species.">ItoKMCPhysics::getSolidSpecies()</a>. </p>
+<p>Solved on the solid phase of the fluid realm, with domain boundary conditions taken from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8a521885200530fb8215864b8b7f0b55" title="Get the domain boundary condition of a solid species on one side of the domain.">ItoKMCPhysics::getSolidDomainBc()</a> rather than from the input options of the CDR solver class. The layout holds no solvers when the physics model has no solid species or the geometry has no dielectrics. </p>
+
+</div>
+</div>
+<a id="a687661f4a3bdcbe2e0f64c9d976397f1" name="a687661f4a3bdcbe2e0f64c9d976397f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a687661f4a3bdcbe2e0f64c9d976397f1">&#9670;&#160;</a></span>m_checkpointSolidSpecies</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_checkpointSolidSpecies</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of solid species found in the checkpoint file being restarted from. </p>
+<p>Set by readCheckpointHeader() and checked against the solid species solvers by readCheckpointData(). A checkpoint written without solid species carries no count and is read as zero. </p>
+
+</div>
+</div>
+<a id="aab39bbae6f346cb303bc479578ddce9b" name="aab39bbae6f346cb303bc479578ddce9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab39bbae6f346cb303bc479578ddce9b">&#9670;&#160;</a></span>m_checkpointSurfaceSpecies</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_checkpointSurfaceSpecies</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of surface species found in the checkpoint file being restarted from. </p>
+<p>Set by readCheckpointHeader(). A checkpoint written without surface species carries no count and is read as zero. </p>
 
 </div>
 </div>
@@ -6251,6 +6720,33 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 </div>
 </div>
+<a id="a06837c93073c6bbe1f265e9dc528f5b5" name="a06837c93073c6bbe1f265e9dc528f5b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06837c93073c6bbe1f265e9dc528f5b5">&#9670;&#160;</a></span>m_particleSurfaceScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRIVData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleSurfaceScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch storage for the surface species on the particle realm, one component per surface species. </p>
+<p>Carries the areal densities into the EB emission kernel, and their change out of it. Only allocated when the physics model has surface species. </p>
+
+</div>
+</div>
 <a id="a5f5502a71101b96855ddb01e9c59b95a" name="a5f5502a71101b96855ddb01e9c59b95a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5f5502a71101b96855ddb01e9c59b95a">&#9670;&#160;</a></span>m_particleYPC</h2>
 
@@ -6437,6 +6933,114 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 <p>List of secondary photons injected through the EB. </p>
 <p>This is used when injecting secondary photons through the EB. </p><dl class="section note"><dt>Note</dt><dd>Stored on the particle realm </dd></dl>
+
+</div>
+</div>
+<a id="a49967169a868170a50ccc1cadbd81fd1" name="a49967169a868170a50ccc1cadbd81fd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49967169a868170a50ccc1cadbd81fd1">&#9670;&#160;</a></span>m_solidScratchDivD</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchDivD</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch storage on the solid phase of the fluid realm for the diffusive divergence of a solid species. </p>
+<p>One component. Only allocated when there are solid species. </p>
+
+</div>
+</div>
+<a id="a877cf527efc0e0283072edb89cce1c62" name="a877cf527efc0e0283072edb89cce1c62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a877cf527efc0e0283072edb89cce1c62">&#9670;&#160;</a></span>m_solidScratchDivF</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchDivF</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch storage on the solid phase of the fluid realm for the advective divergence of a solid species. </p>
+<p>One component. Only allocated when there are solid species. </p>
+
+</div>
+</div>
+<a id="ad45667f4b3d4d1ec21bda0460085701f" name="ad45667f4b3d4d1ec21bda0460085701f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad45667f4b3d4d1ec21bda0460085701f">&#9670;&#160;</a></span>m_solidScratchEB</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;EBAMRIVData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchEB</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm. </p>
+<p>One component each. Holds the injected mass that <a class="el" href="#aa31c519664e5a6226c05af440a4f509b" title="Exchange charge between the surface and the solid species through the gas-dielectric interface.">exchangeSurfaceSolid()</a> redistributes. Empty when there are no solid species. </p>
+
+</div>
+</div>
+<a id="a265e04b9b61aa34e8063b620e2da1870" name="a265e04b9b61aa34e8063b620e2da1870"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a265e04b9b61aa34e8063b620e2da1870">&#9670;&#160;</a></span>m_surfaceSolvers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;<a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt;1&gt; &gt; &gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_surfaceSolvers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Areal densities (1/m^2) of the surface species, one solver per species in the order of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a012b3dd0bbcf6239c42fa736f4f0dca7" title="Get all surface species.">ItoKMCPhysics::getSurfaceSpecies()</a>. </p>
+<p>Stored on the fluid realm, like m_sigmaSolver. The surface charge density in m_sigmaSolver remains the record of the charge on the surface; these densities are a breakdown of it, and the part of the surface charge that is not assigned to any surface species is sigma - sum_s Z_s q_e n_s. Empty when the physics model has no surface species. </p>
 
 </div>
 </div>

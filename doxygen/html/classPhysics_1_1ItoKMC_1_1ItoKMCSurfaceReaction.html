@@ -102,11 +102,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a8329b8fb0eb5c2ad7a2964a5f14911f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allowed, but you need to call the define function afterwards. <br /></td></tr>
 <tr class="memitem:a619129f05f3183a2b1b347ae703c90a2" id="r_a619129f05f3183a2b1b347ae703c90a2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a619129f05f3183a2b1b347ae703c90a2">ItoKMCSurfaceReaction</a> (const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const Real a_efficiency) noexcept</td></tr>
 <tr class="memdesc:a619129f05f3183a2b1b347ae703c90a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
+<tr class="memitem:ab4003e2556ca5935867f9b2ad10a54eb" id="r_ab4003e2556ca5935867f9b2ad10a54eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4003e2556ca5935867f9b2ad10a54eb">ItoKMCSurfaceReaction</a> (const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const std::list&lt; size_t &gt; a_surfaceReactants, const std::list&lt; size_t &gt; a_surfaceProducts, const Real a_efficiency) noexcept</td></tr>
+<tr class="memdesc:ab4003e2556ca5935867f9b2ad10a54eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor for reactions that involve surface species. Calls the define function.  <br /></td></tr>
 <tr class="memitem:a84c1e4e17eb2de387f8edc23666b09a3" id="r_a84c1e4e17eb2de387f8edc23666b09a3"><td class="memItemLeft" align="right" valign="top"><a id="a84c1e4e17eb2de387f8edc23666b09a3" name="a84c1e4e17eb2de387f8edc23666b09a3"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCSurfaceReaction</b> () noexcept</td></tr>
 <tr class="memdesc:a84c1e4e17eb2de387f8edc23666b09a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="memitem:a88268eb6d0a4ef165855d282cd45b711" id="r_a88268eb6d0a4ef165855d282cd45b711"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88268eb6d0a4ef165855d282cd45b711">define</a> (const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const Real a_efficiency) noexcept</td></tr>
 <tr class="memdesc:a88268eb6d0a4ef165855d282cd45b711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
+<tr class="memitem:a48a991f9dfdd8342a03f0bf870e535e9" id="r_a48a991f9dfdd8342a03f0bf870e535e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48a991f9dfdd8342a03f0bf870e535e9">define</a> (const size_t a_reactant, const std::list&lt; size_t &gt; a_products, const std::list&lt; size_t &gt; a_surfaceReactants, const std::list&lt; size_t &gt; a_surfaceProducts, const Real a_efficiency) noexcept</td></tr>
+<tr class="memdesc:a48a991f9dfdd8342a03f0bf870e535e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function for reactions that involve surface species.  <br /></td></tr>
 <tr class="memitem:a7ad732de65882df4e924f5320e758d58" id="r_a7ad732de65882df4e924f5320e758d58"><td class="memItemLeft" align="right" valign="top">const size_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ad732de65882df4e924f5320e758d58">getReactant</a> () const noexcept</td></tr>
 <tr class="memdesc:a7ad732de65882df4e924f5320e758d58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant species index (const).  <br /></td></tr>
 <tr class="memitem:abd6fa5d4b33abc846add7e40e656c438" id="r_abd6fa5d4b33abc846add7e40e656c438"><td class="memItemLeft" align="right" valign="top">size_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd6fa5d4b33abc846add7e40e656c438">getReactant</a> () noexcept</td></tr>
@@ -115,6 +119,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCSurfaceReac
 <tr class="memdesc:adaf61bda608bfeff6b30afb6bbe09336"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma product species indices (const).  <br /></td></tr>
 <tr class="memitem:ae6514a9ee77de7c52523961883e088ce" id="r_ae6514a9ee77de7c52523961883e088ce"><td class="memItemLeft" align="right" valign="top">std::list&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6514a9ee77de7c52523961883e088ce">getProducts</a> () noexcept</td></tr>
 <tr class="memdesc:ae6514a9ee77de7c52523961883e088ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma product species indices (mutable).  <br /></td></tr>
+<tr class="memitem:aa28b04ad1c7f173d561d6bea6348e61a" id="r_aa28b04ad1c7f173d561d6bea6348e61a"><td class="memItemLeft" align="right" valign="top">const std::list&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa28b04ad1c7f173d561d6bea6348e61a">getSurfaceReactants</a> () const noexcept</td></tr>
+<tr class="memdesc:aa28b04ad1c7f173d561d6bea6348e61a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the surface species consumed by the reaction.  <br /></td></tr>
+<tr class="memitem:ae972ef29603a5250c7e6aca90073e9db" id="r_ae972ef29603a5250c7e6aca90073e9db"><td class="memItemLeft" align="right" valign="top">const std::list&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae972ef29603a5250c7e6aca90073e9db">getSurfaceProducts</a> () const noexcept</td></tr>
+<tr class="memdesc:ae972ef29603a5250c7e6aca90073e9db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the surface species produced by the reaction.  <br /></td></tr>
 <tr class="memitem:a4bb8ac5be2dcf5f61eecb3c367b836c1" id="r_a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4bb8ac5be2dcf5f61eecb3c367b836c1">getEfficiency</a> () const noexcept</td></tr>
 <tr class="memdesc:a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reaction efficiency (const).  <br /></td></tr>
 <tr class="memitem:a72648e8b790fe32ac99f4d112292bc50" id="r_a72648e8b790fe32ac99f4d112292bc50"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72648e8b790fe32ac99f4d112292bc50">getEfficiency</a> () noexcept</td></tr>
@@ -128,16 +136,23 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>m_reactant</b></td>
 <tr class="memitem:a65bfc2d312a7627575b203eb6f2a92ab" id="r_a65bfc2d312a7627575b203eb6f2a92ab"><td class="memItemLeft" align="right" valign="top"><a id="a65bfc2d312a7627575b203eb6f2a92ab" name="a65bfc2d312a7627575b203eb6f2a92ab"></a>
 std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_products</b></td></tr>
 <tr class="memdesc:a65bfc2d312a7627575b203eb6f2a92ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plasma product indices. <br /></td></tr>
+<tr class="memitem:a2011273da2c6093fb55d948bb89387fc" id="r_a2011273da2c6093fb55d948bb89387fc"><td class="memItemLeft" align="right" valign="top"><a id="a2011273da2c6093fb55d948bb89387fc" name="a2011273da2c6093fb55d948bb89387fc"></a>
+std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceReactants</b></td></tr>
+<tr class="memdesc:a2011273da2c6093fb55d948bb89387fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface species consumed by the reaction. <br /></td></tr>
+<tr class="memitem:a5917a0af88c519ba362da878807e6251" id="r_a5917a0af88c519ba362da878807e6251"><td class="memItemLeft" align="right" valign="top"><a id="a5917a0af88c519ba362da878807e6251" name="a5917a0af88c519ba362da878807e6251"></a>
+std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceProducts</b></td></tr>
+<tr class="memdesc:a5917a0af88c519ba362da878807e6251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface species produced by the reaction. <br /></td></tr>
 <tr class="memitem:ae9aa9481028cbb183fb4083a91a86a5f" id="r_ae9aa9481028cbb183fb4083a91a86a5f"><td class="memItemLeft" align="right" valign="top"><a id="ae9aa9481028cbb183fb4083a91a86a5f" name="ae9aa9481028cbb183fb4083a91a86a5f"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiency</b></td></tr>
 <tr class="memdesc:ae9aa9481028cbb183fb4083a91a86a5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction efficiency. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Reaction class for describing secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>. </p>
-<p>This class supports multiple emissions due to single impinging particles, and encapsulates all reactions A -&gt; B, A -&gt; B + C, etc. </p>
+<p>This class supports multiple emissions due to single impinging particles, and encapsulates all reactions A -&gt; B, A -&gt; B + C, etc.</p>
+<p>A reaction can also consume and produce surface species. In an impact reaction the reactant is the impinging plasma or photon species, the surface reactants are surface species that the impact consumes, and the efficiency is the probability of the pathway. In a first-order surface reaction the reactant is the index of the surface species that decays, the list of surface reactants is empty, and the efficiency holds the rate constant (1/s). </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a619129f05f3183a2b1b347ae703c90a2" name="a619129f05f3183a2b1b347ae703c90a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a619129f05f3183a2b1b347ae703c90a2">&#9670;&#160;</a></span>ItoKMCSurfaceReaction()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a619129f05f3183a2b1b347ae703c90a2">&#9670;&#160;</a></span>ItoKMCSurfaceReaction() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -180,9 +195,65 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiency</b></td>
 
 </div>
 </div>
+<a id="ab4003e2556ca5935867f9b2ad10a54eb" name="ab4003e2556ca5935867f9b2ad10a54eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4003e2556ca5935867f9b2ad10a54eb">&#9670;&#160;</a></span>ItoKMCSurfaceReaction() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ItoKMCSurfaceReaction::ItoKMCSurfaceReaction </td>
+          <td>(</td>
+          <td class="paramtype">const size_t</td>          <td class="paramname"><span class="paramname"><em>a_reactant</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_products</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceReactants</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceProducts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_efficiency</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Full constructor for reactions that involve surface species. Calls the define function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactant</td><td>Index of the impinging plasma or photon species, or of the decaying surface species for a first-order surface reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_products</td><td>List of plasma species potentially generated by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceReactants</td><td>List of surface species consumed by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceProducts</td><td>List of surface species produced by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_efficiency</td><td>Reaction efficiency, or the rate constant (1/s) for a first-order surface reaction. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a88268eb6d0a4ef165855d282cd45b711" name="a88268eb6d0a4ef165855d282cd45b711"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88268eb6d0a4ef165855d282cd45b711">&#9670;&#160;</a></span>define()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a88268eb6d0a4ef165855d282cd45b711">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -219,6 +290,62 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiency</b></td>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactant</td><td>Index in the list of plasma or photon species that triggers the reaction. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_products</td><td>List of plasma species potentially generated by the reaction. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_efficiency</td><td>Reaction efficiency </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a48a991f9dfdd8342a03f0bf870e535e9" name="a48a991f9dfdd8342a03f0bf870e535e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48a991f9dfdd8342a03f0bf870e535e9">&#9670;&#160;</a></span>define() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCSurfaceReaction::define </td>
+          <td>(</td>
+          <td class="paramtype">const size_t</td>          <td class="paramname"><span class="paramname"><em>a_reactant</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_products</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceReactants</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::list&lt; size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>a_surfaceProducts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_efficiency</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Full define function for reactions that involve surface species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactant</td><td>Index of the impinging plasma or photon species, or of the decaying surface species for a first-order surface reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_products</td><td>List of plasma species potentially generated by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceReactants</td><td>List of surface species consumed by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaceProducts</td><td>List of surface species produced by the reaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_efficiency</td><td>Reaction efficiency, or the rate constant (1/s) for a first-order surface reaction. </td></tr>
   </table>
   </dd>
 </dl>
@@ -390,6 +517,62 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiency</b></td>
 
 <p>Get the reactant species index (mutable). </p>
 <dl class="section return"><dt>Returns</dt><dd>Index into the plasma/photon species list that triggers this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="ae972ef29603a5250c7e6aca90073e9db" name="ae972ef29603a5250c7e6aca90073e9db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae972ef29603a5250c7e6aca90073e9db">&#9670;&#160;</a></span>getSurfaceProducts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::list&lt; size_t &gt; &amp; ItoKMCSurfaceReaction::getSurfaceProducts </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the surface species produced by the reaction. </p>
+<dl class="section return"><dt>Returns</dt><dd>List of indices into the surface species list. </dd></dl>
+
+</div>
+</div>
+<a id="aa28b04ad1c7f173d561d6bea6348e61a" name="aa28b04ad1c7f173d561d6bea6348e61a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa28b04ad1c7f173d561d6bea6348e61a">&#9670;&#160;</a></span>getSurfaceReactants()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::list&lt; size_t &gt; &amp; ItoKMCSurfaceReaction::getSurfaceReactants </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the surface species consumed by the reaction. </p>
+<dl class="section return"><dt>Returns</dt><dd>List of indices into the surface species list. </dd></dl>
 
 </div>
 </div>

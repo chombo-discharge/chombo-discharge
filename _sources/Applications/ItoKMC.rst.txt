@@ -2344,6 +2344,7 @@ Specification of secondary emission is done separately on dielectrics, electrode
 The internal specification for these are identical (see :ref:`Chap:ItoKMCDomainEmission` for the one addition for the domain), so all examples below use ``dielectric emission``.
 Secondary emission reactions are specified similarly to photoionization reactions.
 However, the left-hand side must consist of a single species (photon or particle), while the right-hand side can consist of multiple species.
+On dielectrics, surface species can also appear on either side (see :ref:`Chap:ItoKMCSurfaceSpecies`).
 Wildcards ``@`` are supported, as is the ``(null)`` species which enables null-reactions, as further discussed below.
 An example JSON specification that enables secondary electron emission due to photons and ion impact is
 
@@ -2422,6 +2423,181 @@ A primary that leaves through a cell on an edge or corner of the domain is assig
 Secondaries are released uniformly in the grid cell next to the face, or in the gas part of it if the cell is cut by the EB.
 CDR species do not take part in domain emission; their fluxes through the domain boundary are set by the CDR solver's boundary conditions.
 Domain faces carry no surface charge, so the charge of the primaries and secondaries is not recorded on the domain boundary.
+
+.. _Chap:ItoKMCSurfaceSpecies:
+
+Surface species
+_______________
+
+Charged states bound to dielectric surfaces, such as trapped electrons or adsorbed ions, can be tracked as surface species.
+They are declared in a top-level ``surface species`` array, where each entry has an ``id``, a charge number ``Z``, and an optional ``initial density`` (in :math:`\text{m}^{-2}`, zero by default).
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
+For example:
+
+.. code-block:: json
+
+   "surface species":
+   [
+      {
+         "id": "e(s)",
+	 "Z": -1
+      },
+      {
+         "id": "O2+(s)",
+	 "Z": 1,
+	 "initial density": 1E10
+      }
+   ]
+
+Each surface species is stored as an areal density on the dielectric cut cells, with its own ``SurfaceODESolver``.
+The surface charge density :math:`\sigma` remains the record of the charge on the surface: it is updated by the charge of the primaries that hit the surface and of the secondaries that leave it, exactly as without surface species, and the initial surface species densities are added to the initial :math:`\sigma`.
+The surface species are a breakdown of :math:`\sigma`, and the step report lists the charge of each surface species together with the part of the surface charge that no surface species accounts for, :math:`\sigma - \sum_s Z_s q_\text{e} n_s` integrated over the surface.
+This unassigned charge stays at round-off when every charged species that reaches a dielectric is captured by a reaction that conserves charge.
+
+Surface species are optional, and so is a surface species for every charge carrier.
+A charged particle that hits a dielectric is absorbed whether or not a reaction names it, so its charge always goes into :math:`\sigma`; without a reaction that involves a surface species, that charge is unassigned.
+The unassigned charge is part of :math:`\sigma` and acts on the field, but it is not a species: no reaction can consume it.
+When surface species are defined, a warning is therefore issued at start-up for every charged Ito species that has no ``dielectric emission`` reaction with a surface species.
+
+With only trapped electrons defined, for example, a positive ion that lands on them does not neutralise them unless a reaction says so.
+The ion's charge is unassigned, and the trapped electrons remain, free to desorb or be detached.
+The total charge is right, but the number of trapped electrons is too high.
+Neutralisation is written as a reaction that consumes a surface electron, and a negative ion can leave its electron on the surface:
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "O2+ + e(s) -> (null)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "O- -> e(s)",
+	 "efficiency": 1.0
+      }
+   ]
+
+The first pathway fires only where a surface electron is present; elsewhere the ion is absorbed and its charge is unassigned.
+
+Surface species may appear in ``dielectric emission`` reactions, on both sides, next to the one impinging particle or photon species.
+They are not permitted in ``electrode emission`` or ``domain emission``.
+Typical reactions are capture, neutralisation, and photodetachment:
+
+.. code-block:: json
+
+   "dielectric emission":
+   [
+      {
+         "reaction": "e -> e(s)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "O2+ -> O2+(s)",
+	 "efficiency": 1.0
+      },
+      {
+         "reaction": "Y + e(s) -> e",
+	 "efficiency": 0.01
+      },
+      {
+         "reaction": "Y -> (null)",
+	 "efficiency": 0.99
+      }
+   ]
+
+The pathways are drawn exactly as for other secondary emission reactions.
+In each cut cell the surface densities are converted to whole numbers of surface particles, and a pathway that consumes surface species fires at most as many times as those are available.
+The primary is absorbed either way, so its charge goes into :math:`\sigma`; if the pathway did not fire, that charge is unassigned.
+A pathway that involves surface species only fires if all its charged products can be released, i.e. if the field pushes them away from the surface.
+A reaction with surface species must conserve charge, or the run stops with an error.
+
+First-order reactions of surface species, such as desorption, are given in a top-level ``surface reactions`` array.
+Each reaction has exactly one surface species on the left-hand side, Ito or surface species (or ``(null)``) on the right-hand side, and a ``rate`` in :math:`\text{s}^{-1}`.
+Entries that involve solid species are described in :ref:`Chap:ItoKMCSolidSpecies`.
+
+.. code-block:: json
+
+   "surface reactions":
+   [
+      {
+         "reaction": "e(s) -> e",
+	 "rate": 1E3
+      }
+   ]
+
+These reactions are sampled exactly over the time step.
+For a surface species with :math:`N` surface particles in a cut cell and reactions with rates :math:`k_1, k_2, \ldots`, the number of particles that react is drawn from a binomial distribution with :math:`N` trials and probability :math:`1 - \exp\left(-K\Delta t\right)` where :math:`K = \sum_i k_i`, and the reacting particles are distributed over the reactions by a multinomial draw with probabilities :math:`k_i/K`.
+As for the impact reactions, a reaction whose charged products the field would push back onto the surface does not fire.
+Surface reactions do not restrict the time step.
+
+When restarting from a checkpoint file that was written without surface species, the surface species densities are set to zero and a warning is issued; the surface charge is kept but is unassigned.
+
+.. _Chap:ItoKMCSolidSpecies:
+
+Solid species
+_____________
+
+Charge carriers inside dielectrics, such as electrons or holes in a polymer, can be tracked as solid species.
+They are declared in a top-level ``solid species`` array, where each entry has an ``id``, a charge number ``Z``, a ``mobility`` and a ``diffusion`` coefficient, an optional ``initial density`` (in :math:`\text{m}^{-3}`, zero by default), and optional ``domain bc`` entries.
+Species ids must be unique across the background, plasma, photon, surface, and solid species.
+The mobility and diffusion coefficient must be of type ``constant``; a zero mobility or diffusion coefficient turns that kind of transport off.
+For example:
+
+.. code-block:: json
+
+   "solid species":
+   [
+      {
+         "id": "e(d)",
+	 "Z": -1,
+	 "mobility": {"type": "constant", "value": 1E-10},
+	 "diffusion": {"type": "constant", "value": 0.0},
+	 "initial density": 0.0,
+	 "domain bc": {"y.lo": "wall"}
+      }
+   ]
+
+Each solid species is transported by its own CDR solver on the solid phase, with the drift velocity :math:`\text{sgn}(Z)\mu\mathbf{E}` where :math:`\mathbf{E}` is the electric field inside the dielectric.
+The update is explicit, and the solid species restrict the time step through their CFL condition and through their dielectric relaxation time :math:`\epsilon_0/\sigma_s` with :math:`\sigma_s = \sum_s |Z_s| q_\text{e}\mu_s n_s`.
+The diffusive flux is zero through the embedded boundaries and the domain boundaries.
+
+The domain boundary conditions of the solid species do not use the ``bc`` options of the CDR solver class (e.g. ``CdrCTU.bc.x.lo``), which only apply to the CDR species in the gas.
+Instead, each solid species gives its own boundary conditions in ``domain bc``, with keys ``x.lo``, ``x.hi``, ``y.lo``, ``y.hi`` (and ``z.lo``, ``z.hi`` in 3D) and values ``outflow`` or ``wall``.
+A side that is not given is ``outflow``.
+
+The space charge of the solid species enters the field solve on the solid side.
+Their conductivity is not part of the semi-implicit field solve.
+
+Solid species exchange charge with the plasma only through the surface species.
+A solid species is injected from the surface by a ``surface reactions`` entry with a surface species on the left-hand side and solid species (and optionally surface species, but no Ito species) on the right-hand side:
+
+.. code-block:: json
+
+   "surface reactions":
+   [
+      {
+         "reaction": "e(s) -> e(d)",
+	 "rate": 1E3
+      },
+      {
+         "reaction": "e(d) -> e(s)"
+      }
+   ]
+
+Injection reactions are sampled as the other first-order surface reactions, on the whole surface particles of the cut cell, and their charge is moved from the surface charge to the solid species.
+Solid species that drift out of the dielectric where it meets the gas arrive at the surface and their charge is added to the surface charge.
+An arrival entry, with a solid species on the left-hand side and surface species on the right-hand side and no ``rate``, assigns the arriving charge to surface species; without one it stays in the surface charge without being assigned to a surface species.
+Each solid species can have at most one arrival entry.
+Solid species that drift out of the dielectric elsewhere, e.g. into an electrode or through a domain boundary with ``outflow``, leave the simulation.
+In a cut cell that holds more than one volume of the gas or the solid phase, the surface exchanges with the first one of each.
+Injection and arrival reactions must conserve charge, or the run stops with an error, and every exchange takes as much charge out of the surface charge as it adds to the solid species, or the other way around.
+The step report lists the charge of each solid species, ``Qsolid``, and includes it in ``Qtot``.
+The densities are written to plot files as ``<id> phi``.
+
+Solid species are only solved for when the geometry has dielectrics.
+Cells inside dielectrics are not tagged for refinement by the solid species.
+When restarting from a checkpoint file that was written without solid species, the solid species densities are set to zero and a warning is issued.
 
 Field emission
 --------------
