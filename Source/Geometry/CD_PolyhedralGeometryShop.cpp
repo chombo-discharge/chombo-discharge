@@ -8578,6 +8578,16 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       fineDomain = a_graphs[lvl + 1]->getDomain().domainBox();
     }
 
+    // The cells under a cell the coarser level filled. This level's states classify them from their corners alone, so
+    // a face onto one reads as a face onto a cut cell, although this level has closed it.
+    LevelData<BaseFab<signed char>> coarserFilled;
+
+    const bool hasCoarser = (lvl > 0) && a_graphs[lvl - 1]->isDefined();
+
+    if (hasCoarser) {
+      graph.markCoarserFilled(coarserFilled, *a_graphs[lvl - 1], 1);
+    }
+
     bool noRefinedEdge[CutCellSurface::s_numEdges];
 
     for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
@@ -8853,9 +8863,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
                 // A face onto a cell the graph filled is closed and holds nothing across it, so an edge in that
                 // plane has no partner to meet and is not this cell's to check -- as for a face on the domain
-                // boundary, or one the coarser level describes.
-                const bool filled = statesFab.box().contains(other) &&
-                                    statesFab(other, 0) == PolyhedralEBGraph::s_covered;
+                // boundary, or one the coarser level describes. That holds whether this level or the coarser one
+                // filled the cell.
+                const bool filledHere = statesFab.box().contains(other) &&
+                                        statesFab(other, 0) == PolyhedralEBGraph::s_covered;
+                const bool filledCoarser = hasCoarser && coarserFilled[din].box().contains(other) &&
+                                           coarserFilled[din](other, 0) != 0;
+                const bool filled = filledHere || filledCoarser;
 
                 if (state != PolyhedralEBGraph::s_faceBoundary && state != PolyhedralEBGraph::s_faceCoarser &&
                     !filled) {
