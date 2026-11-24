@@ -225,15 +225,6 @@ public:
   getPhi() const noexcept;
 
   /**
-   * @brief Get the cut cells that are also dielectric cells, i.e. cut cells of both the gas and the solid phase.
-   * @details One VoF iterator per level and grid patch, over the VoFs of this solver's phase. Rebuilt when the
-   * solver is allocated. Does not include ghost cells.
-   * @return m_dielectricVoFs
-   */
-  virtual const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
-  getDielectricVoFs() const noexcept;
-
-  /**
    * @brief Convenience function for setting m_rhs
    * @param[in] a_rhs Values for all components
    */

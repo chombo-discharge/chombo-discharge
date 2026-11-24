@@ -1310,8 +1310,6 @@ ItoKMCStepper<I, C, R, F>::exchangeSurfaceSolid(const Real a_dt) noexcept
 
     EBAMRIVData& sigma = m_sigmaSolver->getPhi();
 
-    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& dielectricVoFs = m_sigmaSolver->getDielectricVoFs();
-
     for (int i = 0; i < numSolidSpecies; i++) {
       DataOps::setValue(m_solidScratchEB[i], 0.0);
     }
@@ -1440,7 +1438,8 @@ ItoKMCStepper<I, C, R, F>::exchangeSurfaceSolid(const Real a_dt) noexcept
           }
         };
 
-        VoFIterator& vofit = (*dielectricVoFs[lvl])[din];
+        // Every gas cut cell is visited; the kernel passes over those that hold no solid VoF.
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
         BoxLoops::loop(vofit, kernel);
       }
