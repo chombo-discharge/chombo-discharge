@@ -602,18 +602,6 @@ protected:
   Real m_inputRefineAngle;
 
   /**
-   * @brief Whether a box holding a saddle -- an interface patch twisted about its own centre -- is split.
-   * ComputationalGeometry.refine_saddles, optional, off by default; set it true to turn the refinement on.
-   * @details Splitting such a box removes the cell that would otherwise be unable to refine single valued, and it
-   * only reaches a saddle that has refinement left to give: one already at the stop level stays, and is the
-   * unresolved-cells rule's to deal with. It is off by default because that rule is to collapse such a cell's
-   * pieces into one body without losing conservation (PolyhedralGeometryShop::UnresolvedAction::Collapse, not yet
-   * wired), which makes a saddle something to repair rather than something to refine away; switching it on buys
-   * centroids that need no repair, at the price of more cells.
-   */
-  bool m_refineSaddles;
-
-  /**
    * @brief Maximum number of ghost cells that we will ever need
    */
   int m_maxGhostEB;
@@ -797,7 +785,7 @@ protected:
    * @brief Read the grids generateGrids built from the graph file.
    * @details The domains, the lower corner and the grid spacing must be those the file was written with, and the
    * inputs may not ask for more EB ghost cells; the run stops otherwise. The settings the grids were generated with --
-   * the refinement angle, the saddle refinement, the tile sizes, the ghost cells and the levels electrode and
+   * the refinement angle, the tile sizes, the ghost cells and the levels electrode and
    * dielectric surfaces are resolved to -- are taken from the file, and each one that differs in the inputs is
    * reported. Leaves the file open for buildGeometries. Collective.
    * @param[in] a_startDomain      Domain the upward pass started from.
@@ -863,8 +851,8 @@ protected:
    *     for each box on lvl that is regular or covered in both phases:
    *       append refine(box, 2) on lvl + 1 with both tags                   -- never a hole beneath these
    *     for the boxes on lvl that are irregular in some phase:
-   *       flags = splitFlags(...): exceedsCurvature, then doublyCrossedEdge, then hasTwistedPatch (if
-   *               m_refineSaddles), in any phase where the box is irregular
+   *       flags = splitFlags(...): exceedsCurvature, then doublyCrossedEdge, then the geometric tag depths,
+   *               then fallsApartWhenCut, in any phase where the box is irregular
    *       for each box with a flag: pieces = domainSplit(refine(box, 2), m_maxBlockSize, m_minBlockSize)
    *       classifyBoxes(all pieces, lvl + 1) in both phases, append on lvl + 1
    *       a box without a flag is a leaf: nothing is appended, the region above it is a hole on lvl + 1
@@ -947,8 +935,9 @@ protected:
   /**
    * @brief Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair
    * reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than
-   * the band), an edge the level above would cross twice, a cut cell whose interface is twisted into a saddle, or a
-   * surface the geometric tags refine below the box's level (Driver.refine_electrodes, Driver.refine_dielectrics).
+   * the band), an edge the level above would cross twice, a cut cell that falls into more than one piece when it is
+   * cut to the stop level, or a surface the geometric tags refine below the box's level (Driver.refine_electrodes,
+   * Driver.refine_dielectrics).
    * @details Only None against anything else decides whether a box splits. Which of the six reasons it is, is
    * recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it
    * is a diagnostic rather than a part of the generator.
@@ -960,44 +949,36 @@ protected:
     Ring,
     Medial,
     DoubleCrossing,
-    Twist,
+    MultiValued,
     Depth
   };
 
   /**
-   * @brief Whether any cut cell of the box holds an interface patch that is twisted about its own centre.
-   * @details Four crossings on the four edges of a cell that run in one direction are coplanar exactly when
-   * f00 + f11 equals f01 + f10; the difference is the twist, and the patch through them is then a saddle. A
-   * saddle is the one shape whose fluid can fall into more than one piece when the cell is cut for a
-   * refinement, which is a cell the polyhedral path cannot carry single valued.
+   * @brief Whether any cut cell of the box, cut into the cells of the stop level, would have a piece of its fluid
+   * in more than one part.
+   * @details A box that no other rule splits is a leaf, and the finer cells over it are cut from its cells'
+   * polyhedra rather than reconstructed from the implicit function. A cell holding one piece of fluid can still
+   * have a piece of a child that does not: a sharp fold of the interface fan cuts an octant off from the rest of
+   * its child, and that child's own children are then not joined through their faces. The curvature rule does not
+   * see this, since the surface the fan approximates may turn very little across the cell.
    *
-   * The test is the position of the patch's own saddle point. Outside the cell's square the patch rises or
-   * falls monotonically across the cell in at least one direction, and every sublevel set of such a patch is
-   * connected on every sub-rectangle -- so the cell is safe at every refinement ratio and is left alone.
-   * Inside, it is not, and the box is split. Measured in cell widths, the twist a cell sees scales with the
-   * spacing while the tilt that opposes it does not, so refining halves the one and leaves the other: the patch
-   * the level above holds is the same saddle seen from further away.
+   * Each cut cell is reconstructed from the implicit function on the level, as exceedsCurvature reconstructs it,
+   * and asked CutCellBody::hasMultiValuedChildren at the ratio from this level to the stop level, which asks every
+   * body on the way down. Splitting the box reconstructs its cells one level finer, where the fold that caused
+   * the failure is no longer there, and those cells are asked again at half the ratio; at the stop level there is
+   * nothing left to cut. Levels finer than the stop level are not asked here, since nothing finer is built from
+   * the implicit function.
    *
-   * A twist at or below 1e-8 counts as none. The crossings are solved to about 1e-10 of the edge, and a flat face
-   * aligned with the grid has its four crossings agree to the last bit, which leaves the twist and both slopes as
-   * rounding; the saddle's position is then one rounding error divided by another and falls inside the square as
-   * often as not. Without the floor, a flat surface is refined as though it were rough.
-   *
-   * This is deliberately separate from exceedsCurvature, which cannot answer it: that rule measures how much
-   * the surface turns, and a gentle saddle turns very little while still being a saddle. It is also blind to a
-   * loop that wraps a cell corner rather than crossing four parallel edges, which carries the same risk with no
-   * quad to test; such a cell is left to the unresolved-cells rule at the finest level.
-   *
-   * Cells are reconstructed from the implicit function on the level, as exceedsCurvature reconstructs them, so
-   * nothing is asked of an index space that does not yet exist. A phase without an implicit function never asks
-   * for a split.
+   * A cell whose body does not close is left to the shop, which reports it when it builds the level. A phase
+   * without an implicit function never asks for a split.
    * @param[in] a_box   Box to test.
-   * @param[in] a_level Level the box lives on.
+   * @param[in] a_level Level the box lives on, coarser than the stop level.
    * @param[in] a_phase Phase whose implicit function is asked.
-   * @return True if some cut cell of the box holds a patch whose saddle lies within it.
+   * @return True if some cut cell of the box has a body on the way to the stop level whose fluid is in more than
+   * one piece.
    */
   bool
-  hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+  fallsApartWhenCut(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
    * @brief Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.
