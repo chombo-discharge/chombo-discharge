@@ -31,6 +31,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
+#include <CD_ScratchPool.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_IrregularDeposition.H>
 #include <CD_CopyStrategy.H>
@@ -644,6 +645,62 @@ public:
    */
   void
   allocate(MFAMRIVData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = 0) const;
+
+  /**
+   * @brief Fetch a temporary over the whole hierarchy of a realm, for data that lives on a phase.
+   * @details Returns a free temporary with the same key from the realm's scratch pool, or allocates a new one. The
+   * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN with
+   * AmrMesh.scratch_poison). Must not be called inside an OpenMP parallel region.
+   * @tparam T EBAMRCellData, EBAMRFluxData or EBAMRIVData
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase
+   * @param[in] a_nComp Number of components
+   * @param[in] a_ghost Number of ghost cells
+   * @return Handle that owns the temporary
+   */
+  template <typename T>
+  Scratch<T>
+  fetchScratch(const std::string&       a_realm,
+               const phase::which_phase a_phase,
+               const int                a_nComp,
+               const int                a_ghost) const;
+
+  /**
+   * @brief Fetch a temporary over the whole hierarchy of a realm, for data that does not live on one phase.
+   * @details As the phase version.
+   * @tparam T EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData
+   * @param[in] a_realm Realm name
+   * @param[in] a_nComp Number of components
+   * @param[in] a_ghost Number of ghost cells
+   * @return Handle that owns the temporary
+   */
+  template <typename T>
+  Scratch<T>
+  fetchScratch(const std::string& a_realm, const int a_nComp, const int a_ghost) const;
+
+  /**
+   * @brief Fetch a temporary on one grid level of a realm.
+   * @details As fetchScratch, for a single level.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_nComp Number of components
+   * @param[in] a_ghost Number of ghost cells
+   * @return Handle that owns the temporary
+   */
+  Scratch<LevelData<EBCellFAB>>
+  fetchLevelScratch(const std::string&       a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level,
+                    const int                a_nComp,
+                    const int                a_ghost) const;
+
+  /**
+   * @brief Abort if a temporary of any realm's scratch pool is still in use.
+   * @details Called between time steps, where no temporary should be held. The message lists the pool entries.
+   */
+  void
+  assertScratchReturned() const;
 
   /**
    * @brief Reallocate data.
@@ -2594,6 +2651,16 @@ protected:
   Real m_mirrorMinDenominator;
 
   /**
+   * @brief Fill every fetched temporary with NaN, so that reads before writes show up.
+   */
+  bool m_scratchPoison;
+
+  /**
+   * @brief Write the entries of every scratch pool to pout() before each regrid.
+   */
+  bool m_scratchReport;
+
+  /**
    * @brief Has grids or not
    */
   bool m_hasGrids;
@@ -2764,6 +2831,76 @@ protected:
    */
   void
   parseMirrorDeposition();
+
+  /**
+   * @brief Parse the scratch pool options.
+   */
+  void
+  parseScratch();
+
+  /**
+   * @brief Abort if a realm does not exist.
+   * @param[in] a_realm  Realm name
+   * @param[in] a_caller Name of the calling function, for the error message
+   */
+  void
+  assertRealm(const std::string& a_realm, const std::string& a_caller) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(EBAMRCellData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(EBAMRFluxData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(EBAMRIVData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(EBAMRFAB& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(MFAMRCellData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(MFAMRFluxData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(MFAMRIVData& a_data) const;
+
+  /**
+   * @brief Fill a temporary with NaN.
+   * @param[in,out] a_data Temporary
+   */
+  void
+  poisonScratch(LevelData<EBCellFAB>& a_data) const;
 
   /**
    * @brief Parse centroid interpolation stencils

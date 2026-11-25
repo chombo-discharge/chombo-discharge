@@ -76,6 +76,9 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
     pout() << "Realm::define" << endl;
   }
 
+  // Temporaries live on the previous grids.
+  m_scratchPool.clear();
+
   m_grids                = a_grids;
   m_domains              = a_domains;
   m_refinementRatios     = a_refRat;
@@ -146,9 +149,18 @@ Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLeve
     pout() << "Realm::setGrids" << endl;
   }
 
+  // Temporaries live on the previous grids.
+  m_scratchPool.clear();
+
   for (auto& r : m_realms) {
     r.second->setGrids(a_grids, a_finestLevel);
   }
+}
+
+ScratchPool&
+Realm::getScratchPool() const noexcept
+{
+  return m_scratchPool;
 }
 
 void
@@ -158,6 +170,9 @@ Realm::preRegrid()
   if (m_verbosity > 5) {
     pout() << "Realm::preRegrid" << endl;
   }
+
+  // Temporaries live on the grids that are about to change.
+  m_scratchPool.clear();
 
   m_grids.resize(0);
   m_mflg.resize(0);

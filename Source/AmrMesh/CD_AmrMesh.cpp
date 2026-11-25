@@ -10,6 +10,11 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <limits>
+#include <memory>
+#include <sstream>
+
 // Chombo includes
 #include <BRMeshRefine.H>
 #include <ParmParse.H>
@@ -971,6 +976,7 @@ AmrMesh::parseOptions()
   this->parseBrFillRatio();
   this->parseStateRedistribution();
   this->parseMirrorDeposition();
+  this->parseScratch();
   ;
   this->parseNumGhostCells();
   this->parseEbGhostCells();
@@ -1000,6 +1006,7 @@ AmrMesh::parseRuntimeOptions()
   this->parseBrBufferSize();
   this->parseBrFillRatio();
   this->parseMultigridInterpolator();
+  this->parseScratch();
 }
 
 void
@@ -1070,6 +1077,14 @@ AmrMesh::preRegrid()
     oldGrids.resize(1 + m_oldFinestLevel);
     for (int lvl = 0; lvl <= m_oldFinestLevel; lvl++) {
       oldGrids[lvl] = this->getGrids(r.first)[lvl];
+    }
+  }
+
+  if (m_scratchReport) {
+    for (const auto& r : m_realms) {
+      pout() << "AmrMesh::preRegrid -- scratch pool on realm '" << r.first << "':\n";
+
+      r.second->getScratchPool().report(pout(), "  ");
     }
   }
 
@@ -4482,6 +4497,156 @@ AmrMesh::getBoxSorting() const
   }
 
   return m_boxSort;
+}
+
+void
+AmrMesh::parseScratch()
+{
+  CH_TIME("AmrMesh::parseScratch()");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::parseScratch()" << endl;
+  }
+
+  ParmParse pp("AmrMesh");
+
+  pp.get("scratch_poison", m_scratchPoison);
+  pp.get("scratch_report", m_scratchReport);
+}
+
+void
+AmrMesh::assertRealm(const std::string& a_realm, const std::string& a_caller) const
+{
+  if (!(this->queryRealm(a_realm))) {
+    const std::string err = a_caller + " -- could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(err.c_str());
+  }
+}
+
+Scratch<LevelData<EBCellFAB>>
+AmrMesh::fetchLevelScratch(const std::string&       a_realm,
+                           const phase::which_phase a_phase,
+                           const int                a_level,
+                           const int                a_nComp,
+                           const int                a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchLevelScratch");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchLevelScratch" << endl;
+  }
+
+  CH_assert(a_level >= 0 && a_level <= m_finestLevel);
+  CH_assert(a_nComp > 0);
+  CH_assert(a_ghost >= 0);
+
+  this->assertRealm(a_realm, "AmrMesh::fetchLevelScratch");
+
+  auto build = [this, &a_realm, a_phase, a_level, a_nComp, a_ghost]() -> std::unique_ptr<LevelData<EBCellFAB>> {
+    std::unique_ptr<LevelData<EBCellFAB>> data(new LevelData<EBCellFAB>());
+
+    this->allocate(*data, a_realm, a_phase, a_level, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  Scratch<LevelData<EBCellFAB>> scratch = m_realms[a_realm]->getScratchPool().acquire<LevelData<EBCellFAB>>(a_phase,
+                                                                                                            a_level,
+                                                                                                            a_nComp,
+                                                                                                            a_ghost,
+                                                                                                            build);
+
+  if (m_scratchPoison) {
+    this->poisonScratch(*scratch);
+  }
+
+  return scratch;
+}
+
+void
+AmrMesh::assertScratchReturned() const
+{
+  CH_TIME("AmrMesh::assertScratchReturned");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::assertScratchReturned" << endl;
+  }
+
+  bool allReturned = true;
+
+  for (const auto& r : m_realms) {
+    allReturned = allReturned && r.second->getScratchPool().allReturned();
+  }
+
+  if (!allReturned) {
+    std::ostringstream os;
+
+    os << "AmrMesh::assertScratchReturned -- temporaries are still in use:\n";
+
+    for (const auto& r : m_realms) {
+      os << " realm '" << r.first << "':\n";
+
+      r.second->getScratchPool().report(os, "  ");
+    }
+
+    MayDay::Abort(os.str().c_str());
+  }
+}
+
+void
+AmrMesh::poisonScratch(EBAMRCellData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(EBAMRFluxData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(EBAMRIVData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(EBAMRFAB& a_data) const
+{
+  for (int lvl = 0; lvl < a_data.size(); lvl++) {
+    const DataIterator& dit  = a_data[lvl]->dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      (*a_data[lvl])[din].setVal(std::numeric_limits<Real>::quiet_NaN());
+    }
+  }
+}
+
+void
+AmrMesh::poisonScratch(MFAMRCellData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(MFAMRFluxData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(MFAMRIVData& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
+}
+
+void
+AmrMesh::poisonScratch(LevelData<EBCellFAB>& a_data) const
+{
+  DataOps::setValue(a_data, std::numeric_limits<Real>::quiet_NaN());
 }
 
 #include <CD_NamespaceFooter.H>

@@ -13,6 +13,10 @@
 #ifndef CD_AMRMESHIMPLEM_H
 #define CD_AMRMESHIMPLEM_H
 
+// Std includes
+#include <memory>
+#include <type_traits>
+
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ParticleOps.H>
@@ -1325,6 +1329,80 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles
       }
     }
   }
+}
+
+template <typename T>
+Scratch<T>
+AmrMesh::fetchScratch(const std::string&       a_realm,
+                      const phase::which_phase a_phase,
+                      const int                a_nComp,
+                      const int                a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchScratch(string, phase::which_phase, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchScratch(string, phase::which_phase, int, int)" << endl;
+  }
+
+  static_assert(std::is_same<T, EBAMRCellData>::value || std::is_same<T, EBAMRFluxData>::value ||
+                  std::is_same<T, EBAMRIVData>::value,
+                "AmrMesh::fetchScratch -- this overload takes EBAMRCellData, EBAMRFluxData or EBAMRIVData");
+
+  CH_assert(a_nComp > 0);
+  CH_assert(a_ghost >= 0);
+
+  this->assertRealm(a_realm, "AmrMesh::fetchScratch");
+
+  auto build = [this, &a_realm, a_phase, a_nComp, a_ghost]() -> std::unique_ptr<T> {
+    std::unique_ptr<T> data(new T());
+
+    this->allocate(*data, a_realm, a_phase, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase, -1, a_nComp, a_ghost, build);
+
+  if (m_scratchPoison) {
+    this->poisonScratch(*scratch);
+  }
+
+  return scratch;
+}
+
+template <typename T>
+Scratch<T>
+AmrMesh::fetchScratch(const std::string& a_realm, const int a_nComp, const int a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchScratch(string, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchScratch(string, int, int)" << endl;
+  }
+
+  static_assert(std::is_same<T, EBAMRFAB>::value || std::is_same<T, MFAMRCellData>::value ||
+                  std::is_same<T, MFAMRFluxData>::value || std::is_same<T, MFAMRIVData>::value,
+                "AmrMesh::fetchScratch -- this overload takes EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData");
+
+  CH_assert(a_nComp > 0);
+  CH_assert(a_ghost >= 0);
+
+  this->assertRealm(a_realm, "AmrMesh::fetchScratch");
+
+  auto build = [this, &a_realm, a_nComp, a_ghost]() -> std::unique_ptr<T> {
+    std::unique_ptr<T> data(new T());
+
+    this->allocate(*data, a_realm, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  // These types have no phase; the pool keys them on phase::gas.
+  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(phase::gas, -1, a_nComp, a_ghost, build);
+
+  if (m_scratchPoison) {
+    this->poisonScratch(*scratch);
+  }
+
+  return scratch;
 }
 
 #include <CD_NamespaceFooter.H>
