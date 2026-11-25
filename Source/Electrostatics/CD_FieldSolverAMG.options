@@ -8,7 +8,7 @@ FieldSolverAMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 FieldSolverAMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 
 FieldSolverAMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'

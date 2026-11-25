@@ -425,15 +425,20 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // (MFHelmholtzOps).
   m_helmholtzOpFactory->setJump(sigmaByEps0, 1.0);
 
+  // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+  Scratch<MFAMRCellData> residual = m_amr->fetchScratch<MFAMRCellData>(m_realm,
+                                                                       m_nComp,
+                                                                       m_amr->getNumberOfGhostCells());
+
   // Aliasing, because Chombo is not too smart about smart pointers.
   Vector<LevelData<MFCellFAB>*> phi; // Raw pointers of a_phi
-  Vector<LevelData<MFCellFAB>*> rhs; // Raw pointers of m_kappaRhoByEps0
-  Vector<LevelData<MFCellFAB>*> res; // Raw pointers of m_residue
-  Vector<LevelData<MFCellFAB>*> zer; // Raw pointers of m_zero
+  Vector<LevelData<MFCellFAB>*> rhs; // Raw pointers of kappaRhoByEps0
+  Vector<LevelData<MFCellFAB>*> res; // Raw pointers of residual
+  Vector<LevelData<MFCellFAB>*> zer; // Raw pointers of zero
 
   m_amr->alias(phi, a_phi);
   m_amr->alias(rhs, kappaRhoByEps0);
-  m_amr->alias(res, m_residue);
+  m_amr->alias(res, *residual);
   m_amr->alias(zer, zero);
 
   // GMG solve. Use phi = zero as initial metric. We want to reduce this by m_multigridExitTolerance, in which case

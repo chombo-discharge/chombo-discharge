@@ -216,6 +216,12 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // those.
     this->resetAlphaAndBeta(1.0, -a_dt);
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing because Chombo did not always use smart pointers.
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
@@ -224,7 +230,7 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 
     m_amr->alias(newPhi, a_newPhi);
     m_amr->alias(eulerRHS, *scratch);
-    m_amr->alias(resid, m_residual);
+    m_amr->alias(resid, *residual);
     m_amr->alias(zer, *zero);
 
     const int coarsestLevel = 0;
@@ -375,6 +381,12 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // to worry about those.
     this->resetAlphaAndBeta(1.0, -0.5 * a_dt);
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing because Chombo did not always use smart pointers.
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
@@ -383,7 +395,7 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
     m_amr->alias(newPhi, a_newPhi);
     m_amr->alias(eulerRHS, *scratch);
-    m_amr->alias(resid, m_residual);
+    m_amr->alias(resid, *residual);
     m_amr->alias(zer, *zero);
 
     // Figure out how far away we are form a "converged" solution.
@@ -463,10 +475,8 @@ CdrMultigrid::setupDiffusionSolver()
   // diffusion solves are implicit, but this is really the easiest way of
   if (m_isDiffusive) {
     m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_residual, m_realm, m_phase, m_nComp);
 
     DataOps::setValue(m_helmAcoef, 1.0);
-    DataOps::setValue(m_residual, 0.0);
 
     // This sets up the multigrid Helmholtz solver.
     this->setupHelmholtzFactory();

@@ -520,13 +520,6 @@ public:
   getRho();
 
   /**
-   * @brief Get the residue
-   * @return Residue
-   */
-  MFAMRCellData&
-  getResidue();
-
-  /**
    * @brief Get cell-centered permittivity
    * @return Permittivity cell
    */
@@ -648,11 +641,6 @@ protected:
   EBAMRIVData m_sigma;
 
   /**
-   * @brief Residue, e.g. used after solving Poisson equation.
-   */
-  MFAMRCellData m_residue;
-
-  /**
    * @brief Cell permittivity
    */
   MFAMRCellData m_permittivityCell;
@@ -691,11 +679,6 @@ protected:
    * @brief If true, the electric field on the inside of dielectrics will be added to plot files.
    */
   bool m_plotElectricFieldSolid;
-
-  /**
-   * @brief If true, the residue will be added to plot files.
-   */
-  bool m_plotResidue;
 
   /**
    * @brief If true, the permittivity will be added to plot files.
@@ -887,7 +870,7 @@ protected:
 
   /**
    * @brief Share the data and the configuration of another solver.
-   * @details The data holders (potential, electric field, space and surface charge, residue, permittivities) are copied
+   * @details The data holders (potential, electric field, space and surface charge, permittivities) are copied
    * by handle, so this solver reads and writes the storage of a_owner. The mesh, realm, geometry, data location,
    * boundary conditions, voltage, time and verbosity are copied by value. The class name, the plot variables and the
    * regrid cache are not copied. Since the data are shared by handle, this must be called again whenever a_owner

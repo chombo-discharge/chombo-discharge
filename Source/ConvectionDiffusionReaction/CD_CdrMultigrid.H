@@ -278,11 +278,6 @@ protected:
   EBAMRCellData m_helmAcoef;
 
   /**
-   * @brief Storage for multigrid residual
-   */
-  EBAMRCellData m_residual;
-
-  /**
    * @brief Verbosity for geometric multigrid
    */
   int m_multigridVerbosity;

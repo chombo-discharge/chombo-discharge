@@ -33,7 +33,7 @@
  * geometric multigrid is re-tried every amg_retry_interval solves.
  *
  * The two solvers share this solver's data: they read and write its potential, space and surface charge, electric
- * field, residue and permittivities. They also read their settings from this class's input options, so that the
+ * field and permittivities. They also read their settings from this class's input options, so that the
  * boundary conditions, the plot variables, the interface condition and the EB stencils are given once, and agree. The
  * EB stencil order and weight (bc_order, bc_weight) apply to electrodes and dielectric interfaces in both solvers.
  *

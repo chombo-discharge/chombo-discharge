@@ -277,7 +277,6 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   m_petscJumpBc->updateJumpData(x, m_permittivityEB);
 
   petscGrid->putPetscInChombo(a_potential, x);
-  petscGrid->putPetscInChombo(m_residue, r);
 
   petscGrid->destroy(b);
   petscGrid->destroy(x);

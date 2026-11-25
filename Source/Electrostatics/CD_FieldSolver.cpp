@@ -148,7 +148,6 @@ FieldSolver::allocate()
 
   m_amr->allocate(m_potential, m_realm, m_nComp);
   m_amr->allocate(m_rho, m_realm, m_nComp);
-  m_amr->allocate(m_residue, m_realm, m_nComp);
   m_amr->allocate(m_permittivityCell, m_realm, m_nComp);
   m_amr->allocate(m_permittivityFace, m_realm, m_nComp);
   m_amr->allocate(m_permittivityEB, m_realm, m_nComp);
@@ -159,7 +158,6 @@ FieldSolver::allocate()
   DataOps::setValue(m_potential, 0.0);
   DataOps::setValue(m_rho, 0.0);
   DataOps::setValue(m_sigma, 0.0);
-  DataOps::setValue(m_residue, 0.0);
   DataOps::setValue(m_electricField, 0.0);
 
   // Set permittivities
@@ -441,7 +439,6 @@ FieldSolver::deallocate()
   m_electricField.clear();
   m_rho.clear();
   m_sigma.clear();
-  m_residue.clear();
   m_permittivityCell.clear();
   m_permittivityFace.clear();
   m_permittivityEB.clear();
@@ -665,7 +662,6 @@ FieldSolver::parsePlotVariables()
   m_plotPotential          = false;
   m_plotRho                = false;
   m_plotElectricField      = false;
-  m_plotResidue            = false;
   m_plotPermittivity       = false;
   m_plotSigma              = false;
   m_plotElectricFieldSolid = false;
@@ -685,7 +681,11 @@ FieldSolver::parsePlotVariables()
         m_plotRho = true;
       }
       else if (str[i] == "res") {
-        m_plotResidue = true;
+        const std::string err = "FieldSolver::parsePlotVariables - the plot variable 'res' was removed, because the "
+                                "solvers no longer store the residual. Remove it from " +
+                                m_className + ".plt_vars";
+
+        MayDay::Error(err.c_str());
       }
       else if (str[i] == "E") {
         m_plotElectricField = true;
@@ -701,7 +701,7 @@ FieldSolver::parsePlotVariables()
       }
       else {
         const std::string err = "FieldSolver::parsePlotVariables - unknown plot variable '" + str[i] +
-                                "' (valid: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol')";
+                                "' (valid: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol')";
 
         MayDay::Error(err.c_str());
       }
@@ -1506,9 +1506,6 @@ FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotSigma) {
     this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_outputRealm, a_level);
   }
-  if (m_plotResidue) {
-    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_outputRealm, a_level, false);
-  }
   if (m_plotPermittivity) {
     this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_outputRealm, a_level, false);
   }
@@ -1843,9 +1840,6 @@ FieldSolver::getNumberOfPlotVariables() const
   if (m_plotSigma) {
     numPltVars = numPltVars + 1;
   }
-  if (m_plotResidue) {
-    numPltVars = numPltVars + 1;
-  }
   if (m_plotPermittivity) {
     numPltVars = numPltVars + 1;
   }
@@ -1877,9 +1871,6 @@ FieldSolver::getPlotVariableNames() const
   }
   if (m_plotSigma) {
     pltVarNames.push_back("Electrostatic sigma");
-  }
-  if (m_plotResidue) {
-    pltVarNames.push_back("Electrostatic potential_residue");
   }
   if (m_plotPermittivity) {
     pltVarNames.push_back("Electrostatic permittivity");
@@ -2010,17 +2001,6 @@ FieldSolver::getSigma()
 }
 
 MFAMRCellData&
-FieldSolver::getResidue()
-{
-  CH_TIME("FieldSolver::getResidue()");
-  if (m_verbosity > 5) {
-    pout() << "FieldSolver::getResidue()" << endl;
-  }
-
-  return m_residue;
-}
-
-MFAMRCellData&
 FieldSolver::getPermittivityCell()
 {
   CH_TIME("FieldSolver::getPermittivityCell()");
@@ -2134,7 +2114,6 @@ FieldSolver::aliasState(const FieldSolver& a_owner)
   m_electricField    = a_owner.m_electricField;
   m_rho              = a_owner.m_rho;
   m_sigma            = a_owner.m_sigma;
-  m_residue          = a_owner.m_residue;
   m_permittivityCell = a_owner.m_permittivityCell;
   m_permittivityFace = a_owner.m_permittivityFace;
   m_permittivityEB   = a_owner.m_permittivityEB;

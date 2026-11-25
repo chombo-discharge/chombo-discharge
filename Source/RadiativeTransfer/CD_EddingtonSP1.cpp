@@ -568,9 +568,7 @@ EddingtonSP1::allocate()
   m_amr->allocate(m_helmBcoIrreg, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_resid, m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(m_resid, 0.0);
   DataOps::setValue(m_phi, 0.0);
   DataOps::setValue(m_source, 0.0);
 
@@ -590,7 +588,6 @@ EddingtonSP1::deallocate()
   m_helmBcoIrreg.clear();
   m_phi.clear();
   m_source.clear();
-  m_resid.clear();
 }
 
 void
@@ -687,6 +684,12 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
       DataOps::kappaScale(scaledSource, m_amr->getVofIterator(m_realm, m_phase));
     }
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing, because Chombo is not too smart.
     Vector<LevelData<EBCellFAB>*> phi;
     Vector<LevelData<EBCellFAB>*> rhs;
@@ -695,7 +698,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
     m_amr->alias(phi, a_phi);
     m_amr->alias(rhs, scaledSource);
-    m_amr->alias(res, m_resid);
+    m_amr->alias(res, *residual);
     m_amr->alias(zer, zero);
 
     const int coarsestLevel = 0;
@@ -1393,7 +1396,7 @@ EddingtonSP1::writePlotFile()
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
 
-  const int      ncomps = 3 + SpaceDim;
+  const int      ncomps = 2 + SpaceDim;
   Vector<string> names(ncomps);
   names[0] = "density";
   names[1] = "x-flux";
@@ -1401,11 +1404,9 @@ EddingtonSP1::writePlotFile()
   if (SpaceDim == 3) {
     names[3] = "z-flux";
     names[4] = "isotropic source";
-    names[5] = "residue";
   }
   else {
     names[3] = "isotropic source";
-    names[4] = "residue";
   }
 
   // Compute the flux
@@ -1429,12 +1430,6 @@ EddingtonSP1::writePlotFile()
                   m_source,
                   Interval(0, 0),
                   Interval(1 + SpaceDim, 1 + SpaceDim),
-                  CopyStrategy::ValidGhost,
-                  CopyStrategy::ValidGhost);
-  m_amr->copyData(output,
-                  m_resid,
-                  Interval(0, 0),
-                  Interval(2 + SpaceDim, 2 + SpaceDim),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
 
