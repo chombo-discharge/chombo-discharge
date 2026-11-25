@@ -263,11 +263,6 @@ protected:
   RefCountedPtr<FieldSolverAMG> m_amg;
 
   /**
-   * @brief Initial guess of the current solve. Algebraic multigrid starts from it when geometric multigrid fails.
-   */
-  MFAMRCellData m_phiStart;
-
-  /**
    * @brief Fall back to algebraic multigrid or not.
    */
   bool m_amgFallback;

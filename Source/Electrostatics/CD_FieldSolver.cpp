@@ -295,12 +295,10 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   const bool reallyMultiPhase = (m_multifluidIndexSpace->numPhases() > 1);
 
-  // Allocate storage first, because we have no scratch storage for this.
-  MFAMRCellData D;
-  MFAMRCellData EdotD;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(D, m_realm, SpaceDim);
-  m_amr->allocate(EdotD, m_realm, 1);
+  Scratch<MFAMRCellData> D     = m_amr->fetchScratch<MFAMRCellData>(m_realm, SpaceDim, ghost);
+  Scratch<MFAMRCellData> EdotD = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
 
   // Compute D = eps*E and then the dot product E*D.
   this->computeDisplacementField(D, a_electricField);
@@ -309,7 +307,7 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   // This defines a lambda which computes the energy in a specified phase
   auto phaseEnergy = [&EdotD, &amr = this->m_amr, this](const phase::which_phase a_phase) -> Real {
-    const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
+    const EBAMRCellData phaseEdotD = amr->alias(a_phase, *EdotD);
 
     Real energy = 0.0;
 
@@ -388,15 +386,12 @@ FieldSolver::computeCapacitance()
   //       with voltage set to 1, and without charges.
   // clang-format on
 
-  MFAMRCellData phi;
-  MFAMRCellData E;
-  MFAMRCellData source;
-  EBAMRIVData   sigma;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(phi, m_realm, 1);
-  m_amr->allocate(E, m_realm, SpaceDim);
-  m_amr->allocate(source, m_realm, 1);
-  m_amr->allocate(sigma, m_realm, phase::gas, 1);
+  Scratch<MFAMRCellData> phi    = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
+  Scratch<MFAMRCellData> E      = m_amr->fetchScratch<MFAMRCellData>(m_realm, SpaceDim, ghost);
+  Scratch<MFAMRCellData> source = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
+  Scratch<EBAMRIVData>   sigma  = m_amr->fetchScratch<EBAMRIVData>(m_realm, phase::gas, 1, ghost);
 
   DataOps::setValue(phi, 0.0);
   DataOps::setValue(E, 0.0);
@@ -1353,14 +1348,16 @@ FieldSolver::writePlotFile()
   const Vector<std::string> plotVarNames = getPlotVariableNames();
 
   // Allocate storage for output
-  EBAMRCellData output;
-  m_amr->allocate(output, m_realm, phase::gas, numPlotVars);
+  Scratch<EBAMRCellData> output = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     phase::gas,
+                                                                     numPlotVars,
+                                                                     m_amr->getNumberOfGhostCells());
 
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
 
-    this->writePlotData(*output[lvl], icomp, m_realm, lvl, true);
+    this->writePlotData(*(*output)[lvl], icomp, m_realm, lvl, true);
   }
 
   // Filename
@@ -1369,7 +1366,7 @@ FieldSolver::writePlotFile()
 
   // Need to alias because EBHDF5 is not too smart.
   Vector<LevelData<EBCellFAB>*> outputPtr(1 + m_amr->getFinestLevel());
-  m_amr->alias(outputPtr, output);
+  m_amr->alias(outputPtr, *output);
 
   Vector<Real> covered_values(numPlotVars, 0.0);
   string       fname(file_char);
@@ -1799,8 +1796,11 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   const int numComp = a_data.nComp();
 
   // Put a_data in volume format.
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   phase::gas,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(scratch, 0.0);
   DataOps::incr(scratch, a_data, 1.0, (*m_amr->getVofIterator(m_realm, phase::gas)[a_level]));
@@ -1809,7 +1809,7 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   const Interval srcInterv = Interval(0, 0);
   const Interval dstInterv = Interval(a_comp, a_comp);
   m_amr->copyData(a_output,
-                  scratch,
+                  *scratch,
                   a_level,
                   a_outputRealm,
                   m_realm,

@@ -386,13 +386,11 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Define temporaries; the incoming data might need to be scaled but we don't want to
   // alter it directly.
   CH_START(t1);
-  MFAMRCellData zero;
-  MFAMRCellData kappaRhoByEps0;
-  EBAMRIVData   sigmaByEps0;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(zero, m_realm, m_nComp);
-  m_amr->allocate(kappaRhoByEps0, m_realm, m_nComp);
-  m_amr->allocate(sigmaByEps0, m_realm, phase::gas, m_nComp);
+  Scratch<MFAMRCellData> zero           = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, ghost);
+  Scratch<MFAMRCellData> kappaRhoByEps0 = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, ghost);
+  Scratch<EBAMRIVData>   sigmaByEps0    = m_amr->fetchScratch<EBAMRIVData>(m_realm, phase::gas, m_nComp, ghost);
   CH_STOP(t1);
 
   // Scale data as appropriate.
@@ -437,9 +435,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   Vector<LevelData<MFCellFAB>*> zer; // Raw pointers of zero
 
   m_amr->alias(phi, a_phi);
-  m_amr->alias(rhs, kappaRhoByEps0);
+  m_amr->alias(rhs, *kappaRhoByEps0);
   m_amr->alias(res, *residual);
-  m_amr->alias(zer, zero);
+  m_amr->alias(zer, *zero);
 
   // GMG solve. Use phi = zero as initial metric. We want to reduce this by m_multigridExitTolerance, in which case
   // multigrid has "converged".
@@ -993,11 +991,10 @@ FieldSolverGMG::setupMultigrid()
 
   // Create some dummy storage for multigrid initialization. This is needed because
   // AMRMultiGrid must allocate the operators.
-  MFAMRCellData dummy1;
-  MFAMRCellData dummy2;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(dummy1, m_realm, m_nComp);
-  m_amr->allocate(dummy2, m_realm, m_nComp);
+  Scratch<MFAMRCellData> dummy1 = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, ghost);
+  Scratch<MFAMRCellData> dummy2 = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, ghost);
 
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
@@ -1006,8 +1003,8 @@ FieldSolverGMG::setupMultigrid()
   Vector<LevelData<MFCellFAB>*> phi;
   Vector<LevelData<MFCellFAB>*> rhs;
 
-  m_amr->alias(phi, dummy1);
-  m_amr->alias(rhs, dummy2);
+  m_amr->alias(phi, *dummy1);
+  m_amr->alias(rhs, *dummy2);
 
   // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
@@ -1057,14 +1054,13 @@ FieldSolverGMG::computeLoads(const DisjointBoxLayout& /*a_dbl*/, const int a_lev
   }
 
   // Allocate a dummy storage that we can operate on.
-  MFAMRCellData dummy;
-  m_amr->allocate(dummy, m_realm, m_nComp);
+  Scratch<MFAMRCellData> dummy = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, m_amr->getNumberOfGhostCells());
 
   // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing
   // kernels.
   auto* oper = m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
 
-  const Vector<long long> loads = oper->computeOperatorLoads(*dummy[a_level], numApply);
+  const Vector<long long> loads = oper->computeOperatorLoads(*(*dummy)[a_level], numApply);
 
   delete oper;
 
@@ -1085,9 +1081,8 @@ FieldSolverGMG::computeElectricField(MFAMRCellData& a_electricField, const MFAMR
   // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
   // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
   // than interpGhostPwl or interpGhost here.
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_nComp);
-  m_amr->copyData(scratch, a_potential);
+  Scratch<MFAMRCellData> scratch = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, m_amr->getNumberOfGhostCells());
+  m_amr->copyData(*scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -1113,9 +1108,8 @@ FieldSolverGMG::computeElectricField(MFAMRFluxData& a_electricField, const MFAMR
   // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
   // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
   // than interpGhostPwl or interpGhost here.
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_nComp);
-  m_amr->copyData(scratch, a_potential);
+  Scratch<MFAMRCellData> scratch = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, m_amr->getNumberOfGhostCells());
+  m_amr->copyData(*scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   // Compute the cell-centered gradient everywhere.
@@ -1139,14 +1133,16 @@ FieldSolverGMG::computeElectricField(EBAMRCellData&           a_electricField,
   // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
   // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
   // than interpGhostPwl or interpGhost here.
-  EBAMRCellData scratch;
-  EBAMRCellData potentialPhase;
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      a_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
+  EBAMRCellData          potentialPhase;
 
   m_amr->allocatePointer(potentialPhase, m_realm);
-  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  m_amr->copyData(scratch, potentialPhase);
+  m_amr->copyData(*scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.
@@ -1174,14 +1170,16 @@ FieldSolverGMG::computeElectricField(EBAMRFluxData&           a_electricField,
   // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
   // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
   // than interpGhostPwl or interpGhost here.
-  EBAMRCellData scratch;
-  EBAMRCellData potentialPhase;
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      a_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
+  EBAMRCellData          potentialPhase;
 
   m_amr->allocatePointer(potentialPhase, m_realm);
-  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  m_amr->copyData(scratch, potentialPhase);
+  m_amr->copyData(*scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   // Use EBGradient for computing the gradient.
