@@ -2300,8 +2300,10 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
   }
 
   if (m_isMobile) {
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
@@ -2342,7 +2344,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
         VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[din];
-        EBCellFAB&       sumWeight = (*scratch[lvl])[din];
+        EBCellFAB&       sumWeight = (*(*scratch)[lvl])[din];
         const EBFluxFAB& facePhi   = (*(*faceStates)[lvl])[din];
         const EBFluxFAB& faceVel   = (*(*faceVelocity)[lvl])[din];
 

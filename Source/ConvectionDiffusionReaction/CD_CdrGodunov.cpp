@@ -252,8 +252,10 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
 
   // If we are extrapolating in time the source term will yield different states on the face centers. The source term is
   // the source S^k + Div(D*Grad(Phi)), which we add to the solver below.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(scratch, 0.0);
 
@@ -289,7 +291,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
       const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[din];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
       const EBFluxFAB& faceVel = (*a_faceVelocity[lvl])[din];
-      const EBCellFAB& source  = (*scratch[lvl])[din];
+      const EBCellFAB& source  = (*(*scratch)[lvl])[din];
       const Real       time    = 0.0;
 
       EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(din);

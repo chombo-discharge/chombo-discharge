@@ -675,8 +675,10 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
   }
 
   if (m_isMobile || m_isDiffusive) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -760,8 +762,10 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
   }
 
   if (m_isMobile) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -816,8 +820,10 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
   }
 
   if (m_isDiffusive) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);

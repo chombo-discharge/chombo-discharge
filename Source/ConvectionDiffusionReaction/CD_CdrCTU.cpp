@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <optional>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -282,8 +285,11 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
   DataOps::setValue(a_facePhi, 0.0);
 
   // Ghost cells need to be interpolated. We make a copy of a_cellPhi which we use for that. This requires
-  EBAMRCellData phi;
-  m_amr->allocate(phi, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> phi = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                  m_phase,
+                                                                  m_nComp,
+                                                                  m_amr->getNumberOfGhostCells());
+
   DataOps::copy(phi, a_cellPhi);
 
   m_amr->conservativeAverage(phi, m_realm, m_phase);
@@ -300,10 +306,10 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
   // first-order and second-order states are the same and there is nothing to correct.
   const bool useFluxCorrection = m_fluxCorrection && a_dt > 0.0 && m_limiter != Limiter::None;
 
-  EBAMRFluxData facePhiLow;
+  std::optional<Scratch<EBAMRFluxData>> facePhiLow;
 
   if (useFluxCorrection) {
-    m_amr->allocate(facePhiLow, m_realm, m_phase, m_nComp);
+    facePhiLow.emplace(m_amr->fetchScratch<EBAMRFluxData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -319,7 +325,7 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
       const DataIndex& din = dit[mybox];
 
       EBFluxFAB&       facePhi = (*a_facePhi[lvl])[din];
-      const EBCellFAB& cellPhi = (*phi[lvl])[din];
+      const EBCellFAB& cellPhi = (*(*phi)[lvl])[din];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
       const EBFluxFAB& faceVel = (*a_faceVelocity[lvl])[din];
 
@@ -349,7 +355,7 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
       }
 
       if (useFluxCorrection) {
-        EBFluxFAB& facePhiFirst = (*facePhiLow[lvl])[din];
+        EBFluxFAB& facePhiFirst = (*(**facePhiLow)[lvl])[din];
         EBCellFAB  zeroSlopes(ebisbox, grownBox, SpaceDim);
 
         zeroSlopes.setVal(0.0);
@@ -366,7 +372,7 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
   }
 
   if (useFluxCorrection) {
-    this->fluxCorrection(a_facePhi, facePhiLow, phi, a_faceVelocity, a_dt);
+    this->fluxCorrection(a_facePhi, **facePhiLow, phi, a_faceVelocity, a_dt);
   }
 }
 
@@ -1030,8 +1036,8 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
 
   // Fraction R of the correction that may take mass from each cell. It is 1 where nothing is limited, also in ghost
   // cells that no box owns.
-  EBAMRCellData fraction;
-  m_amr->allocate(fraction, m_realm, m_phase, 1, 1);
+  Scratch<EBAMRCellData> fraction = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, 1);
+
   DataOps::setValue(fraction, 1.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1048,7 +1054,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
       const Box        box     = dbl[din];
       const EBISBox&   ebisbox = ebisl[din];
 
-      EBCellFAB&             frac    = (*fraction[lvl])[din];
+      EBCellFAB&             frac    = (*(*fraction)[lvl])[din];
       const EBCellFAB&       phi     = (*a_cellPhi[lvl])[din];
       const EBFluxFAB&       phiHigh = (*a_facePhi[lvl])[din];
       const EBFluxFAB&       phiLow  = (*a_facePhiLow[lvl])[din];
@@ -1116,7 +1122,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
       BoxLoops::loop(vofit, irregularKernel);
     }
 
-    fraction[lvl]->exchange();
+    (*fraction)[lvl]->exchange();
 
     // The corrected face states. The correction on a face takes mass from the cell on one side and is limited by the
     // fraction of that cell.
@@ -1126,7 +1132,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
       const Box        box     = dbl[din];
       const EBISBox&   ebisbox = ebisl[din];
 
-      const BaseFab<Real>& fracReg = (*fraction[lvl])[din].getSingleValuedFAB();
+      const BaseFab<Real>& fracReg = (*(*fraction)[lvl])[din].getSingleValuedFAB();
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         BaseFab<Real>&       fh = (*a_facePhi[lvl])[din][dir].getSingleValuedFAB();
