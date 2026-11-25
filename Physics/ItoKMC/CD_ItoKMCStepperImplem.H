@@ -2024,12 +2024,15 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, a_data.getRealm(), m_plasmaPhase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(a_data.getRealm(),
+                                                                   m_plasmaPhase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, a_data.getRealm(), a_data.getRealm());
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, a_data.getRealm(), a_data.getRealm());
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -2049,7 +2052,7 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t5);
   m_amr->copyData(a_output,
-                  scratch,
+                  *scratch,
                   a_level,
                   a_outputRealm,
                   a_data.getRealm(),
@@ -3166,8 +3169,10 @@ ItoKMCStepper<I, C, R, F>::computeCurrentDensity(EBAMRCellData& a_J) noexcept
 
   CH_assert(a_J[0]->nComp() == SpaceDim);
 
-  EBAMRCellData conductivity;
-  m_amr->allocate(conductivity, m_fluidRealm, m_plasmaPhase, 1);
+  Scratch<EBAMRCellData> conductivity = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+                                                                           m_plasmaPhase,
+                                                                           1,
+                                                                           m_amr->getNumberOfGhostCells());
   this->computeConductivityCell(conductivity);
 
   DataOps::copy(a_J, m_electricFieldFluid);
@@ -3185,11 +3190,14 @@ ItoKMCStepper<I, C, R, F>::computeRelaxationTime() noexcept
 
   // TLDR: We compute eps0/conductivity directly.
 
-  EBAMRCellData conductivity;
-  EBAMRCellData relaxTime;
-
-  m_amr->allocate(conductivity, m_fluidRealm, m_plasmaPhase, 1);
-  m_amr->allocate(relaxTime, m_fluidRealm, m_plasmaPhase, 1);
+  Scratch<EBAMRCellData> conductivity = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+                                                                           m_plasmaPhase,
+                                                                           1,
+                                                                           m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> relaxTime    = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+                                                                        m_plasmaPhase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
   this->computeConductivityCell(conductivity);
 
@@ -6706,11 +6714,15 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 
     // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance
     // bottleneck as well.
-    EBAMRCellData divG;
-    EBAMRFluxData G;
 
-    m_amr->allocate(divG, m_fluidRealm, m_plasmaPhase, 1);
-    m_amr->allocate(G, m_fluidRealm, m_plasmaPhase, 1);
+    Scratch<EBAMRCellData> divG = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+                                                                     m_plasmaPhase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> G    = m_amr->fetchScratch<EBAMRFluxData>(m_fluidRealm,
+                                                                  m_plasmaPhase,
+                                                                  1,
+                                                                  m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(G, 0.0);
 
@@ -7514,11 +7526,15 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
   // 1. Allocate something that we can regrid the PPC for each species into, and something that holds the total
   // PPC on the new grids.
-  EBAMRCellData totalPPC;
-  EBAMRCellData speciesPPC;
 
-  m_amr->allocate(totalPPC, m_particleRealm, m_plasmaPhase, 1);
-  m_amr->allocate(speciesPPC, m_particleRealm, m_plasmaPhase, 1);
+  Scratch<EBAMRCellData> totalPPC   = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
+                                                                       m_plasmaPhase,
+                                                                       1,
+                                                                       m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> speciesPPC = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
+                                                                         m_plasmaPhase,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(totalPPC, 0.0);
   DataOps::setValue(speciesPPC, 0.0);
@@ -7548,22 +7564,22 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
     // These levels have not changed but ownship MIGHT have changed.
     for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
-      oldData[lvl]->copyTo(*speciesPPC[lvl]);
+      oldData[lvl]->copyTo(*(*speciesPPC)[lvl]);
     }
 
     // These levels have changed.
     for (int lvl = std::max(1, a_lmin); lvl <= a_finestLevel; lvl++) {
       RefCountedPtr<EBCoarseToFineInterp>& interpolator = interpOp[lvl];
 
-      interpolator->interpolate(*speciesPPC[lvl],
-                                *speciesPPC[lvl - 1],
+      interpolator->interpolate(*(*speciesPPC)[lvl],
+                                *(*speciesPPC)[lvl - 1],
                                 Interval(0, 0),
                                 EBCoarseToFineInterp::Type::ConservativePWC);
 
       // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
       // to pollute the solution with interpolation there since we already have valid data.
       if (lvl <= std::min(oldFinestLevel, a_finestLevel)) {
-        oldData[lvl]->copyTo(*speciesPPC[lvl]);
+        oldData[lvl]->copyTo(*(*speciesPPC)[lvl]);
       }
     }
 
@@ -7589,7 +7605,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
       const DataIndex& din = dit[mybox];
 
       const Box            cellBox    = dbl[din];
-      const EBCellFAB&     PPC        = (*totalPPC[lvl])[din];
+      const EBCellFAB&     PPC        = (*(*totalPPC)[lvl])[din];
       const EBISBox&       ebisbox    = PPC.getEBISBox();
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
       const FArrayBox&     regPPC     = PPC.getFArrayBox();

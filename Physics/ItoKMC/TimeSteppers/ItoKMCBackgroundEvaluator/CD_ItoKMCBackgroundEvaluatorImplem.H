@@ -184,18 +184,25 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::computeBackgroundField() noexcept
 
   // Allocate the background field, storage for the potential, storage for the space-charge, and storage for the
   // surface charge.
-  MFAMRCellData phi;
-  MFAMRCellData rho;
-  EBAMRIVData   sigma;
 
-  (this->m_amr)->allocate(phi, this->m_fluidRealm, 1);
-  (this->m_amr)->allocate(rho, this->m_fluidRealm, 1);
-  (this->m_amr)->allocate(sigma, this->m_fluidRealm, this->m_plasmaPhase, 1);
+  Scratch<MFAMRCellData> phi = (this->m_amr)
+                                 ->template fetchScratch<MFAMRCellData>(this->m_fluidRealm,
+                                                                        1,
+                                                                        (this->m_amr)->getNumberOfGhostCells());
+  Scratch<MFAMRCellData> rho = (this->m_amr)
+                                 ->template fetchScratch<MFAMRCellData>(this->m_fluidRealm,
+                                                                        1,
+                                                                        (this->m_amr)->getNumberOfGhostCells());
+  Scratch<EBAMRIVData> sigma = (this->m_amr)
+                                 ->template fetchScratch<EBAMRIVData>(this->m_fluidRealm,
+                                                                      this->m_plasmaPhase,
+                                                                      1,
+                                                                      (this->m_amr)->getNumberOfGhostCells());
   (this->m_amr)->allocate(m_backgroundField, this->m_fluidRealm, SpaceDim);
 
   // Copy the potential over from the field solver so we have a better initial guess for the potential. The
   // space-charge and surface charge must be zero.
-  (this->m_amr)->copyData(phi, (this->m_fieldSolver)->getPotential());
+  (this->m_amr)->copyData(*phi, (this->m_fieldSolver)->getPotential());
 
   DataOps::setValue(rho, 0.0);
   DataOps::setValue(sigma, 0.0);
@@ -224,17 +231,33 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
     pout() << "ItoKMCBackgroundEvaluator::evaluateSpaceChargeEffects" << endl;
   }
 
-  EBAMRCellData poissonNorm;
-  EBAMRCellData laplaceNorm;
-  EBAMRCellData poissonField;
-  EBAMRCellData laplaceField;
-  EBAMRCellData deltaE;
-
-  (this->m_amr)->allocate(poissonNorm, this->m_fluidRealm, this->m_plasmaPhase, 1);
-  (this->m_amr)->allocate(laplaceNorm, this->m_fluidRealm, this->m_plasmaPhase, 1);
-  (this->m_amr)->allocate(poissonField, this->m_fluidRealm, this->m_plasmaPhase, SpaceDim);
-  (this->m_amr)->allocate(laplaceField, this->m_fluidRealm, this->m_plasmaPhase, SpaceDim);
-  (this->m_amr)->allocate(deltaE, this->m_fluidRealm, this->m_plasmaPhase, 1);
+  Scratch<EBAMRCellData> poissonNorm = (this->m_amr)
+                                         ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                                this->m_plasmaPhase,
+                                                                                1,
+                                                                                (this->m_amr)->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> laplaceNorm = (this->m_amr)
+                                         ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                                this->m_plasmaPhase,
+                                                                                1,
+                                                                                (this->m_amr)->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> poissonField = (this->m_amr)
+                                          ->template fetchScratch<EBAMRCellData>(
+                                            this->m_fluidRealm,
+                                            this->m_plasmaPhase,
+                                            SpaceDim,
+                                            (this->m_amr)->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> laplaceField = (this->m_amr)
+                                          ->template fetchScratch<EBAMRCellData>(
+                                            this->m_fluidRealm,
+                                            this->m_plasmaPhase,
+                                            SpaceDim,
+                                            (this->m_amr)->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> deltaE = (this->m_amr)
+                                    ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                           this->m_plasmaPhase,
+                                                                           1,
+                                                                           (this->m_amr)->getNumberOfGhostCells());
 
   // Get the fields in the plasma phase -- the actual field and the background field.
   const MFAMRCellData electricField = (this->m_fieldSolver)->getElectricField();
@@ -302,7 +325,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = (*(this->m_amr)->getValidCells(this->m_fluidRealm)[lvl])[din];
 
-      const EBCellFAB& data    = (*deltaE[lvl])[din];
+      const EBCellFAB& data    = (*(*deltaE)[lvl])[din];
       const FArrayBox& dataReg = data.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -349,8 +372,12 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::integrateElectrodeSurfaceCharge() const n
   const EBAMRCellData  permittivity      = (this->m_amr)->alias(this->m_plasmaPhase, permittivityCell);
 
   // Allocates data and computes the electric field on the cell centroid(s).
-  EBAMRCellData electricField;
-  (this->m_amr)->allocate(electricField, this->m_fluidRealm, this->m_plasmaPhase, SpaceDim);
+  Scratch<EBAMRCellData> electricField = (this->m_amr)
+                                           ->template fetchScratch<EBAMRCellData>(
+                                             this->m_fluidRealm,
+                                             this->m_plasmaPhase,
+                                             SpaceDim,
+                                             (this->m_amr)->getNumberOfGhostCells());
   DataOps::copy(electricField, (this->m_amr)->alias(this->m_plasmaPhase, electricFieldCell));
   (this->m_amr)->interpToCentroids(electricField, this->m_fluidRealm, this->m_plasmaPhase);
 
@@ -367,7 +394,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::integrateElectrodeSurfaceCharge() const n
     for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex&     din        = dit[mybox];
       const EBISBox&       ebisbox    = ebisl[din];
-      const EBCellFAB&     E          = (*electricField[lvl])[din];
+      const EBCellFAB&     E          = (*(*electricField)[lvl])[din];
       const EBCellFAB&     eps        = (*permittivity[lvl])[din];
       const BaseFab<bool>& validCells = (*(this->m_amr)->getValidCells(this->m_fluidRealm)[lvl])[din];
 
