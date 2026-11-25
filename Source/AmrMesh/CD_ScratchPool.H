@@ -43,7 +43,7 @@ class ScratchPool;
  * Copying the underlying EBAMRData into an object that outlives the handle is an error, which the pool detects
  * when the handle is destroyed.
  *
- * The data is uninitialized when fetched.
+ * The data is uninitialized when fetched, and may have more ghost cells than were asked for.
  * @tparam T Data type. One of the types ScratchPool stores.
  */
 template <typename T>
@@ -207,13 +207,14 @@ public:
 
   /**
    * @brief Hand out a temporary with the given key.
-   * @details Returns the first free entry of type T with a matching key. If there is none, calls a_build and stores
-   * its result as a new entry.
+   * @details Returns a free entry of type T with the same phase, level and number of components and at least a_ghost
+   * ghost cells, preferring the fewest ghost cells. If there is none, calls a_build and stores its result as a new
+   * entry.
    * @param[in] a_phase Phase the data lives on. Types without a phase pass phase::gas.
    * @param[in] a_level Grid level for single-level data, -1 for data over the whole hierarchy.
    * @param[in] a_nComp Number of components
-   * @param[in] a_ghost Number of ghost cells
-   * @param[in] a_build Builds a new temporary with this key on the current grids.
+   * @param[in] a_ghost Smallest number of ghost cells the caller needs
+   * @param[in] a_build Builds a new temporary with this key, and exactly a_ghost ghost cells, on the current grids.
    * @return Handle that owns the temporary until it is destroyed.
    */
   template <typename T>
