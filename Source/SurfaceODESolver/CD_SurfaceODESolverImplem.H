@@ -832,8 +832,11 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // HDF5 doesn't do irregular data the way we want so we copy into EBCellFABs and
   // use that as output.
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, N);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   N,
+                                                                   m_amr->getNumberOfGhostCells());
 
   // Copy m_phi to a_output
   if (m_plotPhi) {
@@ -843,7 +846,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
     a_output.exchange(dstInterv);
 
@@ -858,7 +861,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
     a_output.exchange(dstInterv);
 

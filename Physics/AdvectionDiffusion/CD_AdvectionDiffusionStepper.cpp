@@ -380,13 +380,10 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     const bool addDomainFlux    = true;
 
     // Transient storage
-    EBAMRCellData yp;
-    EBAMRCellData k1;
-    EBAMRCellData k2;
 
-    m_amr->allocate(yp, m_realm, m_phase, 1);
-    m_amr->allocate(k1, m_realm, m_phase, 1);
-    m_amr->allocate(k2, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> yp = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 
     // Compute k1 coefficient
     m_solver->computeDivJ(k1, state, 0.0, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
@@ -406,11 +403,9 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
 
     // Transient storage
     EBAMRCellData yp;
-    EBAMRCellData k1;
-    EBAMRCellData k2;
 
-    m_amr->allocate(k1, m_realm, m_phase, 1);
-    m_amr->allocate(k2, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 
     if (m_solver->isDiffusive()) {
 
