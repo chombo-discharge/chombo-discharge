@@ -600,21 +600,6 @@ protected:
   CoarseFineDeposition m_coarseFineDeposition;
 
   /**
-   * @brief Coarse data for interpolation of deposition clouds
-   */
-  mutable EBAMRCellData m_scratch;
-
-  /**
-   * @brief Scratch storage for holding the non-conservative deposition
-   */
-  mutable EBAMRIVData m_depositionNC;
-
-  /**
-   * @brief Scratch storage for holding the mass difference when using hybrid deposition
-   */
-  mutable EBAMRIVData m_massDiff;
-
-  /**
    * @brief All particles
    */
   ParticleContainer<Photon> m_photons;

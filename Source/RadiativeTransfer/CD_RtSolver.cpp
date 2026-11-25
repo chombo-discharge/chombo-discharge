@@ -343,14 +343,17 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, m_realm);
 
-  scratch.exchange();
+  scratch->exchange();
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -376,7 +379,7 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t5);
   m_amr->copyData(a_output,
-                  scratch,
+                  *scratch,
                   a_level,
                   a_outputRealm,
                   m_realm,
