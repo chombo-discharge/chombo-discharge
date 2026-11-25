@@ -687,10 +687,20 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     if (m_isMobile && !m_isDiffusive) {
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
+      // Face velocities and states are scratch for the advective flux below.
+      Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+      Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+
       // Update face velocity and advect to faces.
-      this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
-      this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
+      this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+      this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
+      this->computeAdvectionFlux(scratchFlux, faceVelocity, faceStates, a_domainFlux);
     }
     else if (!m_isMobile && m_isDiffusive) {
       this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Domain flux needs to come in through here.
@@ -698,13 +708,24 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     }
     else if (m_isMobile && m_isDiffusive) { //
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
-      this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
+
+      // Face velocities and states are scratch for the advective flux below.
+      Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+      Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+
+      this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+      this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
 
       this->computeAdvectionDiffusionFlux(scratchFlux,
                                           a_phi,
-                                          m_faceStates,
-                                          m_faceVelocity,
+                                          faceStates,
+                                          faceVelocity,
                                           m_faceCenteredDiffusionCoefficient,
                                           a_domainFlux);
     }
@@ -746,14 +767,24 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
     m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
-    // Cell-centered velocities become face-centered velocities.
-    this->averageVelocityToFaces();
+    // Cell-centered velocities become face-centered velocities. Both they and the face states are scratch for the
+    // advective flux.
+    Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                           m_phase,
+                                                                           m_nComp,
+                                                                           m_amr->getNumberOfGhostCells());
 
-    // Face extrapolation to cell-centered faces
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
+    this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+
+    // Face extrapolation to cell-centered faces.
+    this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
 
     // Compute face-centered fluxes
-    this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
+    this->computeAdvectionFlux(scratchFlux, faceVelocity, faceStates, a_domainFlux);
 
     EBAMRIVData* ebflux;
     if (a_ebFlux) {

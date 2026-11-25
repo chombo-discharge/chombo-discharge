@@ -50,6 +50,7 @@ public:
    * @brief MUSCL advection to faces
    * @param[out] a_facePhi  Phi on face centers
    * @param[in]  a_cellPhi  Phi on cell centers
+   * @param[in]  a_faceVelocity Face-centered velocities (normal component)
    * @param[in]  a_extrapDt Time step (i.e. extrapolation) of the face-centered states.
    * @param[in]  a_dt       Time step of the update that the face states enter, or 0 if they enter no update. Used for
    * the EB inflow state on outgoing faces of cut cells and for the flux correction.
@@ -61,6 +62,7 @@ public:
   virtual void
   advectToFaces(EBAMRFluxData&       a_facePhi,
                 const EBAMRCellData& a_cellPhi,
+                const EBAMRFluxData& a_faceVelocity,
                 const Real           a_extrapDt,
                 const Real           a_dt) override;
 
@@ -148,12 +150,14 @@ protected:
    * @param[in,out] a_facePhi    On input the second-order face states, on output the corrected states.
    * @param[in]     a_facePhiLow First-order face states.
    * @param[in]     a_cellPhi    Cell states.
+   * @param[in]     a_faceVelocity Face-centered velocities (normal component).
    * @param[in]     a_dt         Time step of the update that the face states enter.
    */
   void
   fluxCorrection(EBAMRFluxData&       a_facePhi,
                  const EBAMRFluxData& a_facePhiLow,
                  const EBAMRCellData& a_cellPhi,
+                 const EBAMRFluxData& a_faceVelocity,
                  const Real           a_dt) noexcept;
 
   /**

@@ -262,7 +262,11 @@ CdrCTU::parseSlopeLimiter()
 }
 
 void
-CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt, const Real a_dt)
+CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
+                      const EBAMRCellData& a_cellPhi,
+                      const EBAMRFluxData& a_faceVelocity,
+                      const Real           a_extrapDt,
+                      const Real           a_dt)
 {
   CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, Real, Real)");
   if (m_verbosity > 5) {
@@ -317,7 +321,7 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
       EBFluxFAB&       facePhi = (*a_facePhi[lvl])[din];
       const EBCellFAB& cellPhi = (*phi[lvl])[din];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
-      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[din];
+      const EBFluxFAB& faceVel = (*a_faceVelocity[lvl])[din];
 
       const Box      cellBox = dbl[din];
       const EBISBox& ebisbox = ebisl[din];
@@ -362,7 +366,7 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
   }
 
   if (useFluxCorrection) {
-    this->fluxCorrection(a_facePhi, facePhiLow, phi, a_dt);
+    this->fluxCorrection(a_facePhi, facePhiLow, phi, a_faceVelocity, a_dt);
   }
 }
 
@@ -1016,6 +1020,7 @@ void
 CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
                        const EBAMRFluxData& a_facePhiLow,
                        const EBAMRCellData& a_cellPhi,
+                       const EBAMRFluxData& a_faceVelocity,
                        const Real           a_dt) noexcept
 {
   CH_TIME("CdrCTU::fluxCorrection");
@@ -1047,7 +1052,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
       const EBCellFAB&       phi     = (*a_cellPhi[lvl])[din];
       const EBFluxFAB&       phiHigh = (*a_facePhi[lvl])[din];
       const EBFluxFAB&       phiLow  = (*a_facePhiLow[lvl])[din];
-      const EBFluxFAB&       faceVel = (*m_faceVelocity[lvl])[din];
+      const EBFluxFAB&       faceVel = (*a_faceVelocity[lvl])[din];
       const BaseIVFAB<Real>& ebFlux  = (*m_ebFlux[lvl])[din];
 
       BaseFab<Real>&       fracReg = frac.getSingleValuedFAB();
@@ -1126,7 +1131,7 @@ CdrCTU::fluxCorrection(EBAMRFluxData&       a_facePhi,
       for (int dir = 0; dir < SpaceDim; dir++) {
         BaseFab<Real>&       fh = (*a_facePhi[lvl])[din][dir].getSingleValuedFAB();
         const BaseFab<Real>& fl = (*a_facePhiLow[lvl])[din][dir].getSingleValuedFAB();
-        const BaseFab<Real>& fv = (*m_faceVelocity[lvl])[din][dir].getSingleValuedFAB();
+        const BaseFab<Real>& fv = (*a_faceVelocity[lvl])[din][dir].getSingleValuedFAB();
 
         auto faceKernel = [&](const IntVect& iv) -> void {
           const IntVect left = iv - BASISV(dir);

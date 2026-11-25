@@ -295,17 +295,11 @@ CdrSolver::allocate()
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
   if (m_isMobile) {
     m_amr->allocate(m_cellVelocity, m_realm, m_phase, SpaceDim);
-    m_amr->allocate(m_faceVelocity, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_faceStates, m_realm, m_phase, m_nComp);
 
     DataOps::setValue(m_cellVelocity, 0.0);
-    DataOps::setValue(m_faceVelocity, 0.0);
-    DataOps::setValue(m_faceStates, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceVelocity, m_realm);
     m_amr->allocatePointer(m_cellVelocity, m_realm);
-    m_amr->allocatePointer(m_faceStates, m_realm);
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
@@ -381,8 +375,6 @@ CdrSolver::deallocate()
 
   m_phi.clear();
   m_source.clear();
-  m_faceVelocity.clear();
-  m_faceStates.clear();
   m_cellVelocity.clear();
   m_ebFlux.clear();
   m_cellCenteredDiffusionCoefficient.clear();
@@ -390,17 +382,6 @@ CdrSolver::deallocate()
   m_ebCenteredDiffusionCoefficient.clear();
 
   m_redistribution = RefCountedPtr<EBRedistribution>();
-}
-
-void
-CdrSolver::averageVelocityToFaces()
-{
-  CH_TIME("CdrSolver::averageVelocityToFaces()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::averageVelocityToFaces()" << endl;
-  }
-
-  this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
 }
 
 void
@@ -2329,8 +2310,17 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     m_amr->interpGhost(m_phi, m_realm, m_phase);
 
     // Compute velocity on faces and EBs. The data is currently face-centered.
-    this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0, 0.0);
+    Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                           m_phase,
+                                                                           m_nComp,
+                                                                           m_amr->getNumberOfGhostCells());
+
+    this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+    this->advectToFaces(faceStates, m_phi, faceVelocity, 0.0, 0.0);
 
     DataOps::setValue(scratch, 0.0); // Used to store sum(alpha*v)
 
@@ -2353,8 +2343,8 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
 
         EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[din];
         EBCellFAB&       sumWeight = (*scratch[lvl])[din];
-        const EBFluxFAB& facePhi   = (*m_faceStates[lvl])[din];
-        const EBFluxFAB& faceVel   = (*m_faceVelocity[lvl])[din];
+        const EBFluxFAB& facePhi   = (*(*faceStates)[lvl])[din];
+        const EBFluxFAB& faceVel   = (*(*faceVelocity)[lvl])[din];
 
         sumPhi.setVal(0.0);
         sumWeight.setVal(0.0);
@@ -2391,8 +2381,8 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
         }
 
         // Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids
-        // since that is the flux that makes its way into the cells anyways when we advect. But, m_faceStates are states
-        // on the face centers. So there's that.
+        // since that is the flux that makes its way into the cells anyways when we advect. But, the face states are
+        // states on the face centers. So there's that.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           sumPhi(vof, m_comp)    = 0.0;
           sumWeight(vof, m_comp) = 0.0;
@@ -2618,17 +2608,6 @@ CdrSolver::getCellCenteredVelocity()
   }
 
   return m_cellVelocity;
-}
-
-EBAMRFluxData&
-CdrSolver::getFaceCenteredVelocity()
-{
-  CH_TIME("CdrSolver::getFaceCenteredVelocity()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getFaceCenteredVelocity()" << endl;
-  }
-
-  return m_faceVelocity;
 }
 
 EBAMRIVData&

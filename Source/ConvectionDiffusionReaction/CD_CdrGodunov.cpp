@@ -234,6 +234,7 @@ CdrGodunov::allocate()
 void
 CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
                           const EBAMRCellData& a_cellPhi,
+                          const EBAMRFluxData& a_faceVelocity,
                           const Real           a_extrapDt,
                           const Real /*a_dt*/)
 {
@@ -244,6 +245,10 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
 
   CH_assert(a_facePhi[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
+
+  // The Godunov integrator only writes the faces of the valid boxes. The ghost faces are read when the fluxes are
+  // interpolated to face centroids, so they are zero rather than whatever the caller's holder contained.
+  DataOps::setValue(a_facePhi, 0.0);
 
   // If we are extrapolating in time the source term will yield different states on the face centers. The source term is
   // the source S^k + Div(D*Grad(Phi)), which we add to the solver below.
@@ -283,7 +288,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
       EBFluxFAB&       facePhi = (*a_facePhi[lvl])[din];
       const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[din];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
-      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[din];
+      const EBFluxFAB& faceVel = (*a_faceVelocity[lvl])[din];
       const EBCellFAB& source  = (*scratch[lvl])[din];
       const Real       time    = 0.0;
 
