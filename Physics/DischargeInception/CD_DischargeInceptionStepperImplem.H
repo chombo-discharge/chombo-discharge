@@ -2561,15 +2561,11 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
   Real U2 = curVoltage;
 
   while (curMaxK < m_maxKLimit && curIter < maxIter) {
+    EBAMRCellData Kplus;
+    EBAMRCellData Kminu;
 
-    Scratch<EBAMRCellData> Kplus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                      m_phase,
-                                                                      1,
-                                                                      m_amr->getNumberOfGhostCells());
-    Scratch<EBAMRCellData> Kminu = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                      m_phase,
-                                                                      1,
-                                                                      m_amr->getNumberOfGhostCells());
+    m_amr->allocate(Kplus, m_realm, m_phase, 1);
+    m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
     DataOps::setValue(Kplus, 0.0);
     DataOps::setValue(Kminu, 0.0);
@@ -3171,14 +3167,11 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
     const EBAMRCellData KPlus = m_inceptionIntegralPlus[i];
     const EBAMRCellData KMinu = m_inceptionIntegralMinu[i];
 
-    Scratch<EBAMRCellData> townsendCriterionPlus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                                      m_phase,
-                                                                                      1,
-                                                                                      m_amr->getNumberOfGhostCells());
-    Scratch<EBAMRCellData> townsendCriterionMinu = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                                      m_phase,
-                                                                                      1,
-                                                                                      m_amr->getNumberOfGhostCells());
+    EBAMRCellData townsendCriterionPlus;
+    EBAMRCellData townsendCriterionMinu;
+
+    m_amr->allocate(townsendCriterionPlus, m_realm, m_phase, 1);
+    m_amr->allocate(townsendCriterionMinu, m_realm, m_phase, 1);
 
     Scratch<EBAMRCellData> expKPlus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
                                                                          m_phase,
@@ -3897,10 +3890,9 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
     // Compute the electric field into the scratch storage
     this->superposition(scratch, voltage);
 
-    Scratch<EBAMRCellData> backgroundRate = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                               m_phase,
-                                                                               1,
-                                                                               m_amr->getNumberOfGhostCells());
+    EBAMRCellData backgroundRate;
+
+    m_amr->allocate(backgroundRate, m_realm, m_phase, 1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -3917,7 +3909,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
 
         const EBISBox& ebisbox = ebisl[din];
 
-        EBCellFAB& bgIonization    = (*(*backgroundRate)[lvl])[din];
+        EBCellFAB& bgIonization    = (*backgroundRate[lvl])[din];
         FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
         const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
@@ -3982,10 +3974,9 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
     // Compute the electric field into the scratch storage
     this->superposition(scratch, voltage);
 
-    Scratch<EBAMRCellData> detachmentRate = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                               m_phase,
-                                                                               1,
-                                                                               m_amr->getNumberOfGhostCells());
+    EBAMRCellData detachmentRate;
+
+    m_amr->allocate(detachmentRate, m_realm, m_phase, 1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -4002,7 +3993,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
 
         const EBISBox& ebisbox = ebisl[din];
 
-        EBCellFAB& detachment    = (*(*detachmentRate)[lvl])[din];
+        EBCellFAB& detachment    = (*detachmentRate[lvl])[din];
         FArrayBox& detachmentReg = detachment.getFArrayBox();
 
         const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[din];
@@ -4081,14 +4072,11 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
     this->superposition(scratchPlus, +voltage);
     this->superposition(scratchMinu, -voltage);
 
-    Scratch<EBAMRCellData> emissionRatesPlus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                                  m_phase,
-                                                                                  1,
-                                                                                  m_amr->getNumberOfGhostCells());
-    Scratch<EBAMRCellData> emissionRatesMinu = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                                  m_phase,
-                                                                                  1,
-                                                                                  m_amr->getNumberOfGhostCells());
+    EBAMRCellData emissionRatesPlus;
+    EBAMRCellData emissionRatesMinu;
+
+    m_amr->allocate(emissionRatesPlus, m_realm, m_phase, 1);
+    m_amr->allocate(emissionRatesMinu, m_realm, m_phase, 1);
 
     DataOps::setValue(emissionRatesPlus, 0.0);
     DataOps::setValue(emissionRatesMinu, 0.0);
@@ -4110,8 +4098,8 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
 
         // Here, emissionPlus is when we have the standard voltage (V = 1) and
         // emissionMinu is when the voltage is reverted.
-        EBCellFAB& emissionPlus = (*(*emissionRatesPlus)[lvl])[din];
-        EBCellFAB& emissionMinu = (*(*emissionRatesMinu)[lvl])[din];
+        EBCellFAB& emissionPlus = (*emissionRatesPlus[lvl])[din];
+        EBCellFAB& emissionMinu = (*emissionRatesMinu[lvl])[din];
 
         emissionPlus.setVal(0.0);
         emissionMinu.setVal(0.0);
