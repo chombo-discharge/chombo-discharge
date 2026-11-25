@@ -314,9 +314,19 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
   // the coarse level puts it outside the coarse-fine band where it would simply be discarded.
   m_mirrorImages.remap();
 
+  // The images are deposited into a scratch field and then added, never straight into a_phi. Every AMR deposit opens
+  // by zeroing its target, and the level exchange is a reversed copier with an add op -- the ghost region is the
+  // source and the owner's valid region the destination -- and nothing writes those ghosts back to zero afterwards. A
+  // second deposit into the same field would fold the first pass's ghost content into the valid region again. One
+  // component, because EBAMRParticleMesh::depositWeight asserts on that.
+  Scratch<EBAMRCellData> mirrorScratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                            m_phase,
+                                                                            1,
+                                                                            m_amr->getNumberOfGhostCells());
+
   // Mirror, like the real particles: the deposit itself treats it as Native, since the images are the cut-cell
   // treatment, but the coarse-fine steps must know that the summed field holds the density in cut cells.
-  m_amr->depositWeight(m_mirrorScratch,
+  m_amr->depositWeight(*mirrorScratch,
                        m_realm,
                        m_phase,
                        m_mirrorImages,
@@ -327,7 +337,7 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
   // No covered-cell reset. Every image is inside the solid by construction -- that is what reflection means -- and
   // the density is only defined where kappa > 0. The deposit's contract is that the field is correct where it is
   // read.
-  DataOps::incr(a_phi, m_mirrorScratch, 1.0);
+  DataOps::incr(a_phi, mirrorScratch, 1.0);
 
   if (m_verbosity > 5) {
     numImages       = ParallelOps::sum(numImages);

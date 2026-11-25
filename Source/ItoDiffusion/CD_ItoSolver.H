@@ -1586,29 +1586,6 @@ protected:
   EBAMRCellData m_diffusionGradient;
 
   /**
-   * @brief Per-cell occupancy scratch for the kd merges (see ParticleManagement::mergeKDCarve).
-   * @details Owned here, not by the merge, so the allocation happens once per regrid rather than once
-   * per merge call. Allocated and released with the other mesh fields, in allocate()/regrid() and
-   * preRegrid() respectively.
-   */
-  EBAMRFAB m_kdMergeCellHistogram;
-
-  /**
-   * @brief Per-cell merge-quota scratch for the kd merges. Same lifetime as m_kdMergeCellHistogram.
-   */
-  EBAMRFAB m_kdMergeLeafQuota;
-
-  /**
-   * @brief Scratch storage for holding the non-conservative deposition
-   */
-  mutable EBAMRIVData m_depositionNC;
-
-  /**
-   * @brief Scratch storage for holding the mass difference when using hybrid deposition
-   */
-  mutable EBAMRIVData m_massDiff;
-
-  /**
    * @brief Reflected images of the band particles, for IrregularDeposition::Mirror.
    * @details Rebuilt from scratch by every mirror pass and cleared at its START rather than its end, so that a pass
    * that aborts partway cannot leak images into the next deposit. Holds no identity: ParticleSoA::append(pos,
@@ -1621,17 +1598,6 @@ protected:
    * per solver needs none of that, at the cost of one container per species.
    */
   mutable ParticleContainer<NoPayload> m_mirrorImages;
-
-  /**
-   * @brief Mesh scratch the mirror images deposit into, before being added to the real field.
-   * @details One component, because EBAMRParticleMesh::depositWeight asserts on that.
-   * @note The images CANNOT be deposited straight into the solver's field, and the reason is not just that every
-   * AMR deposit opens by zeroing its target. The level exchange is a reversed copier with an add op -- the ghost
-   * region is the source and the owner's valid region the destination -- and nothing writes those ghosts back to
-   * zero afterwards. A second deposit into the same field would fold the first pass's ghost content into the valid
-   * region again, silently double counting in proportion to each patch's ghost share.
-   */
-  mutable EBAMRCellData m_mirrorScratch;
 
   /**
    * @brief Various particle containers with identifiers.
