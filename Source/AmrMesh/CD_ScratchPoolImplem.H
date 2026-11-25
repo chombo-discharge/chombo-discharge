@@ -112,17 +112,26 @@ ScratchPool::acquire(const phase::which_phase                   a_phase,
 
   const int numEntries = static_cast<int>(list.size());
 
+  // A free entry with the same phase, level and number of components, and at least the requested number of ghost
+  // cells, will do. Prefer the fewest ghost cells, so that an exact match is used when there is one and the entries
+  // with wide ghost regions stay free for the callers that need them.
+  int best = -1;
+
   for (int i = 0; i < numEntries; i++) {
-    Entry<T>& entry = list[i];
+    const Entry<T>& entry = list[i];
 
-    const bool match = (entry.phase == a_phase) && (entry.level == a_level) && (entry.nComp == a_nComp) &&
-                       (entry.ghost == a_ghost);
+    const bool match = !entry.inUse && (entry.phase == a_phase) && (entry.level == a_level) &&
+                       (entry.nComp == a_nComp) && (entry.ghost >= a_ghost);
 
-    if (match && !entry.inUse) {
-      entry.inUse = true;
-
-      return Scratch<T>(*this, i);
+    if (match && (best < 0 || entry.ghost < list[best].ghost)) {
+      best = i;
     }
+  }
+
+  if (best >= 0) {
+    list[best].inUse = true;
+
+    return Scratch<T>(*this, best);
   }
 
   Entry<T> entry;

@@ -650,12 +650,13 @@ public:
    * @brief Fetch a temporary over the whole hierarchy of a realm, for data that lives on a phase.
    * @details Returns a free temporary with the same key from the realm's scratch pool, or allocates a new one. The
    * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN with
-   * AmrMesh.scratch_poison). Must not be called inside an OpenMP parallel region.
+   * AmrMesh.scratch_poison), and may have more ghost cells than a_ghost. Must not be called inside an OpenMP parallel
+   * region.
    * @tparam T EBAMRCellData, EBAMRFluxData or EBAMRIVData
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase
    * @param[in] a_nComp Number of components
-   * @param[in] a_ghost Number of ghost cells
+   * @param[in] a_ghost Smallest number of ghost cells needed
    * @return Handle that owns the temporary
    */
   template <typename T>
@@ -671,7 +672,7 @@ public:
    * @tparam T EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData
    * @param[in] a_realm Realm name
    * @param[in] a_nComp Number of components
-   * @param[in] a_ghost Number of ghost cells
+   * @param[in] a_ghost Smallest number of ghost cells needed
    * @return Handle that owns the temporary
    */
   template <typename T>
@@ -685,7 +686,7 @@ public:
    * @param[in] a_phase Phase
    * @param[in] a_level Grid level
    * @param[in] a_nComp Number of components
-   * @param[in] a_ghost Number of ghost cells
+   * @param[in] a_ghost Smallest number of ghost cells needed
    * @return Handle that owns the temporary
    */
   Scratch<LevelData<EBCellFAB>>

@@ -100,6 +100,24 @@ main(int argc, char* argv[])
   check(pool.allReturned(), "all temporaries are returned at scope exit");
 
   {
+    // The pool now holds two free entries with 2 ghost cells and one with 1 ghost cell (same phase, level and
+    // components). Asking for 1 ghost cell takes the exact match first, then an entry with more ghost cells. Asking
+    // for more ghost cells than any entry has builds a new one.
+    const int numBefore = numBuilt;
+
+    Scratch<EBAMRCellData> a = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 1, buildCell);
+    Scratch<EBAMRCellData> b = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 1, buildCell);
+
+    check(numBuilt == numBefore, "an entry with more ghost cells than asked for is reused");
+
+    Scratch<EBAMRCellData> c = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 3, buildCell);
+
+    check(numBuilt == numBefore + 1, "an entry with fewer ghost cells than asked for is not used");
+  }
+
+  check(pool.allReturned(), "all temporaries are returned at scope exit");
+
+  {
     // Moving a handle transfers ownership; the temporary is returned once, by the new owner.
     Scratch<EBAMRCellData> a = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 2, buildCell);
 
