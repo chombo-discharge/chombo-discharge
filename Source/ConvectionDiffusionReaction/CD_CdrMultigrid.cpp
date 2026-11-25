@@ -174,11 +174,14 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 
   if (m_isDiffusive) {
     // Allocate some data = 0 which we use for computing the residual.
-    EBAMRCellData zero;
-    EBAMRCellData scratch;
-
-    m_amr->allocate(zero, m_realm, m_phase, 1);
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> zero    = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(zero, 0.0);
 
@@ -220,9 +223,9 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, scratch);
+    m_amr->alias(eulerRHS, *scratch);
     m_amr->alias(resid, m_residual);
-    m_amr->alias(zer, zero);
+    m_amr->alias(zer, *zero);
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
@@ -305,11 +308,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
   if (m_isDiffusive) {
     // Allocate some data = 0 which we use for computing the residual.
-    EBAMRCellData zero;
-    EBAMRCellData scratch;
-
-    m_amr->allocate(zero, m_realm, m_phase, 1);
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> zero    = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(zero, 0.0);
 
@@ -348,11 +354,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     DataOps::incr(scratch, a_source, a_dt);
 
     // Compute kappa*L(phi^k) and add it to the scratch data holder.
-    EBAMRCellData kappaLphi;
-    EBAMRCellData phiScratch;
-
-    m_amr->allocate(kappaLphi, m_realm, m_phase, 1);
-    m_amr->allocate(phiScratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> kappaLphi  = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                          m_phase,
+                                                                          1,
+                                                                          m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> phiScratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                           m_phase,
+                                                                           1,
+                                                                           m_amr->getNumberOfGhostCells());
 
     DataOps::copy(phiScratch, a_oldPhi);
 
@@ -373,9 +382,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, scratch);
+    m_amr->alias(eulerRHS, *scratch);
     m_amr->alias(resid, m_residual);
-    m_amr->alias(zer, zero);
+    m_amr->alias(zer, *zero);
 
     // Figure out how far away we are form a "converged" solution.
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
@@ -620,11 +629,14 @@ CdrMultigrid::setupMultigrid()
   m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
-  EBAMRCellData dummy1;
-  EBAMRCellData dummy2;
-
-  m_amr->allocate(dummy1, m_realm, m_phase, m_nComp);
-  m_amr->allocate(dummy2, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> dummy1 = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> dummy2 = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
@@ -633,8 +645,8 @@ CdrMultigrid::setupMultigrid()
   Vector<LevelData<EBCellFAB>*> phi;
   Vector<LevelData<EBCellFAB>*> rhs;
 
-  m_amr->alias(phi, dummy1);
-  m_amr->alias(rhs, dummy2);
+  m_amr->alias(phi, *dummy1);
+  m_amr->alias(rhs, *dummy2);
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);

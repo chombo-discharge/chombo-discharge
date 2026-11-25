@@ -234,8 +234,10 @@ CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
   //       version.
   // clang-format on
   if (m_isDiffusive) {
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> src = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    m_nComp,
+                                                                    m_amr->getNumberOfGhostCells());
     DataOps::setValue(src, 0.0);
 
     this->advanceEuler(a_newPhi, a_oldPhi, src, a_dt);
@@ -261,8 +263,10 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
   //       version.
   // clang-format on
   if (m_isDiffusive) {
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> src = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    m_nComp,
+                                                                    m_amr->getNumberOfGhostCells());
     DataOps::setValue(src, 0.0);
 
     this->advanceCrankNicholson(a_newPhi, a_oldPhi, src, a_dt);
@@ -1245,8 +1249,10 @@ CdrSolver::initialDataDistribution()
     return m_species->initialData(pos, m_time);
   };
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(scratch,
                     initFunc,
@@ -1733,14 +1739,16 @@ CdrSolver::writePlotFile()
   const Vector<std::string> plotVarNames = this->getPlotVariableNames();
 
   // Allocate storage
-  EBAMRCellData output;
-  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
+  Scratch<EBAMRCellData> output = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     numPlotVars,
+                                                                     m_amr->getNumberOfGhostCells());
   DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
-    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
+    this->writePlotData(*(*output)[lvl], icomp, m_realm, lvl);
   }
 
   // Filename
@@ -1750,7 +1758,7 @@ CdrSolver::writePlotFile()
 
   // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended).
   Vector<LevelData<EBCellFAB>*> outputPtr;
-  m_amr->alias(outputPtr, output);
+  m_amr->alias(outputPtr, *output);
 
 #ifdef CH_USE_HDF5
   constexpr int numPlotGhost = 0;
@@ -1785,8 +1793,13 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   //       behind that is that a_output is a plot file which accumulates data over many solvers. Note that because
   //       this solver is cell-centered, we interpolate m_phi to centroids when outputting it.
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, 1);
+  // Zeroed because the plot file includes ghost cells, and the averaging of face data to cells below leaves the ghost
+  // cells outside the domain untouched.
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
+  DataOps::setValue(scratch, 0.0);
 
   // Plot state
   if (m_plotPhi) {
@@ -1802,14 +1815,14 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Plot diffusion coefficients. These are stored on face centers but we need cell-centered data for output.
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
-    DataOps::averageFaceToCell(*scratch[a_level],
+    DataOps::averageFaceToCell(*(*scratch)[a_level],
                                *m_faceCenteredDiffusionCoefficient[a_level],
                                m_amr->getDomains()[a_level],
                                *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     // Do the previous because we need the ghost cells too.
     if (a_level > 0) {
-      DataOps::averageFaceToCell(*scratch[a_level - 1],
+      DataOps::averageFaceToCell(*(*scratch)[a_level - 1],
                                  *m_faceCenteredDiffusionCoefficient[a_level - 1],
                                  m_amr->getDomains()[a_level - 1],
                                  *m_amr->getVofIterator(m_realm, m_phase)[a_level - 1]);
@@ -1839,8 +1852,8 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to
   // scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
-    DataOps::setValue(*scratch[a_level], 0.0);
-    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
+    DataOps::setValue(*(*scratch)[a_level], 0.0);
+    DataOps::incr(*(*scratch)[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }
@@ -1873,12 +1886,15 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_START(t2);
 
   // Interpolate ghost cells
@@ -1897,7 +1913,7 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t5);
 
   a_comp += numComp;
@@ -2458,8 +2474,10 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     }
 
     // Divide. Set to zero m_phi if there are no inflow faces.
-    EBAMRCellData zero;
-    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> zero = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
     DataOps::setValue(zero, 0.0);
     DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
@@ -2702,11 +2720,15 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
   if (m_isMobile) {
 
     // Compute v * phi on cell centers.
-    EBAMRCellData flux;
-    EBAMRIVData   fluxEB;
 
-    m_amr->allocate(flux, m_realm, m_phase, SpaceDim);
-    m_amr->allocate(fluxEB, m_realm, m_phase, SpaceDim);
+    Scratch<EBAMRCellData> flux   = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     SpaceDim,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRIVData>   fluxEB = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                   m_phase,
+                                                                   SpaceDim,
+                                                                   m_amr->getNumberOfGhostCells());
 
     DataOps::copy(flux, m_cellVelocity);
     DataOps::multiplyScalar(flux, m_phi);
@@ -2734,7 +2756,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
         const EBISBox& ebisBox = ebisl[din];
 
         BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[din];
-        const BaseIVFAB<Real>& vectorFlux = (*fluxEB[lvl])[din];
+        const BaseIVFAB<Real>& vectorFlux = (*(*fluxEB)[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) {
           const RealVect& normal = ebisBox.normal(vof);
@@ -2945,11 +2967,15 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   // we have the fluctuating term, we simply compute Div(G).
 
   if (m_isDiffusive) {
-    EBAMRFluxData scratchFluxOne;
-    EBAMRFluxData scratchFluxTwo;
 
-    m_amr->allocate(scratchFluxOne, m_realm, m_phase, m_nComp);
-    m_amr->allocate(scratchFluxTwo, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFluxOne = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> scratchFluxTwo = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
 
     // scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
     this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
