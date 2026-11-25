@@ -1576,8 +1576,10 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates()
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
-  EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIVData> eb_gradient = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                      m_cdr->getPhase(),
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   for (int i = 0; i < cdr_states.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
@@ -1613,8 +1615,10 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
-  EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIVData> eb_gradient = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                      m_cdr->getPhase(),
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   for (int i = 0; i < a_phis.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
