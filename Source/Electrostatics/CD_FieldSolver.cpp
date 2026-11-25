@@ -1348,16 +1348,14 @@ FieldSolver::writePlotFile()
   const Vector<std::string> plotVarNames = getPlotVariableNames();
 
   // Allocate storage for output
-  Scratch<EBAMRCellData> output = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                     phase::gas,
-                                                                     numPlotVars,
-                                                                     m_amr->getNumberOfGhostCells());
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, phase::gas, numPlotVars);
 
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
 
-    this->writePlotData(*(*output)[lvl], icomp, m_realm, lvl, true);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl, true);
   }
 
   // Filename
@@ -1366,7 +1364,7 @@ FieldSolver::writePlotFile()
 
   // Need to alias because EBHDF5 is not too smart.
   Vector<LevelData<EBCellFAB>*> outputPtr(1 + m_amr->getFinestLevel());
-  m_amr->alias(outputPtr, *output);
+  m_amr->alias(outputPtr, output);
 
   Vector<Real> covered_values(numPlotVars, 0.0);
   string       fname(file_char);

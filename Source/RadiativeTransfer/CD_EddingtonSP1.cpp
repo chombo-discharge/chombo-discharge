@@ -1418,17 +1418,18 @@ EddingtonSP1::writePlotFile()
   this->computeFlux(flux, m_phi);
 
   // Allocate output storage
-  Scratch<EBAMRCellData> output = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, ncomps, 1);
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, m_phase, ncomps, 1);
 
   // Copy data to put data holder
-  m_amr->copyData(*output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
-  m_amr->copyData(*output,
+  m_amr->copyData(output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
+  m_amr->copyData(output,
                   *flux,
                   Interval(0, SpaceDim - 1),
                   Interval(1, SpaceDim),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
-  m_amr->copyData(*output,
+  m_amr->copyData(output,
                   m_source,
                   Interval(0, 0),
                   Interval(1 + SpaceDim, 1 + SpaceDim),
@@ -1440,7 +1441,7 @@ EddingtonSP1::writePlotFile()
 
   // Alias this stuff
   Vector<LevelData<EBCellFAB>*> output_ptr;
-  m_amr->alias(output_ptr, *output);
+  m_amr->alias(output_ptr, output);
 
   Vector<Real> covered_values(ncomps, 0.0);
   string       fname(file_char);

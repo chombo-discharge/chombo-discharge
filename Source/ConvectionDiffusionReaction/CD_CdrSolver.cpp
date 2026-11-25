@@ -1739,16 +1739,14 @@ CdrSolver::writePlotFile()
   const Vector<std::string> plotVarNames = this->getPlotVariableNames();
 
   // Allocate storage
-  Scratch<EBAMRCellData> output = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                     m_phase,
-                                                                     numPlotVars,
-                                                                     m_amr->getNumberOfGhostCells());
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
   DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     int icomp = 0;
-    this->writePlotData(*(*output)[lvl], icomp, m_realm, lvl);
+    this->writePlotData(*output[lvl], icomp, m_realm, lvl);
   }
 
   // Filename
@@ -1758,7 +1756,7 @@ CdrSolver::writePlotFile()
 
   // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended).
   Vector<LevelData<EBCellFAB>*> outputPtr;
-  m_amr->alias(outputPtr, *output);
+  m_amr->alias(outputPtr, output);
 
 #ifdef CH_USE_HDF5
   constexpr int numPlotGhost = 0;
