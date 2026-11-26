@@ -2849,8 +2849,8 @@ protected:
 
   /**
    * @brief Hand out a temporary from the pool of a realm. Shared by fetchScratch and fetchLevelScratch.
-   * @details Aborts if the realm does not exist or if more ghost cells than the default are asked for, and fills the
-   * temporary with NaN when AmrMesh.scratch_poison is set.
+   * @details Aborts if the realm does not exist, or if the number of components is not positive or the number of
+   * ghost cells is negative. Fills the temporary with NaN when AmrMesh.scratch_poison is set.
    * @tparam T     Type of the temporary
    * @tparam Build Callable () -> std::unique_ptr<T> that allocates a new temporary with the key
    * @param[in] a_realm  Realm name
