@@ -748,7 +748,7 @@ protected:
 
   /**
    * @brief Function which parses which plot variables to write to plot files
-   * @details Valid names are 'phi', 'rho', 'E', 'res', 'perm', 'sigma' and 'Esol'. An unknown name aborts the run.
+   * @details Valid names are 'phi', 'rho', 'E', 'perm', 'sigma' and 'Esol'. An unknown name aborts the run.
    */
   virtual void
   parsePlotVariables();
