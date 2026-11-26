@@ -380,7 +380,6 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     const bool addDomainFlux    = true;
 
     // Transient storage
-
     Scratch<EBAMRCellData> yp = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
     Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
     Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
@@ -402,8 +401,6 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     const bool addDomainFlux = true;
 
     // Transient storage
-    EBAMRCellData yp;
-
     Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
     Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 

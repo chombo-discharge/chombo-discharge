@@ -190,7 +190,7 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in,out] a_cellHistogram Caller-owned per-cell scratch (1 component, >= 1 ghost cell, this
  * container's realm) holding the cell occupancy. Contents on entry are irrelevant -- it is overwritten
- * per patch. Owned by the caller so the allocation happens once per regrid rather than once per call.
+ * per patch. Owned by the caller, which can take it from the AmrMesh scratch pool.
  * @param[in,out] a_leafQuota Caller-owned per-cell scratch, same shape and lifetime as
  * @a a_cellHistogram, holding the live per-cell merge quota.
  * @param[in] a_ppc Target particles per cell.

@@ -399,9 +399,12 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
   CH_assert(a_faceVelocity[0]->nComp() == 1);
   CH_assert(a_cellVelocity[0]->nComp() == SpaceDim);
 
+  // Only faces within one tangential ghost cell are written below. The others are set to a huge value in debug
+  // code, so that the code breaks if they are read, and to zero otherwise.
 #ifndef NDEBUG
-  // Put in something huge in debug code so we can catch if the code breaks.
   DataOps::setValue(a_faceVelocity, std::numeric_limits<Real>::max());
+#else
+  DataOps::setValue(a_faceVelocity, 0.0);
 #endif
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

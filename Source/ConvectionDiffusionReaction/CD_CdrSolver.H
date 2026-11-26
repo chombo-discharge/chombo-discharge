@@ -978,7 +978,8 @@ protected:
    * @param[out] a_faceVelocity Face-centered velocities
    * @param[in]  a_cellVelocity Cell-centered velocities
    * @note This sets the velocity component normal to the face to be the arithmetic average of the cell center
-   * velocities on the low/high side of the face.
+   * velocities on the low/high side of the face. Faces farther than one tangential ghost cell from the valid region
+   * are set to zero, or to a huge value in debug builds.
    * @note Virtual because some solvers might want to do this differently.
    */
   virtual void
