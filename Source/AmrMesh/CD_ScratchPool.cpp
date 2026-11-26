@@ -67,13 +67,15 @@ ScratchPool::clear() noexcept
 bool
 ScratchPool::allReturned() const noexcept
 {
+  ScratchPool::assertSerial("ScratchPool::allReturned");
+
   bool allFree = true;
 
   std::apply(
     [&allFree](const auto&... a_list) -> void {
       const auto listFree = [](const auto& a_entries) -> bool {
         for (const auto& entry : a_entries) {
-          if (entry.inUse) {
+          if (entry.m_inUse) {
             return false;
           }
         }
@@ -91,6 +93,8 @@ ScratchPool::allReturned() const noexcept
 void
 ScratchPool::report(std::ostream& a_os, const std::string& a_prefix) const noexcept
 {
+  ScratchPool::assertSerial("ScratchPool::report");
+
   std::apply(
     [this, &a_os, &a_prefix](const auto&... a_list) -> void {
       (this->reportType(a_list, a_os, a_prefix), ...);
