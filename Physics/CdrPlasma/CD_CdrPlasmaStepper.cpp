@@ -4579,7 +4579,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, a_data.getRealm());
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);

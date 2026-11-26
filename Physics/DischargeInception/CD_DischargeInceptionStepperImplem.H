@@ -18,6 +18,7 @@
 #define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 
 // Std includes
+#include <optional>
 #include <iostream>
 #include <fstream>
 
@@ -1247,7 +1248,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   }
 
   if (m_plotAlpha) {
-    LevelData<EBCellFAB> alphaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaCoar;
 
     Scratch<LevelData<EBCellFAB>> alpha = m_amr->fetchLevelScratch(m_realm,
                                                                    m_phase,
@@ -1255,14 +1256,14 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
                                                                    1,
                                                                    m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
-        m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
+        m_amr->interpGhost(alpha, **alphaCoar, a_level, m_realm, m_phase);
       }
       else {
         alpha->exchange();
@@ -1275,7 +1276,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   }
 
   if (m_plotEta) {
-    LevelData<EBCellFAB> etaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> etaCoar;
 
     Scratch<LevelData<EBCellFAB>> eta = m_amr->fetchLevelScratch(m_realm,
                                                                  m_phase,
@@ -1283,14 +1284,14 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
                                                                  1,
                                                                  m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+      etaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(eta, m_voltageSweeps[i], m_eta, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
-        m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
+        m_amr->interpGhost(eta, **etaCoar, a_level, m_realm, m_phase);
       }
       else {
         eta->exchange();
@@ -1303,7 +1304,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   }
 
   if (m_plotAlpha && m_plotEta) {
-    LevelData<EBCellFAB> alphaEffCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaEffCoar;
 
     Scratch<LevelData<EBCellFAB>> alphaEff = m_amr->fetchLevelScratch(m_realm,
                                                                       m_phase,
@@ -1311,7 +1312,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
                                                                       1,
                                                                       m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaEffCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
@@ -1321,8 +1322,8 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alphaEff, m_voltageSweeps[i], alphaFunc, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
-        m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
+        m_amr->interpGhost(alphaEff, **alphaEffCoar, a_level, m_realm, m_phase);
       }
       else {
         alphaEff->exchange();
@@ -1421,7 +1422,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotDetachment) {
-    LevelData<EBCellFAB> detachRateCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> detachRateCoar;
 
     Scratch<LevelData<EBCellFAB>> detachRate = m_amr->fetchLevelScratch(m_realm,
                                                                         m_phase,
@@ -1429,13 +1430,14 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
                                                                         1,
                                                                         m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(detachRateCoar, m_realm, m_phase, a_level - 1, 1);
+      detachRateCoar.emplace(
+        m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(detachRate, m_voltageCurve(m_time), m_detachmentRate, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
-      m_amr->interpGhost(detachRate, detachRateCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
+      m_amr->interpGhost(detachRate, **detachRateCoar, a_level, m_realm, m_phase);
     }
 
     m_amr->copyData(a_output, *detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
@@ -1448,7 +1450,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotAlpha) {
-    LevelData<EBCellFAB> alphaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaCoar;
 
     Scratch<LevelData<EBCellFAB>> alpha = m_amr->fetchLevelScratch(m_realm,
                                                                    m_phase,
@@ -1456,13 +1458,13 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
                                                                    1,
                                                                    m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
-      m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
+      m_amr->interpGhost(alpha, **alphaCoar, a_level, m_realm, m_phase);
     }
     else {
       alpha->exchange();
@@ -1476,7 +1478,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotEta) {
-    LevelData<EBCellFAB> etaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> etaCoar;
 
     Scratch<LevelData<EBCellFAB>> eta = m_amr->fetchLevelScratch(m_realm,
                                                                  m_phase,
@@ -1484,13 +1486,13 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
                                                                  1,
                                                                  m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+      etaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
-      m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
+      m_amr->interpGhost(eta, **etaCoar, a_level, m_realm, m_phase);
     }
     else {
       eta->exchange();
@@ -1504,7 +1506,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotAlpha && m_plotEta) {
-    LevelData<EBCellFAB> alphaEffCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaEffCoar;
 
     Scratch<LevelData<EBCellFAB>> alphaEff = m_amr->fetchLevelScratch(m_realm,
                                                                       m_phase,
@@ -1512,7 +1514,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
                                                                       1,
                                                                       m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaEffCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
@@ -1521,8 +1523,8 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
 
     this->evaluateFunction(alphaEff, m_voltageCurve(m_time), alphaFunc, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
-      m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
+      m_amr->interpGhost(alphaEff, **alphaEffCoar, a_level, m_realm, m_phase);
     }
     else {
       alphaEff->exchange();
