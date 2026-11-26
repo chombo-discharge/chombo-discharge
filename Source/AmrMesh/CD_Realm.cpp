@@ -158,7 +158,7 @@ Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLeve
 }
 
 ScratchPool&
-Realm::getScratchPool() const noexcept
+Realm::getScratchPool() noexcept
 {
   return m_scratchPool;
 }

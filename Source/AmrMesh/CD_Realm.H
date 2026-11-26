@@ -158,7 +158,7 @@ public:
    * @return The scratch pool
    */
   ScratchPool&
-  getScratchPool() const noexcept;
+  getScratchPool() noexcept;
 
   /**
    * @brief Regrid method for EBAMR base
@@ -872,7 +872,7 @@ protected:
    * @brief Pool of temporaries on this realm, built on the current grids.
    * @details Mutable because AmrMesh hands out temporaries from const member functions.
    */
-  mutable ScratchPool m_scratchPool;
+  ScratchPool m_scratchPool;
 
   /**
    * @brief Define MFLevelGrid

@@ -35,15 +35,20 @@ class ScratchPool;
  * @brief Single owner of a temporary that belongs to a ScratchPool.
  * @details A Scratch is obtained from AmrMesh::fetchScratch (or ScratchPool::acquire) and returns the temporary to
  * its pool when it is destroyed. It can be moved but not copied, so a temporary has exactly one owner at a time. It
- * has no default constructor and cannot be assigned, so it cannot be a class member: data that must live longer than
- * the function that fetches it is fetched by a caller that spans all of its uses, and passed down by reference.
+ * has no default constructor and cannot be assigned. It must never be stored in a class member (the compiler does not
+ * prevent it, e.g. through a constructor's initializer list or std::optional): the entry would stay in use for the
+ * object's lifetime, and the pool aborts at the next regrid. Data that must live longer than the function that
+ * fetches it is fetched by a caller that spans all of its uses, and passed down by reference.
  *
  * The handle converts implicitly to T&, so it can be passed directly to functions that take the data by reference.
  * References and aliases (e.g. Vector<LevelData<T>*>) taken from it are views: they must not outlive the handle.
- * Copying the underlying EBAMRData into an object that outlives the handle is an error, which the pool detects
- * when the handle is destroyed.
+ * Copying the underlying EBAMRData into an object that outlives the handle is an error. The pool detects shallow
+ * copies of the EBAMRData levels when the handle is destroyed. It cannot detect aliases built with AmrMesh::alias,
+ * EBAMRData::slice or aliasLevelData, so those must never outlive the handle either.
  *
- * The data is uninitialized when fetched, and may have more ghost cells than were asked for.
+ * The data is uninitialized when fetched, and may have more ghost cells than were asked for. A caller that needs an
+ * exact number of ghost cells, such as AmrMesh::interpGhostMG or AmrMesh::copyData with CopyStrategy::ValidGhost,
+ * fetches with the default number of ghost cells, which no entry exceeds.
  * @tparam T Data type. One of the types ScratchPool stores.
  */
 template <typename T>
@@ -139,6 +144,13 @@ private:
   Scratch(ScratchPool& a_pool, const int a_entry) noexcept;
 
   /**
+   * @brief Abort if the handle was moved from. Checked in every build, not only with assertions on.
+   * @param[in] a_pool Pool of the handle
+   */
+  static void
+  assertOwner(const ScratchPool* const a_pool) noexcept;
+
+  /**
    * @brief Pool that owns the temporary. Null after the handle was moved from.
    */
   ScratchPool* m_pool;
@@ -216,14 +228,16 @@ public:
    * @param[in] a_ghost Smallest number of ghost cells the caller needs
    * @param[in] a_build Builds a new temporary with this key, and exactly a_ghost ghost cells, on the current grids.
    * @return Handle that owns the temporary until it is destroyed.
+   * @tparam T     Data type
+   * @tparam Build Callable () -> std::unique_ptr<T>. Only called when no free entry matches.
    */
-  template <typename T>
+  template <typename T, typename Build>
   Scratch<T>
-  acquire(const phase::which_phase                   a_phase,
-          const int                                  a_level,
-          const int                                  a_nComp,
-          const int                                  a_ghost,
-          const std::function<std::unique_ptr<T>()>& a_build) noexcept;
+  acquire(const phase::which_phase a_phase,
+          const int                a_level,
+          const int                a_nComp,
+          const int                a_ghost,
+          const Build&             a_build) noexcept;
 
   /**
    * @brief Delete all temporaries. Called whenever the grids change.
