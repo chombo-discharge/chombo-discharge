@@ -14,11 +14,13 @@
 #define CD_AMRMESHIMPLEM_H
 
 // Std includes
+#include <limits>
 #include <memory>
 #include <type_traits>
 
 // Our includes
 #include <CD_AmrMesh.H>
+#include <CD_DataOps.H>
 #include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1328,6 +1330,30 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles
         }
       }
     }
+  }
+}
+
+template <typename T>
+void
+AmrMesh::poisonScratch(T& a_data) const
+{
+  const Real nan = std::numeric_limits<Real>::quiet_NaN();
+
+  if constexpr (std::is_same<T, EBAMRFAB>::value) {
+    for (int lvl = 0; lvl < a_data.size(); lvl++) {
+      const DataIterator& dit  = a_data[lvl]->dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        (*a_data[lvl])[din].setVal(nan);
+      }
+    }
+  }
+  else {
+    DataOps::setValue(a_data, nan);
   }
 }
 
