@@ -142,6 +142,13 @@ public:
   operator*() && = delete;
 
   /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  const T&
+  operator*() const&& = delete;
+
+  /**
    * @brief Access the data.
    * @return Pointer to the temporary
    */
@@ -154,6 +161,20 @@ public:
    */
   const T*
   operator->() const& noexcept;
+
+  /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  T*
+  operator->() && = delete;
+
+  /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  const T*
+  operator->() const&& = delete;
 
 private:
   friend class ScratchPool;
