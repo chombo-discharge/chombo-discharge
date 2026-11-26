@@ -1352,6 +1352,14 @@ AmrMesh::fetchFromPool(const std::string&       a_realm,
 
   this->assertRealm(a_realm, a_caller);
 
+  // Between AmrMesh::preRegrid and the regrid the realms have no grids, and nothing can be allocated on them.
+  if (static_cast<int>(this->getGrids(a_realm).size()) != m_finestLevel + 1) {
+    const std::string err = a_caller + " -- the grids of realm '" + a_realm +
+                            "' are not defined (fetch during a regrid?)";
+
+    MayDay::Abort(err.c_str());
+  }
+
   Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase,
                                                                                a_level,
                                                                                a_nComp,

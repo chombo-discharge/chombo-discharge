@@ -16,6 +16,7 @@
 #include <utility>
 
 // Chombo includes
+#include <EBCellFactory.H>
 #include <MayDay.H>
 
 // Our includes
@@ -51,10 +52,21 @@ main(int argc, char* argv[])
     return std::unique_ptr<EBAMRCellData>(new EBAMRCellData(2));
   };
 
-  auto buildLevel = [&numBuilt]() -> std::unique_ptr<LevelData<EBCellFAB>> {
+  // Levels are defined on an empty layout, so that they have the number of components and ghost cells of their key
+  // without needing grids or a geometry.
+  DisjointBoxLayout emptyGrids;
+  emptyGrids.close();
+
+  const EBISLayout emptyEBISL;
+
+  auto makeLevel = [&emptyGrids, &emptyEBISL](const int a_nComp, const int a_ghost) -> LevelData<EBCellFAB>* {
+    return new LevelData<EBCellFAB>(emptyGrids, a_nComp, a_ghost * IntVect::Unit, EBCellFactory(emptyEBISL));
+  };
+
+  auto buildLevel = [&numBuilt, &makeLevel]() -> std::unique_ptr<LevelData<EBCellFAB>> {
     numBuilt++;
 
-    return std::unique_ptr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+    return std::unique_ptr<LevelData<EBCellFAB>>(makeLevel(1, 2));
   };
 
   // The pool is destroyed at the end of this block, before finalize() tears down MPI and the timers.
@@ -155,12 +167,12 @@ main(int argc, char* argv[])
     {
       // A temporary whose levels are only referenced by the pool is returned without complaint. A copy that outlived
       // the handle would raise the level's reference count, and the return would abort.
-      auto buildWithLevel = [&numBuilt]() -> std::unique_ptr<EBAMRCellData> {
+      auto buildWithLevel = [&numBuilt, &makeLevel]() -> std::unique_ptr<EBAMRCellData> {
         numBuilt++;
 
         std::unique_ptr<EBAMRCellData> data(new EBAMRCellData(1));
 
-        (*data)[0] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+        (*data)[0] = RefCountedPtr<LevelData<EBCellFAB>>(makeLevel(4, 2));
 
         return data;
       };
