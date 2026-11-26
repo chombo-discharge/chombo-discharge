@@ -4536,10 +4536,6 @@ AmrMesh::fetchLevelScratch(const std::string&       a_realm,
   }
 
   CH_assert(a_level >= 0 && a_level <= m_finestLevel);
-  CH_assert(a_nComp > 0);
-  CH_assert(a_ghost >= 0);
-
-  this->assertRealm(a_realm, "AmrMesh::fetchLevelScratch");
 
   auto build = [this, &a_realm, a_phase, a_level, a_nComp, a_ghost]() -> std::unique_ptr<LevelData<EBCellFAB>> {
     std::unique_ptr<LevelData<EBCellFAB>> data(new LevelData<EBCellFAB>());
@@ -4549,17 +4545,13 @@ AmrMesh::fetchLevelScratch(const std::string&       a_realm,
     return data;
   };
 
-  Scratch<LevelData<EBCellFAB>> scratch = m_realms[a_realm]->getScratchPool().acquire<LevelData<EBCellFAB>>(a_phase,
-                                                                                                            a_level,
-                                                                                                            a_nComp,
-                                                                                                            a_ghost,
-                                                                                                            build);
-
-  if (m_scratchPoison) {
-    this->poisonScratch(*scratch);
-  }
-
-  return scratch;
+  return this->fetchFromPool<LevelData<EBCellFAB>>(a_realm,
+                                                   a_phase,
+                                                   a_level,
+                                                   a_nComp,
+                                                   a_ghost,
+                                                   build,
+                                                   "AmrMesh::fetchLevelScratch");
 }
 
 void
