@@ -697,23 +697,9 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(*m_cdrProducts[i], m_particleRealm);
   }
 
-  // Storage for the density gradients
-  m_fluidGradPhiIto.resize(numItoSpecies);
-  m_fluidPhiIto.resize(numItoSpecies);
-  m_fluidGradPhiCDR.resize(numCdrSpecies);
-  for (int i = 0; i < numItoSpecies; i++) {
-    m_amr->allocate(m_fluidGradPhiIto[i], m_fluidRealm, m_plasmaPhase, SpaceDim);
-    m_amr->allocate(m_fluidPhiIto[i], m_fluidRealm, m_plasmaPhase, 1);
-  }
-  for (int i = 0; i < numCdrSpecies; i++) {
-    m_amr->allocate(m_fluidGradPhiCDR[i], m_fluidRealm, m_plasmaPhase, SpaceDim);
-  }
-
   // Storage for secondary particle and photon emission
   m_secondaryParticles.resize(numItoSpecies);
   m_secondaryPhotons.resize(numPhotonSpecies);
-
-  m_cdrFluxes.resize(numCdrSpecies);
 
   for (int i = 0; i < numItoSpecies; i++) {
     m_secondaryParticles[i] = RefCountedPtr<ParticleContainer<ItoParticle>>(new ParticleContainer<ItoParticle>());
@@ -724,15 +710,6 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_secondaryPhotons[i] = RefCountedPtr<ParticleContainer<Photon>>(new ParticleContainer<Photon>());
     m_amr->allocate(*m_secondaryPhotons[i], m_particleRealm);
   }
-
-  for (int i = 0; i < numCdrSpecies; i++) {
-    m_amr->allocate(m_cdrFluxes[i], m_particleRealm, m_plasmaPhase, 1);
-  }
-
-  // Storage for the physics time step
-  m_amr->allocate(m_kmcDt, m_fluidRealm, m_plasmaPhase, 1);
-
-  DataOps::setValue(m_kmcDt, std::numeric_limits<Real>::max());
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2675,22 +2652,10 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   }
 
   for (int i = 0; i < numItoSpecies; i++) {
-    m_fluidGradPhiIto[i].clear();
-    m_fluidPhiIto[i].clear();
-  }
-  for (int i = 0; i < numCdrSpecies; i++) {
-    m_fluidGradPhiCDR[i].clear();
-  }
-
-  for (int i = 0; i < numItoSpecies; i++) {
     m_secondaryParticles[i]->clearParticles();
   }
   for (int i = 0; i < numPhotonSpecies; i++) {
     m_secondaryPhotons[i]->clearParticles();
-  }
-
-  for (int i = 0; i < numCdrSpecies; i++) {
-    m_cdrFluxes[i].clear();
   }
 
   m_currentDensity.clear();
@@ -3088,48 +3053,78 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
+ItoKMCStepper<I, C, R, F>::computeDensityGradients(std::vector<Scratch<EBAMRCellData>>& a_storage,
+                                                   Vector<const EBAMRCellData*>&        a_densitiesIto,
+                                                   Vector<const EBAMRCellData*>&        a_densityGradientsIto,
+                                                   Vector<const EBAMRCellData*>&        a_densityGradientsCDR,
+                                                   const bool                           a_computeGradients) noexcept
 {
-  CH_TIME("ItoKMCStepper::computeDensityGradients()");
+  CH_TIME("ItoKMCStepper::computeDensityGradients");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeDensityGradients()" << endl;
+    pout() << m_name + "::computeDensityGradients" << endl;
   }
 
-  Scratch<EBAMRCellData> fluidScratch1 = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
-                                                                            m_plasmaPhase,
-                                                                            1,
-                                                                            m_amr->getNumberOfGhostCells());
-
   const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+  const int ghost         = m_amr->getNumberOfGhostCells();
+
+  // Two shared zero fields, plus at most a density and a gradient per Ito species and a gradient per CDR species.
+  // Reserving them up front keeps the handles in place while the pointers below are taken.
+  a_storage.clear();
+  a_storage.reserve(2 + 2 * numItoSpecies + numCdrSpecies);
+
+  a_storage.emplace_back(m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, ghost));
+  a_storage.emplace_back(m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, SpaceDim, ghost));
+
+  const EBAMRCellData& zeroDensity  = *a_storage[0];
+  const EBAMRCellData& zeroGradient = *a_storage[1];
+
+  DataOps::setValue(*a_storage[0], 0.0);
+  DataOps::setValue(*a_storage[1], 0.0);
+
+  a_densitiesIto        = Vector<const EBAMRCellData*>(numItoSpecies, &zeroDensity);
+  a_densityGradientsIto = Vector<const EBAMRCellData*>(numItoSpecies, &zeroGradient);
+  a_densityGradientsCDR = Vector<const EBAMRCellData*>(numCdrSpecies, &zeroGradient);
+
+  if (!a_computeGradients) {
+    return;
+  }
+
+  Scratch<EBAMRCellData> fluidScratch1 = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, ghost);
 
   // Each gradient costs a cross-realm copy, a coarsening, a ghost interpolation and the gradient stencil
   // itself, over the whole hierarchy. The reaction kernel reads a gradient slot for every species, but a
-  // chemistry typically corrects on one or two of them; the rest were computed and never looked at. Ask
-  // the physics which ones it actually reads, and zero the others so the unread slots hold a defined
-  // value rather than whatever the last grid left there.
+  // chemistry typically corrects on one or two of them. Ask the physics which ones it actually reads; the others
+  // read the shared zero fields. The Ito densities are only computed for the species that need a gradient, because
+  // the time stepper deposits only those before calling this.
   //
   // The plasma index is the Ito species first and then the CDR species, matching the density vector that
   // updateReactionRates() is handed.
-
-  // Do the same for the Ito species.
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
     const int idx = it.index();
 
     if (!(m_physics->needGradient(idx))) {
-      DataOps::setValue(m_fluidGradPhiIto[idx], 0.0);
-
       continue;
     }
 
+    a_storage.emplace_back(m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, ghost));
+    EBAMRCellData& density = *a_storage.back();
+
+    a_storage.emplace_back(m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, SpaceDim, ghost));
+    EBAMRCellData& densityGradient = *a_storage.back();
+
     // Update ghost cells and coarsenings. Then compute the gradient.
-    m_amr->copyData(m_fluidPhiIto[idx], solver->getPhi());
+    m_amr->copyData(density, solver->getPhi());
 
-    m_amr->arithmeticAverage(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
-    m_amr->interpGhostPwl(m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
+    m_amr->arithmeticAverage(density, m_fluidRealm, m_plasmaPhase);
+    m_amr->interpGhostPwl(density, m_fluidRealm, m_plasmaPhase);
 
-    m_amr->computeGradient(m_fluidGradPhiIto[idx], m_fluidPhiIto[idx], m_fluidRealm, m_plasmaPhase);
+    m_amr->computeGradient(densityGradient, density, m_fluidRealm, m_plasmaPhase);
+
+    a_densitiesIto[idx]        = &density;
+    a_densityGradientsIto[idx] = &densityGradient;
   }
 
   // Compute gradients for the CDR species.
@@ -3139,10 +3134,11 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     const int idx = it.index();
 
     if (!(m_physics->needGradient(numItoSpecies + idx))) {
-      DataOps::setValue(m_fluidGradPhiCDR[idx], 0.0);
-
       continue;
     }
+
+    a_storage.emplace_back(m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, SpaceDim, ghost));
+    EBAMRCellData& densityGradient = *a_storage.back();
 
     // Update ghost cells and coarsenings. Then compute the gradient.
     m_amr->copyData(*fluidScratch1, solver->getPhi());
@@ -3150,7 +3146,9 @@ ItoKMCStepper<I, C, R, F>::computeDensityGradients() noexcept
     m_amr->arithmeticAverage(*fluidScratch1, m_fluidRealm, m_plasmaPhase);
     m_amr->interpGhostPwl(*fluidScratch1, m_fluidRealm, m_plasmaPhase);
 
-    m_amr->computeGradient(m_fluidGradPhiCDR[idx], *fluidScratch1, m_fluidRealm, m_plasmaPhase);
+    m_amr->computeGradient(densityGradient, *fluidScratch1, m_fluidRealm, m_plasmaPhase);
+
+    a_densityGradientsCDR[idx] = &densityGradient;
   }
 }
 
@@ -5003,25 +5001,12 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const Real a_dt) noexcept
-{
-  CH_TIME("ItoKMCStepper::advanceReactionNetwork(dt)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetwork(dt)" << endl;
-  }
-
-  CH_assert(a_dt > 0.0);
-
-  this->advanceReactionNetwork(m_electricFieldFluid, a_dt);
-
-  // NOTE: super-particle merging is NOT done here. Chemistry creates/removes particles; the caller
-  //       (e.g. ItoKMCGodunovStepper::advance()) merges afterwards through
-  //       ItoSolver::makeSuperparticles(), where it can be timed as its own step.
-}
-
-template <typename I, typename C, typename R, typename F>
-void
-ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electricField, const Real a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBAMRCellData&                      a_physicsDt,
+                                                  const EBAMRCellData&                a_electricField,
+                                                  const Vector<const EBAMRCellData*>& a_densitiesIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                                                  const Real                          a_dt) noexcept
 {
   CH_TIMERS("ItoKMCStepper::advanceReactionNetwork");
   CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc", t1);
@@ -5113,7 +5098,15 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // photons that need to be generated per cell.
   CH_START(t2);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->advanceReactionNetwork(*(*fluidPPC)[lvl], *(*fluidYPC)[lvl], *a_electricField[lvl], lvl, a_dt);
+    this->advanceReactionNetwork(*(*fluidPPC)[lvl],
+                                 *(*fluidYPC)[lvl],
+                                 *a_physicsDt[lvl],
+                                 *a_electricField[lvl],
+                                 a_densitiesIto,
+                                 a_densityGradientsIto,
+                                 a_densityGradientsCDR,
+                                 lvl,
+                                 a_dt);
   }
   CH_STOP(t2);
 
@@ -5278,11 +5271,15 @@ ItoKMCStepper<I, C, R, F>::depositCdrProducts(EBAMRCellData& a_cdrChange) noexce
 
 template <typename I, typename C, typename R, typename F>
 inline void
-ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
-                                                  LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-                                                  const LevelData<EBCellFAB>& a_electricField,
-                                                  const int                   a_level,
-                                                  const Real                  a_dt) const noexcept
+ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&               a_particlesPerCell,
+                                                  LevelData<EBCellFAB>&               a_newPhotonsPerCell,
+                                                  LevelData<EBCellFAB>&               a_physicsDt,
+                                                  const LevelData<EBCellFAB>&         a_electricField,
+                                                  const Vector<const EBAMRCellData*>& a_densitiesIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                                                  const int                           a_level,
+                                                  const Real                          a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(LD<EBCellFAB>x3, int, Real)");
   if (m_verbosity > 5) {
@@ -5311,7 +5308,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
       this->advanceReactionNetwork(a_particlesPerCell[din],
                                    a_newPhotonsPerCell[din],
+                                   a_physicsDt[din],
                                    a_electricField[din],
+                                   a_densitiesIto,
+                                   a_densityGradientsIto,
+                                   a_densityGradientsCDR,
                                    a_level,
                                    din,
                                    dbl[din],
@@ -5325,14 +5326,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
 template <typename I, typename C, typename R, typename F>
 inline void
-ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
-                                                  EBCellFAB&       a_newPhotonsPerCell,
-                                                  const EBCellFAB& a_electricField,
-                                                  const int        a_level,
-                                                  const DataIndex  a_din,
-                                                  const Box        a_box,
-                                                  const Real       a_dx,
-                                                  const Real       a_dt) const noexcept
+ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&                          a_particlesPerCell,
+                                                  EBCellFAB&                          a_newPhotonsPerCell,
+                                                  EBCellFAB&                          a_physicsDt,
+                                                  const EBCellFAB&                    a_electricField,
+                                                  const Vector<const EBAMRCellData*>& a_densitiesIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                                                  const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                                                  const int                           a_level,
+                                                  const DataIndex                     a_din,
+                                                  const Box                           a_box,
+                                                  const Real                          a_dx,
+                                                  const Real                          a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(EBCellFABx3, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
@@ -5378,7 +5383,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
 
   // Handle to critical and non-critical time step containers.
-  EBCellFAB& physicsDt = (*m_kmcDt[a_level])[a_din];
+  EBCellFAB& physicsDt = a_physicsDt;
 
   FArrayBox& physicsDtReg = physicsDt.getFArrayBox();
 
@@ -5389,9 +5394,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
     const int i = it.index();
 
-    densitiesIto[i]           = &(*(m_fluidPhiIto[i])[a_level])[a_din];
+    densitiesIto[i]           = &(*(*a_densitiesIto[i])[a_level])[a_din];
     densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
-    densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_din];
+    densityGradientsIto[i]    = &(*(*a_densityGradientsIto[i])[a_level])[a_din];
     densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
   }
 
@@ -5403,7 +5408,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
     densitiesCDR[i]           = &(*phi[a_level])[a_din];
     densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
-    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_din];
+    densityGradientsCDR[i]    = &(*(*a_densityGradientsCDR[i])[a_level])[a_din];
     densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
   }
 
@@ -6198,7 +6203,32 @@ ItoKMCStepper<I, C, R, F>::needSecondaryEmissionEB() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::fetchSecondaryEmissionFluxesEB(std::vector<Scratch<EBAMRIVData>>& a_storage,
+                                                          Vector<EBAMRIVData*>&              a_cdrFluxes) const noexcept
+{
+  CH_TIME("ItoKMCStepper::fetchSecondaryEmissionFluxesEB");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::fetchSecondaryEmissionFluxesEB" << endl;
+  }
+
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  a_storage.clear();
+  a_storage.reserve(numCdrSpecies);
+
+  a_cdrFluxes.resize(0);
+
+  for (int i = 0; i < numCdrSpecies; i++) {
+    a_storage.emplace_back(
+      m_amr->fetchScratch<EBAMRIVData>(m_particleRealm, m_plasmaPhase, 1, m_amr->getNumberOfGhostCells()));
+
+    a_cdrFluxes.push_back(&(*a_storage.back()));
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<EBAMRIVData*>& a_cdrFluxes, const Real a_dt) noexcept
 {
   CH_TIME("ItoKMCStepper::fillSecondaryEmissionEB(Real)");
   if (m_verbosity > 5) {
@@ -6264,9 +6294,15 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
     m_amr->copyData(m_particleSurfaceScratch, m_surfaceSolvers[i]->getPhi(), Interval(i, i), Interval(0, 0));
   }
 
+  // The kernel takes the CDR fluxes as a vector of data holders, so cdrFluxes holds shallow copies of the caller's.
+  Vector<EBAMRIVData> cdrFluxes;
+  for (int i = 0; i < numCdrSpecies; i++) {
+    cdrFluxes.push_back(*a_cdrFluxes[i]);
+  }
+
   // Call the other version.
   this->fillSecondaryEmissionEB(m_secondaryParticles,
-                                m_cdrFluxes,
+                                cdrFluxes,
                                 m_secondaryPhotons,
                                 m_particleSurfaceScratch,
                                 primaryParticles,
@@ -6551,7 +6587,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Vector<EBAMRIVData*>& a_cdrFluxes, const Real a_dt) noexcept
 {
   CH_TIME("ItoKMCStepper::resolveSecondaryEmissionEB(short)");
   if (m_verbosity > 5) {
@@ -6581,7 +6617,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
     EBAMRIVData& ebFlux = solver->getEbFlux();
 
-    m_amr->copyData(ebFlux, m_cdrFluxes[idx]);
+    m_amr->copyData(ebFlux, *a_cdrFluxes[idx]);
 
     m_amr->arithmeticAverage(ebFlux, m_fluidRealm, m_plasmaPhase);
 
@@ -7068,7 +7104,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionDomain() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
+ItoKMCStepper<I, C, R, F>::computePhysicsDt(EBAMRCellData& a_physicsDt) noexcept
 {
   CH_TIME("ItoKMCStepper::computePhysicsDt()");
   if (m_verbosity > 5) {
@@ -7078,7 +7114,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
   Real maxDt = std::numeric_limits<Real>::max();
   Real minDt = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMin(maxDt, minDt, m_kmcDt, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
+  DataOps::getMaxMin(maxDt, minDt, a_physicsDt, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   m_physicsDt = minDt;
 }
@@ -7164,9 +7200,28 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
   DataOps::setValue(*fluidYPC, 0.0);
   DataOps::setValue(*particleYPC, 0.0);
 
+  // The reaction kernels read densities and gradients, which are not computed before the first time step. They read
+  // zeros.
+  std::vector<Scratch<EBAMRCellData>> densityStorage;
+  Vector<const EBAMRCellData*>        densitiesIto;
+  Vector<const EBAMRCellData*>        densityGradientsIto;
+  Vector<const EBAMRCellData*>        densityGradientsCDR;
+
+  this->computeDensityGradients(densityStorage, densitiesIto, densityGradientsIto, densityGradientsCDR, false);
+
+  Scratch<EBAMRCellData> physicsDt = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, ghost);
+
   // Advance the reaction network using a zero time step, which should not trigger any change in the state vector.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->advanceReactionNetwork(*(*fluidPPC)[lvl], *(*fluidYPC)[lvl], *m_electricFieldFluid[lvl], lvl, 0.0);
+    this->advanceReactionNetwork(*(*fluidPPC)[lvl],
+                                 *(*fluidYPC)[lvl],
+                                 *(*physicsDt)[lvl],
+                                 *m_electricFieldFluid[lvl],
+                                 densitiesIto,
+                                 densityGradientsIto,
+                                 densityGradientsCDR,
+                                 lvl,
+                                 0.0);
   }
 
   // Reorganize into patch
@@ -7174,7 +7229,7 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
 
-  this->computePhysicsDt();
+  this->computePhysicsDt(physicsDt);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -7757,7 +7812,12 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
   CH_assert(a_physicsPlotVars.getRealm() == m_fluidRealm);
 
   // Update gradients
-  this->computeDensityGradients();
+  std::vector<Scratch<EBAMRCellData>> densityStorage;
+  Vector<const EBAMRCellData*>        densitiesItoAMR;
+  Vector<const EBAMRCellData*>        densityGradientsItoAMR;
+  Vector<const EBAMRCellData*>        densityGradientsCDRAMR;
+
+  this->computeDensityGradients(densityStorage, densitiesItoAMR, densityGradientsItoAMR, densityGradientsCDRAMR, true);
 
   const RealVect probLo = m_amr->getProbLo();
 
@@ -7796,9 +7856,9 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
 
         const int i = it.index();
 
-        densitiesIto[i]           = &(*(m_fluidPhiIto[i])[lvl])[din];
+        densitiesIto[i]           = &(*(*densitiesItoAMR[i])[lvl])[din];
         densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
-        densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][lvl])[din];
+        densityGradientsIto[i]    = &(*(*densityGradientsItoAMR[i])[lvl])[din];
         densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
       }
 
@@ -7810,7 +7870,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
 
         densitiesCDR[i]           = &(*phi[lvl])[din];
         densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
-        densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][lvl])[din];
+        densityGradientsCDR[i]    = &(*(*densityGradientsCDRAMR[i])[lvl])[din];
         densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
       }
 

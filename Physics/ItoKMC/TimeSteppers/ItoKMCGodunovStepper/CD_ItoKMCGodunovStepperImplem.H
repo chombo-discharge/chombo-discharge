@@ -529,6 +529,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
                                                      SpaceDim,
                                                      (this->m_amr)->getNumberOfGhostCells());
 
+  // The non-critical KMC time step per cell, from the reaction network to the physics time step at the end.
+  Scratch<EBAMRCellData> physicsDt = (this->m_amr)
+                                       ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                              this->m_plasmaPhase,
+                                                                              1,
+                                                                              (this->m_amr)->getNumberOfGhostCells());
+
   m_timer.startEvent("Store E^k");
   if (m_reactiveFieldCentering < 1.0) {
     DataOps::copy(reactiveElectricField, this->m_electricFieldFluid);
@@ -704,12 +711,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
 
-  // Compute the gradients of the various species densities - this is used in the KMC kernels.
-  if ((this->m_physics)->needGradients()) {
-    m_timer.startEvent("Gradient calculation");
+  // Compute the gradients of the various species densities - this is used in the KMC kernels. The handles are held
+  // until the reaction network has run.
+  std::vector<Scratch<EBAMRCellData>> densityStorage;
+  Vector<const EBAMRCellData*>        densitiesIto;
+  Vector<const EBAMRCellData*>        densityGradientsIto;
+  Vector<const EBAMRCellData*>        densityGradientsCDR;
 
-    // Only the species computeDensityGradients() actually differentiates. It skips the rest and zeroes
-    // their gradient slots, so depositing them here bought nothing but a halo deposit, a redistribution and
+  m_timer.startEvent("Gradient calculation");
+  if ((this->m_physics)->needGradients()) {
+
+    // Only the species computeDensityGradients() actually differentiates. The rest read shared zero fields,
+    // so depositing them here bought nothing but a halo deposit, a redistribution and
     // a coarsen-and-fill-ghosts apiece -- and a chemistry typically corrects on one or two species out of
     // the set. The mesh densities of the skipped species are stale until prePlot() re-deposits all of them,
     // which is ahead of every reader that wants them current.
@@ -718,10 +731,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
         solverIt()->depositParticles();
       }
     }
-
-    this->computeDensityGradients();
-    m_timer.stopEvent("Gradient calculation");
   }
+
+  this->computeDensityGradients(densityStorage,
+                                densitiesIto,
+                                densityGradientsIto,
+                                densityGradientsCDR,
+                                (this->m_physics)->needGradients());
+  m_timer.stopEvent("Gradient calculation");
 
   // Resolve secondary emission. We have filled the relevant particles in the transport step -- this can be done
   // either before or after the reactions.
@@ -729,8 +746,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->barrier();
     m_timer.startEvent("EB particle injection");
     if (this->needSecondaryEmissionEB()) {
-      this->fillSecondaryEmissionEB(a_dt);
-      this->resolveSecondaryEmissionEB(a_dt);
+      std::vector<Scratch<EBAMRIVData>> cdrFluxesScratch;
+      Vector<EBAMRIVData*>              cdrFluxes;
+
+      this->fetchSecondaryEmissionFluxesEB(cdrFluxesScratch, cdrFluxes);
+      this->fillSecondaryEmissionEB(cdrFluxes, a_dt);
+      this->resolveSecondaryEmissionEB(cdrFluxes, a_dt);
     }
     m_timer.stopEvent("EB particle injection");
 
@@ -761,7 +782,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_timer.startEvent("Reaction network");
   if (m_reactiveFieldCentering >= 1.0) {
     // Pure E^(k+1). reactiveElectricField was never filled -- see "Store E^k" above.
-    this->advanceReactionNetwork(this->m_electricFieldFluid, a_dt);
+    this->advanceReactionNetwork(physicsDt,
+                                 this->m_electricFieldFluid,
+                                 densitiesIto,
+                                 densityGradientsIto,
+                                 densityGradientsCDR,
+                                 a_dt);
   }
   else {
     // Pure E^k needs no blending; reactiveElectricField already holds it.
@@ -770,7 +796,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       DataOps::incr(reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
     }
 
-    this->advanceReactionNetwork(reactiveElectricField, a_dt);
+    this->advanceReactionNetwork(physicsDt,
+                                 reactiveElectricField,
+                                 densitiesIto,
+                                 densityGradientsIto,
+                                 densityGradientsCDR,
+                                 a_dt);
   }
   m_timer.stopEvent("Reaction network");
 
@@ -799,8 +830,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->barrier();
     m_timer.startEvent("EB particle injection");
     if (this->needSecondaryEmissionEB()) {
-      this->fillSecondaryEmissionEB(a_dt);
-      this->resolveSecondaryEmissionEB(a_dt);
+      std::vector<Scratch<EBAMRIVData>> cdrFluxesScratch;
+      Vector<EBAMRIVData*>              cdrFluxes;
+
+      this->fetchSecondaryEmissionFluxesEB(cdrFluxesScratch, cdrFluxes);
+      this->fillSecondaryEmissionEB(cdrFluxes, a_dt);
+      this->resolveSecondaryEmissionEB(cdrFluxes, a_dt);
     }
     m_timer.stopEvent("EB particle injection");
 
@@ -848,7 +883,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->computeDiffusionCoefficients();
   m_timer.stopEvent("Post-compute D");
 
-  this->computePhysicsDt();
+  this->computePhysicsDt(physicsDt);
 
   if ((this->m_profile)) {
     m_timer.eventReport(pout(), false);
