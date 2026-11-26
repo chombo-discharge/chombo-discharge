@@ -18,6 +18,7 @@
 #include <memory>
 #include <ostream>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // Chombo includes
@@ -40,15 +41,18 @@ class ScratchPool;
  * object's lifetime, and the pool aborts at the next regrid. Data that must live longer than the function that
  * fetches it is fetched by a caller that spans all of its uses, and passed down by reference.
  *
- * The handle converts implicitly to T&, so it can be passed directly to functions that take the data by reference.
+ * The handle converts implicitly to T&, so it can be passed directly to non-template functions that take the data by
+ * reference. A function template that deduces the data type from its argument (e.g. AmrMesh::copyData or the
+ * templated DataOps functions) does not see the conversion, and takes *handle.
  * References and aliases (e.g. Vector<LevelData<T>*>) taken from it are views: they must not outlive the handle.
  * Copying the underlying EBAMRData into an object that outlives the handle is an error. The pool detects shallow
  * copies of the EBAMRData levels when the handle is destroyed. It cannot detect aliases built with AmrMesh::alias,
  * EBAMRData::slice or aliasLevelData, so those must never outlive the handle either.
  *
- * The data is uninitialized when fetched, and may have more ghost cells than were asked for. A caller that needs an
- * exact number of ghost cells, such as AmrMesh::interpGhostMG or AmrMesh::copyData with CopyStrategy::ValidGhost,
- * fetches with the default number of ghost cells, which no entry exceeds.
+ * The data is uninitialized when fetched, and may have more ghost cells than were asked for. AmrMesh::fetchScratch
+ * refuses more ghost cells than the default, so no entry exceeds the default, and a caller that needs an exact number
+ * of ghost cells (such as AmrMesh::interpGhostMG or AmrMesh::copyData with CopyStrategy::ValidGhost) fetches with the
+ * default.
  * @tparam T Data type. One of the types ScratchPool stores.
  */
 template <typename T>
@@ -300,6 +304,12 @@ private:
      * @brief True while a Scratch owns the temporary.
      */
     bool inUse;
+
+    /**
+     * @brief Number of components and ghost cells of each level when the temporary was built. A null level is
+     * recorded as -1 components. giveBack() checks that the data still has this layout.
+     */
+    std::vector<std::pair<int, IntVect>> layout;
   };
 
   /**
@@ -366,21 +376,23 @@ private:
   typeName() noexcept;
 
   /**
-   * @brief Write the entries of one type. Used by report().
+   * @brief Write the entries of one type, one line per entry.
+   * @param[in]     a_list   Entries of type T
    * @param[in,out] a_os     Output stream
    * @param[in]     a_prefix Text written at the start of every line
    */
   template <typename T>
   void
-  reportType(std::ostream& a_os, const std::string& a_prefix) const noexcept;
+  reportType(const std::vector<Entry<T>>& a_list, std::ostream& a_os, const std::string& a_prefix) const noexcept;
 
   /**
-   * @brief Number of entries of one type that are in use.
-   * @return Number of entries in use
+   * @brief The number of components and ghost cells of each level of a temporary.
+   * @param[in] a_data Temporary
+   * @return One (components, ghost cells) pair per level, with -1 components for a null level.
    */
   template <typename T>
-  int
-  numInUse() const noexcept;
+  static std::vector<std::pair<int, IntVect>>
+  layoutOf(const T& a_data) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

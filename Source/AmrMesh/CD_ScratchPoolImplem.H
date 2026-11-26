@@ -156,6 +156,8 @@ ScratchPool::acquire(const phase::which_phase a_phase,
     MayDay::Abort("ScratchPool::acquire -- the build function returned no data");
   }
 
+  entry.layout = ScratchPool::layoutOf(*entry.data);
+
   list.emplace_back(std::move(entry));
 
   return Scratch<T>(*this, numEntries);
@@ -216,16 +218,25 @@ ScratchPool::giveBack(const int a_entry) noexcept
     }
   }
 
+  // A temporary that was reallocated, deallocated or given other levels through its handle would be handed out again
+  // under a key it no longer matches.
+  if (ScratchPool::layoutOf(*(list[a_entry].data)) != list[a_entry].layout) {
+    const std::string err = std::string("ScratchPool::giveBack -- a ") + ScratchPool::typeName<T>() +
+                            " temporary was reallocated or given other levels through its handle";
+
+    MayDay::Abort(err.c_str());
+  }
+
   list[a_entry].inUse = false;
 }
 
 template <typename T>
 void
-ScratchPool::reportType(std::ostream& a_os, const std::string& a_prefix) const noexcept
+ScratchPool::reportType(const std::vector<Entry<T>>& a_list,
+                        std::ostream&                a_os,
+                        const std::string&           a_prefix) const noexcept
 {
-  const std::vector<Entry<T>>& list = this->entries<T>();
-
-  for (const Entry<T>& entry : list) {
+  for (const Entry<T>& entry : a_list) {
     a_os << a_prefix << ScratchPool::typeName<T>() << ": phase = " << static_cast<int>(entry.phase)
          << ", level = " << entry.level << ", components = " << entry.nComp << ", ghost cells = " << entry.ghost
          << (entry.inUse ? ", in use" : ", free") << "\n";
@@ -233,18 +244,26 @@ ScratchPool::reportType(std::ostream& a_os, const std::string& a_prefix) const n
 }
 
 template <typename T>
-int
-ScratchPool::numInUse() const noexcept
+std::vector<std::pair<int, IntVect>>
+ScratchPool::layoutOf(const T& a_data) noexcept
 {
-  int count = 0;
+  std::vector<std::pair<int, IntVect>> layout;
 
-  for (const Entry<T>& entry : this->entries<T>()) {
-    if (entry.inUse) {
-      count++;
+  if constexpr (std::is_same<T, LevelData<EBCellFAB>>::value) {
+    layout.emplace_back(a_data.nComp(), a_data.ghostVect());
+  }
+  else {
+    for (int lvl = 0; lvl < a_data.size(); lvl++) {
+      if (a_data[lvl].isNull()) {
+        layout.emplace_back(-1, IntVect::Zero);
+      }
+      else {
+        layout.emplace_back(a_data[lvl]->nComp(), a_data[lvl]->ghostVect());
+      }
     }
   }
 
-  return count;
+  return layout;
 }
 
 template <>

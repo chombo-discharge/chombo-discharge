@@ -2848,13 +2848,29 @@ protected:
   assertRealm(const std::string& a_realm, const std::string& a_caller) const;
 
   /**
-   * @brief Fill a temporary with NaN.
-   * @tparam T Type of the temporary. One of the types the scratch pool holds.
-   * @param[in,out] a_data Temporary
+   * @brief Hand out a temporary from the pool of a realm. Shared by fetchScratch and fetchLevelScratch.
+   * @details Aborts if the realm does not exist or if more ghost cells than the default are asked for, and fills the
+   * temporary with NaN when AmrMesh.scratch_poison is set.
+   * @tparam T     Type of the temporary
+   * @tparam Build Callable () -> std::unique_ptr<T> that allocates a new temporary with the key
+   * @param[in] a_realm  Realm name
+   * @param[in] a_phase  Phase. phase::gas for types without a phase.
+   * @param[in] a_level  Grid level for single-level data, -1 for data over the whole hierarchy
+   * @param[in] a_nComp  Number of components
+   * @param[in] a_ghost  Number of ghost cells
+   * @param[in] a_build  Allocates a new temporary
+   * @param[in] a_caller Name of the calling function, for error messages
+   * @return Handle that owns the temporary until it is destroyed
    */
-  template <typename T>
-  void
-  poisonScratch(T& a_data) const;
+  template <typename T, typename Build>
+  Scratch<T>
+  fetchFromPool(const std::string&       a_realm,
+                const phase::which_phase a_phase,
+                const int                a_level,
+                const int                a_nComp,
+                const int                a_ghost,
+                const Build&             a_build,
+                const std::string&       a_caller) const;
 
   /**
    * @brief Parse centroid interpolation stencils

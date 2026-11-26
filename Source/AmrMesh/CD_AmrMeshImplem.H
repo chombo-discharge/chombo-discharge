@@ -1333,28 +1333,41 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles
   }
 }
 
-template <typename T>
-void
-AmrMesh::poisonScratch(T& a_data) const
+template <typename T, typename Build>
+Scratch<T>
+AmrMesh::fetchFromPool(const std::string&       a_realm,
+                       const phase::which_phase a_phase,
+                       const int                a_level,
+                       const int                a_nComp,
+                       const int                a_ghost,
+                       const Build&             a_build,
+                       const std::string&       a_caller) const
 {
-  const Real nan = std::numeric_limits<Real>::quiet_NaN();
+  CH_assert(a_nComp > 0);
+  CH_assert(a_ghost >= 0);
 
-  if constexpr (std::is_same<T, EBAMRFAB>::value) {
-    for (int lvl = 0; lvl < a_data.size(); lvl++) {
-      const DataIterator& dit  = a_data[lvl]->dataIterator();
-      const int           nbox = dit.size();
+  this->assertRealm(a_realm, a_caller);
 
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+  // The pool may hand out an entry with more ghost cells than asked for. Capping requests at the default means that a
+  // caller asking for the default gets exactly the default.
+  if (a_ghost > m_numGhostCells) {
+    const std::string err = a_caller + " -- asked for " + std::to_string(a_ghost) +
+                            " ghost cells, more than the default of " + std::to_string(m_numGhostCells);
 
-        (*a_data[lvl])[din].setVal(nan);
-      }
-    }
+    MayDay::Abort(err.c_str());
   }
-  else {
-    DataOps::setValue(a_data, nan);
+
+  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase,
+                                                                               a_level,
+                                                                               a_nComp,
+                                                                               a_ghost,
+                                                                               a_build);
+
+  if (m_scratchPoison) {
+    DataOps::setValue(*scratch, std::numeric_limits<Real>::quiet_NaN());
   }
+
+  return scratch;
 }
 
 template <typename T>
@@ -1373,11 +1386,6 @@ AmrMesh::fetchScratch(const std::string&       a_realm,
                   std::is_same<T, EBAMRIVData>::value,
                 "AmrMesh::fetchScratch -- this overload takes EBAMRCellData, EBAMRFluxData or EBAMRIVData");
 
-  CH_assert(a_nComp > 0);
-  CH_assert(a_ghost >= 0);
-
-  this->assertRealm(a_realm, "AmrMesh::fetchScratch");
-
   auto build = [this, &a_realm, a_phase, a_nComp, a_ghost]() -> std::unique_ptr<T> {
     std::unique_ptr<T> data(new T());
 
@@ -1386,13 +1394,7 @@ AmrMesh::fetchScratch(const std::string&       a_realm,
     return data;
   };
 
-  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase, -1, a_nComp, a_ghost, build);
-
-  if (m_scratchPoison) {
-    this->poisonScratch(*scratch);
-  }
-
-  return scratch;
+  return this->template fetchFromPool<T>(a_realm, a_phase, -1, a_nComp, a_ghost, build, "AmrMesh::fetchScratch");
 }
 
 template <typename T>
@@ -1408,11 +1410,6 @@ AmrMesh::fetchScratch(const std::string& a_realm, const int a_nComp, const int a
                   std::is_same<T, MFAMRFluxData>::value || std::is_same<T, MFAMRIVData>::value,
                 "AmrMesh::fetchScratch -- this overload takes EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData");
 
-  CH_assert(a_nComp > 0);
-  CH_assert(a_ghost >= 0);
-
-  this->assertRealm(a_realm, "AmrMesh::fetchScratch");
-
   auto build = [this, &a_realm, a_nComp, a_ghost]() -> std::unique_ptr<T> {
     std::unique_ptr<T> data(new T());
 
@@ -1422,13 +1419,7 @@ AmrMesh::fetchScratch(const std::string& a_realm, const int a_nComp, const int a
   };
 
   // These types have no phase; the pool keys them on phase::gas.
-  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(phase::gas, -1, a_nComp, a_ghost, build);
-
-  if (m_scratchPoison) {
-    this->poisonScratch(*scratch);
-  }
-
-  return scratch;
+  return this->template fetchFromPool<T>(a_realm, phase::gas, -1, a_nComp, a_ghost, build, "AmrMesh::fetchScratch");
 }
 
 #include <CD_NamespaceFooter.H>
