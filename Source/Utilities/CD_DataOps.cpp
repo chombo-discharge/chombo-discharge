@@ -3222,6 +3222,24 @@ DataOps::setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp)
 }
 
 void
+DataOps::setValue(EBAMRFAB& a_lhs, const Real a_value)
+{
+  CH_TIME("DataOps::setValue(EBAMRFAB, Real)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    const DataIterator& dit  = a_lhs[lvl]->dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      (*a_lhs[lvl])[din].setVal(a_value);
+    }
+  }
+}
+
+void
 DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp)
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, Real, int)");

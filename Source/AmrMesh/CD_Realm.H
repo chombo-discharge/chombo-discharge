@@ -870,7 +870,6 @@ protected:
 
   /**
    * @brief Pool of temporaries on this realm, built on the current grids.
-   * @details Mutable because AmrMesh hands out temporaries from const member functions.
    */
   ScratchPool m_scratchPool;
 

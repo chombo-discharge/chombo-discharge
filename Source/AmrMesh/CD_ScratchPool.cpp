@@ -67,25 +67,35 @@ ScratchPool::clear() noexcept
 bool
 ScratchPool::allReturned() const noexcept
 {
-  const int numInUse = this->numInUse<EBAMRCellData>() + this->numInUse<EBAMRFluxData>() +
-                       this->numInUse<EBAMRIVData>() + this->numInUse<EBAMRFAB>() + this->numInUse<MFAMRCellData>() +
-                       this->numInUse<MFAMRFluxData>() + this->numInUse<MFAMRIVData>() +
-                       this->numInUse<LevelData<EBCellFAB>>();
+  bool allFree = true;
 
-  return numInUse == 0;
+  std::apply(
+    [&allFree](const auto&... a_list) -> void {
+      const auto listFree = [](const auto& a_entries) -> bool {
+        for (const auto& entry : a_entries) {
+          if (entry.inUse) {
+            return false;
+          }
+        }
+
+        return true;
+      };
+
+      allFree = (listFree(a_list) && ...);
+    },
+    m_entries);
+
+  return allFree;
 }
 
 void
 ScratchPool::report(std::ostream& a_os, const std::string& a_prefix) const noexcept
 {
-  this->reportType<EBAMRCellData>(a_os, a_prefix);
-  this->reportType<EBAMRFluxData>(a_os, a_prefix);
-  this->reportType<EBAMRIVData>(a_os, a_prefix);
-  this->reportType<EBAMRFAB>(a_os, a_prefix);
-  this->reportType<MFAMRCellData>(a_os, a_prefix);
-  this->reportType<MFAMRFluxData>(a_os, a_prefix);
-  this->reportType<MFAMRIVData>(a_os, a_prefix);
-  this->reportType<LevelData<EBCellFAB>>(a_os, a_prefix);
+  std::apply(
+    [this, &a_os, &a_prefix](const auto&... a_list) -> void {
+      (this->reportType(a_list, a_os, a_prefix), ...);
+    },
+    m_entries);
 }
 
 void

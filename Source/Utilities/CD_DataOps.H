@@ -1478,6 +1478,14 @@ public:
   setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
   /**
+   * @brief Set value in regular grid data, ghost cells included.
+   * @param[out] a_lhs   Input/output data
+   * @param[in]  a_value Value to set
+   */
+  static void
+  setValue(EBAMRFAB& a_lhs, const Real a_value);
+
+  /**
    * @brief Set value in data
    * @param[out] a_lhs   Input/output data
    * @param[in]  a_value Value to set
