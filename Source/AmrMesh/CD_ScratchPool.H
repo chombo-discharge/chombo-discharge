@@ -96,43 +96,64 @@ public:
 
   /**
    * @brief Access the data.
+   * @details Only on a named handle: a reference taken from a temporary handle would outlive the handle, which returns
+   * the data to the pool at the end of the statement.
    * @return The temporary
    */
-  operator T&() noexcept;
+  operator T&() & noexcept;
 
   /**
    * @brief Access the data.
    * @return The temporary
    */
-  operator const T&() const noexcept;
+  operator const T&() const& noexcept;
+
+  /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  operator T&() && = delete;
+
+  /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  operator const T&() const&& = delete;
 
   /**
    * @brief Access the data.
    * @return The temporary
    */
   T&
-  operator*() noexcept;
+  operator*() & noexcept;
 
   /**
    * @brief Access the data.
    * @return The temporary
    */
   const T&
-  operator*() const noexcept;
+  operator*() const& noexcept;
+
+  /**
+   * @brief Disallowed on a temporary handle.
+   * @return Not applicable
+   */
+  T&
+  operator*() && = delete;
 
   /**
    * @brief Access the data.
    * @return Pointer to the temporary
    */
   T*
-  operator->() noexcept;
+  operator->() & noexcept;
 
   /**
    * @brief Access the data.
    * @return Pointer to the temporary
    */
   const T*
-  operator->() const noexcept;
+  operator->() const& noexcept;
 
 private:
   friend class ScratchPool;
@@ -274,39 +295,39 @@ private:
     /**
      * @brief The temporary.
      */
-    std::unique_ptr<T> data;
+    std::unique_ptr<T> m_data;
 
     /**
      * @brief Phase. phase::gas for types without a phase.
      */
-    phase::which_phase phase;
+    phase::which_phase m_phase;
 
     /**
      * @brief Grid level for single-level data, -1 for data over the whole hierarchy.
      */
-    int level;
+    int m_level;
 
     /**
      * @brief Number of components.
      */
-    int nComp;
+    int m_nComp;
 
     /**
      * @brief Number of ghost cells.
      */
-    int ghost;
+    int m_ghost;
 
     /**
      * @brief True while a Scratch owns the temporary.
      */
-    bool inUse;
+    bool m_inUse;
 
     /**
-     * @brief Each level of the temporary as built: the LevelData it points to, its number of components and its ghost
-     * cells. giveBack() checks that the data still has these levels, so that reallocating or replacing them through the
-     * handle is caught.
+     * @brief Each level of the temporary as built: the LevelData it points to, its grids, its number of components and
+     * its ghost cells. giveBack() checks that the data still has these levels, so that reallocating, redefining or
+     * replacing them through the handle is caught.
      */
-    std::vector<std::tuple<const void*, int, IntVect>> layout;
+    std::vector<std::tuple<const void*, DisjointBoxLayout, int, IntVect>> m_layout;
   };
 
   /**
@@ -383,10 +404,11 @@ private:
   reportType(const std::vector<Entry<T>>& a_list, std::ostream& a_os, const std::string& a_prefix) const noexcept;
 
   /**
-   * @brief Call a function on each level of a temporary, with the level's address, components and ghost cells.
-   * @details A null level is passed as a null address, -1 components and zero ghost cells.
+   * @brief Call a function on each level of a temporary, with the level's address, grids, components and ghost cells.
+   * @details A null level is passed as a null address, undefined grids, -1 components and zero ghost cells.
    * @param[in] a_data  Temporary
-   * @param[in] a_visit Callable (int level, const void* address, int components, const IntVect& ghost) -> void
+   * @param[in] a_visit Callable (int level, const void* address, const DisjointBoxLayout& grids, int components,
+   * const IntVect& ghost) -> void
    */
   template <typename T, typename Visit>
   static void

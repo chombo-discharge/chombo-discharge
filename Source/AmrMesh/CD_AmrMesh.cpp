@@ -4535,7 +4535,12 @@ AmrMesh::fetchLevelScratch(const std::string&       a_realm,
     pout() << "AmrMesh::fetchLevelScratch" << endl;
   }
 
-  CH_assert(a_level >= 0 && a_level <= m_finestLevel);
+  if (a_level < 0 || a_level > m_finestLevel) {
+    const std::string err = "AmrMesh::fetchLevelScratch -- level " + std::to_string(a_level) + " is not in [0, " +
+                            std::to_string(m_finestLevel) + "]";
+
+    MayDay::Abort(err.c_str());
+  }
 
   auto build = [this, &a_realm, a_phase, a_level, a_nComp, a_ghost]() -> std::unique_ptr<LevelData<EBCellFAB>> {
     std::unique_ptr<LevelData<EBCellFAB>> data(new LevelData<EBCellFAB>());
