@@ -569,8 +569,13 @@ BrownianWalkerStepper::advance(const Real a_dt)
   // diffusion coefficient would be handled correctly.
   const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
 
+  Scratch<EBAMRCellData> diffusionGradient = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                m_phase,
+                                                                                SpaceDim,
+                                                                                m_amr->getNumberOfGhostCells());
+
   if (gradientDrift) {
-    m_solver->computeDiffusionGradient();
+    m_solver->computeDiffusionGradient(diffusionGradient);
   }
 
   // 1. Euler-Maruayma kernel on each patch.
@@ -595,7 +600,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
       // kernels below move a particle: the interpolation stencil reads the patch that owns X^k, and the particles
       // are not remapped until after the whole Euler-Maruyama kernel has run.
       if (gradientDrift) {
-        m_solver->interpolateDiffusionGradient(lvl, din);
+        m_solver->interpolateDiffusionGradient(lvl, din, (*(*diffusionGradient)[lvl])[din]);
       }
 
       // Euler step.

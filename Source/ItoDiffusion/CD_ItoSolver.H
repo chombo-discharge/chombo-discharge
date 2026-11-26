@@ -869,35 +869,35 @@ public:
 
   /**
    * @brief Compute the cell-centered gradient of the mesh diffusion field.
-   * @details Fills m_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the
+   * @details Fills a_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the
    * result and updates its ghost cells. The caller must have brought m_diffusionFunction's own ghost cells up to
    * date first -- the gradient stencil reaches into them and across refinement boundaries. Does nothing when the
-   * solver is not diffusive or when ItoSolver.diffusion_grad_drift is false, in which case m_diffusionGradient
-   * is not allocated.
+   * solver is not diffusive or when ItoSolver.diffusion_grad_drift is false.
+   * @param[out] a_diffusionGradient Gradient of the diffusion field. Must have SpaceDim components.
    */
   virtual void
-  computeDiffusionGradient();
+  computeDiffusionGradient(EBAMRCellData& a_diffusionGradient) const;
 
   /**
    * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.
    * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns, from which the
    * caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is
-   * not diffusive or the drift correction is disabled, so callers may add the term unconditionally. Requires a
-   * preceding call to computeDiffusionGradient().
+   * not diffusive or the drift correction is disabled, so callers may add the term unconditionally.
+   * @param[in] a_diffusionGradient Gradient of the diffusion field, from computeDiffusionGradient().
    */
   virtual void
-  interpolateDiffusionGradient();
+  interpolateDiffusionGradient(const EBAMRCellData& a_diffusionGradient);
 
   /**
    * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.
-   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns. Requires a
-   * preceding call to computeDiffusionGradient(). Public because the time steppers call it per patch, from
-   * inside their own OpenMP loops over boxes.
-   * @param[in] a_lvl Grid level
-   * @param[in] a_dit Grid index
+   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns. Public because the
+   * time steppers call it per patch, from inside their own OpenMP loops over boxes.
+   * @param[in] a_lvl               Grid level
+   * @param[in] a_dit               Grid index
+   * @param[in] a_diffusionGradient Gradient of the diffusion field on this patch, from computeDiffusionGradient().
    */
   virtual void
-  interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit);
+  interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_diffusionGradient);
 
   /**
    * @brief Check if the grad(D) drift correction is enabled.
@@ -1503,7 +1503,7 @@ protected:
   bool m_plotDiffCo;
 
   /**
-   * @brief Flag for outputting m_diffusionGradient to plot files.
+   * @brief Flag for outputting the gradient of the diffusion field to plot files.
    */
   bool m_plotDiffusionGradient;
 
@@ -1576,14 +1576,6 @@ protected:
    * @brief Diffusion-centerer field used for interpolating diffusion coefficients
    */
   EBAMRCellData m_diffusionFunction;
-
-  /**
-   * @brief Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction.
-   * @details Allocated only when the solver is diffusive and m_diffusionGradientDrift is true; otherwise this is a
-   * bare pointer holder. Recomputed from m_diffusionFunction by computeDiffusionGradient(), so it carries no state
-   * across a regrid and is never checkpointed.
-   */
-  EBAMRCellData m_diffusionGradient;
 
   /**
    * @brief Reflected images of the band particles, for IrregularDeposition::Mirror.

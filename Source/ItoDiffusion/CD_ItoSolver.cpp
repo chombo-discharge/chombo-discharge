@@ -198,8 +198,6 @@ ItoSolver::parseDiffusionGradient()
 
   ParmParse pp(m_className.c_str());
 
-  // Not a runtime option: the flag decides whether m_diffusionGradient is allocated at all, and allocate()
-  // runs once. Flipping it mid-run would leave the drift correction reading an unallocated field.
   pp.get("diffusion_grad_drift", m_diffusionGradientDrift);
 }
 
@@ -1180,15 +1178,6 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
   }
 
-  // The grad(D) drift correction is the only consumer of the diffusion gradient, so skip the SpaceDim
-  // components per diffusive species when it is switched off.
-  if (m_isDiffusive && m_diffusionGradientDrift) {
-    m_amr->allocate(m_diffusionGradient, m_realm, m_phase, SpaceDim);
-  }
-  else {
-    m_amr->allocatePointer(m_diffusionGradient, m_realm);
-  }
-
   // Regrid particle containers. The bulk one is empty -- preRegrid() moved its particles into
   // m_regridParticles -- but it still has to make the trip, since ParticleContainer::regrid() is what
   // rebuilds its holders over the new layout.
@@ -1288,15 +1277,6 @@ ItoSolver::allocate()
   }
   else {
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
-  }
-
-  // The grad(D) drift correction is the only consumer of the diffusion gradient, so skip the SpaceDim
-  // components per diffusive species when it is switched off.
-  if (m_isDiffusive && m_diffusionGradientDrift) {
-    m_amr->allocate(m_diffusionGradient, m_realm, m_phase, SpaceDim);
-  }
-  else {
-    m_amr->allocatePointer(m_diffusionGradient, m_realm);
   }
 
   // ParticleContainer is move-only-incapable, so default-construct each container in place (operator[])
@@ -1770,9 +1750,19 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
     this->writeData(a_output, a_comp, m_diffusionFunction, a_outputRealm, a_level, false, true);
   }
 
-  // Plot the diffusion gradient
+  // Plot the diffusion gradient, computed from the current diffusion field.
   if (m_plotDiffusionGradient && m_isDiffusive && m_diffusionGradientDrift) {
-    this->writeData(a_output, a_comp, m_diffusionGradient, a_outputRealm, a_level, false, true);
+    Scratch<EBAMRCellData> diffusionGradient = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                  m_phase,
+                                                                                  SpaceDim,
+                                                                                  m_amr->getNumberOfGhostCells());
+
+    // The plot includes ghost cells, and the corner ghost cells outside the domain are not written by the gradient.
+    DataOps::setValue(diffusionGradient, 0.0);
+
+    this->computeDiffusionGradient(diffusionGradient);
+
+    this->writeData(a_output, a_comp, diffusionGradient, a_outputRealm, a_level, false, true);
   }
 
   // Write velocities
@@ -2381,7 +2371,6 @@ ItoSolver::preRegrid(const int a_lbase, const int /*a_oldFinestLevel*/)
   m_mobilityFunction.clear();
   m_velocityFunction.clear();
   m_diffusionFunction.clear();
-  m_diffusionGradient.clear();
 }
 
 ParticleContainer<ItoParticle>&
@@ -2894,7 +2883,7 @@ ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit)
 }
 
 void
-ItoSolver::computeDiffusionGradient()
+ItoSolver::computeDiffusionGradient(EBAMRCellData& a_diffusionGradient) const
 {
   CH_TIME("ItoSolver::computeDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2902,19 +2891,19 @@ ItoSolver::computeDiffusionGradient()
   }
 
   if (m_isDiffusive && m_diffusionGradientDrift) {
-    CH_assert(m_diffusionGradient[0]->nComp() == SpaceDim);
+    CH_assert(a_diffusionGradient[0]->nComp() == SpaceDim);
 
     // Reaches into m_diffusionFunction's ghost cells and across refinement boundaries, so the caller is
     // responsible for having filled them.
-    m_amr->computeGradient(m_diffusionGradient, m_diffusionFunction, m_realm, m_phase);
+    m_amr->computeGradient(a_diffusionGradient, m_diffusionFunction, m_realm, m_phase);
 
-    m_amr->conservativeAverage(m_diffusionGradient, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_diffusionGradient, m_realm, m_phase);
+    m_amr->conservativeAverage(a_diffusionGradient, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_diffusionGradient, m_realm, m_phase);
   }
 }
 
 void
-ItoSolver::interpolateDiffusionGradient()
+ItoSolver::interpolateDiffusionGradient(const EBAMRCellData& a_diffusionGradient)
 {
   CH_TIME("ItoSolver::interpolateDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2931,13 +2920,13 @@ ItoSolver::interpolateDiffusionGradient()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      this->interpolateDiffusionGradient(lvl, din);
+      this->interpolateDiffusionGradient(lvl, din, (*a_diffusionGradient[lvl])[din]);
     }
   }
 }
 
 void
-ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit)
+ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_diffusionGradient)
 {
   CH_TIME("ItoSolver::interpolateDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2954,14 +2943,12 @@ ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit)
     const Real           dx      = m_amr->getDx()[a_lvl];
     const RealVect       probLo  = m_amr->getProbLo();
 
-    const EBCellFAB& gradD = (*m_diffusionGradient[a_lvl])[a_dit];
-
     // Interpolate grad(D) onto the scratch vector columns, using the same interpolation the velocities get.
     EBParticleMesh meshInterp(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     meshInterp.interpolate<D_DECL(&ItoParticle::scratch_x, &ItoParticle::scratch_y, &ItoParticle::scratch_z)>(
       leaf,
-      gradD,
+      a_diffusionGradient,
       m_deposition,
       m_forceIrregInterpolationNGP);
   }
