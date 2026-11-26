@@ -67,7 +67,6 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
 
   const int ghost = m_amr->getNumberOfGhostCells();
 
-  Scratch<EBAMRCellData> phi                  = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
   Scratch<EBAMRCellData> numPhysPhotonsTotal  = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
   Scratch<EBAMRCellData> numPhysPhotonsPacket = m_amr->fetchScratch<EBAMRCellData>(m_realm,
                                                                                    m_phase,
@@ -101,6 +100,8 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
 
       ParticleContainer<Photon> scratchPhotons;
       m_amr->allocate(scratchPhotons, m_realm);
+
+      Scratch<EBAMRCellData> phi = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
 
       for (int i = 0; i < m_numSamplingPackets; i++) {
         const size_t maxPhotonsPerCell = (i == 0) ? maxPhotonsPerPacket + remainder : maxPhotonsPerPacket;
@@ -1873,6 +1874,15 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
+  const bool plotAnyPhotons = m_plotPhotons || m_plotBulkPhotons || m_plotEBPhotons || m_plotDomainPhotons ||
+                              m_plotSourcePhotons;
+
+  if (!plotAnyPhotons) {
+    CH_STOP(t2);
+
+    return;
+  }
+
   Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
                                                                    m_phase,
                                                                    a_level,

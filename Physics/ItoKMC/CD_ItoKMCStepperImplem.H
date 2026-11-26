@@ -2033,7 +2033,7 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(*scratch, *a_data[a_level], a_level, a_data.getRealm(), a_data.getRealm());
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -2941,6 +2941,9 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
                                                                             1,
                                                                             m_amr->getNumberOfGhostCells());
 
+  // copyData fills only the valid cells of fluidScratch1, but all of it is added below, ghost cells included.
+  DataOps::setValue(*fluidScratch1, 0.0);
+
   // Guard the realm spot-checks: either layout may legitimately be empty. A chemistry that puts every
   // plasma species on the Ito solver leaves a_cdrDensities empty, and indexing [0] to check its realm
   // then aborts on the assert rather than on anything real. The loops below iterate the solver
@@ -3040,6 +3043,9 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&               
                                                                                m_plasmaPhase,
                                                                                1,
                                                                                m_amr->getNumberOfGhostCells());
+
+  // copyData fills only the valid cells of fluidScratch1, but all of it is added below, ghost cells included.
+  DataOps::setValue(*fluidScratch1, 0.0);
 
   DataOps::setValue(a_conductivity, 0.0);
 
@@ -5206,6 +5212,9 @@ ItoKMCStepper<I, C, R, F>::depositCdrProducts(EBAMRCellData& a_cdrChange) noexce
                                                                                1,
                                                                                m_amr->getNumberOfGhostCells());
 
+  // copyData fills only the valid cells of fluidScratch1, but all of it is added below, ghost cells included.
+  DataOps::setValue(*fluidScratch1, 0.0);
+
   CH_assert(a_cdrChange.getRealm() == m_fluidRealm);
 
   // Species whose product container is empty on EVERY rank deposit identically zero, so the whole block
@@ -7105,31 +7114,19 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
   const int numCdrComp       = std::max(numCdrSpecies, 1);
   const int numPhotonComp    = std::max(numPhotonSpecies, 1);
 
-  Scratch<EBAMRCellData> fluidPPC          = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+  Scratch<EBAMRCellData> fluidPPC       = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
                                                                        m_plasmaPhase,
                                                                        numPlasmaSpecies,
                                                                        ghost);
-  Scratch<EBAMRCellData> particleItoPPC    = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
+  Scratch<EBAMRCellData> particleItoPPC = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
                                                                              m_plasmaPhase,
                                                                              numItoComp,
                                                                              ghost);
-  Scratch<EBAMRCellData> particleOldItoPPC = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
-                                                                                m_plasmaPhase,
-                                                                                numItoComp,
-                                                                                ghost);
-  Scratch<EBAMRCellData> fluidCdrPPC       = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+  Scratch<EBAMRCellData> fluidCdrPPC    = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
                                                                           m_plasmaPhase,
                                                                           numCdrComp,
                                                                           ghost);
-  Scratch<EBAMRCellData> fluidOldCdrPPC    = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
-                                                                             m_plasmaPhase,
-                                                                             numCdrComp,
-                                                                             ghost);
-  Scratch<EBAMRCellData> particleYPC       = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
-                                                                          m_plasmaPhase,
-                                                                          numPhotonComp,
-                                                                          ghost);
-  Scratch<EBAMRCellData> fluidYPC          = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
+  Scratch<EBAMRCellData> fluidYPC       = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
                                                                        m_plasmaPhase,
                                                                        numPhotonComp,
                                                                        ghost);
@@ -7139,8 +7136,7 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
 
-  // Compute the number of reactive particles for both Ito and CDR species. Also do a backup of the initial number
-  // of particles per cell. This is required when reconciling the results lateron.
+  // Compute the number of reactive particles for both Ito and CDR species.
   if (numItoSpecies > 0) {
     this->computeReactiveItoParticlesPerCell(*particleItoPPC);
 
@@ -7148,8 +7144,6 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
     const Interval dstInterv(0, numItoSpecies - 1);
 
     m_amr->copyData(*fluidPPC, *particleItoPPC, dstInterv, srcInterv);
-
-    DataOps::copy(*particleOldItoPPC, *particleItoPPC);
   }
   if (numCdrSpecies > 0) {
     this->computeReactiveCdrParticlesPerCell(*fluidCdrPPC);
@@ -7158,12 +7152,9 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
     const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
 
     m_amr->copyData(*fluidPPC, *fluidCdrPPC, dstInterv, srcInterv);
-
-    DataOps::copy(*fluidOldCdrPPC, *fluidCdrPPC);
   }
 
   DataOps::setValue(*fluidYPC, 0.0);
-  DataOps::setValue(*particleYPC, 0.0);
 
   // Advance the reaction network using a zero time step, which should not trigger any change in the state vector.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -7754,6 +7745,9 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
                                                                                m_plasmaPhase,
                                                                                1,
                                                                                m_amr->getNumberOfGhostCells());
+
+  // copyData fills only the valid cells of fluidScratch1, but all of it is added below, ghost cells included.
+  DataOps::setValue(*fluidScratch1, 0.0);
 
   CH_assert(a_dt > 0.0);
 
