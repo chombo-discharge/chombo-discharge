@@ -167,7 +167,7 @@ The handle converts to a reference to the data, so it can be passed to functions
 The following rules apply:
 
 * The data is uninitialized when it is fetched. A caller that reads a value before writing it, including ghost cells, sets it first.
-* The data may have more ghost cells than were asked for. A caller that needs an exact number of ghost cells fetches with the default number, which no temporary exceeds.
+* The data has exactly the number of components and ghost cells that were asked for.
 * A handle is never stored in a class member. Data that must live longer than the function that fetches it is fetched by a caller that spans all of its uses, and passed down by reference.
 * References and aliases taken from a handle must not outlive it. A shallow copy of the data that outlives its handle makes the pool abort when the handle is destroyed. Aliases made with ``AmrMesh::alias``, ``EBAMRData::slice`` or ``aliasLevelData`` are not detected.
 * The pool is emptied whenever the grids change, so a handle cannot be held across a regrid.

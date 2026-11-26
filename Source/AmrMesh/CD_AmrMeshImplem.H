@@ -1343,19 +1343,14 @@ AmrMesh::fetchFromPool(const std::string&       a_realm,
                        const Build&             a_build,
                        const std::string&       a_caller) const
 {
-  CH_assert(a_nComp > 0);
-  CH_assert(a_ghost >= 0);
-
-  this->assertRealm(a_realm, a_caller);
-
-  // The pool may hand out an entry with more ghost cells than asked for. Capping requests at the default means that a
-  // caller asking for the default gets exactly the default.
-  if (a_ghost > m_numGhostCells) {
-    const std::string err = a_caller + " -- asked for " + std::to_string(a_ghost) +
-                            " ghost cells, more than the default of " + std::to_string(m_numGhostCells);
+  if (a_nComp <= 0 || a_ghost < 0) {
+    const std::string err = a_caller + " -- asked for " + std::to_string(a_nComp) + " components and " +
+                            std::to_string(a_ghost) + " ghost cells";
 
     MayDay::Abort(err.c_str());
   }
+
+  this->assertRealm(a_realm, a_caller);
 
   Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase,
                                                                                a_level,

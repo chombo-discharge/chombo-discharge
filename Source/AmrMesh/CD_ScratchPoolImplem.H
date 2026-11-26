@@ -111,7 +111,7 @@ ScratchPool::acquire(const phase::which_phase a_phase,
                      const int                a_level,
                      const int                a_nComp,
                      const int                a_ghost,
-                     const Build&             a_build) noexcept
+                     const Build&             a_build)
 {
   CH_TIME("ScratchPool::acquire");
 
@@ -121,26 +121,17 @@ ScratchPool::acquire(const phase::which_phase a_phase,
 
   const int numEntries = static_cast<int>(list.size());
 
-  // A free entry with the same phase, level and number of components, and at least the requested number of ghost
-  // cells, will do. Prefer the fewest ghost cells, so that an exact match is used when there is one and the entries
-  // with wide ghost regions stay free for the callers that need them.
-  int best = -1;
-
+  // A free entry with exactly the same key will do. The number of ghost cells is matched exactly: the irregular-cell
+  // sets of EB data grow with it, so a wider temporary is not interchangeable with a narrower one.
   for (int i = 0; i < numEntries; i++) {
-    const Entry<T>& entry = list[i];
+    Entry<T>& entry = list[i];
 
-    const bool match = !entry.inUse && (entry.phase == a_phase) && (entry.level == a_level) &&
-                       (entry.nComp == a_nComp) && (entry.ghost >= a_ghost);
+    if (!entry.inUse && (entry.phase == a_phase) && (entry.level == a_level) && (entry.nComp == a_nComp) &&
+        (entry.ghost == a_ghost)) {
+      entry.inUse = true;
 
-    if (match && (best < 0 || entry.ghost < list[best].ghost)) {
-      best = i;
+      return Scratch<T>(*this, i);
     }
-  }
-
-  if (best >= 0) {
-    list[best].inUse = true;
-
-    return Scratch<T>(*this, best);
   }
 
   Entry<T> entry;
@@ -156,7 +147,11 @@ ScratchPool::acquire(const phase::which_phase a_phase,
     MayDay::Abort("ScratchPool::acquire -- the build function returned no data");
   }
 
-  entry.layout = ScratchPool::layoutOf(*entry.data);
+  ScratchPool::forEachLevel(
+    *entry.data,
+    [&entry](const int /*a_lvl*/, const void* a_address, const int a_levelComps, const IntVect& a_levelGhost) {
+      entry.layout.emplace_back(a_address, a_levelComps, a_levelGhost);
+    });
 
   list.emplace_back(std::move(entry));
 
@@ -220,7 +215,18 @@ ScratchPool::giveBack(const int a_entry) noexcept
 
   // A temporary that was reallocated, deallocated or given other levels through its handle would be handed out again
   // under a key it no longer matches.
-  if (ScratchPool::layoutOf(*(list[a_entry].data)) != list[a_entry].layout) {
+  bool sameLayout = true;
+
+  ScratchPool::forEachLevel(
+    *(list[a_entry].data),
+    [&](const int a_lvl, const void* a_address, const int a_levelComps, const IntVect& a_levelGhost) {
+      const auto& recorded = list[a_entry].layout;
+
+      sameLayout = sameLayout && (a_lvl < static_cast<int>(recorded.size())) &&
+                   (recorded[a_lvl] == std::make_tuple(a_address, a_levelComps, a_levelGhost));
+    });
+
+  if (!sameLayout || static_cast<int>(list[a_entry].layout.size()) != ScratchPool::numLevels(*(list[a_entry].data))) {
     const std::string err = std::string("ScratchPool::giveBack -- a ") + ScratchPool::typeName<T>() +
                             " temporary was reallocated or given other levels through its handle";
 
@@ -243,27 +249,35 @@ ScratchPool::reportType(const std::vector<Entry<T>>& a_list,
   }
 }
 
-template <typename T>
-std::vector<std::pair<int, IntVect>>
-ScratchPool::layoutOf(const T& a_data) noexcept
+template <typename T, typename Visit>
+void
+ScratchPool::forEachLevel(const T& a_data, const Visit& a_visit) noexcept
 {
-  std::vector<std::pair<int, IntVect>> layout;
-
   if constexpr (std::is_same<T, LevelData<EBCellFAB>>::value) {
-    layout.emplace_back(a_data.nComp(), a_data.ghostVect());
+    a_visit(0, static_cast<const void*>(&a_data), a_data.nComp(), a_data.ghostVect());
   }
   else {
     for (int lvl = 0; lvl < a_data.size(); lvl++) {
       if (a_data[lvl].isNull()) {
-        layout.emplace_back(-1, IntVect::Zero);
+        a_visit(lvl, nullptr, -1, IntVect::Zero);
       }
       else {
-        layout.emplace_back(a_data[lvl]->nComp(), a_data[lvl]->ghostVect());
+        a_visit(lvl, static_cast<const void*>(&(*a_data[lvl])), a_data[lvl]->nComp(), a_data[lvl]->ghostVect());
       }
     }
   }
+}
 
-  return layout;
+template <typename T>
+int
+ScratchPool::numLevels(const T& a_data) noexcept
+{
+  if constexpr (std::is_same<T, LevelData<EBCellFAB>>::value) {
+    return 1;
+  }
+  else {
+    return a_data.size();
+  }
 }
 
 template <>

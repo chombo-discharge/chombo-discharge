@@ -102,7 +102,8 @@ void
 ScratchPool::assertSerial(const char* a_caller) noexcept
 {
 #ifdef _OPENMP
-  if (omp_in_parallel()) {
+  // omp_get_level counts every enclosing parallel region, also those that run with a single thread.
+  if (omp_get_level() > 0) {
     const std::string err = std::string(a_caller) + " -- called inside an OpenMP parallel region";
 
     MayDay::Abort(err.c_str());

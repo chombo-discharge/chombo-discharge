@@ -92,8 +92,7 @@ main(int argc, char* argv[])
       Scratch<EBAMRCellData> f = pool.acquire<EBAMRCellData>(phase::gas, 0, 1, 2, buildCell);
 
       check(numBuilt == 6,
-            "a different phase, level or number of components, or no free entry with enough ghost cells, "
-            "gives a new temporary");
+            "a different phase, level, number of components or number of ghost cells gives a new temporary");
 
       // Types are kept apart.
       Scratch<LevelData<EBCellFAB>> g = pool.acquire<LevelData<EBCellFAB>>(phase::gas, 0, 1, 2, buildLevel);
@@ -105,18 +104,21 @@ main(int argc, char* argv[])
 
     {
       // The pool now holds two free entries with 2 ghost cells and one with 1 ghost cell (same phase, level and
-      // components). Asking for 1 ghost cell takes the exact match first, then an entry with more ghost cells. Asking
-      // for more ghost cells than any entry has builds a new one.
+      // components). Ghost cells are matched exactly: the first request for 1 ghost cell takes the 1-ghost entry, and
+      // the second builds a new one rather than taking a 2-ghost entry.
       const int numBefore = numBuilt;
 
       Scratch<EBAMRCellData> a = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 1, buildCell);
+
+      check(numBuilt == numBefore, "an entry with the same number of ghost cells is reused");
+
       Scratch<EBAMRCellData> b = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 1, buildCell);
 
-      check(numBuilt == numBefore, "an entry with more ghost cells than asked for is reused");
+      check(numBuilt == numBefore + 1, "an entry with more ghost cells than asked for is not used");
 
       Scratch<EBAMRCellData> c = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 3, buildCell);
 
-      check(numBuilt == numBefore + 1, "an entry with fewer ghost cells than asked for is not used");
+      check(numBuilt == numBefore + 2, "an entry with fewer ghost cells than asked for is not used");
     }
 
     check(pool.allReturned(), "all temporaries are returned at scope exit");
