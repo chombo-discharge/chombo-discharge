@@ -156,6 +156,14 @@ ScratchPool::acquire(const phase::which_phase a_phase,
                               entry.m_layout.emplace_back(a_address, a_grids, a_levelComps, a_levelGhost);
                             });
 
+  // The temporary must have the key it is stored under, or it would be handed out later as something else.
+  for (const auto& level : entry.m_layout) {
+    if (std::get<0>(level) != nullptr &&
+        (std::get<2>(level) != a_nComp || std::get<3>(level) != a_ghost * IntVect::Unit)) {
+      MayDay::Abort("ScratchPool::acquire -- the build function returned data that does not match the key");
+    }
+  }
+
   list.emplace_back(std::move(entry));
 
   return Scratch<T>(*this, numEntries);
