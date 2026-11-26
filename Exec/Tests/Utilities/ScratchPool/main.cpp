@@ -89,7 +89,9 @@ main(int argc, char* argv[])
     Scratch<EBAMRCellData> e = pool.acquire<EBAMRCellData>(phase::gas, -1, 1, 1, buildCell);
     Scratch<EBAMRCellData> f = pool.acquire<EBAMRCellData>(phase::gas, 0, 1, 2, buildCell);
 
-    check(numBuilt == 6, "the phase, level, components and ghost cells are all part of the key");
+    check(numBuilt == 6,
+          "a different phase, level or number of components, or no free entry with enough ghost cells, "
+          "gives a new temporary");
 
     // Types are kept apart.
     Scratch<LevelData<EBCellFAB>> g = pool.acquire<LevelData<EBCellFAB>>(phase::gas, 0, 1, 2, buildLevel);
@@ -144,6 +146,36 @@ main(int argc, char* argv[])
     };
 
     check(numLevels(a) == 2, "a handle converts to a reference to its temporary");
+  }
+
+  {
+    // A temporary whose levels are only referenced by the pool is returned without complaint. A copy that outlived the
+    // handle would raise the level's reference count, and the return would abort.
+    auto buildWithLevel = [&numBuilt]() -> std::unique_ptr<EBAMRCellData> {
+      numBuilt++;
+
+      std::unique_ptr<EBAMRCellData> data(new EBAMRCellData(1));
+
+      (*data)[0] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+
+      return data;
+    };
+
+    {
+      // A key no earlier entry has, so that the pool builds a temporary with a level.
+      const int numBefore = numBuilt;
+
+      Scratch<EBAMRCellData> a = pool.acquire<EBAMRCellData>(phase::gas, 0, 4, 2, buildWithLevel);
+
+      check(numBuilt == numBefore + 1, "a temporary with a level is built");
+
+      // A reference does not count as a copy.
+      const EBAMRCellData& view = a;
+
+      check(view[0].refCount() == 1, "the pool holds the only reference to a level of a held temporary");
+    }
+
+    check(pool.allReturned(), "a temporary with levels is returned at scope exit");
   }
 
   // Clearing deletes the temporaries, so the next request builds again.

@@ -37,6 +37,15 @@ Scratch<T>::Scratch(Scratch&& a_other) noexcept : m_pool(a_other.m_pool), m_entr
 }
 
 template <typename T>
+void
+Scratch<T>::assertOwner(const ScratchPool* const a_pool) noexcept
+{
+  if (a_pool == nullptr) {
+    MayDay::Abort("Scratch -- using a handle that was moved from");
+  }
+}
+
+template <typename T>
 Scratch<T>::~Scratch() noexcept
 {
   if (m_pool != nullptr) {
@@ -47,7 +56,7 @@ Scratch<T>::~Scratch() noexcept
 template <typename T>
 Scratch<T>::operator T&() noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return m_pool->template get<T>(m_entry);
 }
@@ -55,7 +64,7 @@ Scratch<T>::operator T&() noexcept
 template <typename T>
 Scratch<T>::operator const T&() const noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return m_pool->template get<T>(m_entry);
 }
@@ -64,7 +73,7 @@ template <typename T>
 T&
 Scratch<T>::operator*() noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return m_pool->template get<T>(m_entry);
 }
@@ -73,7 +82,7 @@ template <typename T>
 const T&
 Scratch<T>::operator*() const noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return m_pool->template get<T>(m_entry);
 }
@@ -82,7 +91,7 @@ template <typename T>
 T*
 Scratch<T>::operator->() noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return &(m_pool->template get<T>(m_entry));
 }
@@ -91,18 +100,18 @@ template <typename T>
 const T*
 Scratch<T>::operator->() const noexcept
 {
-  CH_assert(m_pool != nullptr);
+  Scratch<T>::assertOwner(m_pool);
 
   return &(m_pool->template get<T>(m_entry));
 }
 
-template <typename T>
+template <typename T, typename Build>
 Scratch<T>
-ScratchPool::acquire(const phase::which_phase                   a_phase,
-                     const int                                  a_level,
-                     const int                                  a_nComp,
-                     const int                                  a_ghost,
-                     const std::function<std::unique_ptr<T>()>& a_build) noexcept
+ScratchPool::acquire(const phase::which_phase a_phase,
+                     const int                a_level,
+                     const int                a_nComp,
+                     const int                a_ghost,
+                     const Build&             a_build) noexcept
 {
   CH_TIME("ScratchPool::acquire");
 
