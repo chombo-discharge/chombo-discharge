@@ -238,9 +238,9 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
                           const Real           a_extrapDt,
                           const Real /*a_dt*/)
 {
-  CH_TIME("CdrGodunov::advectToFaces(EBAMRFluxDat, EBAMRCellData, Real)");
+  CH_TIME("CdrGodunov::advectToFaces(EBAMRFluxData, EBAMRCellData, EBAMRFluxData, Real, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::advectToFaces(EBAMRFluxDat, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, EBAMRFluxData, Real, Real)" << endl;
   }
 
   CH_assert(a_facePhi[0]->nComp() == 1);

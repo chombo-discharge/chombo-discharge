@@ -1425,14 +1425,14 @@ EddingtonSP1::writePlotFile()
   m_amr->copyData(output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
   m_amr->copyData(output,
                   *flux,
-                  Interval(0, SpaceDim - 1),
                   Interval(1, SpaceDim),
+                  Interval(0, SpaceDim - 1),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
   m_amr->copyData(output,
                   m_source,
-                  Interval(0, 0),
                   Interval(1 + SpaceDim, 1 + SpaceDim),
+                  Interval(0, 0),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
 

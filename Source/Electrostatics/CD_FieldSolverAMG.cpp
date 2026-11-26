@@ -192,11 +192,9 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   Vec b;
   Vec x;
-  Vec r;
 
   petscGrid->create(b);
   petscGrid->create(x);
-  petscGrid->create(r);
 
   // The jump condition is eps_0 * D_0 + eps_1 * D_1 = sigma/eps0, as in FieldSolverGMG.
   Scratch<EBAMRIVData> sigmaByEps0 = m_amr->fetchScratch<EBAMRIVData>(m_realm,
@@ -227,7 +225,6 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   // Residual r = b - A*x. As in FieldSolverGMG's Krylov solvers, the residual is reported in the 2-norm and relative
   // to the zero-residual b - A*0 = b, which does not depend on the initial guess. This is the true residual of the
   // matrix, not the (possibly preconditioned) residual that the KSP tests convergence on.
-  PetscReal residNorm;
   PetscReal zeroResidNorm;
 
   PetscCallAbort(Chombo_MPI::comm, VecNorm(b, NORM_2, &zeroResidNorm));
@@ -245,17 +242,24 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const bool converged = (reason > 0);
 
-  PetscReal residNormUnweighted;
-
-  PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
-
-  // Remove the row weights, so that the residual is that of the unweighted divergence.
-  m_petscOp->scaleRows(r, true);
-
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNormUnweighted));
-
+  // The true residual is only reported.
   if (m_verbosity > 1) {
+    Vec       r;
+    PetscReal residNorm;
+    PetscReal residNormUnweighted;
+
+    petscGrid->create(r);
+
+    PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
+    PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
+
+    // Remove the row weights, so that the residual is that of the unweighted divergence.
+    m_petscOp->scaleRows(r, true);
+
+    PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNormUnweighted));
+
+    petscGrid->destroy(r);
+
     KSPType kspType;
 
     PetscCallAbort(Chombo_MPI::comm, KSPGetType(m_ksp, &kspType));
@@ -283,7 +287,6 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   petscGrid->destroy(b);
   petscGrid->destroy(x);
-  petscGrid->destroy(r);
 
   // Coarsen and update ghost cells before computing the field, as FieldSolverGMG does.
   m_amr->conservativeAverage(a_potential, m_realm);

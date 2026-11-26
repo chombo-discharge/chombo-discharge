@@ -271,9 +271,9 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
                       const Real           a_extrapDt,
                       const Real           a_dt)
 {
-  CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, Real, Real)");
+  CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, EBAMRFluxData, Real, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, Real, Real)" << endl;
+    pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, EBAMRFluxData, Real, Real)" << endl;
   }
 
   const int numberOfGhostCells = m_amr->getNumberOfGhostCells();
