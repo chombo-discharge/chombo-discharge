@@ -243,13 +243,6 @@ public:
   getVelocities();
 
   /**
-   * @brief Get all cell-centered diffusion coefficients.
-   * @return Pointers to cell-centered diffusion coefficient data in each solver.
-   */
-  virtual Vector<EBAMRCellData*>
-  getCellCenteredDiffusionCoefficients();
-
-  /**
    * @brief Get all face-centered diffusion coefficients.
    * @return Pointers to face-centered diffusion coefficient data in each solver.
    */

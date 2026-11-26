@@ -956,6 +956,24 @@ ItoKMCStepper<I, C, R, F>::computeSolidTransportCoefficients() noexcept
     // Electric field inside the dielectrics.
     const EBAMRCellData electricField = m_amr->alias(phase::solid, m_fieldSolver->getElectricField());
 
+    // Cell-centered diffusion coefficients of the diffusive species, averaged to faces below. Null for the other
+    // species. Zeroed because the coefficients are only computed on the valid cells.
+    std::vector<Scratch<EBAMRCellData>> solidDiffusionScratch;
+    solidDiffusionScratch.reserve(numSolidSpecies);
+
+    Vector<EBAMRCellData*> solidDiffusionCoefficients(numSolidSpecies, nullptr);
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      if (solverIt()->isDiffusive()) {
+        solidDiffusionScratch.emplace_back(
+          m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, phase::solid, 1, m_amr->getNumberOfGhostCells()));
+
+        DataOps::setValue(*solidDiffusionScratch.back(), 0.0);
+
+        solidDiffusionCoefficients[solverIt.index()] = &(*solidDiffusionScratch.back());
+      }
+    }
+
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
@@ -985,7 +1003,7 @@ ItoKMCStepper<I, C, R, F>::computeSolidTransportCoefficients() noexcept
             velocities[solverIt.index()] = &((*solver->getCellCenteredVelocity()[lvl])[din]);
           }
           if (solver->isDiffusive()) {
-            diffusionCoefficients[solverIt.index()] = &((*solver->getCellCenteredDiffusionCoefficient()[lvl])[din]);
+            diffusionCoefficients[solverIt.index()] = &((*(*solidDiffusionCoefficients[solverIt.index()])[lvl])[din]);
           }
         }
 
@@ -1064,7 +1082,7 @@ ItoKMCStepper<I, C, R, F>::computeSolidTransportCoefficients() noexcept
       }
 
       if (solver->isDiffusive()) {
-        EBAMRCellData& cellCenteredDiffusionCoefficient = solver->getCellCenteredDiffusionCoefficient();
+        EBAMRCellData& cellCenteredDiffusionCoefficient = *solidDiffusionCoefficients[solverIt.index()];
         EBAMRFluxData& faceCenteredDiffusionCoefficient = solver->getFaceCenteredDiffusionCoefficient();
 
         DataOps::setValue(faceCenteredDiffusionCoefficient, std::numeric_limits<Real>::max());
@@ -4275,11 +4293,31 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients() noexcept
     pout() << m_name + "::computeDiffusionCoefficients()" << endl;
   }
 
+  // The physics gives the CDR diffusion coefficients on cell centers. They are computed into temporaries, one per
+  // diffusive species, and averaged to the faces that the solvers use. The entries of the other species are null.
+  // The temporaries are zeroed because the coefficients are only computed on valid and covered cells.
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  std::vector<Scratch<EBAMRCellData>> cdrDiffusionScratch;
+  cdrDiffusionScratch.reserve(numCdrSpecies);
+
+  Vector<EBAMRCellData*> cdrDiffusionCoefficients(numCdrSpecies, nullptr);
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    if (solverIt()->isDiffusive()) {
+      cdrDiffusionScratch.emplace_back(
+        m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(*cdrDiffusionScratch.back(), 0.0);
+
+      cdrDiffusionCoefficients[solverIt.index()] = &(*cdrDiffusionScratch.back());
+    }
+  }
+
   Vector<EBAMRCellData*> itoDiffusionCoefficients = m_ito->getDiffusionFunctions();
-  Vector<EBAMRCellData*> cdrDiffusionCoefficients = m_cdr->getCellCenteredDiffusionCoefficients();
 
   this->computeDiffusionCoefficients(itoDiffusionCoefficients, cdrDiffusionCoefficients, m_electricFieldFluid, m_time);
-  this->averageDiffusionCoefficientsCellToFace();
+  this->averageDiffusionCoefficientsCellToFace(cdrDiffusionCoefficients);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4306,7 +4344,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& 
     CH_assert(a_itoDiffusionCoefficients[i]->getRealm() == m_particleRealm);
   }
   for (int i = 0; i < numCdrSpecies; i++) {
-    CH_assert(a_cdrDiffusionCoefficients[i]->getRealm() == m_fluidRealm);
+    CH_assert(a_cdrDiffusionCoefficients[i] == nullptr || a_cdrDiffusionCoefficients[i]->getRealm() == m_fluidRealm);
   }
 
   // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion
@@ -4335,7 +4373,9 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& 
       itoDiffusionCoefficients[i] = &(*(*fluidScratchIto[i])[lvl]);
     }
     for (int i = 0; i < numCdrSpecies; i++) {
-      cdrDiffusionCoefficients[i] = &(*(*a_cdrDiffusionCoefficients[i])[lvl]);
+      cdrDiffusionCoefficients[i] = (a_cdrDiffusionCoefficients[i] != nullptr)
+                                      ? &(*(*a_cdrDiffusionCoefficients[i])[lvl])
+                                      : nullptr;
     }
 
     this->computeDiffusionCoefficients(itoDiffusionCoefficients,
@@ -4563,7 +4603,8 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace() noexcept
+ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace(
+  const Vector<EBAMRCellData*>& a_cellCenteredDiffusionCoefficients) noexcept
 {
   CH_TIME("ItoKMCStepper::averageDiffusionCoefficientsCellToFace");
   if (m_verbosity > 5) {
@@ -4575,7 +4616,7 @@ ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace() noexcept
 
     if (solver->isDiffusive()) {
 
-      EBAMRCellData& cellCenteredDiffusionCoefficient = solver->getCellCenteredDiffusionCoefficient();
+      EBAMRCellData& cellCenteredDiffusionCoefficient = *a_cellCenteredDiffusionCoefficients[solverIt.index()];
       EBAMRFluxData& faceCenteredDiffusionCoefficient = solver->getFaceCenteredDiffusionCoefficient();
 
       CH_assert(cellCenteredDiffusionCoefficient.getRealm() == m_fluidRealm);

@@ -683,13 +683,6 @@ public:
   getCellCenteredVelocity();
 
   /**
-   * @brief Get the cell-centered diffusion coefficient.
-   * @return m_cellCenteredDiffusionCoefficient
-   */
-  virtual EBAMRCellData&
-  getCellCenteredDiffusionCoefficient();
-
-  /**
    * @brief Get the face-centered diffusion coefficient
    * @return m_faceCentereDiffusionCoefficient
    */
@@ -850,12 +843,6 @@ protected:
    * @brief Domain flux
    */
   EBAMRIFData m_domainFlux;
-
-  /**
-   * @brief Diffusion coefficients on cell centers
-   * @note Memory is only allocated if the solver is diffusive
-   */
-  EBAMRCellData m_cellCenteredDiffusionCoefficient;
 
   /**
    * @brief Diffusion coefficients on face centers

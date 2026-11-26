@@ -1293,7 +1293,7 @@ protected:
    * @param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the
    * particle realm.
    * @param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the
-   * fluid realm.
+   * fluid realm. Null for species that do not diffuse.
    * @param[in]  a_electricField            Electric field. Must be defined on the fluid realm.
    * @param[in]  a_time                     Time
    */
@@ -1342,10 +1342,12 @@ protected:
                                const Real          a_time) noexcept;
 
   /**
-   * @brief Average cell-centered diffusion coefficient to faces
+   * @brief Average cell-centered diffusion coefficients to the faces of the CDR solvers.
+   * @param[in,out] a_cellCenteredDiffusionCoefficients Cell-centered diffusion coefficient per CDR species, null for
+   * species that do not diffuse. Coarsened and ghost-filled here before the averaging.
    */
   virtual void
-  averageDiffusionCoefficientsCellToFace() noexcept;
+  averageDiffusionCoefficientsCellToFace(const Vector<EBAMRCellData*>& a_cellCenteredDiffusionCoefficients) noexcept;
 
   /**
    * @brief Get the physical number of particles per cell.
