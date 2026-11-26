@@ -75,6 +75,13 @@ public:
   computeAdvectionDt() override;
 
   /**
+   * @brief Register operators and the mask of the ghost cells outside the grids.
+   * @details The mask is used by getEbInflowState, which needs one ghost cell.
+   */
+  virtual void
+  registerOperators() override;
+
+  /**
    * @brief Allocate internal storage and build pre-built VoF iterators.
    */
   virtual void
@@ -104,12 +111,6 @@ protected:
   Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_grownVofIter;
 
   /**
-   * @brief 1 in the cells of each level's grids (with one ghost cell, filled where other boxes cover it), 0 elsewhere.
-   * The EB inflow state is only used where the EB flux is known, which excludes ghost cells on refinement boundaries.
-   */
-  Vector<RefCountedPtr<LevelData<FArrayBox>>> m_levelCells;
-
-  /**
    * @brief Get the EB normal of a cut cell, pointing into the fluid.
    * @details This is EBISBox::normal, which points into the fluid.
    * @param[in] a_vof     Cut cell
@@ -129,14 +130,16 @@ protected:
    * @param[in]  a_ebisbox EBISBox of the grid box
    * @param[in]  a_level   Grid level
    * @param[in]  a_dit     Grid index
+   * @param[in]  a_coarseFineGhost Mask of the ghost cells outside the grids of the level, on this grid box.
    * @return True if the cell has an EB and the flow leaves it, false otherwise.
    */
   bool
-  getEbInflowState(Real&            a_phiEB,
-                   const VolIndex&  a_vof,
-                   const EBISBox&   a_ebisbox,
-                   const int        a_level,
-                   const DataIndex& a_dit) const noexcept;
+  getEbInflowState(Real&                a_phiEB,
+                   const VolIndex&      a_vof,
+                   const EBISBox&       a_ebisbox,
+                   const int            a_level,
+                   const DataIndex&     a_dit,
+                   const BaseFab<bool>& a_coarseFineGhost) const noexcept;
 
   /**
    * @brief Flux-corrected transport that keeps the update non-negative.
@@ -192,7 +195,7 @@ protected:
                 const Real       a_dt) noexcept;
 
   /**
-   * @brief Build m_grownVofIter and m_levelCells for all AMR levels.
+   * @brief Build m_grownVofIter for all AMR levels.
    */
   void
   defineIterators();

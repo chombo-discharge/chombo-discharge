@@ -73,6 +73,19 @@ CdrCTU::parseRuntimeOptions()
 }
 
 void
+CdrCTU::registerOperators()
+{
+  CH_TIME("CdrCTU::registerOperators()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::registerOperators()" << endl;
+  }
+
+  CdrMultigrid::registerOperators();
+
+  m_amr->registerMask(s_coarse_fine_ghost, 1, m_realm);
+}
+
+void
 CdrCTU::allocate()
 {
   CH_TIME("CdrCTU::allocate()");
@@ -94,7 +107,6 @@ CdrCTU::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   CdrMultigrid::preRegrid(a_lbase, a_oldFinestLevel);
   m_grownVofIter.resize(0);
-  m_levelCells.resize(0);
 }
 
 void
@@ -120,7 +132,6 @@ CdrCTU::defineIterators()
   const int finest = m_amr->getFinestLevel();
 
   m_grownVofIter.resize(1 + finest);
-  m_levelCells.resize(1 + finest);
 
   for (int lvl = 0; lvl <= finest; lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -134,16 +145,6 @@ CdrCTU::defineIterators()
       const EBISBox& ebisbox  = ebisl[dit()];
       (*m_grownVofIter[lvl])[dit()].define(ebisbox.getIrregIVS(grownBox), ebisbox.getEBGraph());
     }
-
-    // 1 in the cells of this level's grids, ghost cells covered by other boxes included, and 0 elsewhere.
-    m_levelCells[lvl] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, 1, IntVect::Unit));
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      (*m_levelCells[lvl])[dit()].setVal(0.0);
-      (*m_levelCells[lvl])[dit()].setVal(1.0, dbl[dit()], 0, 1);
-    }
-
-    m_levelCells[lvl]->exchange();
   }
 }
 
@@ -395,6 +396,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
   const Box&     domainBox = a_domain.domainBox();
   const EBISBox& ebisbox   = a_cellPhi.getEBISBox();
 
+  const BaseFab<bool>& coarseFineGhost = (*m_amr->getMask(s_coarse_fine_ghost, 1, m_realm)[a_level])[a_dit];
+
   // Compute slopes in regular cells.
   BaseFab<Real>&       slopesReg = a_normalSlopes.getSingleValuedFAB();
   const BaseFab<Real>& phiReg    = a_cellPhi.getSingleValuedFAB();
@@ -560,7 +563,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       if (m_ebInflowState && ((closedLeft && hasFacesRigh) || (closedRigh && hasFacesLeft))) {
         Real phiEB = 0.0;
 
-        if (this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit)) {
+        if (this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit, coarseFineGhost)) {
           if (closedLeft) {
             dwl = a_cellPhi(vof, m_comp) - phiEB;
           }
@@ -1174,14 +1177,15 @@ CdrCTU::getEbNormalIntoFluid(const VolIndex& a_vof, const EBISBox& a_ebisbox) co
 }
 
 bool
-CdrCTU::getEbInflowState(Real&            a_phiEB,
-                         const VolIndex&  a_vof,
-                         const EBISBox&   a_ebisbox,
-                         const int        a_level,
-                         const DataIndex& a_dit) const noexcept
+CdrCTU::getEbInflowState(Real&                a_phiEB,
+                         const VolIndex&      a_vof,
+                         const EBISBox&       a_ebisbox,
+                         const int            a_level,
+                         const DataIndex&     a_dit,
+                         const BaseFab<bool>& a_coarseFineGhost) const noexcept
 {
   // The EB flux is only known in cells of this level's grids, not in ghost cells on refinement boundaries.
-  if (a_ebisbox.bndryArea(a_vof) <= 0.0 || (*m_levelCells[a_level])[a_dit](a_vof.gridIndex(), 0) <= 0.0) {
+  if (a_ebisbox.bndryArea(a_vof) <= 0.0 || a_coarseFineGhost(a_vof.gridIndex(), 0)) {
     return false;
   }
 
@@ -1224,6 +1228,8 @@ CdrCTU::ebInflowState(EBFaceFAB&       a_facePhi,
   const EBISBox& ebisbox = a_cellVel.getEBISBox();
   const Box      faceBox = surroundingNodes(a_cellBox, a_dir);
 
+  const BaseFab<bool>& coarseFineGhost = (*m_amr->getMask(s_coarse_fine_ghost, 1, m_realm)[a_level])[a_dit];
+
   // The cut cells of the box and its first layer of ghost cells, which are upwind of the faces of the box.
   VoFIterator& vofit = (*m_grownVofIter[a_level])[a_dit];
 
@@ -1231,7 +1237,7 @@ CdrCTU::ebInflowState(EBFaceFAB&       a_facePhi,
     Real phiEB = 0.0;
 
     // Only where the flow leaves the EB.
-    if (!this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit)) {
+    if (!this->getEbInflowState(phiEB, vof, ebisbox, a_level, a_dit, coarseFineGhost)) {
       return;
     }
 

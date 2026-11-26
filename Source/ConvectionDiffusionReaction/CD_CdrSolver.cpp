@@ -326,11 +326,9 @@ CdrSolver::allocate()
 
   // These don't consume (much) memory so we always allocate them.
   m_amr->allocate(m_ebFlux, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_ebZero, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_domainFlux, m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_ebFlux, 0.0);
-  DataOps::setValue(m_ebZero, 0.0);
   DataOps::setValue(m_domainFlux, 0.0);
 
   // The cut-cell stabilization holds data on the grids, so it is rebuilt with them.
@@ -2628,17 +2626,6 @@ CdrSolver::getCellCenteredVelocity()
   return m_cellVelocity;
 }
 
-EBAMRIVData&
-CdrSolver::getEbCenteredVelocity()
-{
-  CH_TIME("CdrSolver::getEbCenteredVelocity()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getEbCenteredVelocity()" << endl;
-  }
-
-  return m_ebVelocity;
-}
-
 EBAMRCellData&
 CdrSolver::getCellCenteredDiffusionCoefficient()
 {
@@ -2996,7 +2983,14 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     // approximation of the divergence
     this->fillGwn(scratchFluxTwo, 1.0);
     DataOps::multiply(scratchFluxOne, scratchFluxTwo);
-    this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, a_cellPhi, a_dt, false);
+    Scratch<EBAMRIVData> ebZero = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                   m_phase,
+                                                                   m_nComp,
+                                                                   m_amr->getNumberOfGhostCells());
+
+    DataOps::setValue(ebZero, 0.0);
+
+    this->computeDivG(a_noiseSource, scratchFluxOne, ebZero, a_cellPhi, a_dt, false);
   }
   else {
     DataOps::setValue(a_noiseSource, 0.0);

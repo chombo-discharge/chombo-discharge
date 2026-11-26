@@ -683,13 +683,6 @@ public:
   getCellCenteredVelocity();
 
   /**
-   * @brief Get the eb-centered velocities
-   * @return m_ebVelocity
-   */
-  virtual EBAMRIVData&
-  getEbCenteredVelocity();
-
-  /**
    * @brief Get the cell-centered diffusion coefficient.
    * @return m_cellCenteredDiffusionCoefficient
    */
@@ -839,11 +832,6 @@ protected:
   RefCountedPtr<EBRedistribution> m_redistribution;
 
   /**
-   * @brief Scratch storage for the EB flux
-   */
-  EBAMRIVData m_ebZero;
-
-  /**
    * @brief Cached state vector for regrid.
    */
   EBAMRCellData m_cachePhi;
@@ -852,11 +840,6 @@ protected:
    * @brief Cached source term for regrids.
    */
   EBAMRCellData m_cacheSource;
-
-  /**
-   * @brief EB-centered velocities
-   */
-  EBAMRIVData m_ebVelocity;
 
   /**
    * @brief Flux through the embedded boundary
