@@ -14,7 +14,6 @@
 #define CD_SCRATCHPOOL_H
 
 // Std includes
-#include <functional>
 #include <memory>
 #include <ostream>
 #include <tuple>
@@ -49,10 +48,8 @@ class ScratchPool;
  * copies of the EBAMRData levels when the handle is destroyed. It cannot detect aliases built with AmrMesh::alias,
  * EBAMRData::slice or aliasLevelData, so those must never outlive the handle either.
  *
- * The data is uninitialized when fetched, and may have more ghost cells than were asked for. AmrMesh::fetchScratch
- * refuses more ghost cells than the default, so no entry exceeds the default, and a caller that needs an exact number
- * of ghost cells (such as AmrMesh::interpGhostMG or AmrMesh::copyData with CopyStrategy::ValidGhost) fetches with the
- * default.
+ * The data is uninitialized when fetched. It has exactly the number of components and ghost cells that were asked
+ * for.
  * @tparam T Data type. One of the types ScratchPool stores.
  */
 template <typename T>
@@ -223,13 +220,12 @@ public:
 
   /**
    * @brief Hand out a temporary with the given key.
-   * @details Returns a free entry of type T with the same phase, level and number of components and at least a_ghost
-   * ghost cells, preferring the fewest ghost cells. If there is none, calls a_build and stores its result as a new
-   * entry.
+   * @details Returns a free entry of type T with the same phase, level, number of components and number of ghost cells.
+   * If there is none, calls a_build and stores its result as a new entry.
    * @param[in] a_phase Phase the data lives on. Types without a phase pass phase::gas.
    * @param[in] a_level Grid level for single-level data, -1 for data over the whole hierarchy.
    * @param[in] a_nComp Number of components
-   * @param[in] a_ghost Smallest number of ghost cells the caller needs
+   * @param[in] a_ghost Number of ghost cells
    * @param[in] a_build Builds a new temporary with this key, and exactly a_ghost ghost cells, on the current grids.
    * @return Handle that owns the temporary until it is destroyed.
    * @tparam T     Data type
@@ -241,7 +237,7 @@ public:
           const int                a_level,
           const int                a_nComp,
           const int                a_ghost,
-          const Build&             a_build) noexcept;
+          const Build&             a_build);
 
   /**
    * @brief Delete all temporaries. Called whenever the grids change.
@@ -306,10 +302,11 @@ private:
     bool inUse;
 
     /**
-     * @brief Number of components and ghost cells of each level when the temporary was built. A null level is
-     * recorded as -1 components. giveBack() checks that the data still has this layout.
+     * @brief Each level of the temporary as built: the LevelData it points to, its number of components and its ghost
+     * cells. giveBack() checks that the data still has these levels, so that reallocating or replacing them through the
+     * handle is caught.
      */
-    std::vector<std::pair<int, IntVect>> layout;
+    std::vector<std::tuple<const void*, int, IntVect>> layout;
   };
 
   /**
@@ -386,13 +383,23 @@ private:
   reportType(const std::vector<Entry<T>>& a_list, std::ostream& a_os, const std::string& a_prefix) const noexcept;
 
   /**
-   * @brief The number of components and ghost cells of each level of a temporary.
+   * @brief Call a function on each level of a temporary, with the level's address, components and ghost cells.
+   * @details A null level is passed as a null address, -1 components and zero ghost cells.
+   * @param[in] a_data  Temporary
+   * @param[in] a_visit Callable (int level, const void* address, int components, const IntVect& ghost) -> void
+   */
+  template <typename T, typename Visit>
+  static void
+  forEachLevel(const T& a_data, const Visit& a_visit) noexcept;
+
+  /**
+   * @brief Number of levels of a temporary. 1 for single-level data.
    * @param[in] a_data Temporary
-   * @return One (components, ghost cells) pair per level, with -1 components for a null level.
+   * @return Number of levels
    */
   template <typename T>
-  static std::vector<std::pair<int, IntVect>>
-  layoutOf(const T& a_data) noexcept;
+  static int
+  numLevels(const T& a_data) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
