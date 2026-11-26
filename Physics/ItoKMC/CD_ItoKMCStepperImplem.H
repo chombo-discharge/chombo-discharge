@@ -24,7 +24,6 @@
 // Our includes
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_ItoKMCStepper.H>
-#include <CD_ItoKMCFieldParticle.H>
 #include <CD_ParticleOps.H>
 #include <CD_ParticleLoops.H>
 #include <CD_DataOps.H>
@@ -684,11 +683,6 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   // Storage for neutral density
   m_amr->allocate(m_neutralDensity, m_fluidRealm, m_plasmaPhase, 1);
 
-  // Storage for conductivities on cell, cell faces, and EB faces.
-  m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
-  m_amr->allocate(m_conductivityFace, m_fluidRealm, m_plasmaPhase, 1);
-  m_amr->allocate(m_conductivityEB, m_fluidRealm, m_plasmaPhase, 1);
-
   // Electric field data on both realms.
   m_amr->allocate(m_electricFieldParticle, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_electricFieldFluid, m_fluidRealm, m_plasmaPhase, SpaceDim);
@@ -734,9 +728,6 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrFluxes[i], m_particleRealm, m_plasmaPhase, 1);
   }
-
-  // Current density.
-  m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
   // Storage for the physics time step
   m_amr->allocate(m_kmcDt, m_fluidRealm, m_plasmaPhase, 1);
@@ -2609,7 +2600,12 @@ ItoKMCStepper<I, C, R, F>::prePlot() noexcept
     this->computePhysicsPlotVariables(m_physicsPlotVariables);
   }
 
-  this->computeCurrentDensity(this->m_currentDensity);
+  if (m_plotCurrentDensity) {
+    m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
+
+    this->computeCurrentDensity(m_currentDensity);
+  }
+
   m_ito->depositParticles();
 }
 
@@ -2623,6 +2619,8 @@ ItoKMCStepper<I, C, R, F>::postPlot() noexcept
   }
 
   m_physicsPlotVariables.clear();
+  m_conductivityCell.clear();
+  m_currentDensity.clear();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2664,8 +2662,6 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
 
   // Release some unnecessary storage.
   m_conductivityCell.clear();
-  m_conductivityFace.clear();
-  m_conductivityEB.clear();
 
   m_electricFieldParticle.clear();
   m_electricFieldFluid.clear();
@@ -7738,211 +7734,6 @@ ItoKMCStepper<I, C, R, F>::getCheckpointLoads(const std::string& a_realm, const 
   }
 
   return loads;
-}
-
-template <typename I, typename C, typename R, typename F>
-void
-ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
-{
-  CH_TIME("ItoKMCStepper::computeEdotJSource(a_dt)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeEdotJSource(a_dt)" << endl;
-  }
-
-  Scratch<EBAMRCellData> fluidScratch1    = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm,
-                                                                            m_plasmaPhase,
-                                                                            1,
-                                                                            m_amr->getNumberOfGhostCells());
-  Scratch<EBAMRCellData> particleScratch1 = m_amr->fetchScratch<EBAMRCellData>(m_particleRealm,
-                                                                               m_plasmaPhase,
-                                                                               1,
-                                                                               m_amr->getNumberOfGhostCells());
-
-  CH_assert(a_dt > 0.0);
-
-  DataOps::setValue(m_EdotJ, 0.0);
-
-  CH_assert(m_EdotJ.getRealm() == m_fluidRealm);
-
-  // clang-format off
-  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
-  //       position A to position B, excluding friction from collision with other molecules. We compute this energy increase as
-  //
-  //          q * V(B) - V(A)
-  //
-  //       which means that the energy rate is q*(V(B) - V(A))/a_dt.
-  //
-  //       We simply assign this factor to the particles and then deposit them on the mesh. However, this is more complex than
-  //       it sounds because the particles m_EdotJ live on different realms. The way we do this is that we copy the potential
-  //       over into the particle realm and we interpolate V(B) and V(A) onto some storage in the particle container. We then
-  //       assign an effective weight w * [V(B) - V(A)] to the particles which we deposit onto the mesh using the appropriate
-  //       deposition scheme that the user has assgned.
-  //
-  // clang-format on
-
-  // Allocate a transient SoA particle holder. The container owns the weight and position; the payload holds
-  // V(A), V(B), and the per-component "other" position (alt) so we can interpolate the potential at both A and B.
-  ParticleContainer<ItoKMCFieldParticle> computationParticles;
-  m_amr->allocate(computationParticles, m_particleRealm);
-
-  // Electrostatic potential on appropriate phase. This is defined on the fluid realm
-  // but we need it on the particle realm.
-  const EBAMRCellData potentialPhase = m_amr->alias(m_plasmaPhase, m_fieldSolver->getPotential());
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<ItoSolver>&        solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int  idx       = solverIt.index();
-    const int  Z         = species->getChargeNumber();
-    const bool mobile    = solver->isMobile();
-    const bool diffusive = solver->isDiffusive();
-
-    if (Z != 0 && (mobile || diffusive)) {
-
-      // The potential is copied into the scratch for every species, since the deposit below overwrites it.
-      m_amr->copyData(*particleScratch1, potentialPhase);
-
-      m_amr->conservativeAverage(*particleScratch1, m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*particleScratch1, m_particleRealm, m_plasmaPhase);
-
-      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-
-      // Copy the ItoParticles to the transient particles we use for computing these things. The container
-      // position holds B (the current position); the payload "alt" columns hold A (the old position).
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-        const DataIterator&      dit = dbl.dataIterator();
-
-        const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din = dit[mybox];
-
-          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
-          const ParticleSoA<ItoParticle>&   leaf = particles[lvl][din];
-
-          for (std::size_t i = 0; i < leaf.size(); i++) {
-            const RealVect posA = RealVect(D_DECL(leaf.template get<&ItoParticle::old_x>(i),
-                                                  leaf.template get<&ItoParticle::old_y>(i),
-                                                  leaf.template get<&ItoParticle::old_z>(i)));
-
-            // No cast to ParticleReal: x0 is a position and stays double, so casting would round the
-            // old position through float whenever PARTICLE_PRECISION=FLOAT. This one compiles either
-            // way, which is why it survived where the pointer bindings below did not.
-            ItoKMCFieldParticle payload;
-            D_DECL(payload.x0_x = posA[0], payload.x0_y = posA[1], payload.x0_z = posA[2]);
-
-            comp.append(leaf.position(i), leaf.weight(i), payload);
-          }
-        }
-      }
-
-      // Interpolate the potential to the current particle position which gives us V(B) for the particles.
-      m_amr->interpolateParticles<&ItoKMCFieldParticle::phiB>(computationParticles,
-                                                              m_particleRealm,
-                                                              m_plasmaPhase,
-                                                              *particleScratch1,
-                                                              solver->getDeposition(),
-                                                              false);
-
-      // Move the particles back to their old positions (A) and interpolate the potential there. The container
-      // position and the payload "alt" position are swapped so position now holds A and alt holds B.
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-        const DataIterator&      dit = dbl.dataIterator();
-
-        const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din = dit[mybox];
-
-          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
-
-          double* const pos[SpaceDim] = {
-            D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          // double rather than ParticleReal: x0 is a position, and positions are double at every
-          // PARTICLE_PRECISION setting -- see ItoKMCFieldParticle. Typing these as ParticleReal
-          // compiles only while the payload precision happens to be double.
-          double* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
-                                                comp.template column<&ItoKMCFieldParticle::x0_y>(),
-                                                comp.template column<&ItoKMCFieldParticle::x0_z>())};
-
-          ParticleLoops::loop(comp, [&](const std::size_t i) {
-            for (int dir = 0; dir < SpaceDim; dir++) {
-              const double posB = pos[dir][i];
-              pos[dir][i]       = alt[dir][i];
-              alt[dir][i]       = posB;
-            }
-          });
-        }
-      }
-
-      computationParticles.remap();
-
-      // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
-      m_amr->interpolateParticles<&ItoKMCFieldParticle::phiA>(computationParticles,
-                                                              m_particleRealm,
-                                                              m_plasmaPhase,
-                                                              *particleScratch1,
-                                                              solver->getDeposition(),
-                                                              false);
-
-      // Move the particles back to B again and multiply the weight by (V(B) - V(A)).
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-        const DataIterator&      dit = dbl.dataIterator();
-
-        const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din = dit[mybox];
-
-          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
-
-          double* const pos[SpaceDim] = {
-            D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          // See the swap above: x0 is a position, hence double rather than ParticleReal.
-          const double* const       alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
-                                                      comp.template column<&ItoKMCFieldParticle::x0_y>(),
-                                                      comp.template column<&ItoKMCFieldParticle::x0_z>())};
-          double* const             w             = comp.weightColumn();
-          const ParticleReal* const phiA          = comp.template column<&ItoKMCFieldParticle::phiA>();
-          const ParticleReal* const phiB          = comp.template column<&ItoKMCFieldParticle::phiB>();
-
-          ParticleLoops::loop(comp, [&](const std::size_t i) {
-            for (int dir = 0; dir < SpaceDim; dir++) {
-              pos[dir][i] = alt[dir][i];
-            }
-
-            // Effective weight = weight * (V(B) - V(A)).
-            w[i] *= (phiB[i] - phiA[i]);
-          });
-        }
-      }
-
-      computationParticles.remap();
-
-      // Deposit the effective (energy-weighted) weight.
-      m_amr->depositWeight(*particleScratch1,
-                           m_particleRealm,
-                           m_plasmaPhase,
-                           computationParticles,
-                           solver->getDeposition(),
-                           solver->getCoarseFineDeposition(),
-                           IrregularDeposition::Native);
-
-      // Copy data back onto the fluid realm.
-      m_amr->copyData(*fluidScratch1, *particleScratch1);
-      DataOps::scale(*fluidScratch1, Z * Units::Qe / a_dt);
-      DataOps::plus(m_EdotJ, *fluidScratch1, 0, idx, 1);
-    }
-
-    computationParticles.clearParticles();
-  }
 }
 
 template <typename I, typename C, typename R, typename F>

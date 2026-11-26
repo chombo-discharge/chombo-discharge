@@ -718,8 +718,9 @@ protected:
   Vector<int> m_loadBalanceIndices;
 
   /**
-   * @brief Storage for current density.
-   * @note Defined over the fluid realm with SpaceDim components.
+   * @brief Current density for plot files.
+   * @details Allocated and filled in prePlot when the current density is plotted, and cleared in postPlot. Defined
+   * over the fluid realm with SpaceDim components.
    */
   EBAMRCellData m_currentDensity;
 
@@ -734,28 +735,11 @@ protected:
   EBAMRCellData m_neutralDensity;
 
   /**
-   * @brief Cell-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
+   * @brief Cell-centered conductivity for plot files.
+   * @details Allocated and filled by the time stepper's prePlot when the conductivity is plotted, and cleared in
+   * postPlot. Defined on the fluid realm with 1 component.
    */
   EBAMRCellData m_conductivityCell;
-
-  /**
-   * @brief Face-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
-   */
-  EBAMRFluxData m_conductivityFace;
-
-  /**
-   * @brief EB-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
-   */
-  EBAMRIVData m_conductivityEB;
-
-  /**
-   * @brief For holding the mean particle energy
-   * @note Defined on the particle realm with components = number of plasma species
-   */
-  EBAMRCellData m_particleEPS;
 
   /**
    * @brief Storage for holding the plasma phase electric field on the fluid realm
@@ -773,17 +757,6 @@ protected:
    * @note Defined on the fluid realm.
    */
   EBAMRCellData m_kmcDt;
-
-  /**
-   * @brief Storage for holding the energy sources for each species.
-   * @note Defined on the particle realm but about to get deprecated when we switch to the new reaction algorithm.
-   */
-  Vector<EBAMRCellData> m_energySources;
-
-  /**
-   * @brief Storage for E·J (Ohmic heating) on the fluid realm. 1 component.
-   */
-  EBAMRCellData m_EdotJ;
 
   /**
    * @brief Scratch storage for the surface species on the particle realm, one component per surface species.
@@ -1923,14 +1896,6 @@ protected:
    */
   virtual void
   postCheckpointPoisson() noexcept;
-
-  /**
-   * @brief Compute the energy source term for the various plasma species
-   * @param[in] a_dt Time step during which the particles move.
-   * @note This fills m_EdotJ
-   */
-  virtual void
-  computeEdotJSource(const Real a_dt) noexcept;
 
   /**
    * @brief Fill surface charge solver with initial data taken from the physics interface.
