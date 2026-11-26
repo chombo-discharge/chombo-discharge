@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 317-325
+   :lines: 320-328
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 584-594
+   :lines: 587-597
    :language: c++
    :dedent: 2
 
@@ -290,7 +290,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 596-603
+      :lines: 599-606
       :language: c++
       :dedent: 2
 
@@ -299,7 +299,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 605-628
+      :lines: 608-631
       :language: c++
       :dedent: 2
 
@@ -324,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 733-734
+   :lines: 736-737
    :language: c++
    :dedent: 2
 
@@ -332,7 +332,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 337-345
+   :lines: 340-348
    :language: c++
    :dedent: 2
 
@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 773-777
+   :lines: 788-792
    :language: c++
    :dedent: 2
 
@@ -427,7 +427,7 @@ ______________
 With the three masks in hand, the ghost particles are filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 656-659
+   :lines: 659-662
    :language: c++
    :dedent: 2
 
@@ -447,7 +447,7 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 682-683
+   :lines: 685-686
    :language: c++
    :dedent: 2
 

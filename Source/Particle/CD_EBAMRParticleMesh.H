@@ -1208,8 +1208,8 @@ protected:
       }
     }
 
-    // Return the halo particles to the valid holder.
-    particles.transferParticles(particles.getMaskParticles());
+    // Return the halo particles to the valid holder, each where it was.
+    particles.returnMaskParticles();
   }
 
   /**
@@ -1322,9 +1322,9 @@ protected:
       }
     }
 
-    // Return the transition particles to the valid holder.
+    // Return the transition particles to the valid holder, each where it was.
     particles.clearGhostParticles(GhostType::Coarse);
-    particles.transferParticles(particles.getMaskParticles());
+    particles.returnMaskParticles();
   }
 };
 

@@ -576,10 +576,13 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
   // ---- re-allocate the (empty) holders over the new grids ----
   m_particles.resize(a_newFinestLevel + 1);
   m_maskParticles.resize(a_newFinestLevel + 1);
+  m_maskOrigins.resize(a_newFinestLevel + 1);
 
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
+    m_maskOrigins[lvl]   = RefCountedPtr<LayoutData<std::vector<std::size_t>>>(
+      new LayoutData<std::vector<std::size_t>>(a_grids[lvl]));
   }
 
   this->setupGrownGrids();
@@ -1046,26 +1049,12 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
     const Box maskBox = mask.box();
 
     Leaf& src = srcLevel[din];
-    Leaf& dst = maskLevel[din];
 
-    std::size_t i = 0;
-    while (i < src.size()) {
-      const IntVect iv = this->cellIndex(a_level, src.position(i));
+    this->moveToMaskHolder(src, maskLevel[din], (*m_maskOrigins[a_level])[din], [&](const std::size_t a_i) -> bool {
+      const IntVect iv = this->cellIndex(a_level, src.position(a_i));
 
-      if (maskBox.contains(iv) && mask(iv, 0)) {
-        dst.append(src.position(i), src.weight(i), src.gather(i));
-
-        const std::size_t k = dst.size() - 1;
-
-        dst.particleID(k) = src.particleID(i);
-        dst.rankID(k)     = src.rankID(i);
-
-        src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
-      }
-      else {
-        ++i;
-      }
-    }
+      return maskBox.contains(iv) && mask(iv, 0);
+    });
   }
 }
 
@@ -1182,16 +1171,14 @@ ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleG
       const ParticleGhostMask& mask = (*a_coarToFine[lvl])[din];
 
       Leaf& src = srcLevel[din];
-      Leaf& dst = maskLevel[din];
 
-      std::size_t i = 0;
-      while (i < src.size()) {
-        const RealVect pos = src.position(i);
+      this->moveToMaskHolder(src, maskLevel[din], (*m_maskOrigins[lvl])[din], [&](const std::size_t a_i) -> bool {
+        const RealVect pos = src.position(a_i);
         const IntVect  iv  = this->cellIndex(lvl, pos);
 
         bool select = false;
 
-        if (!src.isGhost(i) && mask.box().contains(iv)) {
+        if (!src.isGhost(a_i) && mask.box().contains(iv)) {
           const IntVect fineCell = this->cellIndex(lvl + 1, pos);
 
           for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
@@ -1199,20 +1186,120 @@ ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleG
           }
         }
 
-        if (select) {
-          dst.append(pos, src.weight(i), src.gather(i));
+        return select;
+      });
+    }
+  }
+}
 
-          const std::size_t k = dst.size() - 1;
+template <typename P, typename Traits>
+template <typename Select>
+inline void
+ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
+                                               Leaf&                     a_dst,
+                                               std::vector<std::size_t>& a_origins,
+                                               const Select&             a_select)
+{
+  CH_assert(a_dst.size() == 0);
 
-          dst.particleID(k) = src.particleID(i);
-          dst.rankID(k)     = src.rankID(i);
+  a_origins.clear();
 
-          src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
+  const std::size_t numParticles = a_src.size();
+
+  for (std::size_t i = 0; i < numParticles; i++) {
+    if (a_select(i)) {
+      a_origins.push_back(i);
+    }
+  }
+
+  if (a_origins.empty()) {
+    return;
+  }
+
+  // Put the selected particles at the end, keeping the order of both groups, and move them to the mask holder.
+  const std::size_t numStay = numParticles - a_origins.size();
+
+  std::vector<std::size_t> dest(numParticles);
+
+  std::size_t stay  = 0;
+  std::size_t moved = numStay;
+  std::size_t k     = 0;
+
+  for (std::size_t i = 0; i < numParticles; i++) {
+    if (k < a_origins.size() && a_origins[k] == i) {
+      dest[i] = moved++;
+      k++;
+    }
+    else {
+      dest[i] = stay++;
+    }
+  }
+
+  a_src.permute(dest);
+
+  for (std::size_t i = numStay; i < numParticles; i++) {
+    a_dst.appendParticle(a_src, i);
+  }
+
+  a_src.resize(numStay);
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::returnMaskParticles()
+{
+  CH_TIME("ParticleContainer::returnMaskParticles");
+
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles& maskLevel = *m_maskParticles[lvl];
+    LevelParticles& srcLevel  = *m_particles[lvl];
+
+    const DataIterator& dit  = m_grids[lvl].dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      Leaf&                     src     = srcLevel[din];
+      Leaf&                     mask    = maskLevel[din];
+      std::vector<std::size_t>& origins = (*m_maskOrigins[lvl])[din];
+
+      CH_assert(mask.size() == origins.size());
+
+      if (origins.empty()) {
+        continue;
+      }
+
+      // The particles that stayed are first, in their original order, and the returned ones follow in the order
+      // they were moved out. Send each one back to its original index.
+      const std::size_t numStay = src.size();
+
+      src.append(mask);
+      mask.clear();
+
+      const std::size_t numParticles = src.size();
+
+      std::vector<std::size_t> dest(numParticles);
+
+      std::size_t stay = 0;
+      std::size_t k    = 0;
+
+      for (std::size_t i = 0; i < numParticles; i++) {
+        if (k < origins.size() && origins[k] == i) {
+          dest[numStay + k] = i;
+          k++;
         }
         else {
-          ++i;
+          dest[stay++] = i;
         }
       }
+
+      src.permute(dest);
+
+      origins.clear();
     }
   }
 }

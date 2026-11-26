@@ -1624,6 +1624,13 @@ public:
 
   ///@}
 
+  /**
+   * @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).
+   * @param[in] a_dest Destination slot for each current particle.
+   */
+  void
+  permute(const std::vector<std::size_t>& a_dest);
+
 protected:
   /**
    * @brief The single arena allocation.
@@ -1945,13 +1952,6 @@ protected:
    */
   void
   reallocate(const std::size_t a_capacity);
-
-  /**
-   * @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).
-   * @param[in] a_dest Destination slot for each current particle.
-   */
-  void
-  permute(const std::vector<std::size_t>& a_dest);
 
   /**
    * @brief Per-column scatter for permute(): newcol[dest[i]] = oldcol[i].
