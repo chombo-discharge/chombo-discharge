@@ -306,7 +306,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``advance`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 362-459
+   :lines: 362-456
 
 In the above code we have included the part of the ``advance`` routine that executes Heun's method for advancing the scalar.
 This code also fetches temporaries from the ``AmrMesh`` scratch pool for the coefficients and the intermediate state, and enforces boundary conditions, all of which include AMR.
@@ -324,7 +324,7 @@ The implementation for :ref:`Chap:AdvectionDiffusionModel` is
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``synchronizeSolverTimes`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 461-474
+   :lines: 458-471
 
 printStepReport
 ---------------
@@ -368,7 +368,7 @@ Solvers usually know how to do this, and in some cases this function can be dece
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``preRegrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 476-485
+   :lines: 473-482
 
 Other implementations of ``TimeStepper`` may have substantially more complicated ``preRegrid`` routines.
 
@@ -383,7 +383,7 @@ Solvers are usually implemented with their own regrid routine, and if the only t
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``regrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 487-506
+   :lines: 484-503
 
 
 For other ``TimeStepper`` implementations this routine can become much more complex.

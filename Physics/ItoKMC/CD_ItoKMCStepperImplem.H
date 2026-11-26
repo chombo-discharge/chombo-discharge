@@ -2294,7 +2294,6 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeItoDensity(Real&        a_maxDensity
                                                                             1,
                                                                             m_amr->getNumberOfGhostCells());
 
-  // Scratch member rather than a per-call hierarchy -- printStepReport() runs every time step.
   EBAMRCellData& tmp = *fluidScratch1;
 
   // Go through each solver and find the max/min values.
@@ -2347,7 +2346,6 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeCDRDensity(Real&        a_maxDensity
                                                                             1,
                                                                             m_amr->getNumberOfGhostCells());
 
-  // Scratch member rather than a per-call hierarchy -- printStepReport() runs every time step.
   EBAMRCellData& tmp = *fluidScratch1;
 
   // Go through each solver and find the max/min values.
@@ -2843,8 +2841,7 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
   // Get a handle to the E-field. Note that this is the cell-centered field!
   const EBAMRCellData cellCenteredE = m_amr->alias(a_phase, m_fieldSolver->getElectricField());
 
-  // Interpolate to centroids. Runs through the scratch member rather than a per-call hierarchy: this is
-  // called once per time step, and AmrMesh::allocate defines an exchange Copier per level.
+  // Interpolate to centroids.
   EBAMRCellData& tmp = *fluidScratch1;
 
   DataOps::vectorLength(tmp,

@@ -13,6 +13,9 @@
 #ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
+// Std includes
+#include <optional>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -520,14 +523,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Store E^k -- the field the step starts from. The chemistry is later evaluated at an interpolant between
   // this field and the one that comes out of the semi-implicit transport step. At theta == 1 that interpolant
   // is E^(k+1) alone, so the buffer would only ever hold a copy that the blend below overwrites in full;
-  // advanceReactionNetwork is handed m_electricFieldFluid directly in that case and this is skipped.
-  // The field the chemistry is evaluated at. Held until the reaction network has run.
-  Scratch<EBAMRCellData> reactiveElectricField = (this->m_amr)
-                                                   ->template fetchScratch<EBAMRCellData>(
-                                                     this->m_fluidRealm,
-                                                     this->m_plasmaPhase,
-                                                     SpaceDim,
-                                                     (this->m_amr)->getNumberOfGhostCells());
+  // advanceReactionNetwork is handed m_electricFieldFluid directly in that case and the buffer is not fetched.
+  // The buffer is held until the reaction network has run.
+  std::optional<Scratch<EBAMRCellData>> reactiveElectricField;
 
   // The non-critical KMC time step per cell, from the reaction network to the physics time step at the end.
   Scratch<EBAMRCellData> physicsDt = (this->m_amr)
@@ -538,7 +536,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   m_timer.startEvent("Store E^k");
   if (m_reactiveFieldCentering < 1.0) {
-    DataOps::copy(reactiveElectricField, this->m_electricFieldFluid);
+    reactiveElectricField.emplace((this->m_amr)
+                                    ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                           this->m_plasmaPhase,
+                                                                           SpaceDim,
+                                                                           (this->m_amr)->getNumberOfGhostCells()));
+
+    DataOps::copy(**reactiveElectricField, this->m_electricFieldFluid);
   }
   m_timer.stopEvent("Store E^k");
 
@@ -781,7 +785,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->barrier();
   m_timer.startEvent("Reaction network");
   if (m_reactiveFieldCentering >= 1.0) {
-    // Pure E^(k+1). reactiveElectricField was never filled -- see "Store E^k" above.
+    // Pure E^(k+1). reactiveElectricField was never fetched -- see "Store E^k" above.
     this->advanceReactionNetwork(physicsDt,
                                  this->m_electricFieldFluid,
                                  densitiesIto,
@@ -792,12 +796,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   else {
     // Pure E^k needs no blending; reactiveElectricField already holds it.
     if (m_reactiveFieldCentering > 0.0) {
-      DataOps::scale(reactiveElectricField, 1.0 - m_reactiveFieldCentering);
-      DataOps::incr(reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
+      DataOps::scale(**reactiveElectricField, 1.0 - m_reactiveFieldCentering);
+      DataOps::incr(**reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
     }
 
     this->advanceReactionNetwork(physicsDt,
-                                 reactiveElectricField,
+                                 **reactiveElectricField,
                                  densitiesIto,
                                  densityGradientsIto,
                                  densityGradientsCDR,
