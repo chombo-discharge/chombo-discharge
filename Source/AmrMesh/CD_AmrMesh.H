@@ -2849,59 +2849,12 @@ protected:
 
   /**
    * @brief Fill a temporary with NaN.
+   * @tparam T Type of the temporary. One of the types the scratch pool holds.
    * @param[in,out] a_data Temporary
    */
+  template <typename T>
   void
-  poisonScratch(EBAMRCellData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(EBAMRFluxData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(EBAMRIVData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(EBAMRFAB& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(MFAMRCellData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(MFAMRFluxData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(MFAMRIVData& a_data) const;
-
-  /**
-   * @brief Fill a temporary with NaN.
-   * @param[in,out] a_data Temporary
-   */
-  void
-  poisonScratch(LevelData<EBCellFAB>& a_data) const;
+  poisonScratch(T& a_data) const;
 
   /**
    * @brief Parse centroid interpolation stencils

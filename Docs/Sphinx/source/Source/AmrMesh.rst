@@ -39,7 +39,7 @@ Various class options are available for adjusting the behavior of the ``AmrMesh`
 Below, we include the current template options file for the ``AmrMesh`` class.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.options
-   :emphasize-lines: 9-15,21-26
+   :emphasize-lines: 9-15,21-26,35-36
    :caption: Template input options for the ``AmrMesh`` class. Runtime adjustable options are highlighted.   
 
 For users, modifying the behavior of ``AmrMesh`` is comparatively easy.
@@ -148,4 +148,29 @@ Currently, we support the following options:
 
 Typically, one can just leave this option at ``minmod``.
 
+Temporaries
+-----------
 
+Solvers and time steppers get their temporary mesh data from a pool of temporaries that ``AmrMesh`` keeps for each realm, rather than allocating it on every call or keeping it as class members.
+``AmrMesh::fetchScratch`` returns a ``Scratch<T>`` handle, which owns a temporary until the handle is destroyed and then returns it to the pool:
+
+.. code-block:: c++
+
+   Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+
+   DataOps::setValue(scratch, 0.0);
+
+The handle converts to a reference to the data, so it can be passed to functions that take the data by reference.
+``fetchScratch`` exists for ``EBAMRCellData``, ``EBAMRFluxData`` and ``EBAMRIVData`` (with a phase), and for ``EBAMRFAB``, ``MFAMRCellData``, ``MFAMRFluxData`` and ``MFAMRIVData`` (without one).
+``AmrMesh::fetchLevelScratch`` returns a single level.
+
+The following rules apply:
+
+* The data is uninitialized when it is fetched. A caller that reads a value before writing it, including ghost cells, sets it first.
+* The data may have more ghost cells than were asked for. A caller that needs an exact number of ghost cells fetches with the default number, which no temporary exceeds.
+* A handle is never stored in a class member. Data that must live longer than the function that fetches it is fetched by a caller that spans all of its uses, and passed down by reference.
+* References and aliases taken from a handle must not outlive it. A shallow copy of the data that outlives its handle makes the pool abort when the handle is destroyed. Aliases made with ``AmrMesh::alias``, ``EBAMRData::slice`` or ``aliasLevelData`` are not detected.
+* The pool is emptied whenever the grids change, so a handle cannot be held across a regrid.
+
+Setting ``AmrMesh.scratch_poison = true`` fills every fetched temporary with NaN, which shows reads of values that were never written.
+Setting ``AmrMesh.scratch_report = true`` writes the pool contents to ``pout`` before every regrid.
