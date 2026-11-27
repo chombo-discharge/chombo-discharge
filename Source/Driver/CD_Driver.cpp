@@ -2509,11 +2509,15 @@ Driver::writePlotFile(const std::string& a_filename)
     pout() << "Driver::writePlotFile(string)" << endl;
   }
 
+  Timer timer("Driver::writePlotFile");
+
   // Time stepper does pre-plot operations
+  timer.startEvent("Pre-plot");
   m_timeStepper->prePlot();
   if (!(m_cellTagger.isNull())) {
     m_cellTagger->prePlot();
   }
+  timer.stopEvent("Pre-plot");
 
   // Get total number of components for output
   int numOutputComp = m_timeStepper->getNumberOfPlotVariables();
@@ -2538,12 +2542,13 @@ Driver::writePlotFile(const std::string& a_filename)
 
     // Write HDF5 header.
 #ifdef CH_USE_HDF5
+    timer.startEvent("Header");
     HDF5Handle handle(a_filename, HDF5Handle::CREATE);
     DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
     handle.close();
+    timer.stopEvent("Header");
 #endif
 
-    Timer timer("Driver::writePlotFile");
     for (int lvl = 0; lvl <= maxPlotLevel; lvl++) {
       timer.startEvent("Allocate");
       LevelData<EBCellFAB> outputData;
@@ -2571,9 +2576,12 @@ Driver::writePlotFile(const std::string& a_filename)
         MemoryReport::getMaxMinMemoryUsage();
       }
 
-      timer.startEvent("HDF5 write");
+      timer.startEvent("Open file");
       HDF5Handle handle(a_filename, HDF5Handle::OPEN_RDWR);
-      const int  refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
+      timer.stopEvent("Open file");
+
+      timer.startEvent("HDF5 write");
+      const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
                                     m_amr->getDomains()[lvl],
@@ -2583,17 +2591,16 @@ Driver::writePlotFile(const std::string& a_filename)
                                     lvl,
                                     refRat,
                                     m_numPlotGhost);
-      handle.close();
       timer.stopEvent("HDF5 write");
+
+      timer.startEvent("Close file");
+      handle.close();
+      timer.stopEvent("Close file");
 
       if (m_verbosity > 2) {
         MemoryReport::getMaxMinMemoryUsage();
       }
 #endif
-    }
-
-    if (m_profile) {
-      timer.eventReport(pout(), true);
     }
   }
   else {
@@ -2604,7 +2611,13 @@ Driver::writePlotFile(const std::string& a_filename)
   }
 
   // TimeStepper does post-plot operations.
+  timer.startEvent("Post-plot");
   m_timeStepper->postPlot();
+  timer.stopEvent("Post-plot");
+
+  if (m_profile) {
+    timer.eventReport(pout(), false);
+  }
 }
 
 void
