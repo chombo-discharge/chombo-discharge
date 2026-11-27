@@ -442,46 +442,77 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
                              H5P_DEFAULT);
 #endif
 
+  // Every rank linearizes its particles into one buffer, box by box, and writes it with a single H5Dwrite. The
+  // file selection is the union of the byte ranges of the rank's boxes. Boxes that follow each other in the file are
+  // merged into one range. The data iterator visits the boxes in increasing layout index, which is also the order of
+  // their ranges in the file, so the buffer and the selection are in the same order.
   if (numLocalParticles > 0) {
-    const size_t chunkSize = objSize * _CHUNK;
-    char* const  chunkBase = new char[chunkSize];
-    char*        chunk     = chunkBase;
+    std::vector<char> buffer(objSize * numLocalParticles);
 
-    if (chunkBase == nullptr) {
-      MayDay::Error("WritePart(SoA)::Error: new returned NULL pointer ");
-    }
+    char* dst = buffer.data();
 
-    // serial: writes into the shared HDF5 dataset at running per-box offsets and shares the chunk buffer
+    hsize_t rangeStart = 0;
+    hsize_t rangeCount = 0;
+    bool    firstRange = true;
+
+    auto selectRange = [&]() -> void {
+      H5Sselect_hyperslab(dataspace,
+                          firstRange ? H5S_SELECT_SET : H5S_SELECT_OR,
+                          &rangeStart,
+                          nullptr,
+                          &rangeCount,
+                          nullptr);
+
+      firstRange = false;
+    };
+
+    // serial: fills the shared buffer at running positions and builds the file selection in box order
     const DataIterator& dit  = grids.dataIterator();
     const int           nbox = dit.size();
 
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din    = dit[mybox];
-      size_t           offset = offsets[grids.index(din)];
-
+      const DataIndex&              din  = dit[mybox];
       const ParticleSoA<P, Traits>& leaf = a_particles[din];
       const size_t                  n    = leaf.size();
 
+      if (n == 0) {
+        continue;
+      }
+
       for (size_t ip = 0; ip < n; ip++) {
-        leaf.h5LinearizeParticle((void*)chunk, ip);
-        chunk += objSize;
+        leaf.h5LinearizeParticle((void*)dst, ip);
 
-        if ((ip + 1) % _CHUNK == 0) {
-          chunk -= chunkSize;
-          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize, chunk);
+        dst += objSize;
+      }
+
+      const hsize_t start = offsets[grids.index(din)];
+      const hsize_t count = objSize * n;
+
+      CH_assert(start >= rangeStart + rangeCount);
+
+      if (rangeCount > 0 && rangeStart + rangeCount == start) {
+        rangeCount += count;
+      }
+      else {
+        if (rangeCount > 0) {
+          selectRange();
         }
-      }
 
-      const size_t nResidual = n % _CHUNK;
-      if (nResidual > 0) {
-        chunk -= (nResidual * objSize);
-        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize, chunk);
+        rangeStart = start;
+        rangeCount = count;
       }
-
-      chunk = chunkBase;
     }
 
-    delete[] chunkBase;
+    selectRange();
+
+    const hsize_t bufferSize = buffer.size();
+    const hid_t   memSpace   = H5Screate_simple(1, &bufferSize, nullptr);
+
+    if (H5Dwrite(dataset, H5T_type, memSpace, dataspace, H5P_DEFAULT, buffer.data()) < 0) {
+      MayDay::Error("DischargeIO::writeCheckParticlesToHDF - H5Dwrite failed");
+    }
+
+    H5Sclose(memSpace);
   }
 
   H5Sclose(dataspace);
