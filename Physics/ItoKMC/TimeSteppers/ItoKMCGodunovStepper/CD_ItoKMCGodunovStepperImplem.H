@@ -2183,15 +2183,16 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     // built for. This mirrors what computeDiffusionTermCDR does with the explicit dt*div(D*grad(phi^k)).
     const bool gradientDrift = diffusive && solver->isDiffusionGradientDrift();
 
-    Scratch<EBAMRCellData> diffusionGradient = (this->m_amr)
-                                                 ->template fetchScratch<EBAMRCellData>(
-                                                   this->m_particleRealm,
-                                                   this->m_plasmaPhase,
-                                                   SpaceDim,
-                                                   (this->m_amr)->getNumberOfGhostCells());
+    std::optional<Scratch<EBAMRCellData>> diffusionGradient;
 
     if (gradientDrift) {
-      solver->computeDiffusionGradient(diffusionGradient);
+      diffusionGradient.emplace((this->m_amr)
+                                  ->template fetchScratch<EBAMRCellData>(this->m_particleRealm,
+                                                                         this->m_plasmaPhase,
+                                                                         SpaceDim,
+                                                                         (this->m_amr)->getNumberOfGhostCells()));
+
+      solver->computeDiffusionGradient(*diffusionGradient);
     }
 
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
@@ -2234,7 +2235,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
         // displacement ends up, so each particle's gradient is read into a local below before being
         // overwritten, within the same loop iteration.
         if (gradientDrift) {
-          solver->interpolateDiffusionGradient(lvl, din, (*(*diffusionGradient)[lvl])[din]);
+          solver->interpolateDiffusionGradient(lvl, din, (*(**diffusionGradient)[lvl])[din]);
         }
 
         // The trajectory and the deposit are corrected independently, and are only the same correction when the
