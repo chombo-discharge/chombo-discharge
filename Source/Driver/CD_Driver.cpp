@@ -2827,16 +2827,21 @@ Driver::writeCheckpointFile()
   snprintf(suffix, sizeof(suffix), ".check%07d.%dd.hdf5", m_timeStep, SpaceDim);
   const std::string str = prefix + suffix;
 
-  // Output file
-  HDF5Handle handleOut(str, HDF5Handle::CREATE);
-  header.writeToFile(handleOut);
-
   Timer timer("Driver::writeCheckpointFile");
   if (m_verbosity >= 3) {
     pout() << "Driver::writeCheckpointFile - writing checkpoint file..." << endl;
   }
+
+  // Output file
   if (m_profile) {
-    timer.startEvent("Write data");
+    timer.startEvent("Open file");
+  }
+
+  HDF5Handle handleOut(str, HDF5Handle::CREATE);
+  header.writeToFile(handleOut);
+
+  if (m_profile) {
+    timer.stopEvent("Open file");
   }
 
   for (int lvl = 0; lvl <= finestCheckLevel; lvl++) {
@@ -2847,37 +2852,52 @@ Driver::writeCheckpointFile()
     handleOut.setGroupToLevel(lvl);
 
     // Write amr grids
-    write(handleOut, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
+    if (m_profile) {
+      timer.startEvent("Box layout");
+    }
+
+    write(handleOut, m_amr->getGrids(m_realm)[lvl]);
+
+    if (m_profile) {
+      timer.stopEvent("Box layout");
+      timer.startEvent("Solver data");
+    }
 
     // Time stepper checkpoints solver data.
     m_timeStepper->writeCheckpointData(handleOut, lvl);
 
+    if (m_profile) {
+      timer.stopEvent("Solver data");
+      timer.startEvent("Tags");
+    }
+
     // Driver checkpoints internal data. This involves the cell tags and the computational loads on the various realms.
-    this->writeCheckpointLevel(handleOut, lvl);
+    this->writeCheckpointTags(handleOut, lvl);
+
+    if (m_profile) {
+      timer.stopEvent("Tags");
+      timer.startEvent("Loads");
+    }
+
+    this->writeCheckpointRealmLoads(handleOut, lvl);
+
+    if (m_profile) {
+      timer.stopEvent("Loads");
+    }
   }
 
   if (m_profile) {
-    timer.stopEvent("Write data");
-    timer.eventReport(pout(), true);
+    timer.startEvent("Close file");
   }
 
   handleOut.close();
-#endif
-}
 
-#ifdef CH_USE_HDF5
-void
-Driver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level)
-{
-  CH_TIME("Driver::writeCheckpointLevel(HDF5Handle, int)");
-  if (m_verbosity > 5) {
-    pout() << "Driver::writeCheckpointLevel(HDF5Handle, int)" << endl;
+  if (m_profile) {
+    timer.stopEvent("Close file");
+    timer.eventReport(pout(), false);
   }
-
-  this->writeCheckpointTags(a_handle, a_level);
-  this->writeCheckpointRealmLoads(a_handle, a_level);
-}
 #endif
+}
 
 #ifdef CH_USE_HDF5
 void

@@ -673,17 +673,6 @@ protected:
 
 #ifdef CH_USE_HDF5
   /**
-   * @brief Write checkpoint data.
-   * @param[in] a_handle HDF5 file
-   * @param[in] a_level  Grid level
-   * @details This will call writeCheckpointTags and writeCheckpointRealmLoads
-   */
-  void
-  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level);
-#endif
-
-#ifdef CH_USE_HDF5
-  /**
    * @brief Write tags to checkpoint file
    * @param[in] a_handle HDF5 file
    * @param[in] a_level  Grid level
