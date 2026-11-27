@@ -723,14 +723,14 @@ SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_leve
   CH_assert(!(m_amr.isNull()));
 
   // HDF5 doesn't like irregular data so we copy the data onto an EBCellFAB, which also has storage for multi-cells
-  EBAMRCellData scratch;
+  LevelData<EBCellFAB> scratch;
 
-  m_amr->allocate(scratch, m_realm, m_phase, N);
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, N);
 
-  DataOps::setValue(*scratch[a_level], 0.0);
-  DataOps::incr(*scratch[a_level], *m_phi[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
+  DataOps::setValue(scratch, 0.0);
+  DataOps::incr(scratch, *m_phi[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
-  write(a_handle, *scratch[a_level], id);
+  write(a_handle, scratch, id);
 }
 #endif
 
@@ -751,14 +751,14 @@ SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level
 
   // HDF5 doesn't like irregular data so we wrote the data onto an EBCellFAB, which also has storage for multi-cells. We
   // also need to read from that...
-  EBAMRCellData scratch;
+  LevelData<EBCellFAB> scratch;
 
-  m_amr->allocate(scratch, m_realm, m_phase, N);
+  m_amr->allocate(scratch, m_realm, m_phase, a_level, N);
 
-  read<EBCellFAB>(a_handle, *scratch[a_level], id, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
+  read<EBCellFAB>(a_handle, scratch, id, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
 
   DataOps::setValue(*m_phi[a_level], 0.0);
-  DataOps::incr(*m_phi[a_level], *scratch[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
+  DataOps::incr(*m_phi[a_level], scratch, 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 }
 #endif
 
