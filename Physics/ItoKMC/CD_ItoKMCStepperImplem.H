@@ -2599,6 +2599,11 @@ ItoKMCStepper<I, C, R, F>::prePlot() noexcept
     this->computeCurrentDensity(m_currentDensity);
   }
 
+  // Filled by the time stepper, which knows the conductivity of its field solve.
+  if (m_plotConductivity) {
+    m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
+  }
+
   m_ito->depositParticles();
 }
 
@@ -2654,8 +2659,6 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   }
 
   // Release some unnecessary storage.
-  m_conductivityCell.clear();
-
   m_electricFieldParticle.clear();
   m_electricFieldFluid.clear();
 
@@ -2673,8 +2676,6 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   for (int i = 0; i < numPhotonSpecies; i++) {
     m_secondaryPhotons[i]->clearParticles();
   }
-
-  m_currentDensity.clear();
 
   // Put solvers in pre-regrid mode.
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
@@ -5836,11 +5837,9 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
-      // NOTE: Super-particle merging is NOT done here anymore. It is a separate step run after the
-      //       whole chemistry advance (see advanceReactionNetwork(Real)), through the public
-      //       ItoSolver::makeSuperparticles(), so that both per-cell and AMR-wide merge algorithms
-      //       are supported. It used to be done here only because the particles happened to be
-      //       cell-sorted for the reaction kernels.
+      // NOTE: Super-particles are not merged here. The time stepper merges them after the whole chemistry
+      //       advance, through ItoSolver::makeSuperparticles(), so that both the per-cell and the AMR-wide
+      //       merge algorithms are supported.
     }
   };
 
@@ -5933,8 +5932,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
-      // NOTE: Super-particle merging is done after the chemistry advance -- see the regular kernel
-      //       above and advanceReactionNetwork(Real).
+      // NOTE: Super-particles are merged after the chemistry advance -- see the regular kernel above.
     }
   };
 

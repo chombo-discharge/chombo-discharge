@@ -882,7 +882,8 @@ public:
    * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.
    * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns, from which the
    * caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is
-   * not diffusive or the drift correction is disabled, so callers may add the term unconditionally.
+   * not diffusive or the drift correction is disabled, so callers may add the term unconditionally. The gradient
+   * must be allocated on every level in either case; it is not read when the columns are zeroed.
    * @param[in] a_diffusionGradient Gradient of the diffusion field, from computeDiffusionGradient().
    */
   virtual void

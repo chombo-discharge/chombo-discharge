@@ -527,13 +527,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // The buffer is held until the reaction network has run.
   std::optional<Scratch<EBAMRCellData>> reactiveElectricField;
 
-  // The non-critical KMC time step per cell, from the reaction network to the physics time step at the end.
-  Scratch<EBAMRCellData> physicsDt = (this->m_amr)
-                                       ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
-                                                                              this->m_plasmaPhase,
-                                                                              1,
-                                                                              (this->m_amr)->getNumberOfGhostCells());
-
   m_timer.startEvent("Store E^k");
   if (m_reactiveFieldCentering < 1.0) {
     reactiveElectricField.emplace((this->m_amr)
@@ -782,6 +775,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   //
   // NOTE: This centering applies to the reactions only. The drift update must keep using E^(k+1) with the
   //       lagged mobility mu^k because that is the pairing the semi-implicit Poisson operator was built for.
+  // The non-critical KMC time step per cell, from the reaction network to the physics time step at the end.
+  Scratch<EBAMRCellData> physicsDt = (this->m_amr)
+                                       ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                              this->m_plasmaPhase,
+                                                                              1,
+                                                                              (this->m_amr)->getNumberOfGhostCells());
+
   this->barrier();
   m_timer.startEvent("Reaction network");
   if (m_reactiveFieldCentering >= 1.0) {
@@ -808,6 +808,10 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
                                  a_dt);
   }
   m_timer.stopEvent("Reaction network");
+
+  // Release the reaction inputs before the merging and the coefficient updates fetch their own scratch.
+  densityStorage.clear();
+  reactiveElectricField.reset();
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
   // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide
@@ -2736,8 +2740,6 @@ ItoKMCGodunovStepper<I, C, R, F>::prePlot() noexcept
   // The conductivity of the last semi-implicit field solve. The conductivity particles and the stored CDR
   // conductivity are kept between steps and remapped at regrids, so this reproduces it.
   if (this->m_plotConductivity) {
-    (this->m_amr)->allocate(this->m_conductivityCell, this->m_fluidRealm, this->m_plasmaPhase, 1);
-
     this->computeCellConductivity(this->m_conductivityCell, m_conductivityParticles, true);
   }
 

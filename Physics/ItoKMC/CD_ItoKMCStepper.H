@@ -712,8 +712,8 @@ protected:
 
   /**
    * @brief Cell-centered conductivity for plot files.
-   * @details Allocated and filled by the time stepper's prePlot when the conductivity is plotted, and cleared in
-   * postPlot. Defined on the fluid realm with 1 component.
+   * @details Allocated in prePlot when the conductivity is plotted and filled by the time stepper's prePlot, which
+   * knows the conductivity of its field solve. Cleared in postPlot. Defined on the fluid realm with 1 component.
    */
   EBAMRCellData m_conductivityCell;
 
@@ -1119,7 +1119,8 @@ protected:
    * @brief Compute the densities and density gradients that the reaction kernels read, on the fluid realm.
    * @details The fields are fetched from the scratch pool into a_storage. Only the species that the physics needs a
    * gradient for are computed: for them, the fluid-realm Ito density and the density gradient. All other entries
-   * point to shared zero fields. The Ito particles of those species must have been deposited before this call.
+   * point to shared zero fields. The solvers' mesh densities are read as they are; the time step deposits the Ito
+   * particles of those species first.
    * @param[out] a_storage              Handles of the fields. They must outlive the pointers below.
    * @param[out] a_densitiesIto         Fluid-realm density per Ito species.
    * @param[out] a_densityGradientsIto  Density gradient per Ito species.
