@@ -1038,12 +1038,17 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+  // Set where the mask holder of a patch is not empty. Aborting from inside the threaded loop is not safe.
+  bool notEmpty = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : notEmpty)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
     const BaseFab<bool>& mask = a_mask[din];
     if (!mask.isUsable()) {
+      notEmpty = notEmpty || (maskLevel[din].size() != 0);
+
       (*m_maskOrigins[a_level])[din].clear();
 
       continue;
@@ -1052,12 +1057,23 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
 
     Leaf& src = srcLevel[din];
 
-    this->moveToMaskHolder(src, maskLevel[din], (*m_maskOrigins[a_level])[din], [&](const std::size_t a_i) -> bool {
-      const IntVect iv = this->cellIndex(a_level, src.position(a_i));
+    const bool moved = this->moveToMaskHolder(src,
+                                              maskLevel[din],
+                                              (*m_maskOrigins[a_level])[din],
+                                              [&](const std::size_t a_i) -> bool {
+                                                const IntVect iv = this->cellIndex(a_level, src.position(a_i));
 
-      return maskBox.contains(iv) && mask(iv, 0);
-    });
+                                                return maskBox.contains(iv) && mask(iv, 0);
+                                              });
+
+    notEmpty = notEmpty || !moved;
   }
+
+  if (notEmpty) {
+    MayDay::Abort("ParticleContainer::transferMaskParticles - the mask holder is not empty");
+  }
+
+  m_isOrganizedByCell = false;
 }
 
 template <typename P, typename Traits>
@@ -1167,46 +1183,60 @@ ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleG
     const DataIterator& dit  = m_grids[lvl].dataIterator();
     const int           nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+    // Set where the mask holder of a patch is not empty. Aborting from inside the threaded loop is not safe.
+    bool notEmpty = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : notEmpty)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex&         din  = dit[mybox];
       const ParticleGhostMask& mask = (*a_coarToFine[lvl])[din];
 
       Leaf& src = srcLevel[din];
 
-      this->moveToMaskHolder(src, maskLevel[din], (*m_maskOrigins[lvl])[din], [&](const std::size_t a_i) -> bool {
-        const RealVect pos = src.position(a_i);
-        const IntVect  iv  = this->cellIndex(lvl, pos);
+      const bool moved = this->moveToMaskHolder(src,
+                                                maskLevel[din],
+                                                (*m_maskOrigins[lvl])[din],
+                                                [&](const std::size_t a_i) -> bool {
+                                                  const RealVect pos = src.position(a_i);
+                                                  const IntVect  iv  = this->cellIndex(lvl, pos);
 
-        bool select = false;
+                                                  bool select = false;
 
-        if (!src.isGhost(a_i) && mask.box().contains(iv)) {
-          const IntVect fineCell = this->cellIndex(lvl + 1, pos);
+                                                  if (!src.isGhost(a_i) && mask.box().contains(iv)) {
+                                                    const IntVect fineCell = this->cellIndex(lvl + 1, pos);
 
-          for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
-            select = mask.targetBox(iv, k).contains(fineCell);
-          }
-        }
+                                                    for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
+                                                      select = mask.targetBox(iv, k).contains(fineCell);
+                                                    }
+                                                  }
 
-        return select;
-      });
+                                                  return select;
+                                                });
+
+      notEmpty = notEmpty || !moved;
+    }
+
+    if (notEmpty) {
+      MayDay::Abort("ParticleContainer::transferMaskParticlesCoarToFine - the mask holder is not empty");
     }
   }
+
+  m_isOrganizedByCell = false;
 }
 
 template <typename P, typename Traits>
 template <typename Select>
-inline void
+inline bool
 ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
                                                Leaf&                     a_dst,
                                                std::vector<std::size_t>& a_origins,
                                                const Select&             a_select)
 {
-  if (a_dst.size() != 0) {
-    MayDay::Abort("ParticleContainer::moveToMaskHolder - the mask holder is not empty");
-  }
-
   a_origins.clear();
+
+  if (a_dst.size() != 0) {
+    return false;
+  }
 
   const std::size_t numParticles = a_src.size();
 
@@ -1217,11 +1247,19 @@ ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
   }
 
   if (a_origins.empty()) {
-    return;
+    return true;
+  }
+
+  const std::size_t numStay = numParticles - a_origins.size();
+
+  // Every particle moves, in its order.
+  if (numStay == 0) {
+    a_dst.catenate(a_src);
+
+    return true;
   }
 
   // Put the selected particles at the end, keeping the order of both groups, and move them to the mask holder.
-  const std::size_t numStay = numParticles - a_origins.size();
 
   std::vector<std::size_t> dest(numParticles);
 
@@ -1241,11 +1279,15 @@ ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
 
   a_src.permute(dest);
 
+  a_dst.reserve(a_origins.size());
+
   for (std::size_t i = numStay; i < numParticles; i++) {
     a_dst.appendParticle(a_src, i);
   }
 
   a_src.resize(numStay);
+
+  return true;
 }
 
 template <typename P, typename Traits>
@@ -1263,7 +1305,10 @@ ParticleContainer<P, Traits>::returnMaskParticles()
     const DataIterator& dit  = m_grids[lvl].dataIterator();
     const int           nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+    // Set where a patch does not match its transfer. Aborting from inside the threaded loop is not safe.
+    bool mismatch = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : mismatch)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -1271,24 +1316,36 @@ ParticleContainer<P, Traits>::returnMaskParticles()
       Leaf&                     mask    = maskLevel[din];
       std::vector<std::size_t>& origins = (*m_maskOrigins[lvl])[din];
 
-      // Anything else in the mask holder, or a valid holder that changed size, would make the map below not a
-      // permutation.
+      // The mask holder must hold exactly the moved particles, and the recorded indices must fit the valid holder,
+      // or the map below is not a permutation.
       if (mask.size() != origins.size()) {
-        MayDay::Abort("ParticleContainer::returnMaskParticles - the mask holder does not match the recorded indices");
+        mismatch = true;
+
+        continue;
       }
 
       if (origins.empty()) {
         continue;
       }
 
+      const std::size_t numStay      = src.size();
+      const std::size_t numParticles = numStay + origins.size();
+
+      if (origins.back() >= numParticles) {
+        mismatch = true;
+
+        continue;
+      }
+
       // The particles that stayed are first, in their original order, and the returned ones follow in the order
-      // they were moved out. Send each one back to its original index.
-      const std::size_t numStay = src.size();
+      // they were moved out. Send each one back to its original index. If none stayed, that is already the order.
+      src.catenate(mask);
 
-      src.append(mask);
-      mask.clear();
+      if (numStay == 0) {
+        origins.clear();
 
-      const std::size_t numParticles = src.size();
+        continue;
+      }
 
       std::vector<std::size_t> dest(numParticles);
 
@@ -1305,13 +1362,13 @@ ParticleContainer<P, Traits>::returnMaskParticles()
         }
       }
 
-      if (stay != numStay || k != origins.size()) {
-        MayDay::Abort("ParticleContainer::returnMaskParticles - the valid holder changed size since the transfer");
-      }
-
       src.permute(dest);
 
       origins.clear();
+    }
+
+    if (mismatch) {
+      MayDay::Abort("ParticleContainer::returnMaskParticles - the mask holder does not match the recorded indices");
     }
   }
 

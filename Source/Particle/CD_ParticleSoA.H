@@ -1626,7 +1626,8 @@ public:
 
   /**
    * @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).
-   * @param[in] a_dest Destination slot for each current particle.
+   * @details Invalidates the cell sort.
+   * @param[in] a_dest Destination slot for each current particle. A permutation of 0..size()-1.
    */
   void
   permute(const std::vector<std::size_t>& a_dest);

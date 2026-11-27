@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 788-792
+   :lines: 789-793
    :language: c++
    :dedent: 2
 

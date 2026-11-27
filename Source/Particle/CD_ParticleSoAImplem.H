@@ -59,6 +59,8 @@ template <typename P, typename Traits>
 inline void
 ParticleSoA<P, Traits>::permute(const std::vector<std::size_t>& a_dest)
 {
+  CH_assert(a_dest.size() == m_size);
+
   std::array<std::size_t, s_numColumns> off{};
   const std::size_t total = this->computeOffsets(m_capacity, off, std::make_index_sequence<s_numColumns>{});
 
@@ -81,6 +83,8 @@ ParticleSoA<P, Traits>::permute(const std::vector<std::size_t>& a_dest)
   m_bytes  = bytes;
 
   this->setColPtrs(off, std::make_index_sequence<s_numColumns>{});
+
+  m_sorted = false;
 }
 
 template <typename P, typename Traits>

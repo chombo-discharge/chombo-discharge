@@ -780,7 +780,8 @@ public:
    * @brief Move the mask particles back into the valid holder, each to the index it was moved out of.
    * @details Undoes transferMaskParticles() or transferMaskParticlesCoarToFine(), so that the valid holder has the
    * same particles in the same order as before the transfer. Particles added to the valid holder in between must have
-   * been removed first. Aborts if the mask holder or the size of the valid holder does not match the transfer.
+   * been removed first. Aborts if the mask holder does not hold exactly the moved particles, or if the recorded indices
+   * no longer fit the valid holder.
    */
   void
   returnMaskParticles();
@@ -959,15 +960,16 @@ protected:
   /**
    * @brief Move the particles of a patch that a_select picks into the mask holder of the patch.
    * @details The particles that stay keep their order. The moved particles are appended to a_dst in their original
-   * order, and their original indices are written to a_origins.
+   * order, and their original indices are written to a_origins. Nothing is moved if a_dst is not empty.
    * @tparam Select Callable (std::size_t index) -> bool.
    * @param[in,out] a_src     Valid particles of the patch.
-   * @param[in,out] a_dst     Mask particles of the patch. Must be empty.
+   * @param[in,out] a_dst     Mask particles of the patch.
    * @param[out]    a_origins Original indices of the moved particles, in increasing order.
    * @param[in]     a_select  Selects the particles to move, by index in a_src.
+   * @return False if a_dst was not empty, true otherwise.
    */
   template <typename Select>
-  void
+  bool
   moveToMaskHolder(Leaf& a_src, Leaf& a_dst, std::vector<std::size_t>& a_origins, const Select& a_select);
 
   /**
