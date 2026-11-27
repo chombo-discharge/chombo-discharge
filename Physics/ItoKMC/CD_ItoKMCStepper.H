@@ -1718,7 +1718,7 @@ protected:
    */
   virtual void
   fillSecondaryEmissionEB(Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
-                          Vector<EBAMRIVData>&                                   a_cdrFluxes,
+                          Vector<EBAMRIVData*>&                                  a_cdrFluxes,
                           Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
                           EBAMRIVData&                                           a_surfaceSpecies,
                           Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,

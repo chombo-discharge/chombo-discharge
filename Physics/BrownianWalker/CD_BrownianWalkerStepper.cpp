@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <optional>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
@@ -569,13 +572,13 @@ BrownianWalkerStepper::advance(const Real a_dt)
   // diffusion coefficient would be handled correctly.
   const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
 
-  Scratch<EBAMRCellData> diffusionGradient = m_amr->fetchScratch<EBAMRCellData>(m_realm,
-                                                                                m_phase,
-                                                                                SpaceDim,
-                                                                                m_amr->getNumberOfGhostCells());
+  std::optional<Scratch<EBAMRCellData>> diffusionGradient;
 
   if (gradientDrift) {
-    m_solver->computeDiffusionGradient(diffusionGradient);
+    diffusionGradient.emplace(
+      m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, SpaceDim, m_amr->getNumberOfGhostCells()));
+
+    m_solver->computeDiffusionGradient(*diffusionGradient);
   }
 
   // 1. Euler-Maruayma kernel on each patch.
@@ -600,7 +603,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
       // kernels below move a particle: the interpolation stencil reads the patch that owns X^k, and the particles
       // are not remapped until after the whole Euler-Maruyama kernel has run.
       if (gradientDrift) {
-        m_solver->interpolateDiffusionGradient(lvl, din, (*(*diffusionGradient)[lvl])[din]);
+        m_solver->interpolateDiffusionGradient(lvl, din, (*(**diffusionGradient)[lvl])[din]);
       }
 
       // Euler step.

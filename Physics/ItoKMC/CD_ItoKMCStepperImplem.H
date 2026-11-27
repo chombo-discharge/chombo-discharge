@@ -6341,15 +6341,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<EBAMRIVData*>& a_cdrFl
     m_amr->copyData(m_particleSurfaceScratch, m_surfaceSolvers[i]->getPhi(), Interval(i, i), Interval(0, 0));
   }
 
-  // The kernel takes the CDR fluxes as a vector of data holders, so cdrFluxes holds shallow copies of the caller's.
-  Vector<EBAMRIVData> cdrFluxes;
-  for (int i = 0; i < numCdrSpecies; i++) {
-    cdrFluxes.push_back(*a_cdrFluxes[i]);
-  }
-
   // Call the other version.
   this->fillSecondaryEmissionEB(m_secondaryParticles,
-                                cdrFluxes,
+                                a_cdrFluxes,
                                 m_secondaryPhotons,
                                 m_particleSurfaceScratch,
                                 primaryParticles,
@@ -6363,7 +6357,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
   Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
-  Vector<EBAMRIVData>&                                   a_cdrFluxes,
+  Vector<EBAMRIVData*>&                                  a_cdrFluxes,
   Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
   EBAMRIVData&                                           a_surfaceSpecies,
   Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
@@ -6405,10 +6399,10 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
   }
 
   for (int i = 0; i < numCdrSpecies; i++) {
-    CH_assert(a_cdrFluxes[i].getRealm() == m_particleRealm);
+    CH_assert(a_cdrFluxes[i]->getRealm() == m_particleRealm);
     CH_assert(a_cdrFluxesExtrap[i].getRealm() == m_particleRealm);
 
-    DataOps::setValue(a_cdrFluxes[i], 0.0);
+    DataOps::setValue(*a_cdrFluxes[i], 0.0);
   }
 
   // Incoming/outgoing photon containers by be sorted by cell
@@ -6476,7 +6470,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       }
 
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
-        cdrFluxesFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[din]));
+        cdrFluxesFAB.push_back(&((*(*a_cdrFluxes[it.index()])[lvl])[din]));
         cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxesExtrap[it.index()])[lvl])[din]));
       }
 
@@ -7229,14 +7223,17 @@ ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
 
   DataOps::setValue(*fluidYPC, 0.0);
 
-  // The reaction kernels read densities and gradients, which are not computed before the first time step. They read
-  // zeros.
+  // The reaction kernels read the densities and gradients of the current state, as in the time step.
   std::vector<Scratch<EBAMRCellData>> densityStorage;
   Vector<const EBAMRCellData*>        densitiesIto;
   Vector<const EBAMRCellData*>        densityGradientsIto;
   Vector<const EBAMRCellData*>        densityGradientsCDR;
 
-  this->computeDensityGradients(densityStorage, densitiesIto, densityGradientsIto, densityGradientsCDR, false);
+  this->computeDensityGradients(densityStorage,
+                                densitiesIto,
+                                densityGradientsIto,
+                                densityGradientsCDR,
+                                m_physics->needGradients());
 
   Scratch<EBAMRCellData> physicsDt = m_amr->fetchScratch<EBAMRCellData>(m_fluidRealm, m_plasmaPhase, 1, ghost);
 

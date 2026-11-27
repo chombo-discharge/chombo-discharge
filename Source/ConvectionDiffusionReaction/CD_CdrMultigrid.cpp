@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <optional>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <EBAMRIO.H>
@@ -756,15 +759,15 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
 
     // General divergence computation. Also inject charge. Domain fluxes came in above but eb fluxes come in here.
     // Without the stored EB flux, the EB faces get a zero flux.
-    Scratch<EBAMRIVData> ebZero = m_amr->fetchScratch<EBAMRIVData>(m_realm,
-                                                                   m_phase,
-                                                                   m_nComp,
-                                                                   m_amr->getNumberOfGhostCells());
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
     if (!a_ebFlux) {
-      DataOps::setValue(ebZero, 0.0);
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
 
-    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : *ebZero;
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
     this->computeDivG(a_divJ, scratchFlux, ebflux, a_phi, a_dt, a_conservativeOnly);
   }
   else {
@@ -816,15 +819,15 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     this->computeAdvectionFlux(scratchFlux, faceVelocity, faceStates, a_domainFlux);
 
     // Without the stored EB flux, the EB faces get a zero flux.
-    Scratch<EBAMRIVData> ebZero = m_amr->fetchScratch<EBAMRIVData>(m_realm,
-                                                                   m_phase,
-                                                                   m_nComp,
-                                                                   m_amr->getNumberOfGhostCells());
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
     if (!a_ebFlux) {
-      DataOps::setValue(ebZero, 0.0);
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
 
-    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : *ebZero;
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
 
     // Compute div(F) -- this includes interpolation to centroids and redistribution.
     this->computeDivG(a_divF, scratchFlux, ebflux, a_phi, a_dt, a_conservativeOnly);
@@ -859,15 +862,15 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
     this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Compute the face-centered diffusion flux
 
     // Without the stored EB flux, the EB faces get a zero flux.
-    Scratch<EBAMRIVData> ebZero = m_amr->fetchScratch<EBAMRIVData>(m_realm,
-                                                                   m_phase,
-                                                                   m_nComp,
-                                                                   m_amr->getNumberOfGhostCells());
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
     if (!a_ebFlux) {
-      DataOps::setValue(ebZero, 0.0);
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
 
-    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : *ebZero;
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
     // The update is phi + a_dt*div(D*grad(phi)) = phi - (-a_dt)*div(D*grad(phi)), so the update time step that the
     // stabilization sees is -a_dt.
     this->computeDivG(a_divD, scratchFlux, ebflux, a_phi, -a_dt, a_conservativeOnly);
