@@ -324,7 +324,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 736-737
+   :lines: 737-738
    :language: c++
    :dedent: 2
 
@@ -340,7 +340,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 789-793
+   :lines: 790-794
    :language: c++
    :dedent: 2
 
@@ -759,7 +759,7 @@ The recommended pattern for the per-cell family is to cell-sort the leaf, extrac
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1554-1576
+   :lines: 1555-1577
    :dedent: 2
    :language: c++
 

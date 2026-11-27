@@ -1172,23 +1172,31 @@ ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleG
 
   CH_assert(m_isDefined);
 
-  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-    if (lvl >= a_coarToFine.size() || a_coarToFine[lvl].isNull()) {
-      continue;
-    }
-
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     LevelParticles& maskLevel = *m_maskParticles[lvl];
     LevelParticles& srcLevel  = *m_particles[lvl];
 
     const DataIterator& dit  = m_grids[lvl].dataIterator();
     const int           nbox = dit.size();
 
+    // Levels without a finer level or without a mask move nothing, but their mask holders must be empty too.
+    const bool hasMask = (lvl < m_finestLevel) && (lvl < a_coarToFine.size()) && !(a_coarToFine[lvl].isNull());
+
     // Set where the mask holder of a patch is not empty. Aborting from inside the threaded loop is not safe.
     bool notEmpty = false;
 
 #pragma omp parallel for schedule(runtime) reduction(|| : notEmpty)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex&         din  = dit[mybox];
+      const DataIndex& din = dit[mybox];
+
+      if (!hasMask) {
+        notEmpty = notEmpty || (maskLevel[din].size() != 0);
+
+        (*m_maskOrigins[lvl])[din].clear();
+
+        continue;
+      }
+
       const ParticleGhostMask& mask = (*a_coarToFine[lvl])[din];
 
       Leaf& src = srcLevel[din];

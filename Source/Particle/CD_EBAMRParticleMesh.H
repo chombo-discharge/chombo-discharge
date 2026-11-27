@@ -1322,7 +1322,8 @@ protected:
       }
     }
 
-    // Return the transition particles to the valid holder, each where it was.
+    // Return the transition particles to the valid holder, each where it was. fillCoarseGhosts appended the coarse
+    // ghosts after the particles that stayed, so removing them leaves those in their order.
     particles.clearGhostParticles(GhostType::Coarse);
     particles.returnMaskParticles();
   }

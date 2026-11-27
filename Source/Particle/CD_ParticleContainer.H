@@ -687,7 +687,8 @@ public:
 
   /**
    * @brief Remove the ghost particles of one GhostType from all levels and patches.
-   * @details Like clearGhostParticles(), but every other particle, owned or ghost, is left untouched.
+   * @details Like clearGhostParticles(), but every other particle, owned or ghost, is left untouched. Removal is by
+   * swap-and-pop, so the other particles keep their order only if the removed ones are all after them.
    * @param[in] a_type Ghost type to remove. Must not be GhostType::Valid.
    */
   void

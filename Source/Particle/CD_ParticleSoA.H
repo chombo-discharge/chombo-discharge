@@ -1002,7 +1002,8 @@ public:
    * @details The move counterpart of append(const ParticleSoA&): appends all of a_other's particles
    * (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas
    * are swapped instead, so the common "drain into an empty destination" case is O(1) with zero copy.
-   * Invalidates the cell sort. Catenating a container into itself is a no-op.
+   * Invalidates the cell sort, except that the swap into an empty container carries a_other's sort state along.
+   * Catenating a container into itself is a no-op.
    * @param[in,out] a_other Source container, left empty afterwards.
    */
   void
