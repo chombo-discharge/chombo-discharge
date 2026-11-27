@@ -1044,6 +1044,8 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
 
     const BaseFab<bool>& mask = a_mask[din];
     if (!mask.isUsable()) {
+      (*m_maskOrigins[a_level])[din].clear();
+
       continue;
     }
     const Box maskBox = mask.box();
@@ -1200,7 +1202,9 @@ ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
                                                std::vector<std::size_t>& a_origins,
                                                const Select&             a_select)
 {
-  CH_assert(a_dst.size() == 0);
+  if (a_dst.size() != 0) {
+    MayDay::Abort("ParticleContainer::moveToMaskHolder - the mask holder is not empty");
+  }
 
   a_origins.clear();
 
@@ -1267,7 +1271,11 @@ ParticleContainer<P, Traits>::returnMaskParticles()
       Leaf&                     mask    = maskLevel[din];
       std::vector<std::size_t>& origins = (*m_maskOrigins[lvl])[din];
 
-      CH_assert(mask.size() == origins.size());
+      // Anything else in the mask holder, or a valid holder that changed size, would make the map below not a
+      // permutation.
+      if (mask.size() != origins.size()) {
+        MayDay::Abort("ParticleContainer::returnMaskParticles - the mask holder does not match the recorded indices");
+      }
 
       if (origins.empty()) {
         continue;
@@ -1297,11 +1305,18 @@ ParticleContainer<P, Traits>::returnMaskParticles()
         }
       }
 
+      if (stay != numStay || k != origins.size()) {
+        MayDay::Abort("ParticleContainer::returnMaskParticles - the valid holder changed size since the transfer");
+      }
+
       src.permute(dest);
 
       origins.clear();
     }
   }
+
+  // The order is restored, but the leaves were resized and appended to.
+  m_isOrganizedByCell = false;
 }
 
 #include <CD_NamespaceFooter.H>

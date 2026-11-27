@@ -780,7 +780,7 @@ public:
    * @brief Move the mask particles back into the valid holder, each to the index it was moved out of.
    * @details Undoes transferMaskParticles() or transferMaskParticlesCoarToFine(), so that the valid holder has the
    * same particles in the same order as before the transfer. Particles added to the valid holder in between must have
-   * been removed first.
+   * been removed first. Aborts if the mask holder or the size of the valid holder does not match the transfer.
    */
   void
   returnMaskParticles();
@@ -852,8 +852,8 @@ public:
    * @brief Move all particles from another holder (on the same valid grids) into the valid holder.
    * @details Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move
    * preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source
-   * empty. Used to return halo/mask particles to the valid holder after a HaloNGP deposition. Assumes
-   * a_source is defined over this container's valid grids.
+   * empty. Appends, so the particles do not go back where they came from; returnMaskParticles() does that for the
+   * mask holder. Assumes a_source is defined over this container's valid grids.
    * @param[in,out] a_source Holder to drain into the valid particles.
    */
   void
