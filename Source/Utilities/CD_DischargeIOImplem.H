@@ -405,7 +405,9 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
   }
 #endif
 
-  write_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType);
+  // The particle count of every box. The boxes themselves are those of the level's box layout, which is written once
+  // per level, so they are not written again for every particle type.
+  write_vect_to_header(a_handle, particlesPerBox, H5T_NATIVE_ULLONG, a_dataType + ":offsets");
 
   // The SoA HDF5 record (position + weight + the payload h5 subset) is stored as raw bytes
   // (H5T_NATIVE_CHAR). Payload columns may be ParticleReal (float), so the per-particle byte size need
@@ -529,11 +531,27 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
 {
   CH_TIMERS("readParticlesFromHDF(SoA)");
 
+  const BoxLayout& bl = a_particles.boxLayout();
+
+  // Checkpoint files hold the particle count of every box. Older files also hold the box list for every particle type,
+  // which is read for them; the data set name tells the layouts apart.
   std::vector<unsigned long long> particlesPerBox;
   Vector<Box>                     grids;
-  read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
 
-  const BoxLayout& bl = a_particles.boxLayout();
+  const std::string boxesName = a_dataType + ":boxes";
+
+  if (H5Lexists(a_handle.groupID(), boxesName.c_str(), H5P_DEFAULT) > 0) {
+    read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
+  }
+  else {
+    grids = bl.boxArray();
+
+    particlesPerBox.resize(grids.size(), 0ULL);
+
+    read_vect_from_header(a_handle, particlesPerBox, H5T_NATIVE_ULLONG, a_dataType + ":offsets");
+  }
+
+  CH_assert(grids.size() == bl.size());
 
   // Byte-based storage (matches writeCheckParticlesToHDF): the per-particle record may not be a multiple
   // of sizeof(double) (ParticleReal payload columns), so everything is counted in bytes (H5T_NATIVE_CHAR).
