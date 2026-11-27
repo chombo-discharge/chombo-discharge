@@ -26,6 +26,8 @@
 #include <CD_GitHash.H>
 #include <CD_NamespaceHeader.H>
 
+const std::size_t DischargeIO::particleBlockSize = 1000000000000;
+
 std::string
 DischargeIO::gitHash() noexcept
 {

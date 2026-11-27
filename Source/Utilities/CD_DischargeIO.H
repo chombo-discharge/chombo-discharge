@@ -14,6 +14,7 @@
 #define CD_DISCHARGEIO_H
 
 // Std includes
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <utility>
@@ -40,6 +41,14 @@
  * @brief Namespace which encapsulates chombo-discharge IO functionality.
  */
 namespace DischargeIO {
+/**
+ * @brief Maximum number of particles that a rank writes with one H5Dwrite when writing particles to a checkpoint file.
+ * @details The particles are linearized into a buffer of at most this many particles, which is written each time it is
+ * full. The default is high enough that every rank writes its particles with one H5Dwrite. Lowering it bounds the
+ * memory used while writing, at the cost of more H5Dwrite calls; the file contents do not depend on it.
+ */
+extern const std::size_t particleBlockSize;
+
 /**
  * @brief Get the git description of the source tree that this executable was compiled from.
  * @details The string is stamped into the library at compile time by Lib/GenerateGitHash.sh, and is
