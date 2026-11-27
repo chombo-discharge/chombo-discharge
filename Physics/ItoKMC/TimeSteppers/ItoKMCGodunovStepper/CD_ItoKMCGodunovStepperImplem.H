@@ -13,6 +13,9 @@
 #ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
+// Std includes
+#include <filesystem>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -2629,18 +2632,22 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       const RefCountedPtr<ItoSolver>&       solver    = solverIt();
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      // Create the output folder
-      // Quoted: a solver name containing a space would otherwise make the shell create one directory
-      // per word, and the file open then fails with a bare MPI_ERR_NO_SUCH_FILE from inside HDF5.
-      std::string cmd     = "mkdir -p 'particles/" + solver->getName() + "'";
-      int         success = 0;
+      // Create the output folder on the master rank. The other ranks wait for it before opening the file.
+      const std::filesystem::path dir = std::filesystem::path("particles") / solver->getName();
+
       if (procID() == 0) {
-        success = system(cmd.c_str());
+        std::error_code error;
+
+        std::filesystem::create_directories(dir, error);
+
+        if (error) {
+          MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
+        }
       }
 
-      if (success != 0) {
-        MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
-      }
+#ifdef CH_MPI
+      MPI_Barrier(Chombo_MPI::comm);
+#endif
 
       // Set plot file name
       const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName();
