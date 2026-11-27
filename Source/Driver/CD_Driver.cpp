@@ -27,6 +27,7 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 #include <SPMD.H>
+#include <ParticleIO.H>
 
 // Our includes
 #include <CD_Driver.H>
@@ -60,6 +61,28 @@ constexpr const char* graphFileKey = "polyhedral_graph_file";
  * @brief HDF5 checkpoint header key holding the identifier of the polyhedral graph file.
  */
 constexpr const char* graphIdKey = "polyhedral_graph_id";
+
+/**
+ * @brief Checkpoint data set holding the cell tags of a level as integer mesh data.
+ */
+constexpr const char* checkpointTagsKey = "tags";
+
+/**
+ * @brief Checkpoint data set holding the cell tags of a level as floating-point EB mesh data, the layout of
+ * older checkpoint files. It is only read.
+ */
+constexpr const char* legacyCheckpointTagsKey = "tagged_cells";
+
+/**
+ * @brief Suffix, after the realm name, of the checkpoint data set holding one load per box of a level.
+ */
+constexpr const char* checkpointLoadsSuffix = "_box_loads";
+
+/**
+ * @brief Suffix, after the realm name, of the checkpoint data set holding the loads of a level as mesh data with the
+ * load of a box in all of its cells, the layout of older checkpoint files. It is only read.
+ */
+constexpr const char* legacyCheckpointLoadsSuffix = "_loads";
 } // namespace
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -2908,28 +2931,29 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
     pout() << "Driver::writeCheckpointTags(HDF5Handle, int)" << endl;
   }
 
-  // We have a set of tags in DenseIntVect that we want to checkpoint. Chombo doesn't do I/O of IntVect
-  // so we create some mesh data on level a_lvl which we fill with grid tags. Then just checkpoint that file instead.
+  // The tags are written as integer mesh data on the valid cells, with 1 in tagged cells and 0 elsewhere. Covered
+  // cells are never written as tagged.
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  EBCellFactory        fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
-  LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3 * IntVect::Unit, fact);
-  DataOps::setValue(scratch, 0.0);
-
-  // Set tags = 1
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const DataIterator&      dit = dbl.dataIterator();
+  LevelData<BaseFab<int>> scratch(dbl, 1, IntVect::Zero);
 
   const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    FArrayBox&             fab  = scratch[din].getFArrayBox();
-    const DenseIntVectSet& tags = (*m_tags[a_level])[din];
+    BaseFab<int>&          fab     = scratch[din];
+    const EBISBox&         ebisbox = ebisl[din];
+    const DenseIntVectSet& tags    = (*m_tags[a_level])[din];
+
+    fab.setVal(0);
 
     auto kernel = [&](const IntVect& iv) -> void {
-      if (tags[iv]) {
-        fab(iv, 0) = 1.0;
+      if (tags[iv] && !ebisbox.isCovered(iv)) {
+        fab(iv, 0) = 1;
       }
     };
 
@@ -2938,14 +2962,7 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
     BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
   }
 
-  // Zero out covered cells (defensive) before writing. Done ONCE over the whole LevelData -- this used to
-  // sit inside the OpenMP box loop above, where it ran nbox times and each thread wrote covered cells across
-  // every box of the shared scratch (redundant + racy). Behavior is unchanged: scratch is zero-initialized
-  // and the kernel only writes tagged (non-covered) cells, so covered cells are already 0.
-  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, phase::gas)[a_level], 0, 0.0);
-
-  // Write tags
-  write(a_handle, scratch, "tagged_cells");
+  write(a_handle, scratch, checkpointTagsKey);
 }
 #endif
 
@@ -2958,31 +2975,12 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
     pout() << "Driver::writeCheckpointRealmLoads(HDF5Handle, int)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const DataIterator&      dit = dbl.dataIterator();
-
-  const int nbox = dit.size();
-
-  // Make some storage and set the computational load to be the same in every patch. Later when
-  // we read the file we can just fetch the computational load from one of the cells.
-  LevelData<FArrayBox> scratch(dbl, 1, IntVect::Zero);
-
-  // Get loads.
+  // The loads are written as one table per realm with one entry per box, in the order of the boxes in the layout.
+  // getCheckpointLoads returns the loads of all boxes on every rank, so the table is written from the master rank.
   for (const auto& r : m_amr->getRealms()) {
-    const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
+    Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
-    }
-
-    // String identifier in HDF file.
-    const std::string str = r + "_loads";
-
-    // Write
-    write(a_handle, scratch, str);
+    write_vect_to_header(a_handle, loads.stdVector(), H5T_NATIVE_LONG, r + checkpointLoadsSuffix);
   }
 }
 #endif
@@ -3022,7 +3020,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   // Get the names of the realms that were checkpointed. This is a part of the HDF header, where each realm is written
   // with its name as both key and value. The header also carries other strings, such as the git description of the
   // writing executable and the polyhedral graph file, which are not realms -- taking one for a realm would send
-  // readCheckpointRealmLoads looking for a "<value>_loads" data set that does not exist.
+  // readCheckpointRealmLoads looking for a loads data set named after the value, which does not exist.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
   for (const auto& s : header.m_string) {
     if (s.first == s.second) {
@@ -3145,35 +3143,60 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
     pout() << "Driver::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
-  const DataIterator&      dit   = dbl.dataIterator();
-  const int                nbox  = dit.size();
+  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
-  // Some scratch data we can use
-  LevelData<EBCellFAB> scratch(dbl, 1, IntVect::Zero, EBCellFactory(ebisl));
-  DataOps::setValue(scratch, 0.0);
+  // Checkpoint files hold the tags either as integer mesh data, with 1 in tagged cells, or, in older files, as
+  // floating-point EB mesh data with 1.0 in tagged cells. The data set name tells them apart.
+  const std::string tagsData = std::string(checkpointTagsKey) + ":datatype=0";
 
-  // Read in tags
-  read<EBCellFAB>(a_handle, scratch, "tagged_cells", dbl, Interval(0, 0), false);
+  if (H5Lexists(a_handle.groupID(), tagsData.c_str(), H5P_DEFAULT) > 0) {
+    LevelData<BaseFab<int>> scratch(dbl, 1, IntVect::Zero);
 
-  // Instantiate m_tags. When we wrote the tags we put a floating point value of 0 where we didn't have tags
-  // and a floating point value of 1 where we had.
+    read<BaseFab<int>>(a_handle, scratch, checkpointTagsKey, dbl, Interval(0, 0), false);
+
 #pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-    DenseIntVectSet& taggedCells = (*m_tags[a_level])[din];
-    FArrayBox&       scratchFAB  = scratch[din].getFArrayBox();
+      DenseIntVectSet&    taggedCells = (*m_tags[a_level])[din];
+      const BaseFab<int>& scratchFAB  = scratch[din];
 
-    auto kernel = [&](const IntVect& iv) -> void {
-      if (scratchFAB(iv, 0) > 0.9999) {
-        taggedCells |= iv;
-      }
-    };
+      auto kernel = [&](const IntVect& iv) -> void {
+        if (scratchFAB(iv, 0) > 0) {
+          taggedCells |= iv;
+        }
+      };
 
-    // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time checkpoint read.
-    BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
+      // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time checkpoint read.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
+    }
+  }
+  else {
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+
+    LevelData<EBCellFAB> scratch(dbl, 1, IntVect::Zero, EBCellFactory(ebisl));
+    DataOps::setValue(scratch, 0.0);
+
+    read<EBCellFAB>(a_handle, scratch, legacyCheckpointTagsKey, dbl, Interval(0, 0), false);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      DenseIntVectSet& taggedCells = (*m_tags[a_level])[din];
+      FArrayBox&       scratchFAB  = scratch[din].getFArrayBox();
+
+      auto kernel = [&](const IntVect& iv) -> void {
+        if (scratchFAB(iv, 0) > 0.9999) {
+          taggedCells |= iv;
+        }
+      };
+
+      // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time checkpoint read.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
+    }
   }
 }
 #endif
@@ -3190,15 +3213,34 @@ Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
     pout() << "Driver::readCheckpointRealmLoads((Vector<long int>, HDF5Handle, string, int))" << endl;
   }
 
-  // This reads computational loads from a file. When we wrote them we set the load in each grid patch, so we can just
-  // fetch using FArrayBox::max() function for getting it.
+  // Checkpoint files hold the loads either as a table with one entry per box or, in older files, as mesh data with the
+  // load of a box in all of its cells. The data set name tells them apart.
+  const std::string tableName = a_realm + checkpointLoadsSuffix;
 
-  // Identifier in HDF5 file.
-  const std::string str = a_realm + "_loads";
+  // The table sits in the level group. The current group is restored afterwards.
+  const std::string currentGroup = a_handle.getGroup();
+
+  a_handle.setGroupToLevel(a_level);
+
+  const bool foundTable = H5Lexists(a_handle.groupID(), tableName.c_str(), H5P_DEFAULT) > 0;
+
+  if (foundTable) {
+    read_vect_from_header(a_handle, a_loads.stdVector(), H5T_NATIVE_LONG, tableName);
+  }
+
+  a_handle.setGroup(currentGroup);
+
+  if (foundTable) {
+    return;
+  }
+
+  // Mesh data layout: every cell of a box holds the load of the box.
+  const std::string str = a_realm + legacyCheckpointLoadsSuffix;
 
 #ifdef CH_MPI
   const int                 nBoxes   = static_cast<int>(a_loads.size());
   const std::pair<int, int> beginEnd = ParallelOps::partition(nBoxes);
+
   for (int i = 0; i < nBoxes; i++) {
     a_loads[i] = 0L;
   }
@@ -3213,8 +3255,8 @@ Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
 
   ParallelOps::sum(a_loads);
 #else
-  // Read into an FArrayBox.
   FArrayBox fab;
+
   for (int ibox = 0; ibox < a_loads.size(); ibox++) {
     readFArrayBox(a_handle, fab, a_level, ibox, Interval(0, 0), str);
 

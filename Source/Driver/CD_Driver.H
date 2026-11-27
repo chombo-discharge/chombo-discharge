@@ -674,6 +674,7 @@ protected:
 #ifdef CH_USE_HDF5
   /**
    * @brief Write tags to checkpoint file
+   * @details The tags are written as integer mesh data on the valid cells, with 1 in tagged cells and 0 elsewhere.
    * @param[in] a_handle HDF5 file
    * @param[in] a_level  Grid level
    */
@@ -684,6 +685,8 @@ protected:
 #ifdef CH_USE_HDF5
   /**
    * @brief Write computational loads to checkpoint file
+   * @details The loads of each realm are written as a table with one entry per box, in the order of the boxes in the
+   * layout.
    * @param[in] a_handle HDF5 file
    * @param[in] a_level  Grid level
    */
@@ -694,6 +697,7 @@ protected:
 #ifdef CH_USE_HDF5
   /**
    * @brief Read checkpoint data from HDF5 file.
+   * @details Reads the tags, either as integer mesh data or, from older files, as floating-point EB mesh data.
    * @param[in,out] a_handle HDF5 file handle.
    * @param[in]     a_level  Grid level.
    */
@@ -704,6 +708,8 @@ protected:
 #ifdef CH_USE_HDF5
   /**
    * @brief Read realm loads from HDF5 file.
+   * @details Reads the loads either from a table with one entry per box or, from older files, from mesh data with the
+   * load of a box in all of its cells. a_loads must be sized to the number of boxes on the level.
    * @param[out] a_loads  Loaded computational loads.
    * @param[in,out] a_handle HDF5 file handle.
    * @param[in]  a_realm  Realm identifier.
