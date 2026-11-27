@@ -2540,12 +2540,14 @@ Driver::writePlotFile(const std::string& a_filename)
     }
     plotVariableNames.append(this->getPlotVariableNames());
 
-    // Write HDF5 header.
+    // Create the file and write the HDF5 header. The file stays open while the levels are written.
 #ifdef CH_USE_HDF5
-    timer.startEvent("Header");
+    timer.startEvent("Open file");
     HDF5Handle handle(a_filename, HDF5Handle::CREATE);
+    timer.stopEvent("Open file");
+
+    timer.startEvent("Header");
     DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
-    handle.close();
     timer.stopEvent("Header");
 #endif
 
@@ -2576,10 +2578,6 @@ Driver::writePlotFile(const std::string& a_filename)
         MemoryReport::getMaxMinMemoryUsage();
       }
 
-      timer.startEvent("Open file");
-      HDF5Handle handle(a_filename, HDF5Handle::OPEN_RDWR);
-      timer.stopEvent("Open file");
-
       timer.startEvent("HDF5 write");
       const int refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
@@ -2593,15 +2591,17 @@ Driver::writePlotFile(const std::string& a_filename)
                                     m_numPlotGhost);
       timer.stopEvent("HDF5 write");
 
-      timer.startEvent("Close file");
-      handle.close();
-      timer.stopEvent("Close file");
-
       if (m_verbosity > 2) {
         MemoryReport::getMaxMinMemoryUsage();
       }
 #endif
     }
+
+#ifdef CH_USE_HDF5
+    timer.startEvent("Close file");
+    handle.close();
+    timer.stopEvent("Close file");
+#endif
   }
   else {
     const std::string msg1 = "Driver::writePlotFile - skipping file '";
