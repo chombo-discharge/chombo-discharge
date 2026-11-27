@@ -230,6 +230,79 @@ void
 readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
                           LayoutData<ParticleSoA<P, Traits>>& a_particles,
                           const std::string&                  a_dataType);
+
+/**
+ * @brief Write several mesh variables of one level to a checkpoint file as one multi-component data set.
+ * @details The variables are copied, in the order given, into the components of one EB data set named a_name. The
+ * name of every component is written as the attribute "component_<i>" of the group a_name + "_attributes". All
+ * variables must be defined on the same box layout and EBIS layout. Ghost cells are not written.
+ * @param[in,out] a_handle        HDF5 file, with its group set to the level.
+ * @param[in]     a_name          Name of the data set.
+ * @param[in]     a_data          Variables to write.
+ * @param[in]     a_variableNames One name per component, in the order of the components of a_data.
+ * @param[in]     a_ebisl         EBIS layout of the variables.
+ */
+void
+writeCheckpointVariables(HDF5Handle&                                     a_handle,
+                         const std::string&                              a_name,
+                         const std::vector<const LevelData<EBCellFAB>*>& a_data,
+                         const std::vector<std::string>&                 a_variableNames,
+                         const EBISLayout&                               a_ebisl);
+
+/**
+ * @brief Read mesh variables of one level from a data set written by writeCheckpointVariables.
+ * @details Every component of a_data is looked up by name in the data set and copied from it. A variable that is not in
+ * the data set is an error. The valid cells are read; ghost cells are left as they are.
+ * @param[in,out] a_handle        HDF5 file, with its group set to the level.
+ * @param[in]     a_name          Name of the data set.
+ * @param[in,out] a_data          Variables to fill.
+ * @param[in]     a_variableNames One name per component, in the order of the components of a_data.
+ * @param[in]     a_ebisl         EBIS layout of the variables.
+ */
+void
+readCheckpointVariables(HDF5Handle&                               a_handle,
+                        const std::string&                        a_name,
+                        const std::vector<LevelData<EBCellFAB>*>& a_data,
+                        const std::vector<std::string>&           a_variableNames,
+                        const EBISLayout&                         a_ebisl);
+
+/**
+ * @brief Write several particle sets of one level, all of the same type and box layout, as one data set.
+ * @details The particles are stored box by box, and within a box set by set. The particle count of every box and set is
+ * written as the table a_name + ":counts", with one row per box and one column per set. The particle records go in
+ * a_name + ":data", and the set names in the attributes "component_<i>" of the group a_name + "_attributes". Every rank
+ * writes its particles with one H5Dwrite.
+ * @param[in,out] a_handle    HDF5 file, with its group set to the level.
+ * @param[in]     a_name      Name of the data set.
+ * @param[in]     a_particles Particle sets to write.
+ * @param[in]     a_setNames  One name per particle set.
+ * @tparam P      Payload type of the particles.
+ * @tparam Traits Column descriptor for the payload.
+ */
+template <typename P, typename Traits>
+void
+writeCheckpointParticles(HDF5Handle&                                                   a_handle,
+                         const std::string&                                            a_name,
+                         const std::vector<const LayoutData<ParticleSoA<P, Traits>>*>& a_particles,
+                         const std::vector<std::string>&                               a_setNames);
+
+/**
+ * @brief Read particle sets of one level from a data set written by writeCheckpointParticles.
+ * @details Every set is looked up by name. A set that is not in the data set is an error. The particles are appended
+ * to a_particles, whose box layout must be the one the data set was written with.
+ * @param[in,out] a_handle    HDF5 file, with its group set to the level.
+ * @param[in]     a_name      Name of the data set.
+ * @param[in,out] a_particles Particle sets to fill.
+ * @param[in]     a_setNames  One name per particle set.
+ * @tparam P      Payload type of the particles.
+ * @tparam Traits Column descriptor for the payload.
+ */
+template <typename P, typename Traits>
+void
+readCheckpointParticles(HDF5Handle&                                             a_handle,
+                        const std::string&                                      a_name,
+                        const std::vector<LayoutData<ParticleSoA<P, Traits>>*>& a_particles,
+                        const std::vector<std::string>&                         a_setNames);
 #endif
 } // namespace DischargeIO
 
