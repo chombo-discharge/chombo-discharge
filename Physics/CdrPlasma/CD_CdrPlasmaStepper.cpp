@@ -663,6 +663,46 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
   const DataIterator&      dit = dbl.dataIterator();
   const Real               dx  = m_amr->getDx()[a_lvl];
 
+  // The kernels use the densities, gradients and electric field on the cell centroids. Interpolate them once for the
+  // whole level, into temporaries from the scratch pool. The regular cells hold the cell-centered values.
+  std::vector<Scratch<LevelData<EBCellFAB>>> centroidCdrDensities;
+  std::vector<Scratch<LevelData<EBCellFAB>>> centroidCdrGradients;
+  std::vector<Scratch<LevelData<EBCellFAB>>> centroidRteDensities;
+
+  centroidCdrDensities.reserve(numCdrSpecies);
+  centroidCdrGradients.reserve(numCdrSpecies);
+  centroidRteDensities.reserve(numRteSpecies);
+
+  for (int idx = 0; idx < numCdrSpecies; idx++) {
+    const LevelData<EBCellFAB>& density  = *a_cdrDensities[idx];
+    const LevelData<EBCellFAB>& gradient = *a_cdrGradients[idx];
+
+    centroidCdrDensities.emplace_back(
+      m_amr->fetchLevelScratch(m_realm, m_phase, a_lvl, density.nComp(), density.ghostVect()[0]));
+    centroidCdrGradients.emplace_back(
+      m_amr->fetchLevelScratch(m_realm, m_phase, a_lvl, gradient.nComp(), gradient.ghostVect()[0]));
+
+    m_amr->interpToCentroids(*centroidCdrDensities.back(), density, m_realm, m_phase, a_lvl);
+    m_amr->interpToCentroids(*centroidCdrGradients.back(), gradient, m_realm, m_phase, a_lvl);
+  }
+
+  for (int idx = 0; idx < numRteSpecies; idx++) {
+    const LevelData<EBCellFAB>& density = *a_rteDensities[idx];
+
+    centroidRteDensities.emplace_back(
+      m_amr->fetchLevelScratch(m_realm, m_phase, a_lvl, density.nComp(), density.ghostVect()[0]));
+
+    m_amr->interpToCentroids(*centroidRteDensities.back(), density, m_realm, m_phase, a_lvl);
+  }
+
+  Scratch<LevelData<EBCellFAB>> centroidField = m_amr->fetchLevelScratch(m_realm,
+                                                                         m_phase,
+                                                                         a_lvl,
+                                                                         a_E.nComp(),
+                                                                         a_E.ghostVect()[0]);
+
+  m_amr->interpToCentroids(*centroidField, a_E, m_realm, m_phase, a_lvl);
+
   // Grid loop
   const int nbox = dit.size();
 
@@ -694,20 +734,10 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
 
       const int idx = solverIt.index();
 
-      const EBCellFAB* cdrDensity  = &(*a_cdrDensities[idx])[din];
-      const EBCellFAB* cdrGradient = &(*a_cdrGradients[idx])[din];
-
-      // Define transient storage and copy data over
+      // Sources, and the densities and gradients on the cell centroids.
       cdrSources[idx]   = &(*a_cdrSources[idx])[din];
-      cdrDensities[idx] = new EBCellFAB();
-      cdrGradients[idx] = new EBCellFAB();
-
-      cdrDensities[idx]->clone(*cdrDensity);
-      cdrGradients[idx]->clone(*cdrGradient);
-
-      // Interpolate density and gradient to cell centroid
-      m_amr->interpToCentroids(*cdrDensities[idx], *cdrDensity, m_realm, m_phase, a_lvl, din);
-      m_amr->interpToCentroids(*cdrGradients[idx], *cdrGradient, m_realm, m_phase, a_lvl, din);
+      cdrDensities[idx] = &(*centroidCdrDensities[idx])[din];
+      cdrGradients[idx] = &(*centroidCdrGradients[idx])[din];
 
       // Handle to regular data for source, density, and gradient
       cdrSourcesFAB[idx]   = &(cdrSources[idx]->getFArrayBox());
@@ -728,25 +758,17 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      const EBCellFAB* rteDensity = &(*a_rteDensities[idx])[din];
-
+      // Sources, and the densities on the cell centroids.
       rteSources[idx]   = &(*a_rteSources[idx])[din];
-      rteDensities[idx] = new EBCellFAB();
-
-      // Copy and interpolate
-      rteDensities[idx]->clone(*rteDensity);
-
-      m_amr->interpToCentroids(*rteDensities[idx], *rteDensity, m_realm, m_phase, a_lvl, din);
+      rteDensities[idx] = &(*centroidRteDensities[idx])[din];
 
       // Handle to regular data.
       rteSourcesFAB[idx]   = &(rteSources[idx]->getFArrayBox());
       rteDensitiesFAB[idx] = &(rteDensities[idx]->getFArrayBox());
     }
 
-    // Storage for E-field, interpolated to cell centroids
-    EBCellFAB E;
-    E.clone(a_E[din]);
-    m_amr->interpToCentroids(E, a_E[din], m_realm, m_phase, a_lvl, din);
+    // Electric field on the cell centroids.
+    const EBCellFAB& E = (*centroidField)[din];
 
     // Do regular cells (actually also does irregular cells but those are redone using correct arithmetic in the call
     // below).
@@ -781,9 +803,6 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const int idx = solverIt.index();
 
       cdrSources[idx]->setCoveredCellVal(0.0, comp);
-
-      delete cdrDensities[idx];
-      delete cdrGradients[idx];
     }
 
     // Covered cells are bogus.
@@ -791,8 +810,6 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const int idx = solverIt.index();
 
       rteSources[idx]->setCoveredCellVal(0.0, comp);
-
-      delete rteDensities[idx];
     };
   }
 }
