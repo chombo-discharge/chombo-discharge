@@ -976,7 +976,6 @@ AmrMesh::parseOptions()
   this->parseBrFillRatio();
   this->parseStateRedistribution();
   this->parseMirrorDeposition();
-  this->parseScratch();
   ;
   this->parseNumGhostCells();
   this->parseEbGhostCells();
@@ -1006,7 +1005,6 @@ AmrMesh::parseRuntimeOptions()
   this->parseBrBufferSize();
   this->parseBrFillRatio();
   this->parseMultigridInterpolator();
-  this->parseScratch();
 }
 
 void
@@ -1077,14 +1075,6 @@ AmrMesh::preRegrid()
     oldGrids.resize(1 + m_oldFinestLevel);
     for (int lvl = 0; lvl <= m_oldFinestLevel; lvl++) {
       oldGrids[lvl] = this->getGrids(r.first)[lvl];
-    }
-  }
-
-  if (m_scratchReport) {
-    for (const auto& r : m_realms) {
-      pout() << "AmrMesh::preRegrid -- scratch pool on realm '" << r.first << "':\n";
-
-      r.second->getScratchPool().report(pout(), "  ");
     }
   }
 
@@ -4497,20 +4487,6 @@ AmrMesh::getBoxSorting() const
   }
 
   return m_boxSort;
-}
-
-void
-AmrMesh::parseScratch()
-{
-  CH_TIME("AmrMesh::parseScratch()");
-  if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseScratch()" << endl;
-  }
-
-  ParmParse pp("AmrMesh");
-
-  pp.get("scratch_poison", m_scratchPoison);
-  pp.get("scratch_report", m_scratchReport);
 }
 
 void

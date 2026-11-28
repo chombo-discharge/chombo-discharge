@@ -1366,9 +1366,9 @@ AmrMesh::fetchFromPool(const std::string&       a_realm,
                                                                                a_ghost,
                                                                                a_build);
 
-  if (m_scratchPoison) {
-    DataOps::setValue(*scratch, std::numeric_limits<Real>::quiet_NaN());
-  }
+#ifndef NDEBUG
+  DataOps::setValue(*scratch, std::numeric_limits<Real>::quiet_NaN());
+#endif
 
   return scratch;
 }
