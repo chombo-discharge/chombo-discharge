@@ -16,6 +16,7 @@
 // Chombo includes
 #include <CH_HDF5.H>
 #include <EBAMRIO.H>
+#include <EBCellFactory.H>
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
@@ -24,6 +25,8 @@
 #include <CD_BoxLoops.H>
 #include <CD_GitHash.H>
 #include <CD_NamespaceHeader.H>
+
+const std::size_t DischargeIO::particleBlockSize = 1000000000000;
 
 std::string
 DischargeIO::gitHash() noexcept
@@ -527,6 +530,140 @@ DischargeIO::writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file)
   }
 
   writeEBAMRname(&raw, a_file.c_str());
+}
+
+void
+DischargeIO::writeCheckpointVariables(HDF5Handle&                                     a_handle,
+                                      const std::string&                              a_name,
+                                      const std::vector<const LevelData<EBCellFAB>*>& a_data,
+                                      const std::vector<std::string>&                 a_variableNames,
+                                      const EBISLayout&                               a_ebisl)
+{
+  CH_TIME("DischargeIO::writeCheckpointVariables");
+
+  CH_assert(a_data.size() > 0);
+
+  const DisjointBoxLayout& dbl  = a_data[0]->disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  int numComp = 0;
+
+  for (const auto& data : a_data) {
+    if (!(data->disjointBoxLayout() == dbl)) {
+      MayDay::Error("DischargeIO::writeCheckpointVariables - all variables must have the same box layout");
+    }
+
+    numComp += data->nComp();
+  }
+
+  if (static_cast<int>(a_variableNames.size()) != numComp) {
+    MayDay::Error("DischargeIO::writeCheckpointVariables - one name is needed per component");
+  }
+
+  LevelData<EBCellFAB> variables(dbl, numComp, IntVect::Zero, EBCellFactory(a_ebisl));
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din    = dit[mybox];
+    const Box&       box    = dbl[din];
+    int              offset = 0;
+
+    for (const auto& data : a_data) {
+      const int nComp = data->nComp();
+
+      variables[din].copy(box, Interval(offset, offset + nComp - 1), box, (*data)[din], Interval(0, nComp - 1));
+
+      offset += nComp;
+    }
+  }
+
+  write(a_handle, variables, a_name);
+
+  // The component names go into the attribute group of the data set.
+  HDF5HeaderData header;
+
+  for (int comp = 0; comp < numComp; comp++) {
+    header.m_string["component_" + std::to_string(comp)] = a_variableNames[comp];
+  }
+
+  const std::string group = a_handle.getGroup();
+
+  a_handle.setGroup(group + "/" + a_name + "_attributes");
+  header.writeToFile(a_handle);
+  a_handle.setGroup(group);
+}
+
+void
+DischargeIO::readCheckpointVariables(HDF5Handle&                               a_handle,
+                                     const std::string&                        a_name,
+                                     const std::vector<LevelData<EBCellFAB>*>& a_data,
+                                     const std::vector<std::string>&           a_variableNames,
+                                     const EBISLayout&                         a_ebisl)
+{
+  CH_TIME("DischargeIO::readCheckpointVariables");
+
+  CH_assert(a_data.size() > 0);
+
+  const DisjointBoxLayout& dbl  = a_data[0]->disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  for (const auto& data : a_data) {
+    if (!(data->disjointBoxLayout() == dbl)) {
+      MayDay::Error("DischargeIO::readCheckpointVariables - all variables must have the same box layout");
+    }
+  }
+
+  // Read the component names and the number of components of the data set.
+  HDF5HeaderData header;
+
+  const std::string group = a_handle.getGroup();
+
+  a_handle.setGroup(group + "/" + a_name + "_attributes");
+  header.readFromFile(a_handle);
+  a_handle.setGroup(group);
+
+  const int numComp = header.m_int["comps"];
+
+  // Component in the data set of every component of a_data.
+  std::vector<int> fileComps;
+
+  for (const auto& name : a_variableNames) {
+    int fileComp = -1;
+
+    for (int comp = 0; comp < numComp; comp++) {
+      if (header.m_string["component_" + std::to_string(comp)] == name) {
+        fileComp = comp;
+      }
+    }
+
+    if (fileComp < 0) {
+      MayDay::Error(
+        ("DischargeIO::readCheckpointVariables - variable '" + name + "' is not in '" + a_name + "'").c_str());
+    }
+
+    fileComps.push_back(fileComp);
+  }
+
+  LevelData<EBCellFAB> variables(dbl, numComp, IntVect::Zero, EBCellFactory(a_ebisl));
+
+  read<EBCellFAB>(a_handle, variables, a_name, dbl, Interval(0, numComp - 1), false);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din  = dit[mybox];
+    const Box&       box  = dbl[din];
+    int              comp = 0;
+
+    for (const auto& data : a_data) {
+      for (int icomp = 0; icomp < data->nComp(); icomp++) {
+        (*data)[din].copy(box, Interval(icomp, icomp), box, variables[din], Interval(fileComps[comp], fileComps[comp]));
+
+        comp++;
+      }
+    }
+  }
 }
 #endif
 

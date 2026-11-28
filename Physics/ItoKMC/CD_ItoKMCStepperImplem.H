@@ -29,6 +29,8 @@
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_Units.H>
+#include <CD_MultifluidAlias.H>
+#include <CD_DischargeIO.H>
 #include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
@@ -1710,27 +1712,160 @@ ItoKMCStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, const int a
     pout() << m_name + "::writeCheckpointData" << endl;
   }
 
-  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  // The mesh variables of the level are written as one data set per realm and phase, and the particles as one data
+  // set per particle type. Each variable is named as the data set its solver writes on its own. Ito solvers that
+  // checkpoint particle numbers instead of particles write their data themselves.
+  std::string itoCheckpointing;
+
+  ParmParse ppIto("ItoSolver");
+  ppIto.get("checkpointing", itoCheckpointing);
+
+  const bool itoParticles = itoCheckpointing == "particles";
+  const bool hasSolid     = !(m_amr->getEBIndexSpace(phase::solid).isNull());
+
+  // Storage for variables that are not held as EB mesh data by their solvers: the field solver's potential is aliased
+  // per phase, and the surface solvers' data is copied onto EB mesh data.
+  Vector<RefCountedPtr<LevelData<EBCellFAB>>> scratch;
+
+  // Particle realm, plasma phase: the Ito and RTE densities.
+  {
+    std::vector<const LevelData<EBCellFAB>*> data;
+    std::vector<std::string>                 names;
+
+    if (itoParticles) {
+      for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+        names.push_back(solverIt()->getName());
+      }
+    }
+
+    for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+      names.push_back(solverIt()->getName());
+    }
+
+    if (data.size() > 0) {
+      DischargeIO::writeCheckpointVariables(a_handle,
+                                            "ItoKMC::particle_realm_gas",
+                                            data,
+                                            names,
+                                            m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl]);
+    }
   }
 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  // Fluid realm, plasma phase: the CDR densities and sources, the gas-phase potential, and the surface data.
+  {
+    std::vector<const LevelData<EBCellFAB>*> data;
+    std::vector<std::string>                 names;
+
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+      names.push_back(solverIt()->getName());
+
+      data.push_back(&(*(solverIt()->getSource()[a_lvl])));
+      names.push_back(solverIt()->getName() + "_src");
+    }
+
+    scratch.push_back(RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>()));
+    MultifluidAlias::aliasMF(*scratch.back(), phase::gas, *(m_fieldSolver->getPotential()[a_lvl]));
+
+    data.push_back(&(*scratch.back()));
+    names.push_back("FieldSolver::m_potential(gas)");
+
+    // The surface solvers and the names they were given in setupSigma() and setupSurfaceSpecies().
+    Vector<RefCountedPtr<SurfaceODESolver<1>>> surfaceSolvers;
+    Vector<std::string>                        surfaceNames;
+
+    surfaceSolvers.push_back(m_sigmaSolver);
+    surfaceNames.push_back("Surface charge");
+
+    for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+      surfaceSolvers.push_back(m_surfaceSolvers[i]);
+      surfaceNames.push_back("Surface density " + m_physics->getSurfaceSpecies()[i]->getName());
+    }
+
+    for (int i = 0; i < surfaceSolvers.size(); i++) {
+      const RefCountedPtr<SurfaceODESolver<1>>& solver = surfaceSolvers[i];
+
+      scratch.push_back(RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>()));
+      m_amr->allocate(*scratch.back(), m_fluidRealm, m_plasmaPhase, a_lvl, 1, 0);
+
+      DataOps::setValue(*scratch.back(), 0.0);
+      DataOps::incr(*scratch.back(),
+                    *(solver->getPhi()[a_lvl]),
+                    1.0,
+                    *m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_lvl]);
+
+      data.push_back(&(*scratch.back()));
+      names.push_back("SurfaceODESolver::" + surfaceNames[i] + "::phi");
+    }
+
+    DischargeIO::writeCheckpointVariables(a_handle,
+                                          "ItoKMC::fluid_realm_gas",
+                                          data,
+                                          names,
+                                          m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_lvl]);
   }
 
-  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  // Fluid realm, solid phase: the solid-phase potential and the solid species densities and sources.
+  if (hasSolid) {
+    std::vector<const LevelData<EBCellFAB>*> data;
+    std::vector<std::string>                 names;
+
+    scratch.push_back(RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>()));
+    MultifluidAlias::aliasMF(*scratch.back(), phase::solid, *(m_fieldSolver->getPotential()[a_lvl]));
+
+    data.push_back(&(*scratch.back()));
+    names.push_back("FieldSolver::m_potential(solid)");
+
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+      names.push_back(solverIt()->getName());
+
+      data.push_back(&(*(solverIt()->getSource()[a_lvl])));
+      names.push_back(solverIt()->getName() + "_src");
+    }
+
+    DischargeIO::writeCheckpointVariables(a_handle,
+                                          "ItoKMC::fluid_realm_solid",
+                                          data,
+                                          names,
+                                          m_amr->getEBISLayout(m_fluidRealm, phase::solid)[a_lvl]);
   }
 
-  m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
-  m_sigmaSolver->writeCheckpointLevel(a_handle, a_lvl);
+  // Ito particles.
+  if (itoParticles) {
+    std::vector<const LayoutData<ParticleSoA<ItoParticle>>*> particles;
+    std::vector<std::string>                                 names;
 
-  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
-    m_surfaceSolvers[i]->writeCheckpointLevel(a_handle, a_lvl);
+    for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      particles.push_back(&(solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[a_lvl]));
+      names.push_back(solverIt()->getName());
+    }
+
+    if (particles.size() > 0) {
+      DischargeIO::writeCheckpointParticles(a_handle, "ItoKMC::ito_particles", particles, names);
+    }
+  }
+  else {
+    for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+    }
   }
 
-  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
+  // Photons.
+  {
+    std::vector<const LayoutData<ParticleSoA<Photon>>*> particles;
+    std::vector<std::string>                            names;
+
+    for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      particles.push_back(&(solverIt()->getBulkPhotons()[a_lvl]));
+      names.push_back(solverIt()->getName());
+    }
+
+    if (particles.size() > 0) {
+      DischargeIO::writeCheckpointParticles(a_handle, "ItoKMC::rte_particles", particles, names);
+    }
   }
 }
 #endif
@@ -1745,36 +1880,28 @@ ItoKMCStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_
     pout() << m_name + "::readCheckpointData" << endl;
   }
 
-  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->readCheckpointLevel(a_handle, a_lvl);
-  }
+  // Checkpoint files hold the data either in the data sets written by writeCheckpointData, one per realm and phase and
+  // one per particle type, or, in older files, in one data set per variable written by the solvers themselves. Each
+  // data set is looked up by name, and the solvers read their own data sets when it is missing.
+  auto hasDataSet = [&](const std::string& a_name) -> bool {
+    return H5Lexists(a_handle.groupID(), a_name.c_str(), H5P_DEFAULT) > 0;
+  };
 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->readCheckpointLevel(a_handle, a_lvl);
-  }
+  std::string itoCheckpointing;
 
-  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->readCheckpointLevel(a_handle, a_lvl);
-  }
+  ParmParse ppIto("ItoSolver");
+  ppIto.get("checkpointing", itoCheckpointing);
 
-  m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
-  m_sigmaSolver->readCheckpointLevel(a_handle, a_lvl);
+  const bool itoParticles = itoCheckpointing == "particles";
+  const bool hasSolid     = !(m_amr->getEBIndexSpace(phase::solid).isNull());
 
   // A checkpoint written without surface species has no data for them; readCheckpointHeader() has already
-  // warned about it.
-  for (int i = 0; i < m_surfaceSolvers.size(); i++) {
-    if (m_checkpointSurfaceSpecies == m_surfaceSolvers.size()) {
-      m_surfaceSolvers[i]->readCheckpointLevel(a_handle, a_lvl);
-    }
-    else {
-      DataOps::setValue(*(m_surfaceSolvers[i]->getPhi())[a_lvl], 0.0);
-    }
-  }
+  // warned about it. Likewise for the solid species.
+  const bool readSurfaceSpecies = m_checkpointSurfaceSpecies == m_surfaceSolvers.size();
+  const int  numSolidSpecies    = m_cdrSolid->getSolvers().size();
+  const bool readSolidSpecies   = m_checkpointSolidSpecies == numSolidSpecies;
 
-  // Likewise for the solid species.
-  const int numSolidSpecies = m_cdrSolid->getSolvers().size();
-
-  if (m_checkpointSolidSpecies != numSolidSpecies) {
+  if (!readSolidSpecies) {
     if (m_checkpointSolidSpecies != 0) {
       MayDay::Error("ItoKMCStepper::readCheckpointData -- checkpoint file has a different number of solid species "
                     "than the physics model");
@@ -1785,13 +1912,186 @@ ItoKMCStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const int a_
     }
   }
 
-  for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
-    if (m_checkpointSolidSpecies == numSolidSpecies) {
-      solverIt()->readCheckpointLevel(a_handle, a_lvl);
+  if (!readSurfaceSpecies) {
+    for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+      DataOps::setValue(*(m_surfaceSolvers[i]->getPhi())[a_lvl], 0.0);
     }
-    else {
+  }
+
+  if (!readSolidSpecies) {
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
       DataOps::setValue(*(solverIt()->getPhi())[a_lvl], 0.0);
       DataOps::setValue(*(solverIt()->getSource())[a_lvl], 0.0);
+    }
+  }
+
+  // Particle realm, plasma phase.
+  if (hasDataSet("ItoKMC::particle_realm_gas:datatype=0")) {
+    std::vector<LevelData<EBCellFAB>*> data;
+    std::vector<std::string>           names;
+
+    if (itoParticles) {
+      for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+        names.push_back(solverIt()->getName());
+      }
+    }
+
+    for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+      names.push_back(solverIt()->getName());
+    }
+
+    if (data.size() > 0) {
+      DischargeIO::readCheckpointVariables(a_handle,
+                                           "ItoKMC::particle_realm_gas",
+                                           data,
+                                           names,
+                                           m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl]);
+    }
+
+    if (itoParticles) {
+      std::vector<LayoutData<ParticleSoA<ItoParticle>>*> particles;
+      std::vector<std::string>                           particleNames;
+
+      for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        particles.push_back(&(solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[a_lvl]));
+        particleNames.push_back(solverIt()->getName());
+      }
+
+      if (particles.size() > 0) {
+        DischargeIO::readCheckpointParticles(a_handle, "ItoKMC::ito_particles", particles, particleNames);
+      }
+    }
+    else {
+      for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        solverIt()->readCheckpointLevel(a_handle, a_lvl);
+      }
+    }
+
+    std::vector<LayoutData<ParticleSoA<Photon>>*> photons;
+    std::vector<std::string>                      photonNames;
+
+    for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      photons.push_back(&(solverIt()->getBulkPhotons()[a_lvl]));
+      photonNames.push_back(solverIt()->getName());
+    }
+
+    if (photons.size() > 0) {
+      DischargeIO::readCheckpointParticles(a_handle, "ItoKMC::rte_particles", photons, photonNames);
+    }
+  }
+  else {
+    for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      solverIt()->readCheckpointLevel(a_handle, a_lvl);
+    }
+
+    for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      solverIt()->readCheckpointLevel(a_handle, a_lvl);
+    }
+  }
+
+  // Fluid realm, plasma phase.
+  if (hasDataSet("ItoKMC::fluid_realm_gas:datatype=0")) {
+    std::vector<LevelData<EBCellFAB>*> data;
+    std::vector<std::string>           names;
+
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+      names.push_back(solverIt()->getName());
+
+      data.push_back(&(*(solverIt()->getSource()[a_lvl])));
+      names.push_back(solverIt()->getName() + "_src");
+    }
+
+    LevelData<EBCellFAB> potentialGas;
+    MultifluidAlias::aliasMF(potentialGas, phase::gas, *(m_fieldSolver->getPotential()[a_lvl]));
+
+    data.push_back(&potentialGas);
+    names.push_back("FieldSolver::m_potential(gas)");
+
+    // The surface solvers and the names they were given in setupSigma() and setupSurfaceSpecies().
+    Vector<RefCountedPtr<SurfaceODESolver<1>>> surfaceSolvers;
+    Vector<std::string>                        surfaceNames;
+
+    surfaceSolvers.push_back(m_sigmaSolver);
+    surfaceNames.push_back("Surface charge");
+
+    if (readSurfaceSpecies) {
+      for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+        surfaceSolvers.push_back(m_surfaceSolvers[i]);
+        surfaceNames.push_back("Surface density " + m_physics->getSurfaceSpecies()[i]->getName());
+      }
+    }
+
+    Vector<RefCountedPtr<LevelData<EBCellFAB>>> scratch;
+
+    for (int i = 0; i < surfaceSolvers.size(); i++) {
+      scratch.push_back(RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>()));
+      m_amr->allocate(*scratch.back(), m_fluidRealm, m_plasmaPhase, a_lvl, 1, 0);
+
+      data.push_back(&(*scratch.back()));
+      names.push_back("SurfaceODESolver::" + surfaceNames[i] + "::phi");
+    }
+
+    DischargeIO::readCheckpointVariables(a_handle,
+                                         "ItoKMC::fluid_realm_gas",
+                                         data,
+                                         names,
+                                         m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_lvl]);
+
+    for (int i = 0; i < surfaceSolvers.size(); i++) {
+      EBAMRIVData& phi = surfaceSolvers[i]->getPhi();
+
+      DataOps::setValue(*phi[a_lvl], 0.0);
+      DataOps::incr(*phi[a_lvl], *scratch[i], 1.0, *m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_lvl]);
+    }
+  }
+  else {
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      solverIt()->readCheckpointLevel(a_handle, a_lvl);
+    }
+
+    m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
+    m_sigmaSolver->readCheckpointLevel(a_handle, a_lvl);
+
+    if (readSurfaceSpecies) {
+      for (int i = 0; i < m_surfaceSolvers.size(); i++) {
+        m_surfaceSolvers[i]->readCheckpointLevel(a_handle, a_lvl);
+      }
+    }
+  }
+
+  // Fluid realm, solid phase. The solid-phase potential of older files was read by the field solver above.
+  if (hasSolid && hasDataSet("ItoKMC::fluid_realm_solid:datatype=0")) {
+    std::vector<LevelData<EBCellFAB>*> data;
+    std::vector<std::string>           names;
+
+    LevelData<EBCellFAB> potentialSolid;
+    MultifluidAlias::aliasMF(potentialSolid, phase::solid, *(m_fieldSolver->getPotential()[a_lvl]));
+
+    data.push_back(&potentialSolid);
+    names.push_back("FieldSolver::m_potential(solid)");
+
+    if (readSolidSpecies) {
+      for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+        data.push_back(&(*(solverIt()->getPhi()[a_lvl])));
+        names.push_back(solverIt()->getName());
+
+        data.push_back(&(*(solverIt()->getSource()[a_lvl])));
+        names.push_back(solverIt()->getName() + "_src");
+      }
+    }
+
+    DischargeIO::readCheckpointVariables(a_handle,
+                                         "ItoKMC::fluid_realm_solid",
+                                         data,
+                                         names,
+                                         m_amr->getEBISLayout(m_fluidRealm, phase::solid)[a_lvl]);
+  }
+  else if (readSolidSpecies) {
+    for (auto solverIt = m_cdrSolid->iterator(); solverIt.ok(); ++solverIt) {
+      solverIt()->readCheckpointLevel(a_handle, a_lvl);
     }
   }
 }

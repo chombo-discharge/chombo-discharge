@@ -15,6 +15,7 @@
 
 // Std includes
 #ifdef CH_USE_HDF5
+#include <algorithm>
 #include <hdf5.h>
 #endif
 
@@ -405,7 +406,9 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
   }
 #endif
 
-  write_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType);
+  // The particle count of every box. The boxes themselves are those of the level's box layout, which is written once
+  // per level, so they are not written again for every particle type.
+  write_vect_to_header(a_handle, particlesPerBox, H5T_NATIVE_ULLONG, a_dataType + ":offsets");
 
   // The SoA HDF5 record (position + weight + the payload h5 subset) is stored as raw bytes
   // (H5T_NATIVE_CHAR). Payload columns may be ParticleReal (float), so the per-particle byte size need
@@ -442,46 +445,87 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
                              H5P_DEFAULT);
 #endif
 
+  // Every rank linearizes its particles box by box into a buffer of at most particleBlockSize particles, and writes
+  // the buffer with one H5Dwrite each time it is full. The file selection of each write is the union of the byte
+  // ranges of the particles in the buffer. Particles that follow each other in the file are merged into one range.
   if (numLocalParticles > 0) {
-    const size_t chunkSize = objSize * _CHUNK;
-    char* const  chunkBase = new char[chunkSize];
-    char*        chunk     = chunkBase;
+    const size_t blockSize = std::min(static_cast<size_t>(numLocalParticles), particleBlockSize);
 
-    if (chunkBase == nullptr) {
-      MayDay::Error("WritePart(SoA)::Error: new returned NULL pointer ");
-    }
+    std::vector<char> buffer(objSize * blockSize);
 
-    // serial: writes into the shared HDF5 dataset at running per-box offsets and shares the chunk buffer
+    char*   dst         = buffer.data();
+    size_t  numInBuffer = 0;
+    hsize_t rangeStart  = 0;
+    hsize_t rangeCount  = 0;
+    bool    firstRange  = true;
+
+    auto selectRange = [&]() -> void {
+      H5Sselect_hyperslab(dataspace,
+                          firstRange ? H5S_SELECT_SET : H5S_SELECT_OR,
+                          &rangeStart,
+                          nullptr,
+                          &rangeCount,
+                          nullptr);
+
+      firstRange = false;
+    };
+
+    auto writeBuffer = [&]() -> void {
+      selectRange();
+
+      const hsize_t bufferSize = objSize * numInBuffer;
+      const hid_t   memSpace   = H5Screate_simple(1, &bufferSize, nullptr);
+
+      if (H5Dwrite(dataset, H5T_type, memSpace, dataspace, H5P_DEFAULT, buffer.data()) < 0) {
+        MayDay::Error("DischargeIO::writeCheckParticlesToHDF - H5Dwrite failed");
+      }
+
+      H5Sclose(memSpace);
+
+      dst         = buffer.data();
+      numInBuffer = 0;
+      rangeCount  = 0;
+      firstRange  = true;
+    };
+
+    // serial: fills the shared buffer at running positions and builds the file selection in file order
     const DataIterator& dit  = grids.dataIterator();
     const int           nbox = dit.size();
 
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din    = dit[mybox];
-      size_t           offset = offsets[grids.index(din)];
+      const DataIndex&              din        = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf       = a_particles[din];
+      hsize_t                       fileOffset = offsets[grids.index(din)];
 
-      const ParticleSoA<P, Traits>& leaf = a_particles[din];
-      const size_t                  n    = leaf.size();
+      for (size_t ip = 0; ip < leaf.size(); ip++) {
+        leaf.h5LinearizeParticle((void*)dst, ip);
 
-      for (size_t ip = 0; ip < n; ip++) {
-        leaf.h5LinearizeParticle((void*)chunk, ip);
-        chunk += objSize;
+        dst += objSize;
+        numInBuffer++;
 
-        if ((ip + 1) % _CHUNK == 0) {
-          chunk -= chunkSize;
-          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize, chunk);
+        if (rangeCount > 0 && rangeStart + rangeCount == fileOffset) {
+          rangeCount += objSize;
+        }
+        else {
+          if (rangeCount > 0) {
+            selectRange();
+          }
+
+          rangeStart = fileOffset;
+          rangeCount = objSize;
+        }
+
+        fileOffset += objSize;
+
+        if (numInBuffer == blockSize) {
+          writeBuffer();
         }
       }
-
-      const size_t nResidual = n % _CHUNK;
-      if (nResidual > 0) {
-        chunk -= (nResidual * objSize);
-        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize, chunk);
-      }
-
-      chunk = chunkBase;
     }
 
-    delete[] chunkBase;
+    if (numInBuffer > 0) {
+      writeBuffer();
+    }
   }
 
   H5Sclose(dataspace);
@@ -498,11 +542,27 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
 {
   CH_TIMERS("readParticlesFromHDF(SoA)");
 
+  const BoxLayout& bl = a_particles.boxLayout();
+
+  // Checkpoint files hold the particle count of every box. Older files also hold the box list for every particle type,
+  // which is read for them; the data set name tells the layouts apart.
   std::vector<unsigned long long> particlesPerBox;
   Vector<Box>                     grids;
-  read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
 
-  const BoxLayout& bl = a_particles.boxLayout();
+  const std::string boxesName = a_dataType + ":boxes";
+
+  if (H5Lexists(a_handle.groupID(), boxesName.c_str(), H5P_DEFAULT) > 0) {
+    read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
+  }
+  else {
+    grids = bl.boxArray();
+
+    particlesPerBox.resize(grids.size(), 0ULL);
+
+    read_vect_from_header(a_handle, particlesPerBox, H5T_NATIVE_ULLONG, a_dataType + ":offsets");
+  }
+
+  CH_assert(grids.size() == bl.size());
 
   // Byte-based storage (matches writeCheckParticlesToHDF): the per-particle record may not be a multiple
   // of sizeof(double) (ParticleReal payload columns), so everything is counted in bytes (H5T_NATIVE_CHAR).
@@ -559,6 +619,306 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
 
   delete[] chunk;
   chunk = nullptr;
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
+}
+#endif
+
+#ifdef CH_USE_HDF5
+template <typename P, typename Traits>
+void
+DischargeIO::writeCheckpointParticles(HDF5Handle&                                                   a_handle,
+                                      const std::string&                                            a_name,
+                                      const std::vector<const LayoutData<ParticleSoA<P, Traits>>*>& a_particles,
+                                      const std::vector<std::string>&                               a_setNames)
+{
+  CH_TIME("DischargeIO::writeCheckpointParticles");
+
+  CH_assert(a_particles.size() > 0);
+  CH_assert(a_particles.size() == a_setNames.size());
+
+  const BoxLayout& grids = a_particles[0]->boxLayout();
+
+  for (const auto& particles : a_particles) {
+    if (!(particles->boxLayout() == grids)) {
+      MayDay::Error("DischargeIO::writeCheckpointParticles - all particle sets must have the same box layout");
+    }
+  }
+
+  const DataIterator& dit     = grids.dataIterator();
+  const int           nbox    = dit.size();
+  const int           numSets = static_cast<int>(a_particles.size());
+  const size_t        objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
+
+  // Particle count of every box and set, box by box.
+  std::vector<unsigned long long> counts(grids.size() * numSets, 0ULL);
+
+  unsigned long long numLocalParticles = 0ULL;
+
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    for (int iset = 0; iset < numSets; iset++) {
+      const unsigned long long n = (*a_particles[iset])[din].size();
+
+      counts[grids.index(din) * numSets + iset] = n;
+
+      numLocalParticles += n;
+    }
+  }
+
+#ifdef CH_MPI
+  MPI_Allreduce(MPI_IN_PLACE, counts.data(), counts.size(), MPI_UNSIGNED_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+  write_vect_to_header(a_handle, counts, H5T_NATIVE_ULLONG, a_name + ":counts");
+
+  // Byte offset in the data set of every box.
+  std::vector<unsigned long long> boxOffsets(grids.size() + 1, 0ULL);
+
+  for (int ibox = 0; ibox < grids.size(); ibox++) {
+    unsigned long long n = 0ULL;
+
+    for (int iset = 0; iset < numSets; iset++) {
+      n += counts[ibox * numSets + iset];
+    }
+
+    boxOffsets[ibox + 1] = boxOffsets[ibox] + objSize * n;
+  }
+
+  hsize_t     dataSize  = boxOffsets[grids.size()];
+  hid_t       dataspace = H5Screate_simple(1, &dataSize, nullptr);
+  std::string dataName  = a_name + ":data";
+  hid_t       dataset   = H5Dcreate2(a_handle.groupID(),
+                             dataName.c_str(),
+                             H5T_NATIVE_CHAR,
+                             dataspace,
+                             H5P_DEFAULT,
+                             H5P_DEFAULT,
+                             H5P_DEFAULT);
+
+  // Every rank linearizes its particles box by box into a buffer of at most particleBlockSize particles, and writes
+  // the buffer with one H5Dwrite each time it is full. The file selection of each write is the union of the byte
+  // ranges of the particles in the buffer. Particles that follow each other in the file are merged into one range.
+  if (numLocalParticles > 0) {
+    const size_t blockSize = std::min(static_cast<size_t>(numLocalParticles), particleBlockSize);
+
+    std::vector<char> buffer(objSize * blockSize);
+
+    char*   dst         = buffer.data();
+    size_t  numInBuffer = 0;
+    hsize_t rangeStart  = 0;
+    hsize_t rangeCount  = 0;
+    bool    firstRange  = true;
+
+    auto selectRange = [&]() -> void {
+      H5Sselect_hyperslab(dataspace,
+                          firstRange ? H5S_SELECT_SET : H5S_SELECT_OR,
+                          &rangeStart,
+                          nullptr,
+                          &rangeCount,
+                          nullptr);
+
+      firstRange = false;
+    };
+
+    auto writeBuffer = [&]() -> void {
+      selectRange();
+
+      const hsize_t bufferSize = objSize * numInBuffer;
+      const hid_t   memSpace   = H5Screate_simple(1, &bufferSize, nullptr);
+
+      if (H5Dwrite(dataset, H5T_NATIVE_CHAR, memSpace, dataspace, H5P_DEFAULT, buffer.data()) < 0) {
+        MayDay::Error("DischargeIO::writeCheckpointParticles - H5Dwrite failed");
+      }
+
+      H5Sclose(memSpace);
+
+      dst         = buffer.data();
+      numInBuffer = 0;
+      rangeCount  = 0;
+      firstRange  = true;
+    };
+
+    // serial: fills the shared buffer at running positions and builds the file selection in file order
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din        = dit[mybox];
+      hsize_t          fileOffset = boxOffsets[grids.index(din)];
+
+      for (int iset = 0; iset < numSets; iset++) {
+        const ParticleSoA<P, Traits>& leaf = (*a_particles[iset])[din];
+
+        for (size_t ip = 0; ip < leaf.size(); ip++) {
+          leaf.h5LinearizeParticle((void*)dst, ip);
+
+          dst += objSize;
+          numInBuffer++;
+
+          if (rangeCount > 0 && rangeStart + rangeCount == fileOffset) {
+            rangeCount += objSize;
+          }
+          else {
+            if (rangeCount > 0) {
+              selectRange();
+            }
+
+            rangeStart = fileOffset;
+            rangeCount = objSize;
+          }
+
+          fileOffset += objSize;
+
+          if (numInBuffer == blockSize) {
+            writeBuffer();
+          }
+        }
+      }
+    }
+
+    if (numInBuffer > 0) {
+      writeBuffer();
+    }
+  }
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
+
+  // The set names.
+  HDF5HeaderData header;
+
+  header.m_int["num_sets"] = numSets;
+
+  for (int iset = 0; iset < numSets; iset++) {
+    header.m_string["component_" + std::to_string(iset)] = a_setNames[iset];
+  }
+
+  const std::string group = a_handle.getGroup();
+
+  a_handle.setGroup(group + "/" + a_name + "_attributes");
+  header.writeToFile(a_handle);
+  a_handle.setGroup(group);
+}
+
+template <typename P, typename Traits>
+void
+DischargeIO::readCheckpointParticles(HDF5Handle&                                             a_handle,
+                                     const std::string&                                      a_name,
+                                     const std::vector<LayoutData<ParticleSoA<P, Traits>>*>& a_particles,
+                                     const std::vector<std::string>&                         a_setNames)
+{
+  CH_TIME("DischargeIO::readCheckpointParticles");
+
+  CH_assert(a_particles.size() > 0);
+  CH_assert(a_particles.size() == a_setNames.size());
+
+  const BoxLayout& grids = a_particles[0]->boxLayout();
+
+  for (const auto& particles : a_particles) {
+    if (!(particles->boxLayout() == grids)) {
+      MayDay::Error("DischargeIO::readCheckpointParticles - all particle sets must have the same box layout");
+    }
+  }
+
+  const DataIterator& dit     = grids.dataIterator();
+  const int           nbox    = dit.size();
+  const size_t        objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
+
+  HDF5HeaderData header;
+
+  const std::string group = a_handle.getGroup();
+
+  a_handle.setGroup(group + "/" + a_name + "_attributes");
+  header.readFromFile(a_handle);
+  a_handle.setGroup(group);
+
+  const int numFileSets = header.m_int["num_sets"];
+
+  // Set in the file of every set in a_particles.
+  std::vector<int> fileSets;
+
+  for (const auto& name : a_setNames) {
+    int fileSet = -1;
+
+    for (int iset = 0; iset < numFileSets; iset++) {
+      if (header.m_string["component_" + std::to_string(iset)] == name) {
+        fileSet = iset;
+      }
+    }
+
+    if (fileSet < 0) {
+      MayDay::Error(("DischargeIO::readCheckpointParticles - set '" + name + "' is not in '" + a_name + "'").c_str());
+    }
+
+    fileSets.push_back(fileSet);
+  }
+
+  std::vector<unsigned long long> counts(grids.size() * numFileSets, 0ULL);
+
+  read_vect_from_header(a_handle, counts, H5T_NATIVE_ULLONG, a_name + ":counts");
+
+  std::vector<unsigned long long> boxOffsets(grids.size() + 1, 0ULL);
+
+  for (int ibox = 0; ibox < grids.size(); ibox++) {
+    unsigned long long n = 0ULL;
+
+    for (int iset = 0; iset < numFileSets; iset++) {
+      n += counts[ibox * numFileSets + iset];
+    }
+
+    boxOffsets[ibox + 1] = boxOffsets[ibox] + objSize * n;
+  }
+
+  if (boxOffsets[grids.size()] == 0) {
+    return;
+  }
+
+  const std::string dataName  = a_name + ":data";
+  const hid_t       dataset   = H5Dopen2(a_handle.groupID(), dataName.c_str(), H5P_DEFAULT);
+  const hid_t       dataspace = H5Dget_space(dataset);
+
+  std::vector<char> buffer;
+
+  // serial: reads every box of this rank into one buffer and appends the particles of each set
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din   = dit[mybox];
+    const int        ibox  = grids.index(din);
+    hsize_t          start = boxOffsets[ibox];
+    hsize_t          count = boxOffsets[ibox + 1] - boxOffsets[ibox];
+
+    if (count == 0) {
+      continue;
+    }
+
+    buffer.resize(count);
+
+    H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, &start, nullptr, &count, nullptr);
+
+    const hid_t memSpace = H5Screate_simple(1, &count, nullptr);
+
+    if (H5Dread(dataset, H5T_NATIVE_CHAR, memSpace, dataspace, H5P_DEFAULT, buffer.data()) < 0) {
+      MayDay::Error("DischargeIO::readCheckpointParticles - H5Dread failed");
+    }
+
+    H5Sclose(memSpace);
+
+    // Offset of every file set within the box.
+    std::vector<size_t> setOffsets(numFileSets + 1, 0);
+
+    for (int iset = 0; iset < numFileSets; iset++) {
+      setOffsets[iset + 1] = setOffsets[iset] + objSize * counts[ibox * numFileSets + iset];
+    }
+
+    for (size_t iset = 0; iset < a_particles.size(); iset++) {
+      ParticleSoA<P, Traits>& leaf = (*a_particles[iset])[din];
+
+      const int fileSet = fileSets[iset];
+
+      for (size_t pos = setOffsets[fileSet]; pos < setOffsets[fileSet + 1]; pos += objSize) {
+        leaf.h5DelinearizeAndAppend(buffer.data() + pos);
+      }
+    }
+  }
 
   H5Sclose(dataspace);
   H5Dclose(dataset);

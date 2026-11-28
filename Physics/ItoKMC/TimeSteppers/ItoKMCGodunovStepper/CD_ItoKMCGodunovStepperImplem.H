@@ -14,6 +14,7 @@
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
 // Std includes
+#include <filesystem>
 #include <optional>
 
 // Chombo includes
@@ -2657,24 +2658,34 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, cons
 
   ItoKMCStepper<I, C, R, F>::writeCheckpointData(a_handle, a_lvl);
 
-  // Write the point-particles.
-  if (m_writeCheckpointParticles) {
+  // Write the point-particles of all Ito species as one data set.
+  if (m_writeCheckpointParticles && (this->m_physics)->getNumItoSpecies() > 0) {
+    std::vector<const LayoutData<ParticleSoA<NoPayload>>*> particles;
+    std::vector<std::string>                               names;
+
     for (int i = 0; i < (this->m_physics)->getNumItoSpecies(); i++) {
-      const std::string identifierSigma = "ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i);
-      const std::string identifierRho   = "ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i);
+      particles.push_back(&((*m_conductivityParticles[i])[a_lvl]));
+      names.push_back("ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i));
 
-      const ParticleContainer<NoPayload>& conductivityParticles = *m_conductivityParticles[i];
-      const ParticleContainer<NoPayload>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
-
-      DischargeIO::writeCheckParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
-      DischargeIO::writeCheckParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+      particles.push_back(&((*m_rhoDaggerParticles[i])[a_lvl]));
+      names.push_back("ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i));
     }
+
+    DischargeIO::writeCheckpointParticles(a_handle, "ItoKMCGodunovStepper::point_particles", particles, names);
   }
 
-  // Write data required for the semi-implicit regrid.
+  // Write data required for the semi-implicit regrid as one data set.
   if (this->m_physics->getNumCdrSpecies() > 0) {
-    write(a_handle, *m_semiImplicitRhoCDR[a_lvl], "ItoKMCGodunovStepper::semiImplicitRhoCDR");
-    write(a_handle, *m_semiImplicitConductivityCDR[a_lvl], "ItoKMCGodunovStepper::semiImplicitConductivityCDR");
+    const std::vector<const LevelData<EBCellFAB>*> data  = {&(*m_semiImplicitRhoCDR[a_lvl]),
+                                                            &(*m_semiImplicitConductivityCDR[a_lvl])};
+    const std::vector<std::string>                 names = {"ItoKMCGodunovStepper::semiImplicitRhoCDR",
+                                                            "ItoKMCGodunovStepper::semiImplicitConductivityCDR"};
+
+    DischargeIO::writeCheckpointVariables(a_handle,
+                                          "ItoKMCGodunovStepper::fluid_realm_gas",
+                                          data,
+                                          names,
+                                          this->m_amr->getEBISLayout(this->m_fluidRealm, this->m_plasmaPhase)[a_lvl]);
   }
 }
 #endif
@@ -2691,8 +2702,27 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
 
   ItoKMCStepper<I, C, R, F>::readCheckpointData(a_handle, a_lvl);
 
-  // Write the point-particles.
-  if (m_readCheckpointParticles) {
+  // Read the point-particles, from one data set for all Ito species or, in older files, from one data set per
+  // particle set.
+  const bool batchedParticles = H5Lexists(a_handle.groupID(),
+                                          "ItoKMCGodunovStepper::point_particles:counts",
+                                          H5P_DEFAULT) > 0;
+
+  if (m_readCheckpointParticles && batchedParticles && (this->m_physics)->getNumItoSpecies() > 0) {
+    std::vector<LayoutData<ParticleSoA<NoPayload>>*> particles;
+    std::vector<std::string>                         names;
+
+    for (int i = 0; i < (this->m_physics)->getNumItoSpecies(); i++) {
+      particles.push_back(&((*m_conductivityParticles[i])[a_lvl]));
+      names.push_back("ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i));
+
+      particles.push_back(&((*m_rhoDaggerParticles[i])[a_lvl]));
+      names.push_back("ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i));
+    }
+
+    DischargeIO::readCheckpointParticles(a_handle, "ItoKMCGodunovStepper::point_particles", particles, names);
+  }
+  else if (m_readCheckpointParticles) {
     for (int i = 0; i < (this->m_physics)->getNumItoSpecies(); i++) {
       const std::string identifierSigma = "ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i);
       const std::string identifierRho   = "ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i);
@@ -2705,8 +2735,25 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
     }
   }
 
-  // Read in data that is required for the semi-implicit regrid.
-  if (this->m_physics->getNumCdrSpecies() > 0) {
+  // Read in data that is required for the semi-implicit regrid, from one data set or, in older files, from one data
+  // set per variable.
+  const bool batchedFields = H5Lexists(a_handle.groupID(),
+                                       "ItoKMCGodunovStepper::fluid_realm_gas:datatype=0",
+                                       H5P_DEFAULT) > 0;
+
+  if (this->m_physics->getNumCdrSpecies() > 0 && batchedFields) {
+    const std::vector<LevelData<EBCellFAB>*> data  = {&(*m_semiImplicitRhoCDR[a_lvl]),
+                                                      &(*m_semiImplicitConductivityCDR[a_lvl])};
+    const std::vector<std::string>           names = {"ItoKMCGodunovStepper::semiImplicitRhoCDR",
+                                                      "ItoKMCGodunovStepper::semiImplicitConductivityCDR"};
+
+    DischargeIO::readCheckpointVariables(a_handle,
+                                         "ItoKMCGodunovStepper::fluid_realm_gas",
+                                         data,
+                                         names,
+                                         this->m_amr->getEBISLayout(this->m_fluidRealm, this->m_plasmaPhase)[a_lvl]);
+  }
+  else if (this->m_physics->getNumCdrSpecies() > 0) {
     const Interval interv(0, 0);
 
     read<EBCellFAB>(a_handle,
@@ -2795,18 +2842,22 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       const RefCountedPtr<ItoSolver>&       solver    = solverIt();
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      // Create the output folder
-      // Quoted: a solver name containing a space would otherwise make the shell create one directory
-      // per word, and the file open then fails with a bare MPI_ERR_NO_SUCH_FILE from inside HDF5.
-      std::string cmd     = "mkdir -p 'particles/" + solver->getName() + "'";
-      int         success = 0;
+      // Create the output folder on the master rank. The other ranks wait for it before opening the file.
+      const std::filesystem::path dir = std::filesystem::path("particles") / solver->getName();
+
       if (procID() == 0) {
-        success = system(cmd.c_str());
+        std::error_code error;
+
+        std::filesystem::create_directories(dir, error);
+
+        if (error) {
+          MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
+        }
       }
 
-      if (success != 0) {
-        MayDay::Error("ItoKMCGodunovStepper::plotParticles - could not create 'particles' directory");
-      }
+#ifdef CH_MPI
+      MPI_Barrier(Chombo_MPI::comm);
+#endif
 
       // Set plot file name
       const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName();

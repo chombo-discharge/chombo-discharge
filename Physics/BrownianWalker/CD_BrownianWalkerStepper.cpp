@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <filesystem>
 #include <optional>
 
 // Chombo includes
@@ -421,21 +422,22 @@ BrownianWalkerStepper::plotParticles() const noexcept
   if (plotParticles) {
     const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    // Create the output folder.
-    // Solver names may contain spaces ("scalar species"), so the path has to be quoted -- an unquoted
-    // one makes the shell create a directory per word and the file open then fails with a bare
-    // MPI_ERR_NO_SUCH_FILE from deep inside HDF5.
-    const std::string dir     = "particles/" + m_solver->getName();
-    const std::string cmd     = "mkdir -p \'" + dir + "\'";
-    int               success = 0;
+    // Create the output folder on the master rank. The other ranks wait for it before opening the file.
+    const std::filesystem::path dir = std::filesystem::path("particles") / m_solver->getName();
 
     if (procID() == 0) {
-      success = system(cmd.c_str());
+      std::error_code error;
+
+      std::filesystem::create_directories(dir, error);
+
+      if (error) {
+        MayDay::Error("BrownianWalkerStepper::plotParticles - could not create 'particles' directory");
+      }
     }
 
-    if (success != 0) {
-      MayDay::Error("BrownianWalkerStepper::plotParticles - could not create 'particles' directory");
-    }
+#ifdef CH_MPI
+    MPI_Barrier(Chombo_MPI::comm);
+#endif
 
     const std::string prefix = "./particles/" + m_solver->getName() + "/" + m_solver->getName();
 
