@@ -162,8 +162,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>writePlotFile
 <tr class="memdesc:a20e53e3c1aef68ef4cbc35fcaa4a90d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all cell-centered states.  <br /></td></tr>
 <tr class="memitem:a4b27c13db2959f0a634411e13dccce72" id="r_a4b27c13db2959f0a634411e13dccce72"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; EBAMRCellData * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b27c13db2959f0a634411e13dccce72">getVelocities</a> ()</td></tr>
 <tr class="memdesc:a4b27c13db2959f0a634411e13dccce72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all cell-centered velocities.  <br /></td></tr>
-<tr class="memitem:aa99bfefe6ce9088b563bdc50f5627f2d" id="r_aa99bfefe6ce9088b563bdc50f5627f2d"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; EBAMRCellData * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa99bfefe6ce9088b563bdc50f5627f2d">getCellCenteredDiffusionCoefficients</a> ()</td></tr>
-<tr class="memdesc:aa99bfefe6ce9088b563bdc50f5627f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all cell-centered diffusion coefficients.  <br /></td></tr>
 <tr class="memitem:a884c8e772479db09eed8901de0e292c4" id="r_a884c8e772479db09eed8901de0e292c4"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; EBAMRFluxData * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a884c8e772479db09eed8901de0e292c4">getFaceCenteredDiffusionCoefficient</a> ()</td></tr>
 <tr class="memdesc:a884c8e772479db09eed8901de0e292c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all face-centered diffusion coefficients.  <br /></td></tr>
 <tr class="memitem:a6a6408194fe2e825efe16a5909636aff" id="r_a6a6408194fe2e825efe16a5909636aff"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; EBAMRIVData * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a6408194fe2e825efe16a5909636aff">getEbCenteredDiffusionCoefficient</a> ()</td></tr>
@@ -346,36 +344,6 @@ template&lt;class T&gt; </div>
 
 <p>Get time step for explicit diffusion. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns the smallest explicit diffusion time step (minimized over solvers) </dd></dl>
-
-</div>
-</div>
-<a id="aa99bfefe6ce9088b563bdc50f5627f2d" name="aa99bfefe6ce9088b563bdc50f5627f2d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa99bfefe6ce9088b563bdc50f5627f2d">&#9670;&#160;</a></span>getCellCenteredDiffusionCoefficients()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; EBAMRCellData * &gt; <a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; T &gt;::getCellCenteredDiffusionCoefficients </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get all cell-centered diffusion coefficients. </p>
-<dl class="section return"><dt>Returns</dt><dd>Pointers to cell-centered diffusion coefficient data in each solver. </dd></dl>
 
 </div>
 </div>

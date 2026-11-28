@@ -994,106 +994,109 @@ $(function() {
 <div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span> </div>
 <div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>  <span class="comment">// HDF5 doesn&#39;t do irregular data the way we want so we copy into EBCellFABs and</span></div>
 <div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>  <span class="comment">// use that as output.</span></div>
-<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>  LevelData&lt;EBCellFAB&gt; scratch;</div>
-<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>  <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;allocate(scratch, <a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>, a_level, N);</div>
-<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span> </div>
-<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>  <span class="comment">// Copy m_phi to a_output</span></div>
-<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
-<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    <a class="code hl_function" href="classDataOps.html#a9def846b3ebd39532355fc7098d8b9f1">DataOps::setValue</a>(scratch, 0.0);</div>
-<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>    <a class="code hl_function" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(scratch, *<a class="code hl_variable" href="classSurfaceODESolver.html#a9c8550ae60904bb1394296af1b749889">m_phi</a>[a_level], 1.0, *<a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;getVofIterator(<a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>)[a_level]);</div>
-<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span> </div>
-<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>    <span class="keyword">const</span> Interval srcInterv(0, N - 1);</div>
-<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>    <span class="keyword">const</span> Interval dstInterv(a_comp, a_comp + N - 1);</div>
+<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>  <a class="code hl_class" href="classScratch.html">Scratch&lt;LevelData&lt;EBCellFAB&gt;</a>&gt; scratch = <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;fetchLevelScratch(<a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>,</div>
+<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>                                                                   <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>,</div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>                                                                   a_level,</div>
+<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>                                                                   N,</div>
+<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>                                                                   <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;getNumberOfGhostCells());</div>
+<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span> </div>
+<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>  <span class="comment">// Copy m_phi to a_output</span></div>
+<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
+<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>    <a class="code hl_function" href="classDataOps.html#a9def846b3ebd39532355fc7098d8b9f1">DataOps::setValue</a>(scratch, 0.0);</div>
+<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>    <a class="code hl_function" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(scratch, *<a class="code hl_variable" href="classSurfaceODESolver.html#a9c8550ae60904bb1394296af1b749889">m_phi</a>[a_level], 1.0, *<a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;getVofIterator(<a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>)[a_level]);</div>
 <div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span> </div>
-<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>    <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;copyData(a_output, scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, dstInterv, srcInterv);</div>
-<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span> </div>
-<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>    a_output.exchange(dstInterv);</div>
-<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span> </div>
-<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>    a_comp += N;</div>
-<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>  }</div>
+<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>    <span class="keyword">const</span> Interval srcInterv(0, N - 1);</div>
+<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>    <span class="keyword">const</span> Interval dstInterv(a_comp, a_comp + N - 1);</div>
+<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span> </div>
+<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span>    <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;copyData(a_output, *scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, dstInterv, srcInterv);</div>
+<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span> </div>
+<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>    a_output.exchange(dstInterv);</div>
 <div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span> </div>
-<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>  <span class="comment">// Copy m_rhs to a_output</span></div>
-<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
-<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>    <a class="code hl_function" href="classDataOps.html#a9def846b3ebd39532355fc7098d8b9f1">DataOps::setValue</a>(scratch, 0.0);</div>
-<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>    <a class="code hl_function" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(scratch, *<a class="code hl_variable" href="classSurfaceODESolver.html#ad38719a4200aef8457446322d5226c63">m_rhs</a>[a_level], 1.0, *<a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;getVofIterator(<a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>)[a_level]);</div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span> </div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>    <span class="keyword">const</span> Interval srcInterv(0, N - 1);</div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    <span class="keyword">const</span> Interval dstInterv(a_comp, a_comp + N - 1);</div>
+<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>    a_comp += N;</div>
+<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>  }</div>
+<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span> </div>
+<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>  <span class="comment">// Copy m_rhs to a_output</span></div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>    <a class="code hl_function" href="classDataOps.html#a9def846b3ebd39532355fc7098d8b9f1">DataOps::setValue</a>(scratch, 0.0);</div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    <a class="code hl_function" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(scratch, *<a class="code hl_variable" href="classSurfaceODESolver.html#ad38719a4200aef8457446322d5226c63">m_rhs</a>[a_level], 1.0, *<a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;getVofIterator(<a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, <a class="code hl_variable" href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">m_phase</a>)[a_level]);</div>
 <div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span> </div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>    <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;copyData(a_output, scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, dstInterv, srcInterv);</div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span> </div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>    a_output.exchange(dstInterv);</div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span> </div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>    a_comp += N;</div>
-<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>  }</div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>}</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>    <span class="keyword">const</span> Interval srcInterv(0, N - 1);</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>    <span class="keyword">const</span> Interval dstInterv(a_comp, a_comp + N - 1);</div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span> </div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>    <a class="code hl_variable" href="classSurfaceODESolver.html#a785ab87bf3d1119fd817299f32132df8">m_amr</a>-&gt;copyData(a_output, *scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">m_realm</a>, dstInterv, srcInterv);</div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span> </div>
+<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>    a_output.exchange(dstInterv);</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span> </div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>    a_comp += N;</div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>  }</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>}</div>
 </div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span> </div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span><span class="keywordtype">int</span></div>
-<div class="foldopen" id="foldopen00871" data-start="{" data-end="}">
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno"><a class="line" href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">  871</a></span><a class="code hl_function" href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">SurfaceODESolver&lt;N&gt;::getNumberOfPlotVariables</a>() const noexcept</div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>{</div>
-<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>  CH_TIME(<span class="stringliteral">&quot;SurfaceODESolver::getNumberOfPlotVariables&quot;</span>);</div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#adb14c59e5a3fb53a783788da74d2f67e">m_verbosity</a> &gt; 5) {</div>
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>    pout() &lt;&lt; <a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot;::getNumberOfPlotVariables&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>  }</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span> </div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>  <span class="keywordtype">int</span> num = 0;</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span> </div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>    num += N;</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>  }</div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span> </div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>    num += N;</div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>  }</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span> </div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>  <span class="keywordflow">return</span> num;</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>}</div>
-</div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span> </div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
+<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span><span class="keywordtype">int</span></div>
+<div class="foldopen" id="foldopen00874" data-start="{" data-end="}">
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno"><a class="line" href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">  874</a></span><a class="code hl_function" href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">SurfaceODESolver&lt;N&gt;::getNumberOfPlotVariables</a>() const noexcept</div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>{</div>
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>  CH_TIME(<span class="stringliteral">&quot;SurfaceODESolver::getNumberOfPlotVariables&quot;</span>);</div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#adb14c59e5a3fb53a783788da74d2f67e">m_verbosity</a> &gt; 5) {</div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>    pout() &lt;&lt; <a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot;::getNumberOfPlotVariables&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>  }</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span> </div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>  <span class="keywordtype">int</span> num = 0;</div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span> </div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>    num += N;</div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>  }</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span> </div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>    num += N;</div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>  }</div>
 <div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span> </div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>Vector&lt;std::string&gt;</div>
-<div class="foldopen" id="foldopen00893" data-start="{" data-end="}">
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno"><a class="line" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">  893</a></span><a class="code hl_function" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">SurfaceODESolver&lt;N&gt;::getPlotVariableNames</a>() const noexcept</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>{</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>  CH_TIME(<span class="stringliteral">&quot;SurfaceODESolver::getPlotVariableNames&quot;</span>);</div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#adb14c59e5a3fb53a783788da74d2f67e">m_verbosity</a> &gt; 5) {</div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>    pout() &lt;&lt; <a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot;::getPlotVariablesNames&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>  }</div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span> </div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>  Vector&lt;std::string&gt; plotVarNames;</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span> </div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>      <span class="keywordflow">if</span> (N &gt; 1) {</div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; phi-&quot;</span> + std::to_string(i));</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>      }</div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>      <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; phi&quot;</span>);</div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>      }</div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>    }</div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>  }</div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span> </div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>      <span class="keywordflow">if</span> (N &gt; 1) {</div>
-<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; rhs-&quot;</span> + std::to_string(i));</div>
-<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>      }</div>
-<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>      <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; rhs&quot;</span>);</div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>      }</div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>    }</div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>  }</div>
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span> </div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>  <span class="keywordflow">return</span> plotVarNames;</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>}</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>  <span class="keywordflow">return</span> num;</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>}</div>
 </div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span> </div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> N&gt;</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>Vector&lt;std::string&gt;</div>
+<div class="foldopen" id="foldopen00896" data-start="{" data-end="}">
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno"><a class="line" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">  896</a></span><a class="code hl_function" href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">SurfaceODESolver&lt;N&gt;::getPlotVariableNames</a>() const noexcept</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>{</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>  CH_TIME(<span class="stringliteral">&quot;SurfaceODESolver::getPlotVariableNames&quot;</span>);</div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#adb14c59e5a3fb53a783788da74d2f67e">m_verbosity</a> &gt; 5) {</div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>    pout() &lt;&lt; <a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot;::getPlotVariablesNames&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>  }</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span> </div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>  Vector&lt;std::string&gt; plotVarNames;</div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span> </div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a88ebb61b30785774fea3fcf940f9670c">m_plotPhi</a>) {</div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>      <span class="keywordflow">if</span> (N &gt; 1) {</div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; phi-&quot;</span> + std::to_string(i));</div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>      }</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; phi&quot;</span>);</div>
+<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>      }</div>
+<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>    }</div>
+<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>  }</div>
+<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span> </div>
+<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="classSurfaceODESolver.html#a77c7671c8f9b97822b41200d0d981322">m_plotRHS</a>) {</div>
+<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>      <span class="keywordflow">if</span> (N &gt; 1) {</div>
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; rhs-&quot;</span> + std::to_string(i));</div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>      }</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>        plotVarNames.push_back(<a class="code hl_variable" href="classSurfaceODESolver.html#a3649ef214718ebedf407e1377088abe4">m_name</a> + <span class="stringliteral">&quot; rhs&quot;</span>);</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>      }</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>    }</div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>  }</div>
 <div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span> </div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span> </div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>  <span class="keywordflow">return</span> plotVarNames;</div>
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>}</div>
+</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span> </div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span> </div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__DischargeIO_8H_html"><div class="ttname"><a href="CD__DischargeIO_8H.html">CD_DischargeIO.H</a></div><div class="ttdoc">Silly, but useful functions that override standard Chombo HDF5 IO.</div></div>
 <div class="ttc" id="aCD__SurfaceODESolver_8H_html"><div class="ttname"><a href="CD__SurfaceODESolver_8H.html">CD_SurfaceODESolver.H</a></div><div class="ttdoc">Declaration of a cut-cell ODE solver.</div></div>
 <div class="ttc" id="aclassDataOps_html_a92454e47ebc4876caec80e40743d469c"><div class="ttname"><a href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a></div><div class="ttdeci">static void incr(MFAMRCellData &amp;a_lhs, const MFAMRCellData &amp;a_rhs, const Real a_scale) noexcept</div><div class="ttdoc">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.</div><div class="ttdef"><b>Definition</b> CD_DataOps.cpp:881</div></div>
@@ -1103,6 +1106,7 @@ $(function() {
 <div class="ttc" id="aclassMFLevelGrid_html"><div class="ttname"><a href="classMFLevelGrid.html">MFLevelGrid</a></div><div class="ttdoc">Wrapper class for holding multifluid EBLevelGrids.</div><div class="ttdef"><b>Definition</b> CD_MFLevelGrid.H:30</div></div>
 <div class="ttc" id="aclassMFLevelGrid_html_a8d1006dea323fb9783f2c642fb97dca3"><div class="ttname"><a href="classMFLevelGrid.html#a8d1006dea323fb9783f2c642fb97dca3">MFLevelGrid::interfaceRegion</a></div><div class="ttdeci">virtual IntVectSet interfaceRegion(const Box &amp;a_box, const DataIndex &amp;a_dit, const int a_phase1=0, const int a_phase2=1) const</div><div class="ttdoc">Get interface region between two phases.</div><div class="ttdef"><b>Definition</b> CD_MFLevelGrid.cpp:94</div></div>
 <div class="ttc" id="aclassRealm_html_ae7b66527325a72d0b3aa2db67d34078e"><div class="ttname"><a href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm::Primal</a></div><div class="ttdeci">static const std::string Primal</div><div class="ttdoc">Identifier for perimal realm.</div><div class="ttdef"><b>Definition</b> CD_Realm.H:45</div></div>
+<div class="ttc" id="aclassScratch_html"><div class="ttname"><a href="classScratch.html">Scratch</a></div><div class="ttdoc">Single owner of a temporary that belongs to a ScratchPool.</div><div class="ttdef"><b>Definition</b> CD_ScratchPool.H:57</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html"><div class="ttname"><a href="classSurfaceODESolver.html">SurfaceODESolver</a></div><div class="ttdoc">Surface ODE solver.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:29</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_a0f255a3b091833c5c7429921bdacff5f"><div class="ttname"><a href="classSurfaceODESolver.html#a0f255a3b091833c5c7429921bdacff5f">SurfaceODESolver::m_dt</a></div><div class="ttdeci">Real m_dt</div><div class="ttdoc">Time increment.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:485</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_a0fdbc1f9cb539777e062072f87a57d08"><div class="ttname"><a href="classSurfaceODESolver.html#a0fdbc1f9cb539777e062072f87a57d08">SurfaceODESolver::getVerbosity</a></div><div class="ttdeci">virtual int getVerbosity() const noexcept</div><div class="ttdoc">Get verbosity.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:248</div></div>
@@ -1142,7 +1146,7 @@ $(function() {
 <div class="ttc" id="aclassSurfaceODESolver_html_aa00027892592e6f07c1875897e95665b"><div class="ttname"><a href="classSurfaceODESolver.html#aa00027892592e6f07c1875897e95665b">SurfaceODESolver::m_realm</a></div><div class="ttdeci">std::string m_realm</div><div class="ttdoc">Realm where this solver is registered.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:399</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_aa76634d6ccd0cb8f6b86d5446e0e30b0"><div class="ttname"><a href="classSurfaceODESolver.html#aa76634d6ccd0cb8f6b86d5446e0e30b0">SurfaceODESolver::setName</a></div><div class="ttdeci">virtual void setName(const std::string &amp;a_name) noexcept</div><div class="ttdoc">Set the solver name.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:188</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_aa82d7383ac29b6009017dfc0a8d02271"><div class="ttname"><a href="classSurfaceODESolver.html#aa82d7383ac29b6009017dfc0a8d02271">SurfaceODESolver::computeMass</a></div><div class="ttdeci">virtual Real computeMass(const int a_comp=0) const noexcept</div><div class="ttdoc">Compute the total mass for component a_comp in m_phi.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:274</div></div>
-<div class="ttc" id="aclassSurfaceODESolver_html_ab41e8ef90c3741552805b6f163392368"><div class="ttname"><a href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">SurfaceODESolver::getPlotVariableNames</a></div><div class="ttdeci">virtual Vector&lt; std::string &gt; getPlotVariableNames() const noexcept</div><div class="ttdoc">Get output plot names.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:893</div></div>
+<div class="ttc" id="aclassSurfaceODESolver_html_ab41e8ef90c3741552805b6f163392368"><div class="ttname"><a href="classSurfaceODESolver.html#ab41e8ef90c3741552805b6f163392368">SurfaceODESolver::getPlotVariableNames</a></div><div class="ttdeci">virtual Vector&lt; std::string &gt; getPlotVariableNames() const noexcept</div><div class="ttdoc">Get output plot names.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:896</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_ac2ca3154efef0b16ff7cca4a73c77241"><div class="ttname"><a href="classSurfaceODESolver.html#ac2ca3154efef0b16ff7cca4a73c77241">SurfaceODESolver::m_dielectricVoFs</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; m_dielectricVoFs</div><div class="ttdoc">Cut-cells that are also dielectric cells. This does not include ghost cells.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:450</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_ac888a390dae05e95f5d6b2800055b041"><div class="ttname"><a href="classSurfaceODESolver.html#ac888a390dae05e95f5d6b2800055b041">SurfaceODESolver::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept</div><div class="ttdoc">Regrid function.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:604</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_ac8a873019cdc9b08ce46800e7be0d2bd"><div class="ttname"><a href="classSurfaceODESolver.html#ac8a873019cdc9b08ce46800e7be0d2bd">SurfaceODESolver::registerOperators</a></div><div class="ttdeci">virtual void registerOperators() noexcept</div><div class="ttdoc">Register operators.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:572</div></div>
@@ -1154,7 +1158,7 @@ $(function() {
 <div class="ttc" id="aclassSurfaceODESolver_html_aec641712eed0f12f057e6c12ec897433"><div class="ttname"><a href="classSurfaceODESolver.html#aec641712eed0f12f057e6c12ec897433">SurfaceODESolver::m_phase</a></div><div class="ttdeci">phase::which_phase m_phase</div><div class="ttdoc">Phase where the data lives.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:414</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_af2257a0a74c725058fe2ce72c8f7493a"><div class="ttname"><a href="classSurfaceODESolver.html#af2257a0a74c725058fe2ce72c8f7493a">SurfaceODESolver::setTime</a></div><div class="ttdeci">virtual void setTime(const int a_step, const Real a_time, const Real a_dt) noexcept</div><div class="ttdoc">Set the time.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:260</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_af47d45d32e2e3c84137db98bb0b844cf"><div class="ttname"><a href="classSurfaceODESolver.html#af47d45d32e2e3c84137db98bb0b844cf">SurfaceODESolver::defineVoFIterators</a></div><div class="ttdeci">void defineVoFIterators() noexcept</div><div class="ttdoc">Define iterators for iterating over cell subsets.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:523</div></div>
-<div class="ttc" id="aclassSurfaceODESolver_html_af92396a184e1a25cb40ad798bdeb0e20"><div class="ttname"><a href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">SurfaceODESolver::getNumberOfPlotVariables</a></div><div class="ttdeci">virtual int getNumberOfPlotVariables() const noexcept</div><div class="ttdoc">Get number of variables to be plotted.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:871</div></div>
+<div class="ttc" id="aclassSurfaceODESolver_html_af92396a184e1a25cb40ad798bdeb0e20"><div class="ttname"><a href="classSurfaceODESolver.html#af92396a184e1a25cb40ad798bdeb0e20">SurfaceODESolver::getNumberOfPlotVariables</a></div><div class="ttdeci">virtual int getNumberOfPlotVariables() const noexcept</div><div class="ttdoc">Get number of variables to be plotted.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:874</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_afb7ae1fc78c58df87d55bbbb2d6d0a36"><div class="ttname"><a href="classSurfaceODESolver.html#afb7ae1fc78c58df87d55bbbb2d6d0a36">SurfaceODESolver::m_electrodeVoFs</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; m_electrodeVoFs</div><div class="ttdoc">Cut-cells that are electrode cells. This does not include ghost cells.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolver.H:445</div></div>
 <div class="ttc" id="aclassSurfaceODESolver_html_afc1aa9cbbab13f884b15e534e66e9e24"><div class="ttname"><a href="classSurfaceODESolver.html#afc1aa9cbbab13f884b15e534e66e9e24">SurfaceODESolver::resetDielectrics</a></div><div class="ttdeci">virtual void resetDielectrics(const Real a_value) noexcept</div><div class="ttdoc">Reset m_phi on dielectric cells.</div><div class="ttdef"><b>Definition</b> CD_SurfaceODESolverImplem.H:668</div></div>
 <div class="ttc" id="anamespaceBoxLoops_html_aa237179546062b6d0f1037ac83043922"><div class="ttname"><a href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">BoxLoops::loop</a></div><div class="ttdeci">ALWAYS_INLINE void loop(const Box &amp;a_computeBox, Functor &amp;&amp;kernel)</div><div class="ttdoc">Launch a C++ kernel over a regular grid with compile-time per-dimension strides.</div><div class="ttdef"><b>Definition</b> CD_BoxLoopsImplem.H:39</div></div>

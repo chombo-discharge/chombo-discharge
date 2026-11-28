@@ -823,80 +823,83 @@ $(function() {
 <div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>  <span class="keyword">const</span> Interval dstInterv(a_comp, a_comp + numComp - 1);</div>
 <div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span> </div>
 <div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>  CH_START(t1);</div>
-<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>  LevelData&lt;EBCellFAB&gt; scratch;</div>
-<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>  <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;allocate(scratch, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>, a_level, numComp);</div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>  CH_STOP(t1);</div>
-<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span> </div>
-<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>  CH_START(t2);</div>
-<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>  <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;copyData(scratch, *a_data[a_level], a_level, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>);</div>
-<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>  CH_START(t2);</div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span> </div>
-<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>  <span class="comment">// Interpolate ghost cells</span></div>
-<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>  CH_START(t3);</div>
-<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>  <span class="keywordflow">if</span> (a_level &gt; 0 &amp;&amp; a_interpGhost) {</div>
-<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;interpGhost(scratch, *a_data[a_level - 1], a_level, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>);</div>
-<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>  }</div>
-<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>  CH_STOP(t3);</div>
-<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span> </div>
-<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>  CH_START(t4);</div>
-<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>  <span class="keywordflow">if</span> (a_interpToCentroids) {</div>
-<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>    <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;interpToCentroids(scratch, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>, a_level);</div>
-<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>  }</div>
-<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>  CH_STOP(t4);</div>
-<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span> </div>
-<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>  <a class="code hl_function" href="classDataOps.html#ac3b1ee086afb3a62f78716790d554a2a">DataOps::setCoveredValue</a>(scratch, *<a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;getCoveredCells(<a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>)[a_level], 0.0);</div>
-<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span> </div>
-<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>  CH_START(t5);</div>
-<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>  <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;copyData(a_output, scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, dstInterv, srcInterv);</div>
-<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>  CH_STOP(t5);</div>
-<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span> </div>
-<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>  a_comp += numComp;</div>
-<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>}</div>
-</div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>  <a class="code hl_class" href="classScratch.html">Scratch&lt;LevelData&lt;EBCellFAB&gt;</a>&gt; scratch = <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;fetchLevelScratch(<a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>,</div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>                                                                   <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>,</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>                                                                   a_level,</div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>                                                                   numComp,</div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>                                                                   <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;getNumberOfGhostCells());</div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>  CH_STOP(t1);</div>
+<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span> </div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>  CH_START(t2);</div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>  <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;copyData(*scratch, *a_data[a_level], a_level, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>);</div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>  CH_STOP(t2);</div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span> </div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>  <span class="comment">// Interpolate ghost cells</span></div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>  CH_START(t3);</div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>  <span class="keywordflow">if</span> (a_level &gt; 0 &amp;&amp; a_interpGhost) {</div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>    <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;interpGhost(scratch, *a_data[a_level - 1], a_level, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>);</div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>  }</div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>  CH_STOP(t3);</div>
+<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span> </div>
+<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>  CH_START(t4);</div>
+<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>  <span class="keywordflow">if</span> (a_interpToCentroids) {</div>
+<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span>    <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;interpToCentroids(scratch, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>, a_level);</div>
+<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>  }</div>
+<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>  CH_STOP(t4);</div>
+<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span> </div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>  <a class="code hl_function" href="classDataOps.html#ac3b1ee086afb3a62f78716790d554a2a">DataOps::setCoveredValue</a>(scratch, *<a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;getCoveredCells(<a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, <a class="code hl_variable" href="classMeshODESolver.html#ad94e0a27d7d78943214793198f745d04">m_phase</a>)[a_level], 0.0);</div>
+<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span> </div>
+<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>  CH_START(t5);</div>
+<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>  <a class="code hl_variable" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a>-&gt;copyData(a_output, *scratch, a_level, a_outputRealm, <a class="code hl_variable" href="classMeshODESolver.html#ab969cc0829148f6c94c3dca9a506ba44">m_realm</a>, dstInterv, srcInterv);</div>
+<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>  CH_STOP(t5);</div>
 <div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span> </div>
-<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span><a class="code hl_class" href="classMeshODESolver.html">MeshODESolver&lt;N&gt;::writeCheckpointLevel</a>(HDF5Handle&amp; a_handle, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>{</div>
-<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>  CH_TIME(<span class="stringliteral">&quot;MeshODESolver::writeCheckpointLevel(HDF5Handle, int)&quot;</span>);</div>
-<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::writeCheckpointLevel(HDF5Handle, int)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>  }</div>
-<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span> </div>
-<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>  write(a_handle, *m_phi[a_level], m_name);</div>
-<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>  write(a_handle, *m_rhs[a_level], m_name + <span class="stringliteral">&quot;_src&quot;</span>);</div>
-<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>}</div>
-<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span> </div>
-<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span><a class="code hl_class" href="classMeshODESolver.html">MeshODESolver&lt;N&gt;::readCheckpointLevel</a>(HDF5Handle&amp; a_handle, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span>{</div>
-<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span>  CH_TIME(<span class="stringliteral">&quot;MeshODESolver::writeCheckpointLevel(HDF5Handle, int)&quot;</span>);</div>
-<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::writeCheckpointLevel(HDF5Handle, int)&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>  }</div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span> </div>
-<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>  read&lt;EBCellFAB&gt;(a_handle,</div>
-<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>                  *m_phi[a_level],</div>
-<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span>                  m_name,</div>
-<div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span>                  m_amr-&gt;getGrids(m_realm)[a_level],</div>
-<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span>                  Interval(0, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(N) - 1),</div>
-<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>                  <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span>  read&lt;EBCellFAB&gt;(a_handle,</div>
-<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>                  *m_rhs[a_level],</div>
-<div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span>                  m_name + <span class="stringliteral">&quot;_src&quot;</span>,</div>
-<div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span>                  m_amr-&gt;getGrids(m_realm)[a_level],</div>
-<div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>                  Interval(0, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(N) - 1),</div>
-<div class="line"><a id="l00754" name="l00754"></a><span class="lineno">  754</span>                  <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>}</div>
-<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span> </div>
-<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span> </div>
-<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>  a_comp += numComp;</div>
+<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span>}</div>
+</div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span> </div>
+<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span><a class="code hl_class" href="classMeshODESolver.html">MeshODESolver&lt;N&gt;::writeCheckpointLevel</a>(HDF5Handle&amp; a_handle, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>{</div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>  CH_TIME(<span class="stringliteral">&quot;MeshODESolver::writeCheckpointLevel(HDF5Handle, int)&quot;</span>);</div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::writeCheckpointLevel(HDF5Handle, int)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>  }</div>
+<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span> </div>
+<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>  write(a_handle, *m_phi[a_level], m_name);</div>
+<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>  write(a_handle, *m_rhs[a_level], m_name + <span class="stringliteral">&quot;_src&quot;</span>);</div>
+<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>}</div>
+<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span> </div>
+<div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span><a class="code hl_class" href="classMeshODESolver.html">MeshODESolver&lt;N&gt;::readCheckpointLevel</a>(HDF5Handle&amp; a_handle, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>{</div>
+<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>  CH_TIME(<span class="stringliteral">&quot;MeshODESolver::writeCheckpointLevel(HDF5Handle, int)&quot;</span>);</div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::writeCheckpointLevel(HDF5Handle, int)&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>  }</div>
+<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span> </div>
+<div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span>  read&lt;EBCellFAB&gt;(a_handle,</div>
+<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span>                  *m_phi[a_level],</div>
+<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>                  m_name,</div>
+<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span>                  m_amr-&gt;getGrids(m_realm)[a_level],</div>
+<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>                  Interval(0, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(N) - 1),</div>
+<div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span>                  <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span>  read&lt;EBCellFAB&gt;(a_handle,</div>
+<div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>                  *m_rhs[a_level],</div>
+<div class="line"><a id="l00754" name="l00754"></a><span class="lineno">  754</span>                  m_name + <span class="stringliteral">&quot;_src&quot;</span>,</div>
+<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>                  m_amr-&gt;getGrids(m_realm)[a_level],</div>
+<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>                  Interval(0, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(N) - 1),</div>
+<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>                  <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>}</div>
+<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span> </div>
+<div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00762" name="l00762"></a><span class="lineno">  762</span> </div>
+<div class="line"><a id="l00763" name="l00763"></a><span class="lineno">  763</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__BoxLoops_8H_html"><div class="ttname"><a href="CD__BoxLoops_8H.html">CD_BoxLoops.H</a></div><div class="ttdoc">Declaration of a namespace for proto-typing grid and EB loops.</div></div>
 <div class="ttc" id="aCD__DischargeIO_8H_html"><div class="ttname"><a href="CD__DischargeIO_8H.html">CD_DischargeIO.H</a></div><div class="ttdoc">Silly, but useful functions that override standard Chombo HDF5 IO.</div></div>
 <div class="ttc" id="aCD__Location_8H_html"><div class="ttname"><a href="CD__Location_8H.html">CD_Location.H</a></div><div class="ttdoc">Declaration of cell positions.</div></div>
@@ -949,6 +952,7 @@ $(function() {
 <div class="ttc" id="aclassMeshODESolver_html_aec8195ea3914c15f91e42e616ff3fb2a"><div class="ttname"><a href="classMeshODESolver.html#aec8195ea3914c15f91e42e616ff3fb2a">MeshODESolver::setTime</a></div><div class="ttdeci">virtual void setTime(int a_step, Real a_time, Real a_dt) noexcept</div><div class="ttdoc">Set the time for this solver.</div><div class="ttdef"><b>Definition</b> CD_MeshODESolverImplem.H:529</div></div>
 <div class="ttc" id="aclassMeshODESolver_html_aeea8a244495f50145d82db821dc54739"><div class="ttname"><a href="classMeshODESolver.html#aeea8a244495f50145d82db821dc54739">MeshODESolver::computeRHS</a></div><div class="ttdeci">virtual void computeRHS(const RHSFunction &amp;a_rhsFunction) noexcept</div><div class="ttdoc">Compute right-hand side from left-hand side. I.e. compute f = f(y,t).</div><div class="ttdef"><b>Definition</b> CD_MeshODESolverImplem.H:286</div></div>
 <div class="ttc" id="aclassRealm_html"><div class="ttname"><a href="classRealm.html">Realm</a></div><div class="ttdoc">Class for holding multifluid Realms, which are the Realms that we actually use.</div><div class="ttdef"><b>Definition</b> CD_Realm.H:40</div></div>
+<div class="ttc" id="aclassScratch_html"><div class="ttname"><a href="classScratch.html">Scratch</a></div><div class="ttdoc">Single owner of a temporary that belongs to a ScratchPool.</div><div class="ttdef"><b>Definition</b> CD_ScratchPool.H:57</div></div>
 <div class="ttc" id="anamespaceBoxLoops_html_aa237179546062b6d0f1037ac83043922"><div class="ttname"><a href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">BoxLoops::loop</a></div><div class="ttdeci">ALWAYS_INLINE void loop(const Box &amp;a_computeBox, Functor &amp;&amp;kernel)</div><div class="ttdoc">Launch a C++ kernel over a regular grid with compile-time per-dimension strides.</div><div class="ttdef"><b>Definition</b> CD_BoxLoopsImplem.H:39</div></div>
 <div class="ttc" id="anamespaceLocation_html_a36c0b34166e702ed3046b0e22fb4ab5a"><div class="ttname"><a href="namespaceLocation.html#a36c0b34166e702ed3046b0e22fb4ab5a">Location::position</a></div><div class="ttdeci">RealVect position(Location::Cell a_location, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisbox, const Real &amp;a_dx)</div><div class="ttdoc">Compute the position (ignoring the &quot;origin) of a Vof.</div><div class="ttdef"><b>Definition</b> CD_LocationImplem.H:21</div></div>
 <div class="ttc" id="anamespacephase_html"><div class="ttname"><a href="namespacephase.html">phase</a></div><div class="ttdoc">Phase names namespace.</div><div class="ttdef"><b>Definition</b> CD_MultiFluidIndexSpace.H:28</div></div>

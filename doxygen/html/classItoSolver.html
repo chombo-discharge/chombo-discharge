@@ -299,12 +299,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memdesc:a877960fbdde4e57f9ce3061fc0bb703f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <br /></td></tr>
 <tr class="memitem:a64b5e34d86ab0286807678c7f753f57e" id="r_a64b5e34d86ab0286807678c7f753f57e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64b5e34d86ab0286807678c7f753f57e">interpolateDiffusion</a> ()</td></tr>
 <tr class="memdesc:a64b5e34d86ab0286807678c7f753f57e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the diffusion field to the particle positions.  <br /></td></tr>
-<tr class="memitem:a539b80e8ccb1bbfab4aa6ce0114dbf78" id="r_a539b80e8ccb1bbfab4aa6ce0114dbf78"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a539b80e8ccb1bbfab4aa6ce0114dbf78">computeDiffusionGradient</a> ()</td></tr>
-<tr class="memdesc:a539b80e8ccb1bbfab4aa6ce0114dbf78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered gradient of the mesh diffusion field.  <br /></td></tr>
-<tr class="memitem:a48b8d183b19d1a4e71d17ea03577d183" id="r_a48b8d183b19d1a4e71d17ea03577d183"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48b8d183b19d1a4e71d17ea03577d183">interpolateDiffusionGradient</a> ()</td></tr>
-<tr class="memdesc:a48b8d183b19d1a4e71d17ea03577d183"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.  <br /></td></tr>
-<tr class="memitem:a7208794ff36b207c8cae3c04c21301f8" id="r_a7208794ff36b207c8cae3c04c21301f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7208794ff36b207c8cae3c04c21301f8">interpolateDiffusionGradient</a> (int a_lvl, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:a7208794ff36b207c8cae3c04c21301f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.  <br /></td></tr>
+<tr class="memitem:ac35be74fad79d378335c029a477d776d" id="r_ac35be74fad79d378335c029a477d776d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac35be74fad79d378335c029a477d776d">computeDiffusionGradient</a> (EBAMRCellData &amp;a_diffusionGradient) const</td></tr>
+<tr class="memdesc:ac35be74fad79d378335c029a477d776d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered gradient of the mesh diffusion field.  <br /></td></tr>
+<tr class="memitem:a81140a49b996ed0d5127c431f31efb09" id="r_a81140a49b996ed0d5127c431f31efb09"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81140a49b996ed0d5127c431f31efb09">interpolateDiffusionGradient</a> (const EBAMRCellData &amp;a_diffusionGradient)</td></tr>
+<tr class="memdesc:a81140a49b996ed0d5127c431f31efb09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.  <br /></td></tr>
+<tr class="memitem:ad4414a13789f30a1be4b6c08dbeae0c5" id="r_ad4414a13789f30a1be4b6c08dbeae0c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4414a13789f30a1be4b6c08dbeae0c5">interpolateDiffusionGradient</a> (int a_lvl, const DataIndex &amp;a_dit, const EBCellFAB &amp;a_diffusionGradient)</td></tr>
+<tr class="memdesc:ad4414a13789f30a1be4b6c08dbeae0c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.  <br /></td></tr>
 <tr class="memitem:a7b18662c972acf95033b5b66b43e0f3c" id="r_a7b18662c972acf95033b5b66b43e0f3c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b18662c972acf95033b5b66b43e0f3c">isDiffusionGradientDrift</a> () const noexcept</td></tr>
 <tr class="memdesc:a7b18662c972acf95033b5b66b43e0f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the grad(D) drift correction is enabled.  <br /></td></tr>
 <tr class="memitem:a4d8246f963aa976e49c808a9d963b464" id="r_a4d8246f963aa976e49c808a9d963b464"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d8246f963aa976e49c808a9d963b464">updateDiffusion</a> ()</td></tr>
@@ -566,7 +566,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotDiffCo</b></td>
 <tr class="memdesc:abe9e7bdf7a18548a2f13572e8e2811c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting m_diffusionFunction to plot files. <br /></td></tr>
 <tr class="memitem:ac783357f8054014eda45a09584364d52" id="r_ac783357f8054014eda45a09584364d52"><td class="memItemLeft" align="right" valign="top"><a id="ac783357f8054014eda45a09584364d52" name="ac783357f8054014eda45a09584364d52"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotDiffusionGradient</b></td></tr>
-<tr class="memdesc:ac783357f8054014eda45a09584364d52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting m_diffusionGradient to plot files. <br /></td></tr>
+<tr class="memdesc:ac783357f8054014eda45a09584364d52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting the gradient of the diffusion field to plot files. <br /></td></tr>
 <tr class="memitem:a4d9a240d402d0800d2420563b308e3f3" id="r_a4d9a240d402d0800d2420563b308e3f3"><td class="memItemLeft" align="right" valign="top"><a id="a4d9a240d402d0800d2420563b308e3f3" name="a4d9a240d402d0800d2420563b308e3f3"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotParticles</b></td></tr>
 <tr class="memdesc:a4d9a240d402d0800d2420563b308e3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for depositing and plotting the bulk particles on the mesh. <br /></td></tr>
@@ -609,23 +609,8 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_velocityFu
 <tr class="memitem:a1530feac364fec71833a2cc367538577" id="r_a1530feac364fec71833a2cc367538577"><td class="memItemLeft" align="right" valign="top"><a id="a1530feac364fec71833a2cc367538577" name="a1530feac364fec71833a2cc367538577"></a>
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_diffusionFunction</b></td></tr>
 <tr class="memdesc:a1530feac364fec71833a2cc367538577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion-centerer field used for interpolating diffusion coefficients. <br /></td></tr>
-<tr class="memitem:a6c9cedeae5f1456da3b2f301042d0971" id="r_a6c9cedeae5f1456da3b2f301042d0971"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c9cedeae5f1456da3b2f301042d0971">m_diffusionGradient</a></td></tr>
-<tr class="memdesc:a6c9cedeae5f1456da3b2f301042d0971"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction.  <br /></td></tr>
-<tr class="memitem:ad34c0550688c09afe97a3c990f1db62d" id="r_ad34c0550688c09afe97a3c990f1db62d"><td class="memItemLeft" align="right" valign="top">EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad34c0550688c09afe97a3c990f1db62d">m_kdMergeCellHistogram</a></td></tr>
-<tr class="memdesc:ad34c0550688c09afe97a3c990f1db62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>).  <br /></td></tr>
-<tr class="memitem:af71e85b23c94fdc63a714d2fbc029d65" id="r_af71e85b23c94fdc63a714d2fbc029d65"><td class="memItemLeft" align="right" valign="top"><a id="af71e85b23c94fdc63a714d2fbc029d65" name="af71e85b23c94fdc63a714d2fbc029d65"></a>
-EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><b>m_kdMergeLeafQuota</b></td></tr>
-<tr class="memdesc:af71e85b23c94fdc63a714d2fbc029d65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell merge-quota scratch for the kd merges. Same lifetime as m_kdMergeCellHistogram. <br /></td></tr>
-<tr class="memitem:a49dc43db44eb8cb98f208c66162d5e7b" id="r_a49dc43db44eb8cb98f208c66162d5e7b"><td class="memItemLeft" align="right" valign="top"><a id="a49dc43db44eb8cb98f208c66162d5e7b" name="a49dc43db44eb8cb98f208c66162d5e7b"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositionNC</b></td></tr>
-<tr class="memdesc:a49dc43db44eb8cb98f208c66162d5e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for holding the non-conservative deposition. <br /></td></tr>
-<tr class="memitem:ab92737393f3b0d1776c7116f65379fec" id="r_ab92737393f3b0d1776c7116f65379fec"><td class="memItemLeft" align="right" valign="top"><a id="ab92737393f3b0d1776c7116f65379fec" name="ab92737393f3b0d1776c7116f65379fec"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDiff</b></td></tr>
-<tr class="memdesc:ab92737393f3b0d1776c7116f65379fec"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for holding the mass difference when using hybrid deposition. <br /></td></tr>
 <tr class="memitem:a05c4353d3fcb69f3cb1b1e942fc23ebd" id="r_a05c4353d3fcb69f3cb1b1e942fc23ebd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05c4353d3fcb69f3cb1b1e942fc23ebd">m_mirrorImages</a></td></tr>
 <tr class="memdesc:a05c4353d3fcb69f3cb1b1e942fc23ebd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflected images of the band particles, for <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50a2403def5083f02105e7802b3b315681e" title="Even extension of the density about the embedded boundary: deposit each particle&#39;s cloud and the clou...">IrregularDeposition::Mirror</a>.  <br /></td></tr>
-<tr class="memitem:a17cf04e959a97412cd1f7500e097efa0" id="r_a17cf04e959a97412cd1f7500e097efa0"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17cf04e959a97412cd1f7500e097efa0">m_mirrorScratch</a></td></tr>
-<tr class="memdesc:a17cf04e959a97412cd1f7500e097efa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mesh scratch the mirror images deposit into, before being added to the real field.  <br /></td></tr>
 <tr class="memitem:a87a391ecb6dd2afbe949ecba8190b1aa" id="r_a87a391ecb6dd2afbe949ecba8190b1aa"><td class="memItemLeft" align="right" valign="top"><a id="a87a391ecb6dd2afbe949ecba8190b1aa" name="a87a391ecb6dd2afbe949ecba8190b1aa"></a>
 std::map&lt; <a class="el" href="#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleContainers</b></td></tr>
 <tr class="memdesc:a87a391ecb6dd2afbe949ecba8190b1aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Various particle containers with identifiers. <br /></td></tr>
@@ -1105,8 +1090,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
-<a id="a539b80e8ccb1bbfab4aa6ce0114dbf78" name="a539b80e8ccb1bbfab4aa6ce0114dbf78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a539b80e8ccb1bbfab4aa6ce0114dbf78">&#9670;&#160;</a></span>computeDiffusionGradient()</h2>
+<a id="ac35be74fad79d378335c029a477d776d" name="ac35be74fad79d378335c029a477d776d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac35be74fad79d378335c029a477d776d">&#9670;&#160;</a></span>computeDiffusionGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1117,8 +1102,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
         <tr>
           <td class="memname">void ItoSolver::computeDiffusionGradient </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
+          <td class="paramtype">EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_diffusionGradient</em></span></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -1129,7 +1114,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div><div class="memdoc">
 
 <p>Compute the cell-centered gradient of the mesh diffusion field. </p>
-<p>Fills m_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the result and updates its ghost cells. The caller must have brought m_diffusionFunction's own ghost cells up to date first &ndash; the gradient stencil reaches into them and across refinement boundaries. Does nothing when the solver is not diffusive or when ItoSolver.diffusion_grad_drift is false, in which case m_diffusionGradient is not allocated. </p>
+<p>Fills a_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the result and updates its ghost cells. The caller must have brought m_diffusionFunction's own ghost cells up to date first &ndash; the gradient stencil reaches into them and across refinement boundaries. Does nothing when the solver is not diffusive or when ItoSolver.diffusion_grad_drift is false. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_diffusionGradient</td><td>Gradient of the diffusion field. Must have SpaceDim components. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -3003,8 +2993,8 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
-<a id="a48b8d183b19d1a4e71d17ea03577d183" name="a48b8d183b19d1a4e71d17ea03577d183"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48b8d183b19d1a4e71d17ea03577d183">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[1/2]</span></h2>
+<a id="a81140a49b996ed0d5127c431f31efb09" name="a81140a49b996ed0d5127c431f31efb09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81140a49b996ed0d5127c431f31efb09">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3015,7 +3005,7 @@ template&lt;typename P, typename Traits&gt; </div>
         <tr>
           <td class="memname">void ItoSolver::interpolateDiffusionGradient </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">const EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_diffusionGradient</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -3027,12 +3017,17 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Interpolate the mesh diffusion gradient onto the particles' scratch vector storage. </p>
-<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns, from which the caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is not diffusive or the drift correction is disabled, so callers may add the term unconditionally. Requires a preceding call to <a class="el" href="#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. </p>
+<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns, from which the caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is not diffusive or the drift correction is disabled, so callers may add the term unconditionally. The gradient must be allocated on every level in either case; it is not read when the columns are zeroed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_diffusionGradient</td><td>Gradient of the diffusion field, from <a class="el" href="#ac35be74fad79d378335c029a477d776d" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
-<a id="a7208794ff36b207c8cae3c04c21301f8" name="a7208794ff36b207c8cae3c04c21301f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7208794ff36b207c8cae3c04c21301f8">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[2/2]</span></h2>
+<a id="ad4414a13789f30a1be4b6c08dbeae0c5" name="ad4414a13789f30a1be4b6c08dbeae0c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4414a13789f30a1be4b6c08dbeae0c5">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3048,7 +3043,12 @@ template&lt;typename P, typename Traits&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dit</em></span>&#160;)</td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_diffusionGradient</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -3059,10 +3059,11 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch. </p>
-<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns. Requires a preceding call to <a class="el" href="#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. Public because the time steppers call it per patch, from inside their own OpenMP loops over boxes. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns. Public because the time steppers call it per patch, from inside their own OpenMP loops over boxes. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_diffusionGradient</td><td>Gradient of the diffusion field on this patch, from <a class="el" href="#ac35be74fad79d378335c029a477d776d" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -5432,31 +5433,6 @@ template&lt;typename P, typename Traits, typename Strength&gt; </div>
 
 </div>
 </div>
-<a id="a6c9cedeae5f1456da3b2f301042d0971" name="a6c9cedeae5f1456da3b2f301042d0971"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6c9cedeae5f1456da3b2f301042d0971">&#9670;&#160;</a></span>m_diffusionGradient</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData ItoSolver::m_diffusionGradient</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction. </p>
-<p>Allocated only when the solver is diffusive and m_diffusionGradientDrift is true; otherwise this is a bare pointer holder. Recomputed from m_diffusionFunction by <a class="el" href="#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>, so it carries no state across a regrid and is never checkpointed. </p>
-
-</div>
-</div>
 <a id="a93ccebe88021c61bd261093653fe9b12" name="a93ccebe88021c61bd261093653fe9b12"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a93ccebe88021c61bd261093653fe9b12">&#9670;&#160;</a></span>m_diffusionGradientDrift</h2>
 
@@ -5554,31 +5530,6 @@ template&lt;typename P, typename Traits, typename Strength&gt; </div>
 
 <p>kd_partition = hybrid: node size, in cell widths, at or below which the split plane switches from the count median to the weight median. </p>
 <p>ItoSolver.kd_hybrid_leaf_dx. Only meaningful for KDPartition::Hybrid &ndash; 'weight' and 'count' are the two limits of the same rule and ignore this. Larger values apply the weight median to bigger nodes, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells. </p>
-
-</div>
-</div>
-<a id="ad34c0550688c09afe97a3c990f1db62d" name="ad34c0550688c09afe97a3c990f1db62d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad34c0550688c09afe97a3c990f1db62d">&#9670;&#160;</a></span>m_kdMergeCellHistogram</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRFAB ItoSolver::m_kdMergeCellHistogram</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). </p>
-<p>Owned here, not by the merge, so the allocation happens once per regrid rather than once per merge call. Allocated and released with the other mesh fields, in <a class="el" href="#aa6f2c8ad146edca5e4d248349fda2afb" title="Allocate internal storage.">allocate()</a>/regrid() and <a class="el" href="#ad10688731e447c23076992858f989e9b" title="Perform pre-regrid operations.">preRegrid()</a> respectively. </p>
 
 </div>
 </div>
@@ -5705,31 +5656,6 @@ template&lt;typename P, typename Traits, typename Strength&gt; </div>
 <p>Reflected images of the band particles, for <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50a2403def5083f02105e7802b3b315681e" title="Even extension of the density about the embedded boundary: deposit each particle&#39;s cloud and the clou...">IrregularDeposition::Mirror</a>. </p>
 <p>Rebuilt from scratch by every mirror pass and cleared at its START rather than its end, so that a pass that aborts partway cannot leak images into the next deposit. Holds no identity: ParticleSoA::append(pos,
 weight) leaves the metadata columns invalid, nothing in <a class="el" href="#a802e12734bd28664a925cf946f485350" title="Remap the bulk particle container.">remap()</a> reads them, and an image is not a particle anyone can refer to. </p><dl class="section note"><dt>Note</dt><dd>Allocated per solver here rather than shared on the realm. Sharing one container across every solver on a (realm, phase) would need it to live on <a class="el" href="classPhaseRealm.html" title="Class that holds important things for doing AMR over a specific phase and processor distribution.">PhaseRealm</a>, which in turn needs the realm name, minimum block size, level tiles and valid cells that <a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">ParticleContainer::define</a> takes and <a class="el" href="classPhaseRealm.html" title="Class that holds important things for doing AMR over a specific phase and processor distribution.">PhaseRealm</a> does not hold &ndash; plus an in-flight assertion, because a shared mutable scratch is only safe while solvers deposit serially. Owning one per solver needs none of that, at the cost of one container per species. </dd></dl>
-
-</div>
-</div>
-<a id="a17cf04e959a97412cd1f7500e097efa0" name="a17cf04e959a97412cd1f7500e097efa0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a17cf04e959a97412cd1f7500e097efa0">&#9670;&#160;</a></span>m_mirrorScratch</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData ItoSolver::m_mirrorScratch</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Mesh scratch the mirror images deposit into, before being added to the real field. </p>
-<p>One component, because <a class="el" href="classEBAMRParticleMesh.html#acf7e220d5ec9e27edc09465546d1c0bc" title="Deposit the container-owned weight onto the AMR mesh.">EBAMRParticleMesh::depositWeight</a> asserts on that. </p><dl class="section note"><dt>Note</dt><dd>The images CANNOT be deposited straight into the solver's field, and the reason is not just that every AMR deposit opens by zeroing its target. The level exchange is a reversed copier with an add op &ndash; the ghost region is the source and the owner's valid region the destination &ndash; and nothing writes those ghosts back to zero afterwards. A second deposit into the same field would fold the first pass's ghost content into the valid region again, silently double counting in proportion to each patch's ghost share. </dd></dl>
 
 </div>
 </div>

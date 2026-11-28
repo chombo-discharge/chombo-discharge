@@ -560,7 +560,7 @@ FieldSolverGMG.bc.y.lo               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.y.hi               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.z.lo               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverGMG.bc.z.hi               = dirichlet 0.0     ## Bc type (see docs)
-<span class="hll">FieldSolverGMG.plt_vars              = phi rho E Esol    ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+<span class="hll">FieldSolverGMG.plt_vars              = phi rho E Esol    ## Plot variables: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 </span><span class="hll">FieldSolverGMG.use_regrid_slopes     = true              ## Use slopes when regridding or not
 </span><span class="hll">FieldSolverGMG.kappa_source          = true              ## Volume weighted space charge density or not (depends on algorithm)
 </span>
@@ -625,12 +625,13 @@ If this flag is set to <code class="docutils literal notranslate"><span class="p
 </section>
 <section id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
-<p>The user may plot the potential, the space charge, the electric field, and the residual as follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+<p>The user may plot the potential, the space charge, and the electric field as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 </pre></div>
 </div>
 <p>The remaining variables are the permittivity (<code class="docutils literal notranslate"><span class="pre">perm</span></code>), the surface charge (<code class="docutils literal notranslate"><span class="pre">sigma</span></code>), and the electric field in the solid phase (<code class="docutils literal notranslate"><span class="pre">Esol</span></code>).
-A name that is not in this list aborts the run.</p>
+A name that is not in this list aborts the run.
+The solvers do not store the residual, so it cannot be plotted, and listing <code class="docutils literal notranslate"><span class="pre">res</span></code> aborts the run.</p>
 </section>
 <section id="saturation-charge-bc">
 <span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading"></a></h3>
@@ -684,7 +685,7 @@ FieldSolverAMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 FieldSolverAMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 
 FieldSolverAMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'
@@ -728,8 +729,7 @@ With the natural jump condition the phases are coupled both ways, and <code clas
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">rel.res</span></code> is the true residual <span class="math notranslate nohighlight">\(|b - Ax|_2\)</span> of the volume-weighted system relative to the zero-residual <span class="math notranslate nohighlight">\(|b|_2\)</span>, and <code class="docutils literal notranslate"><span class="pre">unweighted</span> <span class="pre">rel.res</span></code> the same with the row weights removed from both.
-<code class="docutils literal notranslate"><span class="pre">|r|</span></code> and <code class="docutils literal notranslate"><span class="pre">|r_zero|</span></code> are the weighted norms.
-The residual that is plotted (<code class="docutils literal notranslate"><span class="pre">res</span></code>) is unweighted.</p>
+<code class="docutils literal notranslate"><span class="pre">|r|</span></code> and <code class="docutils literal notranslate"><span class="pre">|r_zero|</span></code> are the weighted norms.</p>
 <p>Any other PETSc option can be given with the prefix <code class="docutils literal notranslate"><span class="pre">fieldsolveramg_</span></code> through the <code class="docutils literal notranslate"><span class="pre">PETSC_OPTIONS</span></code> environment variable, e.g.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PETSC_OPTIONS</span><span class="o">=</span><span class="s2">"-fieldsolveramg_pc_gamg_agg_nsmooths 1 -fieldsolveramg_ksp_view_mat binary:A.bin"</span><span class="w"> </span>mpirun<span class="w"> </span>-x<span class="w"> </span>PETSC_OPTIONS<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>./main2d.*.ex<span class="w"> </span>example2d.inputs
 </pre></div>
@@ -760,7 +760,7 @@ Without PETSc, <code class="docutils literal notranslate"><span class="pre">Fiel
 <section id="how-it-works">
 <h3>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> holds a <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> and, in PETSc builds, a <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code>.
-The two solvers share the data of <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> (the potential, the space and surface charge, the electric field, the residue and the permittivities), and they read their options from the <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> block of the input file.
+The two solvers share the data of <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> (the potential, the space and surface charge, the electric field and the permittivities), and they read their options from the <code class="docutils literal notranslate"><span class="pre">FieldSolverMG</span></code> block of the input file.
 The boundary conditions, the interface condition, the plot variables and the embedded-boundary stencils are therefore given once, and agree in the two solvers.</p>
 <p>Each solve goes through the geometric multigrid solver chain first (<code class="docutils literal notranslate"><span class="pre">gmg_solver</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">bicgstab</span></code>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridtuning"><span class="std std-ref">Tuning multigrid performance</span></a>).
 If the chain does not converge, the potential is reset to the initial guess of the solve, and the solve is repeated with algebraic multigrid.
@@ -792,7 +792,7 @@ FieldSolverMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverMG.bc_order              = 2                ## EB stencil order on electrodes and dielectric interfaces (GMG and AMG)
 FieldSolverMG.bc_weight             = 2                ## EB stencil least-squares weight on electrodes and dielectric interfaces (GMG and AMG)
-FieldSolverMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 FieldSolverMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 FieldSolverMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 

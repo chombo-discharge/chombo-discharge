@@ -275,8 +275,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolver</b> (
 <tr class="memdesc:a03ae7311e790e0e1396d2feebc87248e inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get electric field on both phases.  <br /></td></tr>
 <tr class="memitem:a9eccd7336ecfe55f427eb0a9dae8ab6b inherit pub_methods_classFieldSolver" id="r_a9eccd7336ecfe55f427eb0a9dae8ab6b"><td class="memItemLeft" align="right" valign="top">MFAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a9eccd7336ecfe55f427eb0a9dae8ab6b">getRho</a> ()</td></tr>
 <tr class="memdesc:a9eccd7336ecfe55f427eb0a9dae8ab6b inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get storage for the space charge density.  <br /></td></tr>
-<tr class="memitem:ac1efc8dcca7d0e3838f2709a695081ef inherit pub_methods_classFieldSolver" id="r_ac1efc8dcca7d0e3838f2709a695081ef"><td class="memItemLeft" align="right" valign="top">MFAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ac1efc8dcca7d0e3838f2709a695081ef">getResidue</a> ()</td></tr>
-<tr class="memdesc:ac1efc8dcca7d0e3838f2709a695081ef inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the residue.  <br /></td></tr>
 <tr class="memitem:abd097dc1a291679898131e63ac916a45 inherit pub_methods_classFieldSolver" id="r_abd097dc1a291679898131e63ac916a45"><td class="memItemLeft" align="right" valign="top">MFAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#abd097dc1a291679898131e63ac916a45">getPermittivityCell</a> ()</td></tr>
 <tr class="memdesc:abd097dc1a291679898131e63ac916a45 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get cell-centered permittivity.  <br /></td></tr>
 <tr class="memitem:ae77e48570694ed11bd2e490f67d44a82 inherit pub_methods_classFieldSolver" id="r_ae77e48570694ed11bd2e490f67d44a82"><td class="memItemLeft" align="right" valign="top">MFAMRFluxData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ae77e48570694ed11bd2e490f67d44a82">getPermittivityFace</a> ()</td></tr>
@@ -519,9 +517,6 @@ MFAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_rho</b></t
 <tr class="memitem:aa107b33dfc038e5b9cafaa5bd17a5e0f inherit pro_attribs_classFieldSolver" id="r_aa107b33dfc038e5b9cafaa5bd17a5e0f"><td class="memItemLeft" align="right" valign="top">
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_sigma</b></td></tr>
 <tr class="memdesc:aa107b33dfc038e5b9cafaa5bd17a5e0f inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for surface charge density. <br /></td></tr>
-<tr class="memitem:aa252c4d2a8e79ce3d8b84f074182527f inherit pro_attribs_classFieldSolver" id="r_aa252c4d2a8e79ce3d8b84f074182527f"><td class="memItemLeft" align="right" valign="top">
-MFAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_residue</b></td></tr>
-<tr class="memdesc:aa252c4d2a8e79ce3d8b84f074182527f inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Residue, e.g. used after solving Poisson equation. <br /></td></tr>
 <tr class="memitem:adbd122f2e271aaa9495c7c3d63d12b1a inherit pro_attribs_classFieldSolver" id="r_adbd122f2e271aaa9495c7c3d63d12b1a"><td class="memItemLeft" align="right" valign="top">
 MFAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_permittivityCell</b></td></tr>
 <tr class="memdesc:adbd122f2e271aaa9495c7c3d63d12b1a inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell permittivity. <br /></td></tr>
@@ -546,9 +541,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotElectricField</
 <tr class="memitem:a22456245c697bbe56bfdba28ef9e52a2 inherit pro_attribs_classFieldSolver" id="r_a22456245c697bbe56bfdba28ef9e52a2"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotElectricFieldSolid</b></td></tr>
 <tr class="memdesc:a22456245c697bbe56bfdba28ef9e52a2 inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the electric field on the inside of dielectrics will be added to plot files. <br /></td></tr>
-<tr class="memitem:ad50614f3eab319e2711b7e8cc88df887 inherit pro_attribs_classFieldSolver" id="r_ad50614f3eab319e2711b7e8cc88df887"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotResidue</b></td></tr>
-<tr class="memdesc:ad50614f3eab319e2711b7e8cc88df887 inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the residue will be added to plot files. <br /></td></tr>
 <tr class="memitem:acd2d731373c7ef6974ff1d79e06c8f84 inherit pro_attribs_classFieldSolver" id="r_acd2d731373c7ef6974ff1d79e06c8f84"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotPermittivity</b></td></tr>
 <tr class="memdesc:acd2d731373c7ef6974ff1d79e06c8f84 inherit pro_attribs_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the permittivity will be added to plot files. <br /></td></tr>

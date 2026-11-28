@@ -310,8 +310,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupSurfaceS
 <tr class="memdesc:acee7252eac6051015ea81c3f58797955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered conductiivty.  <br /></td></tr>
 <tr class="memitem:ae6179848c6f2c98504e2bb2dfa48dde2" id="r_ae6179848c6f2c98504e2bb2dfa48dde2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6179848c6f2c98504e2bb2dfa48dde2">computeConductivityCell</a> (EBAMRCellData &amp;a_conductivity, const Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles) noexcept</td></tr>
 <tr class="memdesc:ae6179848c6f2c98504e2bb2dfa48dde2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered conductiivty.  <br /></td></tr>
-<tr class="memitem:a4d6ae219f4a0b444699438c27e5d28ef" id="r_a4d6ae219f4a0b444699438c27e5d28ef"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d6ae219f4a0b444699438c27e5d28ef">computeDensityGradients</a> () noexcept</td></tr>
-<tr class="memdesc:a4d6ae219f4a0b444699438c27e5d28ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm.  <br /></td></tr>
+<tr class="memitem:a952a84e6770df34752a8f48d9668c82c" id="r_a952a84e6770df34752a8f48d9668c82c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a952a84e6770df34752a8f48d9668c82c">computeDensityGradients</a> (std::vector&lt; <a class="el" href="classScratch.html">Scratch</a>&lt; EBAMRCellData &gt; &gt; &amp;a_storage, Vector&lt; const EBAMRCellData * &gt; &amp;a_densitiesIto, Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsIto, Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsCDR, const bool a_computeGradients) noexcept</td></tr>
+<tr class="memdesc:a952a84e6770df34752a8f48d9668c82c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the densities and density gradients that the reaction kernels read, on the fluid realm.  <br /></td></tr>
 <tr class="memitem:a536b7800d42de906cd940e51b08e2686" id="r_a536b7800d42de906cd940e51b08e2686"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a536b7800d42de906cd940e51b08e2686">computeCurrentDensity</a> (EBAMRCellData &amp;a_J) noexcept</td></tr>
 <tr class="memdesc:a536b7800d42de906cd940e51b08e2686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the current density.  <br /></td></tr>
 <tr class="memitem:ab21b4ef8da7c4c73ed038b628afc82ca" id="r_ab21b4ef8da7c4c73ed038b628afc82ca"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab21b4ef8da7c4c73ed038b628afc82ca">computeRelaxationTime</a> () noexcept</td></tr>
@@ -353,9 +353,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>multiplyCdrVe
 <tr class="memdesc:ad8e4c25f05b3d4dd11eb70c98fbc3732"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level-routine when computing mesh-based mobilities for LFA coupling.  <br /></td></tr>
 <tr class="memitem:a8a927bea11d8aaa695f3ace75afd2021" id="r_a8a927bea11d8aaa695f3ace75afd2021"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a927bea11d8aaa695f3ace75afd2021">computeDiffusionCoefficients</a> (Vector&lt; EBCellFAB * &gt; &amp;a_itoDiffusionCoefficients, Vector&lt; EBCellFAB * &gt; &amp;a_cdrDiffusionCoefficients, const EBCellFAB &amp;a_E, const int a_level, const DataIndex a_din, const Box a_box, const Real a_time) noexcept</td></tr>
 <tr class="memdesc:a8a927bea11d8aaa695f3ace75afd2021"><td class="mdescLeft">&#160;</td><td class="mdescRight">Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling.  <br /></td></tr>
-<tr class="memitem:a4627b5f53b8e7c84cbefdc0953f130d9" id="r_a4627b5f53b8e7c84cbefdc0953f130d9"><td class="memItemLeft" align="right" valign="top"><a id="a4627b5f53b8e7c84cbefdc0953f130d9" name="a4627b5f53b8e7c84cbefdc0953f130d9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffusionCoefficientsCellToFace</b> () noexcept</td></tr>
-<tr class="memdesc:a4627b5f53b8e7c84cbefdc0953f130d9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4" title="Various averaging methods.">Average</a> cell-centered diffusion coefficient to faces. <br /></td></tr>
+<tr class="memitem:ae136078a6309d418c674a5de0d1c9a3f" id="r_ae136078a6309d418c674a5de0d1c9a3f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae136078a6309d418c674a5de0d1c9a3f">averageDiffusionCoefficientsCellToFace</a> (const Vector&lt; EBAMRCellData * &gt; &amp;a_cellCenteredDiffusionCoefficients) noexcept</td></tr>
+<tr class="memdesc:ae136078a6309d418c674a5de0d1c9a3f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4" title="Various averaging methods.">Average</a> cell-centered diffusion coefficients to the faces of the CDR solvers.  <br /></td></tr>
 <tr class="memitem:afb04a59b6445055d6b491ea87dc02e4e" id="r_afb04a59b6445055d6b491ea87dc02e4e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb04a59b6445055d6b491ea87dc02e4e">getPhysicalParticlesPerCell</a> (EBAMRCellData &amp;a_ppc) const noexcept</td></tr>
 <tr class="memdesc:afb04a59b6445055d6b491ea87dc02e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the physical number of particles per cell.  <br /></td></tr>
 <tr class="memitem:abd477ea20d1575c886c2511a29a24dbd" id="r_abd477ea20d1575c886c2511a29a24dbd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd477ea20d1575c886c2511a29a24dbd">computeReactiveItoParticlesPerCell</a> (EBAMRCellData &amp;a_ppc) noexcept</td></tr>
@@ -376,14 +375,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:a41927c8fe0688c91803a6c98ce25f3d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the mean particle energy in all grid cells. Level version.  <br /></td></tr>
 <tr class="memitem:aebf2b498ca53f789dc2cacdf5e372b1e" id="r_aebf2b498ca53f789dc2cacdf5e372b1e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebf2b498ca53f789dc2cacdf5e372b1e">computeReactiveMeanEnergiesPerCell</a> (EBCellFAB &amp;a_meanEnergies, const int a_level, const DataIndex a_din, const Box a_box, const EBISBox &amp;a_ebisbox) noexcept</td></tr>
 <tr class="memdesc:aebf2b498ca53f789dc2cacdf5e372b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the mean particle energy in all grid cells. Patch version.  <br /></td></tr>
-<tr class="memitem:a36907acbc61c507c48ae84b3d06249a4" id="r_a36907acbc61c507c48ae84b3d06249a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36907acbc61c507c48ae84b3d06249a4">advanceReactionNetwork</a> (const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a36907acbc61c507c48ae84b3d06249a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt.  <br /></td></tr>
-<tr class="memitem:adffac88f5d22f36c9bc3c75da3804b32" id="r_adffac88f5d22f36c9bc3c75da3804b32"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adffac88f5d22f36c9bc3c75da3804b32">advanceReactionNetwork</a> (const EBAMRCellData &amp;a_E, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:adffac88f5d22f36c9bc3c75da3804b32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. AMR version.  <br /></td></tr>
-<tr class="memitem:a3c04b697af287625418a22aced96764f" id="r_a3c04b697af287625418a22aced96764f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c04b697af287625418a22aced96764f">advanceReactionNetwork</a> (LevelData&lt; EBCellFAB &gt; &amp;a_particlesPerCell, LevelData&lt; EBCellFAB &gt; &amp;a_newPhotonsPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_electricField, const int a_level, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a3c04b697af287625418a22aced96764f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. Level version.  <br /></td></tr>
-<tr class="memitem:a45ea918deba13aeab6adf0e0fb3e4195" id="r_a45ea918deba13aeab6adf0e0fb3e4195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45ea918deba13aeab6adf0e0fb3e4195">advanceReactionNetwork</a> (EBCellFAB &amp;a_particlesPerCell, EBCellFAB &amp;a_newPhotonsPerCell, const EBCellFAB &amp;a_electricField, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) const noexcept</td></tr>
-<tr class="memdesc:a45ea918deba13aeab6adf0e0fb3e4195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. Patch version.  <br /></td></tr>
+<tr class="memitem:a09189ee39128bf497abcf3db22f27fbc" id="r_a09189ee39128bf497abcf3db22f27fbc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09189ee39128bf497abcf3db22f27fbc">advanceReactionNetwork</a> (EBAMRCellData &amp;a_physicsDt, const EBAMRCellData &amp;a_E, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densitiesIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsCDR, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a09189ee39128bf497abcf3db22f27fbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. AMR version.  <br /></td></tr>
+<tr class="memitem:af020422110052a33057192d774612235" id="r_af020422110052a33057192d774612235"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af020422110052a33057192d774612235">advanceReactionNetwork</a> (LevelData&lt; EBCellFAB &gt; &amp;a_particlesPerCell, LevelData&lt; EBCellFAB &gt; &amp;a_newPhotonsPerCell, LevelData&lt; EBCellFAB &gt; &amp;a_physicsDt, const LevelData&lt; EBCellFAB &gt; &amp;a_electricField, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densitiesIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsCDR, const int a_level, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:af020422110052a33057192d774612235"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. Level version.  <br /></td></tr>
+<tr class="memitem:a2cf9e992d099664e03e644534a30b4f3" id="r_a2cf9e992d099664e03e644534a30b4f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cf9e992d099664e03e644534a30b4f3">advanceReactionNetwork</a> (EBCellFAB &amp;a_particlesPerCell, EBCellFAB &amp;a_newPhotonsPerCell, EBCellFAB &amp;a_physicsDt, const EBCellFAB &amp;a_electricField, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densitiesIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsIto, const Vector&lt; const EBAMRCellData * &gt; &amp;a_densityGradientsCDR, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) const noexcept</td></tr>
+<tr class="memdesc:a2cf9e992d099664e03e644534a30b4f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. Patch version.  <br /></td></tr>
 <tr class="memitem:a39a4942db9c07c680cb5230e8f98b3c9" id="r_a39a4942db9c07c680cb5230e8f98b3c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a39a4942db9c07c680cb5230e8f98b3c9">reconcileParticles</a> (const EBAMRCellData &amp;a_newParticlesPerCell, const EBAMRCellData &amp;a_oldParticlesPerCell, const EBAMRCellData &amp;a_newPhotonsPerCell, const EBAMRCellData &amp;a_cdrProduction, const EBAMRCellData &amp;a_electricField) const noexcept</td></tr>
 <tr class="memdesc:a39a4942db9c07c680cb5230e8f98b3c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
 <tr class="memitem:ac147f662f4e3dd2ebc34eb7010f22ca1" id="r_ac147f662f4e3dd2ebc34eb7010f22ca1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac147f662f4e3dd2ebc34eb7010f22ca1">reconcileParticles</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_newParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_oldParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_newPhotonsPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_cdrProduction, const LevelData&lt; EBCellFAB &gt; &amp;a_electricField, const int a_level) const noexcept</td></tr>
@@ -404,12 +401,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
 <tr class="memitem:abe1aae47c80aee7c2055a853f588863c" id="r_abe1aae47c80aee7c2055a853f588863c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe1aae47c80aee7c2055a853f588863c">needSecondaryEmissionEB</a> () const noexcept</td></tr>
 <tr class="memdesc:abe1aae47c80aee7c2055a853f588863c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether anything can be emitted from the EB this step, answered globally.  <br /></td></tr>
-<tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
-<tr class="memitem:a22787cd04bc164bf206a1d6bad1cbad9" id="r_a22787cd04bc164bf206a1d6bad1cbad9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22787cd04bc164bf206a1d6bad1cbad9">fillSecondaryEmissionEB</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;a_secondaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxes, Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;a_secondaryPhotons, EBAMRIVData &amp;a_surfaceSpecies, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxesExtrap, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_primaryPhotons, const EBAMRCellData &amp;a_electricField, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a22787cd04bc164bf206a1d6bad1cbad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission at the EB.  <br /></td></tr>
-<tr class="memitem:a9100de38907383b414890febd188fdb6" id="r_a9100de38907383b414890febd188fdb6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9100de38907383b414890febd188fdb6">resolveSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a9100de38907383b414890febd188fdb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:a7021e1ff06935bbe585267950ee218ea" id="r_a7021e1ff06935bbe585267950ee218ea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7021e1ff06935bbe585267950ee218ea">fillSecondaryEmissionEB</a> (Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a7021e1ff06935bbe585267950ee218ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
+<tr class="memitem:affd9f06c0fb16940b5679829ed5ce4fa" id="r_affd9f06c0fb16940b5679829ed5ce4fa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#affd9f06c0fb16940b5679829ed5ce4fa">fillSecondaryEmissionEB</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &gt; &amp;a_secondaryParticles, Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt; &amp;a_secondaryPhotons, EBAMRIVData &amp;a_surfaceSpecies, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData &gt; &amp;a_cdrFluxesExtrap, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_primaryPhotons, const EBAMRCellData &amp;a_electricField, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:affd9f06c0fb16940b5679829ed5ce4fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:a741c2d1f77e038fa7050dd18d7e07076" id="r_a741c2d1f77e038fa7050dd18d7e07076"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a741c2d1f77e038fa7050dd18d7e07076">resolveSecondaryEmissionEB</a> (const Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a741c2d1f77e038fa7050dd18d7e07076"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
+<tr class="memitem:ad32a373779539cc6dff4b11232addb66" id="r_ad32a373779539cc6dff4b11232addb66"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad32a373779539cc6dff4b11232addb66">fetchSecondaryEmissionFluxesEB</a> (std::vector&lt; <a class="el" href="classScratch.html">Scratch</a>&lt; EBAMRIVData &gt; &gt; &amp;a_storage, Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes) const noexcept</td></tr>
+<tr class="memdesc:ad32a373779539cc6dff4b11232addb66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the CDR fluxes that fillSecondaryEmissionEB and resolveSecondaryEmissionEB pass between them.  <br /></td></tr>
 <tr class="memitem:a989274946d637dd8b68bb50f9a9caa18" id="r_a989274946d637dd8b68bb50f9a9caa18"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a989274946d637dd8b68bb50f9a9caa18">resolveSecondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_secondaryParticles, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_primaryParticles, Vector&lt; EBAMRIVData * &gt; &amp;a_cdrFluxes, EBAMRIVData &amp;a_surfaceChargeDensity, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a989274946d637dd8b68bb50f9a9caa18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="memitem:abf72046e193f9722cc60f2a4e69c3e99" id="r_abf72046e193f9722cc60f2a4e69c3e99"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf72046e193f9722cc60f2a4e69c3e99">needSecondaryEmissionDomain</a> () const noexcept</td></tr>
@@ -420,8 +419,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:adc754a896fabccc555dc12fc307b1526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute secondary emission on the domain boundary.  <br /></td></tr>
 <tr class="memitem:a0a94da96a3dde02124994341df815104" id="r_a0a94da96a3dde02124994341df815104"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a94da96a3dde02124994341df815104">resolveSecondaryEmissionDomain</a> () noexcept</td></tr>
 <tr class="memdesc:a0a94da96a3dde02124994341df815104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission on the domain boundary.  <br /></td></tr>
-<tr class="memitem:a0f2ff3044d33797d8b9f7149cc4b08fd" id="r_a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f2ff3044d33797d8b9f7149cc4b08fd">computePhysicsDt</a> () noexcept</td></tr>
-<tr class="memdesc:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based maximum time step.  <br /></td></tr>
+<tr class="memitem:a44089ae8ab2ed8313f0c4df5bf19f55e" id="r_a44089ae8ab2ed8313f0c4df5bf19f55e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44089ae8ab2ed8313f0c4df5bf19f55e">computePhysicsDt</a> (EBAMRCellData &amp;a_physicsDt) noexcept</td></tr>
+<tr class="memdesc:a44089ae8ab2ed8313f0c4df5bf19f55e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based maximum time step.  <br /></td></tr>
 <tr class="memitem:a38962bd222ff6b86f2e3a462050f95f2" id="r_a38962bd222ff6b86f2e3a462050f95f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38962bd222ff6b86f2e3a462050f95f2">computeDummyPhysicsDt</a> () noexcept</td></tr>
 <tr class="memdesc:a38962bd222ff6b86f2e3a462050f95f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special routine which performs a dummy KMC advance over a zero time step.  <br /></td></tr>
 <tr class="memitem:a90eb59616f7bdf40384d9c807e3917f1" id="r_a90eb59616f7bdf40384d9c807e3917f1"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90eb59616f7bdf40384d9c807e3917f1">computeTotalCharge</a> () const noexcept</td></tr>
@@ -444,8 +443,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memdesc:af5796b6c64561e0c27a53d3a81976b5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort photons by patch.  <br /></td></tr>
 <tr class="memitem:ad060848c8a0398b4bf953be93a6986ac" id="r_ad060848c8a0398b4bf953be93a6986ac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad060848c8a0398b4bf953be93a6986ac">postCheckpointPoisson</a> () noexcept</td></tr>
 <tr class="memdesc:ad060848c8a0398b4bf953be93a6986ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do some post-checkpoint operations for the electrostatic part.  <br /></td></tr>
-<tr class="memitem:a4d9d22e110b93f12e87a622edf20b7b6" id="r_a4d9d22e110b93f12e87a622edf20b7b6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d9d22e110b93f12e87a622edf20b7b6">computeEdotJSource</a> (const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a4d9d22e110b93f12e87a622edf20b7b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the energy source term for the various plasma species.  <br /></td></tr>
 <tr class="memitem:a62503850f9b5305f9389c125fa627544" id="r_a62503850f9b5305f9389c125fa627544"><td class="memItemLeft" align="right" valign="top"><a id="a62503850f9b5305f9389c125fa627544" name="a62503850f9b5305f9389c125fa627544"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initialSigma</b> () noexcept</td></tr>
 <tr class="memdesc:a62503850f9b5305f9389c125fa627544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill surface charge solver with initial data taken from the physics interface. <br /></td></tr>
@@ -528,11 +525,6 @@ RefCountedPtr&lt; <a class="el" href="classSurfaceODESolver.html">SurfaceODESolv
 <tr class="memdesc:a44efe4ce7d4905527ab286d2a2b5e439"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of secondary particles injected through the EB.  <br /></td></tr>
 <tr class="memitem:addf999056b25403a73844a942d073f51" id="r_addf999056b25403a73844a942d073f51"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#addf999056b25403a73844a942d073f51">m_secondaryPhotons</a></td></tr>
 <tr class="memdesc:addf999056b25403a73844a942d073f51"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of secondary photons injected through the EB.  <br /></td></tr>
-<tr class="memitem:a185c3fa17f03a7f36e0b4dc9c5bf78cc" id="r_a185c3fa17f03a7f36e0b4dc9c5bf78cc"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRIVData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a185c3fa17f03a7f36e0b4dc9c5bf78cc">m_cdrFluxes</a></td></tr>
-<tr class="memdesc:a185c3fa17f03a7f36e0b4dc9c5bf78cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">CDR fluxes for CDR BCs.  <br /></td></tr>
-<tr class="memitem:aaa6445dd13ce576861ddfbf06bef106d" id="r_aaa6445dd13ce576861ddfbf06bef106d"><td class="memItemLeft" align="right" valign="top"><a id="aaa6445dd13ce576861ddfbf06bef106d" name="aaa6445dd13ce576861ddfbf06bef106d"></a>
-Vector&lt; EBAMRIVData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cdrFluxesExtrap</b></td></tr>
-<tr class="memdesc:aaa6445dd13ce576861ddfbf06bef106d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolated CDR fluxes. <br /></td></tr>
 <tr class="memitem:accc14b3af6e5cb3fe790bdefec37738f" id="r_accc14b3af6e5cb3fe790bdefec37738f"><td class="memItemLeft" align="right" valign="top"><a id="accc14b3af6e5cb3fe790bdefec37738f" name="accc14b3af6e5cb3fe790bdefec37738f"></a>
 std::function&lt; Real(const Real a_time)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_voltage</b></td></tr>
 <tr class="memdesc:accc14b3af6e5cb3fe790bdefec37738f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Voltage curve on the electrodes used in the simulation. <br /></td></tr>
@@ -638,22 +630,13 @@ Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"
 <tr class="memdesc:a71eb936c6c97546b95ea5de1458c576e"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of computational particles per cell when load balancing. <br /></td></tr>
 <tr class="memitem:a68b20292b3ee59234724484c87e963b3" id="r_a68b20292b3ee59234724484c87e963b3"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a68b20292b3ee59234724484c87e963b3">m_cdrMobilities</a></td></tr>
 <tr class="memdesc:a68b20292b3ee59234724484c87e963b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the mobilities for the CDR species.  <br /></td></tr>
-<tr class="memitem:a89e412af2dd2e0fb3b0edb7805843d50" id="r_a89e412af2dd2e0fb3b0edb7805843d50"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89e412af2dd2e0fb3b0edb7805843d50">m_fluidGradPhiCDR</a></td></tr>
-<tr class="memdesc:a89e412af2dd2e0fb3b0edb7805843d50"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the gradient of all CDR species densities.  <br /></td></tr>
-<tr class="memitem:aed0d2064d75366ea75b3a4475755d4c8" id="r_aed0d2064d75366ea75b3a4475755d4c8"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed0d2064d75366ea75b3a4475755d4c8">m_fluidGradPhiIto</a></td></tr>
-<tr class="memdesc:aed0d2064d75366ea75b3a4475755d4c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the gradient of all Ito species densities.  <br /></td></tr>
-<tr class="memitem:a0d6e950a46c51ea66fa9107f597f84a1" id="r_a0d6e950a46c51ea66fa9107f597f84a1"><td class="memItemLeft" align="right" valign="top"><a id="a0d6e950a46c51ea66fa9107f597f84a1" name="a0d6e950a46c51ea66fa9107f597f84a1"></a>
-Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidPhiIto</b></td></tr>
-<tr class="memdesc:a0d6e950a46c51ea66fa9107f597f84a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the Ito species densities on the fluid realm. <br /></td></tr>
 <tr class="memitem:a07f79b8d581afd416585df819bd4f5b7" id="r_a07f79b8d581afd416585df819bd4f5b7"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a07f79b8d581afd416585df819bd4f5b7">m_cdrProducts</a></td></tr>
 <tr class="memdesc:a07f79b8d581afd416585df819bd4f5b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction products to be put in the CDR equations, as particles.  <br /></td></tr>
-<tr class="memitem:a070e7d254a6a131cd4a8d509e49bc5a7" id="r_a070e7d254a6a131cd4a8d509e49bc5a7"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a070e7d254a6a131cd4a8d509e49bc5a7">m_particleCdrProduction</a></td></tr>
-<tr class="memdesc:a070e7d254a6a131cd4a8d509e49bc5a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell CDR production from the reaction network, on the particle realm.  <br /></td></tr>
 <tr class="memitem:ac9e87817a9a5538143e13d6d2042f805" id="r_ac9e87817a9a5538143e13d6d2042f805"><td class="memItemLeft" align="right" valign="top"><a id="ac9e87817a9a5538143e13d6d2042f805" name="ac9e87817a9a5538143e13d6d2042f805"></a>
 Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_loadBalanceIndices</b></td></tr>
 <tr class="memdesc:ac9e87817a9a5538143e13d6d2042f805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver indices used when load-balancing the particle solvers. <br /></td></tr>
 <tr class="memitem:a643cd82cfa5a81f7f6cb51e08bbe0ded" id="r_a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a643cd82cfa5a81f7f6cb51e08bbe0ded">m_currentDensity</a></td></tr>
-<tr class="memdesc:a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for current density.  <br /></td></tr>
+<tr class="memdesc:a643cd82cfa5a81f7f6cb51e08bbe0ded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current density for plot files.  <br /></td></tr>
 <tr class="memitem:a3aa74c9372693aec084f1ce7a54840dc" id="r_a3aa74c9372693aec084f1ce7a54840dc"><td class="memItemLeft" align="right" valign="top"><a id="a3aa74c9372693aec084f1ce7a54840dc" name="a3aa74c9372693aec084f1ce7a54840dc"></a>
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_physicsPlotVariables</b></td></tr>
 <tr class="memdesc:a3aa74c9372693aec084f1ce7a54840dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for physics plot variables. <br /></td></tr>
@@ -661,68 +644,15 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_physicsPlo
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_neutralDensity</b></td></tr>
 <tr class="memdesc:a1d69e35e4e2c2a1ae784f68ed2a5772e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the neutral density. <br /></td></tr>
 <tr class="memitem:a0fb0c6ee311d27df4ab7c5b0f53ff94b" id="r_a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fb0c6ee311d27df4ab7c5b0f53ff94b">m_conductivityCell</a></td></tr>
-<tr class="memdesc:a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered conductivity.  <br /></td></tr>
-<tr class="memitem:aa1fa79189045c6b0da2ed4556f1c805b" id="r_aa1fa79189045c6b0da2ed4556f1c805b"><td class="memItemLeft" align="right" valign="top">EBAMRFluxData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1fa79189045c6b0da2ed4556f1c805b">m_conductivityFace</a></td></tr>
-<tr class="memdesc:aa1fa79189045c6b0da2ed4556f1c805b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-centered conductivity.  <br /></td></tr>
-<tr class="memitem:aa9226b44c0686c6cc40a06535da52b77" id="r_aa9226b44c0686c6cc40a06535da52b77"><td class="memItemLeft" align="right" valign="top">EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9226b44c0686c6cc40a06535da52b77">m_conductivityEB</a></td></tr>
-<tr class="memdesc:aa9226b44c0686c6cc40a06535da52b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered conductivity.  <br /></td></tr>
-<tr class="memitem:a4eebf477f5f4e9a71147b308669aa860" id="r_a4eebf477f5f4e9a71147b308669aa860"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4eebf477f5f4e9a71147b308669aa860">m_particleItoPPC</a></td></tr>
-<tr class="memdesc:a4eebf477f5f4e9a71147b308669aa860"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of physical particles per cell for all Ito species.  <br /></td></tr>
-<tr class="memitem:a5f5502a71101b96855ddb01e9c59b95a" id="r_a5f5502a71101b96855ddb01e9c59b95a"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f5502a71101b96855ddb01e9c59b95a">m_particleYPC</a></td></tr>
-<tr class="memdesc:a5f5502a71101b96855ddb01e9c59b95a"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of generated photons per cell.  <br /></td></tr>
-<tr class="memitem:acb3a491600dd656bedae9bd2b1bdec56" id="r_acb3a491600dd656bedae9bd2b1bdec56"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb3a491600dd656bedae9bd2b1bdec56">m_particleEPS</a></td></tr>
-<tr class="memdesc:acb3a491600dd656bedae9bd2b1bdec56"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the mean particle energy.  <br /></td></tr>
-<tr class="memitem:a0fb2b77a3a839765210cd5fb10478c36" id="r_a0fb2b77a3a839765210cd5fb10478c36"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0fb2b77a3a839765210cd5fb10478c36">m_particleOldItoPPC</a></td></tr>
-<tr class="memdesc:a0fb2b77a3a839765210cd5fb10478c36"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the previous number of particles per cell for all species.  <br /></td></tr>
-<tr class="memitem:aa0f73db702049f88103527909d91f732" id="r_aa0f73db702049f88103527909d91f732"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0f73db702049f88103527909d91f732">m_fluidCdrPPC</a></td></tr>
-<tr class="memdesc:aa0f73db702049f88103527909d91f732"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of physical particles per cell for all CDR species.  <br /></td></tr>
-<tr class="memitem:a7faab93e4f99e9444d0fc3b156573d98" id="r_a7faab93e4f99e9444d0fc3b156573d98"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7faab93e4f99e9444d0fc3b156573d98">m_fluidOldCdrPPC</a></td></tr>
-<tr class="memdesc:a7faab93e4f99e9444d0fc3b156573d98"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the previous number of physical particles per cell for all CDR species.  <br /></td></tr>
-<tr class="memitem:a7376666830d566fcb7e38f17df2ef406" id="r_a7376666830d566fcb7e38f17df2ef406"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7376666830d566fcb7e38f17df2ef406">m_fluidPPC</a></td></tr>
-<tr class="memdesc:a7376666830d566fcb7e38f17df2ef406"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of particles per cell for all species.  <br /></td></tr>
-<tr class="memitem:ac111178070073e116fdb8f68138412b0" id="r_ac111178070073e116fdb8f68138412b0"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac111178070073e116fdb8f68138412b0">m_fluidYPC</a></td></tr>
-<tr class="memdesc:ac111178070073e116fdb8f68138412b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of generated photons per cell.  <br /></td></tr>
+<tr class="memdesc:a0fb0c6ee311d27df4ab7c5b0f53ff94b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered conductivity for plot files.  <br /></td></tr>
 <tr class="memitem:a88d144f1eccfa3d8db9a1df845af3fc8" id="r_a88d144f1eccfa3d8db9a1df845af3fc8"><td class="memItemLeft" align="right" valign="top"><a id="a88d144f1eccfa3d8db9a1df845af3fc8" name="a88d144f1eccfa3d8db9a1df845af3fc8"></a>
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_electricFieldFluid</b></td></tr>
 <tr class="memdesc:a88d144f1eccfa3d8db9a1df845af3fc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the plasma phase electric field on the fluid realm. <br /></td></tr>
 <tr class="memitem:a24faea7c8117158679ae47f6bbc7a59b" id="r_a24faea7c8117158679ae47f6bbc7a59b"><td class="memItemLeft" align="right" valign="top"><a id="a24faea7c8117158679ae47f6bbc7a59b" name="a24faea7c8117158679ae47f6bbc7a59b"></a>
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_electricFieldParticle</b></td></tr>
 <tr class="memdesc:a24faea7c8117158679ae47f6bbc7a59b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the plasma phase electric field on the particle realm. <br /></td></tr>
-<tr class="memitem:a7fe2ec10d3c12490b6b23d0bfedb1a57" id="r_a7fe2ec10d3c12490b6b23d0bfedb1a57"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7fe2ec10d3c12490b6b23d0bfedb1a57">m_kmcDt</a></td></tr>
-<tr class="memdesc:a7fe2ec10d3c12490b6b23d0bfedb1a57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>.  <br /></td></tr>
-<tr class="memitem:ae2bade8aae81b93de860fa59265fb2c2" id="r_ae2bade8aae81b93de860fa59265fb2c2"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2bade8aae81b93de860fa59265fb2c2">m_energySources</a></td></tr>
-<tr class="memdesc:ae2bade8aae81b93de860fa59265fb2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the energy sources for each species.  <br /></td></tr>
-<tr class="memitem:a41aee03356fd5c8dd341056c220bbb41" id="r_a41aee03356fd5c8dd341056c220bbb41"><td class="memItemLeft" align="right" valign="top"><a id="a41aee03356fd5c8dd341056c220bbb41" name="a41aee03356fd5c8dd341056c220bbb41"></a>
-EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_EdotJ</b></td></tr>
-<tr class="memdesc:a41aee03356fd5c8dd341056c220bbb41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for E·J (Ohmic heating) on the fluid realm. 1 component. <br /></td></tr>
-<tr class="memitem:a7f4d126482c7381563ef5661a4f2a5da" id="r_a7f4d126482c7381563ef5661a4f2a5da"><td class="memItemLeft" align="right" valign="top"><a id="a7f4d126482c7381563ef5661a4f2a5da" name="a7f4d126482c7381563ef5661a4f2a5da"></a>
-EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratch1</b></td></tr>
-<tr class="memdesc:a7f4d126482c7381563ef5661a4f2a5da"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the fluid realm having 1 component. <br /></td></tr>
-<tr class="memitem:a595763b0ab88ad27f5b677497724b1dc" id="r_a595763b0ab88ad27f5b677497724b1dc"><td class="memItemLeft" align="right" valign="top"><a id="a595763b0ab88ad27f5b677497724b1dc" name="a595763b0ab88ad27f5b677497724b1dc"></a>
-EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratchD</b></td></tr>
-<tr class="memdesc:a595763b0ab88ad27f5b677497724b1dc"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the fluid realm with SpaceDim components. <br /></td></tr>
-<tr class="memitem:a418b1eaafec36a45fefecbefd5a3e1e2" id="r_a418b1eaafec36a45fefecbefd5a3e1e2"><td class="memItemLeft" align="right" valign="top"><a id="a418b1eaafec36a45fefecbefd5a3e1e2" name="a418b1eaafec36a45fefecbefd5a3e1e2"></a>
-EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratch1</b></td></tr>
-<tr class="memdesc:a418b1eaafec36a45fefecbefd5a3e1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the particle realm with 1 component. <br /></td></tr>
-<tr class="memitem:a89b35ed749de88122f496a26d62bb718" id="r_a89b35ed749de88122f496a26d62bb718"><td class="memItemLeft" align="right" valign="top"><a id="a89b35ed749de88122f496a26d62bb718" name="a89b35ed749de88122f496a26d62bb718"></a>
-EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratchD</b></td></tr>
-<tr class="memdesc:a89b35ed749de88122f496a26d62bb718"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the particle realm with SpaceDim components. <br /></td></tr>
-<tr class="memitem:a77f330eb8338345b2cc9a714b7ff7e9a" id="r_a77f330eb8338345b2cc9a714b7ff7e9a"><td class="memItemLeft" align="right" valign="top"><a id="a77f330eb8338345b2cc9a714b7ff7e9a" name="a77f330eb8338345b2cc9a714b7ff7e9a"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratchEB</b></td></tr>
-<tr class="memdesc:a77f330eb8338345b2cc9a714b7ff7e9a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for EB-only data on the fluid realm. One component. <br /></td></tr>
-<tr class="memitem:a5e0a1b8ef4446b1591e410d81d692bac" id="r_a5e0a1b8ef4446b1591e410d81d692bac"><td class="memItemLeft" align="right" valign="top"><a id="a5e0a1b8ef4446b1591e410d81d692bac" name="a5e0a1b8ef4446b1591e410d81d692bac"></a>
-EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratchEB</b></td></tr>
-<tr class="memdesc:a5e0a1b8ef4446b1591e410d81d692bac"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for EB-only data on the particle realm. One component. <br /></td></tr>
 <tr class="memitem:a06837c93073c6bbe1f265e9dc528f5b5" id="r_a06837c93073c6bbe1f265e9dc528f5b5"><td class="memItemLeft" align="right" valign="top">EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06837c93073c6bbe1f265e9dc528f5b5">m_particleSurfaceScratch</a></td></tr>
 <tr class="memdesc:a06837c93073c6bbe1f265e9dc528f5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for the surface species on the particle realm, one component per surface species.  <br /></td></tr>
-<tr class="memitem:a877cf527efc0e0283072edb89cce1c62" id="r_a877cf527efc0e0283072edb89cce1c62"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a877cf527efc0e0283072edb89cce1c62">m_solidScratchDivF</a></td></tr>
-<tr class="memdesc:a877cf527efc0e0283072edb89cce1c62"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the solid phase of the fluid realm for the advective divergence of a solid species.  <br /></td></tr>
-<tr class="memitem:a49967169a868170a50ccc1cadbd81fd1" id="r_a49967169a868170a50ccc1cadbd81fd1"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49967169a868170a50ccc1cadbd81fd1">m_solidScratchDivD</a></td></tr>
-<tr class="memdesc:a49967169a868170a50ccc1cadbd81fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the solid phase of the fluid realm for the diffusive divergence of a solid species.  <br /></td></tr>
-<tr class="memitem:ad45667f4b3d4d1ec21bda0460085701f" id="r_ad45667f4b3d4d1ec21bda0460085701f"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRIVData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad45667f4b3d4d1ec21bda0460085701f">m_solidScratchEB</a></td></tr>
-<tr class="memdesc:ad45667f4b3d4d1ec21bda0460085701f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm.  <br /></td></tr>
-<tr class="memitem:a7a0c46545b232af0d6b4169bf3c5f39c" id="r_a7a0c46545b232af0d6b4169bf3c5f39c"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a0c46545b232af0d6b4169bf3c5f39c">m_fluidScratchIto</a></td></tr>
-<tr class="memdesc:a7a0c46545b232af0d6b4169bf3c5f39c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-Ito-species scratch storage on the fluid realm, one component each.  <br /></td></tr>
 <tr class="inherit_header pro_attribs_classTimeStepper"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classTimeStepper')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a3b59b74dcaad022a7e1382865ac82d44 inherit pro_attribs_classTimeStepper" id="r_a3b59b74dcaad022a7e1382865ac82d44"><td class="memItemLeft" align="right" valign="top">
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
@@ -897,8 +827,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="adffac88f5d22f36c9bc3c75da3804b32" name="adffac88f5d22f36c9bc3c75da3804b32"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adffac88f5d22f36c9bc3c75da3804b32">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[1/4]</span></h2>
+<a id="a09189ee39128bf497abcf3db22f27fbc" name="a09189ee39128bf497abcf3db22f27fbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09189ee39128bf497abcf3db22f27fbc">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -911,7 +841,27 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::advanceReactionNetwork </td>
           <td>(</td>
+          <td class="paramtype">EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_physicsDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_E</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densitiesIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsCDR</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -927,60 +877,23 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Chemistry advance over time a_dt. AMR version. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="section note"><dt>Note</dt><dd>This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>E </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a36907acbc61c507c48ae84b3d06249a4" name="a36907acbc61c507c48ae84b3d06249a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36907acbc61c507c48ae84b3d06249a4">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[2/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I, typename C, typename R, typename F&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoKMCStepper::advanceReactionNetwork </td>
-          <td>(</td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Chemistry advance over time a_dt. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_physicsDt</td><td>Non-critical KMC time step per cell. Read by computePhysicsDt. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densitiesIto</td><td>Fluid-realm density per Ito species, from computeDensityGradients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsIto</td><td>Density gradient per Ito species, from computeDensityGradients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsCDR</td><td>Density gradient per CDR species, from computeDensityGradients. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This will call the other version. The kernel will only run over valid grid cells (not covered by a finer grid. </dd></dl>
 
 </div>
 </div>
-<a id="a45ea918deba13aeab6adf0e0fb3e4195" name="a45ea918deba13aeab6adf0e0fb3e4195"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a45ea918deba13aeab6adf0e0fb3e4195">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[3/4]</span></h2>
+<a id="a2cf9e992d099664e03e644534a30b4f3" name="a2cf9e992d099664e03e644534a30b4f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cf9e992d099664e03e644534a30b4f3">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1003,7 +916,27 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_physicsDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electricField</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densitiesIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsCDR</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1043,7 +976,11 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particlesPerCell</td><td>Number of particles per cell for each plasma species </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_newPhotonsPerCell</td><td>Number of physical photons to be generated for each photon species </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_physicsDt</td><td>Non-critical KMC time step per cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densitiesIto</td><td>Fluid-realm density per Ito species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsIto</td><td>Density gradient per Ito species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsCDR</td><td>Density gradient per CDR species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Grid box </td></tr>
@@ -1056,8 +993,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a3c04b697af287625418a22aced96764f" name="a3c04b697af287625418a22aced96764f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c04b697af287625418a22aced96764f">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[4/4]</span></h2>
+<a id="af020422110052a33057192d774612235" name="af020422110052a33057192d774612235"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af020422110052a33057192d774612235">&#9670;&#160;</a></span>advanceReactionNetwork() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1080,7 +1017,27 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_physicsDt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_electricField</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densitiesIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsCDR</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1105,7 +1062,11 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particlesPerCell</td><td>Number of particles per cell for each plasma species </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_newPhotonsPerCell</td><td>Number of physical photons to be generated for each photon species </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_physicsDt</td><td>Non-critical KMC time step per cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densitiesIto</td><td>Fluid-realm density per Ito species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsIto</td><td>Density gradient per Ito species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityGradientsCDR</td><td>Density gradient per CDR species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time increment </td></tr>
   </table>
@@ -1211,6 +1172,41 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 <p>Allocate "internal" storage. </p>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e">Physics::ItoKMC::ItoKMCGodunovStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverMG &gt;</a>.</p>
+
+</div>
+</div>
+<a id="ae136078a6309d418c674a5de0d1c9a3f" name="ae136078a6309d418c674a5de0d1c9a3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae136078a6309d418c674a5de0d1c9a3f">&#9670;&#160;</a></span>averageDiffusionCoefficientsCellToFace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::averageDiffusionCoefficientsCellToFace </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellCenteredDiffusionCoefficients</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4" title="Various averaging methods.">Average</a> cell-centered diffusion coefficients to the faces of the CDR solvers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellCenteredDiffusionCoefficients</td><td>Cell-centered diffusion coefficient per CDR species, null for species that do not diffuse. Coarsened and ghost-filled here before the averaging. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1362,8 +1358,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a4d6ae219f4a0b444699438c27e5d28ef" name="a4d6ae219f4a0b444699438c27e5d28ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d6ae219f4a0b444699438c27e5d28ef">&#9670;&#160;</a></span>computeDensityGradients()</h2>
+<a id="a952a84e6770df34752a8f48d9668c82c" name="a952a84e6770df34752a8f48d9668c82c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a952a84e6770df34752a8f48d9668c82c">&#9670;&#160;</a></span>computeDensityGradients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1376,8 +1372,27 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::computeDensityGradients </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="classScratch.html">Scratch</a>&lt; EBAMRCellData &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_storage</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densitiesIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsIto</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; const EBAMRCellData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_densityGradientsCDR</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool</td>          <td class="paramname"><span class="paramname"><em>a_computeGradients</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1387,8 +1402,17 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm. </p>
-<p>This will compute the gradients using the results in the solvers. The user should make sure he/she deposits the Ito particles before calling this routine. The results are put in m_fluidGradPhiCDR and and m_fluidGradPhiito </p>
+<p>Compute the densities and density gradients that the reaction kernels read, on the fluid realm. </p>
+<p>The fields are fetched from the scratch pool into a_storage. Only the species that the physics needs a gradient for are computed: for them, the fluid-realm Ito density and the density gradient. All other entries point to shared zero fields. The solvers' mesh densities are read as they are; the time step deposits the Ito particles of those species first. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_storage</td><td>Handles of the fields. They must outlive the pointers below. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_densitiesIto</td><td>Fluid-realm density per Ito species. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_densityGradientsIto</td><td>Density gradient per Ito species. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_densityGradientsCDR</td><td>Density gradient per CDR species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_computeGradients</td><td>If false, every entry points to the zero fields. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1465,7 +1489,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_itoDiffusionCoefficients</td><td>Mesh-based diffusion coefficients for Ito solvers. Must be defined on the particle realm. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_cdrDiffusionCoefficients</td><td>Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_cdrDiffusionCoefficients</td><td>Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. Null for species that do not diffuse. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. Must be defined on the fluid realm. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time </td></tr>
   </table>
@@ -1696,42 +1720,6 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a4d9d22e110b93f12e87a622edf20b7b6" name="a4d9d22e110b93f12e87a622edf20b7b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d9d22e110b93f12e87a622edf20b7b6">&#9670;&#160;</a></span>computeEdotJSource()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I, typename C, typename R, typename F&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoKMCStepper::computeEdotJSource </td>
-          <td>(</td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute the energy source term for the various plasma species. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step during which the particles move. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This fills m_EdotJ </dd></dl>
-
-</div>
-</div>
 <a id="a1f99526bf18ad76cf313af033dded8f8" name="a1f99526bf18ad76cf313af033dded8f8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1f99526bf18ad76cf313af033dded8f8">&#9670;&#160;</a></span>computeElectricField()</h2>
 
@@ -1798,7 +1786,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Compute the maximum electric field (norm). </p>
-<p>Runs through m_fluidScratch1 rather than allocating a hierarchy of its own &ndash; this is called once per time step, and <a class="el" href="classAmrMesh.html#a1db67df63dc5a853e9d284c79065c54f" title="Allocate a struct-of-arrays particle container on the given realm.">AmrMesh::allocate</a> defines an exchange Copier per level. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Uses a temporary from the scratch pool on the plasma phase of the fluid realm. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where we compute the field. Must be the plasma phase, which is the phase the rest of the body already assumes. </td></tr>
   </table>
@@ -2018,8 +2006,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a0f2ff3044d33797d8b9f7149cc4b08fd" name="a0f2ff3044d33797d8b9f7149cc4b08fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f2ff3044d33797d8b9f7149cc4b08fd">&#9670;&#160;</a></span>computePhysicsDt()</h2>
+<a id="a44089ae8ab2ed8313f0c4df5bf19f55e" name="a44089ae8ab2ed8313f0c4df5bf19f55e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44089ae8ab2ed8313f0c4df5bf19f55e">&#9670;&#160;</a></span>computePhysicsDt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2032,7 +2020,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::computePhysicsDt </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">EBAMRCellData &amp;</td>          <td class="paramname"><span class="paramname"><em>a_physicsDt</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -2044,7 +2032,12 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Compute a physics-based maximum time step. </p>
-<p>This routine simply returns the non-critical KMC time step. Note that this time step is the one computed AFTER advanceReactionNetwork has been called. I.e., this routine sets m_physicsDt based on m_nonCriticalTimeStep (which is filled in advanceReactionNetwork). </p><dl class="section note"><dt>Note</dt><dd>Calling this routine without first calling advanceReactionNetwork is sure to lead to unintended side effects. </dd></dl>
+<p>Sets m_physicsDt to the smallest non-critical KMC time step that advanceReactionNetwork wrote into a_physicsDt. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_physicsDt</td><td>Non-critical KMC time step per cell, from advanceReactionNetwork. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2996,6 +2989,46 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
+<a id="ad32a373779539cc6dff4b11232addb66" name="ad32a373779539cc6dff4b11232addb66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad32a373779539cc6dff4b11232addb66">&#9670;&#160;</a></span>fetchSecondaryEmissionFluxesEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I, typename C, typename R, typename F&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::fetchSecondaryEmissionFluxesEB </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="classScratch.html">Scratch</a>&lt; EBAMRIVData &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_storage</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector&lt; EBAMRIVData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cdrFluxes</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fetch the CDR fluxes that fillSecondaryEmissionEB and resolveSecondaryEmissionEB pass between them. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_storage</td><td>Handles of the fluxes. They must outlive a_cdrFluxes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_cdrFluxes</td><td>One flux per CDR species, on the particle realm. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a32cbacb05348a1914afa8f5e7700632e" name="a32cbacb05348a1914afa8f5e7700632e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a32cbacb05348a1914afa8f5e7700632e">&#9670;&#160;</a></span>fillNeutralDensity()</h2>
 
@@ -3126,8 +3159,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a5f165cf7747a84abe650c67ca1852ecf" name="a5f165cf7747a84abe650c67ca1852ecf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f165cf7747a84abe650c67ca1852ecf">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[1/2]</span></h2>
+<a id="a7021e1ff06935bbe585267950ee218ea" name="a7021e1ff06935bbe585267950ee218ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7021e1ff06935bbe585267950ee218ea">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3140,8 +3173,12 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::fillSecondaryEmissionEB </td>
           <td>(</td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
+          <td class="paramtype">Vector&lt; EBAMRIVData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cdrFluxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -3152,18 +3189,19 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Resolve particle injection at EBs. </p>
+<dl class="section note"><dt>Note</dt><dd>Calls the other version. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_cdrFluxes</td><td>CDR fluxes for the EB boundary conditions, on the particle realm, one per CDR species. Read by resolveSecondaryEmissionEB. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Calls the other version. </dd></dl>
 
 </div>
 </div>
-<a id="a22787cd04bc164bf206a1d6bad1cbad9" name="a22787cd04bc164bf206a1d6bad1cbad9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22787cd04bc164bf206a1d6bad1cbad9">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[2/2]</span></h2>
+<a id="affd9f06c0fb16940b5679829ed5ce4fa" name="affd9f06c0fb16940b5679829ed5ce4fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affd9f06c0fb16940b5679829ed5ce4fa">&#9670;&#160;</a></span>fillSecondaryEmissionEB() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3181,7 +3219,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; EBAMRIVData &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cdrFluxes</em></span>, </td>
+          <td class="paramtype">Vector&lt; EBAMRIVData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cdrFluxes</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4076,7 +4114,7 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 <p>Whether anything can be emitted from the EB this step, answered globally. </p>
 <p>Secondary emission is driven by particles and photons that struck the boundary, by the advective flux a mobile CDR species delivers to it, and by emission that needs none of these, such as field emission (<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae205cd2b6ec870b929c3efffb00e6c37" title="Return true if secondaryEmissionEB() can emit in a step where nothing reached the EB.">ItoKMCPhysics::emitsWithoutPrimariesEB()</a>). When none of those exist anywhere, the emission routines still run their full fixed cost &ndash; roughly twenty hierarchy-wide exchanges, per step, whether or not a single particle reached the EB.</p>
 <p>The test has to be global, because the work it guards is collective: every rank must reach the same verdict or the ones that skip leave the others waiting in an exchange that never completes. One Allreduce over the local counts answers it, and those counts are free (the containers track their own size). Mobility and emitsWithoutPrimariesEB() are static properties and need no reduction.</p>
-<p>Skipping leaves the secondary containers holding whatever the last emitting step put there, which is harmless: nothing reads them unless the emission runs, and <a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> clears them on entry when it does. </p><dl class="section return"><dt>Returns</dt><dd>True if secondary emission must be resolved this step. </dd></dl>
+<p>Skipping leaves the secondary containers holding whatever the last emitting step put there, which is harmless: nothing reads them unless the emission runs, and <a class="el" href="#a7021e1ff06935bbe585267950ee218ea" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> clears them on entry when it does. </p><dl class="section return"><dt>Returns</dt><dd>True if secondary emission must be resolved this step. </dd></dl>
 
 </div>
 </div>
@@ -5226,8 +5264,8 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 
 </div>
 </div>
-<a id="a9100de38907383b414890febd188fdb6" name="a9100de38907383b414890febd188fdb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9100de38907383b414890febd188fdb6">&#9670;&#160;</a></span>resolveSecondaryEmissionEB() <span class="overload">[1/2]</span></h2>
+<a id="a741c2d1f77e038fa7050dd18d7e07076" name="a741c2d1f77e038fa7050dd18d7e07076"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a741c2d1f77e038fa7050dd18d7e07076">&#9670;&#160;</a></span>resolveSecondaryEmissionEB() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5240,8 +5278,12 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
         <tr>
           <td class="memname">void ItoKMCStepper::resolveSecondaryEmissionEB </td>
           <td>(</td>
-          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span></td><td>)</td>
+          <td class="paramtype">const Vector&lt; EBAMRIVData * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cdrFluxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Real</td>          <td class="paramname"><span class="paramname"><em>a_dt</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -5252,8 +5294,9 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div><div class="memdoc">
 
 <p>Resolve secondary emission at the EB. </p>
-<p>Calls the other version, which updates the surface charge, and then adds the change in the surface species densities computed by <a class="el" href="#a5f165cf7747a84abe650c67ca1852ecf" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> to the surface species solvers. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Calls the other version, which updates the surface charge, and then adds the change in the surface species densities computed by <a class="el" href="#a7021e1ff06935bbe585267950ee218ea" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> to the surface species solvers. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrFluxes</td><td>CDR fluxes for the EB boundary conditions, from fillSecondaryEmissionEB. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
   </table>
   </dd>
@@ -5991,33 +6034,6 @@ template&lt;typename I, typename C, typename R, typename F&gt; </div>
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a185c3fa17f03a7f36e0b4dc9c5bf78cc" name="a185c3fa17f03a7f36e0b4dc9c5bf78cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a185c3fa17f03a7f36e0b4dc9c5bf78cc">&#9670;&#160;</a></span>m_cdrFluxes</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRIVData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_cdrFluxes</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>CDR fluxes for CDR BCs. </p>
-<p>There's a version of this inside the solvers, but we need this one because the EB coupling takes place on the particle realm. </p>
-
-</div>
-</div>
 <a id="a68b20292b3ee59234724484c87e963b3" name="a68b20292b3ee59234724484c87e963b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a68b20292b3ee59234724484c87e963b3">&#9670;&#160;</a></span>m_cdrMobilities</h2>
 
@@ -6095,7 +6111,7 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 </div><div class="memdoc">
 
 <p>Reaction products to be put in the CDR equations, as particles. </p>
-<p>Holds both the photoionization products and the production computed by the KMC advance. The containers are filled and emptied within a single call to <a class="el" href="#a36907acbc61c507c48ae84b3d06249a4" title="Chemistry advance over time a_dt.">advanceReactionNetwork()</a> and carry no state across time steps. </p><dl class="section note"><dt>Note</dt><dd>Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers' deposition machinery live. </dd></dl>
+<p>Holds both the photoionization products and the production computed by the KMC advance. The containers are filled and emptied within a single call to <a class="el" href="#a09189ee39128bf497abcf3db22f27fbc" title="Chemistry advance over time a_dt. AMR version.">advanceReactionNetwork()</a> and carry no state across time steps. </p><dl class="section note"><dt>Note</dt><dd>Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers' deposition machinery live. </dd></dl>
 
 </div>
 </div>
@@ -6202,62 +6218,8 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 </table>
 </div><div class="memdoc">
 
-<p>Cell-centered conductivity. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with 1 component </dd></dl>
-
-</div>
-</div>
-<a id="aa9226b44c0686c6cc40a06535da52b77" name="aa9226b44c0686c6cc40a06535da52b77"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9226b44c0686c6cc40a06535da52b77">&#9670;&#160;</a></span>m_conductivityEB</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRIVData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_conductivityEB</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>EB-centered conductivity. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with 1 component </dd></dl>
-
-</div>
-</div>
-<a id="aa1fa79189045c6b0da2ed4556f1c805b" name="aa1fa79189045c6b0da2ed4556f1c805b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1fa79189045c6b0da2ed4556f1c805b">&#9670;&#160;</a></span>m_conductivityFace</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRFluxData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_conductivityFace</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Face-centered conductivity. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with 1 component </dd></dl>
+<p>Cell-centered conductivity for plot files. </p>
+<p>Allocated in prePlot when the conductivity is plotted and filled by the time stepper's prePlot, which knows the conductivity of its field solve. Cleared in postPlot. Defined on the fluid realm with 1 component. </p>
 
 </div>
 </div>
@@ -6283,170 +6245,8 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 </table>
 </div><div class="memdoc">
 
-<p>Storage for current density. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined over the fluid realm with SpaceDim components. </dd></dl>
-
-</div>
-</div>
-<a id="ae2bade8aae81b93de860fa59265fb2c2" name="ae2bade8aae81b93de860fa59265fb2c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2bade8aae81b93de860fa59265fb2c2">&#9670;&#160;</a></span>m_energySources</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRCellData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_energySources</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Storage for holding the energy sources for each species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the particle realm but about to get deprecated when we switch to the new reaction algorithm. </dd></dl>
-
-</div>
-</div>
-<a id="aa0f73db702049f88103527909d91f732" name="aa0f73db702049f88103527909d91f732"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0f73db702049f88103527909d91f732">&#9670;&#160;</a></span>m_fluidCdrPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidCdrPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of physical particles per cell for all CDR species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with components = number of CDr species </dd></dl>
-
-</div>
-</div>
-<a id="a89e412af2dd2e0fb3b0edb7805843d50" name="a89e412af2dd2e0fb3b0edb7805843d50"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89e412af2dd2e0fb3b0edb7805843d50">&#9670;&#160;</a></span>m_fluidGradPhiCDR</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRCellData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidGradPhiCDR</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the gradient of all CDR species densities. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm </dd></dl>
-
-</div>
-</div>
-<a id="aed0d2064d75366ea75b3a4475755d4c8" name="aed0d2064d75366ea75b3a4475755d4c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed0d2064d75366ea75b3a4475755d4c8">&#9670;&#160;</a></span>m_fluidGradPhiIto</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRCellData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidGradPhiIto</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the gradient of all Ito species densities. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm </dd></dl>
-
-</div>
-</div>
-<a id="a7faab93e4f99e9444d0fc3b156573d98" name="a7faab93e4f99e9444d0fc3b156573d98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7faab93e4f99e9444d0fc3b156573d98">&#9670;&#160;</a></span>m_fluidOldCdrPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidOldCdrPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the previous number of physical particles per cell for all CDR species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with components = number of CDR species </dd></dl>
-
-</div>
-</div>
-<a id="a7376666830d566fcb7e38f17df2ef406" name="a7376666830d566fcb7e38f17df2ef406"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7376666830d566fcb7e38f17df2ef406">&#9670;&#160;</a></span>m_fluidPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of particles per cell for all species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with components = number of plasma species </dd></dl>
+<p>Current density for plot files. </p>
+<p>Allocated and filled in prePlot when the current density is plotted, and cleared in postPlot. Defined over the fluid realm with SpaceDim components. </p>
 
 </div>
 </div>
@@ -6474,87 +6274,6 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 <p><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> used for the fluid part (i.e., electrostatic) part of the simulation. </p>
 <dl class="section note"><dt>Note</dt><dd>This is hardcoded to <a class="el" href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e" title="Identifier for perimal realm.">Realm::Primal</a> </dd></dl>
-
-</div>
-</div>
-<a id="a7a0c46545b232af0d6b4169bf3c5f39c" name="a7a0c46545b232af0d6b4169bf3c5f39c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7a0c46545b232af0d6b4169bf3c5f39c">&#9670;&#160;</a></span>m_fluidScratchIto</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRCellData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidScratchIto</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Per-Ito-species scratch storage on the fluid realm, one component each. </p>
-<p><a class="el" href="#aec90ccbc72cd17b71b9297356b516443" title="Compute mesh-based mobilities for LFA coupling.">computeMobilities()</a> and <a class="el" href="#aa224f120fcfa0b3867fed1d93abe139e" title="Compute mesh-based diffusion coefficients for LFA coupling.">computeDiffusionCoefficients()</a> evaluate the physics on the fluid realm and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar hierarchy per Ito species to do that, and neither needs it to survive the call, but allocating them per call defines an exchange Copier per level per species on every time step. They do not overlap in time, so one set serves both. </p>
-
-</div>
-</div>
-<a id="ac111178070073e116fdb8f68138412b0" name="ac111178070073e116fdb8f68138412b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac111178070073e116fdb8f68138412b0">&#9670;&#160;</a></span>m_fluidYPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidYPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of generated photons per cell. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm with components = number of photon species </dd></dl>
-
-</div>
-</div>
-<a id="a7fe2ec10d3c12490b6b23d0bfedb1a57" name="a7fe2ec10d3c12490b6b23d0bfedb1a57"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7fe2ec10d3c12490b6b23d0bfedb1a57">&#9670;&#160;</a></span>m_kmcDt</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_kmcDt</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>. </p>
-<p>This is computed using the non-critical reactions assuming eps=1 </p><dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm. </dd></dl>
 
 </div>
 </div>
@@ -6612,114 +6331,6 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 </div>
 </div>
-<a id="a070e7d254a6a131cd4a8d509e49bc5a7" name="a070e7d254a6a131cd4a8d509e49bc5a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a070e7d254a6a131cd4a8d509e49bc5a7">&#9670;&#160;</a></span>m_particleCdrProduction</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleCdrProduction</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Per-cell CDR production from the reaction network, on the particle realm. </p>
-<p>One component per CDR species, holding the number of physical particles produced in the cell &ndash; the positive part of the change computed by the KMC advance. The reconciliation kernels turn this into the particles in m_cdrProducts. </p>
-
-</div>
-</div>
-<a id="acb3a491600dd656bedae9bd2b1bdec56" name="acb3a491600dd656bedae9bd2b1bdec56"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb3a491600dd656bedae9bd2b1bdec56">&#9670;&#160;</a></span>m_particleEPS</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleEPS</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the mean particle energy. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the particle realm with components = number of plasma species </dd></dl>
-
-</div>
-</div>
-<a id="a4eebf477f5f4e9a71147b308669aa860" name="a4eebf477f5f4e9a71147b308669aa860"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4eebf477f5f4e9a71147b308669aa860">&#9670;&#160;</a></span>m_particleItoPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleItoPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of physical particles per cell for all Ito species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the particle realm with components = number of Ito species </dd></dl>
-
-</div>
-</div>
-<a id="a0fb2b77a3a839765210cd5fb10478c36" name="a0fb2b77a3a839765210cd5fb10478c36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0fb2b77a3a839765210cd5fb10478c36">&#9670;&#160;</a></span>m_particleOldItoPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleOldItoPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the previous number of particles per cell for all species. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the particle realm with components = number of plasma species </dd></dl>
-
-</div>
-</div>
 <a id="a06837c93073c6bbe1f265e9dc528f5b5" name="a06837c93073c6bbe1f265e9dc528f5b5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a06837c93073c6bbe1f265e9dc528f5b5">&#9670;&#160;</a></span>m_particleSurfaceScratch</h2>
 
@@ -6744,33 +6355,6 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 <p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage for the surface species on the particle realm, one component per surface species. </p>
 <p>Carries the areal densities into the EB emission kernel, and their change out of it. Only allocated when the physics model has surface species. </p>
-
-</div>
-</div>
-<a id="a5f5502a71101b96855ddb01e9c59b95a" name="a5f5502a71101b96855ddb01e9c59b95a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f5502a71101b96855ddb01e9c59b95a">&#9670;&#160;</a></span>m_particleYPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleYPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of generated photons per cell. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined on the particle realm with components = number of photon species </dd></dl>
 
 </div>
 </div>
@@ -6933,87 +6517,6 @@ template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, t
 
 <p>List of secondary photons injected through the EB. </p>
 <p>This is used when injecting secondary photons through the EB. </p><dl class="section note"><dt>Note</dt><dd>Stored on the particle realm </dd></dl>
-
-</div>
-</div>
-<a id="a49967169a868170a50ccc1cadbd81fd1" name="a49967169a868170a50ccc1cadbd81fd1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49967169a868170a50ccc1cadbd81fd1">&#9670;&#160;</a></span>m_solidScratchDivD</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchDivD</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the solid phase of the fluid realm for the diffusive divergence of a solid species. </p>
-<p>One component. Only allocated when there are solid species. </p>
-
-</div>
-</div>
-<a id="a877cf527efc0e0283072edb89cce1c62" name="a877cf527efc0e0283072edb89cce1c62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a877cf527efc0e0283072edb89cce1c62">&#9670;&#160;</a></span>m_solidScratchDivF</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchDivF</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> storage on the solid phase of the fluid realm for the advective divergence of a solid species. </p>
-<p>One component. Only allocated when there are solid species. </p>
-
-</div>
-</div>
-<a id="ad45667f4b3d4d1ec21bda0460085701f" name="ad45667f4b3d4d1ec21bda0460085701f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad45667f4b3d4d1ec21bda0460085701f">&#9670;&#160;</a></span>m_solidScratchEB</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt;EBAMRIVData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_solidScratchEB</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm. </p>
-<p>One component each. Holds the injected mass that <a class="el" href="#aa31c519664e5a6226c05af440a4f509b" title="Exchange charge between the surface and the solid species through the gas-dielectric interface.">exchangeSurfaceSolid()</a> redistributes. Empty when there are no solid species. </p>
 
 </div>
 </div>
