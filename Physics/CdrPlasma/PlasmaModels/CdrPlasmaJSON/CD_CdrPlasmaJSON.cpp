@@ -70,6 +70,88 @@ CdrPlasmaJSON::CdrPlasmaJSON()
 
   m_numCdrSpecies = static_cast<int>(m_cdrSpecies.size());
   m_numRtSpecies  = static_cast<int>(m_rtSpecies.size());
+
+  this->initializeEvaluationFlags();
+}
+
+void
+CdrPlasmaJSON::initializeEvaluationFlags() noexcept
+{
+  CH_TIME("CdrPlasmaJSON::initializeEvaluationFlags");
+
+  m_transportNeedsEnergies  = false;
+  m_reactionsNeedEnergies   = false;
+  m_reactionsNeedMobilities = false;
+  m_reactionsNeedDiffusion  = false;
+  m_reactionsNeedAlpha      = false;
+  m_reactionsNeedEta        = false;
+
+  for (const auto& m : m_mobilityLookup) {
+    m_transportNeedsEnergies = m_transportNeedsEnergies || (m.second == LookupMethod::TableEnergy);
+  }
+
+  for (const auto& m : m_diffusionLookup) {
+    m_transportNeedsEnergies = m_transportNeedsEnergies || (m.second == LookupMethod::TableEnergy);
+  }
+
+  for (const auto& m : m_plasmaReactionLookup) {
+    const int reactionIndex = m.first;
+
+    switch (m.second) {
+    case LookupMethod::TableEnergy: {
+      m_reactionsNeedEnergies = true;
+
+      break;
+    }
+    case LookupMethod::FunctionT: {
+      m_reactionsNeedEnergies = m_reactionsNeedEnergies || (m_plasmaReactionFunctionsT.at(reactionIndex).first >= 0);
+
+      break;
+    }
+    case LookupMethod::FunctionTT: {
+      const auto& tup = m_plasmaReactionFunctionsTT.at(reactionIndex);
+
+      m_reactionsNeedEnergies = m_reactionsNeedEnergies || (std::get<0>(tup) >= 0) || (std::get<1>(tup) >= 0);
+
+      break;
+    }
+    case LookupMethod::AlphaV: {
+      m_reactionsNeedAlpha      = true;
+      m_reactionsNeedMobilities = true;
+
+      break;
+    }
+    case LookupMethod::EtaV: {
+      m_reactionsNeedEta        = true;
+      m_reactionsNeedMobilities = true;
+
+      break;
+    }
+    default: {
+      break;
+    }
+    }
+  }
+
+  for (const auto& m : m_plasmaReactionSolovievCorrection) {
+    if (m.second.first) {
+      m_reactionsNeedMobilities = true;
+      m_reactionsNeedDiffusion  = true;
+    }
+  }
+
+  // Energy solvers use the energies in the reactive energy losses, and the mobilities and diffusion coefficients in the
+  // energy source term. Compute everything for them.
+  if (!m_cdrTransportEnergyMap.empty()) {
+    m_reactionsNeedEnergies   = true;
+    m_reactionsNeedMobilities = true;
+    m_reactionsNeedDiffusion  = true;
+  }
+
+  // Mobilities and diffusion coefficients that are looked up from the energy need the energies.
+  if ((m_reactionsNeedMobilities || m_reactionsNeedDiffusion) && m_transportNeedsEnergies) {
+    m_reactionsNeedEnergies = true;
+  }
 }
 
 CdrPlasmaJSON::CdrPlasmaJSON(const int /*a_dummy*/)
@@ -4569,16 +4651,26 @@ CdrPlasmaJSON::getPlotVariables(Vector<Real>&           a_plotVariables,
   const std::vector<Real>&     cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
   const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&)a_cdrGradients).stdVector();
 
-  // These may or may not be needed.
-  const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities(a_pos, a_E, cdrDensities);
-  const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_pos, a_E, cdrDensities);
-  const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrDensities);
-  const std::vector<Real> cdrEnergies              = this->computePlasmaSpeciesEnergies(a_pos, a_E, cdrDensities);
-
   // Electric field and reduce electric field.
   const Real E   = a_E.vectorLength();
   const Real N   = m_gasDensity(a_pos);
   const Real Etd = (E / (N * Units::Td));
+
+  // These may or may not be needed.
+  thread_local std::vector<Real> cdrMobilities;
+  thread_local std::vector<Real> cdrDiffusionCoefficients;
+  thread_local std::vector<Real> cdrTemperatures;
+  thread_local std::vector<Real> cdrEnergies;
+
+  cdrMobilities.resize(m_numCdrSpecies);
+  cdrDiffusionCoefficients.resize(m_numCdrSpecies);
+  cdrTemperatures.resize(m_numCdrSpecies);
+  cdrEnergies.resize(m_numCdrSpecies);
+
+  this->computePlasmaSpeciesEnergies(cdrEnergies, a_pos, Etd, cdrDensities);
+  this->computePlasmaSpeciesTemperatures(cdrTemperatures, cdrEnergies);
+  this->computePlasmaSpeciesMobilities(cdrMobilities, a_pos, E, N, Etd, cdrEnergies);
+  this->computePlasmaSpeciesDiffusion(cdrDiffusionCoefficients, a_pos, E, N, Etd, cdrEnergies);
 
   // Townsend ionization and attachment coefficients. May or may not be used.
   const Real alpha = this->computeAlpha(E, a_pos);
@@ -4695,23 +4787,28 @@ CdrPlasmaJSON::doesFileExist(const std::string& a_filename)
   return exists;
 }
 
-std::vector<Real>
-CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_position,
-                                              const RealVect&          a_E,
-                                              const std::vector<Real>& a_cdrDensities) const
+void
+CdrPlasmaJSON::computePlasmaSpeciesMobilities(std::vector<Real>&       a_mobilities,
+                                              const RealVect&          a_position,
+                                              const Real               a_E,
+                                              const Real               a_N,
+                                              const Real               a_Etd,
+                                              const std::vector<Real>& a_energies) const noexcept
 {
-  // Get E/N .
-  const Real E   = a_E.vectorLength();
-  const Real N   = m_gasDensity(a_position);
-  const Real Etd = (E / (N * Units::Td));
+  const Real E   = a_E;
+  const Real N   = a_N;
+  const Real Etd = a_Etd;
 
-  const std::vector<Real> energies = this->computePlasmaSpeciesEnergies(a_position, a_E, a_cdrDensities);
+  const std::vector<Real>& energies = a_energies;
 
-  // vector of mobilities
-  std::vector<Real> mu(m_numCdrSpecies, 0.0);
+  std::vector<Real>& mu = a_mobilities;
+
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    mu[i] = 0.0;
+  }
 
   // Go through each species and compute mobilities.
-  for (int i = 0; i < a_cdrDensities.size(); i++) {
+  for (int i = 0; i < m_numCdrSpecies; i++) {
     const bool isMobile       = m_cdrSpecies[i]->isMobile();
     const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
 
@@ -4766,25 +4863,29 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
 
     mu[energyIdx] = 5. / 3. * mu[transportIdx];
   }
-
-  return mu;
 }
 
-std::vector<Real>
-CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect&          a_pos,
-                                             const RealVect&          a_E,
-                                             const std::vector<Real>& a_cdrDensities) const
+void
+CdrPlasmaJSON::computePlasmaSpeciesDiffusion(std::vector<Real>&       a_diffusionCoefficients,
+                                             const RealVect&          a_position,
+                                             const Real               a_E,
+                                             const Real               a_N,
+                                             const Real               a_Etd,
+                                             const std::vector<Real>& a_energies) const noexcept
 {
-  std::vector<Real> diffusionCoefficients(m_numCdrSpecies, 0.0);
+  std::vector<Real>& diffusionCoefficients = a_diffusionCoefficients;
 
-  const Real E   = a_E.vectorLength();
-  const Real N   = m_gasDensity(a_pos);
-  const Real Etd = (E / (N * Units::Td));
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    diffusionCoefficients[i] = 0.0;
+  }
 
-  // Compute the species energies. We might need them.
-  const std::vector<Real> energies = this->computePlasmaSpeciesEnergies(a_pos, a_E, a_cdrDensities);
+  const Real E   = a_E;
+  const Real N   = a_N;
+  const Real Etd = a_Etd;
 
-  for (int i = 0; i < a_cdrDensities.size(); i++) {
+  const std::vector<Real>& energies = a_energies;
+
+  for (int i = 0; i < m_numCdrSpecies; i++) {
     const bool isDiffusive    = m_cdrSpecies[i]->isDiffusive();
     const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
 
@@ -4840,40 +4941,33 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect&          a_pos,
 
     diffusionCoefficients[energyIdx] = 5. / 3. * diffusionCoefficients[transportIdx];
   }
-
-  return diffusionCoefficients;
 }
 
-std::vector<Real>
-CdrPlasmaJSON::computePlasmaSpeciesTemperatures(const RealVect&          a_position,
-                                                const RealVect&          a_E,
-                                                const std::vector<Real>& a_cdrDensities) const
+void
+CdrPlasmaJSON::computePlasmaSpeciesTemperatures(std::vector<Real>&       a_temperatures,
+                                                const std::vector<Real>& a_energies) const noexcept
 {
-  // First, compute energies in electron volts.
-  std::vector<Real> temperatures = this->computePlasmaSpeciesEnergies(a_position, a_E, a_cdrDensities);
-
-  // Convert to Kelvin.
+  // Convert the energies (electron volts) to Kelvin.
   constexpr Real factor = 2.0 * Units::Qe / (3.0 * Units::kb);
 
-  for (auto& T : temperatures) {
-    T *= factor;
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    a_temperatures[i] = a_energies[i] * factor;
   }
-
-  return temperatures;
 }
 
-std::vector<Real>
-CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
-                                            const RealVect&          a_E,
-                                            const std::vector<Real>& a_cdrDensities) const
+void
+CdrPlasmaJSON::computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
+                                            const RealVect&          a_position,
+                                            const Real               a_Etd,
+                                            const std::vector<Real>& a_cdrDensities) const noexcept
 {
-  // Electric field and neutral density.
-  const Real N   = m_gasDensity(a_position);
-  const Real E   = a_E.vectorLength();
-  const Real Etd = (E / (N * Units::Td));
+  const Real Etd = a_Etd;
 
-  // Return vector of temperatures.
-  std::vector<Real> energies(m_numCdrSpecies, 0.0);
+  std::vector<Real>& energies = a_energies;
+
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    energies[i] = 0.0;
+  }
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
     const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
@@ -4940,8 +5034,6 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
 
     energies[energyIdx] = energies[transportIdx];
   }
-
-  return energies;
 }
 
 Real
@@ -5210,8 +5302,11 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
     // Solve the reactive problem. The first hook will INTEGRATE the reactive problem (and then linearize the source
     // terms). The other hook will just fill the source terms.
     if (m_reactionIntegrator != ReactionIntegrator::None) {
-      std::vector<Real> finalCdrDensities = cdrDensities;
-      std::vector<Real> photonProduction(m_numRtSpecies, 0.0);
+      thread_local std::vector<Real> finalCdrDensities;
+      thread_local std::vector<Real> photonProduction;
+
+      finalCdrDensities.assign(cdrDensities.begin(), cdrDensities.end());
+      photonProduction.assign(m_numRtSpecies, 0.0);
 
       this->integrateReactions(finalCdrDensities,
                                photonProduction,
@@ -5267,8 +5362,23 @@ CdrPlasmaJSON::computeCdrDriftVelocities(Vector<RealVect>& a_velocities,
   // I really hate Chombo sometimes.
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
-  // Compute the mobilities for each species.
-  const std::vector<Real> mu = this->computePlasmaSpeciesMobilities(a_position, a_E, cdrDensities);
+  // Electric field, neutral density and reduced field.
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_position);
+  const Real Etd = (E / (N * Units::Td));
+
+  // Compute the mobilities for each species. The energies are only computed if a mobility is looked up from them.
+  thread_local std::vector<Real> energies;
+  thread_local std::vector<Real> mu;
+
+  energies.resize(m_numCdrSpecies);
+  mu.resize(m_numCdrSpecies);
+
+  if (m_transportNeedsEnergies) {
+    this->computePlasmaSpeciesEnergies(energies, a_position, Etd, cdrDensities);
+  }
+
+  this->computePlasmaSpeciesMobilities(mu, a_position, E, N, Etd, energies);
 
   // Species that are not given a velocity below drift with zero velocity.
   Vector<RealVect>& velocities = a_velocities;
@@ -5313,8 +5423,23 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(Vector<Real>& a_diffusionCoeffici
 
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
-  // Compute diffusion coefficients.
-  const std::vector<Real> diffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_position, a_E, cdrDensities);
+  // Electric field, neutral density and reduced field.
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_position);
+  const Real Etd = (E / (N * Units::Td));
+
+  // Compute diffusion coefficients. The energies are only computed if a coefficient is looked up from them.
+  thread_local std::vector<Real> energies;
+  thread_local std::vector<Real> diffusionCoefficients;
+
+  energies.resize(m_numCdrSpecies);
+  diffusionCoefficients.resize(m_numCdrSpecies);
+
+  if (m_transportNeedsEnergies) {
+    this->computePlasmaSpeciesEnergies(energies, a_position, Etd, cdrDensities);
+  }
+
+  this->computePlasmaSpeciesDiffusion(diffusionCoefficients, a_position, E, N, Etd, energies);
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
     a_diffusionCoefficients[i] = diffusionCoefficients[i];
@@ -5352,11 +5477,20 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(Vector<Real>& a_fluxes,
   // Compute the magnitude of the electric field both in SI units and Townsend units
   const Real E = a_E.vectorLength();
 
-  // Compute temperatures
-  const std::vector<Real> cdrTemperatures = this->computePlasmaSpeciesTemperatures(
-    a_pos,
-    a_E,
-    ((Vector<Real>&)a_cdrDensities).stdVector());
+  // Compute temperatures. They are only used for the thermal flux of species with an energy solver.
+  thread_local std::vector<Real> cdrEnergies;
+  thread_local std::vector<Real> cdrTemperatures;
+
+  cdrEnergies.resize(m_numCdrSpecies);
+  cdrTemperatures.resize(m_numCdrSpecies);
+
+  if (!m_cdrTransportEnergyMap.empty()) {
+    const Real N   = m_gasDensity(a_pos);
+    const Real Etd = (E / (N * Units::Td));
+
+    this->computePlasmaSpeciesEnergies(cdrEnergies, a_pos, Etd, ((Vector<Real>&)a_cdrDensities).stdVector());
+    this->computePlasmaSpeciesTemperatures(cdrTemperatures, cdrEnergies);
+  }
 
   // Compute the outflow fluxes.
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -5509,11 +5643,20 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(Vector<Real>& a_fluxes,
     }
   }
 
-  // Compute temperatures
-  const std::vector<Real> cdrTemperatures = this->computePlasmaSpeciesTemperatures(
-    a_pos,
-    a_E,
-    ((Vector<Real>&)a_cdrDensities).stdVector());
+  // Compute temperatures. They are only used for the thermal flux of species with an energy solver.
+  thread_local std::vector<Real> cdrEnergies;
+  thread_local std::vector<Real> cdrTemperatures;
+
+  cdrEnergies.resize(m_numCdrSpecies);
+  cdrTemperatures.resize(m_numCdrSpecies);
+
+  if (!m_cdrTransportEnergyMap.empty()) {
+    const Real N   = m_gasDensity(a_pos);
+    const Real Etd = (E / (N * Units::Td));
+
+    this->computePlasmaSpeciesEnergies(cdrEnergies, a_pos, Etd, ((Vector<Real>&)a_cdrDensities).stdVector());
+    this->computePlasmaSpeciesTemperatures(cdrTemperatures, cdrEnergies);
+  }
 
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma
   // species and photon species.
@@ -5880,20 +6023,39 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
                                const Real a_time,
                                const Real /*a_kappa*/) const
 {
-  // These may or may not be needed.
-  const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities(a_pos, a_E, a_cdrDensities);
-  const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_pos, a_E, a_cdrDensities);
-  const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, a_cdrDensities);
-  const std::vector<Real> cdrEnergies              = this->computePlasmaSpeciesEnergies(a_pos, a_E, a_cdrDensities);
-
   // Electric field and reduce electric field.
   const Real E   = a_E.vectorLength();
   const Real N   = m_gasDensity(a_pos);
   const Real Etd = (E / (N * Units::Td));
 
-  // Townsend ionization and attachment coefficients. May or may not be used.
-  const Real alpha = this->computeAlpha(E, a_pos);
-  const Real eta   = this->computeEta(E, a_pos);
+  // Species energies, temperatures, mobilities and diffusion coefficients. Each is computed once, and only if the
+  // reactions use it; the reactions never read the ones that are not computed.
+  thread_local std::vector<Real> cdrMobilities;
+  thread_local std::vector<Real> cdrDiffusionCoefficients;
+  thread_local std::vector<Real> cdrTemperatures;
+  thread_local std::vector<Real> cdrEnergies;
+
+  cdrMobilities.resize(m_numCdrSpecies);
+  cdrDiffusionCoefficients.resize(m_numCdrSpecies);
+  cdrTemperatures.resize(m_numCdrSpecies);
+  cdrEnergies.resize(m_numCdrSpecies);
+
+  if (m_reactionsNeedEnergies) {
+    this->computePlasmaSpeciesEnergies(cdrEnergies, a_pos, Etd, a_cdrDensities);
+    this->computePlasmaSpeciesTemperatures(cdrTemperatures, cdrEnergies);
+  }
+
+  if (m_reactionsNeedMobilities) {
+    this->computePlasmaSpeciesMobilities(cdrMobilities, a_pos, E, N, Etd, cdrEnergies);
+  }
+
+  if (m_reactionsNeedDiffusion) {
+    this->computePlasmaSpeciesDiffusion(cdrDiffusionCoefficients, a_pos, E, N, Etd, cdrEnergies);
+  }
+
+  // Townsend ionization and attachment coefficients, if the reactions use them.
+  const Real alpha = m_reactionsNeedAlpha ? this->computeAlpha(E, a_pos) : 0.0;
+  const Real eta   = m_reactionsNeedEta ? this->computeEta(E, a_pos) : 0.0;
 
   // Set source terms to zero.
   for (auto& S : a_cdrSources) {
@@ -6028,8 +6190,12 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
                                                const Real                   a_time,
                                                const Real                   a_kappa) const
 {
-  std::vector<Real> cdrSources(m_numCdrSpecies, 0.0);
-  std::vector<Real> rteSources(m_numRtSpecies, 0.0);
+  // Per-thread storage. fillSourceTerms writes every entry.
+  thread_local std::vector<Real> cdrSources;
+  thread_local std::vector<Real> rteSources;
+
+  cdrSources.resize(m_numCdrSpecies);
+  rteSources.resize(m_numRtSpecies);
 
   this->fillSourceTerms(cdrSources, rteSources, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
 
@@ -6058,13 +6224,20 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
   const Real c1 = 1.0 - 1.0 / (2.0 * a_tableuAlpha);
   const Real c2 = 1.0 / (2.0 * a_tableuAlpha);
 
-  // Storage for k1- and k2- coefficients, and intermediate states.
-  std::vector<Real> cdrK1(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrK2(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrY1(m_numCdrSpecies, 0.0);
+  // Per-thread storage for k1- and k2- coefficients, and intermediate states. Every entry is written before it is read.
+  thread_local std::vector<Real> cdrK1;
+  thread_local std::vector<Real> cdrK2;
+  thread_local std::vector<Real> cdrY1;
 
-  std::vector<Real> rteK1(m_numRtSpecies, 0.0);
-  std::vector<Real> rteK2(m_numRtSpecies, 0.0);
+  thread_local std::vector<Real> rteK1;
+  thread_local std::vector<Real> rteK2;
+
+  cdrK1.resize(m_numCdrSpecies);
+  cdrK2.resize(m_numCdrSpecies);
+  cdrY1.resize(m_numCdrSpecies);
+
+  rteK1.resize(m_numRtSpecies);
+  rteK2.resize(m_numRtSpecies);
 
   // Compute k1 coefficient and fill intermediate states.
   this->fillSourceTerms(cdrK1, rteK1, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
@@ -6106,17 +6279,29 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrD
   //          k3 = f(t+dt/2, y(t) + 0.5*dt*k2)
   //          k4 = f(t+dt  , y(t) +     dt*k3)
 
-  // Storage for Runge-Kutta k-coefficients and intermediate states.
-  std::vector<Real> cdrK1(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrK2(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrK3(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrK4(m_numCdrSpecies, 0.0);
-  std::vector<Real> cdrY1(m_numCdrSpecies, 0.0);
+  // Per-thread storage for Runge-Kutta k-coefficients and intermediate states. Every entry is written before it is
+  // read.
+  thread_local std::vector<Real> cdrK1;
+  thread_local std::vector<Real> cdrK2;
+  thread_local std::vector<Real> cdrK3;
+  thread_local std::vector<Real> cdrK4;
+  thread_local std::vector<Real> cdrY1;
 
-  std::vector<Real> rteK1(m_numRtSpecies, 0.0);
-  std::vector<Real> rteK2(m_numRtSpecies, 0.0);
-  std::vector<Real> rteK3(m_numRtSpecies, 0.0);
-  std::vector<Real> rteK4(m_numRtSpecies, 0.0);
+  thread_local std::vector<Real> rteK1;
+  thread_local std::vector<Real> rteK2;
+  thread_local std::vector<Real> rteK3;
+  thread_local std::vector<Real> rteK4;
+
+  cdrK1.resize(m_numCdrSpecies);
+  cdrK2.resize(m_numCdrSpecies);
+  cdrK3.resize(m_numCdrSpecies);
+  cdrK4.resize(m_numCdrSpecies);
+  cdrY1.resize(m_numCdrSpecies);
+
+  rteK1.resize(m_numRtSpecies);
+  rteK2.resize(m_numRtSpecies);
+  rteK3.resize(m_numRtSpecies);
+  rteK4.resize(m_numRtSpecies);
 
   // Compute k1-coefficients and intermediate states
   this->fillSourceTerms(cdrK1, rteK1, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);

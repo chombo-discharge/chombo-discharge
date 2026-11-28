@@ -410,6 +410,36 @@ protected:
   bool m_skipReactions;
 
   /**
+   * @brief True if a mobility or diffusion coefficient is looked up from the species energy.
+   */
+  bool m_transportNeedsEnergies;
+
+  /**
+   * @brief True if the plasma reactions use the species energies or temperatures.
+   */
+  bool m_reactionsNeedEnergies;
+
+  /**
+   * @brief True if the plasma reactions use the species mobilities.
+   */
+  bool m_reactionsNeedMobilities;
+
+  /**
+   * @brief True if the plasma reactions use the species diffusion coefficients.
+   */
+  bool m_reactionsNeedDiffusion;
+
+  /**
+   * @brief True if the plasma reactions use the Townsend ionization coefficient.
+   */
+  bool m_reactionsNeedAlpha;
+
+  /**
+   * @brief True if the plasma reactions use the Townsend attachment coefficient.
+   */
+  bool m_reactionsNeedEta;
+
+  /**
    * @brief JSON definition. This is populated when calling parseJSON.
    */
   json m_json;
@@ -1274,55 +1304,72 @@ protected:
                           const std::string&              a_reaction) const;
 
   /**
-   * @brief Compute the various plasma species temperatures.
-   * @param[in] a_position     Physical coordinates
-   * @param[in] a_E            Electric field (SI units)
-   * @param[in] a_cdrDensities List of plasma species densities.
-   * @return Computed plasma species temperatures
+   * @brief Compute the various plasma species temperatures from their energies.
+   * @param[out] a_temperatures Plasma species temperatures (K). Sized to the number of CDR species by the caller.
+   * @param[in]  a_energies     Plasma species energies (eV), as computed by computePlasmaSpeciesEnergies.
    */
-  virtual std::vector<Real>
-  computePlasmaSpeciesTemperatures(const RealVect&          a_position,
-                                   const RealVect&          a_E,
-                                   const std::vector<Real>& a_cdrDensities) const;
+  virtual void
+  computePlasmaSpeciesTemperatures(std::vector<Real>&       a_temperatures,
+                                   const std::vector<Real>& a_energies) const noexcept;
 
   /**
    * @brief Compute the various plasma species energies. Returns a list of energies in electron-volts. We assume that
    * temperature-energy relations are e = 3/2 * kB * T.
    * @details If a transported species is associated with an energy solver the energy is computed from e = (n_eps)/ne.
    * Otherwise, we compute the energy and returns 3/2 * kB * T.
-   * @param[in] a_position     Physical coordinates
-   * @param[in] a_E            Electric field (SI units)
-   * @param[in] a_cdrDensities List of plasma species densities.
-   * @return Computed plasma species energies
+   * @param[out] a_energies     Plasma species energies (eV). Sized to the number of CDR species by the caller.
+   * @param[in]  a_position     Physical coordinates
+   * @param[in]  a_Etd          Reduced electric field (Td)
+   * @param[in]  a_cdrDensities List of plasma species densities.
    */
-  virtual std::vector<Real>
-  computePlasmaSpeciesEnergies(const RealVect&          a_position,
-                               const RealVect&          a_E,
-                               const std::vector<Real>& a_cdrDensities) const;
+  virtual void
+  computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
+                               const RealVect&          a_position,
+                               const Real               a_Etd,
+                               const std::vector<Real>& a_cdrDensities) const noexcept;
 
   /**
    * @brief Compute the various plasma species mobilities.
-   * @param[in] a_position     Physical coordinates
-   * @param[in] a_E            Electric field (SI units)
-   * @param[in] a_cdrDensities List of plasma species densities.
-   * @return Computed plasma species mobilities
+   * @param[out] a_mobilities Plasma species mobilities. Sized to the number of CDR species by the caller.
+   * @param[in]  a_position   Physical coordinates
+   * @param[in]  a_E          Electric field magnitude (SI units)
+   * @param[in]  a_N          Neutral density
+   * @param[in]  a_Etd        Reduced electric field (Td)
+   * @param[in]  a_energies   Plasma species energies. Only read for species whose mobility depends on the energy.
    */
-  virtual std::vector<Real>
-  computePlasmaSpeciesMobilities(const RealVect&          a_position,
-                                 const RealVect&          a_E,
-                                 const std::vector<Real>& a_cdrDensities) const;
+  virtual void
+  computePlasmaSpeciesMobilities(std::vector<Real>&       a_mobilities,
+                                 const RealVect&          a_position,
+                                 const Real               a_E,
+                                 const Real               a_N,
+                                 const Real               a_Etd,
+                                 const std::vector<Real>& a_energies) const noexcept;
 
   /**
    * @brief Compute the various plasma species diffusion coefficients.
-   * @param[in] a_position     Physical coordinates
-   * @param[in] a_E            Electric field (SI units)
-   * @param[in] a_cdrDensities List of plasma species densities
-   * @return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies.
+   * @param[out] a_diffusionCoefficients Diffusion coefficients, in the same order as m_cdrSpecies. Sized to the number
+   * of CDR species by the caller.
+   * @param[in]  a_position              Physical coordinates
+   * @param[in]  a_E                     Electric field magnitude (SI units)
+   * @param[in]  a_N                     Neutral density
+   * @param[in]  a_Etd                   Reduced electric field (Td)
+   * @param[in]  a_energies              Plasma species energies. Only read for species whose diffusion coefficient
+   * depends on the energy.
    */
-  virtual std::vector<Real>
-  computePlasmaSpeciesDiffusion(const RealVect&          a_position,
-                                const RealVect&          a_E,
-                                const std::vector<Real>& a_cdrDensities) const;
+  virtual void
+  computePlasmaSpeciesDiffusion(std::vector<Real>&       a_diffusionCoefficients,
+                                const RealVect&          a_position,
+                                const Real               a_E,
+                                const Real               a_N,
+                                const Real               a_Etd,
+                                const std::vector<Real>& a_energies) const noexcept;
+
+  /**
+   * @brief Determine which per-cell quantities the transport and reaction lookups use.
+   * @details Sets m_transportNeedsEnergies and the m_reactionsNeed* flags. Must be called after all lookups are parsed.
+   */
+  virtual void
+  initializeEvaluationFlags() noexcept;
 
   /**
    * @brief Compute the reaction rate for a plasma reaction.
