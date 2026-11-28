@@ -3649,9 +3649,10 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
   }
 }
 
-std::pair<std::function<
-            Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<Real>& phi)>,
-          std::function<Real(const Real E, const RealVect& x)>>
+std::pair<
+  std::function<
+    Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<FPR>& numParticles)>,
+  std::function<Real(const Real E, const RealVect& x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
                                     const std::list<size_t>& a_plasmaReactants) const
@@ -3678,7 +3679,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     return 0.0;
   };
 
-  FunctionDXP gridFactor = [](const Real /*dx*/, const Vector<Real>& /*phi*/) -> Real {
+  FunctionN gridFactor = [](const Vector<FPR>& /*numParticles*/) -> Real {
     return 1.0;
   };
 
@@ -4036,25 +4037,25 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
 
     if (cutoff == "above") {
-      gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
-        Real sumPhi = 0.0;
+      gridFactor = [speciesIndices, thresh](const Vector<FPR>& numParticles) -> Real {
+        FPR sumParticles = 0.0;
         for (const auto& idx : speciesIndices) {
-          sumPhi += phi[idx];
+          sumParticles += numParticles[idx];
         }
 
-        const long long PPC = llround(sumPhi * std::pow(dx, 3));
+        const long long PPC = llround(sumParticles);
 
         return (PPC > thresh) ? 1.0 : 0.0;
       };
     }
     else if (cutoff == "below") {
-      gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
-        Real sumPhi = 0.0;
+      gridFactor = [speciesIndices, thresh](const Vector<FPR>& numParticles) -> Real {
+        FPR sumParticles = 0.0;
         for (const auto& idx : speciesIndices) {
-          sumPhi += phi[idx];
+          sumParticles += numParticles[idx];
         }
 
-        const long long PPC = llround(sumPhi * std::pow(dx, 3));
+        const long long PPC = llround(sumParticles);
 
         return (PPC < thresh) ? 1.0 : 0.0;
       };
@@ -4074,12 +4075,12 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                            maxRateDt,
                            a_backgroundReactants,
                            &S = this->m_backgroundSpecies,
-                           &N = this->m_gasNumberDensity](const Real          E,
-                                                          const Real          V,
-                                                          const Real          dx,
-                                                          const Real          dt,
-                                                          const RealVect&     x,
-                                                          const Vector<Real>& phi) -> Real {
+                           &N = this->m_gasNumberDensity](const Real         E,
+                                                          const Real         V,
+                                                          const Real         dx,
+                                                          const Real         dt,
+                                                          const RealVect&    x,
+                                                          const Vector<FPR>& numParticles) -> Real {
     Real k = fluidRate(E, x);
 
     // Multiply by neutral densities
@@ -4096,7 +4097,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     k *= propensityFactor;
 
     // Multiply by the grid factor
-    k *= gridFactor(dx, phi);
+    k *= gridFactor(numParticles);
 
     // Multiply by volume factor (for higher-order reactions)
     if (volumeFactor > 0) {
@@ -4612,6 +4613,7 @@ void
 ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>& a_kmcReactions,
                                 const RealVect                                   a_E,
                                 const RealVect                                   a_pos,
+                                const Vector<FPR>&                               a_numParticles,
                                 const Vector<Real>&                              a_phi,
                                 const Vector<RealVect>&                          a_gradPhi,
                                 const Real                                       a_dt,
@@ -4631,7 +4633,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
   const Real V = std::pow(a_dx, SpaceDim);
 
   for (int i = 0; i < a_kmcReactions.size(); i++) {
-    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_dt, a_pos, a_phi);
+    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_dt, a_pos, a_numParticles);
 
     // Add gradient correction if the user has asked for it.
     const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];

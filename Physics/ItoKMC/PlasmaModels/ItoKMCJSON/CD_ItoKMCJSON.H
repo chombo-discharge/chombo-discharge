@@ -77,17 +77,16 @@ public:
    * @param[in] dx Grid resolution
    * @param[in] dt Time step
    * @param[in] x Physical coordinate
-   * @param[in] phi List of plasma species densities
+   * @param[in] numParticles Number of reactive particles in the cell, per plasma species.
    */
   using FunctionEVXTP = std::function<
-    Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<Real>& phi)>;
+    Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<FPR>& numParticles)>;
 
   /**
-   * @brief Function alias for f = f(dx, phi) where dx is the grid resolution and phi is the plasma species densities.
-   * @param[in] dx  Grid resolution.
-   * @param[in] phi List of plasma species densities.
+   * @brief Function alias for f = f(N) where N is the number of reactive particles in the cell, per plasma species.
+   * @param[in] numParticles Number of reactive particles in the cell, per plasma species.
    */
-  using FunctionDXP = std::function<Real(const Real dx, const Vector<Real>& phi)>;
+  using FunctionN = std::function<Real(const Vector<FPR>& numParticles)>;
 
   /**
    * @brief Function for encapsulating a function f = f(T) where T is the temperature of some species
@@ -1167,6 +1166,7 @@ protected:
    * @param[out] a_kmcReactions Reaction rates to be set.
    * @param[in] a_E       Electric field
    * @param[in] a_pos     Physical position
+   * @param[in] a_numParticles Number of reactive particles in the cell, per plasma species.
    * @param[in] a_phi     Plasma species densities
    * @param[in] a_gradPhi Density gradients for plasma species.
    * @param[in] a_dt      Time step
@@ -1177,6 +1177,7 @@ protected:
   updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>& a_kmcReactions,
                       const RealVect                                   a_E,
                       const RealVect                                   a_pos,
+                      const Vector<FPR>&                               a_numParticles,
                       const Vector<Real>&                              a_phi,
                       const Vector<RealVect>&                          a_gradPhi,
                       const Real                                       a_dt,

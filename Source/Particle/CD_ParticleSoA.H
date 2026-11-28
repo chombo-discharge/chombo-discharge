@@ -1002,7 +1002,8 @@ public:
    * @details The move counterpart of append(const ParticleSoA&): appends all of a_other's particles
    * (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas
    * are swapped instead, so the common "drain into an empty destination" case is O(1) with zero copy.
-   * Invalidates the cell sort. Catenating a container into itself is a no-op.
+   * Invalidates the cell sort, except that the swap into an empty container carries a_other's sort state along.
+   * Catenating a container into itself is a no-op.
    * @param[in,out] a_other Source container, left empty afterwards.
    */
   void
@@ -1624,6 +1625,14 @@ public:
 
   ///@}
 
+  /**
+   * @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).
+   * @details Invalidates the cell sort.
+   * @param[in] a_dest Destination slot for each current particle. A permutation of 0..size()-1.
+   */
+  void
+  permute(const std::vector<std::size_t>& a_dest);
+
 protected:
   /**
    * @brief The single arena allocation.
@@ -1945,13 +1954,6 @@ protected:
    */
   void
   reallocate(const std::size_t a_capacity);
-
-  /**
-   * @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).
-   * @param[in] a_dest Destination slot for each current particle.
-   */
-  void
-  permute(const std::vector<std::size_t>& a_dest);
 
   /**
    * @brief Per-column scatter for permute(): newcol[dest[i]] = oldcol[i].

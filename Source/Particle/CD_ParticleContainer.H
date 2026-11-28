@@ -234,9 +234,12 @@ public:
 
     m_particles.resize(a_finestLevel + 1);
     m_maskParticles.resize(a_finestLevel + 1);
+    m_maskOrigins.resize(a_finestLevel + 1);
     for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
       m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
       m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
+      m_maskOrigins[lvl]   = RefCountedPtr<LayoutData<std::vector<std::size_t>>>(
+        new LayoutData<std::vector<std::size_t>>(a_grids[lvl]));
     }
 
     // Buffer particles live on the grown grids (boxes grown by the refinement factor on finer levels).
@@ -684,7 +687,8 @@ public:
 
   /**
    * @brief Remove the ghost particles of one GhostType from all levels and patches.
-   * @details Like clearGhostParticles(), but every other particle, owned or ghost, is left untouched.
+   * @details Like clearGhostParticles(), but every other particle, owned or ghost, is left untouched. Removal is by
+   * swap-and-pop, so the other particles keep their order only if the removed ones are all after them.
    * @param[in] a_type Ghost type to remove. Must not be GhostType::Valid.
    */
   void
@@ -745,6 +749,7 @@ public:
 
   /**
    * @brief Move the valid particles selected by a per-cell mask into the mask holder, all levels.
+   * @details See the one-level version. returnMaskParticles() puts them back.
    * @param[in] a_mask Per-level cell masks (skipped where null).
    */
   void
@@ -752,8 +757,9 @@ public:
 
   /**
    * @brief Move the valid particles whose cell the mask marks true into the mask holder, one level.
-   * @details Like copyMaskParticles but MOVES (removes from the valid holder via swap-and-pop, which
-   * does not preserve order). Does not clear the mask holder first (accumulates). Ids/rank preserved.
+   * @details Like copyMaskParticles but moves them. The particles that stay keep their order, and the original
+   * index of each moved particle is recorded, so that returnMaskParticles() can put it back where it was. The mask
+   * holder must be empty. All columns are moved, ids and ranks included.
    * @param[in] a_level Level to fill.
    * @param[in] a_mask  Per-cell boolean mask over that level's valid grids (box == grid box).
    */
@@ -764,11 +770,22 @@ public:
    * @brief Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an
    * acceptance box of a_coarToFine into the mask holder.
    * @details Particles are selected at the finer level's cell granularity: those within the mask's width of a finer
-   * patch. Like transferMaskParticles, this accumulates into the mask holder and preserves ids and ranks.
+   * patch. Like transferMaskParticles, the particles that stay keep their order, the original indices of the moved
+   * ones are recorded for returnMaskParticles(), and the mask holder must be empty.
    * @param[in] a_coarToFine Coarse-to-fine particle ghost mask (Realm::getParticleGhostMaskCoarToFine).
    */
   void
   transferMaskParticlesCoarToFine(const AMRParticleGhostMask& a_coarToFine);
+
+  /**
+   * @brief Move the mask particles back into the valid holder, each to the index it was moved out of.
+   * @details Undoes transferMaskParticles() or transferMaskParticlesCoarToFine(), so that the valid holder has the
+   * same particles in the same order as before the transfer. Particles added to the valid holder in between must have
+   * been removed first. Aborts if the mask holder does not hold exactly the moved particles, or if the recorded indices
+   * no longer fit the valid holder.
+   */
+  void
+  returnMaskParticles();
 
   /**
    * @brief Drop all mask/halo particles on every level (keeps capacity).
@@ -792,6 +809,7 @@ public:
         const DataIndex& din = dit[mybox];
 
         level[din].clear();
+        (*m_maskOrigins[lvl])[din].clear();
       }
     }
   }
@@ -836,8 +854,8 @@ public:
    * @brief Move all particles from another holder (on the same valid grids) into the valid holder.
    * @details Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move
    * preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source
-   * empty. Used to return halo/mask particles to the valid holder after a HaloNGP deposition. Assumes
-   * a_source is defined over this container's valid grids.
+   * empty. Appends, so the particles do not go back where they came from; returnMaskParticles() does that for the
+   * mask holder. Assumes a_source is defined over this container's valid grids.
    * @param[in,out] a_source Holder to drain into the valid particles.
    */
   void
@@ -939,6 +957,21 @@ protected:
    */
   void
   setupGrownGrids();
+
+  /**
+   * @brief Move the particles of a patch that a_select picks into the mask holder of the patch.
+   * @details The particles that stay keep their order. The moved particles are appended to a_dst in their original
+   * order, and their original indices are written to a_origins. Nothing is moved if a_dst is not empty.
+   * @tparam Select Callable (std::size_t index) -> bool.
+   * @param[in,out] a_src     Valid particles of the patch.
+   * @param[in,out] a_dst     Mask particles of the patch.
+   * @param[out]    a_origins Original indices of the moved particles, in increasing order.
+   * @param[in]     a_select  Selects the particles to move, by index in a_src.
+   * @return False if a_dst was not empty, true otherwise.
+   */
+  template <typename Select>
+  bool
+  moveToMaskHolder(Leaf& a_src, Leaf& a_dst, std::vector<std::size_t>& a_origins, const Select& a_select);
 
   /**
    * @brief Pool key identifying a destination patch: (level, grid index within the level).
@@ -1095,6 +1128,12 @@ protected:
    * @brief Halo/mask particles per level.
    */
   AMRParticlesSoA<P, Traits> m_maskParticles;
+
+  /**
+   * @brief For each patch, the indices in the valid holder that the mask particles were moved out of, in increasing
+   * order. Filled by the mask transfers and consumed by returnMaskParticles().
+   */
+  Vector<RefCountedPtr<LayoutData<std::vector<std::size_t>>>> m_maskOrigins;
 
   /**
    * @brief Grown-grid buffer particles per level (on m_grownGrids; filled during halo deposition).

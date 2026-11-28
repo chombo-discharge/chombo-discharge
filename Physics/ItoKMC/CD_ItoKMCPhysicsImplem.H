@@ -478,7 +478,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   const long long chargeBefore = m_debug ? computeCharge() : 0LL;
 
   // Update the reaction rates to be used by the KMC solver.
-  this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dt, a_dx, a_kappa);
+  updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_numParticles, a_phi, a_gradPhi, a_dt, a_dx, a_kappa);
 
   // Run the KMC solver.
   switch (m_algorithm) {

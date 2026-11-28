@@ -576,10 +576,13 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
   // ---- re-allocate the (empty) holders over the new grids ----
   m_particles.resize(a_newFinestLevel + 1);
   m_maskParticles.resize(a_newFinestLevel + 1);
+  m_maskOrigins.resize(a_newFinestLevel + 1);
 
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
+    m_maskOrigins[lvl]   = RefCountedPtr<LayoutData<std::vector<std::size_t>>>(
+      new LayoutData<std::vector<std::size_t>>(a_grids[lvl]));
   }
 
   this->setupGrownGrids();
@@ -1035,38 +1038,42 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+  // Set where the mask holder of a patch is not empty. Aborting from inside the threaded loop is not safe.
+  bool notEmpty = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : notEmpty)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
     const BaseFab<bool>& mask = a_mask[din];
     if (!mask.isUsable()) {
+      notEmpty = notEmpty || (maskLevel[din].size() != 0);
+
+      (*m_maskOrigins[a_level])[din].clear();
+
       continue;
     }
     const Box maskBox = mask.box();
 
     Leaf& src = srcLevel[din];
-    Leaf& dst = maskLevel[din];
 
-    std::size_t i = 0;
-    while (i < src.size()) {
-      const IntVect iv = this->cellIndex(a_level, src.position(i));
+    const bool moved = this->moveToMaskHolder(src,
+                                              maskLevel[din],
+                                              (*m_maskOrigins[a_level])[din],
+                                              [&](const std::size_t a_i) -> bool {
+                                                const IntVect iv = this->cellIndex(a_level, src.position(a_i));
 
-      if (maskBox.contains(iv) && mask(iv, 0)) {
-        dst.append(src.position(i), src.weight(i), src.gather(i));
+                                                return maskBox.contains(iv) && mask(iv, 0);
+                                              });
 
-        const std::size_t k = dst.size() - 1;
-
-        dst.particleID(k) = src.particleID(i);
-        dst.rankID(k)     = src.rankID(i);
-
-        src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
-      }
-      else {
-        ++i;
-      }
-    }
+    notEmpty = notEmpty || !moved;
   }
+
+  if (notEmpty) {
+    MayDay::Abort("ParticleContainer::transferMaskParticles - the mask holder is not empty");
+  }
+
+  m_isOrganizedByCell = false;
 }
 
 template <typename P, typename Traits>
@@ -1165,56 +1172,216 @@ ParticleContainer<P, Traits>::transferMaskParticlesCoarToFine(const AMRParticleG
 
   CH_assert(m_isDefined);
 
-  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-    if (lvl >= a_coarToFine.size() || a_coarToFine[lvl].isNull()) {
-      continue;
-    }
-
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     LevelParticles& maskLevel = *m_maskParticles[lvl];
     LevelParticles& srcLevel  = *m_particles[lvl];
 
     const DataIterator& dit  = m_grids[lvl].dataIterator();
     const int           nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+    // Levels without a finer level or without a mask move nothing, but their mask holders must be empty too.
+    const bool hasMask = (lvl < m_finestLevel) && (lvl < a_coarToFine.size()) && !(a_coarToFine[lvl].isNull());
+
+    // Set where the mask holder of a patch is not empty. Aborting from inside the threaded loop is not safe.
+    bool notEmpty = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : notEmpty)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex&         din  = dit[mybox];
+      const DataIndex& din = dit[mybox];
+
+      if (!hasMask) {
+        notEmpty = notEmpty || (maskLevel[din].size() != 0);
+
+        (*m_maskOrigins[lvl])[din].clear();
+
+        continue;
+      }
+
       const ParticleGhostMask& mask = (*a_coarToFine[lvl])[din];
 
       Leaf& src = srcLevel[din];
-      Leaf& dst = maskLevel[din];
 
-      std::size_t i = 0;
-      while (i < src.size()) {
-        const RealVect pos = src.position(i);
-        const IntVect  iv  = this->cellIndex(lvl, pos);
+      const bool moved = this->moveToMaskHolder(src,
+                                                maskLevel[din],
+                                                (*m_maskOrigins[lvl])[din],
+                                                [&](const std::size_t a_i) -> bool {
+                                                  const RealVect pos = src.position(a_i);
+                                                  const IntVect  iv  = this->cellIndex(lvl, pos);
 
-        bool select = false;
+                                                  bool select = false;
 
-        if (!src.isGhost(i) && mask.box().contains(iv)) {
-          const IntVect fineCell = this->cellIndex(lvl + 1, pos);
+                                                  if (!src.isGhost(a_i) && mask.box().contains(iv)) {
+                                                    const IntVect fineCell = this->cellIndex(lvl + 1, pos);
 
-          for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
-            select = mask.targetBox(iv, k).contains(fineCell);
-          }
-        }
+                                                    for (int k = 0; k < mask.numTargets(iv) && !select; k++) {
+                                                      select = mask.targetBox(iv, k).contains(fineCell);
+                                                    }
+                                                  }
 
-        if (select) {
-          dst.append(pos, src.weight(i), src.gather(i));
+                                                  return select;
+                                                });
 
-          const std::size_t k = dst.size() - 1;
+      notEmpty = notEmpty || !moved;
+    }
 
-          dst.particleID(k) = src.particleID(i);
-          dst.rankID(k)     = src.rankID(i);
-
-          src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
-        }
-        else {
-          ++i;
-        }
-      }
+    if (notEmpty) {
+      MayDay::Abort("ParticleContainer::transferMaskParticlesCoarToFine - the mask holder is not empty");
     }
   }
+
+  m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+template <typename Select>
+inline bool
+ParticleContainer<P, Traits>::moveToMaskHolder(Leaf&                     a_src,
+                                               Leaf&                     a_dst,
+                                               std::vector<std::size_t>& a_origins,
+                                               const Select&             a_select)
+{
+  a_origins.clear();
+
+  if (a_dst.size() != 0) {
+    return false;
+  }
+
+  const std::size_t numParticles = a_src.size();
+
+  for (std::size_t i = 0; i < numParticles; i++) {
+    if (a_select(i)) {
+      a_origins.push_back(i);
+    }
+  }
+
+  if (a_origins.empty()) {
+    return true;
+  }
+
+  const std::size_t numStay = numParticles - a_origins.size();
+
+  // Every particle moves, in its order.
+  if (numStay == 0) {
+    a_dst.catenate(a_src);
+
+    return true;
+  }
+
+  // Put the selected particles at the end, keeping the order of both groups, and move them to the mask holder.
+
+  std::vector<std::size_t> dest(numParticles);
+
+  std::size_t stay  = 0;
+  std::size_t moved = numStay;
+  std::size_t k     = 0;
+
+  for (std::size_t i = 0; i < numParticles; i++) {
+    if (k < a_origins.size() && a_origins[k] == i) {
+      dest[i] = moved++;
+      k++;
+    }
+    else {
+      dest[i] = stay++;
+    }
+  }
+
+  a_src.permute(dest);
+
+  a_dst.reserve(a_origins.size());
+
+  for (std::size_t i = numStay; i < numParticles; i++) {
+    a_dst.appendParticle(a_src, i);
+  }
+
+  a_src.resize(numStay);
+
+  return true;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::returnMaskParticles()
+{
+  CH_TIME("ParticleContainer::returnMaskParticles");
+
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles& maskLevel = *m_maskParticles[lvl];
+    LevelParticles& srcLevel  = *m_particles[lvl];
+
+    const DataIterator& dit  = m_grids[lvl].dataIterator();
+    const int           nbox = dit.size();
+
+    // Set where a patch does not match its transfer. Aborting from inside the threaded loop is not safe.
+    bool mismatch = false;
+
+#pragma omp parallel for schedule(runtime) reduction(|| : mismatch)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      Leaf&                     src     = srcLevel[din];
+      Leaf&                     mask    = maskLevel[din];
+      std::vector<std::size_t>& origins = (*m_maskOrigins[lvl])[din];
+
+      // The mask holder must hold exactly the moved particles, and the recorded indices must fit the valid holder,
+      // or the map below is not a permutation.
+      if (mask.size() != origins.size()) {
+        mismatch = true;
+
+        continue;
+      }
+
+      if (origins.empty()) {
+        continue;
+      }
+
+      const std::size_t numStay      = src.size();
+      const std::size_t numParticles = numStay + origins.size();
+
+      if (origins.back() >= numParticles) {
+        mismatch = true;
+
+        continue;
+      }
+
+      // The particles that stayed are first, in their original order, and the returned ones follow in the order
+      // they were moved out. Send each one back to its original index. If none stayed, that is already the order.
+      src.catenate(mask);
+
+      if (numStay == 0) {
+        origins.clear();
+
+        continue;
+      }
+
+      std::vector<std::size_t> dest(numParticles);
+
+      std::size_t stay = 0;
+      std::size_t k    = 0;
+
+      for (std::size_t i = 0; i < numParticles; i++) {
+        if (k < origins.size() && origins[k] == i) {
+          dest[numStay + k] = i;
+          k++;
+        }
+        else {
+          dest[stay++] = i;
+        }
+      }
+
+      src.permute(dest);
+
+      origins.clear();
+    }
+
+    if (mismatch) {
+      MayDay::Abort("ParticleContainer::returnMaskParticles - the mask holder does not match the recorded indices");
+    }
+  }
+
+  // The order is restored, but the leaves were resized and appended to.
+  m_isOrganizedByCell = false;
 }
 
 #include <CD_NamespaceFooter.H>
