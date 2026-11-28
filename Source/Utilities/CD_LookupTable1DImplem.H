@@ -15,6 +15,7 @@
 
 // Std includes
 #include <algorithm>
+#include <cmath>
 #include <math.h>
 #include <iomanip>
 #include <fstream>
@@ -348,7 +349,13 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
     break;
   }
   case LookupTable::Spacing::Exponential: {
-    idxLo = static_cast<long long>(std::floor(log10(a_x / x0) / delta));
+    // log10(a_x/x0)/delta, but with log10 replaced by an approximation of log2: log10(r) = log2(r) * log10(2). The
+    // estimate may be off by an interval; it is corrected below by comparing a_x with the grid points.
+    constexpr T log10Two = 0.30102999566398119521;
+
+    const T ratio = a_x / x0;
+
+    idxLo = (ratio > T(0)) ? static_cast<long long>(std::floor(approximateLog2(ratio) * (log10Two / delta))) : 0LL;
 
     break;
   }
@@ -365,7 +372,38 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
   // 50 points over three. Clamping to the last interval is correct in both directions: linear
   // interpolation there returns the endpoint value exactly at xmax, and the lower clamp absorbs a
   // -0.0 at xmin.
-  return static_cast<size_t>(std::min(std::max(idxLo, 0LL), static_cast<long long>(numPoints) - 2));
+  size_t idx = static_cast<size_t>(std::min(std::max(idxLo, 0LL), static_cast<long long>(numPoints) - 2));
+
+  // The exponential estimate is approximate. Move to the interval [x_idx, x_{idx+1}) that contains a_x, staying inside
+  // the clamped range.
+  if (spacing == LookupTable::Spacing::Exponential) {
+    const size_t& indVar = std::get<1>(m_grid);
+
+    while (idx > 0 && a_x < m_structuredData[idx][indVar]) {
+      idx--;
+    }
+
+    while (idx < numPoints - 2 && a_x >= m_structuredData[idx + 1][indVar]) {
+      idx++;
+    }
+  }
+
+  return idx;
+}
+
+template <typename T, size_t N, typename I>
+inline T
+LookupTable1D<T, N, I>::approximateLog2(const T a_x) noexcept
+{
+  // a_x = mantissa * 2^exponent with mantissa in [0.5, 1), i.e. a_x = (1 + t) * 2^(exponent - 1) with t in [0, 1).
+  int     exponent = 0;
+  const T mantissa = std::frexp(a_x, &exponent);
+  const T t        = T(2) * mantissa - T(1);
+
+  // log2(1 + t) by a cubic that is exact at t = 0 and t = 1. The maximum error is about 1e-3.
+  const T log2OnePlusT = t + t * (T(1) - t) * (T(0.42086454) - T(0.15638611) * t);
+
+  return T(exponent - 1) + log2OnePlusT;
 }
 
 template <typename T, size_t N, typename I>
