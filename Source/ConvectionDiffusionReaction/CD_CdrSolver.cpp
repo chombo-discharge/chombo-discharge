@@ -44,22 +44,12 @@ CdrSolver::~CdrSolver() = default;
 RefCountedPtr<CdrSpecies>&
 CdrSolver::getSpecies() noexcept
 {
-  CH_TIME("CdrSolver::getSpecies()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getSpecies()" << endl;
-  }
-
   return m_species;
 }
 
 const RefCountedPtr<CdrSpecies>&
 CdrSolver::getSpecies() const noexcept
 {
-  CH_TIME("CdrSolver::getSpecies()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getSpecies()" << endl;
-  }
-
   return m_species;
 }
 
@@ -2565,22 +2555,12 @@ CdrSolver::computeCharge()
 bool
 CdrSolver::isDiffusive()
 {
-  CH_TIME("CdrSolver::isDiffusive()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::isDiffusive()" << endl;
-  }
-
   return m_isDiffusive;
 }
 
 bool
 CdrSolver::isMobile()
 {
-  CH_TIME("CdrSolver::isMobile()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::isMobile()" << endl;
-  }
-
   return m_isMobile;
 }
 

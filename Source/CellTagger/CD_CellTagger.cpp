@@ -249,11 +249,6 @@ CellTagger::parseVerbosity()
 bool
 CellTagger::insideTagBox(const RealVect& a_pos) const
 {
-  CH_TIME("CellTagger::insideTagBox(RealVect)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::insideTagBox(RealVect)" << endl;
-  }
-
   bool doThisRefine = (m_tagBoxes.size() > 0) ? false : true; // If we don't have any boxes, everything goes.
 
   for (int ibox = 0; ibox < m_tagBoxes.size(); ibox++) {
@@ -272,11 +267,6 @@ CellTagger::insideTagBox(const RealVect& a_pos) const
 int
 CellTagger::getManualRefinementLevel(const RealVect& a_pos) const
 {
-  CH_TIME("CellTagger::getManualRefinementLevel(RealVect)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getManualRefinementLevel(RealVect)" << endl;
-  }
-
   int refToThisLevel = -1;
 
   for (const auto& m_refBoxe : m_refBoxes) {

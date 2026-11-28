@@ -2498,8 +2498,6 @@ EBHelmholtzOp::makeAggStencil()
 VoFStencil
 EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const
 {
-  CH_TIME("EBHelmholtzOp::getFaceCenterFluxStencil(FaceIndex, DataIndex)");
-
   // clang-format off
   // TLDR: This routine computes a regular finite difference stencil for getting a second-order accurate approximation to the face-centered flux (presuming
   //       that the data is cell-centered).
@@ -2519,8 +2517,6 @@ EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex
 VoFStencil
 EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const
 {
-  CH_TIME("EBHelmholtzOp::getFaceCentroidFluxStencil(FaceIndex, DataIndex)");
-
   // clang-format off
   // TLDR: This routine computes a second order accurate approximation to the flux on a cut-cell centroid. How this is done differs between discretizations. For
   //       cell-centered discretizations we get the face-centered fluxes and interpolate them to the face centroid. For centroid-based discretizations we have to

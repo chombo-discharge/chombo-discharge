@@ -274,9 +274,6 @@ EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_
                                                  const DataIndex&             a_dit,
                                                  const int                    a_order) const
 {
-  CH_TIME(
-    "EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>, VolIndex, VofUtils::Neighborhood, DataIndex, int)");
-
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
@@ -316,8 +313,6 @@ EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>& a_sten
                                              const DataIndex&             a_dit,
                                              const int                    a_order) const
 {
-  CH_TIME("EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>, VolIndex, DataIndex, int)");
-
   CH_assert(a_order == 1 || m_order == 2);
 
   // Also issue run-time error if the assertions break.

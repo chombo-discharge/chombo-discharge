@@ -61,11 +61,6 @@ PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil(Real&            a
                                                               const Real       a_bCoefPhase0,
                                                               const Real       a_bCoefPhase1) const noexcept
 {
-  CH_TIME("PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_phase == 0 || a_phase == 1);
 
@@ -115,11 +110,6 @@ PetscHelmholtzSaturationChargeJumpBC::getJumpData(const int /*a_level*/,
                                                   const IntVect& /*a_iv*/,
                                                   const EBAMRIVData& /*a_sigma*/) const noexcept
 {
-  CH_TIME("PetscHelmholtzSaturationChargeJumpBC::getJumpData");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzSaturationChargeJumpBC::getJumpData" << endl;
-  }
-
   return 0.0;
 }
 

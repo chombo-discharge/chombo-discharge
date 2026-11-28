@@ -303,11 +303,6 @@ PetscHelmholtzOp::getBcoef(const IntVect&       a_iv,
                            const DataIndex&     a_din,
                            const int            a_phase) const noexcept
 {
-  CH_TIME("PetscHelmholtzOp::getBcoef");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::getBcoef" << endl;
-  }
-
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
 
   // The face on the low side of cell iv has index iv, the face on the high side has index iv + BASISV(dir).
@@ -362,11 +357,6 @@ PetscHelmholtzOp::getCoveredCells(const int a_level, const DataIndex& a_din, con
 bool
 PetscHelmholtzOp::isInterfaceCell(const IntVect& a_iv, const int a_level, const DataIndex& a_din) const noexcept
 {
-  CH_TIME("PetscHelmholtzOp::isInterfaceCell");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::isInterfaceCell" << endl;
-  }
-
   bool isInterface = false;
 
   if (m_petscGrid->getNumPhases() == 2) {
@@ -386,11 +376,6 @@ PetscHelmholtzOp::getCutFaceFluxStencil(const FaceIndex&  a_face,
                                         const DataIndex&  a_din,
                                         const int         a_phase) const noexcept
 {
-  CH_TIME("PetscHelmholtzOp::getCutFaceFluxStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::getCutFaceFluxStencil" << endl;
-  }
-
   const EBLevelGrid& eblg    = m_petscGrid->getMFLevelGrids()[a_level]->getEBLevelGrid(a_phase);
   const EBISBox&     ebisbox = eblg.getEBISL()[a_din];
   const EBFaceFAB&   bco     = (*m_bCoef[a_level])[a_din].getPhase(a_phase)[a_face.direction()];
@@ -426,11 +411,6 @@ PetscHelmholtzOp::getCoarseRow(const IntVect&   a_ivGhost,
                                const DataIndex& a_din,
                                const int        a_phase) const noexcept
 {
-  CH_TIME("PetscHelmholtzOp::getCoarseRow");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::getCoarseRow" << endl;
-  }
-
   CH_assert(a_level > 0);
 
   // The coarse row is found through the coarsened fine grids, which share this grid index.
@@ -517,11 +497,6 @@ PetscHelmholtzOp::createMatrix() noexcept
 void
 PetscHelmholtzOp::addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept
 {
-  CH_TIME("PetscHelmholtzOp::addToMatrix");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::addToMatrix" << endl;
-  }
-
   CH_assert(a_row >= 0);
 
   const PetscInt numEntries = a_stencil.size();

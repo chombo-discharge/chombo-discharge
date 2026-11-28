@@ -147,8 +147,6 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
                                         const DataIndex&      a_dit,
                                         const bool            a_useHomogeneous) const
 {
-  CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
-
   Real centroidFlux = 0.0;
 
   if (a_useHomogeneous) {
