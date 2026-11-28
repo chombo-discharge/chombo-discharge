@@ -359,9 +359,18 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
     facePhiLow.emplace(m_amr->fetchScratch<EBAMRFluxData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
   }
 
+  // Storage for the normal slopes in each box and its first layer of ghost cells, and for the zero slopes of the
+  // first-order states.
+  Scratch<EBAMRCellData> normalSlopesData = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, SpaceDim, 1);
+
+  std::optional<Scratch<EBAMRCellData>> zeroSlopesData;
+
+  if (useFluxCorrection) {
+    zeroSlopesData.emplace(m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, SpaceDim, 1));
+  }
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
     const DataIterator&      dit    = dbl.dataIterator();
 
@@ -376,16 +385,16 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
       const EBFluxFAB& faceVel = (*a_faceVelocity[lvl])[din];
 
-      const Box      cellBox = dbl[din];
-      const EBISBox& ebisbox = ebisl[din];
+      const Box cellBox = dbl[din];
 
       // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost
       // cell for the slopes because in order to extrapolate to the left/right sides of a face, we need the centered
       // slope on both sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope
       // is computed using the left/right slopes, we end up needing two grid cells.
-      Box grownBox = cellBox;
-      grownBox.grow(1);
-      EBCellFAB normalSlopes(ebisbox, grownBox, SpaceDim);
+      EBCellFAB& normalSlopes = (*(*normalSlopesData)[lvl])[din];
+
+      CH_assert(normalSlopes.getRegion() == grow(cellBox, 1));
+
       normalSlopes.setVal(0.0);
 
       // Compute normal slopes.
@@ -403,7 +412,7 @@ CdrCTU::advectToFaces(EBAMRFluxData&       a_facePhi,
 
       if (useFluxCorrection) {
         EBFluxFAB& facePhiFirst = (*(**facePhiLow)[lvl])[din];
-        EBCellFAB  zeroSlopes(ebisbox, grownBox, SpaceDim);
+        EBCellFAB& zeroSlopes   = (*(**zeroSlopesData)[lvl])[din];
 
         zeroSlopes.setVal(0.0);
 
