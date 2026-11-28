@@ -175,8 +175,6 @@ std::pair<VoFStencil, VoFStencil>
 EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  a_fineGhost,
                                                                const DataIndex& a_din) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB");
-
   VoFStencil fineStencil;
   VoFStencil coarStencil;
 
@@ -194,8 +192,6 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  
 std::pair<VoFStencil, VoFStencil>
 EBLeastSquaresMultigridInterpolator::getGhostStencil(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::getGhostStencil");
-
   const IntVect& iv = a_fineGhost.gridIndex();
 
   if (m_ghostCells[a_din].contains(iv)) {
@@ -678,12 +674,6 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
                                                 const int&             a_order,
                                                 const int&             a_weight) const noexcept
 {
-  CH_TIMERS("EBLeastSquaresMultigridInterpolator::getStencil");
-  CH_TIMER("get_vofs", t1);
-  CH_TIMER("trim_vofs", t2);
-  CH_TIMER("compute_displacements", t3);
-  CH_TIMER("compute_stencil", t4);
-
   // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in
   // a_validFineCells and a_validCoarCells. We use that information to build an overdetermined linear system of
   // equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations, this routine will
@@ -693,7 +683,6 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
 
   // I think these radii are good -- but there's no hard limit here. Increase the radii if you
   // see that the stencil drops order.
-  CH_START(t1);
   const int fineRadius = std::max(2, a_order);
   const int coarRadius = std::max(2, fineRadius / m_refRat);
 
@@ -717,14 +706,12 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
 
   const int numEquations = static_cast<int>(coarVofs.size() + fineVofs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
-  CH_STOP(t1);
 
   if (numEquations >= numUnknowns) { // We have enough equations to get a stencil.
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
     // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2
     // this = 125 cells, not counting the fine cells. Since singular value decomposition scales like O(n^3), the
     // penalty for including too may equations can be quite severe.
-    CH_START(t2);
     std::vector<VolIndex>& fineVofsTrimmedSize = fineVofs.stdVector();
     std::vector<VolIndex>& coarVofsTrimmedSize = coarVofs.stdVector();
 
@@ -771,10 +758,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));
-    CH_STOP(t2);
 
     // Build displacement vectors.
-    CH_START(t3);
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
@@ -793,13 +778,11 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
                                                              a_dxFine,
                                                              a_dxCoar));
     }
-    CH_STOP(t3);
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term,
     // i.e. the interpolated value, which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of
     // the two-level least squares routine is such that the fine stencil lies on the first index. This can be confusing,
     // but the LeastSquares uses a very compact notation.
-    CH_START(t4);
     IntVect    interpStenIndex = IntVect::Zero;
     IntVectSet derivs          = IntVectSet(interpStenIndex);
     IntVectSet knownTerms      = IntVectSet();
@@ -812,7 +795,6 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
 
     // The stencils are empty if the system was rank deficient, in which case the caller drops order.
     foundStencil = (a_stencilFine.size() + a_stencilCoar.size()) > 0;
-    CH_STOP(t4);
   }
   else {
     foundStencil = false;

@@ -42,40 +42,30 @@ CdrSpecies::~CdrSpecies() = default;
 Real
 CdrSpecies::initialData(const RealVect& /*a_pos*/, const Real /*a_time*/) const
 {
-  CH_TIME("CdrSpecies::initialData(RealVect, Real)");
-
   return 0.;
 }
 
 std::string
 CdrSpecies::getName() const
 {
-  CH_TIME("CdrSpecies::getName()");
-
   return m_name;
 }
 
 int
 CdrSpecies::getChargeNumber() const
 {
-  CH_TIME("CdrSpecies::getChargeNumber()");
-
   return m_chargeNumber;
 }
 
 bool
 CdrSpecies::isDiffusive() const
 {
-  CH_TIME("CdrSpecies::isDiffusive()");
-
   return m_isDiffusive;
 }
 
 bool
 CdrSpecies::isMobile() const
 {
-  CH_TIME("CdrSpecies::isMobile()");
-
   return m_isMobile;
 }
 

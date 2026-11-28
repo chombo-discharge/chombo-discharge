@@ -102,11 +102,6 @@ ItoSolver::setParticleCellMerger(
 const RefCountedPtr<ItoSpecies>&
 ItoSolver::getSpecies() const
 {
-  CH_TIME("ItoSolver::getSpecies");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getSpecies" << endl;
-  }
-
   CH_assert(!m_species.isNull());
 
   return m_species;
@@ -2324,16 +2319,12 @@ ItoSolver::depositHybrid(EBAMRCellData&     a_depositionH,
 bool
 ItoSolver::isMobile() const
 {
-  CH_TIME("ItoSolver::isMobile");
-
   return m_isMobile;
 }
 
 bool
 ItoSolver::isDiffusive() const
 {
-  CH_TIME("ItoSolver::isDiffusive");
-
   return m_isDiffusive;
 }
 

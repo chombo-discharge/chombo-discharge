@@ -92,11 +92,6 @@ PetscHelmholtzNeumannEBBC::getEBFluxStencil(Real&         a_boundaryWeight,
                                             const DataIndex& /*a_din*/,
                                             const VolIndex& /*a_vof*/) const noexcept
 {
-  CH_TIME("PetscHelmholtzNeumannEBBC::getEBFluxStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzNeumannEBBC::getEBFluxStencil" << endl;
-  }
-
   // The flux is the given normal derivative g.
   a_boundaryWeight = 1.0;
   a_stencil.clear();
@@ -108,11 +103,6 @@ PetscHelmholtzNeumannEBBC::getBoundaryData(const int        a_phase,
                                            const DataIndex& a_din,
                                            const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzNeumannEBBC::getBoundaryData");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzNeumannEBBC::getBoundaryData" << endl;
-  }
-
   CH_assert(m_isDefined);
 
   Real DphiDn = 0.0;

@@ -105,11 +105,6 @@ ItoKMCStreamerTagger<S>::computeTagFields(const RealVect& a_pos,
                                           const Real      a_minGradE,
                                           const Real      a_maxGradE) const noexcept
 {
-  CH_TIME("ItoKMCStreamerTagger::computeTagFields");
-  if (this->m_verbosity > 5) {
-    pout() << "ItoKMCStreamerTagger::computeTagFields" << endl;
-  }
-
   Vector<Real> tagFields(this->m_numTagFields);
 
   const Real E = a_E.vectorLength();
@@ -129,11 +124,6 @@ ItoKMCStreamerTagger<S>::coarsenCell(const RealVect&         a_pos,
                                      const Vector<Real>&     a_tagFields,
                                      const Vector<RealVect>& a_gradTagFields) const noexcept
 {
-  CH_TIME("ItoKMCStreamerTagger::coarsenCell");
-  if (this->m_verbosity > 5) {
-    pout() << "ItoKMCStreamerTagger::coarsenCell" << endl;
-  }
-
   bool coarsen = false;
 
   if (a_lvl >= m_maxCoarsenLevel) {
@@ -162,11 +152,6 @@ ItoKMCStreamerTagger<S>::refineCell(const RealVect&         a_pos,
                                     const Vector<Real>&     a_tagFields,
                                     const Vector<RealVect>& a_gradTagFields) const noexcept
 {
-  CH_TIME("ItoKMCStreamerTagger::refineCell");
-  if (this->m_verbosity > 5) {
-    pout() << "ItoKMCStreamerTagger::refineCell" << endl;
-  }
-
   const Real     E       = a_tagFields[0];
   const Real     alphaDx = a_tagFields[1];
   const RealVect gradE   = a_gradTagFields[0];

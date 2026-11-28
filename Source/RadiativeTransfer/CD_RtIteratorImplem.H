@@ -24,8 +24,6 @@
 template <class T>
 RtIterator<T>::RtIterator(RtLayout<T>& a_layout)
 {
-  CH_TIME("RtIterator::RtIterator");
-
   m_solvers = a_layout.getSolvers();
   m_species = a_layout.getSpecies();
   m_num     = m_solvers.size();
@@ -35,9 +33,7 @@ RtIterator<T>::RtIterator(RtLayout<T>& a_layout)
 
 template <class T>
 RtIterator<T>::~RtIterator()
-{
-  CH_TIME("RtIterator::~RtIterator");
-}
+{}
 
 template <class T>
 int
