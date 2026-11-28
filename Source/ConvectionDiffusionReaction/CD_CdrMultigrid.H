@@ -278,11 +278,6 @@ protected:
   EBAMRCellData m_helmAcoef;
 
   /**
-   * @brief Storage for multigrid residual
-   */
-  EBAMRCellData m_residual;
-
-  /**
    * @brief Verbosity for geometric multigrid
    */
   int m_multigridVerbosity;
@@ -341,12 +336,14 @@ protected:
    * @brief Advection-only extrapolation to faces
    * @param[out] a_facePhi Face-centered states
    * @param[in] a_phi Cell-centered states
+   * @param[in] a_faceVelocity Face-centered velocities (normal component)
    * @param[in] a_extrapDt Extrapolating time step.
    * @param[in] a_dt Time step of the update that the face states enter, or 0 if they enter no update.
    */
   virtual void
   advectToFaces(EBAMRFluxData&       a_facePhi,
                 const EBAMRCellData& a_phi,
+                const EBAMRFluxData& a_faceVelocity,
                 const Real           a_extrapDt,
                 const Real           a_dt) override = 0;
 

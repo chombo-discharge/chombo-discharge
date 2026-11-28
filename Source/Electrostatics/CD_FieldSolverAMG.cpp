@@ -176,8 +176,9 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   // Right-hand side rho/eps0, with the boundary data parts of the domain, electrode and interface fluxes moved into
   // it. The surface charge enters through the interface fluxes.
-  MFAMRCellData rhoByEps0;
-  m_amr->allocate(rhoByEps0, m_realm, m_nComp);
+  Scratch<MFAMRCellData> rhoByEps0 = m_amr->fetchScratch<MFAMRCellData>(m_realm,
+                                                                        m_nComp,
+                                                                        m_amr->getNumberOfGhostCells());
   DataOps::copy(rhoByEps0, a_rho);
   DataOps::scale(rhoByEps0, 1.0 / Units::eps0);
 
@@ -191,15 +192,15 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   Vec b;
   Vec x;
-  Vec r;
 
   petscGrid->create(b);
   petscGrid->create(x);
-  petscGrid->create(r);
 
   // The jump condition is eps_0 * D_0 + eps_1 * D_1 = sigma/eps0, as in FieldSolverGMG.
-  EBAMRIVData sigmaByEps0;
-  m_amr->allocate(sigmaByEps0, m_realm, phase::gas, m_nComp);
+  Scratch<EBAMRIVData> sigmaByEps0 = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                      phase::gas,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
   DataOps::copy(sigmaByEps0, a_sigma);
   DataOps::scale(sigmaByEps0, 1.0 / Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
@@ -224,7 +225,6 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   // Residual r = b - A*x. As in FieldSolverGMG's Krylov solvers, the residual is reported in the 2-norm and relative
   // to the zero-residual b - A*0 = b, which does not depend on the initial guess. This is the true residual of the
   // matrix, not the (possibly preconditioned) residual that the KSP tests convergence on.
-  PetscReal residNorm;
   PetscReal zeroResidNorm;
 
   PetscCallAbort(Chombo_MPI::comm, VecNorm(b, NORM_2, &zeroResidNorm));
@@ -242,17 +242,24 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const bool converged = (reason > 0);
 
-  PetscReal residNormUnweighted;
-
-  PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
-
-  // Remove the row weights, so that the residual is that of the unweighted divergence.
-  m_petscOp->scaleRows(r, true);
-
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNormUnweighted));
-
+  // The true residual is only reported.
   if (m_verbosity > 1) {
+    Vec       r;
+    PetscReal residNorm;
+    PetscReal residNormUnweighted;
+
+    petscGrid->create(r);
+
+    PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
+    PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
+
+    // Remove the row weights, so that the residual is that of the unweighted divergence.
+    m_petscOp->scaleRows(r, true);
+
+    PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNormUnweighted));
+
+    petscGrid->destroy(r);
+
     KSPType kspType;
 
     PetscCallAbort(Chombo_MPI::comm, KSPGetType(m_ksp, &kspType));
@@ -277,11 +284,9 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   m_petscJumpBc->updateJumpData(x, m_permittivityEB);
 
   petscGrid->putPetscInChombo(a_potential, x);
-  petscGrid->putPetscInChombo(m_residue, r);
 
   petscGrid->destroy(b);
   petscGrid->destroy(x);
-  petscGrid->destroy(r);
 
   // Coarsen and update ghost cells before computing the field, as FieldSolverGMG does.
   m_amr->conservativeAverage(a_potential, m_realm);
@@ -668,9 +673,8 @@ FieldSolverAMG::computeElectricField(MFAMRCellData& a_electricField, const MFAMR
 
   // As in FieldSolverGMG: fill ghost cells with the multigrid interpolator, which is consistent with the
   // discretization, then compute the gradient.
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_nComp);
-  m_amr->copyData(scratch, a_potential);
+  Scratch<MFAMRCellData> scratch = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, m_amr->getNumberOfGhostCells());
+  m_amr->copyData(*scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   m_amr->computeGradient(a_electricField, scratch, m_realm);
@@ -691,9 +695,8 @@ FieldSolverAMG::computeElectricField(MFAMRFluxData& a_electricField, const MFAMR
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
   CH_assert(a_potential[0]->nComp() == 1);
 
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_nComp);
-  m_amr->copyData(scratch, a_potential);
+  Scratch<MFAMRCellData> scratch = m_amr->fetchScratch<MFAMRCellData>(m_realm, m_nComp, m_amr->getNumberOfGhostCells());
+  m_amr->copyData(*scratch, a_potential);
   m_amr->interpGhostMG(scratch, m_realm);
 
   m_amr->computeGradient(a_electricField, scratch, m_realm);
@@ -713,14 +716,16 @@ FieldSolverAMG::computeElectricField(EBAMRCellData&           a_electricField,
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
   CH_assert(a_potential[0]->nComp() == 1);
 
-  EBAMRCellData scratch;
-  EBAMRCellData potentialPhase;
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      a_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
+  EBAMRCellData          potentialPhase;
 
   m_amr->allocatePointer(potentialPhase, m_realm);
-  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  m_amr->copyData(scratch, potentialPhase);
+  m_amr->copyData(*scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   m_amr->computeGradient(a_electricField, scratch, m_realm, a_phase);
@@ -743,14 +748,16 @@ FieldSolverAMG::computeElectricField(EBAMRFluxData&           a_electricField,
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
   CH_assert(a_potential[0]->nComp() == 1);
 
-  EBAMRCellData scratch;
-  EBAMRCellData potentialPhase;
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      a_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
+  EBAMRCellData          potentialPhase;
 
   m_amr->allocatePointer(potentialPhase, m_realm);
-  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
   m_amr->alias(potentialPhase, a_phase, a_potential);
 
-  m_amr->copyData(scratch, potentialPhase);
+  m_amr->copyData(*scratch, potentialPhase);
   m_amr->interpGhostMG(scratch, m_realm, a_phase);
 
   m_amr->computeGradient(a_electricField, scratch, m_realm, a_phase);

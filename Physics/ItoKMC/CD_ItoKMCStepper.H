@@ -492,11 +492,6 @@ protected:
   Vector<EBAMRIVData> m_cdrFluxes;
 
   /**
-   * @brief Extrapolated CDR fluxes.
-   */
-  Vector<EBAMRIVData> m_cdrFluxesExtrap;
-
-  /**
    * @brief Voltage curve on the electrodes used in the simulation.
    */
   std::function<Real(const Real a_time)> m_voltage;
@@ -718,14 +713,6 @@ protected:
   mutable Vector<RefCountedPtr<ParticleContainer<NoPayload>>> m_cdrProducts;
 
   /**
-   * @brief Per-cell CDR production from the reaction network, on the particle realm.
-   * @details One component per CDR species, holding the number of physical particles produced in the cell -- the
-   * positive part of the change computed by the KMC advance. The reconciliation kernels turn this into the particles
-   * in m_cdrProducts.
-   */
-  EBAMRCellData m_particleCdrProduction;
-
-  /**
    * @brief Solver indices used when load-balancing the particle solvers.
    */
   Vector<int> m_loadBalanceIndices;
@@ -765,52 +752,10 @@ protected:
   EBAMRIVData m_conductivityEB;
 
   /**
-   * @brief For holding the number of physical particles per cell for all Ito species.
-   * @note Defined on the particle realm with components = number of Ito species
-   */
-  EBAMRCellData m_particleItoPPC;
-
-  /**
-   * @brief For holding the number of generated photons per cell.
-   * @note Defined on the particle realm with components = number of photon species
-   */
-  EBAMRCellData m_particleYPC;
-
-  /**
    * @brief For holding the mean particle energy
    * @note Defined on the particle realm with components = number of plasma species
    */
   EBAMRCellData m_particleEPS;
-
-  /**
-   * @brief For holding the previous number of particles per cell for all species
-   * @note Defined on the particle realm with components = number of plasma species
-   */
-  EBAMRCellData m_particleOldItoPPC;
-
-  /**
-   * @brief For holding the number of physical particles per cell for all CDR species.
-   * @note Defined on the fluid realm with components = number of CDr species
-   */
-  EBAMRCellData m_fluidCdrPPC;
-
-  /**
-   * @brief For holding the previous number of physical particles per cell for all CDR species.
-   * @note Defined on the fluid realm with components = number of CDR species
-   */
-  EBAMRCellData m_fluidOldCdrPPC;
-
-  /**
-   * @brief For holding the number of particles per cell for all species.
-   * @note Defined on the fluid realm with components = number of plasma species
-   */
-  EBAMRCellData m_fluidPPC;
-
-  /**
-   * @brief For holding the number of generated photons per cell.
-   * @note Defined on the fluid realm with components = number of photon species
-   */
-  EBAMRCellData m_fluidYPC;
 
   /**
    * @brief Storage for holding the plasma phase electric field on the fluid realm
@@ -841,70 +786,11 @@ protected:
   EBAMRCellData m_EdotJ;
 
   /**
-   * @brief Scratch storage on the fluid realm having 1 component
-   */
-  mutable EBAMRCellData m_fluidScratch1;
-
-  /**
-   * @brief Scratch storage on the fluid realm with SpaceDim components
-   */
-  mutable EBAMRCellData m_fluidScratchD;
-
-  /**
-   * @brief Scratch storage on the particle realm with 1 component
-   */
-  mutable EBAMRCellData m_particleScratch1;
-
-  /**
-   * @brief Scratch storage on the particle realm with SpaceDim components
-   */
-  mutable EBAMRCellData m_particleScratchD;
-
-  /**
-   * @brief Scratch storage for EB-only data on the fluid realm. One component.
-   */
-  mutable EBAMRIVData m_fluidScratchEB;
-
-  /**
-   * @brief Scratch storage for EB-only data on the particle realm. One component.
-   */
-  mutable EBAMRIVData m_particleScratchEB;
-
-  /**
    * @brief Scratch storage for the surface species on the particle realm, one component per surface species.
    * @details Carries the areal densities into the EB emission kernel, and their change out of it. Only allocated
    * when the physics model has surface species.
    */
   mutable EBAMRIVData m_particleSurfaceScratch;
-
-  /**
-   * @brief Scratch storage on the solid phase of the fluid realm for the advective divergence of a solid species.
-   * @details One component. Only allocated when there are solid species.
-   */
-  mutable EBAMRCellData m_solidScratchDivF;
-
-  /**
-   * @brief Scratch storage on the solid phase of the fluid realm for the diffusive divergence of a solid species.
-   * @details One component. Only allocated when there are solid species.
-   */
-  mutable EBAMRCellData m_solidScratchDivD;
-
-  /**
-   * @brief Per-solid-species scratch storage for EB-only data on the solid phase of the fluid realm.
-   * @details One component each. Holds the injected mass that exchangeSurfaceSolid() redistributes. Empty when there
-   * are no solid species.
-   */
-  mutable Vector<EBAMRIVData> m_solidScratchEB;
-
-  /**
-   * @brief Per-Ito-species scratch storage on the fluid realm, one component each.
-   * @details computeMobilities() and computeDiffusionCoefficients() evaluate the physics on the fluid realm
-   * and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar
-   * hierarchy per Ito species to do that, and neither needs it to survive the call, but allocating them per
-   * call defines an exchange Copier per level per species on every time step. They do not overlap in time,
-   * so one set serves both.
-   */
-  Vector<EBAMRCellData> m_fluidScratchIto;
 
   /**
    * @brief Allocate "internal" storage.
@@ -1242,8 +1128,7 @@ protected:
 
   /**
    * @brief Compute the maximum electric field (norm)
-   * @details Runs through m_fluidScratch1 rather than allocating a hierarchy of its own -- this is called
-   * once per time step, and AmrMesh::allocate defines an exchange Copier per level.
+   * @details Uses a temporary from the scratch pool on the plasma phase of the fluid realm.
    * @param[in] a_phase Phase where we compute the field. Must be the plasma phase, which is the phase the
    * rest of the body already assumes.
    * @return Computed max reduced electric field

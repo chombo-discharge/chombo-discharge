@@ -2627,8 +2627,11 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
 
   // Need some scratch storage for the tags because DenseIntVectSet can't be written to file. We just run through
   // the cells and set data == 1 if a cell had been flagged for refinement.
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, a_level, 1);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   phase::gas,
+                                                                   a_level,
+                                                                   1,
+                                                                   m_amr->getNumberOfGhostCells());
   DataOps::setValue(scratch, 0.0);
 
   // Set tagged cells = 1
@@ -2640,7 +2643,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    FArrayBox&             regTags = scratch[din].getFArrayBox();
+    FArrayBox&             regTags = (*scratch)[din].getFArrayBox();
     const DenseIntVectSet& ivs     = (*m_tags[a_level])[din];
 
     auto kernel = [&](const IntVect& iv) -> void {
@@ -2657,7 +2660,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
   const Interval srcInterv(0, 0);
   const Interval dstInterv(a_comp, a_comp);
 
-  m_amr->copyData(scratch, a_output, a_level, m_realm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(*scratch, a_output, a_level, m_realm, m_realm, dstInterv, srcInterv);
 
   a_comp++;
 }
@@ -2676,15 +2679,18 @@ Driver::writeRanks(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
   for (const auto& r : m_amr->getRealms()) {
     CH_assert(a_output.nComp() > a_comp);
 
-    LevelData<EBCellFAB> scratch;
-    m_amr->allocate(scratch, r, phase::gas, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(r,
+                                                                     phase::gas,
+                                                                     a_level,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(scratch, 1.0 * procID());
 
     const Interval srcInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
 
-    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
+    m_amr->copyData(a_output, *scratch, a_level, m_realm, r, dstInterv, srcInterv);
 
     a_comp++;
   }
@@ -2752,8 +2758,11 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
   for (const auto& r : m_amr->getRealms()) {
     CH_assert(a_output.nComp() > a_comp);
 
-    LevelData<EBCellFAB> scratch;
-    m_amr->allocate(scratch, r, phase::gas, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(r,
+                                                                     phase::gas,
+                                                                     a_level,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
 
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
@@ -2766,13 +2775,13 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
+      (*scratch)[din].setVal(static_cast<double>(loads[din.intCode()]));
     }
 
     const Interval srcInterv(0, 0);
     const Interval dstInterv(a_comp, a_comp);
 
-    m_amr->copyData(a_output, scratch, a_level, m_realm, r, dstInterv, srcInterv);
+    m_amr->copyData(a_output, *scratch, a_level, m_realm, r, dstInterv, srcInterv);
 
     a_comp++;
   }

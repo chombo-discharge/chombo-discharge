@@ -148,7 +148,6 @@ FieldSolver::allocate()
 
   m_amr->allocate(m_potential, m_realm, m_nComp);
   m_amr->allocate(m_rho, m_realm, m_nComp);
-  m_amr->allocate(m_residue, m_realm, m_nComp);
   m_amr->allocate(m_permittivityCell, m_realm, m_nComp);
   m_amr->allocate(m_permittivityFace, m_realm, m_nComp);
   m_amr->allocate(m_permittivityEB, m_realm, m_nComp);
@@ -159,7 +158,6 @@ FieldSolver::allocate()
   DataOps::setValue(m_potential, 0.0);
   DataOps::setValue(m_rho, 0.0);
   DataOps::setValue(m_sigma, 0.0);
-  DataOps::setValue(m_residue, 0.0);
   DataOps::setValue(m_electricField, 0.0);
 
   // Set permittivities
@@ -297,12 +295,10 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   const bool reallyMultiPhase = (m_multifluidIndexSpace->numPhases() > 1);
 
-  // Allocate storage first, because we have no scratch storage for this.
-  MFAMRCellData D;
-  MFAMRCellData EdotD;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(D, m_realm, SpaceDim);
-  m_amr->allocate(EdotD, m_realm, 1);
+  Scratch<MFAMRCellData> D     = m_amr->fetchScratch<MFAMRCellData>(m_realm, SpaceDim, ghost);
+  Scratch<MFAMRCellData> EdotD = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
 
   // Compute D = eps*E and then the dot product E*D.
   this->computeDisplacementField(D, a_electricField);
@@ -311,7 +307,7 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   // This defines a lambda which computes the energy in a specified phase
   auto phaseEnergy = [&EdotD, &amr = this->m_amr, this](const phase::which_phase a_phase) -> Real {
-    const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
+    const EBAMRCellData phaseEdotD = amr->alias(a_phase, *EdotD);
 
     Real energy = 0.0;
 
@@ -390,15 +386,12 @@ FieldSolver::computeCapacitance()
   //       with voltage set to 1, and without charges.
   // clang-format on
 
-  MFAMRCellData phi;
-  MFAMRCellData E;
-  MFAMRCellData source;
-  EBAMRIVData   sigma;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(phi, m_realm, 1);
-  m_amr->allocate(E, m_realm, SpaceDim);
-  m_amr->allocate(source, m_realm, 1);
-  m_amr->allocate(sigma, m_realm, phase::gas, 1);
+  Scratch<MFAMRCellData> phi    = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
+  Scratch<MFAMRCellData> E      = m_amr->fetchScratch<MFAMRCellData>(m_realm, SpaceDim, ghost);
+  Scratch<MFAMRCellData> source = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, ghost);
+  Scratch<EBAMRIVData>   sigma  = m_amr->fetchScratch<EBAMRIVData>(m_realm, phase::gas, 1, ghost);
 
   DataOps::setValue(phi, 0.0);
   DataOps::setValue(E, 0.0);
@@ -441,7 +434,6 @@ FieldSolver::deallocate()
   m_electricField.clear();
   m_rho.clear();
   m_sigma.clear();
-  m_residue.clear();
   m_permittivityCell.clear();
   m_permittivityFace.clear();
   m_permittivityEB.clear();
@@ -665,7 +657,6 @@ FieldSolver::parsePlotVariables()
   m_plotPotential          = false;
   m_plotRho                = false;
   m_plotElectricField      = false;
-  m_plotResidue            = false;
   m_plotPermittivity       = false;
   m_plotSigma              = false;
   m_plotElectricFieldSolid = false;
@@ -685,7 +676,11 @@ FieldSolver::parsePlotVariables()
         m_plotRho = true;
       }
       else if (str[i] == "res") {
-        m_plotResidue = true;
+        const std::string err = "FieldSolver::parsePlotVariables - the plot variable 'res' was removed, because the "
+                                "solvers no longer store the residual. Remove it from " +
+                                m_className + ".plt_vars";
+
+        MayDay::Error(err.c_str());
       }
       else if (str[i] == "E") {
         m_plotElectricField = true;
@@ -701,7 +696,7 @@ FieldSolver::parsePlotVariables()
       }
       else {
         const std::string err = "FieldSolver::parsePlotVariables - unknown plot variable '" + str[i] +
-                                "' (valid: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol')";
+                                "' (valid: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol')";
 
         MayDay::Error(err.c_str());
       }
@@ -1506,9 +1501,6 @@ FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotSigma) {
     this->writeSurfaceData(a_output, a_comp, *m_sigma[a_level], a_outputRealm, a_level);
   }
-  if (m_plotResidue) {
-    this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, a_outputRealm, a_level, false);
-  }
   if (m_plotPermittivity) {
     this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, a_outputRealm, a_level, false);
   }
@@ -1802,8 +1794,11 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   const int numComp = a_data.nComp();
 
   // Put a_data in volume format.
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   phase::gas,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(scratch, 0.0);
   DataOps::incr(scratch, a_data, 1.0, (*m_amr->getVofIterator(m_realm, phase::gas)[a_level]));
@@ -1812,7 +1807,7 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   const Interval srcInterv = Interval(0, 0);
   const Interval dstInterv = Interval(a_comp, a_comp);
   m_amr->copyData(a_output,
-                  scratch,
+                  *scratch,
                   a_level,
                   a_outputRealm,
                   m_realm,
@@ -1841,9 +1836,6 @@ FieldSolver::getNumberOfPlotVariables() const
     numPltVars = numPltVars + 1;
   }
   if (m_plotSigma) {
-    numPltVars = numPltVars + 1;
-  }
-  if (m_plotResidue) {
     numPltVars = numPltVars + 1;
   }
   if (m_plotPermittivity) {
@@ -1877,9 +1869,6 @@ FieldSolver::getPlotVariableNames() const
   }
   if (m_plotSigma) {
     pltVarNames.push_back("Electrostatic sigma");
-  }
-  if (m_plotResidue) {
-    pltVarNames.push_back("Electrostatic potential_residue");
   }
   if (m_plotPermittivity) {
     pltVarNames.push_back("Electrostatic permittivity");
@@ -2010,17 +1999,6 @@ FieldSolver::getSigma()
 }
 
 MFAMRCellData&
-FieldSolver::getResidue()
-{
-  CH_TIME("FieldSolver::getResidue()");
-  if (m_verbosity > 5) {
-    pout() << "FieldSolver::getResidue()" << endl;
-  }
-
-  return m_residue;
-}
-
-MFAMRCellData&
 FieldSolver::getPermittivityCell()
 {
   CH_TIME("FieldSolver::getPermittivityCell()");
@@ -2134,7 +2112,6 @@ FieldSolver::aliasState(const FieldSolver& a_owner)
   m_electricField    = a_owner.m_electricField;
   m_rho              = a_owner.m_rho;
   m_sigma            = a_owner.m_sigma;
-  m_residue          = a_owner.m_residue;
   m_permittivityCell = a_owner.m_permittivityCell;
   m_permittivityFace = a_owner.m_permittivityFace;
   m_permittivityEB   = a_owner.m_permittivityEB;

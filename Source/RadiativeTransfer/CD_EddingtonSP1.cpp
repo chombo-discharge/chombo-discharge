@@ -568,9 +568,7 @@ EddingtonSP1::allocate()
   m_amr->allocate(m_helmBcoIrreg, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_resid, m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(m_resid, 0.0);
   DataOps::setValue(m_phi, 0.0);
   DataOps::setValue(m_source, 0.0);
 
@@ -590,7 +588,6 @@ EddingtonSP1::deallocate()
   m_helmBcoIrreg.clear();
   m_phi.clear();
   m_source.clear();
-  m_resid.clear();
 }
 
 void
@@ -669,11 +666,12 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     this->setupSolver();
   }
 
-  EBAMRCellData zero;
-  EBAMRCellData scaledSource;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(zero, m_realm, m_phase, 1);
-  m_amr->allocate(scaledSource, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> zero         = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
+  Scratch<EBAMRCellData> scaledSource = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
+
+  DataOps::setValue(zero, 0.0);
 
   // Modify the source term.  Operator is scaled by kappa and source term might also have to be scaled by kappa
   // Source should be scaled by 1./c0 (due to the way we do the EBHelmholtzOp coefficients)
@@ -687,6 +685,12 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
       DataOps::kappaScale(scaledSource, m_amr->getVofIterator(m_realm, m_phase));
     }
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing, because Chombo is not too smart.
     Vector<LevelData<EBCellFAB>*> phi;
     Vector<LevelData<EBCellFAB>*> rhs;
@@ -694,9 +698,9 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(phi, a_phi);
-    m_amr->alias(rhs, scaledSource);
-    m_amr->alias(res, m_resid);
-    m_amr->alias(zer, zero);
+    m_amr->alias(rhs, *scaledSource);
+    m_amr->alias(res, *residual);
+    m_amr->alias(zer, *zero);
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
@@ -803,11 +807,10 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
     this->setupSolver();
   }
 
-  EBAMRCellData zero;
-  EBAMRCellData scratch;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(zero, m_realm, m_phase, 1);
-  m_amr->allocate(scratch, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> zero    = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
 
   // Make the right-hand side for the Euler equation advance. First compute kappa*acoef*(phi^k) + dt*kappa*S, which
   // is the right-hand side of our system.
@@ -821,7 +824,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   for (int i = 0; i < amrOps.size(); i++) {
     auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
-    helmholtzOperator->diagonalScale(*scratch[i], false);
+    helmholtzOperator->diagonalScale(*(*scratch)[i], false);
   }
 
   // Set coefficients for multigrid solve.
@@ -842,8 +845,8 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   Vector<LevelData<EBCellFAB>*> zer;
 
   m_amr->alias(newPhi, a_phi);
-  m_amr->alias(eulerRHS, scratch);
-  m_amr->alias(zer, zero);
+  m_amr->alias(eulerRHS, *scratch);
+  m_amr->alias(zer, *zero);
 
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
@@ -1216,11 +1219,10 @@ EddingtonSP1::setupMultigrid()
   m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
-  EBAMRCellData dummy1;
-  EBAMRCellData dummy2;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(dummy1, m_realm, m_phase, m_nComp);
-  m_amr->allocate(dummy2, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> dummy1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, m_nComp, ghost);
+  Scratch<EBAMRCellData> dummy2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, m_nComp, ghost);
 
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
@@ -1229,8 +1231,8 @@ EddingtonSP1::setupMultigrid()
   Vector<LevelData<EBCellFAB>*> phi;
   Vector<LevelData<EBCellFAB>*> rhs;
 
-  m_amr->alias(phi, dummy1);
-  m_amr->alias(rhs, dummy2);
+  m_amr->alias(phi, *dummy1);
+  m_amr->alias(rhs, *dummy2);
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
@@ -1353,8 +1355,10 @@ EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
   // We happen that our discretization uses Aco = kappa, so we just divide by it rather than computing
   // it on the mesh again.
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
 
   DataOps::copy(scratch, a_phi);
   m_amr->interpGhostMG(scratch, m_realm, m_phase);
@@ -1393,7 +1397,7 @@ EddingtonSP1::writePlotFile()
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
 
-  const int      ncomps = 3 + SpaceDim;
+  const int      ncomps = 2 + SpaceDim;
   Vector<string> names(ncomps);
   names[0] = "density";
   names[1] = "x-flux";
@@ -1401,16 +1405,16 @@ EddingtonSP1::writePlotFile()
   if (SpaceDim == 3) {
     names[3] = "z-flux";
     names[4] = "isotropic source";
-    names[5] = "residue";
   }
   else {
     names[3] = "isotropic source";
-    names[4] = "residue";
   }
 
   // Compute the flux
-  EBAMRCellData flux;
-  m_amr->allocate(flux, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> flux = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                   m_phase,
+                                                                   SpaceDim,
+                                                                   m_amr->getNumberOfGhostCells());
   this->computeFlux(flux, m_phi);
 
   // Allocate output storage
@@ -1420,21 +1424,15 @@ EddingtonSP1::writePlotFile()
   // Copy data to put data holder
   m_amr->copyData(output, m_phi, Interval(0, 0), Interval(0, 0), CopyStrategy::ValidGhost, CopyStrategy::ValidGhost);
   m_amr->copyData(output,
-                  flux,
-                  Interval(0, SpaceDim - 1),
+                  *flux,
                   Interval(1, SpaceDim),
+                  Interval(0, SpaceDim - 1),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
   m_amr->copyData(output,
                   m_source,
-                  Interval(0, 0),
                   Interval(1 + SpaceDim, 1 + SpaceDim),
-                  CopyStrategy::ValidGhost,
-                  CopyStrategy::ValidGhost);
-  m_amr->copyData(output,
-                  m_resid,
                   Interval(0, 0),
-                  Interval(2 + SpaceDim, 2 + SpaceDim),
                   CopyStrategy::ValidGhost,
                   CopyStrategy::ValidGhost);
 

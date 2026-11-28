@@ -136,18 +136,10 @@ FieldSolverMG::parseSolverSettings()
 
     m_amg->m_ebOrder  = m_bcOrder;
     m_amg->m_ebWeight = m_bcWeight;
-
-    // When the fallback is switched on at run time, the solver data is already allocated, and the storage for the
-    // initial guess is allocated here. Otherwise allocate() allocates it.
-    if (m_phiStart.size() == 0 && m_potential.size() > 0) {
-      m_amr->allocate(m_phiStart, m_realm, m_nComp);
-    }
   }
   else {
     m_amg        = RefCountedPtr<FieldSolverAMG>();
     m_amgLatched = false;
-
-    m_phiStart.clear();
   }
 #else
   (void)amgRetryInterval;
@@ -201,12 +193,6 @@ FieldSolverMG::allocate()
 
   FieldSolver::allocate();
 
-#ifdef CH_USE_PETSC
-  if (m_amgFallback) {
-    m_amr->allocate(m_phiStart, m_realm, m_nComp);
-  }
-#endif
-
   this->syncSolvers();
 }
 
@@ -225,10 +211,6 @@ FieldSolverMG::deallocate()
   m_solverPermCell.clear();
   m_solverPermFace.clear();
   m_solverPermEB.clear();
-
-#ifdef CH_USE_PETSC
-  m_phiStart.clear();
-#endif
 
   // The solvers must not keep the old data alive.
   this->syncSolvers();
@@ -379,7 +361,12 @@ FieldSolverMG::solve(MFAMRCellData& a_phi, const MFAMRCellData& a_rho, const EBA
     }
 
     if (tryGMG) {
-      DataOps::copy(m_phiStart, a_phi);
+      // Initial guess of this solve. Algebraic multigrid starts from it when geometric multigrid fails.
+      Scratch<MFAMRCellData> phiStart = m_amr->fetchScratch<MFAMRCellData>(m_realm,
+                                                                           m_nComp,
+                                                                           m_amr->getNumberOfGhostCells());
+
+      DataOps::copy(phiStart, a_phi);
 
       if (m_gmg->solve(a_phi, a_rho, a_sigma, false)) {
         if (m_amgLatched) {
@@ -393,7 +380,7 @@ FieldSolverMG::solve(MFAMRCellData& a_phi, const MFAMRCellData& a_rho, const EBA
       }
 
       // Algebraic multigrid starts from the same initial guess as geometric multigrid did.
-      DataOps::copy(a_phi, m_phiStart);
+      DataOps::copy(a_phi, phiStart);
 
       if (!m_amgLatched) {
         pout() << "FieldSolverMG::solve -- geometric multigrid did not converge; falling back to algebraic multigrid"

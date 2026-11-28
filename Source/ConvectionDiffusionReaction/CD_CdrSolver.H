@@ -296,14 +296,6 @@ public:
   gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi, const Real a_dt);
 
   /**
-   * @brief Average velocities to faces
-   * @note This takes the cell-centered velocities in m_cellVelocity and averages them onto m_faceVelocity. Only the
-   * velocity component normal to the face is stored in m_faceVelocity.
-   */
-  virtual void
-  averageVelocityToFaces();
-
-  /**
    * @brief Perform pre-regrid operations.
    * @param[in] a_lbase          Coarsest level that changed during regrid.
    * @param[in] a_oldFinestLevel Finest grid level before the regrid operation.
@@ -691,13 +683,6 @@ public:
   getCellCenteredVelocity();
 
   /**
-   * @brief Get the face-centered velocities
-   * @return m_faceVelocity
-   */
-  virtual EBAMRFluxData&
-  getFaceCenteredVelocity();
-
-  /**
    * @brief Get the eb-centered velocities
    * @return m_ebVelocity
    */
@@ -849,18 +834,6 @@ protected:
   EBAMRCellData m_cellVelocity;
 
   /**
-   * @brief Holder for face centered states
-   * @note Memory is only allocated if the solver is mobile.
-   */
-  EBAMRFluxData m_faceStates;
-
-  /**
-   * @brief Face-centered velocities (only normal components)
-   * @note Memory is only allocated if the solver is mobile.
-   */
-  EBAMRFluxData m_faceVelocity;
-
-  /**
    * @brief Cut-cell stabilization of the explicit divergences. Rebuilt in allocate().
    */
   RefCountedPtr<EBRedistribution> m_redistribution;
@@ -1005,7 +978,8 @@ protected:
    * @param[out] a_faceVelocity Face-centered velocities
    * @param[in]  a_cellVelocity Cell-centered velocities
    * @note This sets the velocity component normal to the face to be the arithmetic average of the cell center
-   * velocities on the low/high side of the face.
+   * velocities on the low/high side of the face. Faces farther than one tangential ghost cell from the valid region
+   * are set to zero, or to a huge value in debug builds.
    * @note Virtual because some solvers might want to do this differently.
    */
   virtual void
@@ -1013,13 +987,18 @@ protected:
 
   /**
    * @brief Advection-only extrapolation to faces.
-   * @param[out] a_facePhi  Phi on faces
-   * @param[in]  a_phi      Phi on cell center
-   * @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
-   * @param[in]  a_dt       Time step of the update that the face states enter, or 0 if they enter no update.
+   * @param[out] a_facePhi      Phi on faces
+   * @param[in]  a_phi          Phi on cell center
+   * @param[in]  a_faceVelocity Face-centered velocities (normal component), from averageVelocityToFaces.
+   * @param[in]  a_extrapDt     Time centering/extrapolation (if the advective integrator can do it)
+   * @param[in]  a_dt           Time step of the update that the face states enter, or 0 if they enter no update.
    */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt, const Real a_dt) = 0;
+  advectToFaces(EBAMRFluxData&       a_facePhi,
+                const EBAMRCellData& a_phi,
+                const EBAMRFluxData& a_faceVelocity,
+                const Real           a_extrapDt,
+                const Real           a_dt) = 0;
 
   /**
    * @brief Set up face-centered advection flux.

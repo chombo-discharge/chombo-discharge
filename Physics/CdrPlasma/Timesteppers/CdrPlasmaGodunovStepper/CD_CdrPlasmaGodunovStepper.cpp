@@ -873,8 +873,10 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
   Vector<EBAMRIVData*>   cdrGradientsEB; // Extrapolation of cdrGradients to the EB
 
   // Scratch storage for holding a gradient at the EB
-  EBAMRIVData gradientEB;
-  m_amr->allocate(gradientEB, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIVData> gradientEB = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                     m_cdr->getPhase(),
+                                                                     SpaceDim,
+                                                                     m_amr->getNumberOfGhostCells());
 
   // Run through the solvers and fetch the various data used for the extrapolation.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {

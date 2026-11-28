@@ -345,40 +345,6 @@ protected:
   Vector<EBAMRCellData> m_cdrDivD;
 
   /**
-   * @brief Storage for the electric field that the chemistry is evaluated at.
-   * @details This holds E^k from the top of advance() until the transport step is done, and is then turned
-   * into the interpolant (1-theta)*E^k + theta*E^(k+1) that is handed to advanceReactionNetwork.
-   */
-  EBAMRCellData m_reactiveElectricField;
-
-  /**
-   * @brief Particle-realm accumulator for per-species sums, one component.
-   * @details computeCellConductivity() and computeSemiImplicitRho() both form a charge-weighted sum over
-   * the Ito species and then hand the result to the fluid realm. Summing on the particle realm and crossing
-   * once costs one cross-realm Copier exchange instead of one per species. Not simultaneously live with
-   * ItoKMCStepper::m_particleScratch1, which is the deposition target the sum is accumulated from.
-   */
-  EBAMRCellData m_particleScratchSum;
-
-  /**
-   * @brief Deposition target on the particle realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_particleScratchSolid;
-
-  /**
-   * @brief Per-species accumulator on the particle realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_particleScratchSumSolid;
-
-  /**
-   * @brief Cross-realm landing buffer on the fluid realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_fluidScratchSolid;
-
-  /**
    * @brief Allocate "internal" storage.
    */
   virtual void
