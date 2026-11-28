@@ -10,6 +10,11 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <limits>
+#include <memory>
+#include <sstream>
+
 // Chombo includes
 #include <BRMeshRefine.H>
 #include <ParmParse.H>
@@ -4482,6 +4487,81 @@ AmrMesh::getBoxSorting() const
   }
 
   return m_boxSort;
+}
+
+void
+AmrMesh::assertRealm(const std::string& a_realm, const std::string& a_caller) const
+{
+  if (!(this->queryRealm(a_realm))) {
+    const std::string err = a_caller + " -- could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(err.c_str());
+  }
+}
+
+Scratch<LevelData<EBCellFAB>>
+AmrMesh::fetchLevelScratch(const std::string&       a_realm,
+                           const phase::which_phase a_phase,
+                           const int                a_level,
+                           const int                a_nComp,
+                           const int                a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchLevelScratch");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchLevelScratch" << endl;
+  }
+
+  if (a_level < 0 || a_level > m_finestLevel) {
+    const std::string err = "AmrMesh::fetchLevelScratch -- level " + std::to_string(a_level) + " is not in [0, " +
+                            std::to_string(m_finestLevel) + "]";
+
+    MayDay::Abort(err.c_str());
+  }
+
+  auto build = [this, &a_realm, a_phase, a_level, a_nComp, a_ghost]() -> std::unique_ptr<LevelData<EBCellFAB>> {
+    std::unique_ptr<LevelData<EBCellFAB>> data(new LevelData<EBCellFAB>());
+
+    this->allocate(*data, a_realm, a_phase, a_level, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  return this->fetchFromPool<LevelData<EBCellFAB>>(a_realm,
+                                                   a_phase,
+                                                   a_level,
+                                                   a_nComp,
+                                                   a_ghost,
+                                                   build,
+                                                   "AmrMesh::fetchLevelScratch");
+}
+
+void
+AmrMesh::assertScratchReturned() const
+{
+  CH_TIME("AmrMesh::assertScratchReturned");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::assertScratchReturned" << endl;
+  }
+
+  bool allReturned = true;
+
+  for (const auto& r : m_realms) {
+    allReturned = allReturned && r.second->getScratchPool().allReturned();
+  }
+
+  if (!allReturned) {
+    std::ostringstream os;
+
+    os << "AmrMesh::assertScratchReturned -- temporaries are still in use:\n";
+
+    for (const auto& r : m_realms) {
+      os << " realm '" << r.first << "':\n";
+
+      r.second->getScratchPool().report(os, "  ");
+    }
+
+    MayDay::Abort(os.str().c_str());
+  }
 }
 
 #include <CD_NamespaceFooter.H>

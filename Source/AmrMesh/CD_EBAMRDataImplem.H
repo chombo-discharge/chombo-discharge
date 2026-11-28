@@ -24,7 +24,6 @@ template <typename T>
 EBAMRData<T>::EBAMRData() noexcept
 {
   CH_TIME("EBAMRData<T>::EBAMRData()");
-  m_reserved = false;
 }
 
 template <typename T>
@@ -78,27 +77,6 @@ EBAMRData<T>::clear() noexcept
   }
 
   m_data.resize(0);
-}
-
-template <typename T>
-void
-EBAMRData<T>::reserve() noexcept
-{
-  m_reserved = true;
-}
-
-template <typename T>
-void
-EBAMRData<T>::release() noexcept
-{
-  m_reserved = false;
-}
-
-template <typename T>
-bool
-EBAMRData<T>::isReserved() const noexcept
-{
-  return m_reserved;
 }
 
 template <typename T>

@@ -25,6 +25,7 @@
 #include <CD_LevelTiles.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_PetscGrid.H>
+#include <CD_ScratchPool.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -150,6 +151,14 @@ public:
    */
   void
   preRegrid();
+
+  /**
+   * @brief Get the pool of temporaries on this realm.
+   * @details The pool is emptied whenever the grids change (define, setGrids, preRegrid).
+   * @return The scratch pool
+   */
+  ScratchPool&
+  getScratchPool() noexcept;
 
   /**
    * @brief Regrid method for EBAMR base
@@ -858,6 +867,11 @@ protected:
    * @brief Masks
    */
   std::map<std::pair<std::string, int>, AMRMask> m_masks;
+
+  /**
+   * @brief Pool of temporaries on this realm, built on the current grids.
+   */
+  ScratchPool m_scratchPool;
 
   /**
    * @brief Define MFLevelGrid

@@ -994,6 +994,10 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       if (!m_cellTagger.isNull()) {
         m_cellTagger->parseRuntimeOptions();
       }
+
+      // No temporary may be held from one time step to the next. Checked at the end of the step, so that the regrid,
+      // the time step computation, the advance and the output of the step are all covered.
+      m_amr->assertScratchReturned();
     }
   }
 
