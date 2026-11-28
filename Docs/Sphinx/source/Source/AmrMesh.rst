@@ -172,5 +172,4 @@ The following rules apply:
 * References and aliases taken from a handle must not outlive it. A shallow copy of the data that outlives its handle makes the pool abort when the handle is destroyed. Aliases made with ``AmrMesh::alias``, ``EBAMRData::slice`` or ``aliasLevelData`` are not detected.
 * The pool is emptied whenever the grids change, so a handle cannot be held across a regrid.
 
-Setting ``AmrMesh.scratch_poison = true`` fills every fetched temporary with NaN, which shows reads of values that were never written.
-Setting ``AmrMesh.scratch_report = true`` writes the pool contents to ``pout`` before every regrid.
+In debug builds every fetched temporary is filled with NaN, which shows reads of values that were never written.
