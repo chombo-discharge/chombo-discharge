@@ -4560,10 +4560,6 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
                                 const Real a_time,
                                 const Real /*a_kappa*/) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::getPlotVariables" << endl;
-  }
-
   Vector<Real> ret(0);
 
   // God how I hate the Chombo Vector.
@@ -4701,10 +4697,6 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
                                               const RealVect&          a_E,
                                               const std::vector<Real>& a_cdrDensities) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computePlasmaSpeciesMobilities" << endl;
-  }
-
   // Get E/N .
   const Real E   = a_E.vectorLength();
   const Real N   = m_gasDensity(a_position);
@@ -4780,10 +4772,6 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect&          a_pos,
                                              const RealVect&          a_E,
                                              const std::vector<Real>& a_cdrDensities) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computePlasmaSpeciesDiffusion" << endl;
-  }
-
   std::vector<Real> diffusionCoefficients(m_numCdrSpecies, 0.0);
 
   const Real E   = a_E.vectorLength();
@@ -4858,10 +4846,6 @@ CdrPlasmaJSON::computePlasmaSpeciesTemperatures(const RealVect&          a_posit
                                                 const RealVect&          a_E,
                                                 const std::vector<Real>& a_cdrDensities) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computePlasmaSpeciesTemperatures" << endl;
-  }
-
   // First, compute energies in electron volts.
   std::vector<Real> temperatures = this->computePlasmaSpeciesEnergies(a_position, a_E, a_cdrDensities);
 
@@ -4880,10 +4864,6 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
                                             const RealVect&          a_E,
                                             const std::vector<Real>& a_cdrDensities) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computePlasmaSpeciesEnergies" << endl;
-  }
-
   // Electric field and neutral density.
   const Real N   = m_gasDensity(a_position);
   const Real E   = a_E.vectorLength();
@@ -5204,10 +5184,6 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
                                       const Real              a_time,
                                       const Real              a_kappa) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::advanceReactionNetwork" << endl;
-  }
-
   // I really hate Chombo sometimes.
   std::vector<Real>& cdrSources = a_cdrSources.stdVector();
   std::vector<Real>& rteSources = a_rteSources.stdVector();
@@ -5282,11 +5258,6 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real /*a_time*/,
                                          const RealVect&     a_E,
                                          const Vector<Real>& a_cdrDensities) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrDriftVelocities");
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computeCdrDriftVelocities" << endl;
-  }
-
   // I really hate Chombo sometimes.
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
@@ -5329,11 +5300,6 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real /*a_time*/,
                                                const RealVect&     a_E,
                                                const Vector<Real>& a_cdrDensities) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrDiffusionCoefficients");
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computeCdrDiffusionCoefficients" << endl;
-  }
-
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
   // Compute diffusion coefficients.
@@ -5353,11 +5319,6 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
                                          const Vector<Real>& a_rteFluxes,
                                          const Vector<Real>& a_extrapCdrFluxes) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrElectrodeFluxes");
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computeCdrElectrodeFluxes" << endl;
-  }
-
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5502,9 +5463,6 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
                                           const Vector<Real>& a_rteFluxes,
                                           const Vector<Real>& a_extrapCdrFluxes) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computeCdrDielectricFluxes" << endl;
-  }
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5543,7 +5501,6 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma
   // species and photon species.
   for (int i = 0; i < m_dielectricReactions.size(); i++) {
-
     // Get the reaction and lookup method.
     const LookupMethod&                 method   = m_dielectricReactionLookup.at(i);
     const CdrPlasmaSurfaceReactionJSON& reaction = m_dielectricReactions[i];
@@ -5649,10 +5606,6 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
                                       const Vector<Real>& a_rteFluxes,
                                       const Vector<Real>& a_extrapCdrFluxes) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::computeCdrDomainFluxes" << endl;
-  }
-
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the domain. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5911,10 +5864,6 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
                                const Real a_time,
                                const Real /*a_kappa*/) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::fillSourceTerms" << endl;
-  }
-
   // These may or may not be needed.
   const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities(a_pos, a_E, a_cdrDensities);
   const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_pos, a_E, a_cdrDensities);
@@ -6063,10 +6012,6 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
                                                const Real                   a_time,
                                                const Real                   a_kappa) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::integrateReactionsExplicitEuler" << endl;
-  }
-
   std::vector<Real> cdrSources(m_numCdrSpecies, 0.0);
   std::vector<Real> rteSources(m_numRtSpecies, 0.0);
 
@@ -6094,10 +6039,6 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
                                              const Real                   a_kappa,
                                              const Real                   a_tableuAlpha) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::integrateReactionsRK2" << endl;
-  }
-
   const Real c1 = 1.0 - 1.0 / (2.0 * a_tableuAlpha);
   const Real c2 = 1.0 / (2.0 * a_tableuAlpha);
 
@@ -6138,10 +6079,6 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrD
                                              const Real                   a_time,
                                              const Real                   a_kappa) const
 {
-  if (m_verbose) {
-    pout() << "CdrPlasmaJSON::integrateReactionsRK4" << endl;
-  }
-
   // TLDR: We are integrating over an interval (a_time, a_time + a_dt). The integration rule for dy/dt = f(y,t) is
   //
   //          y(t+dt) = y0 + a_dt/6 * (k1 + 2*k2 + 2*k3 + k4)

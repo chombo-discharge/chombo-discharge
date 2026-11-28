@@ -3119,22 +3119,12 @@ AmrMesh::sanityCheck() const
 RealVect
 AmrMesh::getProbLo() const
 {
-  CH_TIME("AmrMesh::getProbLo()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getProbLo()" << endl;
-  }
-
   return m_probLo;
 }
 
 RealVect
 AmrMesh::getProbHi() const
 {
-  CH_TIME("AmrMesh::getProbHi()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getProbHi()" << endl;
-  }
-
   return m_probHi;
 }
 
@@ -3314,11 +3304,6 @@ AmrMesh::getFinestDx() const
 const Vector<Real>&
 AmrMesh::getDx() const
 {
-  CH_TIME("AmrMesh::getDx()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getDx()" << endl;
-  }
-
   return m_dx;
 }
 

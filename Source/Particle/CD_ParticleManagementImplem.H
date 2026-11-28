@@ -280,8 +280,6 @@ buildKDCellLeaves(const std::vector<P>&                           a_particles,
                   const BinaryParticleReconcile<P>&               a_particleReconcile,
                   std::vector<std::pair<const P*, const P*>>&     a_leaves) noexcept
 {
-  CH_TIME("ParticleManagement::buildKDCellLeaves");
-
   // Half-open particle range [lo, hi) into the flat working buffer, plus the node weight. This replaces
   // the old heap-allocated, shared_ptr-linked KDNode<P> (one alloc + atomic refcount per node).
   struct NodeRange
@@ -602,12 +600,6 @@ makeKDCellMerger(
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
 {
   return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
-    CH_TIMERS("ParticleManagement::makeKDCellMerger");
-    CH_TIMER("ParticleManagement::makeKDCellMerger::populate", t1);
-    CH_TIMER("ParticleManagement::makeKDCellMerger::build_kd", t2);
-    CH_TIMER("ParticleManagement::makeKDCellMerger::scatter", t3);
-
-    CH_START(t1);
     thread_local std::vector<Packed> particles;
 
     particles.clear();
@@ -620,7 +612,6 @@ makeKDCellMerger(
       W += p.*packWeight;
       particles.emplace_back(std::move(p));
     }
-    CH_STOP(t1);
 
     if (W < 2.0 || a_ppc <= 0) {
       return;
@@ -644,7 +635,6 @@ makeKDCellMerger(
       return detail::kdSplitDisplace(a_splitPlacement, a_parent, cellLo, dxCell * RealVect::Unit, spacing);
     };
 
-    CH_START(t2);
     thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
 
     // The crossover is given in cell widths, so it becomes a length only once the cell is known.
@@ -655,14 +645,11 @@ makeKDCellMerger(
                                                                 splitPosition,
                                                                 a_reconcile,
                                                                 leaves);
-    CH_STOP(t2);
 
-    CH_START(t3);
     a_particles.clear();
     for (const auto& leaf : leaves) {
       a_scatterLeaf(a_particles, leaf.first, leaf.second, a_cellInfo);
     }
-    CH_STOP(t3);
   };
 }
 
@@ -673,8 +660,6 @@ makeReinitializeMerger(std::function<std::pair<long long, Context>(const Particl
                        std::function<RealVect()> a_probLo) noexcept
 {
   return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
-    CH_TIME("ParticleManagement::makeReinitializeMerger");
-
     if (a_ppc <= 0) {
       return;
     }

@@ -20,8 +20,6 @@
 Real
 FieldSolver::getDielectricPermittivity(const RealVect& a_pos) const
 {
-  CH_TIME("FieldSolver::getDielectricPermittivity(RealVect a_pos)");
-
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
   Real relPerm = 0.0;

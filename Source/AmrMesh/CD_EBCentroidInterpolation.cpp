@@ -163,8 +163,6 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
                                           const EBISBox&       a_ebisBox,
                                           const ProblemDomain& a_domain) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getLinearStencil");
-
   const bool foundStencil = LinearStencil::getLinearInterpStencil(a_stencil,
                                                                   a_ebisBox.bndryCentroid(a_vof),
                                                                   a_vof,
@@ -180,8 +178,6 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil
                                                        const EBISBox&  a_ebisBox,
                                                        const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
-
   const int order = EBArith::getFirstOrderExtrapolationStencil(a_stencil,
                                                                a_ebisBox.bndryCentroid(a_vof) * m_dx,
                                                                m_dx * RealVect::Unit,
@@ -200,8 +196,6 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
                                                 const EBISBox&  a_ebisBox,
                                                 const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getLeastSquaresStencil");
-
   const int radius = 1;
   const int order  = 1;
   const int weight = 0;
@@ -228,8 +222,6 @@ EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
                                                    const EBISBox&  a_ebisBox,
                                                    const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getPiecewiseLinearStencil");
-
   a_stencil.clear();
   a_stencil.add(a_vof, 1.0);
 

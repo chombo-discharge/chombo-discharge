@@ -3765,8 +3765,6 @@ DataOps::vectorLength2(EBCellFAB&       a_lhs,
 void
 DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect& a_normal, const RealVect& a_centroid)
 {
-  CH_TIME("DataOps::computeMinValidBox");
-
   // TLDR: A stupid routine. The below code shifts planes until we "hit" the EB, but we
   //       should be able to compute up with a way better method of doing this.
 
@@ -3832,8 +3830,6 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect& a_no
 bool
 DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect& a_normal, const RealVect& a_centroid)
 {
-  CH_TIME("DataOps::allCornersInsideEb");
-
   bool ret = true;
 
   // If any point it outside the EB, i.e. inside the domain boundary, return false.
@@ -3849,8 +3845,6 @@ DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect& a
 void
 DataOps::shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance)
 {
-  CH_TIME("DataOps::shiftCorners");
-
   for (int i = 0; i < a_corners.size(); i++) {
     a_corners[i] += a_distance;
   }

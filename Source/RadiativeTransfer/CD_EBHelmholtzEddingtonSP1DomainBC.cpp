@@ -127,8 +127,6 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
                                              const DataIndex&      a_dit,
                                              const bool            a_useHomogeneous) const
 {
-  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(irreg)");
-
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
