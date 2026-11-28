@@ -463,14 +463,15 @@ The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and 
 Adjusting output
 ________________
 
-The user may plot the potential, the space charge, the electric field, and the residual as follows:
+The user may plot the potential, the space charge, and the electric field as follows:
 
 .. code-block:: text
 
-   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+   FieldSolverGMG.plt_vars  = phi rho E     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 
 The remaining variables are the permittivity (``perm``), the surface charge (``sigma``), and the electric field in the solid phase (``Esol``).
 A name that is not in this list aborts the run.
+The solvers do not store the residual, so it cannot be plotted, and listing ``res`` aborts the run.
 
 .. _Chap:PoissonDielectricBC:   
 
@@ -555,7 +556,6 @@ With ``verbosity`` above 1, each solve ends with a summary in the same form as `
 
 where ``rel.res`` is the true residual :math:`|b - Ax|_2` of the volume-weighted system relative to the zero-residual :math:`|b|_2`, and ``unweighted rel.res`` the same with the row weights removed from both.
 ``|r|`` and ``|r_zero|`` are the weighted norms.
-The residual that is plotted (``res``) is unweighted.
 
 Any other PETSc option can be given with the prefix ``fieldsolveramg_`` through the ``PETSC_OPTIONS`` environment variable, e.g.
 
@@ -592,7 +592,7 @@ How it works
 ____________
 
 ``FieldSolverMG`` holds a ``FieldSolverGMG`` and, in PETSc builds, a ``FieldSolverAMG``.
-The two solvers share the data of ``FieldSolverMG`` (the potential, the space and surface charge, the electric field, the residue and the permittivities), and they read their options from the ``FieldSolverMG`` block of the input file.
+The two solvers share the data of ``FieldSolverMG`` (the potential, the space and surface charge, the electric field and the permittivities), and they read their options from the ``FieldSolverMG`` block of the input file.
 The boundary conditions, the interface condition, the plot variables and the embedded-boundary stencils are therefore given once, and agree in the two solvers.
 
 Each solve goes through the geometric multigrid solver chain first (``gmg_solver``, e.g. ``gmg bicgstab``, see :ref:`Chap:MultigridTuning`).

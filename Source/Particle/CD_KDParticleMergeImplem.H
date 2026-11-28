@@ -906,10 +906,9 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
   const RealVect    probLo      = a_amr.getProbLo();
 
   // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
-  // cell data, and this is what the rest of the code uses for cell data. The caller owns the holders
-  // so they are allocated once per regrid rather than once per call -- AmrMesh::allocate() builds a
-  // Copier per level, which is cheap in isolation but adds up at scale. Their one ghost cell is what
-  // the gathered ghosts and any just-outside leaf centroid need.
+  // cell data, and this is what the rest of the code uses for cell data. The caller owns the holders,
+  // so they can come from the AmrMesh scratch pool rather than being allocated on every call. Their one
+  // ghost cell is what the gathered ghosts and any just-outside leaf centroid need.
   EBAMRFAB& histogram = a_cellHistogram;
   EBAMRFAB& leafQuota = a_leafQuota;
 

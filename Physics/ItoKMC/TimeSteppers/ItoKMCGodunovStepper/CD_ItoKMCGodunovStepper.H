@@ -340,45 +340,6 @@ protected:
   EBAMRCellData m_scratchSemiImplicitConductivityCDR;
 
   /**
-   * @brief Storage for the conservative finite-volume approximation of kappa*div(D*grad(phi)) for the CDR equations.
-   */
-  Vector<EBAMRCellData> m_cdrDivD;
-
-  /**
-   * @brief Storage for the electric field that the chemistry is evaluated at.
-   * @details This holds E^k from the top of advance() until the transport step is done, and is then turned
-   * into the interpolant (1-theta)*E^k + theta*E^(k+1) that is handed to advanceReactionNetwork.
-   */
-  EBAMRCellData m_reactiveElectricField;
-
-  /**
-   * @brief Particle-realm accumulator for per-species sums, one component.
-   * @details computeCellConductivity() and computeSemiImplicitRho() both form a charge-weighted sum over
-   * the Ito species and then hand the result to the fluid realm. Summing on the particle realm and crossing
-   * once costs one cross-realm Copier exchange instead of one per species. Not simultaneously live with
-   * ItoKMCStepper::m_particleScratch1, which is the deposition target the sum is accumulated from.
-   */
-  EBAMRCellData m_particleScratchSum;
-
-  /**
-   * @brief Deposition target on the particle realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_particleScratchSolid;
-
-  /**
-   * @brief Per-species accumulator on the particle realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_particleScratchSumSolid;
-
-  /**
-   * @brief Cross-realm landing buffer on the fluid realm, solid phase. One component.
-   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
-   */
-  EBAMRCellData m_fluidScratchSolid;
-
-  /**
    * @brief Allocate "internal" storage.
    */
   virtual void
@@ -515,14 +476,19 @@ protected:
 
   /**
    * @brief Compute all conductivities (cell, face, and EB) from the input point particles
-   * @param[in] a_particles Particles to deposit. Particle weights must hold the mobility*weight
-   * @param[in] a_useStoredCdrConductivity If true, take the CDR contribution from
+   * @param[out] a_conductivityCell Cell-centered conductivity
+   * @param[out] a_conductivityFace Face-centered conductivity
+   * @param[out] a_conductivityEB   EB-centered conductivity
+   * @param[in]  a_particles Particles to deposit. Particle weights must hold the mobility*weight
+   * @param[in]  a_useStoredCdrConductivity If true, take the CDR contribution from
    * m_semiImplicitConductivityCDR as it stands; if false, recompute it first through computeCdrConductivity.
-   * @note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace.
    * @note Also adds in the conductive contribution from the CDR solvers.
    */
   virtual void
-  computeConductivities(const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  computeConductivities(EBAMRCellData&                                             a_conductivityCell,
+                        EBAMRFluxData&                                             a_conductivityFace,
+                        EBAMRIVData&                                               a_conductivityEB,
+                        const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
                         const bool                                                 a_useStoredCdrConductivity) noexcept;
 
   /**
@@ -539,11 +505,15 @@ protected:
                           const bool a_useStoredCdrConductivity) noexcept;
 
   /**
-   * @brief Compute the cell-centered conductivity
-   * @note Interpolates m_conductivityCell to m_conductivityFace
+   * @brief Compute the face- and EB-centered conductivities from the cell-centered conductivity.
+   * @param[out] a_conductivityFace Face-centered conductivity
+   * @param[out] a_conductivityEB   EB-centered conductivity
+   * @param[in]  a_conductivityCell Cell-centered conductivity
    */
   virtual void
-  computeFaceConductivity() noexcept;
+  computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+                          EBAMRIVData&         a_conductivityEB,
+                          const EBAMRCellData& a_conductivityCell) noexcept;
 
   /**
    * @brief Set up the space charge density for the regrid operation
@@ -553,10 +523,15 @@ protected:
 
   /**
    * @brief Set up the semi-implicit Poisson solver
-   *         @param[in] a_dt Description
+   * @details Adds a_dt/eps0 times the conductivities to the field solver permittivities.
+   * @param[in] a_conductivityFace Face-centered conductivity
+   * @param[in] a_conductivityEB   EB-centered conductivity
+   * @param[in] a_dt               Time step
    */
   virtual void
-  setupSemiImplicitPoisson(const Real a_dt) noexcept;
+  setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
+                           const EBAMRIVData&   a_conductivityEB,
+                           const Real           a_dt) noexcept;
 
   /**
    * @brief Solve the electrostatic problem
@@ -611,13 +586,16 @@ protected:
   /**
    * @brief Compute the diffusion term for the CDR equations as well as the resulting CDR-contributions to
    * the space charge density.
-   * @details This does an explicit diffusion advance over a_dt for the diffusive CDR species. This also
-   *         @param[in,out] m_semiImplicitRhoCDR Description
-   *         @param[in] a_dt Description
-   * stores the resultant space charge on m_semiImplicitRhoCDR.
+   * @details This does an explicit diffusion advance over a_dt for the diffusive CDR species, and stores the
+   * resultant space charge on a_semiImplicitRhoCDR.
+   * @param[out] a_cdrDivD            kappa*div(D*grad(phi)) per CDR species. Null for species that do not diffuse.
+   * @param[out] a_semiImplicitRhoCDR Space charge density of the CDR species after the diffusion advance.
+   * @param[in]  a_dt                 Time step.
    */
   virtual void
-  computeDiffusionTermCDR(EBAMRCellData& m_semiImplicitRhoCDR, const Real a_dt) noexcept;
+  computeDiffusionTermCDR(Vector<EBAMRCellData*>& a_cdrDivD,
+                          EBAMRCellData&          a_semiImplicitRhoCDR,
+                          const Real              a_dt) noexcept;
 
   /**
    * @brief Step the particles according to the regular Euler-Maruyama scheme.
@@ -632,11 +610,12 @@ protected:
 
   /**
    * @brief Step the CDR equations according to the regular Euler-Maruyama scheme.
-   * @param[in] a_dt Time step.
    * @details This sets phi^(k+1) = phi^k - a_dt * div(v * phi) + a_dt * div(D*grad(phi))
+   * @param[in] a_cdrDivD kappa*div(D*grad(phi)) per CDR species, from computeDiffusionTermCDR.
+   * @param[in] a_dt      Time step.
    */
   virtual void
-  stepEulerMaruyamaCDR(const Real a_dt) noexcept;
+  stepEulerMaruyamaCDR(const Vector<EBAMRCellData*>& a_cdrDivD, const Real a_dt) noexcept;
 
   /**
    * @brief Utility function for plotting the ItoSolver particles. These are written in a particles folder

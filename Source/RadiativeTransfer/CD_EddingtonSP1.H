@@ -438,11 +438,6 @@ protected:
   EBAMRCellData m_cacheSrc;
 
   /**
-   * @brief Multigrid residue
-   */
-  EBAMRCellData m_resid;
-
-  /**
    * @brief a-coefficient
    */
   EBAMRCellData m_helmAco;

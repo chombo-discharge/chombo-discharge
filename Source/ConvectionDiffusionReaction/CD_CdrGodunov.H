@@ -102,6 +102,7 @@ protected:
    * @brief Godunov face extrapolation method for advection.
    * @param[out] a_facePhi  Phi on face centers.
    * @param[in]  a_cellPhi  Phi on cell centers.
+   * @param[in]  a_faceVelocity Face-centered velocities (normal component).
    * @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states.
    * @param[in]  a_dt       Time step of the update that the face states enter (not used).
    * @details This functions calls Chombo code which implements the Graves/Trebotich discretization.
@@ -109,6 +110,7 @@ protected:
   virtual void
   advectToFaces(EBAMRFluxData&       a_facePhi,
                 const EBAMRCellData& a_cellPhi,
+                const EBAMRFluxData& a_faceVelocity,
                 const Real           a_extrapDt,
                 const Real           a_dt) override;
 };

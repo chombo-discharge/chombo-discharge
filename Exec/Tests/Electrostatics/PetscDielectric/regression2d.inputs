@@ -77,7 +77,7 @@ FieldSolverGMG.bc.x.lo               = neumann 0.0      ## Bc type.
 FieldSolverGMG.bc.x.hi               = neumann 0.0      ## Bc type.
 FieldSolverGMG.bc.y.lo               = dirichlet 0.0    ## Bc type.
 FieldSolverGMG.bc.y.hi               = dirichlet 1.0    ## Bc type.
-FieldSolverGMG.plt_vars              = phi rho E res    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables. Possible vars are 'phi', 'rho', 'E'
 FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
@@ -156,7 +156,7 @@ FieldSolverAMG.bc.x.lo               = neumann 0.0      ## Bc type (see docs)
 FieldSolverAMG.bc.x.hi               = neumann 0.0      ## Bc type (see docs)
 FieldSolverAMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverAMG.bc.y.hi               = dirichlet 1.0    ## Bc type (see docs)
-FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'perm', 'sigma', 'Esol'
 FieldSolverAMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 
 FieldSolverAMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'

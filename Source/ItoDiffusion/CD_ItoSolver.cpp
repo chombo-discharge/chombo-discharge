@@ -198,8 +198,6 @@ ItoSolver::parseDiffusionGradient()
 
   ParmParse pp(m_className.c_str());
 
-  // Not a runtime option: the flag decides whether m_diffusionGradient is allocated at all, and allocate()
-  // runs once. Flipping it mid-run would leave the drift correction reading an unallocated field.
   pp.get("diffusion_grad_drift", m_diffusionGradientDrift);
 }
 
@@ -1154,23 +1152,13 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   // Mesh data -- always allocate it.
   m_amr->allocate(m_phi, m_realm, m_phase, ncomp);
 
-  // For "redistributed" particle deposition
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
-
-  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
-  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
-  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
-  // and valid cells that the regrid rebuilds.
+  // For mirrored cut-cell deposition. The images are rebuilt from scratch by every pass, so unlike the solver's
+  // particle containers they are simply reallocated here rather than remapped -- there is no state in them to carry
+  // across a regrid. The image container must be redefined at every regrid regardless, because remap() reads the level
+  // tiles and valid cells that the regrid rebuilds.
   if (m_irregularDeposition == IrregularDeposition::Mirror) {
-    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
     m_amr->allocate(m_mirrorImages, m_realm);
   }
-
-  // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
-  // ghost cell -- the shape those functions document.
-  m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
-  m_amr->allocate(m_kdMergeLeafQuota, m_realm, 1, 1);
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if (m_isMobile) {
@@ -1190,15 +1178,6 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
   }
 
-  // The grad(D) drift correction is the only consumer of the diffusion gradient, so skip the SpaceDim
-  // components per diffusive species when it is switched off.
-  if (m_isDiffusive && m_diffusionGradientDrift) {
-    m_amr->allocate(m_diffusionGradient, m_realm, m_phase, SpaceDim);
-  }
-  else {
-    m_amr->allocatePointer(m_diffusionGradient, m_realm);
-  }
-
   // Regrid particle containers. The bulk one is empty -- preRegrid() moved its particles into
   // m_regridParticles -- but it still has to make the trip, since ParticleContainer::regrid() is what
   // rebuilds its holders over the new layout.
@@ -1215,8 +1194,7 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   //
   // Safe to run the AMR-collective merges from here: Driver::regrid() calls AmrMesh::regridOperators()
   // before the time stepper's regrid, so the particle ghost masks exist and m_amr->getFinestLevel() is
-  // already the new finest level. The kd merges' mesh scratch (m_kdMergeCellHistogram/m_kdMergeLeafQuota)
-  // was allocated above.
+  // already the new finest level.
   {
     CH_TIME("ItoSolver::regrid::mergeRegridParticles");
 
@@ -1275,23 +1253,13 @@ ItoSolver::allocate()
   // Mesh data -- always allocate it.
   m_amr->allocate(m_phi, m_realm, m_phase, ncomp);
 
-  // For "redistributed" particle deposition
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
-
-  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
-  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
-  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
-  // and valid cells that the regrid rebuilds.
+  // For mirrored cut-cell deposition. The images are rebuilt from scratch by every pass, so unlike the solver's
+  // particle containers they are simply reallocated here rather than remapped -- there is no state in them to carry
+  // across a regrid. The image container must be redefined at every regrid regardless, because remap() reads the level
+  // tiles and valid cells that the regrid rebuilds.
   if (m_irregularDeposition == IrregularDeposition::Mirror) {
-    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
     m_amr->allocate(m_mirrorImages, m_realm);
   }
-
-  // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
-  // ghost cell -- the shape those functions document.
-  m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
-  m_amr->allocate(m_kdMergeLeafQuota, m_realm, 1, 1);
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if (m_isMobile) {
@@ -1309,15 +1277,6 @@ ItoSolver::allocate()
   }
   else {
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
-  }
-
-  // The grad(D) drift correction is the only consumer of the diffusion gradient, so skip the SpaceDim
-  // components per diffusive species when it is switched off.
-  if (m_isDiffusive && m_diffusionGradientDrift) {
-    m_amr->allocate(m_diffusionGradient, m_realm, m_phase, SpaceDim);
-  }
-  else {
-    m_amr->allocatePointer(m_diffusionGradient, m_realm);
   }
 
   // ParticleContainer is move-only-incapable, so default-construct each container in place (operator[])
@@ -1768,8 +1727,11 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, 1);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   1,
+                                                                   m_amr->getNumberOfGhostCells());
 
   // Write phi
   CH_START(t1);
@@ -1788,9 +1750,19 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
     this->writeData(a_output, a_comp, m_diffusionFunction, a_outputRealm, a_level, false, true);
   }
 
-  // Plot the diffusion gradient
+  // Plot the diffusion gradient, computed from the current diffusion field.
   if (m_plotDiffusionGradient && m_isDiffusive && m_diffusionGradientDrift) {
-    this->writeData(a_output, a_comp, m_diffusionGradient, a_outputRealm, a_level, false, true);
+    Scratch<EBAMRCellData> diffusionGradient = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                  m_phase,
+                                                                                  SpaceDim,
+                                                                                  m_amr->getNumberOfGhostCells());
+
+    // The plot includes ghost cells, and the corner ghost cells outside the domain are not written by the gradient.
+    DataOps::setValue(diffusionGradient, 0.0);
+
+    this->computeDiffusionGradient(diffusionGradient);
+
+    this->writeData(a_output, a_comp, diffusionGradient, a_outputRealm, a_level, false, true);
   }
 
   // Write velocities
@@ -1806,35 +1778,35 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotParticles) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Bulk), a_level);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
   if (m_plotParticlesEB) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::EB), a_level);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
   if (m_plotParticlesDomain) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Domain), a_level);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
   if (m_plotParticlesSource) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Source), a_level);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
   if (m_plotParticlesCovered) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Covered), a_level);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1846,13 +1818,16 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                                return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::energy>(a_i);
                              });
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
   if (m_plotAverageEnergy) {
-    LevelData<EBCellFAB> weight;
-    m_amr->allocate(weight, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> weight = m_amr->fetchLevelScratch(m_realm,
+                                                                    m_phase,
+                                                                    a_level,
+                                                                    1,
+                                                                    m_amr->getNumberOfGhostCells());
 
     this->depositWeightNGP(weight, m_particleContainers.at(WhichContainer::Bulk), a_level);
 
@@ -1866,7 +1841,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
     // Set scratch = totalEnergy/totalWeight
     DataOps::divideFallback(scratch, weight, 0.0, *m_amr->getMultiCutVofIterator(m_realm, m_phase)[a_level]);
 
-    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+    m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
     a_comp++;
   }
@@ -1896,14 +1871,17 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   const int numComp = a_data[a_level]->nComp();
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  scratch.exchange();
-  CH_START(t2);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  scratch->exchange();
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -1925,7 +1903,7 @@ ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   m_amr->copyData(a_output,
-                  scratch,
+                  *scratch,
                   a_level,
                   a_outputRealm,
                   m_realm,
@@ -2063,8 +2041,10 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  EBAMRCellData weight;
-  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> weight = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
 
   // Deposit weight*mu and weight
   this->depositGathered(a_phi,
@@ -2098,8 +2078,10 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  EBAMRCellData weight;
-  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> weight = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
 
   // Deposit weight*D and weight
   this->depositGathered(a_phi,
@@ -2134,8 +2116,10 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
   CH_assert(!a_particles.isOrganizedByCell());
 
   // Need scratch storage to deposit into
-  EBAMRCellData weight;
-  m_amr->allocate(weight, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> weight = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
 
   // Deposit weight*energy and weight
   this->depositGathered(a_phi,
@@ -2260,10 +2244,15 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
 
   if (m_irregularDeposition == IrregularDeposition::Redistribute ||
       m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
-    this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-    this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass difference
+    const int ghost = m_amr->getNumberOfGhostCells();
 
-    m_amr->redistributeMass(a_phi, m_massDiff, m_realm, m_phase);
+    Scratch<EBAMRIVData> depositionNC = m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, 1, ghost);
+    Scratch<EBAMRIVData> massDiff     = m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, 1, ghost);
+
+    this->depositNonConservative(depositionNC, a_phi);  // Compute depositionNC = sum(kappa*Wc)/sum(kappa)
+    this->depositHybrid(a_phi, massDiff, depositionNC); // Compute hybrid deposition, including mass difference
+
+    m_amr->redistributeMass(a_phi, massDiff, m_realm, m_phase);
   }
 }
 
@@ -2382,11 +2371,6 @@ ItoSolver::preRegrid(const int a_lbase, const int /*a_oldFinestLevel*/)
   m_mobilityFunction.clear();
   m_velocityFunction.clear();
   m_diffusionFunction.clear();
-  m_diffusionGradient.clear();
-  m_depositionNC.clear();
-  m_massDiff.clear();
-  m_kdMergeCellHistogram.clear();
-  m_kdMergeLeafQuota.clear();
 }
 
 ParticleContainer<ItoParticle>&
@@ -2674,8 +2658,10 @@ ItoSolver::interpolateMobilities()
     break;
   }
   case WhichMobilityInterpolation::Velocity: {
-    EBAMRCellData velocityMagnitude;
-    m_amr->allocate(velocityMagnitude, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> velocityMagnitude = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                  m_phase,
+                                                                                  1,
+                                                                                  m_amr->getNumberOfGhostCells());
 
     // Compute |v|
     DataOps::vectorLength(velocityMagnitude,
@@ -2696,7 +2682,7 @@ ItoSolver::interpolateMobilities()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        this->interpolateMobilitiesVelocity(lvl, din, (*velocityMagnitude[lvl])[din]);
+        this->interpolateMobilitiesVelocity(lvl, din, (*(*velocityMagnitude)[lvl])[din]);
       }
     }
 
@@ -2897,7 +2883,7 @@ ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit)
 }
 
 void
-ItoSolver::computeDiffusionGradient()
+ItoSolver::computeDiffusionGradient(EBAMRCellData& a_diffusionGradient) const
 {
   CH_TIME("ItoSolver::computeDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2905,19 +2891,19 @@ ItoSolver::computeDiffusionGradient()
   }
 
   if (m_isDiffusive && m_diffusionGradientDrift) {
-    CH_assert(m_diffusionGradient[0]->nComp() == SpaceDim);
+    CH_assert(a_diffusionGradient[0]->nComp() == SpaceDim);
 
     // Reaches into m_diffusionFunction's ghost cells and across refinement boundaries, so the caller is
     // responsible for having filled them.
-    m_amr->computeGradient(m_diffusionGradient, m_diffusionFunction, m_realm, m_phase);
+    m_amr->computeGradient(a_diffusionGradient, m_diffusionFunction, m_realm, m_phase);
 
-    m_amr->conservativeAverage(m_diffusionGradient, m_realm, m_phase);
-    m_amr->interpGhostPwl(m_diffusionGradient, m_realm, m_phase);
+    m_amr->conservativeAverage(a_diffusionGradient, m_realm, m_phase);
+    m_amr->interpGhostPwl(a_diffusionGradient, m_realm, m_phase);
   }
 }
 
 void
-ItoSolver::interpolateDiffusionGradient()
+ItoSolver::interpolateDiffusionGradient(const EBAMRCellData& a_diffusionGradient)
 {
   CH_TIME("ItoSolver::interpolateDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2934,13 +2920,13 @@ ItoSolver::interpolateDiffusionGradient()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      this->interpolateDiffusionGradient(lvl, din);
+      this->interpolateDiffusionGradient(lvl, din, (*a_diffusionGradient[lvl])[din]);
     }
   }
 }
 
 void
-ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit)
+ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_diffusionGradient)
 {
   CH_TIME("ItoSolver::interpolateDiffusionGradient");
   if (m_verbosity > 5) {
@@ -2957,14 +2943,12 @@ ItoSolver::interpolateDiffusionGradient(const int a_lvl, const DataIndex& a_dit)
     const Real           dx      = m_amr->getDx()[a_lvl];
     const RealVect       probLo  = m_amr->getProbLo();
 
-    const EBCellFAB& gradD = (*m_diffusionGradient[a_lvl])[a_dit];
-
     // Interpolate grad(D) onto the scratch vector columns, using the same interpolation the velocities get.
     EBParticleMesh meshInterp(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     meshInterp.interpolate<D_DECL(&ItoParticle::scratch_x, &ItoParticle::scratch_y, &ItoParticle::scratch_z)>(
       leaf,
-      gradD,
+      a_diffusionGradient,
       m_deposition,
       m_forceIrregInterpolationNGP);
   }
@@ -4725,14 +4709,18 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
                            m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
   };
 
+  // Per-cell scratch for the kd merges: one component and at least one ghost cell, the shape they document.
+  Scratch<EBAMRFAB> cellHistogram = m_amr->fetchScratch<EBAMRFAB>(m_realm, 1, 1);
+  Scratch<EBAMRFAB> leafQuota     = m_amr->fetchScratch<EBAMRFAB>(m_realm, 1, 1);
+
   // 3. Interior tier -- one local pass, no communication beyond the ghost fill it reads.
   renumber();
   fillWidthOneGhosts(merge);
 
   ParticleManagement::mergeKDInterior<ItoMergeParticle, Real>(merge,
                                                               interior,
-                                                              m_kdMergeCellHistogram,
-                                                              m_kdMergeLeafQuota,
+                                                              *cellHistogram,
+                                                              *leafQuota,
                                                               *m_amr,
                                                               numParticlesPerCellThresh,
                                                               this->kdWeightMedianCellWidths(),
@@ -4963,6 +4951,10 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
     return nextID++;
   };
 
+  // Per-cell scratch for the kd merges: one component and at least one ghost cell, the shape they document.
+  Scratch<EBAMRFAB> cellHistogram = m_amr->fetchScratch<EBAMRFAB>(m_realm, 1, 1);
+  Scratch<EBAMRFAB> leafQuota     = m_amr->fetchScratch<EBAMRFAB>(m_realm, 1, 1);
+
   // 3. Fresh ids, ghost fill, single merge pass.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -4991,8 +4983,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
 
     ParticleManagement::mergeKDCarve<ItoMergeParticle, Real>(merge,
-                                                             m_kdMergeCellHistogram,
-                                                             m_kdMergeLeafQuota,
+                                                             *cellHistogram,
+                                                             *leafQuota,
                                                              *m_amr,
                                                              a_numParticlesPerCellThresh,
                                                              this->kdWeightMedianCellWidths(),
@@ -5009,8 +5001,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
   }
   else {
     ParticleManagement::mergeKDPatch<ItoMergeParticle, Real>(merge,
-                                                             m_kdMergeCellHistogram,
-                                                             m_kdMergeLeafQuota,
+                                                             *cellHistogram,
+                                                             *leafQuota,
                                                              *m_amr,
                                                              a_numParticlesPerCellThresh,
                                                              this->kdWeightMedianCellWidths(),

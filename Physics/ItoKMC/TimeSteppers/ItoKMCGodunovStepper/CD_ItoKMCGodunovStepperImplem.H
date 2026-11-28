@@ -15,6 +15,7 @@
 
 // Std includes
 #include <filesystem>
+#include <optional>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -143,13 +144,6 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
 
   ItoKMCStepper<I, C, R, F>::allocateInternals();
 
-  const int numCdrSpecies = this->m_physics->getNumCdrSpecies();
-
-  m_cdrDivD.resize(numCdrSpecies);
-  for (int i = 0; i < numCdrSpecies; i++) {
-    this->m_amr->allocate(m_cdrDivD[i], this->m_fluidRealm, this->m_plasmaPhase, 1);
-  }
-
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
 
@@ -158,26 +152,6 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
   // interpToNewGrids.
   DataOps::setValue(m_semiImplicitRhoCDR, 0.0);
   DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
-
-  // Holds the field the chemistry is evaluated at. This one needs no initialization -- advance() overwrites
-  // it from m_electricFieldFluid before anything reads it, and nothing else consumes it.
-  this->m_amr->allocate(m_reactiveElectricField, this->m_fluidRealm, this->m_plasmaPhase, SpaceDim);
-
-  // Accumulator for the per-species charge-weighted sums, so the cross-realm copy runs once rather than
-  // once per species. Zeroed by its users before they accumulate into it.
-  this->m_amr->allocate(m_particleScratchSum, this->m_particleRealm, this->m_plasmaPhase, 1);
-
-  // Solid-phase buffers for the space charge that gas-side particles carried into the dielectrics. These
-  // exist only when there is a dielectric to carry charge into; computeSemiImplicitRho() asks the same
-  // question before it touches them, and used to allocate them on every time step.
-  const RefCountedPtr<MultiFluidIndexSpace>& mfis        = (this->m_computationalGeometry)->getMfIndexSpace();
-  const Vector<Dielectric>&                  dielectrics = (this->m_computationalGeometry)->getDielectrics();
-
-  if ((mfis->numPhases() > 1) && (dielectrics.size() > 0)) {
-    this->m_amr->allocate(m_particleScratchSolid, this->m_particleRealm, phase::solid, 1);
-    this->m_amr->allocate(m_particleScratchSumSolid, this->m_particleRealm, phase::solid, 1);
-    this->m_amr->allocate(m_fluidScratchSolid, this->m_fluidRealm, phase::solid, 1);
-  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -550,10 +524,19 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Store E^k -- the field the step starts from. The chemistry is later evaluated at an interpolant between
   // this field and the one that comes out of the semi-implicit transport step. At theta == 1 that interpolant
   // is E^(k+1) alone, so the buffer would only ever hold a copy that the blend below overwrites in full;
-  // advanceReactionNetwork is handed m_electricFieldFluid directly in that case and this is skipped.
+  // advanceReactionNetwork is handed m_electricFieldFluid directly in that case and the buffer is not fetched.
+  // The buffer is held until the reaction network has run.
+  std::optional<Scratch<EBAMRCellData>> reactiveElectricField;
+
   m_timer.startEvent("Store E^k");
   if (m_reactiveFieldCentering < 1.0) {
-    DataOps::copy(m_reactiveElectricField, this->m_electricFieldFluid);
+    reactiveElectricField.emplace((this->m_amr)
+                                    ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                           this->m_plasmaPhase,
+                                                                           SpaceDim,
+                                                                           (this->m_amr)->getNumberOfGhostCells()));
+
+    DataOps::copy(**reactiveElectricField, this->m_electricFieldFluid);
   }
   m_timer.stopEvent("Store E^k");
 
@@ -726,12 +709,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
 
-  // Compute the gradients of the various species densities - this is used in the KMC kernels.
-  if ((this->m_physics)->needGradients()) {
-    m_timer.startEvent("Gradient calculation");
+  // Compute the gradients of the various species densities - this is used in the KMC kernels. The handles are held
+  // until the reaction network has run.
+  std::vector<Scratch<EBAMRCellData>> densityStorage;
+  Vector<const EBAMRCellData*>        densitiesIto;
+  Vector<const EBAMRCellData*>        densityGradientsIto;
+  Vector<const EBAMRCellData*>        densityGradientsCDR;
 
-    // Only the species computeDensityGradients() actually differentiates. It skips the rest and zeroes
-    // their gradient slots, so depositing them here bought nothing but a halo deposit, a redistribution and
+  m_timer.startEvent("Gradient calculation");
+  if ((this->m_physics)->needGradients()) {
+
+    // Only the species computeDensityGradients() actually differentiates. The rest read shared zero fields,
+    // so depositing them here bought nothing but a halo deposit, a redistribution and
     // a coarsen-and-fill-ghosts apiece -- and a chemistry typically corrects on one or two species out of
     // the set. The mesh densities of the skipped species are stale until prePlot() re-deposits all of them,
     // which is ahead of every reader that wants them current.
@@ -740,10 +729,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
         solverIt()->depositParticles();
       }
     }
-
-    this->computeDensityGradients();
-    m_timer.stopEvent("Gradient calculation");
   }
+
+  this->computeDensityGradients(densityStorage,
+                                densitiesIto,
+                                densityGradientsIto,
+                                densityGradientsCDR,
+                                (this->m_physics)->needGradients());
+  m_timer.stopEvent("Gradient calculation");
 
   // Resolve secondary emission. We have filled the relevant particles in the transport step -- this can be done
   // either before or after the reactions.
@@ -751,8 +744,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->barrier();
     m_timer.startEvent("EB particle injection");
     if (this->needSecondaryEmissionEB()) {
-      this->fillSecondaryEmissionEB(a_dt);
-      this->resolveSecondaryEmissionEB(a_dt);
+      std::vector<Scratch<EBAMRIVData>> cdrFluxesScratch;
+      Vector<EBAMRIVData*>              cdrFluxes;
+
+      this->fetchSecondaryEmissionFluxesEB(cdrFluxesScratch, cdrFluxes);
+      this->fillSecondaryEmissionEB(cdrFluxes, a_dt);
+      this->resolveSecondaryEmissionEB(cdrFluxes, a_dt);
     }
     m_timer.stopEvent("EB particle injection");
 
@@ -775,26 +772,47 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   // Run the Kinetic Monte Carlo reaction kernels. These are evaluated at (1-theta)*E^k + theta*E^(k+1) rather
   // than at the end-of-step field: in the semi-implicit formulation E^(k+1) is the already-screened field, so
   // evaluating the whole reactive substep there biases the rate coefficients low wherever the plasma screens
-  // the field. m_reactiveElectricField holds E^k, and m_electricFieldFluid holds E^(k+1) at this point.
+  // the field. reactiveElectricField holds E^k, and m_electricFieldFluid holds E^(k+1) at this point.
   //
   // NOTE: This centering applies to the reactions only. The drift update must keep using E^(k+1) with the
   //       lagged mobility mu^k because that is the pairing the semi-implicit Poisson operator was built for.
+  // The non-critical KMC time step per cell, from the reaction network to the physics time step at the end.
+  Scratch<EBAMRCellData> physicsDt = (this->m_amr)
+                                       ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                              this->m_plasmaPhase,
+                                                                              1,
+                                                                              (this->m_amr)->getNumberOfGhostCells());
+
   this->barrier();
   m_timer.startEvent("Reaction network");
   if (m_reactiveFieldCentering >= 1.0) {
-    // Pure E^(k+1). m_reactiveElectricField was never filled -- see "Store E^k" above.
-    this->advanceReactionNetwork(this->m_electricFieldFluid, a_dt);
+    // Pure E^(k+1). reactiveElectricField was never fetched -- see "Store E^k" above.
+    this->advanceReactionNetwork(physicsDt,
+                                 this->m_electricFieldFluid,
+                                 densitiesIto,
+                                 densityGradientsIto,
+                                 densityGradientsCDR,
+                                 a_dt);
   }
   else {
-    // Pure E^k needs no blending; m_reactiveElectricField already holds it.
+    // Pure E^k needs no blending; reactiveElectricField already holds it.
     if (m_reactiveFieldCentering > 0.0) {
-      DataOps::scale(m_reactiveElectricField, 1.0 - m_reactiveFieldCentering);
-      DataOps::incr(m_reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
+      DataOps::scale(**reactiveElectricField, 1.0 - m_reactiveFieldCentering);
+      DataOps::incr(**reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
     }
 
-    this->advanceReactionNetwork(m_reactiveElectricField, a_dt);
+    this->advanceReactionNetwork(physicsDt,
+                                 **reactiveElectricField,
+                                 densitiesIto,
+                                 densityGradientsIto,
+                                 densityGradientsCDR,
+                                 a_dt);
   }
   m_timer.stopEvent("Reaction network");
+
+  // Release the reaction inputs before the merging and the coefficient updates fetch their own scratch.
+  densityStorage.clear();
+  reactiveElectricField.reset();
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
   // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide
@@ -821,8 +839,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->barrier();
     m_timer.startEvent("EB particle injection");
     if (this->needSecondaryEmissionEB()) {
-      this->fillSecondaryEmissionEB(a_dt);
-      this->resolveSecondaryEmissionEB(a_dt);
+      std::vector<Scratch<EBAMRIVData>> cdrFluxesScratch;
+      Vector<EBAMRIVData*>              cdrFluxes;
+
+      this->fetchSecondaryEmissionFluxesEB(cdrFluxesScratch, cdrFluxes);
+      this->fillSecondaryEmissionEB(cdrFluxes, a_dt);
+      this->resolveSecondaryEmissionEB(cdrFluxes, a_dt);
     }
     m_timer.stopEvent("EB particle injection");
 
@@ -870,7 +892,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->computeDiffusionCoefficients();
   m_timer.stopEvent("Post-compute D");
 
-  this->computePhysicsDt();
+  this->computePhysicsDt(physicsDt);
 
   if ((this->m_profile)) {
     m_timer.eventReport(pout(), false);
@@ -894,7 +916,6 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
   }
 
   const int numItoSpecies    = (this->m_physics)->getNumItoSpecies();
-  const int numCdrSpecies    = (this->m_physics)->getNumCdrSpecies();
   const int numPlasmaSpecies = (this->m_physics)->getNumPlasmaSpecies();
   const int numPhotonSpecies = (this->m_physics)->getNumPhotonSpecies();
 
@@ -913,11 +934,6 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
-
-  // Release unnecessary storage.
-  for (int i = 0; i < numCdrSpecies; i++) {
-    m_cdrDivD[i].clear();
-  }
 
   m_semiImplicitRhoCDR.clear();
   m_semiImplicitConductivityCDR.clear();
@@ -1016,8 +1032,29 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   // modified coefficients if we are reusing data from the last time step.
   m_timer.startEvent("Setup field solver");
   (this->m_fieldSolver)->setupSolver();
-  this->computeConductivities(m_conductivityParticles, true);
-  this->setupSemiImplicitPoisson(this->m_prevDt);
+  {
+    Scratch<EBAMRCellData> conductivityCell = (this->m_amr)
+                                                ->template fetchScratch<EBAMRCellData>(
+                                                  this->m_fluidRealm,
+                                                  this->m_plasmaPhase,
+                                                  1,
+                                                  (this->m_amr)->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> conductivityFace = (this->m_amr)
+                                                ->template fetchScratch<EBAMRFluxData>(
+                                                  this->m_fluidRealm,
+                                                  this->m_plasmaPhase,
+                                                  1,
+                                                  (this->m_amr)->getNumberOfGhostCells());
+    Scratch<EBAMRIVData> conductivityEB = (this->m_amr)
+                                            ->template fetchScratch<EBAMRIVData>(
+                                              this->m_fluidRealm,
+                                              this->m_plasmaPhase,
+                                              1,
+                                              (this->m_amr)->getNumberOfGhostCells());
+
+    this->computeConductivities(conductivityCell, conductivityFace, conductivityEB, m_conductivityParticles, true);
+    this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, this->m_prevDt);
+  }
   m_timer.stopEvent("Setup field solver");
 
   // Solve the Poisson equation.
@@ -1438,6 +1475,12 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCdrConductivity() noexcept
     pout() << this->m_name + "::computeCdrConductivity" << endl;
   }
 
+  Scratch<EBAMRCellData> fluidScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_fluidRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
+
   DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
 
   for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
@@ -1451,10 +1494,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCdrConductivity() noexcept
       const EBAMRCellData& phi = solver->getPhi();
       const EBAMRCellData& mu  = this->m_cdrMobilities[index];
 
-      DataOps::copy(this->m_fluidScratch1, phi);
-      DataOps::multiply(this->m_fluidScratch1, mu);
+      DataOps::copy(*fluidScratch1, phi);
+      DataOps::multiply(*fluidScratch1, mu);
 
-      DataOps::incr(m_semiImplicitConductivityCDR, this->m_fluidScratch1, 1.0 * std::abs(Z));
+      DataOps::incr(m_semiImplicitConductivityCDR, *fluidScratch1, 1.0 * std::abs(Z));
     }
   }
 }
@@ -1462,6 +1505,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCdrConductivity() noexcept
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
+  EBAMRCellData&                                             a_conductivityCell,
+  EBAMRFluxData&                                             a_conductivityFace,
+  EBAMRIVData&                                               a_conductivityEB,
   const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
   const bool                                                 a_useStoredCdrConductivity) noexcept
 {
@@ -1470,8 +1516,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
     pout() << this->m_name + "::computeConductivities" << endl;
   }
 
-  this->computeCellConductivity((this->m_conductivityCell), a_particles, a_useStoredCdrConductivity);
-  this->computeFaceConductivity();
+  this->computeCellConductivity(a_conductivityCell, a_particles, a_useStoredCdrConductivity);
+  this->computeFaceConductivity(a_conductivityFace, a_conductivityEB, a_conductivityCell);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1486,13 +1532,29 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     pout() << this->m_name + "::computeCellConductivity(EBAMRCellData, ParticleContainer)" << endl;
   }
 
+  Scratch<EBAMRCellData> fluidScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_fluidRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> particleScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_particleRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> particleScratchSum = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_particleRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
+
   DataOps::setValue(a_conductivityCell, 0.0);
 
   // Contribution from Ito solvers. The |Z|-weighted sum is formed on the particle realm and crossed to the
   // fluid realm once: the deposit has to happen per species (each has its own container, and the deposit
   // resets its target rather than incrementing it), but the cross-realm copy does not, and under dual-grid
   // it is a Copier exchange over the whole hierarchy.
-  DataOps::setValue(m_particleScratchSum, 0.0);
+  DataOps::setValue(*particleScratchSum, 0.0);
 
   bool anyItoConductivity = false;
 
@@ -1505,9 +1567,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
 
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm. No zeroing first -- the deposition resets a_phi itself.
-      depositPointParticlesLikeSolver(solver, this->m_particleScratch1, *a_particles[idx]);
+      depositPointParticlesLikeSolver(solver, *particleScratch1, *a_particles[idx]);
 
-      DataOps::incr(m_particleScratchSum, this->m_particleScratch1, 1.0 * std::abs(Z));
+      DataOps::incr(*particleScratchSum, *particleScratch1, 1.0 * std::abs(Z));
 
       anyItoConductivity = true;
     }
@@ -1517,10 +1579,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     // Zeroed because the copy below fills the valid region only, and DataOps::incr adds the whole FAB. The
     // ghost cells that neither the copy nor the later coarsen/interpolate/exchange reaches -- the ones
     // outside the physical domain -- would otherwise carry whatever the last user of the scratch left there.
-    DataOps::setValue(this->m_fluidScratch1, 0.0);
+    DataOps::setValue(*fluidScratch1, 0.0);
 
-    (this->m_amr)->copyData(this->m_fluidScratch1, m_particleScratchSum);
-    DataOps::incr(a_conductivityCell, this->m_fluidScratch1, 1.0);
+    (this->m_amr)->copyData(*fluidScratch1, *particleScratchSum);
+    DataOps::incr(a_conductivityCell, *fluidScratch1, 1.0);
   }
 
   // Contribution from the CDR solvers, always taken from m_semiImplicitConductivityCDR. The flag decides only
@@ -1562,15 +1624,17 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
+ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+                                                          EBAMRIVData&         a_conductivityEB,
+                                                          const EBAMRCellData& a_conductivityCell) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeFaceConductivity");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeFaceConductivity" << endl;
   }
 
-  DataOps::setValue((this->m_conductivityFace), 0.0);
-  DataOps::setValue((this->m_conductivityEB), 0.0);
+  DataOps::setValue(a_conductivityFace, 0.0);
+  DataOps::setValue(a_conductivityEB, 0.0);
 
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
@@ -1579,8 +1643,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
   const Interval interv(0, 0);
 
   DataOps::averageCellToFace(
-    (this->m_conductivityFace),
-    (this->m_conductivityCell),
+    a_conductivityFace,
+    a_conductivityCell,
     (this->m_amr)->getDomains(),
     tanGhost,
     interv,
@@ -1589,8 +1653,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
     (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase));
 
   // Set the EB conductivity.
-  DataOps::incr((this->m_conductivityEB),
-                (this->m_conductivityCell),
+  DataOps::incr(a_conductivityEB,
+                a_conductivityCell,
                 1.0,
                 (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 }
@@ -1606,6 +1670,17 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeSemiImplicitRho" << endl;
   }
+
+  Scratch<EBAMRCellData> fluidScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_fluidRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> particleScratchSum = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_particleRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
 
   // Soft requirement?
   CH_assert(this->m_plasmaPhase == phase::gas);
@@ -1629,7 +1704,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   // particle realm -- where every solver's density already lives -- and crossed to the fluid realm once
   // instead of once per species. See computeCellConductivity(), which does the same for the conductivity.
   CH_START(t1);
-  DataOps::setValue(m_particleScratchSum, 0.0);
+  DataOps::setValue(*particleScratchSum, 0.0);
 
   bool anyItoCharge = false;
 
@@ -1642,7 +1717,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
       // The per-species weight stays Z*Qe rather than being factored out of the loop: the terms are then
       // summed in the same order and with the same values as when each was incremented into rhoGas
       // separately, so the result is bit-for-bit what it was before the accumulation moved realms.
-      DataOps::incr(m_particleScratchSum, solver->getPhi(), 1.0 * Z * Units::Qe);
+      DataOps::incr(*particleScratchSum, solver->getPhi(), 1.0 * Z * Units::Qe);
 
       anyItoCharge = true;
     }
@@ -1650,10 +1725,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
   if (anyItoCharge) {
     // See computeCellConductivity() for why the landing buffer is zeroed first.
-    DataOps::setValue(this->m_fluidScratch1, 0.0);
+    DataOps::setValue(*fluidScratch1, 0.0);
 
-    (this->m_amr)->copyData(this->m_fluidScratch1, m_particleScratchSum);
-    DataOps::incr(rhoGas, this->m_fluidScratch1, 1.0);
+    (this->m_amr)->copyData(*fluidScratch1, *particleScratchSum);
+    DataOps::incr(rhoGas, *fluidScratch1, 1.0);
   }
 
   // Contribution from CDR equations to the gas-side space charge density.
@@ -1666,9 +1741,25 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   if (hasDielectrics) {
     CH_START(t2);
 
-    // The buffers are members allocated once (see allocateInternals) rather than a pair of hierarchies built
-    // and thrown away on every time step.
-    DataOps::setValue(m_particleScratchSumSolid, 0.0);
+    const int ghost = (this->m_amr)->getNumberOfGhostCells();
+
+    Scratch<EBAMRCellData> particleScratchSolid = (this->m_amr)
+                                                    ->template fetchScratch<EBAMRCellData>(this->m_particleRealm,
+                                                                                           phase::solid,
+                                                                                           1,
+                                                                                           ghost);
+    Scratch<EBAMRCellData> particleScratchSumSolid = (this->m_amr)
+                                                       ->template fetchScratch<EBAMRCellData>(this->m_particleRealm,
+                                                                                              phase::solid,
+                                                                                              1,
+                                                                                              ghost);
+    Scratch<EBAMRCellData> fluidScratchSolid = (this->m_amr)
+                                                 ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                                        phase::solid,
+                                                                                        1,
+                                                                                        ghost);
+
+    DataOps::setValue(*particleScratchSumSolid, 0.0);
 
     bool anySolidCharge = false;
 
@@ -1685,7 +1776,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
         //
         // No zeroing first -- the deposition resets its target itself.
         (this->m_amr)
-          ->depositWeight(m_particleScratchSolid,
+          ->depositWeight(*particleScratchSolid,
                           this->m_particleRealm,
                           phase::solid,
                           *m_rhoDaggerParticles[solverIt.index()],
@@ -1694,7 +1785,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
                           IrregularDeposition::NGP);
 
         // Weighted per species, not once at the end -- see the gas-phase loop above.
-        DataOps::incr(m_particleScratchSumSolid, m_particleScratchSolid, 1.0 * Z * Units::Qe);
+        DataOps::incr(*particleScratchSumSolid, *particleScratchSolid, 1.0 * Z * Units::Qe);
 
         anySolidCharge = true;
       }
@@ -1702,10 +1793,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
     if (anySolidCharge) {
       // See computeCellConductivity() for why the landing buffer is zeroed first.
-      DataOps::setValue(m_fluidScratchSolid, 0.0);
+      DataOps::setValue(*fluidScratchSolid, 0.0);
 
-      (this->m_amr)->copyData(m_fluidScratchSolid, m_particleScratchSumSolid);
-      DataOps::incr(rhoSolid, m_fluidScratchSolid, 1.0);
+      (this->m_amr)->copyData(*fluidScratchSolid, *particleScratchSumSolid);
+      DataOps::incr(rhoSolid, *fluidScratchSolid, 1.0);
     }
 
     // Space charge of the solid species, at the start of the step. Their conductivity is not in the semi-implicit
@@ -1749,7 +1840,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noexcept
+ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
+                                                           const EBAMRIVData&   a_conductivityEB,
+                                                           const Real           a_dt) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::setupSemiImplicitPoisson");
   if (this->m_verbosity > 5) {
@@ -1770,9 +1863,9 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
 
   // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
   // given by epsr + a_factor*sigma
-  DataOps::incr(permFaceGas, (this->m_conductivityFace), a_dt / Units::eps0);
+  DataOps::incr(permFaceGas, a_conductivityFace, a_dt / Units::eps0);
   DataOps::incr(permEBGas,
-                (this->m_conductivityEB),
+                a_conductivityEB,
                 a_dt / Units::eps0,
                 (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
@@ -1942,24 +2035,66 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::ChargedDiffusive);
   m_timer.stopEvent("Diffuse particles");
 
+  // kappa*div(D*grad(phi)) of the diffusive CDR species, from the explicit diffusion advance to the Euler-Maruyama
+  // step. The entries of the other species are null.
+  const int numCdrSpecies = (this->m_physics)->getNumCdrSpecies();
+
+  std::vector<Scratch<EBAMRCellData>> cdrDivDScratch;
+  cdrDivDScratch.reserve(numCdrSpecies);
+
+  Vector<EBAMRCellData*> cdrDivD(numCdrSpecies, nullptr);
+
+  for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
+    if (solverIt()->isDiffusive()) {
+      cdrDivDScratch.emplace_back((this->m_amr)
+                                    ->template fetchScratch<EBAMRCellData>(this->m_fluidRealm,
+                                                                           this->m_plasmaPhase,
+                                                                           1,
+                                                                           (this->m_amr)->getNumberOfGhostCells()));
+
+      cdrDivD[solverIt.index()] = &(*cdrDivDScratch.back());
+    }
+  }
+
   // Perform the diffusive CDR advance.
   this->barrier();
   m_timer.startEvent("Diffuse CDR");
-  this->computeDiffusionTermCDR(m_semiImplicitRhoCDR, a_dt);
+  this->computeDiffusionTermCDR(cdrDivD, m_semiImplicitRhoCDR, a_dt);
   m_timer.stopEvent("Diffuse CDR");
 
   // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
   this->barrier();
   m_timer.startEvent("Compute conductivities");
   this->copyConductivityParticles(m_conductivityParticles);
-  this->computeConductivities(m_conductivityParticles, false);
-  m_timer.stopEvent("Compute conductivities");
+  {
+    Scratch<EBAMRCellData> conductivityCell = (this->m_amr)
+                                                ->template fetchScratch<EBAMRCellData>(
+                                                  this->m_fluidRealm,
+                                                  this->m_plasmaPhase,
+                                                  1,
+                                                  (this->m_amr)->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> conductivityFace = (this->m_amr)
+                                                ->template fetchScratch<EBAMRFluxData>(
+                                                  this->m_fluidRealm,
+                                                  this->m_plasmaPhase,
+                                                  1,
+                                                  (this->m_amr)->getNumberOfGhostCells());
+    Scratch<EBAMRIVData> conductivityEB = (this->m_amr)
+                                            ->template fetchScratch<EBAMRIVData>(
+                                              this->m_fluidRealm,
+                                              this->m_plasmaPhase,
+                                              1,
+                                              (this->m_amr)->getNumberOfGhostCells());
 
-  // Set up the semi-implicit Poisson solver with the computed conductivities.
-  this->barrier();
-  m_timer.startEvent("Setup Poisson");
-  this->setupSemiImplicitPoisson(a_dt);
-  m_timer.stopEvent("Setup Poisson");
+    this->computeConductivities(conductivityCell, conductivityFace, conductivityEB, m_conductivityParticles, false);
+    m_timer.stopEvent("Compute conductivities");
+
+    // Set up the semi-implicit Poisson solver with the computed conductivities.
+    this->barrier();
+    m_timer.startEvent("Setup Poisson");
+    this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt);
+    m_timer.stopEvent("Setup Poisson");
+  }
 
   // Compute space charge density arising from the displaced particle positions X^k + sqrt(2*D*dt)*W + dt*grad(D).
   // Only need to do the diffusive and charged species.
@@ -2002,7 +2137,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->barrier();
   m_timer.startEvent("Euler-Maruyama step");
   this->stepEulerMaruyamaParticles(a_dt);
-  this->stepEulerMaruyamaCDR(a_dt);
+  this->stepEulerMaruyamaCDR(cdrDivD, a_dt);
   m_timer.stopEvent("Euler-Maruyama step");
 
   // Transport the solid species in the new field.
@@ -2053,8 +2188,16 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     // built for. This mirrors what computeDiffusionTermCDR does with the explicit dt*div(D*grad(phi^k)).
     const bool gradientDrift = diffusive && solver->isDiffusionGradientDrift();
 
+    std::optional<Scratch<EBAMRCellData>> diffusionGradient;
+
     if (gradientDrift) {
-      solver->computeDiffusionGradient();
+      diffusionGradient.emplace((this->m_amr)
+                                  ->template fetchScratch<EBAMRCellData>(this->m_particleRealm,
+                                                                         this->m_plasmaPhase,
+                                                                         SpaceDim,
+                                                                         (this->m_amr)->getNumberOfGhostCells()));
+
+      solver->computeDiffusionGradient(*diffusionGradient);
     }
 
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
@@ -2097,7 +2240,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
         // displacement ends up, so each particle's gradient is read into a local below before being
         // overwritten, within the same loop iteration.
         if (gradientDrift) {
-          solver->interpolateDiffusionGradient(lvl, din);
+          solver->interpolateDiffusionGradient(lvl, din, (*(**diffusionGradient)[lvl])[din]);
         }
 
         // The trajectory and the deposit are corrected independently, and are only the same correction when the
@@ -2288,12 +2431,20 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(EBAMRCellData& a_semiImplicitRhoCDR, const Real a_dt) noexcept
+ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(Vector<EBAMRCellData*>& a_cdrDivD,
+                                                          EBAMRCellData&          a_semiImplicitRhoCDR,
+                                                          const Real              a_dt) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::diffuseCDREulerMaruyama");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::diffuseCDREulerMaruyama" << endl;
   }
+
+  Scratch<EBAMRCellData> fluidScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_fluidRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(a_semiImplicitRhoCDR, 0.0);
 
@@ -2309,7 +2460,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(EBAMRCellData& a_semiI
     // Compute the conservative finite-volume approximation to kappa*div(D*grad(phi)). It is stabilized together with
     // the advective term in stepEulerMaruyamaCDR, since the two enter the same update.
     if (solver->isDiffusive()) {
-      solver->computeDivD(m_cdrDivD[index], solver->getPhi(), a_dt, true, false, false);
+      solver->computeDivD(*a_cdrDivD[index], solver->getPhi(), a_dt, true, false, false);
     }
 
     // Update the space charge density arising from the update phi^dagger = phi^k + dt * div(D*grad(phi^k)), with the
@@ -2320,11 +2471,11 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDiffusionTermCDR(EBAMRCellData& a_semiI
     if (Z != 0) {
       DataOps::incr(a_semiImplicitRhoCDR, phi, 1.0 * Z);
       if (solver->isDiffusive()) {
-        DataOps::copy(this->m_fluidScratch1, m_cdrDivD[index]);
+        DataOps::copy(*fluidScratch1, *a_cdrDivD[index]);
 
-        solver->redistributeDivergence(this->m_fluidScratch1, phi, -a_dt);
+        solver->redistributeDivergence(*fluidScratch1, phi, -a_dt);
 
-        DataOps::incr(a_semiImplicitRhoCDR, this->m_fluidScratch1, 1.0 * Z * a_dt);
+        DataOps::incr(a_semiImplicitRhoCDR, *fluidScratch1, 1.0 * Z * a_dt);
       }
     }
   }
@@ -2394,12 +2545,19 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
+ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Vector<EBAMRCellData*>& a_cdrDivD,
+                                                       const Real                    a_dt) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::stepEulerMaruyamaCDR");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::stepEulerMaruyamaCDR" << endl;
   }
+
+  Scratch<EBAMRCellData> fluidScratch1 = this->m_amr->template fetchScratch<EBAMRCellData>(
+    this->m_fluidRealm,
+    this->m_plasmaPhase,
+    1,
+    this->m_amr->getNumberOfGhostCells());
 
   for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrSolver>& solver = solverIt();
@@ -2424,24 +2582,24 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     // together as conservative divergences and then stabilized once, since the cut-cell stabilization of a sum is not
     // the sum of the stabilizations (see EBRedistribution).
     if (solver->isMobile() || solver->isDiffusive()) {
-      DataOps::setValue(this->m_fluidScratch1, 0.0);
+      DataOps::setValue(*fluidScratch1, 0.0);
 
       // Compute the FV approximation to kappa*div(F). If the underlying CDR solver is a CTU solver, we also add in the
       // transverse terms. The BC comes later.
       if (solver->isMobile()) {
         DataOps::setValue(solver->getEbFlux(), 0.0);
 
-        solver->computeDivF(this->m_fluidScratch1, phi, a_dt, a_dt, true, true, true);
+        solver->computeDivF(*fluidScratch1, phi, a_dt, a_dt, true, true, true);
       }
 
       // Subtract kappa*div(D*grad(phi)) from computeDiffusionTermCDR.
       if (solver->isDiffusive()) {
-        DataOps::incr(this->m_fluidScratch1, this->m_cdrDivD[index], -1.0);
+        DataOps::incr(*fluidScratch1, *a_cdrDivD[index], -1.0);
       }
 
-      solver->redistributeDivergence(this->m_fluidScratch1, phi, a_dt);
+      solver->redistributeDivergence(*fluidScratch1, phi, a_dt);
 
-      DataOps::incr(phi, this->m_fluidScratch1, -a_dt);
+      DataOps::incr(phi, *fluidScratch1, -a_dt);
     }
 
     DataOps::floor(phi, 0.0, this->m_amr->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
@@ -2626,6 +2784,12 @@ ItoKMCGodunovStepper<I, C, R, F>::prePlot() noexcept
 
   ItoKMCStepper<I, C, R, F>::prePlot();
 
+  // The conductivity of the last semi-implicit field solve. The conductivity particles and the stored CDR
+  // conductivity are kept between steps and remapped at regrids, so this reproduces it.
+  if (this->m_plotConductivity) {
+    this->computeCellConductivity(this->m_conductivityCell, m_conductivityParticles, true);
+  }
+
   // Deposit the photons that were absorbed on the mesh during the last advance. This used to run at the top
   // of every advance(); it belongs here because McPhoto's mesh density has exactly two readers, both of them
   // output paths (McPhoto::writePlotData and McPhoto::writeCheckpointLevel), and a full deposit is a halo
@@ -2652,7 +2816,7 @@ ItoKMCGodunovStepper<I, C, R, F>::postPlot() noexcept
     pout() << this->m_name + "::postPlot" << endl;
   }
 
-  this->m_physicsPlotVariables.clear();
+  ItoKMCStepper<I, C, R, F>::postPlot();
 
   this->plotParticles();
 }

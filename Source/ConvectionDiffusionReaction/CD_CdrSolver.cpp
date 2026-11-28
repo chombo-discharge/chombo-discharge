@@ -234,8 +234,10 @@ CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
   //       version.
   // clang-format on
   if (m_isDiffusive) {
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> src = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    m_nComp,
+                                                                    m_amr->getNumberOfGhostCells());
     DataOps::setValue(src, 0.0);
 
     this->advanceEuler(a_newPhi, a_oldPhi, src, a_dt);
@@ -261,8 +263,10 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
   //       version.
   // clang-format on
   if (m_isDiffusive) {
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> src = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    m_nComp,
+                                                                    m_amr->getNumberOfGhostCells());
     DataOps::setValue(src, 0.0);
 
     this->advanceCrankNicholson(a_newPhi, a_oldPhi, src, a_dt);
@@ -295,44 +299,33 @@ CdrSolver::allocate()
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
   if (m_isMobile) {
     m_amr->allocate(m_cellVelocity, m_realm, m_phase, SpaceDim);
-    m_amr->allocate(m_faceVelocity, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_faceStates, m_realm, m_phase, m_nComp);
 
     DataOps::setValue(m_cellVelocity, 0.0);
-    DataOps::setValue(m_faceVelocity, 0.0);
-    DataOps::setValue(m_faceStates, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_faceVelocity, m_realm);
     m_amr->allocatePointer(m_cellVelocity, m_realm);
-    m_amr->allocatePointer(m_faceStates, m_realm);
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
   // pass around pointers in case we need it. This might seem confusing but its easier to resize those vectors
   // and set nullpointers when we iterate through grid levels and patches.
   if (m_isDiffusive) {
-    m_amr->allocate(m_cellCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
 
-    DataOps::setValue(m_cellCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   }
   else {
-    m_amr->allocatePointer(m_cellCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient, m_realm);
     m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
 
   // These don't consume (much) memory so we always allocate them.
   m_amr->allocate(m_ebFlux, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_ebZero, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_domainFlux, m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_ebFlux, 0.0);
-  DataOps::setValue(m_ebZero, 0.0);
   DataOps::setValue(m_domainFlux, 0.0);
 
   // The cut-cell stabilization holds data on the grids, so it is rebuilt with them.
@@ -381,26 +374,12 @@ CdrSolver::deallocate()
 
   m_phi.clear();
   m_source.clear();
-  m_faceVelocity.clear();
-  m_faceStates.clear();
   m_cellVelocity.clear();
   m_ebFlux.clear();
-  m_cellCenteredDiffusionCoefficient.clear();
   m_faceCenteredDiffusionCoefficient.clear();
   m_ebCenteredDiffusionCoefficient.clear();
 
   m_redistribution = RefCountedPtr<EBRedistribution>();
-}
-
-void
-CdrSolver::averageVelocityToFaces()
-{
-  CH_TIME("CdrSolver::averageVelocityToFaces()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::averageVelocityToFaces()" << endl;
-  }
-
-  this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
 }
 
 void
@@ -414,9 +393,12 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
   CH_assert(a_faceVelocity[0]->nComp() == 1);
   CH_assert(a_cellVelocity[0]->nComp() == SpaceDim);
 
+  // Only faces within one tangential ghost cell are written below. The others are set to a huge value in debug
+  // code, so that the code breaks if they are read, and to zero otherwise.
 #ifndef NDEBUG
-  // Put in something huge in debug code so we can catch if the code breaks.
   DataOps::setValue(a_faceVelocity, std::numeric_limits<Real>::max());
+#else
+  DataOps::setValue(a_faceVelocity, 0.0);
 #endif
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1264,8 +1246,10 @@ CdrSolver::initialDataDistribution()
     return m_species->initialData(pos, m_time);
   };
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      m_nComp,
+                                                                      m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(scratch,
                     initFunc,
@@ -1525,11 +1509,9 @@ CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient)
     pout() << m_name + "::setDiffusionCoefficient(Real)" << endl;
   }
 
-  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffusionCoefficient);
 
-  m_amr->conservativeAverage(m_cellCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
 }
@@ -1542,12 +1524,6 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
-  DataOps::setValue(m_cellCenteredDiffusionCoefficient,
-                    a_diffCo,
-                    m_amr->getProbLo(),
-                    m_amr->getDx(),
-                    m_comp,
-                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::setValue(m_faceCenteredDiffusionCoefficient,
                     a_diffCo,
                     m_amr->getProbLo(),
@@ -1804,8 +1780,13 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   //       behind that is that a_output is a plot file which accumulates data over many solvers. Note that because
   //       this solver is cell-centered, we interpolate m_phi to centroids when outputting it.
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, 1);
+  // Zeroed because the plot file includes ghost cells, and the averaging of face data to cells below leaves the ghost
+  // cells outside the domain untouched.
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
+  DataOps::setValue(scratch, 0.0);
 
   // Plot state
   if (m_plotPhi) {
@@ -1821,14 +1802,14 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
 
   // Plot diffusion coefficients. These are stored on face centers but we need cell-centered data for output.
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
-    DataOps::averageFaceToCell(*scratch[a_level],
+    DataOps::averageFaceToCell(*(*scratch)[a_level],
                                *m_faceCenteredDiffusionCoefficient[a_level],
                                m_amr->getDomains()[a_level],
                                *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     // Do the previous because we need the ghost cells too.
     if (a_level > 0) {
-      DataOps::averageFaceToCell(*scratch[a_level - 1],
+      DataOps::averageFaceToCell(*(*scratch)[a_level - 1],
                                  *m_faceCenteredDiffusionCoefficient[a_level - 1],
                                  m_amr->getDomains()[a_level - 1],
                                  *m_amr->getVofIterator(m_realm, m_phase)[a_level - 1]);
@@ -1858,8 +1839,8 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to
   // scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
-    DataOps::setValue(*scratch[a_level], 0.0);
-    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
+    DataOps::setValue(*(*scratch)[a_level], 0.0);
+    DataOps::incr(*(*scratch)[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }
@@ -1892,13 +1873,16 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  CH_START(t2);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -1916,7 +1900,7 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t5);
 
   a_comp += numComp;
@@ -2319,8 +2303,10 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
   }
 
   if (m_isMobile) {
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
@@ -2329,8 +2315,17 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     m_amr->interpGhost(m_phi, m_realm, m_phase);
 
     // Compute velocity on faces and EBs. The data is currently face-centered.
-    this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0, 0.0);
+    Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                           m_phase,
+                                                                           m_nComp,
+                                                                           m_amr->getNumberOfGhostCells());
+
+    this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+    this->advectToFaces(faceStates, m_phi, faceVelocity, 0.0, 0.0);
 
     DataOps::setValue(scratch, 0.0); // Used to store sum(alpha*v)
 
@@ -2352,9 +2347,9 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
         VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[din];
-        EBCellFAB&       sumWeight = (*scratch[lvl])[din];
-        const EBFluxFAB& facePhi   = (*m_faceStates[lvl])[din];
-        const EBFluxFAB& faceVel   = (*m_faceVelocity[lvl])[din];
+        EBCellFAB&       sumWeight = (*(*scratch)[lvl])[din];
+        const EBFluxFAB& facePhi   = (*(*faceStates)[lvl])[din];
+        const EBFluxFAB& faceVel   = (*(*faceVelocity)[lvl])[din];
 
         sumPhi.setVal(0.0);
         sumWeight.setVal(0.0);
@@ -2391,8 +2386,8 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
         }
 
         // Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids
-        // since that is the flux that makes its way into the cells anyways when we advect. But, m_faceStates are states
-        // on the face centers. So there's that.
+        // since that is the flux that makes its way into the cells anyways when we advect. But, the face states are
+        // states on the face centers. So there's that.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           sumPhi(vof, m_comp)    = 0.0;
           sumWeight(vof, m_comp) = 0.0;
@@ -2466,8 +2461,10 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     }
 
     // Divide. Set to zero m_phi if there are no inflow faces.
-    EBAMRCellData zero;
-    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRCellData> zero = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
     DataOps::setValue(zero, 0.0);
     DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
@@ -2621,39 +2618,6 @@ CdrSolver::getCellCenteredVelocity()
 }
 
 EBAMRFluxData&
-CdrSolver::getFaceCenteredVelocity()
-{
-  CH_TIME("CdrSolver::getFaceCenteredVelocity()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getFaceCenteredVelocity()" << endl;
-  }
-
-  return m_faceVelocity;
-}
-
-EBAMRIVData&
-CdrSolver::getEbCenteredVelocity()
-{
-  CH_TIME("CdrSolver::getEbCenteredVelocity()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getEbCenteredVelocity()" << endl;
-  }
-
-  return m_ebVelocity;
-}
-
-EBAMRCellData&
-CdrSolver::getCellCenteredDiffusionCoefficient()
-{
-  CH_TIME("CdrSolver::getCellCenteredDiffusionCoefficient()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getCellCenteredDiffusionCoefficient()" << endl;
-  }
-
-  return m_cellCenteredDiffusionCoefficient;
-}
-
-EBAMRFluxData&
 CdrSolver::getFaceCenteredDiffusionCoefficient()
 {
   CH_TIME("CdrSolver::getFaceCenteredDiffusionCoefficient()");
@@ -2721,11 +2685,15 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
   if (m_isMobile) {
 
     // Compute v * phi on cell centers.
-    EBAMRCellData flux;
-    EBAMRIVData   fluxEB;
 
-    m_amr->allocate(flux, m_realm, m_phase, SpaceDim);
-    m_amr->allocate(fluxEB, m_realm, m_phase, SpaceDim);
+    Scratch<EBAMRCellData> flux   = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     SpaceDim,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRIVData>   fluxEB = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                   m_phase,
+                                                                   SpaceDim,
+                                                                   m_amr->getNumberOfGhostCells());
 
     DataOps::copy(flux, m_cellVelocity);
     DataOps::multiplyScalar(flux, m_phi);
@@ -2753,7 +2721,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
         const EBISBox& ebisBox = ebisl[din];
 
         BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[din];
-        const BaseIVFAB<Real>& vectorFlux = (*fluxEB[lvl])[din];
+        const BaseIVFAB<Real>& vectorFlux = (*(*fluxEB)[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) {
           const RealVect& normal = ebisBox.normal(vof);
@@ -2964,11 +2932,15 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   // we have the fluctuating term, we simply compute Div(G).
 
   if (m_isDiffusive) {
-    EBAMRFluxData scratchFluxOne;
-    EBAMRFluxData scratchFluxTwo;
 
-    m_amr->allocate(scratchFluxOne, m_realm, m_phase, m_nComp);
-    m_amr->allocate(scratchFluxTwo, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFluxOne = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> scratchFluxTwo = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
 
     // scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
     this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
@@ -2991,7 +2963,14 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     // approximation of the divergence
     this->fillGwn(scratchFluxTwo, 1.0);
     DataOps::multiply(scratchFluxOne, scratchFluxTwo);
-    this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, a_cellPhi, a_dt, false);
+    Scratch<EBAMRIVData> ebZero = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                   m_phase,
+                                                                   m_nComp,
+                                                                   m_amr->getNumberOfGhostCells());
+
+    DataOps::setValue(ebZero, 0.0);
+
+    this->computeDivG(a_noiseSource, scratchFluxOne, ebZero, a_cellPhi, a_dt, false);
   }
   else {
     DataOps::setValue(a_noiseSource, 0.0);

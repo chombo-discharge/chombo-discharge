@@ -63,11 +63,15 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
   //       refine cells where |grad(phi)|*dx/phi > m_refCurv or where phi > m_refMagn.
 
   // Data allocation
-  EBAMRCellData sca;
-  EBAMRCellData vec;
 
-  m_amr->allocate(sca, m_realm, phase::gas, 1);
-  m_amr->allocate(vec, m_realm, phase::gas, SpaceDim);
+  Scratch<EBAMRCellData> sca = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                  phase::gas,
+                                                                  1,
+                                                                  m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> vec = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                  phase::gas,
+                                                                  SpaceDim,
+                                                                  m_amr->getNumberOfGhostCells());
 
   // Get cell-centered state from the solver.
   const EBAMRCellData& state = m_solver->getPhi();
@@ -95,7 +99,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
   const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
-    DataOps::scale(*sca[lvl], m_amr->getDx()[lvl]); // sca = |grad(phi)|*dx
+    DataOps::scale(*(*sca)[lvl], m_amr->getDx()[lvl]); // sca = |grad(phi)|*dx
 
     constexpr Real SAFETY = 1.E-6; // To avoid division by zero
 
@@ -110,8 +114,8 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
       const DataIndex& din = dit[mybox];
 
       const Box        cellBox = dbl[din];
-      const EBCellFAB& gradPhi = (*sca[lvl])[din];   // |grad(phi)|
-      const EBCellFAB& phi     = (*state[lvl])[din]; //  phi
+      const EBCellFAB& gradPhi = (*(*sca)[lvl])[din]; // |grad(phi)|
+      const EBCellFAB& phi     = (*state[lvl])[din];  //  phi
       const EBISBox&   ebisBox = phi.getEBISBox();
 
       // Clear all previous cell tags.

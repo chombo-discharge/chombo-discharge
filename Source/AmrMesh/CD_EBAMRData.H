@@ -106,25 +106,6 @@ public:
   clear() noexcept;
 
   /**
-   * @brief Reserve data
-   */
-  void
-  reserve() noexcept;
-
-  /**
-   * @brief Release data
-   */
-  void
-  release() noexcept;
-
-  /**
-   * @brief Check if data is reserved
-   * @return True if reserved, false otherwise
-   */
-  bool
-  isReserved() const noexcept;
-
-  /**
    * @brief Get underlying data. Returns m_data.
    * @return Data
    */
@@ -157,11 +138,6 @@ protected:
    * @brief Identifier for realm
    */
   std::string m_realm;
-
-  /**
-   * @brief Reserved or not
-   */
-  bool m_reserved;
 
   /**
    * @brief Underlying data

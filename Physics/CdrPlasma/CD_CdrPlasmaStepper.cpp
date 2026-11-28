@@ -175,11 +175,15 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   const EBAMRCellData cellCenteredElectricField = m_amr->alias(m_phase, m_fieldSolver->getElectricField());
 
   // Allocate some storage for holding the electric field magnitude and one species conductivity.
-  EBAMRCellData fieldMagnitude;
-  EBAMRCellData speciesConductivity;
 
-  m_amr->allocate(fieldMagnitude, m_realm, m_phase, 1);
-  m_amr->allocate(speciesConductivity, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> fieldMagnitude      = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                             m_phase,
+                                                                             1,
+                                                                             m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> speciesConductivity = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                  m_phase,
+                                                                                  1,
+                                                                                  m_amr->getNumberOfGhostCells());
 
   // Compute the electric field magnitude
   DataOps::vectorLength(fieldMagnitude,
@@ -288,13 +292,19 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt)
   CH_assert(a_dt >= 0.0);
 
   // Storage that is needed.
-  EBAMRCellData conductivityCell;
-  EBAMRFluxData conductivityFace;
-  EBAMRIVData   conductivityEB;
 
-  m_amr->allocate(conductivityCell, m_realm, phase::gas, 1);
-  m_amr->allocate(conductivityFace, m_realm, phase::gas, 1);
-  m_amr->allocate(conductivityEB, m_realm, phase::gas, 1);
+  Scratch<EBAMRCellData> conductivityCell = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                               phase::gas,
+                                                                               1,
+                                                                               m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRFluxData> conductivityFace = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               phase::gas,
+                                                                               1,
+                                                                               m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRIVData>   conductivityEB   = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                         phase::gas,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
 
   // Compute the cell-centered conductivity first. Then compute the face- and EB-centered conductivities by averaging
   // the cell-centered conductivity.
@@ -436,8 +446,10 @@ CdrPlasmaStepper::advanceReactionNetwork(const Real a_time, const Real a_dt)
   CH_assert(a_dt >= 0.0);
 
   // Compute the electric field on the compute phase.
-  EBAMRCellData E;
-  m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRCellData> E = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                m_cdr->getPhase(),
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
   // Get the source terms and densities from the solvers.
@@ -471,21 +483,26 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
   CH_assert(a_dt >= 0.0);
 
   // Allocate scratch data which we will use to compute the gradient.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_cdr->getPhase(), 1);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_cdr->getPhase(),
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
 
   // Number of CDR solvers.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
   // Compute the cell-centered gradient for each plasma species.
-  Vector<EBAMRCellData*> cdrGradients(numCdrSpecies);
+  std::vector<Scratch<EBAMRCellData>> cdrGradientsScratch;
+  Vector<EBAMRCellData*>              cdrGradients(numCdrSpecies);
+
+  cdrGradientsScratch.reserve(numCdrSpecies);
+
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    // Create some storage where we store the gradient. Note that we use the new operator so this
-    // storage must be deleted later.
-    cdrGradients[idx] = new EBAMRCellData();
-    m_amr->allocate(*cdrGradients[idx], m_realm, m_cdr->getPhase(), SpaceDim);
+    cdrGradientsScratch.emplace_back(
+      m_amr->fetchScratch<EBAMRCellData>(m_realm, m_cdr->getPhase(), SpaceDim, m_amr->getNumberOfGhostCells()));
+    cdrGradients[idx] = &(*cdrGradientsScratch.back());
 
     // Copy the cell-centered density to the scratch data holder. Need to do this because the CDR solvers may not
     // have updated their ghost cells.
@@ -507,15 +524,6 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
                                a_E,
                                a_time,
                                a_dt);
-
-  // Delete the extra storage since we didn't use smart pointers.
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    m_amr->deallocate(*cdrGradients[idx]);
-
-    delete cdrGradients[idx];
-  }
 }
 
 void
@@ -550,7 +558,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
 
   // This is a special option in case we use upwinding. In that case we need to allocate
   // storage for holding the upwind-weighted data for each cdr solver.
-  Vector<EBAMRCellData*> cdrStates(numCdrSpecies);
+  std::vector<Scratch<EBAMRCellData>> cdrStatesScratch;
+  Vector<EBAMRCellData*>              cdrStates(numCdrSpecies);
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
@@ -560,8 +569,9 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
 
       // Allocate some storage and compute an upwind approximation to the cell-centered density. This is the Villa et.
       // al magic for stabilizing the drift-reaction mechanism. Only use if you absolute know what you're doing.
-      cdrStates[idx] = new EBAMRCellData();
-      m_amr->allocate(*cdrStates[idx], m_realm, m_cdr->getPhase(), 1);
+      cdrStatesScratch.emplace_back(
+        m_amr->fetchScratch<EBAMRCellData>(m_realm, m_cdr->getPhase(), 1, m_amr->getNumberOfGhostCells()));
+      cdrStates[idx] = &(*cdrStatesScratch.back());
 
       // Compute the upwind approximation.
       solverIt()->weightedUpwind(*cdrStates[idx], m_upwindFactor);
@@ -608,15 +618,6 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSour
                                  a_time,
                                  a_dt,
                                  lvl);
-  }
-
-  // When we did the upwind approximation we explicitly allocate memory. Now release it.
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-    if (m_whichSourceTermComputation == SourceTermComputation::Upwind && idx == 0) {
-
-      delete cdrStates[idx];
-    }
   }
 }
 
@@ -1246,11 +1247,15 @@ CdrPlasmaStepper::computeCdrDiffusion()
   }
 
   // Allocate storage for the electric field.
-  EBAMRCellData electricFieldCell;
-  EBAMRIVData   electricFieldEB;
 
-  m_amr->allocate(electricFieldCell, m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(electricFieldEB, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRCellData> electricFieldCell = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                m_cdr->getPhase(),
+                                                                                SpaceDim,
+                                                                                m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRIVData>   electricFieldEB   = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                          m_cdr->getPhase(),
+                                                                          SpaceDim,
+                                                                          m_amr->getNumberOfGhostCells());
 
   // Compute field on cell center and on EB centroid.
   this->computeElectricField(electricFieldCell, m_cdr->getPhase(), m_fieldSolver->getPotential());
@@ -1296,14 +1301,17 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
   // 2a. Allocate some storage that allows us to extrapolate the CDR densities to the EB so we can call the same physics on the EB instead of the
   //     grid faces.
   // clang-format on
-  Vector<EBAMRIVData*> cdrDensitiesExtrap(numCdrSpecies, nullptr);
+  std::vector<Scratch<EBAMRIVData>> cdrDensitiesExtrapScratch;
+  Vector<EBAMRIVData*>              cdrDensitiesExtrap(numCdrSpecies, nullptr);
+
+  cdrDensitiesExtrapScratch.reserve(numCdrSpecies);
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    // Allocate storage. Note that because we use the new operator we must the the storage as well.
-    cdrDensitiesExtrap[idx] = new EBAMRIVData(); // This must be deleted
-    m_amr->allocate(*cdrDensitiesExtrap[idx], m_realm, m_cdr->getPhase(), numComp);
+    cdrDensitiesExtrapScratch.emplace_back(
+      m_amr->fetchScratch<EBAMRIVData>(m_realm, m_cdr->getPhase(), numComp, m_amr->getNumberOfGhostCells()));
+    cdrDensitiesExtrap[idx] = &(*cdrDensitiesExtrapScratch.back());
 
     // Extrapolate the cell-centered densities to the EB.
     m_amr->interpToEB(*cdrDensitiesExtrap[idx], *cdrDensities[idx], m_realm, m_cdr->getPhase());
@@ -1311,15 +1319,6 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
 
   // 2b. Compute the diffusion coefficients on the EB.
   this->computeCdrDiffusionEb(cdrDcoEB, cdrDensitiesExtrap, a_electricFieldEB, m_time);
-
-  // 2c. Release the extra storage allocate in 2a.
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    m_amr->deallocate(*cdrDensitiesExtrap[idx]);
-
-    delete cdrDensitiesExtrap[idx];
-  }
 }
 
 void
@@ -1653,12 +1652,19 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
   CH_assert(a_cdrDcoFace.size() == numCdrSpecies);
   CH_assert(a_cdrDensities.size() == numCdrSpecies);
 
-  // Allocate data for cell-centered diffusion coefficients.
-  Vector<EBAMRCellData> cdrDcoCell(numCdrSpecies);
+  // Cell-centered diffusion coefficients. computeCdrDiffusionCell takes a vector of data holders, so cdrDcoCell holds
+  // shallow copies of the pooled temporaries.
+  std::vector<Scratch<EBAMRCellData>> cdrDcoCellScratch;
+  Vector<EBAMRCellData>               cdrDcoCell(numCdrSpecies);
+
+  cdrDcoCellScratch.reserve(numCdrSpecies);
+
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_amr->allocate(cdrDcoCell[idx], m_realm, m_cdr->getPhase(), nComp);
+    cdrDcoCellScratch.emplace_back(
+      m_amr->fetchScratch<EBAMRCellData>(m_realm, m_cdr->getPhase(), nComp, m_amr->getNumberOfGhostCells()));
+    cdrDcoCell[idx] = *cdrDcoCellScratch.back();
   }
 
   // Compute the diffusion coefficients on cell centers.
@@ -1842,8 +1848,10 @@ CdrPlasmaStepper::computeCdrDriftVelocities()
   }
 
   // Compute the electric field first.
-  EBAMRCellData E;
-  m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRCellData> E = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                m_cdr->getPhase(),
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
   // Get handle to CDR drift velocities and densities.
@@ -2598,13 +2606,16 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&         a_extr
   // noisy bastard
 
   // Allocate some data holders we can use for holding the fluxes.
-  EBAMRIVData ebFlux;
-  EBAMRIVData ebVel;
-  EBAMRIVData ebPhi;
 
-  m_amr->allocate(ebFlux, m_realm, a_phase, SpaceDim);
-  m_amr->allocate(ebVel, m_realm, a_phase, SpaceDim);
-  m_amr->allocate(ebPhi, m_realm, a_phase, 1);
+  Scratch<EBAMRIVData> ebFlux = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                 a_phase,
+                                                                 SpaceDim,
+                                                                 m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRIVData> ebVel  = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                a_phase,
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRIVData> ebPhi  = m_amr->fetchScratch<EBAMRIVData>(m_realm, a_phase, 1, m_amr->getNumberOfGhostCells());
 
   // Go through the CDR solvers.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2660,10 +2671,12 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         
 
   // Allocate some storage for holding the cell-centered flux and the domain-centered flux (with SpaceDim components).
   // We will take the domain-centered flux and project it on the domain faces.
-  EBAMRCellData cellCenteredFlux;
-  EBAMRIFData   domainCenteredFlux;
 
-  m_amr->allocate(cellCenteredFlux, m_realm, a_phase, SpaceDim);
+  Scratch<EBAMRCellData> cellCenteredFlux = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                               a_phase,
+                                                                               SpaceDim,
+                                                                               m_amr->getNumberOfGhostCells());
+  EBAMRIFData            domainCenteredFlux;
   m_amr->allocate(domainCenteredFlux, m_realm, a_phase, SpaceDim);
 
   // Go through the CDR solvers and extrapolated everything.
@@ -2709,8 +2722,10 @@ CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&         a_
   CH_assert(a_cdrVelocitiesCell.size() == numCdrSolvers);
 
   // Allocate some scratch data -- it is used for extrapolating the well-centered data to the EB.
-  EBAMRIVData scratch;
-  m_amr->allocate(scratch, m_realm, a_phase, SpaceDim);
+  Scratch<EBAMRIVData> scratch = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                  a_phase,
+                                                                  SpaceDim,
+                                                                  m_amr->getNumberOfGhostCells());
 
   //  for (int i = 0; i < a_cdrVelocitiesEB.size(); i++){
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2844,11 +2859,15 @@ CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const
 
   // Allocate scratch storage for holding the cell-centered diffusion coefficient and
   // D * grad(phi)
-  EBAMRCellData scratchONE;
-  EBAMRCellData scratchDIM;
 
-  m_amr->allocate(scratchONE, m_realm, m_phase, 1);
-  m_amr->allocate(scratchDIM, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratchONE = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> scratchDIM = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         SpaceDim,
+                                                                         m_amr->getNumberOfGhostCells());
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<CdrSolver>&  solver  = solverIt();
@@ -3039,8 +3058,10 @@ CdrPlasmaStepper::computeMaxElectricField(Real& a_maximumElectricField, const ph
   }
 
   // Compute the electric field on the input phase and interpolate it to centroids.
-  EBAMRCellData E;
-  m_amr->allocate(E, m_realm, a_phase, SpaceDim);
+  Scratch<EBAMRCellData> E = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                a_phase,
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
 
   this->computeElectricField(E, a_phase, m_fieldSolver->getPotential());
   m_amr->interpToCentroids(E, m_realm, a_phase);
@@ -3980,8 +4001,10 @@ CdrPlasmaStepper::computeElectrodeCurrent()
   // clang-format on
 
   // Allocate a data holder for storing the total charge flux, i.e. J.
-  EBAMRIVData currentDensity;
-  m_amr->allocate(currentDensity, m_realm, m_cdr->getPhase(), 1);
+  Scratch<EBAMRIVData> currentDensity = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                         m_cdr->getPhase(),
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
   DataOps::setValue(currentDensity, 0.0);
 
   // Iterate through all CDR solvers and add their EB BC flux to the current density data holder.
@@ -4026,7 +4049,7 @@ CdrPlasmaStepper::computeElectrodeCurrent()
 
     const Box&             cellBox      = dbl[din];
     const EBISBox&         ebisBox      = ebisl[din];
-    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[din];
+    const BaseIVFAB<Real>& patchCurrent = (*(*currentDensity)[integrationLevel])[din];
 
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -4073,8 +4096,10 @@ CdrPlasmaStepper::computeDielectricCurrent()
   // clang-format on
 
   // Allocate a data holder for storing the total charge flux, i.e. J.
-  EBAMRIVData currentDensity;
-  m_amr->allocate(currentDensity, m_realm, m_cdr->getPhase(), 1);
+  Scratch<EBAMRIVData> currentDensity = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                         m_cdr->getPhase(),
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
   DataOps::setValue(currentDensity, 0.0);
 
   // Iterate through all CDR solvers and add their EB BC flux to the current density data holder.
@@ -4119,7 +4144,7 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
     const Box&             cellBox      = dbl[din];
     const EBISBox&         ebisBox      = ebisl[din];
-    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[din];
+    const BaseIVFAB<Real>& patchCurrent = (*(*currentDensity)[integrationLevel])[din];
 
     // Grid kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -4245,13 +4270,19 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   Real current = 0.0;
 
   // Allocate data that can holder the various parts.
-  EBAMRCellData J;
-  EBAMRCellData E;
-  EBAMRCellData JdotE;
 
-  m_amr->allocate(J, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(E, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(JdotE, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> J     = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                m_phase,
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> E     = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                m_phase,
+                                                                SpaceDim,
+                                                                m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> JdotE = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    1,
+                                                                    m_amr->getNumberOfGhostCells());
 
   // Compute the electric field and the current density.
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
@@ -4267,7 +4298,7 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   const int integrationLevel = 0;
 
   DataOps::kappaSum(current,
-                    *JdotE[integrationLevel],
+                    *(*JdotE)[integrationLevel],
                     *m_amr->getRegularCells(m_realm, m_phase)[integrationLevel],
                     0,
                     *m_amr->getVofIterator(m_realm, m_phase)[integrationLevel]);
@@ -4290,11 +4321,15 @@ CdrPlasmaStepper::computeRelaxationTime()
   // TLDR: This computes the relaxation time as t = eps0/conductivity. Simple as that.
 
   // Allocate some data that can hold the conductivity and eps0/conductivity.
-  EBAMRCellData relaxTime;
-  EBAMRCellData conductivity;
 
-  m_amr->allocate(relaxTime, m_realm, phase::gas, 1);
-  m_amr->allocate(conductivity, m_realm, phase::gas, 1);
+  Scratch<EBAMRCellData> relaxTime    = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        phase::gas,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> conductivity = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                           phase::gas,
+                                                                           1,
+                                                                           m_amr->getNumberOfGhostCells());
 
   // Compute the conductivity.
   this->computeCellConductivity(conductivity);
@@ -4535,13 +4570,16 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, a_data.getRealm());
-  CH_START(t2);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, a_data.getRealm());
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -4559,7 +4597,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t5);
 
   a_comp += numComp;
@@ -4581,8 +4619,10 @@ CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Allocates storage for computing J.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      phase::gas,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
 
   // Compute the current density.
   this->computeJ(scratch);
@@ -4590,7 +4630,7 @@ CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
   // Add the current density to the a_output data holder, starting on component a_icomp.
   const Interval srcInterv(0, SpaceDim - 1);
   const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-  m_amr->copyData(a_output, *scratch[a_level], a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output, *(*scratch)[a_level], a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
 
   // Need to inform the outside world about the change in starting component.
   a_icomp += SpaceDim;
@@ -4622,28 +4662,31 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
     const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
     // Compute the electric field
-    EBAMRCellData E;
-    m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
+    Scratch<EBAMRCellData> E = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                  phase::gas,
+                                                                  SpaceDim,
+                                                                  m_amr->getNumberOfGhostCells());
     this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
     // Scratch data.
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_realm, phase::gas, 1);
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        phase::gas,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     // CDR and RTE densities
     const Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
     const Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
 
     // Compute the gradient of each species.
-    std::vector<std::shared_ptr<EBAMRCellData>> cdrGradients(numCdrSpecies);
+    std::vector<Scratch<EBAMRCellData>> cdrGradients;
+    cdrGradients.reserve(numCdrSpecies);
+
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      // This storage must be deleted later.
-      cdrGradients[idx] = std::make_shared<EBAMRCellData>();
-
-      // Allocate cell-centered data
-      m_amr->allocate(*cdrGradients[idx], m_realm, m_cdr->getPhase(), SpaceDim);
+      cdrGradients.emplace_back(
+        m_amr->fetchScratch<EBAMRCellData>(m_realm, m_cdr->getPhase(), SpaceDim, m_amr->getNumberOfGhostCells()));
 
       // Copy the densities to a scratch data holder so we can compute the gradient. Must do this because
       // the gradient is a two-level AMR operator.
@@ -4696,9 +4739,9 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
           const RealVect position = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-          const RealVect localE   = RealVect(D_DECL((*E[lvl])[din].getSingleValuedFAB()(iv, 0),
-                                                  (*E[lvl])[din].getSingleValuedFAB()(iv, 1),
-                                                  (*E[lvl])[din].getSingleValuedFAB()(iv, 2)));
+          const RealVect localE   = RealVect(D_DECL((*(*E)[lvl])[din].getSingleValuedFAB()(iv, 0),
+                                                  (*(*E)[lvl])[din].getSingleValuedFAB()(iv, 1),
+                                                  (*(*E)[lvl])[din].getSingleValuedFAB()(iv, 2)));
 
           for (int i = 0; i < cdrDensities.size(); i++) {
             localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[din].getSingleValuedFAB()(iv, 0);
@@ -4733,7 +4776,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect position = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisBox, dx);
           const RealVect localE   = RealVect(
-            D_DECL((*E[lvl])[din](vof, 0), (*E[lvl])[din](vof, 1), (*E[lvl])[din](vof, 2)));
+            D_DECL((*(*E)[lvl])[din](vof, 0), (*(*E)[lvl])[din](vof, 1), (*(*E)[lvl])[din](vof, 2)));
 
           for (int i = 0; i < cdrDensities.size(); i++) {
             localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[din](vof, 0);

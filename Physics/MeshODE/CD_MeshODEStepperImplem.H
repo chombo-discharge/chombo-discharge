@@ -436,11 +436,12 @@ MeshODEStepper<N>::advanceRK2(const Real a_dt)
 
   EBAMRCellData& phi = m_solver->getPhi();
 
-  EBAMRCellData k1;
-  EBAMRCellData k2;
+  Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, N, m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, N, m_amr->getNumberOfGhostCells());
 
-  m_amr->allocate(k1, m_realm, m_phase, N);
-  m_amr->allocate(k2, m_realm, m_phase, N);
+  // The right-hand side is computed in the valid cells only, but the stages are added over the ghost cells too.
+  DataOps::setValue(k1, 0.0);
+  DataOps::setValue(k2, 0.0);
 
   m_solver->computeRHS(k1, m_rhsFunction);
   DataOps::incr(phi, k1, a_dt);

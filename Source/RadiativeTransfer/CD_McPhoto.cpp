@@ -65,13 +65,13 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
 
   DataOps::setValue(a_phi, 0.0);
 
-  EBAMRCellData phi;
-  EBAMRCellData numPhysPhotonsTotal;
-  EBAMRCellData numPhysPhotonsPacket;
+  const int ghost = m_amr->getNumberOfGhostCells();
 
-  m_amr->allocate(phi, m_realm, m_phase, 1);
-  m_amr->allocate(numPhysPhotonsTotal, m_realm, m_phase, 1);
-  m_amr->allocate(numPhysPhotonsPacket, m_realm, m_phase, m_numSamplingPackets);
+  Scratch<EBAMRCellData> numPhysPhotonsTotal  = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
+  Scratch<EBAMRCellData> numPhysPhotonsPacket = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                                   m_phase,
+                                                                                   m_numSamplingPackets,
+                                                                                   ghost);
 
   // clang-format off
   // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
@@ -101,10 +101,12 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
       ParticleContainer<Photon> scratchPhotons;
       m_amr->allocate(scratchPhotons, m_realm);
 
+      Scratch<EBAMRCellData> phi = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, ghost);
+
       for (int i = 0; i < m_numSamplingPackets; i++) {
         const size_t maxPhotonsPerCell = (i == 0) ? maxPhotonsPerPacket + remainder : maxPhotonsPerPacket;
 
-        const EBAMRCellData& numPhysPhotons = m_amr->slice(numPhysPhotonsPacket, Interval(i, i));
+        const EBAMRCellData& numPhysPhotons = m_amr->slice(*numPhysPhotonsPacket, Interval(i, i));
 
         this->generateComputationalPhotons(m_photons, numPhysPhotons, maxPhotonsPerCell);
         this->advancePhotonsInstantaneous(scratchPhotons, m_ebPhotons, m_domainPhotons, m_photons);
@@ -135,7 +137,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     for (int i = 0; i < m_numSamplingPackets; i++) {
       const size_t maxPhotonsPerCell = (i == 0) ? maxPhotonsPerPacket + remainder : maxPhotonsPerPacket;
 
-      const EBAMRCellData& numPhysPhotons = m_amr->slice(numPhysPhotonsPacket, Interval(i, i));
+      const EBAMRCellData& numPhysPhotons = m_amr->slice(*numPhysPhotonsPacket, Interval(i, i));
 
       this->dirtySamplePhotons(pointParticles, a_phi, numPhysPhotons, maxPhotonsPerCell);
     }
@@ -529,9 +531,6 @@ McPhoto::allocate()
   // Allocate mesh data
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   // Allocate particle data holders
   m_amr->allocate(m_photons, m_realm);
@@ -568,9 +567,6 @@ McPhoto::deallocate()
 
   m_phi.clear();
   m_source.clear();
-  m_scratch.clear();
-  m_depositionNC.clear();
-  m_massDiff.clear();
 }
 
 void
@@ -584,9 +580,6 @@ McPhoto::regrid(const int a_lmin, const int /*a_oldFinestLevel*/, const int a_ne
   // Mesh data regrids
   m_amr->allocate(m_phi, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   m_amr->remapToNewGrids(m_photons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_bulkPhotons, a_lmin, a_newFinestLevel);
@@ -1338,16 +1331,21 @@ McPhoto::depositHybridDivergence(EBAMRCellData& a_phi) const noexcept
     pout() << m_name + "::depositHybridDivergence" << endl;
   }
 
-  // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->depositNonConservative(m_depositionNC, a_phi);
+  const int ghost = m_amr->getNumberOfGhostCells();
+
+  Scratch<EBAMRIVData> depositionNC = m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, ghost);
+  Scratch<EBAMRIVData> massDiff     = m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, ghost);
+
+  // Compute depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositNonConservative(depositionNC, a_phi);
 
   // Compute hybrid deposition, including mass difference
-  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
+  this->depositHybrid(a_phi, massDiff, depositionNC);
 
   // Redistribute
   if (m_irregularDeposition == IrregularDeposition::Redistribute ||
       m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
-    m_amr->redistributeMass(a_phi, m_massDiff, m_realm, m_phase);
+    m_amr->redistributeMass(a_phi, massDiff, m_realm, m_phase);
   }
 
   // Average down and interpolate
@@ -1876,14 +1874,29 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t1);
 
   CH_START(t2);
+  const bool plotAnyPhotons = m_plotPhotons || m_plotBulkPhotons || m_plotEBPhotons || m_plotDomainPhotons ||
+                              m_plotSourcePhotons;
+
+  if (!plotAnyPhotons) {
+    CH_STOP(t2);
+
+    return;
+  }
+
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   m_nComp,
+                                                                   m_amr->getNumberOfGhostCells());
+
   if (m_plotPhotons) {
-    this->depositPhotonsNGP(*m_scratch[a_level], m_photons, a_level);
+    this->depositPhotonsNGP(*scratch, m_photons, a_level);
 
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(a_comp, a_comp);
 
     m_amr->copyData(a_output,
-                    *m_scratch[a_level],
+                    *scratch,
                     a_level,
                     a_outputRealm,
                     m_realm,
@@ -1895,13 +1908,13 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
     a_comp++;
   }
   if (m_plotBulkPhotons) {
-    this->depositPhotonsNGP(*m_scratch[a_level], m_bulkPhotons, a_level);
+    this->depositPhotonsNGP(*scratch, m_bulkPhotons, a_level);
 
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(a_comp, a_comp);
 
     m_amr->copyData(a_output,
-                    *m_scratch[a_level],
+                    *scratch,
                     a_level,
                     a_outputRealm,
                     m_realm,
@@ -1913,13 +1926,13 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
     a_comp++;
   }
   if (m_plotEBPhotons) {
-    this->depositPhotonsNGP(*m_scratch[a_level], m_ebPhotons, a_level);
+    this->depositPhotonsNGP(*scratch, m_ebPhotons, a_level);
 
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(a_comp, a_comp);
 
     m_amr->copyData(a_output,
-                    *m_scratch[a_level],
+                    *scratch,
                     a_level,
                     a_outputRealm,
                     m_realm,
@@ -1931,13 +1944,13 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
     a_comp++;
   }
   if (m_plotDomainPhotons) {
-    this->depositPhotonsNGP(*m_scratch[a_level], m_domainPhotons, a_level);
+    this->depositPhotonsNGP(*scratch, m_domainPhotons, a_level);
 
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(a_comp, a_comp);
 
     m_amr->copyData(a_output,
-                    *m_scratch[a_level],
+                    *scratch,
                     a_level,
                     a_outputRealm,
                     m_realm,
@@ -1949,13 +1962,13 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
     a_comp++;
   }
   if (m_plotSourcePhotons) {
-    this->depositPhotonsNGP(*m_scratch[a_level], m_sourcePhotons, a_level);
+    this->depositPhotonsNGP(*scratch, m_sourcePhotons, a_level);
 
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(a_comp, a_comp);
 
     m_amr->copyData(a_output,
-                    *m_scratch[a_level],
+                    *scratch,
                     a_level,
                     a_outputRealm,
                     m_realm,

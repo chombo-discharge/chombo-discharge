@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <optional>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <EBAMRIO.H>
@@ -174,11 +177,14 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 
   if (m_isDiffusive) {
     // Allocate some data = 0 which we use for computing the residual.
-    EBAMRCellData zero;
-    EBAMRCellData scratch;
-
-    m_amr->allocate(zero, m_realm, m_phase, 1);
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> zero    = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(zero, 0.0);
 
@@ -213,6 +219,12 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // those.
     this->resetAlphaAndBeta(1.0, -a_dt);
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing because Chombo did not always use smart pointers.
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
@@ -220,9 +232,9 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, scratch);
-    m_amr->alias(resid, m_residual);
-    m_amr->alias(zer, zero);
+    m_amr->alias(eulerRHS, *scratch);
+    m_amr->alias(resid, *residual);
+    m_amr->alias(zer, *zero);
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
@@ -305,11 +317,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
   if (m_isDiffusive) {
     // Allocate some data = 0 which we use for computing the residual.
-    EBAMRCellData zero;
-    EBAMRCellData scratch;
-
-    m_amr->allocate(zero, m_realm, m_phase, 1);
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> zero    = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(zero, 0.0);
 
@@ -348,11 +363,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     DataOps::incr(scratch, a_source, a_dt);
 
     // Compute kappa*L(phi^k) and add it to the scratch data holder.
-    EBAMRCellData kappaLphi;
-    EBAMRCellData phiScratch;
-
-    m_amr->allocate(kappaLphi, m_realm, m_phase, 1);
-    m_amr->allocate(phiScratch, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> kappaLphi  = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                          m_phase,
+                                                                          1,
+                                                                          m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> phiScratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                           m_phase,
+                                                                           1,
+                                                                           m_amr->getNumberOfGhostCells());
 
     DataOps::copy(phiScratch, a_oldPhi);
 
@@ -366,6 +384,12 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // to worry about those.
     this->resetAlphaAndBeta(1.0, -0.5 * a_dt);
 
+    // Multigrid residual. The solver redefines it from the right-hand side and zeroes it before use.
+    Scratch<EBAMRCellData> residual = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         m_nComp,
+                                                                         m_amr->getNumberOfGhostCells());
+
     // Aliasing because Chombo did not always use smart pointers.
     Vector<LevelData<EBCellFAB>*> newPhi;
     Vector<LevelData<EBCellFAB>*> eulerRHS;
@@ -373,9 +397,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     Vector<LevelData<EBCellFAB>*> zer;
 
     m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(eulerRHS, scratch);
-    m_amr->alias(resid, m_residual);
-    m_amr->alias(zer, zero);
+    m_amr->alias(eulerRHS, *scratch);
+    m_amr->alias(resid, *residual);
+    m_amr->alias(zer, *zero);
 
     // Figure out how far away we are form a "converged" solution.
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
@@ -454,10 +478,8 @@ CdrMultigrid::setupDiffusionSolver()
   // diffusion solves are implicit, but this is really the easiest way of
   if (m_isDiffusive) {
     m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_residual, m_realm, m_phase, m_nComp);
 
     DataOps::setValue(m_helmAcoef, 1.0);
-    DataOps::setValue(m_residual, 0.0);
 
     // This sets up the multigrid Helmholtz solver.
     this->setupHelmholtzFactory();
@@ -620,11 +642,14 @@ CdrMultigrid::setupMultigrid()
   m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
-  EBAMRCellData dummy1;
-  EBAMRCellData dummy2;
-
-  m_amr->allocate(dummy1, m_realm, m_phase, m_nComp);
-  m_amr->allocate(dummy2, m_realm, m_phase, m_nComp);
+  Scratch<EBAMRCellData> dummy1 = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> dummy2 = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     m_nComp,
+                                                                     m_amr->getNumberOfGhostCells());
 
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
@@ -633,8 +658,8 @@ CdrMultigrid::setupMultigrid()
   Vector<LevelData<EBCellFAB>*> phi;
   Vector<LevelData<EBCellFAB>*> rhs;
 
-  m_amr->alias(phi, dummy1);
-  m_amr->alias(rhs, dummy2);
+  m_amr->alias(phi, *dummy1);
+  m_amr->alias(rhs, *dummy2);
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
@@ -675,8 +700,10 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
   }
 
   if (m_isMobile || m_isDiffusive) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -687,10 +714,20 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     if (m_isMobile && !m_isDiffusive) {
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
+      // Face velocities and states are scratch for the advective flux below.
+      Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+      Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+
       // Update face velocity and advect to faces.
-      this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
-      this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
+      this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+      this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
+      this->computeAdvectionFlux(scratchFlux, faceVelocity, faceStates, a_domainFlux);
     }
     else if (!m_isMobile && m_isDiffusive) {
       this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Domain flux needs to come in through here.
@@ -698,26 +735,40 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
     }
     else if (m_isMobile && m_isDiffusive) { //
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
-      this->averageVelocityToFaces();
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
+
+      // Face velocities and states are scratch for the advective flux below.
+      Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                               m_phase,
+                                                                               m_nComp,
+                                                                               m_amr->getNumberOfGhostCells());
+      Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+
+      this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+      this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
 
       this->computeAdvectionDiffusionFlux(scratchFlux,
                                           a_phi,
-                                          m_faceStates,
-                                          m_faceVelocity,
+                                          faceStates,
+                                          faceVelocity,
                                           m_faceCenteredDiffusionCoefficient,
                                           a_domainFlux);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in above but eb fluxes come in here.
-    EBAMRIVData* ebflux;
-    if (a_ebFlux) {
-      ebflux = &m_ebFlux;
+    // Without the stored EB flux, the EB faces get a zero flux.
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
+    if (!a_ebFlux) {
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
-    else {
-      ebflux = &m_ebZero;
-    }
-    this->computeDivG(a_divJ, scratchFlux, *ebflux, a_phi, a_dt, a_conservativeOnly);
+
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
+    this->computeDivG(a_divJ, scratchFlux, ebflux, a_phi, a_dt, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divJ, 0.0);
@@ -739,32 +790,47 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
   }
 
   if (m_isMobile) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
     m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
-    // Cell-centered velocities become face-centered velocities.
-    this->averageVelocityToFaces();
+    // Cell-centered velocities become face-centered velocities. Both they and the face states are scratch for the
+    // advective flux.
+    Scratch<EBAMRFluxData> faceVelocity = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                             m_phase,
+                                                                             m_nComp,
+                                                                             m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRFluxData> faceStates   = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                           m_phase,
+                                                                           m_nComp,
+                                                                           m_amr->getNumberOfGhostCells());
 
-    // Face extrapolation to cell-centered faces
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt, a_dt);
+    this->averageVelocityToFaces(faceVelocity, m_cellVelocity);
+
+    // Face extrapolation to cell-centered faces.
+    this->advectToFaces(faceStates, a_phi, faceVelocity, a_extrapDt, a_dt);
 
     // Compute face-centered fluxes
-    this->computeAdvectionFlux(scratchFlux, m_faceVelocity, m_faceStates, a_domainFlux);
+    this->computeAdvectionFlux(scratchFlux, faceVelocity, faceStates, a_domainFlux);
 
-    EBAMRIVData* ebflux;
-    if (a_ebFlux) {
-      ebflux = &m_ebFlux;
+    // Without the stored EB flux, the EB faces get a zero flux.
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
+    if (!a_ebFlux) {
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
-    else {
-      ebflux = &m_ebZero;
-    }
+
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
 
     // Compute div(F) -- this includes interpolation to centroids and redistribution.
-    this->computeDivG(a_divF, scratchFlux, *ebflux, a_phi, a_dt, a_conservativeOnly);
+    this->computeDivG(a_divF, scratchFlux, ebflux, a_phi, a_dt, a_conservativeOnly);
   }
   else {
     DataOps::setValue(a_divF, 0.0);
@@ -785,24 +851,29 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
   }
 
   if (m_isDiffusive) {
-    EBAMRFluxData scratchFlux;
-    m_amr->allocate(scratchFlux, m_realm, m_phase, m_nComp);
+    Scratch<EBAMRFluxData> scratchFlux = m_amr->fetchScratch<EBAMRFluxData>(m_realm,
+                                                                            m_phase,
+                                                                            m_nComp,
+                                                                            m_amr->getNumberOfGhostCells());
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
 
     this->computeDiffusionFlux(scratchFlux, a_phi, a_domainFlux); // Compute the face-centered diffusion flux
 
-    EBAMRIVData* ebflux;
-    if (a_ebFlux) {
-      ebflux = &m_ebFlux;
+    // Without the stored EB flux, the EB faces get a zero flux.
+    std::optional<Scratch<EBAMRIVData>> ebZero;
+
+    if (!a_ebFlux) {
+      ebZero.emplace(m_amr->fetchScratch<EBAMRIVData>(m_realm, m_phase, m_nComp, m_amr->getNumberOfGhostCells()));
+
+      DataOps::setValue(**ebZero, 0.0);
     }
-    else {
-      ebflux = &m_ebZero;
-    }
+
+    const EBAMRIVData& ebflux = a_ebFlux ? m_ebFlux : **ebZero;
     // The update is phi + a_dt*div(D*grad(phi)) = phi - (-a_dt)*div(D*grad(phi)), so the update time step that the
     // stabilization sees is -a_dt.
-    this->computeDivG(a_divD, scratchFlux, *ebflux, a_phi, -a_dt, a_conservativeOnly);
+    this->computeDivG(a_divD, scratchFlux, ebflux, a_phi, -a_dt, a_conservativeOnly);
 
     m_amr->conservativeAverage(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);

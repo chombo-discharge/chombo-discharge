@@ -13,8 +13,14 @@
 #ifndef CD_AMRMESHIMPLEM_H
 #define CD_AMRMESHIMPLEM_H
 
+// Std includes
+#include <limits>
+#include <memory>
+#include <type_traits>
+
 // Our includes
 #include <CD_AmrMesh.H>
+#include <CD_DataOps.H>
 #include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1325,6 +1331,98 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles
       }
     }
   }
+}
+
+template <typename T, typename Build>
+Scratch<T>
+AmrMesh::fetchFromPool(const std::string&       a_realm,
+                       const phase::which_phase a_phase,
+                       const int                a_level,
+                       const int                a_nComp,
+                       const int                a_ghost,
+                       const Build&             a_build,
+                       const std::string&       a_caller) const
+{
+  if (a_nComp <= 0 || a_ghost < 0) {
+    const std::string err = a_caller + " -- asked for " + std::to_string(a_nComp) + " components and " +
+                            std::to_string(a_ghost) + " ghost cells";
+
+    MayDay::Abort(err.c_str());
+  }
+
+  this->assertRealm(a_realm, a_caller);
+
+  // Between AmrMesh::preRegrid and the regrid the realms have no grids, and nothing can be allocated on them.
+  if (static_cast<int>(this->getGrids(a_realm).size()) != m_finestLevel + 1) {
+    const std::string err = a_caller + " -- the grids of realm '" + a_realm +
+                            "' are not defined (fetch during a regrid?)";
+
+    MayDay::Abort(err.c_str());
+  }
+
+  Scratch<T> scratch = m_realms[a_realm]->getScratchPool().template acquire<T>(a_phase,
+                                                                               a_level,
+                                                                               a_nComp,
+                                                                               a_ghost,
+                                                                               a_build);
+
+#ifndef NDEBUG
+  DataOps::setValue(*scratch, std::numeric_limits<Real>::quiet_NaN());
+#endif
+
+  return scratch;
+}
+
+template <typename T>
+Scratch<T>
+AmrMesh::fetchScratch(const std::string&       a_realm,
+                      const phase::which_phase a_phase,
+                      const int                a_nComp,
+                      const int                a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchScratch(string, phase::which_phase, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchScratch(string, phase::which_phase, int, int)" << endl;
+  }
+
+  static_assert(std::is_same<T, EBAMRCellData>::value || std::is_same<T, EBAMRFluxData>::value ||
+                  std::is_same<T, EBAMRIVData>::value,
+                "AmrMesh::fetchScratch -- this overload takes EBAMRCellData, EBAMRFluxData or EBAMRIVData");
+
+  auto build = [this, &a_realm, a_phase, a_nComp, a_ghost]() -> std::unique_ptr<T> {
+    std::unique_ptr<T> data(new T());
+
+    this->allocate(*data, a_realm, a_phase, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  return this->template fetchFromPool<T>(a_realm, a_phase, -1, a_nComp, a_ghost, build, "AmrMesh::fetchScratch");
+}
+
+template <typename T>
+Scratch<T>
+AmrMesh::fetchScratch(const std::string& a_realm, const int a_nComp, const int a_ghost) const
+{
+  CH_TIME("AmrMesh::fetchScratch(string, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::fetchScratch(string, int, int)" << endl;
+  }
+
+  static_assert(std::is_same<T, EBAMRFAB>::value || std::is_same<T, MFAMRCellData>::value ||
+                  std::is_same<T, MFAMRFluxData>::value || std::is_same<T, MFAMRIVData>::value,
+                "AmrMesh::fetchScratch -- this overload takes EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData");
+
+  auto build = [this, &a_realm, a_nComp, a_ghost]() -> std::unique_ptr<T> {
+    std::unique_ptr<T> data(new T());
+
+    this->allocate(*data, a_realm, a_nComp, a_ghost);
+
+    return data;
+  };
+
+  // These types have no phase; the pool keys them on phase::gas.
+  return this->template fetchFromPool<T>(a_realm, phase::gas, -1, a_nComp, a_ghost, build, "AmrMesh::fetchScratch");
 }
 
 #include <CD_NamespaceFooter.H>

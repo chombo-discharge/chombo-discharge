@@ -18,6 +18,7 @@
 #define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 
 // Std includes
+#include <optional>
 #include <iostream>
 #include <fstream>
 
@@ -1128,11 +1129,12 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   const std::string prefix = "DischargeInceptionStepper/";
 
   if (m_plotField) {
-    MFAMRCellData scratch;
-    EBAMRIVData   scratchSurf;
 
-    m_amr->allocate(scratch, m_realm, 1);
-    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
+    Scratch<MFAMRCellData> scratch     = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRIVData>   scratchSurf = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                        phase::gas,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     for (const auto& V : m_voltageSweeps) {
 
@@ -1191,7 +1193,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
                       m_amr->getDx(),
                       0,
                       m_amr->getVofIterator(m_realm, phase::gas));
-    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *(*scratchSurf)[a_level], a_outputRealm, a_level);
   }
 
   if (m_plotInceptionVoltage) {
@@ -1246,62 +1248,71 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   }
 
   if (m_plotAlpha) {
-    LevelData<EBCellFAB> alpha;
-    LevelData<EBCellFAB> alphaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaCoar;
 
-    m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> alpha = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   1,
+                                                                   m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
-        m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**alphaCoar, m_voltageSweeps[i], m_alpha, a_level - 1);
+        m_amr->interpGhost(alpha, **alphaCoar, a_level, m_realm, m_phase);
       }
       else {
-        alpha.exchange();
+        alpha->exchange();
       }
 
-      m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+      m_amr->copyData(a_output, *alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
     }
   }
 
   if (m_plotEta) {
-    LevelData<EBCellFAB> eta;
-    LevelData<EBCellFAB> etaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> etaCoar;
 
-    m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> eta = m_amr->fetchLevelScratch(m_realm,
+                                                                 m_phase,
+                                                                 a_level,
+                                                                 1,
+                                                                 m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+      etaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(eta, m_voltageSweeps[i], m_eta, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
-        m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**etaCoar, m_voltageSweeps[i], m_eta, a_level - 1);
+        m_amr->interpGhost(eta, **etaCoar, a_level, m_realm, m_phase);
       }
       else {
-        eta.exchange();
+        eta->exchange();
       }
 
-      m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+      m_amr->copyData(a_output, *eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
     }
   }
 
   if (m_plotAlpha && m_plotEta) {
-    LevelData<EBCellFAB> alphaEff;
-    LevelData<EBCellFAB> alphaEffCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaEffCoar;
 
-    m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> alphaEff = m_amr->fetchLevelScratch(m_realm,
+                                                                      m_phase,
+                                                                      a_level,
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaEffCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
@@ -1311,16 +1322,16 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       this->evaluateFunction(alphaEff, m_voltageSweeps[i], alphaFunc, a_level);
       if (a_level > 0) {
-        this->evaluateFunction(alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
-        m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+        this->evaluateFunction(**alphaEffCoar, m_voltageSweeps[i], alphaFunc, a_level - 1);
+        m_amr->interpGhost(alphaEff, **alphaEffCoar, a_level, m_realm, m_phase);
       }
       else {
-        alphaEff.exchange();
+        alphaEff->exchange();
       }
 
       // Do a copy, but note that this does not include ghost cells across the CF interface since
       // we are only computing for a single grid level.
-      m_amr->copyData(a_output, alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+      m_amr->copyData(a_output, *alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
       a_icomp++;
     }
@@ -1346,11 +1357,12 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   if (m_plotField) {
 
     // Holds the field magnitude
-    MFAMRCellData scratch;
-    EBAMRIVData   scratchSurf;
 
-    m_amr->allocate(scratch, m_realm, 1);
-    m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
+    Scratch<MFAMRCellData> scratch     = m_amr->fetchScratch<MFAMRCellData>(m_realm, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRIVData>   scratchSurf = m_amr->fetchScratch<EBAMRIVData>(m_realm,
+                                                                        phase::gas,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
     DataOps::dotProduct(scratch, m_electricField, m_electricField);
     DataOps::squareRoot(scratch,
@@ -1381,7 +1393,7 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
                       m_amr->getDx(),
                       0,
                       m_amr->getVofIterator(m_realm, phase::gas));
-    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
+    m_fieldSolver->writeSurfaceData(a_output, a_icomp, *(*scratchSurf)[a_level], a_outputRealm, a_level);
   }
 
   if (m_plotInceptionIntegral) {
@@ -1393,35 +1405,42 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotBackgroundIonization) {
-    LevelData<EBCellFAB> bgIonization;
-    m_amr->allocate(bgIonization, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> bgIonization = m_amr->fetchLevelScratch(m_realm,
+                                                                          m_phase,
+                                                                          a_level,
+                                                                          1,
+                                                                          m_amr->getNumberOfGhostCells());
 
     this->evaluateFunction(bgIonization, m_voltageCurve(m_time), m_backgroundRate, a_level);
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
     m_amr
-      ->copyData(a_output, bgIonization, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+      ->copyData(a_output, *bgIonization, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
 
   if (m_plotDetachment) {
-    LevelData<EBCellFAB> detachRate;
-    LevelData<EBCellFAB> detachRateCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> detachRateCoar;
 
-    m_amr->allocate(detachRate, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> detachRate = m_amr->fetchLevelScratch(m_realm,
+                                                                        m_phase,
+                                                                        a_level,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(detachRateCoar, m_realm, m_phase, a_level - 1, 1);
+      detachRateCoar.emplace(
+        m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(detachRate, m_voltageCurve(m_time), m_detachmentRate, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
-      m_amr->interpGhost(detachRate, detachRateCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**detachRateCoar, m_voltageCurve(m_time), m_detachmentRate, a_level - 1);
+      m_amr->interpGhost(detachRate, **detachRateCoar, a_level, m_realm, m_phase);
     }
 
-    m_amr->copyData(a_output, detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+    m_amr->copyData(a_output, *detachRate, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
@@ -1431,62 +1450,71 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
   }
 
   if (m_plotAlpha) {
-    LevelData<EBCellFAB> alpha;
-    LevelData<EBCellFAB> alphaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaCoar;
 
-    m_amr->allocate(alpha, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> alpha = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   1,
+                                                                   m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
-      m_amr->interpGhost(alpha, alphaCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**alphaCoar, m_voltageCurve(m_time), m_alpha, a_level - 1);
+      m_amr->interpGhost(alpha, **alphaCoar, a_level, m_realm, m_phase);
     }
     else {
-      alpha.exchange();
+      alpha->exchange();
     }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    m_amr->copyData(a_output, alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+    m_amr->copyData(a_output, *alpha, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
 
   if (m_plotEta) {
-    LevelData<EBCellFAB> eta;
-    LevelData<EBCellFAB> etaCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> etaCoar;
 
-    m_amr->allocate(eta, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> eta = m_amr->fetchLevelScratch(m_realm,
+                                                                 m_phase,
+                                                                 a_level,
+                                                                 1,
+                                                                 m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(etaCoar, m_realm, m_phase, a_level - 1, 1);
+      etaCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
-      m_amr->interpGhost(eta, etaCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**etaCoar, m_voltageCurve(m_time), m_eta, a_level - 1);
+      m_amr->interpGhost(eta, **etaCoar, a_level, m_realm, m_phase);
     }
     else {
-      eta.exchange();
+      eta->exchange();
     }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    m_amr->copyData(a_output, eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+    m_amr->copyData(a_output, *eta, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
 
   if (m_plotAlpha && m_plotEta) {
-    LevelData<EBCellFAB> alphaEff;
-    LevelData<EBCellFAB> alphaEffCoar;
+    std::optional<Scratch<LevelData<EBCellFAB>>> alphaEffCoar;
 
-    m_amr->allocate(alphaEff, m_realm, m_phase, a_level, 1);
+    Scratch<LevelData<EBCellFAB>> alphaEff = m_amr->fetchLevelScratch(m_realm,
+                                                                      m_phase,
+                                                                      a_level,
+                                                                      1,
+                                                                      m_amr->getNumberOfGhostCells());
     if (a_level > 0) {
-      m_amr->allocate(alphaEffCoar, m_realm, m_phase, a_level - 1, 1);
+      alphaEffCoar.emplace(m_amr->fetchLevelScratch(m_realm, m_phase, a_level - 1, 1, m_amr->getNumberOfGhostCells()));
     }
 
     auto alphaFunc = [alpha = this->m_alpha, eta = this->m_eta](const Real E, const RealVect x) -> Real {
@@ -1495,16 +1523,16 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
 
     this->evaluateFunction(alphaEff, m_voltageCurve(m_time), alphaFunc, a_level);
     if (a_level > 0) {
-      this->evaluateFunction(alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
-      m_amr->interpGhost(alphaEff, alphaEffCoar, a_level, m_realm, m_phase);
+      this->evaluateFunction(**alphaEffCoar, m_voltageCurve(m_time), alphaFunc, a_level - 1);
+      m_amr->interpGhost(alphaEff, **alphaEffCoar, a_level, m_realm, m_phase);
     }
     else {
-      alphaEff.exchange();
+      alphaEff->exchange();
     }
 
     // Do a copy, but note that this does not include ghost cells across the CF interface since
     // we are only computing for a single grid level.
-    m_amr->copyData(a_output, alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
+    m_amr->copyData(a_output, *alphaEff, a_level, a_outputRealm, m_realm, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_icomp++;
   }
@@ -1737,8 +1765,10 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
 
   switch (m_transportAlgorithm) {
   case TransportAlgorithm::Euler: {
-    EBAMRCellData divJ;
-    m_amr->allocate(divJ, m_realm, m_phase, 1.0);
+    Scratch<EBAMRCellData> divJ = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                     m_phase,
+                                                                     1,
+                                                                     m_amr->getNumberOfGhostCells());
 
     m_ionSolver->computeDivJ(divJ, phi, 0.0, a_dt, false, true, false);
 
@@ -1748,13 +1778,10 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
   }
   case TransportAlgorithm::Heun: {
     // Transient storage
-    EBAMRCellData yp;
-    EBAMRCellData k1;
-    EBAMRCellData k2;
 
-    m_amr->allocate(yp, m_realm, m_phase, 1);
-    m_amr->allocate(k1, m_realm, m_phase, 1);
-    m_amr->allocate(k2, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> yp = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 
     // Compute k1 coefficient
     m_ionSolver->computeDivJ(k1, phi, 0.0, a_dt, false, true, false);
@@ -1773,11 +1800,9 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     const bool addDomainFlux = true;
 
     // Transient storage
-    EBAMRCellData k1;
-    EBAMRCellData k2;
 
-    m_amr->allocate(k1, m_realm, m_phase, 1);
-    m_amr->allocate(k2, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> k1 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> k2 = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 
     m_ionSolver->computeDivF(k1, phi, a_dt, a_dt, false, true, true);
 
@@ -2226,11 +2251,15 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
   amrParticles.clearParticles();
 
   // Scratch storages
-  EBAMRCellData scratch;
-  EBAMRCellData alphaMesh;
 
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(alphaMesh, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> scratch   = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> alphaMesh = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                        m_phase,
+                                                                        1,
+                                                                        m_amr->getNumberOfGhostCells());
 
   this->superposition(scratch, a_voltage);
 
@@ -2259,10 +2288,10 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
       ParticleSoA<P>& leaf = levelParticles[din];
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[din];
+      const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      EBCellFAB& alpha    = (*alphaMesh[lvl])[din];
+      EBCellFAB& alpha    = (*(*alphaMesh)[lvl])[din];
       FArrayBox& alphaReg = alpha.getFArrayBox();
 
       if (!ebisbox.isAllCovered()) {
@@ -2664,8 +2693,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   }
 
   // Allocate something that holds the velocity of the electrons
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
   DataOps::scale(scratch, -1.0);
 
@@ -2866,8 +2897,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
   }
 
   // Allocate something that holds the velocity of the electrons
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
   DataOps::scale(scratch, -1.0);
 
@@ -3139,14 +3172,17 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
     EBAMRCellData townsendCriterionPlus;
     EBAMRCellData townsendCriterionMinu;
 
-    EBAMRCellData expKPlus;
-    EBAMRCellData expKMinu;
-
     m_amr->allocate(townsendCriterionPlus, m_realm, m_phase, 1);
     m_amr->allocate(townsendCriterionMinu, m_realm, m_phase, 1);
 
-    m_amr->allocate(expKPlus, m_realm, m_phase, 1);
-    m_amr->allocate(expKMinu, m_realm, m_phase, 1);
+    Scratch<EBAMRCellData> expKPlus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
+    Scratch<EBAMRCellData> expKMinu = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
 
     DataOps::setValue(townsendCriterionPlus, 0.0);
     DataOps::setValue(townsendCriterionMinu, 0.0);
@@ -3279,8 +3315,10 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionTransient(const Real
   }
 
   // Compute gamma
-  EBAMRCellData gamma;
-  m_amr->allocate(gamma, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> gamma = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                    m_phase,
+                                                                    1,
+                                                                    m_amr->getNumberOfGhostCells());
   DataOps::setValue(gamma, 0.0);
   m_tracerParticleSolver->deposit(gamma);
 
@@ -3334,8 +3372,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   }
 
   // Allocate something that holds the velocity of the ions
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   m_tracerParticleSolver->setVelocity(scratch);
@@ -3464,8 +3504,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   }
 
   // Allocate something that holds the velocity of the ions
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   m_tracerParticleSolver->setVelocity(scratch);
@@ -3662,8 +3704,10 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field at the input voltage
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -3684,7 +3728,7 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      const EBCellFAB& electricField     = (*scratch[lvl])[din];
+      const EBCellFAB& electricField     = (*(*scratch)[lvl])[din];
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[din];
       const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[din];
       const EBCellFAB& ionDensity        = (*m_ionSolver->getPhi()[lvl])[din];
@@ -3836,8 +3880,10 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
   m_backgroundIonizationStationary.resize(0);
 
   // Holds the electric field
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
 
   // Solve ionization volume for each voltage
   for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
@@ -3868,7 +3914,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
         EBCellFAB& bgIonization    = (*backgroundRate[lvl])[din];
         FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
-        const EBCellFAB& electricField    = (*scratch[lvl])[din];
+        const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3918,8 +3964,10 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
   m_detachmentStationary.resize(0);
 
   // Holds the electric field
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
 
   // Solve ionization volume for each voltage
   for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
@@ -3951,7 +3999,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
         FArrayBox& detachmentReg = detachment.getFArrayBox();
 
         const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[din];
-        const EBCellFAB& electricField = (*scratch[lvl])[din];
+        const EBCellFAB& electricField = (*(*scratch)[lvl])[din];
 
         const FArrayBox& ionDensityReg    = ionDensity.getFArrayBox();
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
@@ -4009,11 +4057,15 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
   const int numVoltages = m_inceptionIntegralPlus.size();
 
   // Holds the electric field
-  EBAMRCellData scratchPlus;
-  EBAMRCellData scratchMinu;
 
-  m_amr->allocate(scratchPlus, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(scratchMinu, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratchPlus = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                          m_phase,
+                                                                          SpaceDim,
+                                                                          m_amr->getNumberOfGhostCells());
+  Scratch<EBAMRCellData> scratchMinu = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                          m_phase,
+                                                                          SpaceDim,
+                                                                          m_amr->getNumberOfGhostCells());
 
   for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
     const Real voltage = m_voltageSweeps[i];
@@ -4054,8 +4106,8 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
         emissionPlus.setVal(0.0);
         emissionMinu.setVal(0.0);
 
-        const EBCellFAB& electricFieldPlus = (*scratchPlus[lvl])[din];
-        const EBCellFAB& electricFieldMinu = (*scratchMinu[lvl])[din];
+        const EBCellFAB& electricFieldPlus = (*(*scratchPlus)[lvl])[din];
+        const EBCellFAB& electricFieldMinu = (*(*scratchMinu)[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
@@ -4105,8 +4157,10 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissi
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field into the scratch storage
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -4129,7 +4183,7 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissi
 
       emission.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[din];
+      const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -4182,8 +4236,10 @@ DischargeInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_dat
   CH_assert(a_level <= m_amr->getFinestLevel());
 
   // Compute the electric field
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   const RealVect probLo = m_amr->getProbLo();
@@ -4208,7 +4264,7 @@ DischargeInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_dat
 
     data.setVal(0.0);
 
-    const EBCellFAB& electricField    = (*scratch[a_level])[din];
+    const EBCellFAB& electricField    = (*(*scratch)[a_level])[din];
     const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4868,8 +4924,10 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
   const int numVoltages = m_inceptionIntegralPlus.size();
 
   // Storage something that holds the electric filed
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
 
   // Solve ionization volume for each voltage
   for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
@@ -4898,7 +4956,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         const EBISBox&       ebisbox    = ebisl[din];
         const BaseFab<bool>& validCells = validCellsLD[din];
 
-        const EBCellFAB& electricField    = (*scratch[lvl])[din];
+        const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
         const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4960,8 +5018,10 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real&
   Real Vion = 0.0;
 
   // Calculate electric field
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
@@ -4984,7 +5044,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real&
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = validCellsLD[din];
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[din];
+      const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -5280,8 +5340,7 @@ DischargeInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) no
   DataOps::scale(vel, -1.0);
 
   // Allocate mesh data that holds mu and compute it on the mesh.
-  EBAMRCellData mu;
-  m_amr->allocate(mu, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> mu = m_amr->fetchScratch<EBAMRCellData>(m_realm, m_phase, 1, m_amr->getNumberOfGhostCells());
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -5296,7 +5355,7 @@ DischargeInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) no
       const EBCellFAB& v    = (*vel[lvl])[din];
       const FArrayBox& vReg = v.getFArrayBox();
 
-      EBCellFAB& MU    = (*mu[lvl])[din];
+      EBCellFAB& MU    = (*(*mu)[lvl])[din];
       FArrayBox& MUREG = MU.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -5340,13 +5399,17 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
   CH_assert(m_ionSolver->isMobile());
 
   // Compute the electric field at the input voltage.
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
+  Scratch<EBAMRCellData> scratch = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                      m_phase,
+                                                                      SpaceDim,
+                                                                      m_amr->getNumberOfGhostCells());
   this->superposition(scratch, a_voltage);
 
   // Compute the diffusion coefficient on cell centers.
-  EBAMRCellData diffCoCell;
-  m_amr->allocate(diffCoCell, m_realm, m_phase, 1);
+  Scratch<EBAMRCellData> diffCoCell = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+                                                                         m_phase,
+                                                                         1,
+                                                                         m_amr->getNumberOfGhostCells());
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -5358,10 +5421,10 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& electricField    = (*scratch[lvl])[din];
+      const EBCellFAB& electricField    = (*(*scratch)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      EBCellFAB& dCo    = (*diffCoCell[lvl])[din];
+      EBCellFAB& dCo    = (*(*diffCoCell)[lvl])[din];
       FArrayBox& dCoReg = dCo.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -5537,12 +5600,15 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   const Interval dstInterv(a_comp, a_comp + numComp - 1);
 
   CH_START(t1);
-  LevelData<EBCellFAB> scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, a_level, numComp);
+  Scratch<LevelData<EBCellFAB>> scratch = m_amr->fetchLevelScratch(m_realm,
+                                                                   m_phase,
+                                                                   a_level,
+                                                                   numComp,
+                                                                   m_amr->getNumberOfGhostCells());
   CH_STOP(t1);
 
   CH_START(t2);
-  m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
+  m_amr->copyData(*scratch, *a_data[a_level], a_level, m_realm, m_realm);
   CH_STOP(t2);
 
   // Interpolate ghost cells
@@ -5561,7 +5627,7 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
-  m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
+  m_amr->copyData(a_output, *scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
   CH_STOP(t5);
 
   a_comp += numComp;
