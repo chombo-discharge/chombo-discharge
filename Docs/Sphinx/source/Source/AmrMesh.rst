@@ -39,7 +39,7 @@ Various class options are available for adjusting the behavior of the ``AmrMesh`
 Below, we include the current template options file for the ``AmrMesh`` class.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.options
-   :emphasize-lines: 9-15,21-26,35-36
+   :emphasize-lines: 9-15,21-26
    :caption: Template input options for the ``AmrMesh`` class. Runtime adjustable options are highlighted.   
 
 For users, modifying the behavior of ``AmrMesh`` is comparatively easy.
