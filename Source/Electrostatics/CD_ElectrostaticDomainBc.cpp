@@ -56,8 +56,6 @@ ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc& a_bc)
 ElectrostaticDomainBc::Bc
 ElectrostaticDomainBc::getBc(const DomainSide a_domainSide) const
 {
-  CH_TIME("ElectrostaticDomainBc::getBc(DomainSide)");
-
   return m_bcFunctions.at(a_domainSide);
 }
 

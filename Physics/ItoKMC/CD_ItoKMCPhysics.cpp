@@ -47,8 +47,6 @@ ItoKMCPhysics::getPlotVariables(const RealVect& /*a_E*/,
                                 const Real /*a_dx*/,
                                 const Real /*a_kappa*/) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::getPlotVariables");
-
   return Vector<Real>(0);
 }
 

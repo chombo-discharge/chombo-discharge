@@ -159,8 +159,6 @@ AMRPolyhedralEBGraph::getCutCells(std::vector<PolyhedralEB::CutCellDescription>&
                                   const DataIndex&                               a_dit,
                                   const IntVect&                                 a_cell) const
 {
-  CH_TIME("AMRPolyhedralEBGraph::getCutCells");
-
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
 

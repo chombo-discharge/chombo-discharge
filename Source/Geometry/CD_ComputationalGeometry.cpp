@@ -209,22 +209,12 @@ ComputationalGeometry::useChomboShop()
 const Vector<Dielectric>&
 ComputationalGeometry::getDielectrics() const
 {
-  CH_TIME("ComputationalGeometry::getDielectrics()");
-  if (m_verbose) {
-    pout() << "ComputationalGeometry::getDielectrics()" << endl;
-  }
-
   return (m_dielectrics);
 }
 
 const Vector<Electrode>&
 ComputationalGeometry::getElectrodes() const
 {
-  CH_TIME("ComputationalGeometry::getElectrodes()");
-  if (m_verbose) {
-    pout() << "ComputationalGeometry::getElectrodes()" << endl;
-  }
-
   return (m_electrodes);
 }
 
@@ -254,11 +244,6 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
 {
   CH_assert(a_phase == phase::gas || a_phase == phase::solid);
-
-  CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
-  if (m_verbose) {
-    pout() << "ComputationalGeometry::getImplicitFunction(phase::which_phase)" << endl;
-  }
 
   return (a_phase == phase::gas) ? m_implicitFunctionGas : m_implicitFunctionSolid;
 }
@@ -2194,11 +2179,6 @@ ComputationalGeometry::piercedSeamFace(const IntVect&           a_cell,
                                        const phase::which_phase a_phase,
                                        const BaseFab<bool>&     a_refined) const
 {
-  CH_TIME("ComputationalGeometry::piercedSeamFace");
-  if (m_verbose) {
-    pout() << "ComputationalGeometry::piercedSeamFace" << endl;
-  }
-
   if (SpaceDim < 3) {
     return false;
   }

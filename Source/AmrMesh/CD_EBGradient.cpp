@@ -525,8 +525,6 @@ EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
                                            const EBISBox&   a_ebisBox,
                                            const FArrayBox& a_invalidRegion) const noexcept
 {
-  CH_TIME("EBGradient::isFiniteDifferenceStencilValid");
-
   // TLDR: Routine which checks if the level finite difference stencil is "valid" in the sense that it does not reach
   //       into invalid regions. A stencil in a cut-cell may not reach into any coarse-grid cell that lies underneath
   //       the fine grid. A stencil in a regular cell may reach into covered regular cells, whose data is the average
@@ -821,8 +819,6 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&     a_stencil,
                                        const EBISBox&  a_ebisBox,
                                        IntVectSet*     a_invalidCells) const noexcept
 {
-  CH_TIME("EBGradient::getFiniteDifferenceStencil");
-
   // clang-format off
   // TLDR: This routine computes a finite difference stencil, in each direction a centered difference if possible and a
   //       one-sided difference otherwise. EBArith drops order if it does not find enough cells, and treats the cells in
@@ -884,8 +880,6 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                    const int&             a_order,
                                    const int&             a_weight) const noexcept
 {
-  CH_TIME("EBGradient::getLeastSquaresStencil");
-
   // clang-format off
   // TLDR: This routine computes a two-level least squares stencil. We include cells that are within a range of 1 on the coarse level, but only
   //       those in a monotone path from the input vof. The fine cells are defined as the cells that are available through a coarsening of the

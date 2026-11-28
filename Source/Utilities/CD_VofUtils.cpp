@@ -352,8 +352,6 @@ VofUtils::getFinerVoFs(const VolIndex&   a_coarVoF,
                        const DataIndex&  a_din,
                        const int         a_refRat)
 {
-  CH_TIME("VofUtils::getFinerVoFs");
-
   const Vector<VolIndex> finer = VofUtils::gatherFinerVoFs(a_coarVoF, a_ebislFine, a_din, a_refRat);
 
   if (finer.size() == 0) {
@@ -369,8 +367,6 @@ VofUtils::getFinerFaces(const FaceIndex&  a_coarFace,
                         const DataIndex&  a_din,
                         const int         a_refRat)
 {
-  CH_TIME("VofUtils::getFinerFaces");
-
   const int dir = a_coarFace.direction();
 
   Vector<FaceIndex> faces;
@@ -618,8 +614,6 @@ VofUtils::getFinerFacesFromSide(const FaceIndex&        a_coarFace,
                                 const DataIndex&        a_din,
                                 const int               a_refRat)
 {
-  CH_TIME("VofUtils::getFinerFacesFromSide");
-
   const EBISBox&       ebisBoxFine  = a_ebislFine[a_din];
   const int            dir          = a_coarFace.direction();
   const Side::LoHiSide otherSide    = flip(a_side);

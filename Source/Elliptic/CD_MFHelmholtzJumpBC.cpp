@@ -507,8 +507,6 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
                                                       const VofUtils::Neighborhood a_neighborhood,
                                                       const int                    a_order) const
 {
-  CH_TIME("MFHelmholtzJumpBC::getLeastSquarseBoundaryGradStencil(...)");
-
   // clang-format off
   // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the EB centroid. We assume that the value
   //       is a "known term" in the expansion.

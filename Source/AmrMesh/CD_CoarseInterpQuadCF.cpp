@@ -238,8 +238,6 @@ CoarseInterpQuadCF::computeFirstDeriv(const FArrayBox& a_coarPhi,
                                       const int        a_dir,
                                       const int        a_coarVar) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::computeFirstDeriv");
-
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
@@ -296,8 +294,6 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
                                        const int        a_dir,
                                        const int        a_coarVar) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::computeSecondDeriv");
-
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
@@ -342,8 +338,6 @@ CoarseInterpQuadCF::computeMixedDeriv([[maybe_unused]] const FArrayBox& a_coarPh
                                       const IntVect&                    a_ivCoar,
                                       [[maybe_unused]] int              a_coarVar) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::computeMixedDeriv");
-
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
   Real mixedDeriv = 0.0;
@@ -385,8 +379,6 @@ CoarseInterpQuadCF::computeMixedDeriv([[maybe_unused]] const FArrayBox& a_coarPh
 DerivStencil
 CoarseInterpQuadCF::getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::getFirstDerivStencil");
-
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
@@ -440,8 +432,6 @@ CoarseInterpQuadCF::getFirstDerivStencil(const IntVect& a_ivCoar, const int a_di
 DerivStencil
 CoarseInterpQuadCF::getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::getSecondDerivStencil");
-
   CH_assert(a_dir != m_ignoreDir);
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
@@ -484,8 +474,6 @@ CoarseInterpQuadCF::getSecondDerivStencil(const IntVect& a_ivCoar, const int a_d
 DerivStencil
 CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept
 {
-  CH_TIME("CoarseInterpQuadCF::getMixedDerivStencil");
-
   CH_assert(m_stencilBox.contains(a_ivCoar));
 
   DerivStencil stencil;

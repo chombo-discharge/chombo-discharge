@@ -270,8 +270,6 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
                                               const VofUtils::Neighborhood a_neighborhood,
                                               const int                    a_order) const
 {
-  CH_TIME("MFHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood, int)");
-
   CH_assert(a_order > 0);
 
   // clang-format off

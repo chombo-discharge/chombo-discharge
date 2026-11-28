@@ -419,11 +419,6 @@ ItoKMCJSON::isBracketed(const std::string& a_str) const noexcept
 void
 ItoKMCJSON::checkMolarFraction(const RealVect& a_position) const noexcept
 {
-  CH_TIME("ItoKMCJSON::checkMolarFraction");
-  if (m_verbose) {
-    pout() << m_className + "::checkMolarFraction" << endl;
-  }
-
   Real sumFractions = 0.0;
   for (const auto& species : m_backgroundSpecies) {
     sumFractions += species.molarFraction(a_position);
@@ -4389,30 +4384,18 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
 Real
 ItoKMCJSON::getNeutralDensity(const RealVect& a_pos) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::getNeutralDensity" << endl;
-  }
-
   return m_gasNumberDensity(a_pos);
 }
 
 Real
 ItoKMCJSON::computeAlpha(const Real a_E, const RealVect& a_pos) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeAlpha" << endl;
-  }
-
   return m_alpha(a_E, a_pos);
 }
 
 Real
 ItoKMCJSON::computeEta(const Real a_E, const RealVect& a_pos) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeEta" << endl;
-  }
-
   return m_eta(a_E, a_pos);
 }
 
@@ -4422,10 +4405,6 @@ ItoKMCJSON::computeMobilities(Vector<Real>& a_mobilities,
                               const RealVect& a_pos,
                               const RealVect& a_E) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeMobilities" << endl;
-  }
-
   const Real E = a_E.vectorLength();
 
   // resize() rather than assign()/construction: the caller reuses this buffer across cells, so after the
@@ -4444,10 +4423,6 @@ ItoKMCJSON::computeDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
                                          const RealVect& a_pos,
                                          const RealVect& a_E) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeDiffusionCoefficients" << endl;
-  }
-
   const Real E = a_E.vectorLength();
 
   // See computeMobilities() for why this is resize() and not a fresh vector.
@@ -4464,10 +4439,6 @@ ItoKMCJSON::computeSolidMobilities(Vector<Real>& a_mobilities,
                                    const RealVect& a_pos,
                                    const RealVect& a_E) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeSolidMobilities" << endl;
-  }
-
   const Real E = a_E.vectorLength();
 
   a_mobilities.resize(m_solidSpecies.size());
@@ -4483,10 +4454,6 @@ ItoKMCJSON::computeSolidDiffusionCoefficients(Vector<Real>& a_diffusionCoefficie
                                               const RealVect& a_pos,
                                               const RealVect& a_E) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::computeSolidDiffusionCoefficients" << endl;
-  }
-
   const Real E = a_E.vectorLength();
 
   a_diffusionCoefficients.resize(m_solidSpecies.size());
@@ -4620,10 +4587,6 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
                                 const Real                                       a_dx,
                                 const Real /*a_kappa*/) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::updateReactionRates" << endl;
-  }
-
 #ifndef NDEBUG
   this->checkMolarFraction(a_pos);
 #endif
@@ -4676,10 +4639,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_second
                                 const bool                              a_isDielectric,
                                 const int                               a_matIndex) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::secondaryEmissionEB" << endl;
-  }
-
   // Without surface densities the surface is treated as empty, and the change in the surface densities is discarded.
   const Vector<Real> surfaceDensities(m_surfaceSpecies.size(), 0.0);
   Vector<Real>       surfaceDensityChange(m_surfaceSpecies.size(), 0.0);
@@ -4724,10 +4683,6 @@ ItoKMCJSON::surfaceEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryParti
                               const bool                              a_isDielectric,
                               const int /*a_matIndex*/) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::surfaceEmissionEB" << endl;
-  }
-
   const int numSurfaceSpecies = m_surfaceSpecies.size();
 
   CH_assert(a_surfaceDensities.size() == numSurfaceSpecies);
@@ -4828,10 +4783,6 @@ ItoKMCJSON::secondaryEmissionDomain(Vector<ParticleSoA<ItoParticle>>& a_secondar
                                     const Real                              a_dx,
                                     const Real                              a_dt) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::secondaryEmissionDomain" << endl;
-  }
-
   // Normal of the domain face, pointing into the domain.
   const RealVect faceNormal = -sign(a_side) * RealVect(BASISV(a_dir));
   const bool     isCathode  = a_E.dotProduct(faceNormal) <= 0.0;
@@ -5061,10 +5012,6 @@ ItoKMCJSON::sampleFieldEmission(Vector<ParticleSoA<ItoParticle>>&              a
                                 const Real                                     a_dx,
                                 const Real                                     a_dt) const noexcept
 {
-  if (m_verbose) {
-    pout() << m_className + "::sampleFieldEmission" << endl;
-  }
-
   for (const auto& fieldEmissionFunction : a_fieldEmission) {
     const auto& species = fieldEmissionFunction.first;
     const auto& J       = fieldEmissionFunction.second;
@@ -5243,11 +5190,6 @@ ItoKMCJSON::getPlotVariables(const RealVect& a_E,
                              const Real /*a_dx*/,
                              const Real /*a_kappa*/) const noexcept
 {
-
-  if (m_verbose) {
-    pout() << m_className + "::getPlotVariables" << endl;
-  }
-
   Vector<Real> plotVars;
 
   // Update basic reaction rates.

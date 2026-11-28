@@ -11,6 +11,7 @@ MPI            = FALSE
 MPICXX         = mpic++
 CXXSTD         = 17
 USE_MT         = TRUE
+USE_TIMER      = FALSE
 OPENMPCC       = FALSE
 USE_PETSC      = FALSE
 USE_EB         = TRUE
