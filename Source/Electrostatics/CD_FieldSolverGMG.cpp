@@ -61,6 +61,7 @@ FieldSolverGMG::parseOptions()
   this->parseKappaSource();
   this->parseJumpBC();
   this->parseRegridSlopes();
+  this->parseFillElectrodePotential();
 }
 
 void
@@ -79,6 +80,7 @@ FieldSolverGMG::parseRuntimeOptions()
   this->parseKappaSource();
   this->parsePlotVariables();
   this->parseRegridSlopes();
+  this->parseFillElectrodePotential();
 }
 
 void
@@ -541,13 +543,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   }
 
   // Hook for filling the electrode potentials directly from the geometry. Useful only for visualization purposes.
-  ParmParse pp(m_className.c_str());
-
-  bool fillElectrodePotential = false;
-
-  pp.query("fill_electrode_potential", fillElectrodePotential);
-
-  if (fillElectrodePotential) {
+  if (m_fillElectrodePotential) {
     this->fillCoveredPotential(a_phi);
   }
 
