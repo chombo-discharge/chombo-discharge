@@ -705,28 +705,28 @@ protected:
   /**
    * @brief Map for figuring out how to look up the rate for a certain plasma reaction.
    */
-  std::map<int, LookupMethod> m_plasmaReactionLookup;
+  std::vector<LookupMethod> m_plasmaReactionLookup;
 
   /**
    * @brief Constant plasma reaction rates.
    */
-  std::map<int, Real> m_plasmaReactionConstants;
+  std::vector<Real> m_plasmaReactionConstants;
 
   /**
    * @brief Plasma reaction rates that are alpha*|v|
    */
-  std::map<int, int> m_plasmaReactionAlphaV;
+  std::vector<int> m_plasmaReactionAlphaV;
 
   /**
    * @brief Plasma reaction rates that are eta*|v|
    */
-  std::map<int, int> m_plasmaReactionEtaV;
+  std::vector<int> m_plasmaReactionEtaV;
   /**
    * @brief Maps for functions of the type k = f(T) where T is the temperature of some species.
    * @details In the tuple the first index in the pair indicates the species we are talking about here. A special rule
    * is enforced when this index is < 0 in which case the temperature is replaced by the background gas temperature.
    */
-  std::map<int, std::pair<int, FunctionT>> m_plasmaReactionFunctionsT;
+  std::vector<std::pair<int, FunctionT>> m_plasmaReactionFunctionsT;
 
   /**
    * @brief Maps for functions of the type k = f(T1,T2) where T1 and T2 are the temperatures of some species.
@@ -737,29 +737,41 @@ protected:
    * third entry in the tuple is the actual function. A special rule occurs if one of the first two indices is < 0 in
    * which case the temperature is replaced by the background gas temperature.
    */
-  std::map<int, std::tuple<int, int, FunctionTT>> m_plasmaReactionFunctionsTT;
+  std::vector<std::tuple<int, int, FunctionTT>> m_plasmaReactionFunctionsTT;
 
   /**
    * @brief Function-based plasma reaction rates.
    */
-  std::map<int, FunctionEN> m_plasmaReactionFunctionsEN;
+  std::vector<FunctionEN> m_plasmaReactionFunctionsEN;
 
   /**
    * @brief Map for table-based reaction coefficients, where k = k(E,N).
    */
-  std::map<int, LookupTable1D<Real, 1>> m_plasmaReactionTablesEN;
+  std::vector<LookupTable1D<Real, 1>> m_plasmaReactionTablesEN;
 
   /**
    * @brief Map for table-based reaction coefficients where k = k(energy).
    * @details The first index is the reaction index, while the pair describes which species energy and the tabulated
    * data.
    */
-  std::map<int, std::pair<int, LookupTable1D<Real, 1>>> m_plasmaReactionTablesEnergy;
+  std::vector<std::pair<int, LookupTable1D<Real, 1>>> m_plasmaReactionTablesEnergy;
 
   /**
    * @brief Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc.
+   * @details Only used for reactions where m_plasmaReactionConstantEfficiency is false.
    */
-  std::map<int, FunctionEX> m_plasmaReactionEfficiencies;
+  std::vector<FunctionEX> m_plasmaReactionEfficiencies;
+
+  /**
+   * @brief True for reactions whose efficiency is the constant m_plasmaReactionScales, so that the efficiency function
+   * need not be called.
+   */
+  std::vector<bool> m_plasmaReactionConstantEfficiency;
+
+  /**
+   * @brief Constant efficiency of the reactions where m_plasmaReactionConstantEfficiency is true.
+   */
+  std::vector<Real> m_plasmaReactionScales;
 
   /**
    * @brief Plasma reactions.
@@ -776,7 +788,7 @@ protected:
    * @details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 +
    * E.(D * grad(phi))/n *
    */
-  std::map<int, std::pair<bool, int>> m_plasmaReactionSolovievCorrection;
+  std::vector<std::pair<bool, int>> m_plasmaReactionSolovievCorrection;
 
   /**
    * @brief For mapping reactive energy losses for all reactions.
@@ -789,7 +801,7 @@ protected:
   /**
    * @brief Associative container for determining if a reaction is associated with an energy loss/gain.
    */
-  std::map<int, bool> m_plasmaReactionHasEnergyLoss;
+  std::vector<bool> m_plasmaReactionHasEnergyLoss;
 
   // ================================
   // PHOTO-REACTIONS BEGIN HERE

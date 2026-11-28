@@ -33,6 +33,28 @@
 
 using namespace Physics::CdrPlasma;
 
+namespace {
+/**
+ * @brief Set entry a_index of a reaction-indexed vector, growing the vector if needed.
+ * @details Reactions are numbered as they are parsed, so the number of reactions is not known in advance.
+ * @param[in,out] a_vector Vector indexed by reaction index.
+ * @param[in]     a_index  Reaction index.
+ * @param[in]     a_value  Value to store. Must be convertible to T.
+ */
+template <typename T, typename U>
+void
+setReactionEntry(std::vector<T>& a_vector, const int a_index, const U& a_value)
+{
+  CH_assert(a_index >= 0);
+
+  if (a_index >= static_cast<int>(a_vector.size())) {
+    a_vector.resize(a_index + 1);
+  }
+
+  a_vector[a_index] = a_value;
+}
+} // namespace
+
 CdrPlasmaJSON::CdrPlasmaJSON()
 {
   CH_TIME("CdrPlasmaJSON::CdrPlasmaJSON()");
@@ -94,10 +116,8 @@ CdrPlasmaJSON::initializeEvaluationFlags() noexcept
     m_transportNeedsEnergies = m_transportNeedsEnergies || (m.second == LookupMethod::TableEnergy);
   }
 
-  for (const auto& m : m_plasmaReactionLookup) {
-    const int reactionIndex = m.first;
-
-    switch (m.second) {
+  for (int reactionIndex = 0; reactionIndex < static_cast<int>(m_plasmaReactionLookup.size()); reactionIndex++) {
+    switch (m_plasmaReactionLookup[reactionIndex]) {
     case LookupMethod::TableEnergy: {
       m_reactionsNeedEnergies = true;
 
@@ -133,8 +153,8 @@ CdrPlasmaJSON::initializeEvaluationFlags() noexcept
     }
   }
 
-  for (const auto& m : m_plasmaReactionSolovievCorrection) {
-    if (m.second.first) {
+  for (const auto& soloviev : m_plasmaReactionSolovievCorrection) {
+    if (soloviev.first) {
       m_reactionsNeedMobilities = true;
       m_reactionsNeedDiffusion  = true;
     }
@@ -2893,8 +2913,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real k = a_R["rate"].get<Real>();
 
     /// Add the rate and lookup method.
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::Constant);
-    m_plasmaReactionConstants.emplace(a_reactionIndex, k);
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::Constant);
+    setReactionEntry(m_plasmaReactionConstants, a_reactionIndex, k);
   }
   else if (lookup == "alpha*v") { 
     if (!(a_R.contains("species"))) {
@@ -2907,8 +2927,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got 'alpha*v' but species '").append(species).append("' is not a plasma species"));
     }
 
-    m_plasmaReactionAlphaV.emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::AlphaV);
+    setReactionEntry(m_plasmaReactionAlphaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::AlphaV);
   }
   else if (lookup == "eta*v") {
     if (!(a_R.contains("species"))) {
@@ -2921,8 +2941,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got 'eta*v' but species '").append(species).append("' is not a plasma species"));
     }
 
-    m_plasmaReactionEtaV.emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::EtaV);
+    setReactionEntry(m_plasmaReactionEtaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::EtaV);
   }
   else if(lookup == "functionT A") {
     if(!(a_R.contains("T"))) {
@@ -2956,8 +2976,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       index = m_cdrSpeciesMap.at(speciesT);
       
     }
-    m_plasmaReactionFunctionsT.emplace(a_reactionIndex, std::make_pair(index, functionT));
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::FunctionT);
+    setReactionEntry(m_plasmaReactionFunctionsT, a_reactionIndex, std::make_pair(index, functionT));
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionT);
     
   }
   else if (lookup == "functionT1T2 A") {
@@ -3012,8 +3032,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       return c1 * std::pow(a_T1 / a_T2, c2);
     };
 
-    m_plasmaReactionFunctionsTT.emplace(a_reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::FunctionTT);
+    setReactionEntry(m_plasmaReactionFunctionsTT, a_reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionTT);
   }
   else if (lookup == "table E/N") {
     if (!(a_R.contains("file"))) {
@@ -3096,8 +3116,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     }
 
     // Add the tabulated rate and identifier.
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::TableEN);
-    m_plasmaReactionTablesEN.emplace(a_reactionIndex, reactionTable);
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEN);
+    setReactionEntry(m_plasmaReactionTablesEN, a_reactionIndex, reactionTable);
   }
   else if (lookup == "table energy") {
     if (!(a_R.contains("file"))) {
@@ -3192,8 +3212,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const int speciesIdx = m_cdrSpeciesMap.at(species);
 
     // Add the tabulated rate and identifier.
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::TableEnergy);
-    m_plasmaReactionTablesEnergy.emplace(a_reactionIndex, std::make_pair(speciesIdx, reactionTable));
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEnergy);
+    setReactionEntry(m_plasmaReactionTablesEnergy, a_reactionIndex, std::make_pair(speciesIdx, reactionTable));
   }
   else if (lookup == "functionEN expA") {
     if (!(a_R.contains("c1"))) {
@@ -3224,8 +3244,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     };
 
     // Add the function and identifier.
-    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::FunctionEN);
-    m_plasmaReactionFunctionsEN.emplace(a_reactionIndex, func);
+    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionEN);
+    setReactionEntry(m_plasmaReactionFunctionsEN, a_reactionIndex, func);
   }
   else {
     ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but lookup = '").append(lookup).append("' is not recognized"));
@@ -3356,8 +3376,12 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     };
   }
 
-  // Add it to the pile.
-  m_plasmaReactionEfficiencies.emplace(a_index, func);
+  // Add it to the pile. A constant efficiency is also stored as a number, so that the function need not be called.
+  const bool constantEfficiency = !doPressureQuenching && !doPhotoIonization;
+
+  setReactionEntry(m_plasmaReactionEfficiencies, a_index, func);
+  setReactionEntry(m_plasmaReactionConstantEfficiency, a_index, constantEfficiency);
+  setReactionEntry(m_plasmaReactionScales, a_index, constantEfficiency ? scale : 0.0);
 }
 
 void
@@ -3454,14 +3478,14 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
           std::string{baseError}.append("but species  + '").append(species).append("' isn't diffusive."));
       }
 
-      m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
+      setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(true, plasmaSpecies));
     }
     else {
-      m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(false, -1));
+      setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
     }
   }
   else {
-    m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(false, -1));
+    setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
   }
 }
 
@@ -3575,11 +3599,11 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     }
 
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
-    m_plasmaReactionHasEnergyLoss.emplace(a_reactionIndex, hasEnergySolver);
+    setReactionEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, hasEnergySolver);
   }
   else {
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
-    m_plasmaReactionHasEnergyLoss.emplace(a_reactionIndex, false);
+    setReactionEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, false);
   }
 }
 
@@ -5053,12 +5077,12 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
                                          const Real&                  a_eta,
                                          const Real& /*a_time*/) const
 {
-  const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
+  const LookupMethod&          method   = m_plasmaReactionLookup[a_reactionIndex];
   const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[a_reactionIndex];
 
   // Get list of reactants and products.
-  const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants();
-  const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+  const std::vector<int>& plasmaReactants  = reaction.getPlasmaReactants();
+  const std::vector<int>& neutralReactants = reaction.getNeutralReactants();
 
   // Figure out how to compute the reaction rate.
   Real k = 0.0;
@@ -5066,7 +5090,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   // Various ways of computing the reaction rate.
   switch (method) {
   case LookupMethod::Constant: {
-    k = m_plasmaReactionConstants.at(a_reactionIndex);
+    k = m_plasmaReactionConstants[a_reactionIndex];
 
     for (const auto& n : neutralReactants) {
       k *= (m_neutralSpeciesDensities[n])(a_pos);
@@ -5075,7 +5099,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::FunctionEN: {
-    k = m_plasmaReactionFunctionsEN.at(a_reactionIndex)(a_E, a_N);
+    k = m_plasmaReactionFunctionsEN[a_reactionIndex](a_E, a_N);
 
     for (const auto& n : neutralReactants) {
       k *= (m_neutralSpeciesDensities[n])(a_pos);
@@ -5085,7 +5109,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
   case LookupMethod::TableEN: {
     // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that.
-    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
+    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEN[a_reactionIndex];
 
     // Get the reaction rate.
     k = reactionTable.interpolate<1>(a_Etd);
@@ -5098,8 +5122,8 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::TableEnergy: {
-    const int&                    speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
-    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
+    const int&                    speciesIndex  = m_plasmaReactionTablesEnergy[a_reactionIndex].first;
+    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy[a_reactionIndex].second;
 
     const Real energy = a_cdrEnergies[speciesIndex];
 
@@ -5114,21 +5138,21 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::AlphaV: {
-    const int idx = m_plasmaReactionAlphaV.at(a_reactionIndex);
+    const int idx = m_plasmaReactionAlphaV[a_reactionIndex];
 
     k = a_alpha * a_E * a_cdrMobilities[idx];
 
     break;
   }
   case LookupMethod::EtaV: {
-    const int idx = m_plasmaReactionEtaV.at(a_reactionIndex);
+    const int idx = m_plasmaReactionEtaV[a_reactionIndex];
 
     k = a_eta * a_E * a_cdrMobilities[idx];
 
     break;
   }
   case LookupMethod::FunctionT: {
-    const std::pair<int, FunctionT>& p = m_plasmaReactionFunctionsT.at(a_reactionIndex);
+    const std::pair<int, FunctionT>& p = m_plasmaReactionFunctionsT[a_reactionIndex];
 
     const int        idx  = p.first;
     const FunctionT& func = p.second;
@@ -5144,7 +5168,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::FunctionTT: {
-    const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(a_reactionIndex);
+    const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT[a_reactionIndex];
 
     const int         idx1 = std::get<0>(tup);
     const int         idx2 = std::get<1>(tup);
@@ -5175,12 +5199,17 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
 
   // Modify by user-provided reaction efficiencies and scales.
-  k *= m_plasmaReactionEfficiencies.at(a_reactionIndex)(a_E, a_pos);
+  if (m_plasmaReactionConstantEfficiency[a_reactionIndex]) {
+    k *= m_plasmaReactionScales[a_reactionIndex];
+  }
+  else {
+    k *= m_plasmaReactionEfficiencies[a_reactionIndex](a_E, a_pos);
+  }
 
   // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 +
   // (E.D*grad(n))/(K * n * E^2) where K is the electron mobility.
-  if ((m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).first) {
-    const int species = (m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).second;
+  if ((m_plasmaReactionSolovievCorrection[a_reactionIndex]).first) {
+    const int species = (m_plasmaReactionSolovievCorrection[a_reactionIndex]).second;
 
     const Real&     n  = a_cdrDensities[species];
     const Real&     mu = a_cdrMobilities[species];
@@ -6073,9 +6102,9 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
     // Reaction and species involved in the reaction.
     const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[i];
 
-    const std::list<int>& plasmaReactants = reaction.getPlasmaReactants();
-    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts();
-    const std::list<int>& photonProducts  = reaction.getPhotonProducts();
+    const std::vector<int>& plasmaReactants = reaction.getPlasmaReactants();
+    const std::vector<int>& plasmaProducts  = reaction.getPlasmaProducts();
+    const std::vector<int>& photonProducts  = reaction.getPhotonProducts();
 
     // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
     const Real k = this->computePlasmaReactionRate(i,
@@ -6111,7 +6140,7 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
 
     // If there is an energy loss associated with this reaction, we need to add the losses to the corresponding energy
     // transport solvers.
-    if (m_plasmaReactionHasEnergyLoss.at(i)) {
+    if (m_plasmaReactionHasEnergyLoss[i]) {
       const auto& energyLosses = m_plasmaReactionEnergyLosses.at(i);
 
       for (const auto& curReactionLoss : energyLosses) {
