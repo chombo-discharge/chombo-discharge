@@ -16,6 +16,9 @@
 // Std includes
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <type_traits>
 #include <math.h>
 #include <iomanip>
 #include <fstream>
@@ -405,15 +408,36 @@ template <typename T, size_t N, typename I>
 inline T
 LookupTable1D<T, N, I>::approximateLog2(const T a_x) noexcept
 {
-  // a_x = mantissa * 2^exponent with mantissa in [0.5, 1), i.e. a_x = (1 + t) * 2^(exponent - 1) with t in [0, 1).
+  // Write a_x = (1 + t) * 2^exponent with t in [0, 1), and approximate log2(1 + t) by a cubic that is exact at t = 0
+  // and t = 1. The maximum error is about 1e-3.
+  auto log2OnePlus = [](const T t) -> T {
+    return t + t * (T(1) - t) * (T(0.42086454) - T(0.15638611) * t);
+  };
+
+  // Normal IEEE doubles: read the exponent and mantissa from the bits, which avoids the library call in std::frexp.
+  if constexpr (std::is_same<T, double>::value) {
+    std::uint64_t bits;
+
+    std::memcpy(&bits, &a_x, sizeof(bits));
+
+    const int biasedExponent = static_cast<int>((bits >> 52) & 0x7FF);
+
+    if (biasedExponent != 0 && biasedExponent != 0x7FF) {
+      const std::uint64_t mantissaBits = (bits & 0x000FFFFFFFFFFFFFULL) | 0x3FF0000000000000ULL;
+
+      double mantissa;
+
+      std::memcpy(&mantissa, &mantissaBits, sizeof(mantissa));
+
+      return T(biasedExponent - 1023) + log2OnePlus(mantissa - 1.0);
+    }
+  }
+
+  // Other types, zero, subnormals, infinity and NaN: a_x = m * 2^e with m in [0.5, 1), so t = 2m - 1.
   int     exponent = 0;
   const T mantissa = std::frexp(a_x, &exponent);
-  const T t        = T(2) * mantissa - T(1);
 
-  // log2(1 + t) by a cubic that is exact at t = 0 and t = 1. The maximum error is about 1e-3.
-  const T log2OnePlusT = t + t * (T(1) - t) * (T(0.42086454) - T(0.15638611) * t);
-
-  return T(exponent - 1) + log2OnePlusT;
+  return T(exponent - 1) + log2OnePlus(T(2) * mantissa - T(1));
 }
 
 template <typename T, size_t N, typename I>

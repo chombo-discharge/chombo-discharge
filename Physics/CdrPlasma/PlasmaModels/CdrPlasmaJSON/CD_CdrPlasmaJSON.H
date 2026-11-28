@@ -440,6 +440,12 @@ protected:
   bool m_reactionsNeedEta;
 
   /**
+   * @brief True for plasma reactions whose rate coefficient does not depend on the plasma densities (constant,
+   * E/N-function and E/N-table rates). Their coefficients are computed once per cell evaluation.
+   */
+  std::vector<bool> m_plasmaReactionDensityIndependent;
+
+  /**
    * @brief JSON definition. This is populated when calling parseJSON.
    */
   json m_json;
@@ -525,18 +531,18 @@ protected:
   /**
    * @brief int-bool encoding for determining if a solver is an energy solver.
    */
-  std::map<int, bool> m_cdrIsEnergySolver;
+  std::vector<bool> m_cdrIsEnergySolver;
 
   /**
    * @brief int-bool encoding for determining if a CDR solver HAS an associated energy solver.
    */
-  std::map<int, bool> m_cdrHasEnergySolver;
+  std::vector<bool> m_cdrHasEnergySolver;
 
   /**
    * @brief Parameters for computing the mean energy from energy density and density.
    * @details The energy is computed as e = max(Emin, min(Emax, E)) where E = n_energy/(min(n_density, safety));
    */
-  std::map<int, std::tuple<Real, Real, Real>> m_cdrEnergyComputation;
+  std::vector<std::tuple<Real, Real, Real>> m_cdrEnergyComputation;
 
   /**
    * @brief int-int encoding for associating a transport solver with an energy solver.
@@ -549,7 +555,7 @@ protected:
    * @brief Map of the species masses. This is needed for imposing BCs on the energy equations.
    * @details This is populated in initializePlasmaSpecies.
    */
-  std::map<int, Real> m_cdrMasses;
+  std::vector<Real> m_cdrMasses;
 
   /**
    * @brief string-int encoding of the RTE species.
@@ -615,33 +621,33 @@ protected:
   /**
    * @brief Mobility lookup method for each species.
    */
-  std::map<int, LookupMethod> m_mobilityLookup;
+  std::vector<LookupMethod> m_mobilityLookup;
 
   /**
    * @brief Map for constant mobilities.
    */
-  std::map<int, Real> m_mobilityConstants;
+  std::vector<Real> m_mobilityConstants;
 
   /**
    * @brief Map for function-based mobilities mu = mu(E,N)
    */
-  std::map<int, FunctionEN> m_mobilityFunctionsEN;
+  std::vector<FunctionEN> m_mobilityFunctionsEN;
 
   /**
    * @brief Map for function-based mobilities mu = mu(E,x)
    */
-  std::map<int, FunctionEX> m_mobilityFunctionsEX;
+  std::vector<FunctionEX> m_mobilityFunctionsEX;
 
   /**
    * @brief Map for table-based mobilities. Stored as tables (E/N, mu*N)
    */
-  std::map<int, LookupTable1D<Real, 1>> m_mobilityTablesEN;
+  std::vector<LookupTable1D<Real, 1>> m_mobilityTablesEN;
 
   /**
    * @brief Map for table-based mobilities as function of energy.
    * @details Stored as tables (eV, mu*N)
    */
-  std::map<int, LookupTable1D<Real, 1>> m_mobilityTablesEnergy;
+  std::vector<LookupTable1D<Real, 1>> m_mobilityTablesEnergy;
 
   // ================================
   // DIFFUSION  QUANTITIES BEGIN HERE
@@ -650,29 +656,29 @@ protected:
   /**
    * @brief Diffusion lookup method.
    */
-  std::map<int, LookupMethod> m_diffusionLookup;
+  std::vector<LookupMethod> m_diffusionLookup;
 
   /**
    * @brief Map for constant diffusion coefficients.
    */
-  std::map<int, Real> m_diffusionConstants;
+  std::vector<Real> m_diffusionConstants;
 
   /**
    * @brief Map for function-based diffusion coefficients. .
    */
-  std::map<int, FunctionEN> m_diffusionFunctionsEN;
+  std::vector<FunctionEN> m_diffusionFunctionsEN;
 
   /**
    * @brief Map for table-based diffusion coefficients D = D(E,N).
    * @details Tables stored as (E/N, D*N)
    */
-  std::map<int, LookupTable1D<Real, 1>> m_diffusionTablesEN;
+  std::vector<LookupTable1D<Real, 1>> m_diffusionTablesEN;
 
   /**
    * @brief Map for table-based diffusion coefficients as function of energy.
    * @details Stored as tables (eV, D*N)
    */
-  std::map<int, LookupTable1D<Real, 1>> m_diffusionTablesEnergy;
+  std::vector<LookupTable1D<Real, 1>> m_diffusionTablesEnergy;
 
   // ===========================================
   // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
@@ -681,17 +687,17 @@ protected:
   /**
    * @brief Temperature lookup method
    */
-  std::map<int, LookupMethod> m_temperatureLookup;
+  std::vector<LookupMethod> m_temperatureLookup;
 
   /**
    * @brief Constant temperatures.
    */
-  std::map<int, FunctionX> m_temperatureConstants;
+  std::vector<FunctionX> m_temperatureConstants;
 
   /**
    * @brief Temperatures as functions of E/N.
    */
-  std::map<int, LookupTable1D<Real, 1>> m_temperatureTablesEN;
+  std::vector<LookupTable1D<Real, 1>> m_temperatureTablesEN;
 
   // ================================
   // REACTION DATA BEGINS HERE
@@ -1377,6 +1383,24 @@ protected:
                                 const std::vector<Real>& a_energies) const noexcept;
 
   /**
+   * @brief Compute the rate coefficients of the plasma reactions whose rate does not depend on the plasma densities.
+   * @details For reactions with constant, E/N-function or E/N-table rates, the coefficient is the looked-up rate times
+   * the neutral reactant densities. computePlasmaReactionRate multiplies it by the plasma reactant densities, the
+   * efficiency and the Soloviev correction. Other reactions are left untouched in a_coefficients.
+   * @param[out] a_coefficients Rate coefficients, indexed by reaction. Sized to the number of reactions by the caller.
+   * @param[in]  a_pos          Physical position.
+   * @param[in]  a_E            Electric field magnitude (SI units).
+   * @param[in]  a_N            Neutral density.
+   * @param[in]  a_Etd          Reduced electric field (Td).
+   */
+  virtual void
+  computePlasmaReactionCoefficients(std::vector<Real>& a_coefficients,
+                                    const RealVect&    a_pos,
+                                    const Real         a_E,
+                                    const Real         a_N,
+                                    const Real         a_Etd) const noexcept;
+
+  /**
    * @brief Determine which per-cell quantities the transport and reaction lookups use.
    * @details Sets m_transportNeedsEnergies and the m_reactionsNeed* flags. Must be called after all lookups are parsed.
    */
@@ -1388,6 +1412,8 @@ protected:
    * @details This routine exists because we need to compute the rates both in advanceReactionNetwork and
    * getPlotVariables. This function reduces code duplication.
    * @param[in] a_reactionIndex            Reaction index
+   * @param[in] a_rateCoefficients         Coefficients from computePlasmaReactionCoefficients. Only read for reactions
+   * whose rate does not depend on the plasma densities.
    * @param[in] a_cdrDensities             Plasma species densities.
    * @param[in] a_cdrMobilities            Plasma species mobilities.
    * @param[in] a_cdrDiffusionCoefficients Plasma species diffusion coefficients.
@@ -1406,6 +1432,7 @@ protected:
    */
   virtual Real
   computePlasmaReactionRate(const int&                   a_reactionIndex,
+                            const std::vector<Real>&     a_rateCoefficients,
                             const std::vector<Real>&     a_cdrDensities,
                             const std::vector<Real>&     a_cdrMobilities,
                             const std::vector<Real>&     a_cdrDiffusionCoefficients,
@@ -1520,6 +1547,7 @@ protected:
    * @brief Routine for integrating the reactive-only problem using various algorithms.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
    * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * @param[in]     a_rateCoefficients Density-independent rate coefficients (computePlasmaReactionCoefficients).
    * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
@@ -1532,6 +1560,7 @@ protected:
   virtual void
   integrateReactions(std::vector<Real>&           a_cdrDensities,
                      std::vector<Real>&           a_photonProduction,
+                     const std::vector<Real>&     a_rateCoefficients,
                      const std::vector<RealVect>& a_cdrGradients,
                      const RealVect&              a_E,
                      const RealVect&              a_pos,
@@ -1544,6 +1573,7 @@ protected:
    * @brief Routine for filling the source terms in the reactive problem.
    * @param[out]   a_cdrSources       Contains source term for CDR equations.
    * @param[out]   a_rteSources       Contains source terms for RTE equations.
+   * @param[in]    a_rateCoefficients Density-independent rate coefficients (computePlasmaReactionCoefficients).
    * @param[in]    a_cdrDensities     CDR densities
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
@@ -1555,6 +1585,7 @@ protected:
   void
   fillSourceTerms(std::vector<Real>&           a_cdrSources,
                   std::vector<Real>&           a_rteSources,
+                  const std::vector<Real>&     a_rateCoefficients,
                   const std::vector<Real>&     a_cdrDensities,
                   const std::vector<RealVect>& a_cdrGradients,
                   const RealVect&              a_E,
@@ -1567,6 +1598,7 @@ protected:
    * @brief Routine for integrating the reactive-only problem using the explicit Euler rule.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
    * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * @param[in]     a_rateCoefficients Density-independent rate coefficients (computePlasmaReactionCoefficients).
    * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
@@ -1579,6 +1611,7 @@ protected:
   void
   integrateReactionsExplicitEuler(std::vector<Real>&           a_cdrDensities,
                                   std::vector<Real>&           a_photonProduction,
+                                  const std::vector<Real>&     a_rateCoefficients,
                                   const std::vector<RealVect>& a_cdrGradients,
                                   const RealVect&              a_E,
                                   const RealVect&              a_pos,
@@ -1616,6 +1649,7 @@ protected:
    * @details This includes the tableu through the a_tableuAlpha parameter.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
    * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * @param[in]     a_rateCoefficients Density-independent rate coefficients (computePlasmaReactionCoefficients).
    * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
@@ -1629,6 +1663,7 @@ protected:
   void
   integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrDensities,
                                 std::vector<Real>&           a_photonProduction,
+                                const std::vector<Real>&     a_rateCoefficients,
                                 const std::vector<RealVect>& a_cdrGradients,
                                 const RealVect&              a_E,
                                 const RealVect&              a_pos,
@@ -1642,6 +1677,7 @@ protected:
    * @brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
    * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * @param[in]     a_rateCoefficients Density-independent rate coefficients (computePlasmaReactionCoefficients).
    * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
@@ -1654,6 +1690,7 @@ protected:
   void
   integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrDensities,
                                 std::vector<Real>&           a_photonProduction,
+                                const std::vector<Real>&     a_rateCoefficients,
                                 const std::vector<RealVect>& a_cdrGradients,
                                 const RealVect&              a_E,
                                 const RealVect&              a_pos,

@@ -35,15 +35,15 @@ using namespace Physics::CdrPlasma;
 
 namespace {
 /**
- * @brief Set entry a_index of a reaction-indexed vector, growing the vector if needed.
+ * @brief Set entry a_index of a vector indexed by reaction or species, growing the vector if needed.
  * @details Reactions are numbered as they are parsed, so the number of reactions is not known in advance.
- * @param[in,out] a_vector Vector indexed by reaction index.
- * @param[in]     a_index  Reaction index.
+ * @param[in,out] a_vector Vector indexed by reaction or species index.
+ * @param[in]     a_index  Reaction or species index.
  * @param[in]     a_value  Value to store. Must be convertible to T.
  */
 template <typename T, typename U>
 void
-setReactionEntry(std::vector<T>& a_vector, const int a_index, const U& a_value)
+setIndexedEntry(std::vector<T>& a_vector, const int a_index, const U& a_value)
 {
   CH_assert(a_index >= 0);
 
@@ -108,15 +108,29 @@ CdrPlasmaJSON::initializeEvaluationFlags() noexcept
   m_reactionsNeedAlpha      = false;
   m_reactionsNeedEta        = false;
 
-  for (const auto& m : m_mobilityLookup) {
-    m_transportNeedsEnergies = m_transportNeedsEnergies || (m.second == LookupMethod::TableEnergy);
+  for (int i = 0; i < static_cast<int>(m_mobilityLookup.size()); i++) {
+    const bool isMobile = (i < static_cast<int>(m_cdrSpecies.size())) && m_cdrSpecies[i]->isMobile();
+
+    m_transportNeedsEnergies = m_transportNeedsEnergies ||
+                               (isMobile && m_mobilityLookup[i] == LookupMethod::TableEnergy);
   }
 
-  for (const auto& m : m_diffusionLookup) {
-    m_transportNeedsEnergies = m_transportNeedsEnergies || (m.second == LookupMethod::TableEnergy);
+  for (int i = 0; i < static_cast<int>(m_diffusionLookup.size()); i++) {
+    const bool isDiffusive = (i < static_cast<int>(m_cdrSpecies.size())) && m_cdrSpecies[i]->isDiffusive();
+
+    m_transportNeedsEnergies = m_transportNeedsEnergies ||
+                               (isDiffusive && m_diffusionLookup[i] == LookupMethod::TableEnergy);
   }
+
+  m_plasmaReactionDensityIndependent.assign(m_plasmaReactionLookup.size(), false);
 
   for (int reactionIndex = 0; reactionIndex < static_cast<int>(m_plasmaReactionLookup.size()); reactionIndex++) {
+    const LookupMethod method = m_plasmaReactionLookup[reactionIndex];
+
+    m_plasmaReactionDensityIndependent[reactionIndex] = (method == LookupMethod::Constant) ||
+                                                        (method == LookupMethod::FunctionEN) ||
+                                                        (method == LookupMethod::TableEN);
+
     switch (m_plasmaReactionLookup[reactionIndex]) {
     case LookupMethod::TableEnergy: {
       m_reactionsNeedEnergies = true;
@@ -817,7 +831,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     // Make the string-int map encodings.
     m_cdrSpeciesMap.emplace(name, transportIdx);
     m_cdrSpeciesInverseMap.emplace(transportIdx, name);
-    m_cdrIsEnergySolver.emplace(transportIdx, false);
+    setIndexedEntry(m_cdrIsEnergySolver, transportIdx, false);
 
     // Push the JSON entry and the new CdrSpecies to corresponding vectors.
     m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
@@ -832,7 +846,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         const std::string str = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(m.get<std::string>());
 
         if (str == "electron") {
-          m_cdrMasses.emplace(transportIdx, Units::me);
+          setIndexedEntry(m_cdrMasses, transportIdx, Units::me);
         }
         else {
           ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
@@ -843,11 +857,11 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         }
       }
       else {
-        m_cdrMasses.emplace(transportIdx, m.get<Real>());
+        setIndexedEntry(m_cdrMasses, transportIdx, m.get<Real>());
       }
     }
     else {
-      m_cdrMasses.emplace(transportIdx, std::numeric_limits<Real>::infinity());
+      setIndexedEntry(m_cdrMasses, transportIdx, std::numeric_limits<Real>::infinity());
     }
 
     // Now check if we should augment this species with an energy transport model.
@@ -901,8 +915,8 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
         m_cdrSpeciesMap.emplace(energyName, energyIdx);
         m_cdrSpeciesInverseMap.emplace(energyIdx, energyName);
-        m_cdrIsEnergySolver.emplace(energyIdx, true);
-        m_cdrEnergyComputation.emplace(transportIdx, std::make_tuple(minEnergy, maxEnergy, safety));
+        setIndexedEntry(m_cdrIsEnergySolver, energyIdx, true);
+        setIndexedEntry(m_cdrEnergyComputation, transportIdx, std::make_tuple(minEnergy, maxEnergy, safety));
 
         // Push the new CdrSpecies to our the list of species.
         m_cdrSpecies.push_back(
@@ -913,10 +927,10 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     // If we had energy transport we must let our associative containers know where the solvers live.
     if (energyTransport) {
       m_cdrTransportEnergyMap.emplace(transportIdx, transportIdx + 1);
-      m_cdrHasEnergySolver.emplace(transportIdx, true);
+      setIndexedEntry(m_cdrHasEnergySolver, transportIdx, true);
     }
     else {
-      m_cdrHasEnergySolver.emplace(transportIdx, false);
+      setIndexedEntry(m_cdrHasEnergySolver, transportIdx, false);
     }
 
     // Print out a message if we're verbose.
@@ -1838,8 +1852,8 @@ CdrPlasmaJSON::parseMobilities()
 
         const Real value = mobilityJSON["value"].get<Real>();
 
-        m_mobilityLookup.emplace(idx, LookupMethod::Constant);
-        m_mobilityConstants.emplace(idx, value);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::Constant);
+        setIndexedEntry(m_mobilityConstants, idx, value);
       }
       else if (lookup == "table E/N") {
         if (!(mobilityJSON.contains("file"))) {
@@ -1929,8 +1943,8 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Ok, put the table where it belongs.
-        m_mobilityLookup.emplace(idx, LookupMethod::TableEN);
-        m_mobilityTablesEN.emplace(idx, mobilityTable);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::TableEN);
+        setIndexedEntry(m_mobilityTablesEN, idx, mobilityTable);
       }
       else if (lookup == "table energy") {
         if (!(mobilityJSON.contains("file"))) {
@@ -2022,8 +2036,8 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Ok, put the table where it belongs.
-        m_mobilityLookup.emplace(idx, LookupMethod::TableEnergy);
-        m_mobilityTablesEnergy.emplace(idx, mobilityTable);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::TableEnergy);
+        setIndexedEntry(m_mobilityTablesEnergy, idx, mobilityTable);
       }
       else if (lookup == "functionEN A") {
         FunctionEN func;
@@ -2049,8 +2063,8 @@ CdrPlasmaJSON::parseMobilities()
           return A * std::pow(a_E, B) / std::pow(a_N, C);
         };
 
-        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEN);
-        m_mobilityFunctionsEN.emplace(idx, func);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::FunctionEN);
+        setIndexedEntry(m_mobilityFunctionsEN, idx, func);
       }
       else if (lookup == "morrow-lowke e") {
         // This is a hook for fetching the electron mobility from the Morrow-Lowke model. The expression
@@ -2086,8 +2100,8 @@ CdrPlasmaJSON::parseMobilities()
           return mu;
         };
 
-        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEN);
-        m_mobilityFunctionsEN.emplace(idx, func);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::FunctionEN);
+        setIndexedEntry(m_mobilityFunctionsEN, idx, func);
       }
       else if (lookup == "morrow-lowke +") {
         // This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
@@ -2099,8 +2113,8 @@ CdrPlasmaJSON::parseMobilities()
           return 2.34E-4 * P0 / P(x);
         };
 
-        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEX);
-        m_mobilityFunctionsEX.emplace(idx, func);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::FunctionEX);
+        setIndexedEntry(m_mobilityFunctionsEX, idx, func);
       }
       else if (lookup == "morrow-lowke -") {
         // This is a hook for fetching the negative ion from the Morrow-Lowke model. The expression
@@ -2124,8 +2138,8 @@ CdrPlasmaJSON::parseMobilities()
           return mu;
         };
 
-        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEX);
-        m_mobilityFunctionsEX.emplace(idx, func);
+        setIndexedEntry(m_mobilityLookup, idx, LookupMethod::FunctionEX);
+        setIndexedEntry(m_mobilityFunctionsEX, idx, func);
       }
       else {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
@@ -2169,8 +2183,8 @@ CdrPlasmaJSON::parseDiffusion()
 
         const Real value = diffusionJSON["value"].get<Real>();
 
-        m_diffusionLookup.emplace(idx, LookupMethod::Constant);
-        m_diffusionConstants.emplace(idx, value);
+        setIndexedEntry(m_diffusionLookup, idx, LookupMethod::Constant);
+        setIndexedEntry(m_diffusionConstants, idx, value);
       }
       else if (lookup == "table E/N") {
         if (!(diffusionJSON.contains("file"))) {
@@ -2259,8 +2273,8 @@ CdrPlasmaJSON::parseDiffusion()
           diffusionTable.writeStructuredData(dumpFile);
         }
 
-        m_diffusionLookup.emplace(idx, LookupMethod::TableEN);
-        m_diffusionTablesEN.emplace(idx, diffusionTable);
+        setIndexedEntry(m_diffusionLookup, idx, LookupMethod::TableEN);
+        setIndexedEntry(m_diffusionTablesEN, idx, diffusionTable);
       }
       else if (lookup == "table energy") {
         if (!(diffusionJSON.contains("file"))) {
@@ -2354,8 +2368,8 @@ CdrPlasmaJSON::parseDiffusion()
           diffusionTable.writeStructuredData(dumpFile);
         }
 
-        m_diffusionLookup.emplace(idx, LookupMethod::TableEnergy);
-        m_diffusionTablesEnergy.emplace(idx, diffusionTable);
+        setIndexedEntry(m_diffusionLookup, idx, LookupMethod::TableEnergy);
+        setIndexedEntry(m_diffusionTablesEnergy, idx, diffusionTable);
       }
       else if (lookup == "functionEN A") {
         FunctionEN func;
@@ -2381,8 +2395,8 @@ CdrPlasmaJSON::parseDiffusion()
           return A * std::pow(a_E, B) / std::pow(a_N, C);
         };
 
-        m_diffusionLookup.emplace(idx, LookupMethod::FunctionEN);
-        m_diffusionFunctionsEN.emplace(idx, func);
+        setIndexedEntry(m_diffusionLookup, idx, LookupMethod::FunctionEN);
+        setIndexedEntry(m_diffusionFunctionsEN, idx, func);
       }
       else if (lookup == "morrow-lowke e") {
         // This is a hook for fetching the electron diffusion from the Morrow-Lowke model. The expression
@@ -2425,8 +2439,8 @@ CdrPlasmaJSON::parseDiffusion()
           return 0.3341E9 * std::pow(EN, 0.54069) * mu;
         };
 
-        m_diffusionLookup.emplace(idx, LookupMethod::FunctionEN);
-        m_diffusionFunctionsEN.emplace(idx, electronDiffusion);
+        setIndexedEntry(m_diffusionLookup, idx, LookupMethod::FunctionEN);
+        setIndexedEntry(m_diffusionFunctionsEN, idx, electronDiffusion);
       }
       else {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
@@ -2450,8 +2464,8 @@ CdrPlasmaJSON::parseTemperatures()
 
     // If temperature is not specified -- we use the background gas temperature.
     if (!(species.contains("temperature"))) {
-      m_temperatureLookup.emplace(idx, LookupMethod::FunctionX);
-      m_temperatureConstants.emplace(idx, m_gasTemperature);
+      setIndexedEntry(m_temperatureLookup, idx, LookupMethod::FunctionX);
+      setIndexedEntry(m_temperatureConstants, idx, m_gasTemperature);
     }
     else {
       const json& S = species["temperature"];
@@ -2473,8 +2487,8 @@ CdrPlasmaJSON::parseTemperatures()
         const Real value = S["value"].get<Real>();
 
         // Create a function which returns a constant value everywhere.
-        m_temperatureLookup.emplace(idx, LookupMethod::FunctionX);
-        m_temperatureConstants.emplace(idx, [value](const RealVect&  /*a_psition*/) -> Real {
+        setIndexedEntry(m_temperatureLookup, idx, LookupMethod::FunctionX);
+        setIndexedEntry(m_temperatureConstants, idx, [value](const RealVect&  /*a_psition*/) -> Real {
           return value;
         });
       }
@@ -2568,8 +2582,8 @@ CdrPlasmaJSON::parseTemperatures()
           temperatureTable.writeStructuredData(dumpFile);
         }
 
-        m_temperatureLookup.emplace(idx, LookupMethod::TableEN);
-        m_temperatureTablesEN.emplace(idx, temperatureTable);
+        setIndexedEntry(m_temperatureLookup, idx, LookupMethod::TableEN);
+        setIndexedEntry(m_temperatureTablesEN, idx, temperatureTable);
       }
       else {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
@@ -2913,8 +2927,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real k = a_R["rate"].get<Real>();
 
     /// Add the rate and lookup method.
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::Constant);
-    setReactionEntry(m_plasmaReactionConstants, a_reactionIndex, k);
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::Constant);
+    setIndexedEntry(m_plasmaReactionConstants, a_reactionIndex, k);
   }
   else if (lookup == "alpha*v") { 
     if (!(a_R.contains("species"))) {
@@ -2927,8 +2941,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got 'alpha*v' but species '").append(species).append("' is not a plasma species"));
     }
 
-    setReactionEntry(m_plasmaReactionAlphaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::AlphaV);
+    setIndexedEntry(m_plasmaReactionAlphaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::AlphaV);
   }
   else if (lookup == "eta*v") {
     if (!(a_R.contains("species"))) {
@@ -2941,8 +2955,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got 'eta*v' but species '").append(species).append("' is not a plasma species"));
     }
 
-    setReactionEntry(m_plasmaReactionEtaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::EtaV);
+    setIndexedEntry(m_plasmaReactionEtaV, a_reactionIndex, m_cdrSpeciesMap.at(species));
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::EtaV);
   }
   else if(lookup == "functionT A") {
     if(!(a_R.contains("T"))) {
@@ -2976,8 +2990,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       index = m_cdrSpeciesMap.at(speciesT);
       
     }
-    setReactionEntry(m_plasmaReactionFunctionsT, a_reactionIndex, std::make_pair(index, functionT));
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionT);
+    setIndexedEntry(m_plasmaReactionFunctionsT, a_reactionIndex, std::make_pair(index, functionT));
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionT);
     
   }
   else if (lookup == "functionT1T2 A") {
@@ -3032,8 +3046,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       return c1 * std::pow(a_T1 / a_T2, c2);
     };
 
-    setReactionEntry(m_plasmaReactionFunctionsTT, a_reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionTT);
+    setIndexedEntry(m_plasmaReactionFunctionsTT, a_reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionTT);
   }
   else if (lookup == "table E/N") {
     if (!(a_R.contains("file"))) {
@@ -3116,8 +3130,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     }
 
     // Add the tabulated rate and identifier.
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEN);
-    setReactionEntry(m_plasmaReactionTablesEN, a_reactionIndex, reactionTable);
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEN);
+    setIndexedEntry(m_plasmaReactionTablesEN, a_reactionIndex, reactionTable);
   }
   else if (lookup == "table energy") {
     if (!(a_R.contains("file"))) {
@@ -3212,8 +3226,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const int speciesIdx = m_cdrSpeciesMap.at(species);
 
     // Add the tabulated rate and identifier.
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEnergy);
-    setReactionEntry(m_plasmaReactionTablesEnergy, a_reactionIndex, std::make_pair(speciesIdx, reactionTable));
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::TableEnergy);
+    setIndexedEntry(m_plasmaReactionTablesEnergy, a_reactionIndex, std::make_pair(speciesIdx, reactionTable));
   }
   else if (lookup == "functionEN expA") {
     if (!(a_R.contains("c1"))) {
@@ -3244,8 +3258,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     };
 
     // Add the function and identifier.
-    setReactionEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionEN);
-    setReactionEntry(m_plasmaReactionFunctionsEN, a_reactionIndex, func);
+    setIndexedEntry(m_plasmaReactionLookup, a_reactionIndex, LookupMethod::FunctionEN);
+    setIndexedEntry(m_plasmaReactionFunctionsEN, a_reactionIndex, func);
   }
   else {
     ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but lookup = '").append(lookup).append("' is not recognized"));
@@ -3379,9 +3393,9 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
   // Add it to the pile. A constant efficiency is also stored as a number, so that the function need not be called.
   const bool constantEfficiency = !doPressureQuenching && !doPhotoIonization;
 
-  setReactionEntry(m_plasmaReactionEfficiencies, a_index, func);
-  setReactionEntry(m_plasmaReactionConstantEfficiency, a_index, constantEfficiency);
-  setReactionEntry(m_plasmaReactionScales, a_index, constantEfficiency ? scale : 0.0);
+  setIndexedEntry(m_plasmaReactionEfficiencies, a_index, func);
+  setIndexedEntry(m_plasmaReactionConstantEfficiency, a_index, constantEfficiency);
+  setIndexedEntry(m_plasmaReactionScales, a_index, constantEfficiency ? scale : 0.0);
 }
 
 void
@@ -3478,14 +3492,14 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
           std::string{baseError}.append("but species  + '").append(species).append("' isn't diffusive."));
       }
 
-      setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(true, plasmaSpecies));
+      setIndexedEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(true, plasmaSpecies));
     }
     else {
-      setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
+      setIndexedEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
     }
   }
   else {
-    setReactionEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
+    setIndexedEntry(m_plasmaReactionSolovievCorrection, a_reactionIndex, std::make_pair(false, -1));
   }
 }
 
@@ -3529,7 +3543,7 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
           std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
       }
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex)) {
+      if (m_cdrIsEnergySolver[speciesIndex]) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
           std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
       }
@@ -3585,7 +3599,7 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
       // specified species. This allows us to ignore all energy losses for a species by just turning off energy
       // transport in the input script.
-      if (m_cdrHasEnergySolver.at(speciesIndex)) {
+      if (m_cdrHasEnergySolver[speciesIndex]) {
         reactionEnergyLosses.emplace(speciesIndex, std::make_pair(lossMethod, loss));
       }
     }
@@ -3593,17 +3607,17 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first)) {
+      if (m_cdrHasEnergySolver[p.first]) {
         hasEnergySolver = true;
       }
     }
 
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
-    setReactionEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, hasEnergySolver);
+    setIndexedEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, hasEnergySolver);
   }
   else {
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
-    setReactionEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, false);
+    setIndexedEntry(m_plasmaReactionHasEnergyLoss, a_reactionIndex, false);
   }
 }
 
@@ -3804,7 +3818,7 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex)) {
+      if (m_cdrIsEnergySolver[speciesIndex]) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
           std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
       }
@@ -3812,7 +3826,7 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
       // specified species. This allows us to ignore all energy losses for a species by just turning off energy
       // transport in the input script.
-      if (m_cdrHasEnergySolver.at(speciesIndex)) {
+      if (m_cdrHasEnergySolver[speciesIndex]) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
     }
@@ -3820,7 +3834,7 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first)) {
+      if (m_cdrHasEnergySolver[p.first]) {
         hasEnergySolver = true;
       }
     }
@@ -4058,7 +4072,7 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex)) {
+      if (m_cdrIsEnergySolver[speciesIndex]) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
           std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
       }
@@ -4066,7 +4080,7 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
       // specified species. This allows us to ignore all energy losses for a species by just turning off energy
       // transport in the input script.
-      if (m_cdrHasEnergySolver.at(speciesIndex)) {
+      if (m_cdrHasEnergySolver[speciesIndex]) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
     }
@@ -4074,7 +4088,7 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first)) {
+      if (m_cdrHasEnergySolver[p.first]) {
         hasEnergySolver = true;
       }
     }
@@ -4586,7 +4600,7 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex)) {
+      if (m_cdrIsEnergySolver[speciesIndex]) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
           std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
       }
@@ -4594,7 +4608,7 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
       // specified species. This allows us to ignore all energy losses for a species by just turning off energy
       // transport in the input script.
-      if (m_cdrHasEnergySolver.at(speciesIndex)) {
+      if (m_cdrHasEnergySolver[speciesIndex]) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
     }
@@ -4602,7 +4616,7 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first)) {
+      if (m_cdrHasEnergySolver[p.first]) {
         hasEnergySolver = true;
       }
     }
@@ -4622,9 +4636,8 @@ CdrPlasmaJSON::getPlotVariableNames() const
   Vector<std::string> ret(0);
 
   // If using the LEA, the energy of each species should be plotted as well.
-  for (const auto& energySolverMap : m_cdrHasEnergySolver) {
-    const auto solverIndex     = energySolverMap.first;
-    const auto hasEnergySolver = energySolverMap.second;
+  for (int solverIndex = 0; solverIndex < static_cast<int>(m_cdrHasEnergySolver.size()); solverIndex++) {
+    const bool hasEnergySolver = m_cdrHasEnergySolver[solverIndex];
 
     if (hasEnergySolver) {
       const RefCountedPtr<CdrSpecies>& species = m_cdrSpecies[solverIndex];
@@ -4696,14 +4709,19 @@ CdrPlasmaJSON::getPlotVariables(Vector<Real>&           a_plotVariables,
   this->computePlasmaSpeciesMobilities(cdrMobilities, a_pos, E, N, Etd, cdrEnergies);
   this->computePlasmaSpeciesDiffusion(cdrDiffusionCoefficients, a_pos, E, N, Etd, cdrEnergies);
 
+  thread_local std::vector<Real> rateCoefficients;
+
+  rateCoefficients.resize(m_plasmaReactions.size());
+
+  this->computePlasmaReactionCoefficients(rateCoefficients, a_pos, E, N, Etd);
+
   // Townsend ionization and attachment coefficients. May or may not be used.
   const Real alpha = this->computeAlpha(E, a_pos);
   const Real eta   = this->computeEta(E, a_pos);
 
   // If using the LEA, the energy of each species should be plotted as well.
-  for (const auto& energySolverMap : m_cdrHasEnergySolver) {
-    const auto solverIndex     = energySolverMap.first;
-    const auto hasEnergySolver = energySolverMap.second;
+  for (int solverIndex = 0; solverIndex < static_cast<int>(m_cdrHasEnergySolver.size()); solverIndex++) {
+    const bool hasEnergySolver = m_cdrHasEnergySolver[solverIndex];
 
     if (hasEnergySolver) {
       a_plotVariables[k++] = cdrEnergies[solverIndex];
@@ -4723,6 +4741,7 @@ CdrPlasmaJSON::getPlotVariables(Vector<Real>&           a_plotVariables,
 
       // Compute the reaction rate for the current reaction.
       const Real rate = this->computePlasmaReactionRate(reactionIndex,
+                                                        rateCoefficients,
                                                         cdrDensities,
                                                         cdrMobilities,
                                                         cdrDiffusionCoefficients,
@@ -4834,31 +4853,31 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(std::vector<Real>&       a_mobilit
   // Go through each species and compute mobilities.
   for (int i = 0; i < m_numCdrSpecies; i++) {
     const bool isMobile       = m_cdrSpecies[i]->isMobile();
-    const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
+    const bool isEnergySolver = m_cdrIsEnergySolver[i];
 
     // Figure out how to compute the mobility for the various species.
     if (isMobile && !isEnergySolver) {
-      const LookupMethod& method = m_mobilityLookup.at(i);
+      const LookupMethod& method = m_mobilityLookup[i];
 
       switch (method) {
       case LookupMethod::Constant: {
-        mu[i] = m_mobilityConstants.at(i);
+        mu[i] = m_mobilityConstants[i];
 
         break;
       }
       case LookupMethod::FunctionEN: {
-        mu[i] = m_mobilityFunctionsEN.at(i)(E, N);
+        mu[i] = m_mobilityFunctionsEN[i](E, N);
 
         break;
       }
       case LookupMethod::FunctionEX: {
-        mu[i] = m_mobilityFunctionsEX.at(i)(E, a_position);
+        mu[i] = m_mobilityFunctionsEX[i](E, a_position);
 
         break;
       }
       case LookupMethod::TableEN: {
         // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that.
-        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEN.at(i);
+        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEN[i];
 
         mu[i] = mobilityTable.interpolate<1>(Etd); // Get mu*N
         mu[i] /= N;                                // Get mu
@@ -4866,7 +4885,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(std::vector<Real>&       a_mobilit
         break;
       }
       case LookupMethod::TableEnergy: {
-        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEnergy.at(i);
+        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEnergy[i];
 
         mu[i] = mobilityTable.interpolate<1>(energies[i]);
         mu[i] /= N;
@@ -4911,29 +4930,29 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(std::vector<Real>&       a_diffusio
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
     const bool isDiffusive    = m_cdrSpecies[i]->isDiffusive();
-    const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
+    const bool isEnergySolver = m_cdrIsEnergySolver[i];
 
     if (isDiffusive && !isEnergySolver) {
 
       // Figure out how we compute the diffusion coefficient for this species.
-      const LookupMethod& method = m_diffusionLookup.at(i);
+      const LookupMethod& method = m_diffusionLookup[i];
 
       Real Dco = 0.0;
 
       switch (method) {
       case LookupMethod::Constant: {
-        Dco = m_diffusionConstants.at(i);
+        Dco = m_diffusionConstants[i];
 
         break;
       }
       case LookupMethod::FunctionEN: {
-        Dco = m_diffusionFunctionsEN.at(i)(E, N);
+        Dco = m_diffusionFunctionsEN[i](E, N);
 
         break;
       }
       case LookupMethod::TableEN: {
         // Recall; the diffusion tables are stored as (E/N, D*N) so we need to extract D from that.
-        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEN.at(i);
+        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEN[i];
 
         Dco = diffusionTable.interpolate<1>(Etd); // Get D*N
         Dco /= N;                                 // Get D
@@ -4942,7 +4961,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(std::vector<Real>&       a_diffusio
       }
       case LookupMethod::TableEnergy: {
         // Recall: The diffusion tables are stored as (eV, D*N) so we just get D from that.
-        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEnergy.at(i);
+        const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEnergy[i];
 
         Dco = diffusionTable.interpolate<1>(energies[i]);
         Dco /= N;
@@ -4994,7 +5013,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
   }
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
-    const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
+    const bool isEnergySolver = m_cdrIsEnergySolver[i];
 
     // Energy solvers don't have temperatures silly. They ARE temperatures. We skip these here and just
     // define them below in a second hook.
@@ -5002,16 +5021,16 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
 
       // This is not an energy solver then we should have populated a map about whether or not
       // this solver is _associated_ with an energy solver.
-      const bool hasEnergySolver = m_cdrHasEnergySolver.at(i);
+      const bool hasEnergySolver = m_cdrHasEnergySolver[i];
 
       if (hasEnergySolver) {
         // Energy solver solves for the energy in electron volts. We compute average_energy = n_energy/n_density and
         // avoid division by zero.
         const int energyIdx = m_cdrTransportEnergyMap.at(i);
 
-        const Real& minEnergy = std::get<0>(m_cdrEnergyComputation.at(i));
-        const Real& maxEnergy = std::get<1>(m_cdrEnergyComputation.at(i));
-        const Real& safety    = std::get<2>(m_cdrEnergyComputation.at(i));
+        const Real& minEnergy = std::get<0>(m_cdrEnergyComputation[i]);
+        const Real& maxEnergy = std::get<1>(m_cdrEnergyComputation[i]);
+        const Real& safety    = std::get<2>(m_cdrEnergyComputation[i]);
 
         const Real safeEnergy = std::max(a_cdrDensities[energyIdx], (Real)0.0) / (std::max(a_cdrDensities[i], safety));
 
@@ -5019,19 +5038,19 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
       }
       else {
         // Otherwise -- we need to look up the
-        const LookupMethod lookup = m_temperatureLookup.at(i);
+        const LookupMethod lookup = m_temperatureLookup[i];
 
         // Switch between various lookup methods.
         Real T = 0.0;
         switch (lookup) {
         case LookupMethod::FunctionX: {
-          T = (m_temperatureConstants.at(i))(a_position);
+          T = (m_temperatureConstants[i])(a_position);
 
           break;
         }
         case LookupMethod::TableEN: {
           // Recall; the temperature tables are stored as (E/N, K) so we can fetch the temperature immediately.
-          const LookupTable1D<Real, 1>& temperatureTable = m_temperatureTablesEN.at(i);
+          const LookupTable1D<Real, 1>& temperatureTable = m_temperatureTablesEN[i];
 
           T = temperatureTable.interpolate<1>(Etd);
 
@@ -5060,8 +5079,61 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(std::vector<Real>&       a_energies,
   }
 }
 
+void
+CdrPlasmaJSON::computePlasmaReactionCoefficients(std::vector<Real>& a_coefficients,
+                                                 const RealVect&    a_pos,
+                                                 const Real         a_E,
+                                                 const Real         a_N,
+                                                 const Real         a_Etd) const noexcept
+{
+  // Neutral densities, evaluated once for all reactions.
+  thread_local std::vector<Real> neutralDensities;
+
+  neutralDensities.resize(m_neutralSpeciesDensities.size());
+
+  for (int n = 0; n < static_cast<int>(m_neutralSpeciesDensities.size()); n++) {
+    neutralDensities[n] = (m_neutralSpeciesDensities[n])(a_pos);
+  }
+
+  for (int i = 0; i < static_cast<int>(m_plasmaReactions.size()); i++) {
+    if (m_plasmaReactionDensityIndependent[i]) {
+      Real k = 0.0;
+
+      switch (m_plasmaReactionLookup[i]) {
+      case LookupMethod::Constant: {
+        k = m_plasmaReactionConstants[i];
+
+        break;
+      }
+      case LookupMethod::FunctionEN: {
+        k = m_plasmaReactionFunctionsEN[i](a_E, a_N);
+
+        break;
+      }
+      case LookupMethod::TableEN: {
+        k = m_plasmaReactionTablesEN[i].interpolate<1>(a_Etd);
+
+        break;
+      }
+      default: {
+        MayDay::Error("CdrPlasmaJSON::computePlasmaReactionCoefficients -- logic bust");
+
+        break;
+      }
+      }
+
+      for (const auto& n : m_plasmaReactions[i].getNeutralReactants()) {
+        k *= neutralDensities[n];
+      }
+
+      a_coefficients[i] = k;
+    }
+  }
+}
+
 Real
 CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reactionIndex,
+                                         const std::vector<Real>&     a_rateCoefficients,
                                          const std::vector<Real>&     a_cdrDensities,
                                          const std::vector<Real>&     a_cdrMobilities,
                                          const std::vector<Real>&     a_cdrDiffusionCoefficients,
@@ -5087,109 +5159,115 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   // Figure out how to compute the reaction rate.
   Real k = 0.0;
 
-  // Various ways of computing the reaction rate.
-  switch (method) {
-  case LookupMethod::Constant: {
-    k = m_plasmaReactionConstants[a_reactionIndex];
+  // Reactions whose coefficient does not depend on the plasma densities were computed once for this cell.
+  if (m_plasmaReactionDensityIndependent[a_reactionIndex]) {
+    k = a_rateCoefficients[a_reactionIndex];
+  }
+  else {
+    // Various ways of computing the reaction rate.
+    switch (method) {
+    case LookupMethod::Constant: {
+      k = m_plasmaReactionConstants[a_reactionIndex];
 
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+
+      break;
     }
+    case LookupMethod::FunctionEN: {
+      k = m_plasmaReactionFunctionsEN[a_reactionIndex](a_E, a_N);
 
-    break;
-  }
-  case LookupMethod::FunctionEN: {
-    k = m_plasmaReactionFunctionsEN[a_reactionIndex](a_E, a_N);
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
 
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      break;
     }
+    case LookupMethod::TableEN: {
+      // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that.
+      const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEN[a_reactionIndex];
 
-    break;
-  }
-  case LookupMethod::TableEN: {
-    // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that.
-    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEN[a_reactionIndex];
+      // Get the reaction rate.
+      k = reactionTable.interpolate<1>(a_Etd);
 
-    // Get the reaction rate.
-    k = reactionTable.interpolate<1>(a_Etd);
+      // Multiply by neutral species densities.
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
 
-    // Multiply by neutral species densities.
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      break;
     }
+    case LookupMethod::TableEnergy: {
+      const int&                    speciesIndex  = m_plasmaReactionTablesEnergy[a_reactionIndex].first;
+      const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy[a_reactionIndex].second;
 
-    break;
-  }
-  case LookupMethod::TableEnergy: {
-    const int&                    speciesIndex  = m_plasmaReactionTablesEnergy[a_reactionIndex].first;
-    const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy[a_reactionIndex].second;
+      const Real energy = a_cdrEnergies[speciesIndex];
 
-    const Real energy = a_cdrEnergies[speciesIndex];
+      // Get the reaction rate.
+      k = reactionTable.interpolate<1>(energy);
 
-    // Get the reaction rate.
-    k = reactionTable.interpolate<1>(energy);
+      // Multiply by neutral species densities.
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
 
-    // Multiply by neutral species densities.
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      break;
     }
+    case LookupMethod::AlphaV: {
+      const int idx = m_plasmaReactionAlphaV[a_reactionIndex];
 
-    break;
-  }
-  case LookupMethod::AlphaV: {
-    const int idx = m_plasmaReactionAlphaV[a_reactionIndex];
+      k = a_alpha * a_E * a_cdrMobilities[idx];
 
-    k = a_alpha * a_E * a_cdrMobilities[idx];
-
-    break;
-  }
-  case LookupMethod::EtaV: {
-    const int idx = m_plasmaReactionEtaV[a_reactionIndex];
-
-    k = a_eta * a_E * a_cdrMobilities[idx];
-
-    break;
-  }
-  case LookupMethod::FunctionT: {
-    const std::pair<int, FunctionT>& p = m_plasmaReactionFunctionsT[a_reactionIndex];
-
-    const int        idx  = p.first;
-    const FunctionT& func = p.second;
-
-    const Real T = (idx < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx];
-
-    k = func(T);
-
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      break;
     }
+    case LookupMethod::EtaV: {
+      const int idx = m_plasmaReactionEtaV[a_reactionIndex];
 
-    break;
-  }
-  case LookupMethod::FunctionTT: {
-    const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT[a_reactionIndex];
+      k = a_eta * a_E * a_cdrMobilities[idx];
 
-    const int         idx1 = std::get<0>(tup);
-    const int         idx2 = std::get<1>(tup);
-    const FunctionTT& func = std::get<2>(tup);
-
-    const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx1];
-    const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx2];
-
-    k = func(T1, T2);
-
-    for (const auto& n : neutralReactants) {
-      k *= (m_neutralSpeciesDensities[n])(a_pos);
+      break;
     }
+    case LookupMethod::FunctionT: {
+      const std::pair<int, FunctionT>& p = m_plasmaReactionFunctionsT[a_reactionIndex];
 
-    break;
-  }
-  default: {
-    MayDay::Error("CdrPlasmaJSON::computePlasmaReactionRate -- logic bust");
+      const int        idx  = p.first;
+      const FunctionT& func = p.second;
 
-    break;
-  }
+      const Real T = (idx < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx];
+
+      k = func(T);
+
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+
+      break;
+    }
+    case LookupMethod::FunctionTT: {
+      const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT[a_reactionIndex];
+
+      const int         idx1 = std::get<0>(tup);
+      const int         idx2 = std::get<1>(tup);
+      const FunctionTT& func = std::get<2>(tup);
+
+      const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx1];
+      const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx2];
+
+      k = func(T1, T2);
+
+      for (const auto& n : neutralReactants) {
+        k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+
+      break;
+    }
+    default: {
+      MayDay::Error("CdrPlasmaJSON::computePlasmaReactionRate -- logic bust");
+
+      break;
+    }
+    }
   }
 
   // Now multiply by the rest of the left-hand side -- all neutrals should be done above so we are only missing the
@@ -5328,6 +5406,19 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
   // Hook for turning off all reactions.
   if (!m_skipReactions) {
 
+    // Rate coefficients that do not depend on the plasma densities, computed once for all integrator stages.
+    thread_local std::vector<Real> rateCoefficients;
+
+    rateCoefficients.resize(m_plasmaReactions.size());
+
+    {
+      const Real E   = a_E.vectorLength();
+      const Real N   = m_gasDensity(a_pos);
+      const Real Etd = (E / (N * Units::Td));
+
+      this->computePlasmaReactionCoefficients(rateCoefficients, a_pos, E, N, Etd);
+    }
+
     // Solve the reactive problem. The first hook will INTEGRATE the reactive problem (and then linearize the source
     // terms). The other hook will just fill the source terms.
     if (m_reactionIntegrator != ReactionIntegrator::None) {
@@ -5339,6 +5430,7 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
 
       this->integrateReactions(finalCdrDensities,
                                photonProduction,
+                               rateCoefficients,
                                cdrGradients,
                                a_E,
                                a_pos,
@@ -5357,7 +5449,16 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
       }
     }
     else {
-      this->fillSourceTerms(cdrSources, rteSources, cdrDensities, cdrGradients, a_E, a_pos, a_dx, a_dt, a_kappa);
+      this->fillSourceTerms(cdrSources,
+                            rteSources,
+                            rateCoefficients,
+                            cdrDensities,
+                            cdrGradients,
+                            a_E,
+                            a_pos,
+                            a_dx,
+                            a_dt,
+                            a_kappa);
     }
 
     // Add the photoionization products
@@ -5420,7 +5521,7 @@ CdrPlasmaJSON::computeCdrDriftVelocities(Vector<RealVect>& a_velocities,
   for (int i = 0; i < a_cdrDensities.size(); i++) {
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
-    const bool isEnergySolver = m_cdrIsEnergySolver.at(i);
+    const bool isEnergySolver = m_cdrIsEnergySolver[i];
 
     if (!isEnergySolver) {
       if (Z > 0) {
@@ -5623,7 +5724,7 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(Vector<Real>& a_fluxes,
     const int energyIndex    = m.second;
 
     const Real T   = cdrTemperatures[transportIndex];
-    const Real vth = sqrt((Units::kb * T) / (m_cdrMasses.at(transportIndex)));
+    const Real vth = sqrt((Units::kb * T) / (m_cdrMasses[transportIndex]));
 
     fluxes[energyIndex] += (2. / 3.) * vth * a_cdrDensities[energyIndex];
   }
@@ -5775,7 +5876,7 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(Vector<Real>& a_fluxes,
     const int energyIndex    = m.second;
 
     const Real T   = cdrTemperatures[transportIndex];
-    const Real vth = sqrt((Units::kb * T) / (m_cdrMasses.at(transportIndex)));
+    const Real vth = sqrt((Units::kb * T) / (m_cdrMasses[transportIndex]));
 
     fluxes[energyIndex] += (2. / 3.) * vth * a_cdrDensities[energyIndex];
   }
@@ -5963,6 +6064,7 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
 void
 CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
                                   std::vector<Real>&           a_photonProduction,
+                                  const std::vector<Real>&     a_rateCoefficients,
                                   const std::vector<RealVect>& a_cdrGradients,
                                   const RealVect&              a_E,
                                   const RealVect&              a_pos,
@@ -5983,6 +6085,7 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
     case ReactionIntegrator::ExplicitEuler: {
       this->integrateReactionsExplicitEuler(a_cdrDensities,
                                             a_photonProduction,
+                                            a_rateCoefficients,
                                             a_cdrGradients,
                                             a_E,
                                             a_pos,
@@ -5996,6 +6099,7 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
     case ReactionIntegrator::ExplicitTrapezoidal: {
       this->integrateReactionsExplicitRK2(a_cdrDensities,
                                           a_photonProduction,
+                                          a_rateCoefficients,
                                           a_cdrGradients,
                                           a_E,
                                           a_pos,
@@ -6010,6 +6114,7 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
     case ReactionIntegrator::ExplicitMidpoint: {
       this->integrateReactionsExplicitRK2(a_cdrDensities,
                                           a_photonProduction,
+                                          a_rateCoefficients,
                                           a_cdrGradients,
                                           a_E,
                                           a_pos,
@@ -6024,6 +6129,7 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
     case ReactionIntegrator::ExplicitRK4: {
       this->integrateReactionsExplicitRK4(a_cdrDensities,
                                           a_photonProduction,
+                                          a_rateCoefficients,
                                           a_cdrGradients,
                                           a_E,
                                           a_pos,
@@ -6044,6 +6150,7 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
 void
 CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
                                std::vector<Real>&           a_rteSources,
+                               const std::vector<Real>&     a_rateCoefficients,
                                const std::vector<Real>&     a_cdrDensities,
                                const std::vector<RealVect>& a_cdrGradients,
                                const RealVect&              a_E,
@@ -6108,6 +6215,7 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
 
     // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
     const Real k = this->computePlasmaReactionRate(i,
+                                                   a_rateCoefficients,
                                                    a_cdrDensities,
                                                    cdrMobilities,
                                                    cdrDiffusionCoefficients,
@@ -6211,6 +6319,7 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
 void
 CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cdrDensities,
                                                std::vector<Real>&           a_photonProduction,
+                                               const std::vector<Real>&     a_rateCoefficients,
                                                const std::vector<RealVect>& a_cdrGradients,
                                                const RealVect&              a_E,
                                                const RealVect&              a_pos,
@@ -6226,7 +6335,16 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
   cdrSources.resize(m_numCdrSpecies);
   rteSources.resize(m_numRtSpecies);
 
-  this->fillSourceTerms(cdrSources, rteSources, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrSources,
+                        rteSources,
+                        a_rateCoefficients,
+                        a_cdrDensities,
+                        a_cdrGradients,
+                        a_E,
+                        a_pos,
+                        a_dx,
+                        a_time,
+                        a_kappa);
 
   // Advance states.
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -6241,6 +6359,7 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
 void
 CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrDensities,
                                              std::vector<Real>&           a_photonProduction,
+                                             const std::vector<Real>&     a_rateCoefficients,
                                              const std::vector<RealVect>& a_cdrGradients,
                                              const RealVect&              a_E,
                                              const RealVect&              a_pos,
@@ -6269,13 +6388,22 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
   rteK2.resize(m_numRtSpecies);
 
   // Compute k1 coefficient and fill intermediate states.
-  this->fillSourceTerms(cdrK1, rteK1, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK1,
+                        rteK1,
+                        a_rateCoefficients,
+                        a_cdrDensities,
+                        a_cdrGradients,
+                        a_E,
+                        a_pos,
+                        a_dx,
+                        a_time,
+                        a_kappa);
   for (int i = 0; i < m_numCdrSpecies; i++) {
     cdrY1[i] = a_cdrDensities[i] + a_tableuAlpha * a_dt * cdrK1[i];
   }
 
   // Compute k2 coefficient and advance to final state.
-  this->fillSourceTerms(cdrK2, rteK2, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK2, rteK2, a_rateCoefficients, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
     a_cdrDensities[i] = a_cdrDensities[i] + a_dt * (c1 * cdrK1[i] + c2 * cdrK2[i]);
@@ -6289,6 +6417,7 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
 void
 CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrDensities,
                                              std::vector<Real>&           a_photonProduction,
+                                             const std::vector<Real>&     a_rateCoefficients,
                                              const std::vector<RealVect>& a_cdrGradients,
                                              const RealVect&              a_E,
                                              const RealVect&              a_pos,
@@ -6333,25 +6462,34 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrD
   rteK4.resize(m_numRtSpecies);
 
   // Compute k1-coefficients and intermediate states
-  this->fillSourceTerms(cdrK1, rteK1, a_cdrDensities, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK1,
+                        rteK1,
+                        a_rateCoefficients,
+                        a_cdrDensities,
+                        a_cdrGradients,
+                        a_E,
+                        a_pos,
+                        a_dx,
+                        a_time,
+                        a_kappa);
   for (int i = 0; i < m_numCdrSpecies; i++) {
     cdrY1[i] = a_cdrDensities[i] + 0.5 * a_dt * cdrK1[i];
   }
 
   // Compute k2-coefficients and intermediate states
-  this->fillSourceTerms(cdrK2, rteK2, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK2, rteK2, a_rateCoefficients, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
   for (int i = 0; i < m_numCdrSpecies; i++) {
     cdrY1[i] = a_cdrDensities[i] + 0.5 * a_dt * cdrK2[i];
   }
 
   // Compute k3-coefficients and intermediate states
-  this->fillSourceTerms(cdrK3, rteK3, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK3, rteK3, a_rateCoefficients, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
   for (int i = 0; i < m_numCdrSpecies; i++) {
     cdrY1[i] = a_cdrDensities[i] + a_dt * cdrK3[i];
   }
 
   // Compute k4-coefficients and final states.
-  this->fillSourceTerms(cdrK4, rteK4, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
+  this->fillSourceTerms(cdrK4, rteK4, a_rateCoefficients, cdrY1, a_cdrGradients, a_E, a_pos, a_dx, a_time, a_kappa);
   for (int i = 0; i < m_numCdrSpecies; i++) {
     a_cdrDensities[i] = a_cdrDensities[i] + a_dt * (cdrK1[i] + 2.0 * cdrK2[i] + 2.0 * cdrK3[i] + cdrK4[i]) / 6.0;
   }
