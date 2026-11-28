@@ -79,12 +79,15 @@ LookupTable1D<T, N, I>::swap(const size_t a_columnOne, const size_t a_columnTwo)
     r[a_columnTwo] = tmp;
   }
 
+  // If the independent variable was one of the swapped columns, it now lives in the other one.
   if (m_isGood) {
-    if (a_columnOne == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) = a_columnOne;
+    size_t& indVar = std::get<1>(m_grid);
+
+    if (a_columnOne == indVar) {
+      indVar = a_columnTwo;
     }
-    else if (a_columnTwo == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) = a_columnTwo;
+    else if (a_columnTwo == indVar) {
+      indVar = a_columnOne;
     }
   }
 }
@@ -102,8 +105,15 @@ LookupTable1D<T, N, I>::scale(const T& a_scale) noexcept
     r[K] *= a_scale;
   }
 
-  if (m_isGood && K == std::get<2>(m_grid)) {
-    std::get<4>(m_grid) *= a_scale;
+  // Scaling the independent variable scales the grid range. Uniform spacing scales with it; exponential spacing is
+  // a spacing in log10(x) and does not change.
+  if (m_isGood && K == std::get<1>(m_grid)) {
+    std::get<2>(m_grid) *= a_scale;
+    std::get<3>(m_grid) *= a_scale;
+
+    if (std::get<0>(m_grid) == LookupTable::Spacing::Uniform) {
+      std::get<4>(m_grid) *= a_scale;
+    }
   }
 }
 
