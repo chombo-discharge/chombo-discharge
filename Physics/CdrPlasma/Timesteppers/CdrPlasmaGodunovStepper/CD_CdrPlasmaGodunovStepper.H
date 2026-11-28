@@ -36,8 +36,8 @@ namespace CdrPlasma {
  * stabilizing the dielectric relaxation time constraint.
  *
  * Multiple advection solvers (Euler, RK2, MUSCL) and diffusion treatments (Explicit, Implicit, Automatic)
- * are configurable at runtime. Transient scratch storage is managed via inner classes CdrStorage,
- * FieldStorage, RtStorage, and SigmaStorage.
+ * are configurable at runtime. Per-step storage is fetched from the scratch pool through the inner classes
+ * CdrStorage, FieldStorage, and RtStorage.
  */
 class CdrPlasmaGodunovStepper : public CdrPlasmaStepper
 {
@@ -46,7 +46,6 @@ public:
   class CdrStorage;
   class FieldStorage;
   class RtStorage;
-  class SigmaStorage;
 
   /**
    * @brief Disallowed constructor -- use strong construction
@@ -186,26 +185,6 @@ protected:
   std::unique_ptr<Timer> m_timer;
 
   /**
-   * @brief Scratch storage for the CDR solvers
-   */
-  Vector<RefCountedPtr<CdrStorage>> m_cdrScratch;
-
-  /**
-   * @brief Scratch storage for the RTE solvers
-   */
-  Vector<RefCountedPtr<RtStorage>> m_rteScratch;
-
-  /**
-   * @brief Scratch storage for the field solver
-   */
-  RefCountedPtr<FieldStorage> m_fieldScratch;
-
-  /**
-   * @brief Scratch storage for the surface charge solver
-   */
-  RefCountedPtr<SigmaStorage> m_sigmaScratch;
-
-  /**
    * @brief Use for holding the "space charge" when doing semi-implicit solves.
    * @details This is different from the actual space charge because it also includes a diffusive contribution
    */
@@ -295,22 +274,6 @@ protected:
   std::vector<bool> m_useImplicitDiffusion;
 
   /**
-   * @brief Function for getting the transient storage associated with a particular CDR solver
-   * @param[in] a_solverIt Solver iterator
-   * @return This returns the entry in m_cdrScratch corresponding to the solver.
-   */
-  RefCountedPtr<CdrStorage>&
-  getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt);
-
-  /**
-   * @brief Function for getting the transient storage associated with a particular RTE solver
-   * @param[in] a_solverIt Solver iterator
-   * @return This returns the entry in m_rteScratch corresponding to the solver.
-   */
-  RefCountedPtr<RtStorage>&
-  getRtStorage(const RtIterator<RtSolver>& a_solverIt);
-
-  /**
    * @brief For regridding internal storage. Does nothing.
    * @param[in] a_lmin           The coarsest level that changed.
    * @param[in] a_oldFinestLevel The finest level before the regrid.
@@ -327,72 +290,73 @@ protected:
   allocateInternals() override;
 
   /**
-   * @brief Allocate internal storage.
-   * @details Set up some scratch storage needed in the time advancement algorithms.
-   */
-  void
-  allocateScratch();
-
-  /**
    * @brief Deallocate transient memory
    */
   void
   deallocateInternals() override;
 
   /**
-   * @brief Allocate internal storage.
-   * @details Set up some scratch storage needed in the algorithms
-   */
-  void
-  deallocateScratch();
-
-  /**
    * @brief Compute electric field into scratch storage.
-   * @details This computes the electric field into the scratch storages in m_fieldScratch
+   * @details This computes the electric field into the per-step field storage.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeElectricFieldIntoScratch();
+  computeElectricFieldIntoScratch(const FieldStorage& a_fieldStorage);
 
   /**
    * @brief Compute gradients of the CDR densities into scratch storage
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
    */
   void
-  computeCdrGradients();
+  computeCdrGradients(const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage);
 
   /**
    * @brief Extrapolate cell-centered states with the source term
    * @details This will compute cell-centered states (in the scratch storage) as n = n(t) + 0.5*a_dt * S(t)
    * @param[in] a_dt Time step size.
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
    */
   void
-  extrapolateWithSourceTerm(Real a_dt);
+  extrapolateWithSourceTerm(Real a_dt, const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage);
 
   /**
    * @brief Extrapolate the cell-centered states to the EB.
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
    */
   void
-  extrapolateCdrToEB();
+  extrapolateCdrToEB(const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage);
 
   /**
    * @brief Compute the CDR boundary condition fluxes on the EBs.
    * @details Prior to calling this routine, one must extrapolated the CDR states to the EB (calling extrapolateCdrToEB)
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_rteStorage   Per-step storage of the RTE species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeCdrFluxesEB();
+  computeCdrFluxesEB(const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                     const Vector<RefCountedPtr<RtStorage>>&  a_rteStorage,
+                     const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Extrapolate the CDR cell-centered densities to domain edges/face
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
    */
   void
-  extrapolateCdrToDomain();
+  extrapolateCdrToDomain(const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage);
 
   /**
    * @brief Compute the CDR boundary condition fluxes on the domain faces.
    * @details Prior to calling this routine, one must extrapolated the CDR states to the domain faces (calling
    * extrapolateCdrToDomain)
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_rteStorage   Per-step storage of the RTE species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeCdrDomainFluxes();
+  computeCdrDomainFluxes(const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                         const Vector<RefCountedPtr<RtStorage>>&  a_rteStorage,
+                         const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Compute the surface flux for the surface charge solver.
@@ -403,25 +367,43 @@ protected:
   /**
    * @brief Advance the transport problem.
    * @param[in] a_dt Time step.
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_rteStorage   Per-step storage of the RTE species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    * @note This will switch between transport algorithms and call the other methods.
    */
   void
-  advanceTransport(Real a_dt);
+  advanceTransport(Real                                     a_dt,
+                   const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                   const Vector<RefCountedPtr<RtStorage>>&  a_rteStorage,
+                   const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Advance the transport problem using the explicit or explicit-implicit Euler rule
    * @param[in] a_dt Time step.
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_rteStorage   Per-step storage of the RTE species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  advanceTransportExplicitField(Real a_dt);
+  advanceTransportExplicitField(Real                                     a_dt,
+                                const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                                const Vector<RefCountedPtr<RtStorage>>&  a_rteStorage,
+                                const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Advance the transport problem using a semi-implicit formulation for the electric field.
    * @details Under the hood, this is still an Euler solve.
    * @param[in] a_dt Time step.
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_rteStorage   Per-step storage of the RTE species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  advanceTransportSemiImplicit(Real a_dt);
+  advanceTransportSemiImplicit(Real                                     a_dt,
+                               const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                               const Vector<RefCountedPtr<RtStorage>>&  a_rteStorage,
+                               const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Advance the reactive problem over a time step dt.
@@ -460,24 +442,30 @@ protected:
    * @brief Compute CDR drift velocities
    * @details This is just like the parent method, except that we use the electric field stored in the scratch storage.
    * @param[in] a_time Time step
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeCdrDriftVelocities(Real a_time);
+  computeCdrDriftVelocities(Real a_time, const FieldStorage& a_fieldStorage);
 
   /**
    * @brief Compute CDR diffusion coefficients
    * @details This is just like the parent method, except that we use the electric field stored in the scratch storage.
    * @param[in] a_time Time step
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeCdrDiffusionCoefficients(Real a_time);
+  computeCdrDiffusionCoefficients(Real a_time, const FieldStorage& a_fieldStorage);
 
   /**
    * @brief Compute source terms for the CDR and RTE equations
    * @param[in] a_dt Time step
+   * @param[in] a_cdrStorage   Per-step storage of the CDR species.
+   * @param[in] a_fieldStorage Per-step storage of the electric field.
    */
   void
-  computeSourceTerms(Real a_dt);
+  computeSourceTerms(Real                                     a_dt,
+                     const Vector<RefCountedPtr<CdrStorage>>& a_cdrStorage,
+                     const FieldStorage&                      a_fieldStorage);
 
   /**
    * @brief Parse centering for the advective integrator.

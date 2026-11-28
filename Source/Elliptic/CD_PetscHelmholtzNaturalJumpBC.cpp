@@ -42,11 +42,6 @@ PetscHelmholtzNaturalJumpBC::getInterfaceFluxStencil(Real&            a_dataWeig
                                                      const Real       a_bCoefPhase0,
                                                      const Real       a_bCoefPhase1) const noexcept
 {
-  CH_TIME("PetscHelmholtzNaturalJumpBC::getInterfaceFluxStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzNaturalJumpBC::getInterfaceFluxStencil" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_phase == 0 || a_phase == 1);
 
@@ -95,11 +90,6 @@ PetscHelmholtzNaturalJumpBC::getJumpData(const int          a_level,
                                          const IntVect&     a_iv,
                                          const EBAMRIVData& a_sigma) const noexcept
 {
-  CH_TIME("PetscHelmholtzNaturalJumpBC::getJumpData");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzNaturalJumpBC::getJumpData" << endl;
-  }
-
   // The surface charge density lives on the cut cells of the first phase.
   return (*a_sigma[a_level])[a_din](VolIndex(a_iv, 0), 0);
 }
