@@ -174,7 +174,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
   m_ebBc->define(m_dataLocation, m_eblg, m_validCells, m_probLo, m_dx, ghostCF);
 
-  // Define stencils and compute relaxation terms.
+  // Define the geometric cut-face stencils once, and then the stencils and relaxation terms.
+  this->defineCutFaceStencils();
   this->defineStencils();
 }
 
@@ -329,6 +330,90 @@ LayoutData<VoFIterator>&
 EBHelmholtzOp::getVofIterIrreg() const noexcept
 {
   return m_vofIterIrreg;
+}
+
+void
+EBHelmholtzOp::defineCutFaceStencils()
+{
+  CH_TIME("EBHelmholtzOp::defineCutFaceStencils");
+
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    m_interpStencil[dir].define(dbl);
+    m_centroidGradStencil[dir].define(dbl);
+  }
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBISBox& ebisbox = ebisl[din];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+    // The faces that connect one or more irregular vofs and that defineStencils visits are faces of the cut cells in
+    // the grid box or its first layer of ghost cells.
+    const Box        cellBox  = dbl[din];
+    const Box        grownBox = grow(cellBox, 1) & m_eblg.getDomain();
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownBox);
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (m_dataLocation == Location::Cell::Center) {
+        m_interpStencil[dir][din].define(irregIVS, ebgraph, dir, m_nComp);
+      }
+      else {
+        m_centroidGradStencil[dir][din].define(irregIVS, ebgraph, dir, m_nComp);
+      }
+
+      FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+
+      // defineStencils only visits faces with at least one vof in the grid box.
+      auto kernel = [&](const FaceIndex& face) -> void {
+        const bool inBox = cellBox.contains(face.gridIndex(Side::Lo)) || cellBox.contains(face.gridIndex(Side::Hi));
+
+        if (!face.isBoundary() && inBox) {
+          if (m_dataLocation == Location::Cell::Center) {
+            m_interpStencil[dir][din](
+              face,
+              m_comp) = EBArith::getInterpStencil(face, IntVectSet(), ebisbox, m_eblg.getDomain());
+          }
+          else {
+            constexpr int stencilWeight = 2;
+            constexpr int stencilRadius = 2;
+            constexpr int stencilOrder  = 2;
+
+            const VoFStencil gradSten = LeastSquares::getGradSten(face,
+                                                                  LeastSquares::FaceLocation::Centroid,
+                                                                  LeastSquares::CellLocation::Centroid,
+                                                                  ebisbox,
+                                                                  m_dx,
+                                                                  stencilRadius,
+                                                                  stencilWeight,
+                                                                  stencilOrder,
+                                                                  IntVectSet());
+
+            VoFStencil& projectedSten = m_centroidGradStencil[dir][din](face, m_comp);
+
+            projectedSten.clear();
+
+            if (gradSten.size() > 0) {
+              projectedSten = LeastSquares::projectGradSten(gradSten, BASISREALV(dir));
+            }
+            else {
+              MayDay::Warning("EBHelmholtz::defineCutFaceStencils -- could not find centroid stencil. Maybe your "
+                              "multigrid runs too deep?");
+            }
+          }
+        }
+      };
+
+      BoxLoops::loop(faceIt, kernel);
+    }
+  }
 }
 
 void
@@ -2539,12 +2624,12 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
     }
     else {
 
-      // Irregular face, but using cell-centered data. Get face-centered stencils and interpolate them to centroids.
+      const int dir = a_face.direction();
+
+      // Irregular face, but using cell-centered data. Interpolate the face-centered stencils to the centroid, using the
+      // interpolation stencil from defineCutFaceStencils.
       if (m_dataLocation == Location::Cell::Center) {
-        const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face,
-                                                                           IntVectSet(),
-                                                                           ebisbox,
-                                                                           m_eblg.getDomain());
+        const FaceStencil& interpolationStencil = m_interpStencil[dir][a_dit](a_face, m_comp);
 
         for (int i = 0; i < interpolationStencil.size(); i++) {
           const FaceIndex& iface   = interpolationStencil.face(i);
@@ -2559,31 +2644,11 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
         }
       }
 
-      // Irregular face, but with centroid-centered data. In this case we reconstruct the gradient using a least squares
-      // reconstruction of the solution.
+      // Irregular face, but with centroid-centered data. Use the least squares gradient from defineCutFaceStencils,
+      // which is empty if no stencil could be found.
       if (m_dataLocation == Location::Cell::Centroid) {
-        constexpr int stencilWeight = 2;
-        constexpr int stencilRadius = 2;
-        constexpr int stencilOrder  = 2;
-
-        const VoFStencil gradSten = LeastSquares::getGradSten(a_face,
-                                                              LeastSquares::FaceLocation::Centroid,
-                                                              LeastSquares::CellLocation::Centroid,
-                                                              ebisbox,
-                                                              m_dx,
-                                                              stencilRadius,
-                                                              stencilWeight,
-                                                              stencilOrder,
-                                                              IntVectSet());
-
-        if (gradSten.size() > 0) {
-          fluxStencil = LeastSquares::projectGradSten(gradSten, BASISREALV(a_face.direction()));
-          fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, m_comp);
-        }
-        else {
-          MayDay::Warning(
-            "EBHelmholtz::getFaceCentroidFluxStencil -- could not find centroid stencil. Maybe your multigrid runs too deep?");
-        }
+        fluxStencil = m_centroidGradStencil[dir][a_dit](a_face, m_comp);
+        fluxStencil *= (*m_Bcoef)[a_dit][dir](a_face, m_comp);
       }
     }
   }
