@@ -1673,8 +1673,6 @@ PolyhedralEBGraph::markSurfaces(LevelData<BaseFab<signed char>>& a_mask) const
 void
 PolyhedralEBGraph::promoteToCut(const DataIndex& a_dit, const IntVect& a_cell)
 {
-  CH_TIME("PolyhedralEBGraph::promoteToCut");
-
   BaseFab<signed char>&       states  = m_cellStates[a_dit];
   BaseFab<signed char>&       faces   = m_faceStates[a_dit];
   const BaseFab<signed char>& refined = m_refined[a_dit];

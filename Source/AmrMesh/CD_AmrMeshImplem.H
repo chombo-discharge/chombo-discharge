@@ -1385,9 +1385,10 @@ AmrMesh::fetchScratch(const std::string&       a_realm,
     pout() << "AmrMesh::fetchScratch(string, phase::which_phase, int, int)" << endl;
   }
 
-  static_assert(std::is_same<T, EBAMRCellData>::value || std::is_same<T, EBAMRFluxData>::value ||
-                  std::is_same<T, EBAMRIVData>::value,
-                "AmrMesh::fetchScratch -- this overload takes EBAMRCellData, EBAMRFluxData or EBAMRIVData");
+  static_assert(
+    std::is_same<T, EBAMRCellData>::value || std::is_same<T, EBAMRFluxData>::value ||
+      std::is_same<T, EBAMRIVData>::value || std::is_same<T, EBAMRIFData>::value,
+    "AmrMesh::fetchScratch -- this overload takes EBAMRCellData, EBAMRFluxData, EBAMRIVData or EBAMRIFData");
 
   auto build = [this, &a_realm, a_phase, a_nComp, a_ghost]() -> std::unique_ptr<T> {
     std::unique_ptr<T> data(new T());

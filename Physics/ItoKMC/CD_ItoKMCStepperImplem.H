@@ -1097,14 +1097,17 @@ ItoKMCStepper<I, C, R, F>::computeSolidTransportCoefficients() noexcept
         const Interval interv   = Interval(0, 0);
         const Average  average  = Average::Arithmetic;
 
-        DataOps::averageCellToFace(faceCenteredDiffusionCoefficient,
-                                   cellCenteredDiffusionCoefficient,
-                                   m_amr->getDomains(),
-                                   tanGhost,
-                                   interv,
-                                   interv,
-                                   average,
-                                   m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, phase::solid));
+        DataOps::averageCellToFace(
+          faceCenteredDiffusionCoefficient,
+          cellCenteredDiffusionCoefficient,
+          m_amr->getDomains(),
+          tanGhost,
+          interv,
+          interv,
+          average,
+          m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, phase::solid),
+          m_amr->getDomainFaceIteratorWithTangentialGhosts(m_fluidRealm, phase::solid, Side::Lo),
+          m_amr->getDomainFaceIteratorWithTangentialGhosts(m_fluidRealm, phase::solid, Side::Hi));
       }
     }
   }
@@ -4938,14 +4941,17 @@ ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace(
       const Interval interv   = Interval(0, 0);
       const Average  average  = Average::Arithmetic;
 
-      DataOps::averageCellToFace(faceCenteredDiffusionCoefficient,
-                                 cellCenteredDiffusionCoefficient,
-                                 m_amr->getDomains(),
-                                 tanGhost,
-                                 interv,
-                                 interv,
-                                 average,
-                                 m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, m_cdr->getPhase()));
+      DataOps::averageCellToFace(
+        faceCenteredDiffusionCoefficient,
+        cellCenteredDiffusionCoefficient,
+        m_amr->getDomains(),
+        tanGhost,
+        interv,
+        interv,
+        average,
+        m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, m_cdr->getPhase()),
+        m_amr->getDomainFaceIteratorWithTangentialGhosts(m_fluidRealm, m_cdr->getPhase(), Side::Lo),
+        m_amr->getDomainFaceIteratorWithTangentialGhosts(m_fluidRealm, m_cdr->getPhase(), Side::Hi));
     }
   }
 }

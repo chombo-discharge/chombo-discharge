@@ -1652,11 +1652,13 @@ CdrPlasmaImExSdcStepper::computeCdrDomainStates()
   CdrPlasmaImExSdcStepper::extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
-  EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIFData> grad = m_amr->fetchScratch<EBAMRIFData>(m_realm,
+                                                               m_cdr->getPhase(),
+                                                               SpaceDim,
+                                                               m_amr->getNumberOfGhostCells());
   for (int i = 0; i < cdr_states.size(); i++) {
     CdrPlasmaImExSdcStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
-    CdrPlasmaImExSdcStepper::projectDomain(*domain_gradients[i], grad);
+    CdrPlasmaImExSdcStepper::projectDomain(*domain_gradients[i], grad, m_cdr->getPhase());
   }
 }
 
@@ -1684,11 +1686,13 @@ CdrPlasmaImExSdcStepper::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_
   this->extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), a_phis);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
-  EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIFData> grad = m_amr->fetchScratch<EBAMRIFData>(m_realm,
+                                                               m_cdr->getPhase(),
+                                                               SpaceDim,
+                                                               m_amr->getNumberOfGhostCells());
   for (int i = 0; i < a_phis.size(); i++) {
     this->extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
-    this->projectDomain(*domain_gradients[i], grad);
+    this->projectDomain(*domain_gradients[i], grad, m_cdr->getPhase());
   }
 }
 

@@ -24,8 +24,6 @@ Real
 MFHelmholtzElectrostaticEBBC::getElectrodePotential(
   const RealVect& a_pos) const // NOLINT(readability-convert-member-functions-to-static)
 {
-  CH_TIME("MFHelmholtzElectrostaticEBBC::getElectrodePotential(RealVect)");
-
   // Find closest electrode
   int  closestElectrode = 0;
   Real minDist          = std::numeric_limits<Real>::infinity();

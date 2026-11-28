@@ -198,11 +198,6 @@ PetscHelmholtzEBStencils::getNormalDerivativeStencil(Real&            a_boundary
                                                      const DataIndex& a_din,
                                                      const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzEBStencils::getNormalDerivativeStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzEBStencils::getNormalDerivativeStencil" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_phase >= 0 && a_phase < m_petscGrid->getNumPhases());
   CH_assert(a_level >= 0 && a_level < m_derivStencils[a_phase].size());
@@ -219,11 +214,6 @@ PetscHelmholtzEBStencils::computeNormalDerivativeStencil(Real&            a_boun
                                                          const DataIndex& a_din,
                                                          const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzEBStencils::computeNormalDerivativeStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzEBStencils::computeNormalDerivativeStencil" << endl;
-  }
-
   const EBISBox& ebisbox = m_petscGrid->getMFLevelGrids()[a_level]->getEBLevelGrid(a_phase).getEBISL()[a_din];
 
   a_boundaryWeight = 0.0;
@@ -269,11 +259,6 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
                                                  const VofUtils::Neighborhood a_neighborhood,
                                                  const int                    a_order) const noexcept
 {
-  CH_TIME("PetscHelmholtzEBStencils::getLeastSquaresStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzEBStencils::getLeastSquaresStencil" << endl;
-  }
-
   constexpr bool addStartVof = false;
   constexpr Real deltaThresh = 0.5;
 
@@ -465,11 +450,6 @@ PetscHelmholtzEBStencils::getBoundaryPosition(const int        a_phase,
                                               const DataIndex& a_din,
                                               const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzEBStencils::getBoundaryPosition");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzEBStencils::getBoundaryPosition" << endl;
-  }
-
   CH_assert(m_isDefined);
 
   const EBISBox& ebisbox = m_petscGrid->getMFLevelGrids()[a_level]->getEBLevelGrid(a_phase).getEBISL()[a_din];

@@ -59,6 +59,7 @@ makefiles+=Make.defs.local
 #   HDFMPILIBFLAGS : link options (-L* -l*) for parallel HDF5 library files
 #  USE_MF          : if TRUE, build Chombo MultiFluid code (requires USE_EB=TRUE)
 #  USE_MT          : if TRUE, enable Chombo memory tracking
+#  USE_TIMER       : if TRUE, compile in the Chombo CH_TIME timers (output is enabled with CH_TIMER=1)
 #  USE_SETVAL      : (TRUE,FALSE) use setVal to initialize all BaseFab<Real>
 
 # These variables are system-dependent but usually dont have to be changed:
@@ -136,6 +137,7 @@ USE_EB         = TRUE
 #HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
 USE_MF         = TRUE
 #USE_MT        =
+USE_TIMER      = FALSE
 #USE_SETVAL    =
 #CH_AR         =
 #CH_CPP        =

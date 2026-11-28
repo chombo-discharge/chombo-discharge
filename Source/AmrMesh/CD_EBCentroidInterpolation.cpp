@@ -62,6 +62,14 @@ EBCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, con
   m_vofIterator.define(dbl);
   m_interpStencils.define(dbl);
 
+  // Stencil-based interpolations use one stencil per cut cell. The slope-limited ones store the cell's neighbors in
+  // 2*SpaceDim components instead.
+  const bool slopeLimited = (m_interpolationType == Type::MinMod) ||
+                            (m_interpolationType == Type::MonotonizedCentral) ||
+                            (m_interpolationType == Type::Superbee);
+
+  const int numStencilComps = slopeLimited ? 2 * SpaceDim : 1;
+
   const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -77,7 +85,7 @@ EBCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, con
     BaseIVFAB<VoFStencil>& stencils = m_interpStencils[din];
 
     vofit.define(irregIVS, ebGraph);
-    stencils.define(irregIVS, ebGraph, 1);
+    stencils.define(irregIVS, ebGraph, numStencilComps);
 
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex& vof     = vofit();
@@ -86,6 +94,31 @@ EBCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, con
       auto defaultStencil = [&]() -> void {
         stencil.clear();
         stencil.add(vof, 1.0);
+      };
+
+      // For the slope-limited interpolations, components 2*dir and 2*dir + 1 hold the neighbor across the low and high
+      // face in direction dir, if there is exactly one such face and the cell is not on the domain boundary. The
+      // neighbors are found once here, so that interpolate() does not query the graph for faces.
+      auto slopeNeighbors = [&]() -> void {
+        const IntVect iv = vof.gridIndex();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const Side::LoHiSide side     = sit();
+            const bool           onDomain = (side == Side::Lo) ? (iv[dir] == domain.domainBox().smallEnd(dir))
+                                                               : (iv[dir] == domain.domainBox().bigEnd(dir));
+
+            VoFStencil& neighbor = stencils(vof, 2 * dir + ((side == Side::Lo) ? 0 : 1));
+
+            neighbor.clear();
+
+            if (ebisBox.numFaces(vof, dir, side) == 1 && !onDomain) {
+              const Vector<FaceIndex> faces = ebisBox.getFaces(vof, dir, side);
+
+              neighbor.add(faces[0].getVoF(side), 1.0);
+            }
+          }
+        }
       };
 
       switch (m_interpolationType) {
@@ -131,17 +164,17 @@ EBCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, con
         break;
       }
       case Type::MinMod: {
-        stencil.clear(); // No need for a stencil.
+        slopeNeighbors();
 
         break;
       }
       case Type::MonotonizedCentral: {
-        stencil.clear(); // No need for a stencil.
+        slopeNeighbors();
 
         break;
       }
       case Type::Superbee: {
-        stencil.clear(); // No need for a stencil.
+        slopeNeighbors();
 
         break;
       }
@@ -163,8 +196,6 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
                                           const EBISBox&       a_ebisBox,
                                           const ProblemDomain& a_domain) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getLinearStencil");
-
   const bool foundStencil = LinearStencil::getLinearInterpStencil(a_stencil,
                                                                   a_ebisBox.bndryCentroid(a_vof),
                                                                   a_vof,
@@ -180,8 +211,6 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil
                                                        const EBISBox&  a_ebisBox,
                                                        const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
-
   const int order = EBArith::getFirstOrderExtrapolationStencil(a_stencil,
                                                                a_ebisBox.bndryCentroid(a_vof) * m_dx,
                                                                m_dx * RealVect::Unit,
@@ -200,8 +229,6 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
                                                 const EBISBox&  a_ebisBox,
                                                 const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getLeastSquaresStencil");
-
   const int radius = 1;
   const int order  = 1;
   const int weight = 0;
@@ -228,8 +255,6 @@ EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
                                                    const EBISBox&  a_ebisBox,
                                                    const ProblemDomain& /*a_domain*/) const noexcept
 {
-  CH_TIME("EBCentroidInterpolation::getPiecewiseLinearStencil");
-
   a_stencil.clear();
   a_stencil.add(a_vof, 1.0);
 
@@ -307,10 +332,8 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
   CH_assert(a_cellData.isDefined());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
 
   const EBISBox&               ebisBox  = ebisl[a_din];
   const BaseIVFAB<VoFStencil>& stencils = m_interpStencils[a_din];
@@ -334,38 +357,27 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
 
     // Kernel used when interpolation is done with a slope limiter.
     auto slopeKernel = [&](const VolIndex& vof) -> void {
-      const IntVect iv = vof.gridIndex();
-
       a_centroidData(vof, comp) = a_cellData(vof, comp);
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         Real slope = 0.0;
 
-        const bool onLoSide = (iv[dir] == domainBox.smallEnd(dir));
-        const bool onHiSide = (iv[dir] == domainBox.bigEnd(dir));
+        // Neighbors across the low and high faces, found in define().
+        const VoFStencil& neighborLeft  = stencils(vof, 2 * dir);
+        const VoFStencil& neighborRight = stencils(vof, 2 * dir + 1);
 
-        const bool hasFacesLeft  = (ebisBox.numFaces(vof, dir, Side::Lo) == 1) && !onLoSide;
-        const bool hasFacesRight = (ebisBox.numFaces(vof, dir, Side::Hi) == 1) && !onHiSide;
-
-        Vector<FaceIndex> facesLeft;
-        Vector<FaceIndex> facesRight;
-
-        VolIndex vofLeft;
-        VolIndex vofRight;
+        const bool hasFacesLeft  = neighborLeft.size() > 0;
+        const bool hasFacesRight = neighborRight.size() > 0;
 
         Real dwl = 0.0;
         Real dwr = 0.0;
 
         // Compute left and right slope
         if (hasFacesLeft) {
-          facesLeft = ebisBox.getFaces(vof, dir, Side::Lo);
-          vofLeft   = facesLeft[0].getVoF(Side::Lo);
-          dwl       = a_cellData(vof, comp) - a_cellData(vofLeft, comp);
+          dwl = a_cellData(vof, comp) - a_cellData(neighborLeft.vof(0), comp);
         }
         if (hasFacesRight) {
-          facesRight = ebisBox.getFaces(vof, dir, Side::Hi);
-          vofRight   = facesRight[0].getVoF(Side::Hi);
-          dwr        = a_cellData(vofRight, comp) - a_cellData(vof, comp);
+          dwr = a_cellData(neighborRight.vof(0), comp) - a_cellData(vof, comp);
         }
 
         if (!hasFacesLeft && hasFacesRight) {
