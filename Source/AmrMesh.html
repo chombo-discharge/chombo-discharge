@@ -71,6 +71,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#multigrid-interpolation">Multigrid interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cut-cell-redistribution">Cut-cell redistribution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interpolation-near-the-eb">Interpolation near the EB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#temporaries">Temporaries</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
@@ -321,6 +322,28 @@ Currently, we support the following options:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">monotonized_central</span></code>, using a van Leer slope limiter.</p></li>
 </ol>
 <p>Typically, one can just leave this option at <code class="docutils literal notranslate"><span class="pre">minmod</span></code>.</p>
+</section>
+<section id="temporaries">
+<h2>Temporaries<a class="headerlink" href="#temporaries" title="Permalink to this heading"></a></h2>
+<p>Solvers and time steppers get their temporary mesh data from a pool of temporaries that <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> keeps for each realm, rather than allocating it on every call or keeping it as class members.
+<code class="docutils literal notranslate"><span class="pre">AmrMesh::fetchScratch</span></code> returns a <code class="docutils literal notranslate"><span class="pre">Scratch&lt;T&gt;</span></code> handle, which owns a temporary until the handle is destroyed and then returns it to the pool:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Scratch</span><span class="o">&lt;</span><span class="n">EBAMRCellData</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scratch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">fetchScratch</span><span class="o">&lt;</span><span class="n">EBAMRCellData</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getNumberOfGhostCells</span><span class="p">());</span>
+
+<span class="n">DataOps</span><span class="o">::</span><span class="n">setValue</span><span class="p">(</span><span class="n">scratch</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The handle converts to a reference to the data, so it can be passed to functions that take the data by reference.
+<code class="docutils literal notranslate"><span class="pre">fetchScratch</span></code> exists for <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code>, <code class="docutils literal notranslate"><span class="pre">EBAMRFluxData</span></code> and <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> (with a phase), and for <code class="docutils literal notranslate"><span class="pre">EBAMRFAB</span></code>, <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code>, <code class="docutils literal notranslate"><span class="pre">MFAMRFluxData</span></code> and <code class="docutils literal notranslate"><span class="pre">MFAMRIVData</span></code> (without one).
+<code class="docutils literal notranslate"><span class="pre">AmrMesh::fetchLevelScratch</span></code> returns a single level.</p>
+<p>The following rules apply:</p>
+<ul class="simple">
+<li><p>The data is uninitialized when it is fetched. A caller that reads a value before writing it, including ghost cells, sets it first.</p></li>
+<li><p>The data has exactly the number of components and ghost cells that were asked for.</p></li>
+<li><p>A handle is never stored in a class member. Data that must live longer than the function that fetches it is fetched by a caller that spans all of its uses, and passed down by reference.</p></li>
+<li><p>References and aliases taken from a handle must not outlive it. A shallow copy of the data that outlives its handle makes the pool abort when the handle is destroyed. Aliases made with <code class="docutils literal notranslate"><span class="pre">AmrMesh::alias</span></code>, <code class="docutils literal notranslate"><span class="pre">EBAMRData::slice</span></code> or <code class="docutils literal notranslate"><span class="pre">aliasLevelData</span></code> are not detected.</p></li>
+<li><p>The pool is emptied whenever the grids change, so a handle cannot be held across a regrid.</p></li>
+</ul>
+<p>In debug builds every fetched temporary is filled with NaN, which shows reads of values that were never written.</p>
 </section>
 </section>
 

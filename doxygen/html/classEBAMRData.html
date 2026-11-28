@@ -117,14 +117,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>exchange</b> () noexc
 <tr class="memitem:aa1dd364444444ec8b5361a9766b1e979" id="r_aa1dd364444444ec8b5361a9766b1e979"><td class="memItemLeft" align="right" valign="top"><a id="aa1dd364444444ec8b5361a9766b1e979" name="aa1dd364444444ec8b5361a9766b1e979"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept</td></tr>
 <tr class="memdesc:aa1dd364444444ec8b5361a9766b1e979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete all data. <br /></td></tr>
-<tr class="memitem:a15cbdc605f116b83f6defb8d943e97cd" id="r_a15cbdc605f116b83f6defb8d943e97cd"><td class="memItemLeft" align="right" valign="top"><a id="a15cbdc605f116b83f6defb8d943e97cd" name="a15cbdc605f116b83f6defb8d943e97cd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>reserve</b> () noexcept</td></tr>
-<tr class="memdesc:a15cbdc605f116b83f6defb8d943e97cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserve data. <br /></td></tr>
-<tr class="memitem:ade763fbedf99b6a1897ab18229f534ba" id="r_ade763fbedf99b6a1897ab18229f534ba"><td class="memItemLeft" align="right" valign="top"><a id="ade763fbedf99b6a1897ab18229f534ba" name="ade763fbedf99b6a1897ab18229f534ba"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> () noexcept</td></tr>
-<tr class="memdesc:ade763fbedf99b6a1897ab18229f534ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release data. <br /></td></tr>
-<tr class="memitem:aa1c35283d111e57c0208830819c56ba8" id="r_aa1c35283d111e57c0208830819c56ba8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1c35283d111e57c0208830819c56ba8">isReserved</a> () const noexcept</td></tr>
-<tr class="memdesc:aa1c35283d111e57c0208830819c56ba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if data is reserved.  <br /></td></tr>
 <tr class="memitem:a4cd751591c1b6c7df68fe6de16e0d998" id="r_a4cd751591c1b6c7df68fe6de16e0d998"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4cd751591c1b6c7df68fe6de16e0d998">getData</a> () noexcept</td></tr>
 <tr class="memdesc:a4cd751591c1b6c7df68fe6de16e0d998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns m_data.  <br /></td></tr>
 <tr class="memitem:a518e63efc37c46c5897ddb47e2ee62bf" id="r_a518e63efc37c46c5897ddb47e2ee62bf"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a518e63efc37c46c5897ddb47e2ee62bf">getData</a> () const noexcept</td></tr>
@@ -139,9 +131,6 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a79179654f3e46665092cef2a59885fe6" id="r_a79179654f3e46665092cef2a59885fe6"><td class="memItemLeft" align="right" valign="top"><a id="a79179654f3e46665092cef2a59885fe6" name="a79179654f3e46665092cef2a59885fe6"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
 <tr class="memdesc:a79179654f3e46665092cef2a59885fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifier for realm. <br /></td></tr>
-<tr class="memitem:a17dabd86e8fd96df61e26ccf2c2bbd6c" id="r_a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="memItemLeft" align="right" valign="top"><a id="a17dabd86e8fd96df61e26ccf2c2bbd6c" name="a17dabd86e8fd96df61e26ccf2c2bbd6c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_reserved</b></td></tr>
-<tr class="memdesc:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved or not. <br /></td></tr>
 <tr class="memitem:ae7331f5ac75760e7519b84b5b4a84560" id="r_ae7331f5ac75760e7519b84b5b4a84560"><td class="memItemLeft" align="right" valign="top"><a id="ae7331f5ac75760e7519b84b5b4a84560" name="ae7331f5ac75760e7519b84b5b4a84560"></a>
 Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_data</b></td></tr>
 <tr class="memdesc:ae7331f5ac75760e7519b84b5b4a84560"><td class="mdescLeft">&#160;</td><td class="mdescRight">Underlying data. <br /></td></tr>
@@ -274,36 +263,6 @@ template&lt;typename T&gt; </div>
 
 <p>Returns the string identifier for whatever realm this data is supposed to be allocated over. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> </dd></dl>
-
-</div>
-</div>
-<a id="aa1c35283d111e57c0208830819c56ba8" name="aa1c35283d111e57c0208830819c56ba8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1c35283d111e57c0208830819c56ba8">&#9670;&#160;</a></span>isReserved()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::isReserved </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Check if data is reserved. </p>
-<dl class="section return"><dt>Returns</dt><dd>True if reserved, false otherwise </dd></dl>
 
 </div>
 </div>

@@ -92,6 +92,16 @@ $(function() {
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__Realm_8H_source.html">CD_Realm.H</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for Realm:</div>
+<div class="dyncontent">
+<div class="center"><img src="classRealm__coll__graph.png" border="0" usemap="#aRealm_coll__map" loading="lazy" alt="Collaboration graph"/></div>
+<map name="aRealm_coll__map" id="aRealm_coll__map">
+<area shape="rect" title="Class for holding multifluid Realms, which are the Realms that we actually use." alt="" coords="22,106,86,134"/>
+<area shape="rect" href="classScratchPool.html" title="Pool of temporaries on one Realm, reused between the functions that need them." alt="" coords="5,5,103,33"/>
+<area shape="poly" title=" " alt="" coords="56,47,57,106,51,105,52,50"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -116,6 +126,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aed9086405be6381b7c82e4b0800614a3" id="r_aed9086405be6381b7c82e4b0800614a3"><td class="memItemLeft" align="right" valign="top"><a id="aed9086405be6381b7c82e4b0800614a3" name="aed9086405be6381b7c82e4b0800614a3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td></tr>
 <tr class="memdesc:aed9086405be6381b7c82e4b0800614a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations. <br /></td></tr>
+<tr class="memitem:aa2972b9b005f622430d7dc22b5a4da39" id="r_aa2972b9b005f622430d7dc22b5a4da39"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScratchPool.html">ScratchPool</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2972b9b005f622430d7dc22b5a4da39">getScratchPool</a> () noexcept</td></tr>
+<tr class="memdesc:aa2972b9b005f622430d7dc22b5a4da39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the pool of temporaries on this realm.  <br /></td></tr>
 <tr class="memitem:af7b956b920638c56071e9957e78090be" id="r_af7b956b920638c56071e9957e78090be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7b956b920638c56071e9957e78090be">regridBase</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:af7b956b920638c56071e9957e78090be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method for EBAMR base.  <br /></td></tr>
 <tr class="memitem:abb47b8d819b9929743c20232a10fe295" id="r_abb47b8d819b9929743c20232a10fe295"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abb47b8d819b9929743c20232a10fe295">regridOperators</a> (const int a_lmin)</td></tr>
@@ -389,6 +401,9 @@ std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c5
 <tr class="memitem:abda2384921c7476fa83efc7d12136967" id="r_abda2384921c7476fa83efc7d12136967"><td class="memItemLeft" align="right" valign="top"><a id="abda2384921c7476fa83efc7d12136967" name="abda2384921c7476fa83efc7d12136967"></a>
 std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_8H.html#ae636920c3f2cbd49ece2ef6ce7bb147e">AMRMask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_masks</b></td></tr>
 <tr class="memdesc:abda2384921c7476fa83efc7d12136967"><td class="mdescLeft">&#160;</td><td class="mdescRight">Masks. <br /></td></tr>
+<tr class="memitem:a79651e3375c9b37e43dd8f2e7f0a9b49" id="r_a79651e3375c9b37e43dd8f2e7f0a9b49"><td class="memItemLeft" align="right" valign="top"><a id="a79651e3375c9b37e43dd8f2e7f0a9b49" name="a79651e3375c9b37e43dd8f2e7f0a9b49"></a>
+<a class="el" href="classScratchPool.html">ScratchPool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchPool</b></td></tr>
+<tr class="memdesc:a79651e3375c9b37e43dd8f2e7f0a9b49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pool of temporaries on this realm, built on the current grids. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for holding multifluid Realms, which are the Realms that we actually use. </p>
@@ -2808,6 +2823,34 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Regular-cell mask </dd></dl>
+
+</div>
+</div>
+<a id="aa2972b9b005f622430d7dc22b5a4da39" name="aa2972b9b005f622430d7dc22b5a4da39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2972b9b005f622430d7dc22b5a4da39">&#9670;&#160;</a></span>getScratchPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScratchPool.html">ScratchPool</a> &amp; Realm::getScratchPool </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the pool of temporaries on this realm. </p>
+<p>The pool is emptied whenever the grids change (define, setGrids, preRegrid). </p><dl class="section return"><dt>Returns</dt><dd>The scratch pool </dd></dl>
 
 </div>
 </div>

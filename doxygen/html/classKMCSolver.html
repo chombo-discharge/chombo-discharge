@@ -231,13 +231,13 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_exitTol</b></td></t
 <tr class="memitem:a289d8b740404ac3f03b8f0a1bac5f1fb" id="r_a289d8b740404ac3f03b8f0a1bac5f1fb"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a289d8b740404ac3f03b8f0a1bac5f1fb">m_nu</a></td></tr>
 <tr class="memdesc:a289d8b740404ac3f03b8f0a1bac5f1fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of state changes for each reaction.  <br /></td></tr>
 <tr class="memitem:a728f4b627c7a72bb80f61dd52deb3727" id="r_a728f4b627c7a72bb80f61dd52deb3727"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a728f4b627c7a72bb80f61dd52deb3727">m_muScratch</a></td></tr>
-<tr class="memdesc:a728f4b627c7a72bb80f61dd52deb3727"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant expected state change, indexed by species.  <br /></td></tr>
+<tr class="memdesc:a728f4b627c7a72bb80f61dd52deb3727"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant expected state change, indexed by species.  <br /></td></tr>
 <tr class="memitem:a1488e34edac2a019e283428e9b8b2813" id="r_a1488e34edac2a019e283428e9b8b2813"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1488e34edac2a019e283428e9b8b2813">m_sigmaScratch</a></td></tr>
-<tr class="memdesc:a1488e34edac2a019e283428e9b8b2813"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant propensity variance, indexed by species.  <br /></td></tr>
+<tr class="memdesc:a1488e34edac2a019e283428e9b8b2813"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant propensity variance, indexed by species.  <br /></td></tr>
 <tr class="memitem:aef118d7b90e77ea304ed1f0c0f3f3fe4" id="r_aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef118d7b90e77ea304ed1f0c0f3f3fe4">m_lossScratch</a></td></tr>
-<tr class="memdesc:aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant expected consumption, indexed by species.  <br /></td></tr>
+<tr class="memdesc:aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant expected consumption, indexed by species.  <br /></td></tr>
 <tr class="memitem:a0eb262f77c7e064bda9b364371de57db" id="r_a0eb262f77c7e064bda9b364371de57db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0eb262f77c7e064bda9b364371de57db">m_reactantScratch</a></td></tr>
-<tr class="memdesc:a0eb262f77c7e064bda9b364371de57db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch holding the distinct reactants of the reaction list currently being processed.  <br /></td></tr>
+<tr class="memdesc:a0eb262f77c7e064bda9b364371de57db"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> holding the distinct reactants of the reaction list currently being processed.  <br /></td></tr>
 <tr class="memitem:acc2f23653ebbfc98f38f40739d238c40" id="r_acc2f23653ebbfc98f38f40739d238c40"><td class="memItemLeft" align="right" valign="top">std::vector&lt; char &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc2f23653ebbfc98f38f40739d238c40">m_seenScratch</a></td></tr>
 <tr class="memdesc:acc2f23653ebbfc98f38f40739d238c40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Membership stamps used to build m_reactantScratch without sorting, indexed by species.  <br /></td></tr>
 </table>
@@ -1911,7 +1911,7 @@ template&lt;typename R, typename State, typename T = long long&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Scratch accumulator for the per-reactant expected consumption, indexed by species. </p>
+<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant expected consumption, indexed by species. </p>
 <p>Sums |nu_ij| * a_j over the reactions that consume species i, i.e. the loss side of m_muScratch without the production that cancels it. Needed only by getNonCriticalTimeStep. Same reentrancy caveat. </p>
 
 </div>
@@ -1938,7 +1938,7 @@ template&lt;typename R, typename State, typename T = long long&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Scratch accumulator for the per-reactant expected state change, indexed by species. </p>
+<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant expected state change, indexed by species. </p>
 <p>Used by computeDt and getNonCriticalTimeStep, which run once per grid cell (and, in the ItoKMC time step tail, once per reaction per grid cell). Holding the buffer on the solver keeps those calls free of heap traffic; previously they allocated a std::list node per reactant per reaction and then sorted it. </p><dl class="section note"><dt>Note</dt><dd>Mutable because the calls that use it are logically const. This makes the solver's const member functions non-reentrant: a single <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> must not be shared across threads. ItoKMCPhysics satisfies this by holding its solver as static thread_local (see defineKMC). </dd></dl>
 
 </div>
@@ -2019,7 +2019,7 @@ template&lt;typename R, typename State, typename T = long long&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Scratch holding the distinct reactants of the reaction list currently being processed. </p>
+<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> holding the distinct reactants of the reaction list currently being processed. </p>
 <p>Replaces the sorted, uniqued std::list the two time step routines used to rebuild on every call. Same reentrancy caveat. </p>
 
 </div>
@@ -2073,7 +2073,7 @@ template&lt;typename R, typename State, typename T = long long&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Scratch accumulator for the per-reactant propensity variance, indexed by species. </p>
+<p><a class="el" href="classScratch.html" title="Single owner of a temporary that belongs to a ScratchPool.">Scratch</a> accumulator for the per-reactant propensity variance, indexed by species. </p>
 <p>Companion to m_muScratch, needed only by getNonCriticalTimeStep. Same reentrancy caveat. </p>
 
 </div>

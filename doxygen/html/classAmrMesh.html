@@ -223,6 +223,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>buildDomains</b> ()</
 <tr class="memdesc:a30606fccd082f1ba83686837519299a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a data holder over a specific realm.  <br /></td></tr>
 <tr class="memitem:aeb4539611f17f0c9e7a9a18870d1dc52" id="r_aeb4539611f17f0c9e7a9a18870d1dc52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb4539611f17f0c9e7a9a18870d1dc52">allocate</a> (MFAMRIVData &amp;a_data, const std::string &amp;a_realm, const int a_nComp, const int a_ghost=0) const</td></tr>
 <tr class="memdesc:aeb4539611f17f0c9e7a9a18870d1dc52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a data holder over a specific realm.  <br /></td></tr>
+<tr class="memitem:a0bd688da9490d2c6de72db1afc50ca13" id="r_a0bd688da9490d2c6de72db1afc50ca13"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a0bd688da9490d2c6de72db1afc50ca13 template"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0bd688da9490d2c6de72db1afc50ca13">fetchScratch</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_nComp, const int a_ghost) const</td></tr>
+<tr class="memdesc:a0bd688da9490d2c6de72db1afc50ca13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a temporary over the whole hierarchy of a realm, for data that lives on a phase.  <br /></td></tr>
+<tr class="memitem:af5482c098e09e0b80c13060f5710cdb1" id="r_af5482c098e09e0b80c13060f5710cdb1"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:af5482c098e09e0b80c13060f5710cdb1 template"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5482c098e09e0b80c13060f5710cdb1">fetchScratch</a> (const std::string &amp;a_realm, const int a_nComp, const int a_ghost) const</td></tr>
+<tr class="memdesc:af5482c098e09e0b80c13060f5710cdb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a temporary over the whole hierarchy of a realm, for data that does not live on one phase.  <br /></td></tr>
+<tr class="memitem:a856de31d69ec48abe8b45ed133ee5a0b" id="r_a856de31d69ec48abe8b45ed133ee5a0b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScratch.html">Scratch</a>&lt; LevelData&lt; EBCellFAB &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a856de31d69ec48abe8b45ed133ee5a0b">fetchLevelScratch</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_level, const int a_nComp, const int a_ghost) const</td></tr>
+<tr class="memdesc:a856de31d69ec48abe8b45ed133ee5a0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch a temporary on one grid level of a realm.  <br /></td></tr>
+<tr class="memitem:a5f6e93e449db486a15cd58b67ff22309" id="r_a5f6e93e449db486a15cd58b67ff22309"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f6e93e449db486a15cd58b67ff22309">assertScratchReturned</a> () const</td></tr>
+<tr class="memdesc:a5f6e93e449db486a15cd58b67ff22309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort if a temporary of any realm's scratch pool is still in use.  <br /></td></tr>
 <tr class="memitem:a87a0c3e11d835a5bd9e3ab8c5950e2ca" id="r_a87a0c3e11d835a5bd9e3ab8c5950e2ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a87a0c3e11d835a5bd9e3ab8c5950e2ca">reallocate</a> (EBAMRCellData &amp;a_data, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_lmin) const</td></tr>
 <tr class="memdesc:a87a0c3e11d835a5bd9e3ab8c5950e2ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate data.  <br /></td></tr>
 <tr class="memitem:a612f5b753bfe06523d77d8ffe49d9459" id="r_a612f5b753bfe06523d77d8ffe49d9459"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a612f5b753bfe06523d77d8ffe49d9459">reallocate</a> (EBAMRFluxData &amp;a_data, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_lmin) const</td></tr>
@@ -623,6 +633,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseStateRedistribut
 <tr class="memitem:af488a755c0931cb2967d9d6d33674a5d" id="r_af488a755c0931cb2967d9d6d33674a5d"><td class="memItemLeft" align="right" valign="top"><a id="af488a755c0931cb2967d9d6d33674a5d" name="af488a755c0931cb2967d9d6d33674a5d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMirrorDeposition</b> ()</td></tr>
 <tr class="memdesc:af488a755c0931cb2967d9d6d33674a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the mirror-deposition band radius and fit/guard tolerances. <br /></td></tr>
+<tr class="memitem:afc2aaa699a9b515ece12c144eae1f373" id="r_afc2aaa699a9b515ece12c144eae1f373"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afc2aaa699a9b515ece12c144eae1f373">assertRealm</a> (const std::string &amp;a_realm, const std::string &amp;a_caller) const</td></tr>
+<tr class="memdesc:afc2aaa699a9b515ece12c144eae1f373"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort if a realm does not exist.  <br /></td></tr>
+<tr class="memitem:a253f8140e40e0019af874dc748bc9db4" id="r_a253f8140e40e0019af874dc748bc9db4"><td class="memTemplParams" colspan="2">template&lt;typename T, typename Build&gt; </td></tr>
+<tr class="memitem:a253f8140e40e0019af874dc748bc9db4 template"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a253f8140e40e0019af874dc748bc9db4">fetchFromPool</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase, const int a_level, const int a_nComp, const int a_ghost, const Build &amp;a_build, const std::string &amp;a_caller) const</td></tr>
+<tr class="memdesc:a253f8140e40e0019af874dc748bc9db4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hand out a temporary from the pool of a realm. Shared by fetchScratch and fetchLevelScratch.  <br /></td></tr>
 <tr class="memitem:a1e0333e81e94f9b4a66fd7d26beb8bf1" id="r_a1e0333e81e94f9b4a66fd7d26beb8bf1"><td class="memItemLeft" align="right" valign="top"><a id="a1e0333e81e94f9b4a66fd7d26beb8bf1" name="a1e0333e81e94f9b4a66fd7d26beb8bf1"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCellCentroidInterpolation</b> ()</td></tr>
 <tr class="memdesc:a1e0333e81e94f9b4a66fd7d26beb8bf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse centroid interpolation stencils. <br /></td></tr>
@@ -2038,6 +2053,64 @@ template&lt;typename T&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="afc2aaa699a9b515ece12c144eae1f373" name="afc2aaa699a9b515ece12c144eae1f373"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc2aaa699a9b515ece12c144eae1f373">&#9670;&#160;</a></span>assertRealm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::assertRealm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_caller</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Abort if a realm does not exist. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_caller</td><td>Name of the calling function, for the error message </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5f6e93e449db486a15cd58b67ff22309" name="a5f6e93e449db486a15cd58b67ff22309"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f6e93e449db486a15cd58b67ff22309">&#9670;&#160;</a></span>assertScratchReturned()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::assertScratchReturned </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Abort if a temporary of any realm's scratch pool is still in use. </p>
+<p>Called between time steps, where no temporary should be held. The message lists the pool entries. </p>
 
 </div>
 </div>
@@ -3459,6 +3532,229 @@ template&lt;typename P, typename Traits&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a253f8140e40e0019af874dc748bc9db4" name="a253f8140e40e0019af874dc748bc9db4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a253f8140e40e0019af874dc748bc9db4">&#9670;&#160;</a></span>fetchFromPool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T, typename Build&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt; AmrMesh::fetchFromPool </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_nComp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Build &amp;</td>          <td class="paramname"><span class="paramname"><em>a_build</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_caller</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Hand out a temporary from the pool of a realm. Shared by fetchScratch and fetchLevelScratch. </p>
+<p>Aborts if the realm does not exist, or if the number of components is not positive or the number of ghost cells is negative. In debug builds the temporary is filled with NaN, so that reads before writes show up. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Type of the temporary </td></tr>
+    <tr><td class="paramname">Build</td><td>Callable () -&gt; std::unique_ptr&lt;T&gt; that allocates a new temporary with the key </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38" title="Gas phase.">phase::gas</a> for types without a phase. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level for single-level data, -1 for data over the whole hierarchy </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Number of ghost cells </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_build</td><td>Allocates a new temporary </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_caller</td><td>Name of the calling function, for error messages </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Handle that owns the temporary until it is destroyed </dd></dl>
+
+</div>
+</div>
+<a id="a856de31d69ec48abe8b45ed133ee5a0b" name="a856de31d69ec48abe8b45ed133ee5a0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a856de31d69ec48abe8b45ed133ee5a0b">&#9670;&#160;</a></span>fetchLevelScratch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScratch.html">Scratch</a>&lt; LevelData&lt; EBCellFAB &gt; &gt; AmrMesh::fetchLevelScratch </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_nComp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fetch a temporary on one grid level of a realm. </p>
+<p>As fetchScratch, for a single level. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Number of ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Handle that owns the temporary </dd></dl>
+
+</div>
+</div>
+<a id="af5482c098e09e0b80c13060f5710cdb1" name="af5482c098e09e0b80c13060f5710cdb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5482c098e09e0b80c13060f5710cdb1">&#9670;&#160;</a></span>fetchScratch() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt; AmrMesh::fetchScratch </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_nComp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fetch a temporary over the whole hierarchy of a realm, for data that does not live on one phase. </p>
+<p>As the phase version. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>EBAMRFAB, MFAMRCellData, MFAMRFluxData or MFAMRIVData </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Number of ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Handle that owns the temporary </dd></dl>
+
+</div>
+</div>
+<a id="a0bd688da9490d2c6de72db1afc50ca13" name="a0bd688da9490d2c6de72db1afc50ca13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd688da9490d2c6de72db1afc50ca13">&#9670;&#160;</a></span>fetchScratch() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScratch.html">Scratch</a>&lt; T &gt; AmrMesh::fetchScratch </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>a_realm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_nComp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_ghost</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fetch a temporary over the whole hierarchy of a realm, for data that lives on a phase. </p>
+<p>Returns a free temporary with the same key from the realm's scratch pool, or allocates a new one. The handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN in debug builds), and has exactly a_ghost ghost cells. Must not be called inside an OpenMP parallel region. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>EBAMRCellData, EBAMRFluxData or EBAMRIVData </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Number of ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Handle that owns the temporary </dd></dl>
 
 </div>
 </div>
