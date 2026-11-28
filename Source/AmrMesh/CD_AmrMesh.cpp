@@ -1463,7 +1463,9 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   DataOps::averageCellToFace(a_gradient,
                              scratch,
                              this->getDomains(),
-                             this->getFaceIteratorNoBoundary(a_realm, a_phase));
+                             this->getFaceIteratorNoBoundary(a_realm, a_phase),
+                             this->getDomainFaceIterator(a_realm, a_phase, Side::Lo),
+                             this->getDomainFaceIterator(a_realm, a_phase, Side::Hi));
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
 
@@ -3508,6 +3510,47 @@ AmrMesh::getMultiCutFaceIterator(const std::string& a_realm, const phase::which_
   }
 
   return m_realms[a_realm]->getMultiCutFaceIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getDomainFaceIterator(const std::string&       a_realm,
+                               const phase::which_phase a_phase,
+                               const Side::LoHiSide     a_side) const
+{
+  CH_TIME("AmrMesh::getDomainFaceIterator(string, phase::which_phase, Side::LoHiSide)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getDomainFaceIterator(string, phase::which_phase, Side::LoHiSide)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getDomainFaceIterator(string, phase::which_phase, Side::LoHiSide) - could not find realm '" +
+            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getDomainFaceIterator(a_phase, a_side);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getDomainFaceIteratorWithTangentialGhosts(const std::string&       a_realm,
+                                                   const phase::which_phase a_phase,
+                                                   const Side::LoHiSide     a_side) const
+{
+  CH_TIME("AmrMesh::getDomainFaceIteratorWithTangentialGhosts(string, phase::which_phase, Side::LoHiSide)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getDomainFaceIteratorWithTangentialGhosts(string, phase::which_phase, Side::LoHiSide)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string
+      str = "AmrMesh::getDomainFaceIteratorWithTangentialGhosts(string, phase::which_phase, Side::LoHiSide) - could not find "
+            "realm '" +
+            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getDomainFaceIteratorWithTangentialGhosts(a_phase, a_side);
 }
 
 const AMRMask&

@@ -1215,7 +1215,9 @@ FieldSolver::setPermittivities()
                                interv,
                                interv,
                                average,
-                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas));
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas),
+                               m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, phase::gas, Side::Lo),
+                               m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, phase::gas, Side::Hi));
 
     m_amr->average(permFluxGas, m_realm, phase::gas, average);
   }
@@ -1240,7 +1242,9 @@ FieldSolver::setPermittivities()
                                interv,
                                interv,
                                average,
-                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid));
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid),
+                               m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, phase::solid, Side::Lo),
+                               m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, phase::solid, Side::Hi));
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }

@@ -1000,7 +1000,8 @@ public:
                            const EBAMRCellData&     a_cellData);
 
   /**
-   * @brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+   * @brief Extrapolate cell-centered data to domain faces. This is the level version.
+   * @details Only the domain faces of the valid boxes are written.
    * @param[out] a_domainData Domain-centered data
    * @param[in]  a_phase      Phase
    * @param[in]  a_cellData   Cell-centered data.
@@ -1081,11 +1082,13 @@ public:
 
   /**
    * @brief Project flux onto domain edges/faces.
+   * @details Only the domain faces of the valid boxes are written.
    * @param[out] a_projectedFlux Projected flux -- must have one component.
    * @param[in]  a_flux          Vector flux -- must have SpaceDim components.
+   * @param[in]  a_phase         Phase of the data.
    */
   virtual void
-  projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux);
+  projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux, const phase::which_phase a_phase);
 
   /**
    * @brief Regrid internal storage. This MUST be overwritten by implementations.

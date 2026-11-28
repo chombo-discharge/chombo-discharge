@@ -915,8 +915,10 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain(const Vector<RefCountedPtr<CdrSt
   Vector<EBAMRIFData*>   cdrGradientsDomain; // CDR gradients on the domain faces
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
-  EBAMRIFData grad;
-  m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
+  Scratch<EBAMRIFData> grad = m_amr->fetchScratch<EBAMRIFData>(m_realm,
+                                                               m_cdr->getPhase(),
+                                                               SpaceDim,
+                                                               m_amr->getNumberOfGhostCells());
 
   // Run through the CDR solvers and populate the vectors.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -939,7 +941,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain(const Vector<RefCountedPtr<CdrSt
     CdrPlasmaStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdrGradients[idx]);
 
     // Project it onto the domain face.
-    CdrPlasmaStepper::projectDomain(*cdrGradientsDomain[idx], grad);
+    CdrPlasmaStepper::projectDomain(*cdrGradientsDomain[idx], grad, m_cdr->getPhase());
   }
 }
 

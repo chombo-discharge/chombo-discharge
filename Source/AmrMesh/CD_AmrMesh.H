@@ -2222,6 +2222,36 @@ public:
   getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each valid grid box.
+   * @details The iterator in direction dir visits the domain faces of the cells next to the a_side domain side,
+   * including faces of regular cells, so that loops over domain faces do not build a FaceIterator on every call.
+   * Faces are enumerated with FaceStop::AllBoundaryOnly. The iterator is empty for boxes that do not touch that side.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @param[in] a_side  Domain side
+   * @return Per-level LayoutData of FaceIterator arrays
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIterator(const std::string&       a_realm,
+                        const phase::which_phase a_phase,
+                        const Side::LoHiSide     a_side) const;
+
+  /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each grid box grown by one cell in
+   * the tangential directions.
+   * @details As getDomainFaceIterator, but the iterator in direction dir also visits the domain faces of the cells in
+   * the first tangential ghost layer. For use with face data that is filled one cell into the tangential ghosts.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @param[in] a_side  Domain side
+   * @return Per-level LayoutData of FaceIterator arrays
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIteratorWithTangentialGhosts(const std::string&       a_realm,
+                                            const phase::which_phase a_phase,
+                                            const Side::LoHiSide     a_side) const;
+
+  /**
    * @brief Get levelset function, allocated over a grid for a Realm and phase
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)

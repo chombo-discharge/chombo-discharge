@@ -434,6 +434,29 @@ public:
   getMultiCutFaceIterator() const;
 
   /**
+   * @brief Return face iterators over the domain faces on one side of the domain, in each valid grid box.
+   * @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction. The iterator in direction
+   * dir visits the domain faces (FaceStop::AllBoundaryOnly) of the cells in the valid box that lie next to the a_side
+   * domain side in that direction, including faces of regular cells. It is empty for boxes that do not touch that side.
+   * @param[in] a_side Domain side
+   * @return m_domainFaceIterLo or m_domainFaceIterHi (which are, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIterator(const Side::LoHiSide a_side) const;
+
+  /**
+   * @brief Return face iterators over the domain faces on one side of the domain, in each grid box grown by one cell in
+   * the tangential directions.
+   * @details As getDomainFaceIterator, but the iterator in direction dir also visits the domain faces of the cells in
+   * the first tangential ghost layer, i.e. the cell strip is the valid box grown by one cell in the directions
+   * tangential to dir and restricted to the domain.
+   * @param[in] a_side Domain side
+   * @return m_domainFaceIterTanGhostLo or m_domainFaceIterTanGhostHi (which are, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIteratorWithTangentialGhosts(const Side::LoHiSide a_side) const;
+
+  /**
    * @brief Get objects for interpolation from cell centers to centroids.
    * @return Cell centroid interpolation
    */
@@ -913,6 +936,28 @@ protected:
    * @brief Face iterators over multiply-cut faces in each valid grid box (SurroundingNoBoundary stop criterion)
    */
   mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_multiCutFaceIter;
+
+  /**
+   * @brief Face iterators over the low-side domain faces of each valid grid box (AllBoundaryOnly stop criterion)
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_domainFaceIterLo;
+
+  /**
+   * @brief Face iterators over the high-side domain faces of each valid grid box (AllBoundaryOnly stop criterion)
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_domainFaceIterHi;
+
+  /**
+   * @brief Face iterators over the low-side domain faces of each grid box grown by one cell in the tangential
+   * directions
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_domainFaceIterTanGhostLo;
+
+  /**
+   * @brief Face iterators over the high-side domain faces of each grid box grown by one cell in the tangential
+   * directions
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_domainFaceIterTanGhostHi;
 
   /**
    * @brief Coarsening operator

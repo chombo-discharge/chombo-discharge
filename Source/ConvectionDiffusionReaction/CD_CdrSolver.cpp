@@ -398,7 +398,9 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
                                                *a_cellVelocity[lvl],
                                                m_amr->getDomains()[lvl],
                                                tanGhosts,
-                                               *m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase)[lvl]);
+                                               *m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase)[lvl],
+                                               *m_amr->getDomainFaceIterator(m_realm, m_phase, Side::Lo)[lvl],
+                                               *m_amr->getDomainFaceIterator(m_realm, m_phase, Side::Hi)[lvl]);
   }
 }
 
@@ -788,10 +790,15 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
   constexpr Real zero = 0.0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const DataIterator&      dit    = dbl.dataIterator();
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  m_phase,
+                                                                                                  Side::Lo)[lvl];
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  m_phase,
+                                                                                                  Side::Hi)[lvl];
 
     const int nbox = dit.size();
 
@@ -799,40 +806,16 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box      cellBox = dbl[din];
-      const EBISBox& ebisbox = ebisl[din];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
       for (int dir = 0; dir < SpaceDim; dir++) {
-        EBFaceFAB&     flux    = (*a_flux[lvl])[din][dir];
-        BaseFab<Real>& regFlux = flux.getSingleValuedFAB();
+        EBFaceFAB& flux = (*a_flux[lvl])[din][dir];
 
-        for (SideIterator sit; sit.ok(); ++sit) {
-          const Side::LoHiSide side = sit();
+        auto kernel = [&](const FaceIndex& face) -> void {
+          flux(face, m_comp) = zero;
+        };
 
-          // Create a cell box which lies next to the domain. Also make an iterator over the cut-cell faces.
-          const Box    boundaryCellBox = adjCellBox(domain.domainBox(), dir, side, -1) & cellBox;
-          FaceIterator faceit(ebisbox.getIrregIVS(boundaryCellBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
-
-          const int     sign  = (side == Side::Lo) ? 0 : 1;
-          const IntVect shift = sign * BASISV(dir);
-
-          // Regular kernel -- note the shift to make sure that cell indices map to face indices. I am doing this
-          // because if we were to convert the box to a face-centered box we would do another layer of faces. So shift
-          // directly.
-          auto regularKernel = [&](const IntVect& iv) -> void {
-            regFlux(iv + shift, m_comp) = zero;
-          };
-
-          // Irregular kernel. Same as the above really.
-          auto irregularKernel = [&](const FaceIndex& face) -> void {
-            flux(face, m_comp) = 0.0;
-          };
-
-          // Execute kernels
-          BoxLoops::loop<D_DECL(1, 1, 1)>(boundaryCellBox, regularKernel);
-          BoxLoops::loop(faceit, irregularKernel);
-        }
+        // The cached domain-face iterators visit every domain face of the valid box, regular faces included.
+        BoxLoops::loop(domainFacesLo[din][dir], kernel);
+        BoxLoops::loop(domainFacesHi[din][dir], kernel);
       }
     }
   }
@@ -868,10 +851,16 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
   //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go through a very small number of faces.
   // clang-format on
 
-  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
-  const ProblemDomain&     domain = m_amr->getDomains()[a_level];
-  const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
+
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                m_phase,
+                                                                                                Side::Lo)[a_level];
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                m_phase,
+                                                                                                Side::Hi)[a_level];
 
   const int nbox = dit.size();
 
@@ -880,13 +869,10 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
     const DataIndex& din = dit[mybox];
 
     const EBISBox& ebisbox = ebisl[din];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const Box      cellBox = dbl[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       EBFaceFAB& flux = a_flux[din][dir];
 
-      // Iterate over domain cells. I'm REALLY not sure about if this is performant...
       for (SideIterator sit; sit.ok(); ++sit) {
         const Side::LoHiSide side = sit();
 
@@ -897,18 +883,9 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
         // Data-based BC holders -- needed if bcType is CdrDomainBC::BcType::DataBased.
         const BaseIFFAB<Real>& dataBasedFlux = (*m_domainFlux[a_level])[din](dir, side);
 
-        // Create a box which abuts the current domain side
-        Box boundaryCellBox;
-        boundaryCellBox = adjCellBox(domain.domainBox(), dir, side, -1);
-        boundaryCellBox &= cellBox;
-
-        // Use a face-iterator here to go through domain faces -- sort of have to do this because of (the odd) design
-        // decision to use a BaseIFFAB for holding the domain fluxes.
-        //
-        // A FaceIterator may be inefficient, but we are REALLY going through a very small number of faces so there
-        // shouldn't be a performance hit here.
-        const IntVectSet ivs(boundaryCellBox);
-        FaceIterator     faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly);
+        // Iterate over the domain faces of the valid box on this side. A face iterator is needed because the domain
+        // fluxes are held in a BaseIFFAB.
+        FaceIterator& faceit = (side == Side::Lo) ? domainFacesLo[din][dir] : domainFacesHi[din][dir];
 
         auto kernel = [&](const FaceIndex& face) -> void {
           // Set the flux on the BC. This can be data-based, wall, function-based, outflow (extrapolated).

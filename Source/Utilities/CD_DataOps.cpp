@@ -31,7 +31,9 @@ DataOps::averageCellVelocityToFaceVelocity(
   const EBAMRCellData&                                                   a_cellData,
   const Vector<ProblemDomain>&                                           a_domains,
   const int                                                              a_tanGhosts,
-  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi)
 {
   CH_TIME("DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData, faceIter)");
 
@@ -44,7 +46,9 @@ DataOps::averageCellVelocityToFaceVelocity(
                                                *a_cellData[lvl],
                                                a_domains[lvl],
                                                a_tanGhosts,
-                                               *a_faceIter[lvl]);
+                                               *a_faceIter[lvl],
+                                               *a_domainFaceIterLo[lvl],
+                                               *a_domainFaceIterHi[lvl]);
   }
 }
 
@@ -53,7 +57,9 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                
                                            const LevelData<EBCellFAB>&                     a_cellData,
                                            const ProblemDomain&                            a_domain,
                                            const int                                       a_tanGhosts,
-                                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
+                                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter,
+                                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterLo,
+                                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterHi)
 {
   CH_TIME("DataOps::averageCellVelocityToFaceVelocity(LD<EBFluxFAB>, faceIter)");
 
@@ -129,7 +135,8 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                
           };
           BoxLoops::loop<D_DECL(1, 1, 1)>(insideBox, domainFaceKernel);
 
-          FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
+          FaceIterator& bndryFaces = (sit() == Side::Lo) ? a_domainFaceIterLo[din][faceDir]
+                                                         : a_domainFaceIterHi[din][faceDir];
 
           for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
             const FaceIndex& bndryFace = bndryFaces();
@@ -149,7 +156,9 @@ void
 DataOps::averageCellToFace(EBAMRFluxData&                                                         a_faceData,
                            const EBAMRCellData&                                                   a_cellData,
                            const Vector<ProblemDomain>&                                           a_domains,
-                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi)
 {
   CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, EBAMRCellData, Vector<ProblemDomain>, faceIter)");
 
@@ -165,7 +174,9 @@ DataOps::averageCellToFace(EBAMRFluxData&                                       
                                interv,
                                interv,
                                average,
-                               *a_faceIter[lvl]);
+                               *a_faceIter[lvl],
+                               *a_domainFaceIterLo[lvl],
+                               *a_domainFaceIterHi[lvl]);
   }
 }
 
@@ -177,7 +188,9 @@ DataOps::averageCellToFace(EBAMRFluxData&                                       
                            const Interval&                                                        a_faceInterval,
                            const Interval&                                                        a_cellInterval,
                            const Average&                                                         a_average,
-                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi)
 {
   CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, faceIter)");
 
@@ -189,7 +202,9 @@ DataOps::averageCellToFace(EBAMRFluxData&                                       
                                a_faceInterval,
                                a_cellInterval,
                                a_average,
-                               *a_faceIter[lvl]);
+                               *a_faceIter[lvl],
+                               *a_domainFaceIterLo[lvl],
+                               *a_domainFaceIterHi[lvl]);
   }
 }
 
@@ -201,9 +216,14 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
                            const Interval&                                 a_faceInterval,
                            const Interval&                                 a_cellInterval,
                            const Average&                                  a_average,
-                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
+                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter,
+                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterLo,
+                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterHi)
 {
   CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB>, faceIter)");
+
+  // The domain-face iterators exist for the valid boxes and for the boxes grown by one tangential ghost cell.
+  CH_assert(a_tanGhosts == 0 || a_tanGhosts == 1);
 
   const int numVars   = a_cellInterval.size();
   const int cellBegin = a_cellInterval.begin();
@@ -339,7 +359,8 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
         };
         BoxLoops::loop<D_DECL(1, 1, 1)>(computeBox, domainFaceKernel);
 
-        FaceIterator bndryFaces(IntVectSet(computeBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
+        FaceIterator& bndryFaces = (sit() == Side::Lo) ? a_domainFaceIterLo[din][faceDir]
+                                                       : a_domainFaceIterHi[din][faceDir];
 
         for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
           const FaceIndex& bndryFace = bndryFaces();

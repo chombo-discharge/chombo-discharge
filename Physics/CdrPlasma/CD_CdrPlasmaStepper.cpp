@@ -265,7 +265,9 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              interv,
                              average,
-                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase),
+                             m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Lo),
+                             m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Hi));
 
 #if 1 // Don't do this if the cell-centered values were interpolated to centroids.
   m_amr->interpToEB(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
@@ -1709,7 +1711,9 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
                                  interv,
                                  interv,
                                  average,
-                                 m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
+                                 m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase),
+                                 m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Lo),
+                                 m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Hi));
     }
   }
 }
@@ -2526,8 +2530,13 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
   const Real               dx     = m_amr->getDx()[a_lvl];
   const RealVect           probLo = m_amr->getProbLo();
 
-  // Stopping criterion for face iteration. We will only visit domain boundary faces.
-  const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
+  // Cached iterators over the domain faces of each valid box.
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                m_cdr->getPhase(),
+                                                                                                Side::Lo)[a_lvl];
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                m_cdr->getPhase(),
+                                                                                                Side::Hi)[a_lvl];
 
   // Iterate through patches on this level.
   const int nbox = dit.size();
@@ -2556,11 +2565,10 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
       // edges/faces.
       for (SideIterator sit; sit.ok(); ++sit) {
 
-        // Get the IntVectSet where we have valid domain faces.
-        const IntVectSet& ivs = (*a_cdrFluxes[0])[din](dir, sit()).getIVS();
+        // Iterate through the domain faces of the valid box on this side.
+        FaceIterator& faceit = (sit() == Side::Lo) ? domainFacesLo[din][dir] : domainFacesHi[din][dir];
 
-        // Iterate through those faces.
-        for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit) {
+        for (faceit.reset(); faceit.ok(); ++faceit) {
 
           // Note that we fill the fluxes on the face centers because CdrSolver will
           // interpolate those fluxes to the face centroids when it computes the divergences.
@@ -2699,12 +2707,14 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         
   // Allocate some storage for holding the cell-centered flux and the domain-centered flux (with SpaceDim components).
   // We will take the domain-centered flux and project it on the domain faces.
 
-  Scratch<EBAMRCellData> cellCenteredFlux = m_amr->fetchScratch<EBAMRCellData>(m_realm,
+  Scratch<EBAMRCellData> cellCenteredFlux   = m_amr->fetchScratch<EBAMRCellData>(m_realm,
                                                                                a_phase,
                                                                                SpaceDim,
                                                                                m_amr->getNumberOfGhostCells());
-  EBAMRIFData            domainCenteredFlux;
-  m_amr->allocate(domainCenteredFlux, m_realm, a_phase, SpaceDim);
+  Scratch<EBAMRIFData>   domainCenteredFlux = m_amr->fetchScratch<EBAMRIFData>(m_realm,
+                                                                             a_phase,
+                                                                             SpaceDim,
+                                                                             m_amr->getNumberOfGhostCells());
 
   // Go through the CDR solvers and extrapolated everything.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2723,7 +2733,7 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         
       this->extrapolateToDomainFaces(domainCenteredFlux, a_phase, cellCenteredFlux);
 
       // Project normal component onto domain face
-      this->projectDomain(*a_cdrDomainFluxes[idx], domainCenteredFlux);
+      this->projectDomain(*a_cdrDomainFluxes[idx], domainCenteredFlux, a_phase);
     }
     else {
       DataOps::setValue(*a_cdrDomainFluxes[idx], 0.0);
@@ -2805,14 +2815,16 @@ CdrPlasmaStepper::extrapolateVectorToDomainFaces(EBAMRIFData&             a_doma
   CH_assert(a_cellData[0]->nComp() == SpaceDim);
 
   // Allocate some memory we need for holding domain-centered data with SpaceDim components.
-  EBAMRIFData domainVector;
-  m_amr->allocate(domainVector, m_realm, a_phase, SpaceDim);
+  Scratch<EBAMRIFData> domainVector = m_amr->fetchScratch<EBAMRIFData>(m_realm,
+                                                                       a_phase,
+                                                                       SpaceDim,
+                                                                       m_amr->getNumberOfGhostCells());
 
   // Extrapolate the cell data to the domain faces.
   this->extrapolateToDomainFaces(domainVector, a_phase, a_cellData);
 
   // Now project it.
-  this->projectDomain(a_domainData, domainVector);
+  this->projectDomain(a_domainData, domainVector, a_phase);
 }
 
 void
@@ -3224,8 +3236,13 @@ CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainD
   const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, a_phase)[a_lvl];
 
-  // Stop criterion for face iteration. We will only set data on domain faces.
-  const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
+  // Cached iterators over the domain faces of each valid box.
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                a_phase,
+                                                                                                Side::Lo)[a_lvl];
+  LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                a_phase,
+                                                                                                Side::Hi)[a_lvl];
 
   // Grid loop.
   const int nbox = dit.size();
@@ -3245,12 +3262,10 @@ CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainD
         // Get a handle to the domain-centered data.
         BaseIFFAB<Real>& extrap = a_domainData[din](dir, sit());
 
-        // This is the region over which the data is defined.
-        const IntVectSet& ivs     = extrap.getIVS();
-        const EBGraph&    ebgraph = extrap.getEBGraph();
+        // Face loop over the domain faces of the valid box on this side.
+        FaceIterator& faceit = (sit() == Side::Lo) ? domainFacesLo[din][dir] : domainFacesHi[din][dir];
 
-        // Face loop.
-        for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit) {
+        for (faceit.reset(); faceit.ok(); ++faceit) {
           const FaceIndex& face = faceit();
 
           // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
@@ -3520,7 +3535,9 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
 }
 
 void
-CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux)
+CdrPlasmaStepper::projectDomain(EBAMRIFData&             a_projectedFlux,
+                                const EBAMRIFData&       a_flux,
+                                const phase::which_phase a_phase)
 {
   CH_TIME("CdrPlasmaStepper::projectDomain(EBAMRIFDatax2)");
   if (m_verbosity > 5) {
@@ -3538,8 +3555,13 @@ CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData&
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
-    // Stop criterion for our face iteration loop. We only do boundary faces.
-    const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
+    // Cached iterators over the domain faces of each valid box.
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  a_phase,
+                                                                                                  Side::Lo)[lvl];
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  a_phase,
+                                                                                                  Side::Hi)[lvl];
 
     // Go through grid patches.
     const int nbox = dit.size();
@@ -3564,11 +3586,8 @@ CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData&
             projectedFlux(face, comp) = sgn * flux(face, dir);
           };
 
-          // Kernel region.
-          const EBGraph&    ebgraph = projectedFlux.getEBGraph();
-          const IntVectSet& ivs     = projectedFlux.getIVS();
-
-          FaceIterator faceIt(ivs, ebgraph, dir, stopCrit);
+          // Kernel region: the domain faces of the valid box on this side.
+          FaceIterator& faceIt = (sit() == Side::Lo) ? domainFacesLo[din][dir] : domainFacesHi[din][dir];
 
           // Launch our kernel.
           BoxLoops::loop(faceIt, irregularKernel);
