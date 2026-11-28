@@ -431,74 +431,54 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
     const IntVect shift = BASISV(dir);
 
-    // Set up the regular slope kernels. Add more slopes if you need them.
-    std::function<void(const IntVect&)> regularKernel;
-    switch (m_limiter) {
-    case Limiter::None: {
-      regularKernel = [&](const IntVect& iv) -> void {
-        CH_assert(a_domain.contains(iv));
+    // Regular slope kernels, one per limiter. Each is passed to BoxLoops::loop directly (see below), so that it is
+    // inlined; add more slopes if you need them.
+    auto noSlopeKernel = [&](const IntVect& iv) -> void {
+      CH_assert(a_domain.contains(iv));
+      slopesReg(iv, dir) = 0.0;
+    };
+
+    auto minmodKernel = [&](const IntVect& iv) -> void {
+      CH_assert(a_domain.contains(iv + shift));
+      CH_assert(a_domain.contains(iv - shift));
+
+      const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+      const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
+
+      if (dwl * dwr > 0.0) {
+        slopesReg(iv, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
+      }
+      else {
         slopesReg(iv, dir) = 0.0;
-      };
+      }
+    };
 
-      break;
-    }
-    case Limiter::MinMod: {
-      regularKernel = [&](const IntVect& iv) -> void {
-        CH_assert(a_domain.contains(iv + shift));
-        CH_assert(a_domain.contains(iv - shift));
+    auto superbeeKernel = [&](const IntVect& iv) -> void {
+      CH_assert(a_domain.contains(iv + shift));
+      CH_assert(a_domain.contains(iv - shift));
 
-        const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-        const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
+      const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+      const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
-        if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
-        }
-        else {
-          slopesReg(iv, dir) = 0.0;
-        }
-      };
+      if (dwl * dwr > 0.0) {
+        slopesReg(iv, dir) = superbee(dwl, dwr);
+      }
+      else {
+        slopesReg(iv, dir) = 0.0;
+      }
+    };
 
-      break;
-    }
-    case Limiter::Superbee: {
-      regularKernel = [&](const IntVect& iv) -> void {
-        CH_assert(a_domain.contains(iv + shift));
-        CH_assert(a_domain.contains(iv - shift));
+    auto monotonizedCentralKernel = [&](const IntVect& iv) -> void {
+      const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+      const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
-        const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-        const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
-
-        if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = superbee(dwl, dwr);
-        }
-        else {
-          slopesReg(iv, dir) = 0.0;
-        }
-      };
-
-      break;
-    }
-    case Limiter::MonotonizedCentral: {
-      regularKernel = [&](const IntVect& iv) -> void {
-        const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-        const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
-
-        if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
-        }
-        else {
-          slopesReg(iv, dir) = 0.0;
-        }
-      };
-
-      break;
-    }
-    default: {
-      MayDay::Error("CdrCTU::computeNormalSlopes -- logic bust");
-
-      break;
-    }
-    }
+      if (dwl * dwr > 0.0) {
+        slopesReg(iv, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
+      }
+      else {
+        slopesReg(iv, dir) = 0.0;
+      }
+    };
 
     // Kernel for cells abutting the boundaries.
     auto boundaryKernelLo = [&](const IntVect& iv) -> void {
@@ -602,7 +582,33 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     };
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
-    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, regularKernel);
+    switch (m_limiter) {
+    case Limiter::None: {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, noSlopeKernel);
+
+      break;
+    }
+    case Limiter::MinMod: {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, minmodKernel);
+
+      break;
+    }
+    case Limiter::Superbee: {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, superbeeKernel);
+
+      break;
+    }
+    case Limiter::MonotonizedCentral: {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, monotonizedCentralKernel);
+
+      break;
+    }
+    default: {
+      MayDay::Error("CdrCTU::computeNormalSlopes -- logic bust");
+
+      break;
+    }
+    }
     BoxLoops::loop<D_DECL(1, 1, 1)>(bndryLo, boundaryKernelLo);
     BoxLoops::loop<D_DECL(1, 1, 1)>(bndryHi, boundaryKernelHi);
     BoxLoops::loop(vofit, irregularKernel);
