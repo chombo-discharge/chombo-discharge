@@ -649,8 +649,8 @@ public:
   /**
    * @brief Fetch a temporary over the whole hierarchy of a realm, for data that lives on a phase.
    * @details Returns a free temporary with the same key from the realm's scratch pool, or allocates a new one. The
-   * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN with
-   * AmrMesh.scratch_poison), and has exactly a_ghost ghost cells. Must not be called inside an OpenMP parallel
+   * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN in debug
+   * builds), and has exactly a_ghost ghost cells. Must not be called inside an OpenMP parallel
    * region.
    * @tparam T EBAMRCellData, EBAMRFluxData or EBAMRIVData
    * @param[in] a_realm Realm name
@@ -2652,16 +2652,6 @@ protected:
   Real m_mirrorMinDenominator;
 
   /**
-   * @brief Fill every fetched temporary with NaN, so that reads before writes show up.
-   */
-  bool m_scratchPoison;
-
-  /**
-   * @brief Write the entries of every scratch pool to pout() before each regrid.
-   */
-  bool m_scratchReport;
-
-  /**
    * @brief Has grids or not
    */
   bool m_hasGrids;
@@ -2834,12 +2824,6 @@ protected:
   parseMirrorDeposition();
 
   /**
-   * @brief Parse the scratch pool options.
-   */
-  void
-  parseScratch();
-
-  /**
    * @brief Abort if a realm does not exist.
    * @param[in] a_realm  Realm name
    * @param[in] a_caller Name of the calling function, for the error message
@@ -2850,7 +2834,7 @@ protected:
   /**
    * @brief Hand out a temporary from the pool of a realm. Shared by fetchScratch and fetchLevelScratch.
    * @details Aborts if the realm does not exist, or if the number of components is not positive or the number of
-   * ghost cells is negative. Fills the temporary with NaN when AmrMesh.scratch_poison is set.
+   * ghost cells is negative. In debug builds the temporary is filled with NaN, so that reads before writes show up.
    * @tparam T     Type of the temporary
    * @tparam Build Callable () -> std::unique_ptr<T> that allocates a new temporary with the key
    * @param[in] a_realm  Realm name
