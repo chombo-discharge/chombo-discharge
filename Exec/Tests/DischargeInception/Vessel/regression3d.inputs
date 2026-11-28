@@ -32,8 +32,6 @@ AmrMesh.mirror_cond_tol         = 1.E-3            ## Mirror deposition: min eig
 AmrMesh.mirror_crease_tol       = 1.E-1            ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
 AmrMesh.mirror_max_jacobian     = 1.E4             ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
 AmrMesh.mirror_min_denom        = 1.E-4            ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
-AmrMesh.scratch_poison          = false            ## Fill fetched temporaries with NaN, to find reads before writes.
-AmrMesh.scratch_report          = false            ## Write the scratch pool entries to pout before every regrid.
 
 # ====================================================================================================
 # Driver class options
