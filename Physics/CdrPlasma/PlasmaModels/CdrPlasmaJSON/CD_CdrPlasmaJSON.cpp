@@ -4549,8 +4549,9 @@ CdrPlasmaJSON::getPlotVariableNames() const
   return ret;
 }
 
-Vector<Real>
-CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
+void
+CdrPlasmaJSON::getPlotVariables(Vector<Real>&           a_plotVariables,
+                                const Vector<Real>&     a_cdrDensities,
                                 const Vector<RealVect>& a_cdrGradients,
                                 const Vector<Real>& /*a_rteDensities*/,
                                 const RealVect& a_E,
@@ -4558,9 +4559,11 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
                                 const Real /*a_dx*/,
                                 const Real /*a_dt*/,
                                 const Real a_time,
-                                const Real /*a_kappa*/) const
+                                const Real /*a_kappa*/) const noexcept
 {
-  Vector<Real> ret(0);
+  CH_assert(a_plotVariables.size() == this->getNumberOfPlotVariables());
+
+  int k = 0;
 
   // God how I hate the Chombo Vector.
   const std::vector<Real>&     cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
@@ -4587,15 +4590,15 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
     const auto hasEnergySolver = energySolverMap.second;
 
     if (hasEnergySolver) {
-      ret.push_back(cdrEnergies[solverIndex]);
+      a_plotVariables[k++] = cdrEnergies[solverIndex];
     }
   }
 
   // Plot the gas data.
   if (m_plotGas) {
-    ret.push_back(m_gasPressure(a_pos));
-    ret.push_back(m_gasTemperature(a_pos));
-    ret.push_back(m_gasDensity(a_pos));
+    a_plotVariables[k++] = m_gasPressure(a_pos);
+    a_plotVariables[k++] = m_gasTemperature(a_pos);
+    a_plotVariables[k++] = m_gasDensity(a_pos);
   }
 
   for (const auto& m : m_plasmaReactionPlot) {
@@ -4603,35 +4606,35 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
       const int reactionIndex = m.first;
 
       // Compute the reaction rate for the current reaction.
-      const Real k = this->computePlasmaReactionRate(reactionIndex,
-                                                     cdrDensities,
-                                                     cdrMobilities,
-                                                     cdrDiffusionCoefficients,
-                                                     cdrTemperatures,
-                                                     cdrEnergies,
-                                                     cdrGradients,
-                                                     a_pos,
-                                                     a_E,
-                                                     E,
-                                                     Etd,
-                                                     N,
-                                                     alpha,
-                                                     eta,
-                                                     a_time);
+      const Real rate = this->computePlasmaReactionRate(reactionIndex,
+                                                        cdrDensities,
+                                                        cdrMobilities,
+                                                        cdrDiffusionCoefficients,
+                                                        cdrTemperatures,
+                                                        cdrEnergies,
+                                                        cdrGradients,
+                                                        a_pos,
+                                                        a_E,
+                                                        E,
+                                                        Etd,
+                                                        N,
+                                                        alpha,
+                                                        eta,
+                                                        a_time);
 
-      ret.push_back(k);
+      a_plotVariables[k++] = rate;
     }
   }
 
   if (m_plotAlpha) {
-    ret.push_back(alpha);
+    a_plotVariables[k++] = alpha;
   }
 
   if (m_plotEta) {
-    ret.push_back(eta);
+    a_plotVariables[k++] = eta;
   }
 
-  return ret;
+  CH_assert(k == a_plotVariables.size());
 }
 
 bool
@@ -5107,7 +5110,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
 }
 
 Real
-CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect& a_position) const
+CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect& a_position) const noexcept
 {
   Real alpha = 0.0;
 
@@ -5137,7 +5140,7 @@ CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect& a_position) const
 }
 
 Real
-CdrPlasmaJSON::computeEta(const Real a_E, const RealVect& a_position) const
+CdrPlasmaJSON::computeEta(const Real a_E, const RealVect& a_position) const noexcept
 {
   Real eta = 0.0;
 
@@ -5182,7 +5185,7 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
                                       const Real              a_dx,
                                       const Real              a_dt,
                                       const Real              a_time,
-                                      const Real              a_kappa) const
+                                      const Real              a_kappa) const noexcept
 {
   // I really hate Chombo sometimes.
   std::vector<Real>& cdrSources = a_cdrSources.stdVector();
@@ -5252,20 +5255,27 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
   }
 }
 
-Vector<RealVect>
-CdrPlasmaJSON::computeCdrDriftVelocities(const Real /*a_time*/,
+void
+CdrPlasmaJSON::computeCdrDriftVelocities(Vector<RealVect>& a_velocities,
+                                         const Real /*a_time*/,
                                          const RealVect&     a_position,
                                          const RealVect&     a_E,
-                                         const Vector<Real>& a_cdrDensities) const
+                                         const Vector<Real>& a_cdrDensities) const noexcept
 {
+  CH_assert(a_velocities.size() == m_numCdrSpecies);
+
   // I really hate Chombo sometimes.
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
   // Compute the mobilities for each species.
   const std::vector<Real> mu = this->computePlasmaSpeciesMobilities(a_position, a_E, cdrDensities);
 
-  // Return vector
-  Vector<RealVect> velocities(m_numCdrSpecies, RealVect::Zero);
+  // Species that are not given a velocity below drift with zero velocity.
+  Vector<RealVect>& velocities = a_velocities;
+
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    velocities[i] = RealVect::Zero;
+  }
 
   // Make sure v = +/- mu*E depending on the sign charge.
   for (int i = 0; i < a_cdrDensities.size(); i++) {
@@ -5290,26 +5300,30 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real /*a_time*/,
 
     velocities[energyIdx] = 5. / 3. * velocities[transportIdx];
   }
-
-  return velocities;
 }
 
-Vector<Real>
-CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real /*a_time*/,
+void
+CdrPlasmaJSON::computeCdrDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
+                                               const Real /*a_time*/,
                                                const RealVect&     a_position,
                                                const RealVect&     a_E,
-                                               const Vector<Real>& a_cdrDensities) const
+                                               const Vector<Real>& a_cdrDensities) const noexcept
 {
+  CH_assert(a_diffusionCoefficients.size() == m_numCdrSpecies);
+
   const std::vector<Real>& cdrDensities = ((Vector<Real>&)a_cdrDensities).stdVector();
 
   // Compute diffusion coefficients.
-  std::vector<Real> diffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_position, a_E, cdrDensities);
+  const std::vector<Real> diffusionCoefficients = this->computePlasmaSpeciesDiffusion(a_position, a_E, cdrDensities);
 
-  return Vector<Real>(diffusionCoefficients);
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+    a_diffusionCoefficients[i] = diffusionCoefficients[i];
+  }
 }
 
-Vector<Real>
-CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
+void
+CdrPlasmaJSON::computeCdrElectrodeFluxes(Vector<Real>& a_fluxes,
+                                         const Real /*a_time*/,
                                          const RealVect&     a_pos,
                                          const RealVect&     a_normal,
                                          const RealVect&     a_E,
@@ -5317,8 +5331,10 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
                                          const Vector<Real>& /*a_cdrVelocities*/,
                                          const Vector<Real>& /*a_cdrGradients*/,
                                          const Vector<Real>& a_rteFluxes,
-                                         const Vector<Real>& a_extrapCdrFluxes) const
+                                         const Vector<Real>& a_extrapCdrFluxes) const noexcept
 {
+  CH_assert(a_fluxes.size() == m_numCdrSpecies);
+
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5425,7 +5441,7 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
 
   // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the
   // magnitude, but in our finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  Vector<Real>& fluxes = a_fluxes;
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
 
@@ -5448,12 +5464,11 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
 
     fluxes[energyIndex] += (2. / 3.) * vth * a_cdrDensities[energyIndex];
   }
-
-  return fluxes;
 }
 
-Vector<Real>
-CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
+void
+CdrPlasmaJSON::computeCdrDielectricFluxes(Vector<Real>& a_fluxes,
+                                          const Real /*a_time*/,
                                           const RealVect&     a_pos,
                                           const RealVect&     a_normal,
                                           const RealVect&     a_E,
@@ -5461,8 +5476,10 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
                                           const Vector<Real>& /*a_cdrVelocities*/,
                                           const Vector<Real>& /*a_cdrGradients*/,
                                           const Vector<Real>& a_rteFluxes,
-                                          const Vector<Real>& a_extrapCdrFluxes) const
+                                          const Vector<Real>& a_extrapCdrFluxes) const noexcept
 {
+  CH_assert(a_fluxes.size() == m_numCdrSpecies);
+
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5567,7 +5584,7 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
 
   // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the
   // magnitude, but in our finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  Vector<Real>& fluxes = a_fluxes;
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
 
@@ -5590,12 +5607,11 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
 
     fluxes[energyIndex] += (2. / 3.) * vth * a_cdrDensities[energyIndex];
   }
-
-  return fluxes;
 }
 
-Vector<Real>
-CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
+void
+CdrPlasmaJSON::computeCdrDomainFluxes(Vector<Real>& a_fluxes,
+                                      const Real /*a_time*/,
                                       const RealVect&      a_pos,
                                       const int            a_dir,
                                       const Side::LoHiSide a_side,
@@ -5604,8 +5620,10 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
                                       const Vector<Real>& /*a_cdrVelocities*/,
                                       const Vector<Real>& /*a_cdrGradients*/,
                                       const Vector<Real>& a_rteFluxes,
-                                      const Vector<Real>& a_extrapCdrFluxes) const
+                                      const Vector<Real>& a_extrapCdrFluxes) const noexcept
 {
+  CH_assert(a_fluxes.size() == m_numCdrSpecies);
+
   // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the domain. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
@@ -5696,7 +5714,7 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
   }
 
   // Now set the finite volume fluxes accordingly.
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  Vector<Real>& fluxes = a_fluxes;
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
 
@@ -5708,12 +5726,10 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
       fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
     }
   }
-
-  return fluxes;
 }
 
 Real
-CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect& a_pos) const
+CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect& a_pos) const noexcept
 {
   return m_initialSigma(a_pos, a_time);
 }
