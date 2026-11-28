@@ -414,6 +414,10 @@ A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
 For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
 Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
 
+The time integrators call the coupling functions once per grid cell, cut cell, or domain face.
+These functions are ``const noexcept`` and write their results into an output argument (the first parameter) that the caller has already sized to the number of species or plot variables.
+An implementation must write every entry of the output.
+
 Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
 For this reason we also provide an implementation layer :ref:`Chap:CdrPlasmaJSON` that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for describing the physics.
 

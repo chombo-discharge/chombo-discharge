@@ -652,7 +652,7 @@ public:
    * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN in debug
    * builds), and has exactly a_ghost ghost cells. Must not be called inside an OpenMP parallel
    * region.
-   * @tparam T EBAMRCellData, EBAMRFluxData or EBAMRIVData
+   * @tparam T EBAMRCellData, EBAMRFluxData, EBAMRIVData or EBAMRIFData
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase
    * @param[in] a_nComp Number of components
@@ -1498,6 +1498,23 @@ public:
                     const std::string&       a_realm,
                     const phase::which_phase a_phase,
                     const int                a_level) const noexcept;
+
+  /**
+   * @brief Interpolate data to centroids on one level, into separate storage.
+   * @details a_centroidData becomes a copy of a_cellData in which the irregular cells hold the centroid values. Both
+   * must be defined on the grids of the realm on this level, with the same number of components.
+   * @param[out] a_centroidData Centroid-centered data
+   * @param[in]  a_cellData     Cell-centered data
+   * @param[in]  a_realm        Realm name
+   * @param[in]  a_phase        Phase (gas or solid)
+   * @param[in]  a_level        Grid level
+   */
+  void
+  interpToCentroids(LevelData<EBCellFAB>&       a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string&          a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept;
 
   /**
    * @brief Interpolate data to centroids

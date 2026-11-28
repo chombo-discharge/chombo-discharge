@@ -2352,6 +2352,28 @@ AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
 }
 
 void
+AmrMesh::interpToCentroids(LevelData<EBCellFAB>&       a_centroidData,
+                           const LevelData<EBCellFAB>& a_cellData,
+                           const std::string&          a_realm,
+                           const phase::which_phase    a_phase,
+                           const int                   a_level) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(level, separate storage)");
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(level, separate storage) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
+
+  cellCentroidInterp->interpolate(a_centroidData, a_cellData);
+}
+
+void
 AmrMesh::interpToCentroids(EBCellFAB&               a_centroidData,
                            const EBCellFAB&         a_cellData,
                            const std::string&       a_realm,
@@ -3119,22 +3141,12 @@ AmrMesh::sanityCheck() const
 RealVect
 AmrMesh::getProbLo() const
 {
-  CH_TIME("AmrMesh::getProbLo()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getProbLo()" << endl;
-  }
-
   return m_probLo;
 }
 
 RealVect
 AmrMesh::getProbHi() const
 {
-  CH_TIME("AmrMesh::getProbHi()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getProbHi()" << endl;
-  }
-
   return m_probHi;
 }
 
@@ -3314,11 +3326,6 @@ AmrMesh::getFinestDx() const
 const Vector<Real>&
 AmrMesh::getDx() const
 {
-  CH_TIME("AmrMesh::getDx()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getDx()" << endl;
-  }
-
   return m_dx;
 }
 

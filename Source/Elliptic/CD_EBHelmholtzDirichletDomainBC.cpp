@@ -135,8 +135,6 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                           const DataIndex&      a_dit,
                                           const bool            a_useHomogeneous) const
 {
-  CH_TIME("EBHelmholtzDirichletDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
-
   CH_assert(m_useConstant || m_useFunction);
 
   const int            isign   = (a_side == Side::Lo) ? -1 : 1;

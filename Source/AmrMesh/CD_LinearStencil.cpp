@@ -60,8 +60,6 @@ LinearStencil::computeInterpStencil1D(VoFStencil&                           a_st
                                       const EBISBox&                        a_ebisbox,
                                       const int                             a_interpDir)
 {
-  CH_TIME("LinearStencil::computeInterpStencil1D");
-
   // We are doing interpolation to a_pos from a_vof. This is done as a 1D interpolation along a_interpDir, ignoring the
   // other coordinates. This is pretty straightforward since y(x) = yLo + (yHi-yHi)*(x - xLo) in dimensionless units. We
   // simply determine if the input point falls on the hi/low side of the cell center and select the two cells
@@ -142,7 +140,6 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
                                       const EBISBox&             a_ebisbox,
                                       [[maybe_unused]] const int a_noInterpDir)
 {
-  CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
 
   // This code is a bit convoluted because of the many pathological cases that may happen with multi-valued cells. For
@@ -466,7 +463,6 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
                                       const ProblemDomain& a_domain,
                                       const EBISBox&       a_ebisbox)
 {
-  CH_TIME("computeInterpStencil3D");
   CH_assert(SpaceDim == 3);
 
   bool foundStencil = false;
@@ -484,7 +480,6 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   // multivalued cells in play, I'm not really sure how to do this because the
   // code when we get the chance.
   if (really3D) {
-
     //    MayDay::Warning("LinearStencil::computeInterpStencil3D - fix this code");
     const int            hiLoInterpDir = a_pos[interpDir3D] > 0. ? 1 : -1;
     const Side::LoHiSide side          = (a_pos[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
