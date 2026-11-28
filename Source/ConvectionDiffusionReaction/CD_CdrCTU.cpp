@@ -107,6 +107,7 @@ CdrCTU::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   CdrMultigrid::preRegrid(a_lbase, a_oldFinestLevel);
   m_grownVofIter.resize(0);
+  m_grownNeighbors.resize(0);
 }
 
 void
@@ -132,18 +133,63 @@ CdrCTU::defineIterators()
   const int finest = m_amr->getFinestLevel();
 
   m_grownVofIter.resize(1 + finest);
+  m_grownNeighbors.resize(1 + finest);
 
   for (int lvl = 0; lvl <= finest; lvl++) {
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const DisjointBoxLayout& dbl       = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit       = dbl.dataIterator();
+    const EBISLayout&        ebisl     = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain    = m_amr->getDomains()[lvl];
+    const Box&               domainBox = domain.domainBox();
 
-    m_grownVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+    m_grownVofIter[lvl]   = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+    m_grownNeighbors[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>(
+      new LayoutData<BaseIVFAB<VoFStencil>>(dbl));
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const Box      grownBox = grow(dbl[dit], 1) & domain;
-      const EBISBox& ebisbox  = ebisl[dit()];
-      (*m_grownVofIter[lvl])[dit()].define(ebisbox.getIrregIVS(grownBox), ebisbox.getEBGraph());
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box         grownBox = grow(dbl[din], 1) & domain;
+      const EBISBox&    ebisbox  = ebisl[din];
+      const EBGraph&    ebgraph  = ebisbox.getEBGraph();
+      const IntVectSet& irregIVS = ebisbox.getIrregIVS(grownBox);
+
+      VoFIterator&           vofit     = (*m_grownVofIter[lvl])[din];
+      BaseIVFAB<VoFStencil>& neighbors = (*m_grownNeighbors[lvl])[din];
+
+      vofit.define(irregIVS, ebgraph);
+      neighbors.define(irregIVS, ebgraph, 2 * SpaceDim);
+
+      // The VoFs across the faces of each cut cell, found once here so that computeNormalSlopes does not query the
+      // graph for faces.
+      auto kernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const Side::LoHiSide side     = sit();
+            const bool           onDomain = (side == Side::Lo) ? (iv[dir] == domainBox.smallEnd(dir))
+                                                               : (iv[dir] == domainBox.bigEnd(dir));
+
+            VoFStencil& neighbor = neighbors(vof, 2 * dir + ((side == Side::Lo) ? 0 : 1));
+
+            neighbor.clear();
+
+            if (!onDomain) {
+              const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
+
+              for (int iface = 0; iface < faces.size(); iface++) {
+                neighbor.add(faces[iface].getVoF(side), 1.0);
+              }
+            }
+          }
+        }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -427,7 +473,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     CH_assert(a_domain.contains(bndryHi));
 
     // Irregular kernel domain -- also does boundary cells if they are cut.
-    VoFIterator& vofit = (*m_grownVofIter[a_level])[a_dit];
+    VoFIterator&                 vofit     = (*m_grownVofIter[a_level])[a_dit];
+    const BaseIVFAB<VoFStencil>& neighbors = (*m_grownNeighbors[a_level])[a_dit];
 
     const IntVect shift = BASISV(dir);
 
@@ -502,11 +549,13 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       const bool onLoSide = (iv[dir] == domainBox.smallEnd(dir));
       const bool onHiSide = (iv[dir] == domainBox.bigEnd(dir));
 
-      const bool hasFacesLeft = (ebisbox.numFaces(vof, dir, Side::Lo) == 1) && !onLoSide;
-      const bool hasFacesRigh = (ebisbox.numFaces(vof, dir, Side::Hi) == 1) && !onHiSide;
+      // VoFs across the low and high faces in direction dir, found in defineIterators(). These are empty on the domain
+      // boundary side.
+      const VoFStencil& neighborsLeft = neighbors(vof, 2 * dir);
+      const VoFStencil& neighborsRigh = neighbors(vof, 2 * dir + 1);
 
-      VolIndex vofLeft;
-      VolIndex vofRigh;
+      const bool hasFacesLeft = (neighborsLeft.size() == 1) && !onLoSide;
+      const bool hasFacesRigh = (neighborsRigh.size() == 1) && !onHiSide;
 
       Real dwl = 0.0;
       Real dwr = 0.0;
@@ -516,16 +565,12 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
       // Compute left and right slope
       if (hasFacesLeft) {
-        Vector<FaceIndex> facesLeft = ebisbox.getFaces(vof, dir, Side::Lo);
-        vofLeft                     = facesLeft[0].getVoF(Side::Lo);
-        phiLeft                     = a_cellPhi(vofLeft, m_comp);
-        dwl                         = a_cellPhi(vof, m_comp) - phiLeft;
+        phiLeft = a_cellPhi(neighborsLeft.vof(0), m_comp);
+        dwl     = a_cellPhi(vof, m_comp) - phiLeft;
       }
       if (hasFacesRigh) {
-        Vector<FaceIndex> facesRigh = ebisbox.getFaces(vof, dir, Side::Hi);
-        vofRigh                     = facesRigh[0].getVoF(Side::Hi);
-        phiRigh                     = a_cellPhi(vofRigh, m_comp);
-        dwr                         = phiRigh - a_cellPhi(vof, m_comp);
+        phiRigh = a_cellPhi(neighborsRigh.vof(0), m_comp);
+        dwr     = phiRigh - a_cellPhi(vof, m_comp);
       }
 
       if (!hasFacesLeft && hasFacesRigh) {
@@ -537,8 +582,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
       // Where the flow leaves the EB, the neighbour on the side that the EB closes (no face, and not the domain
       // boundary) is the EB inflow state, one cell away, instead of a copy of the difference on the other side.
-      const bool closedLeft = (ebisbox.numFaces(vof, dir, Side::Lo) == 0) && !onLoSide;
-      const bool closedRigh = (ebisbox.numFaces(vof, dir, Side::Hi) == 0) && !onHiSide;
+      const bool closedLeft = (neighborsLeft.size() == 0) && !onLoSide;
+      const bool closedRigh = (neighborsRigh.size() == 0) && !onHiSide;
 
       if (m_ebInflowState && ((closedLeft && hasFacesRigh) || (closedRigh && hasFacesLeft))) {
         Real phiEB = 0.0;
