@@ -521,7 +521,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 664-725
+   :lines: 664-711
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.

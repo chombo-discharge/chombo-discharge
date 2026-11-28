@@ -247,7 +247,10 @@ CdrGodunov::advectToFaces(EBAMRFluxData&       a_facePhi,
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
   // The Godunov integrator only writes the faces of the valid boxes. The ghost faces are read when the fluxes are
-  // interpolated to face centroids, so they are zero rather than whatever the caller's holder contained.
+  // interpolated to face centroids, so they are zero rather than whatever the caller's holder contained. The exchange
+  // fills the ghost faces that a box on the same level covers, but ghost faces along a refinement boundary stay zero.
+  // Cut faces there are therefore interpolated with a zero flux on their outside neighbors. This is a known
+  // inaccuracy.
   DataOps::setValue(a_facePhi, 0.0);
 
   // If we are extrapolating in time the source term will yield different states on the face centers. The source term is

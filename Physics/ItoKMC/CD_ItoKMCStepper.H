@@ -485,13 +485,6 @@ protected:
   Vector<RefCountedPtr<ParticleContainer<Photon>>> m_secondaryPhotons;
 
   /**
-   * @brief CDR fluxes for CDR BCs.
-   * @details There's a version of this inside the solvers, but we need this one because the EB coupling
-   * takes place on the particle realm.
-   */
-  Vector<EBAMRIVData> m_cdrFluxes;
-
-  /**
    * @brief Voltage curve on the electrodes used in the simulation.
    */
   std::function<Real(const Real a_time)> m_voltage;
@@ -687,23 +680,6 @@ protected:
   Vector<EBAMRCellData> m_cdrMobilities;
 
   /**
-   * @brief For holding the gradient of all CDR species densities
-   * @note Defined on the fluid realm
-   */
-  Vector<EBAMRCellData> m_fluidGradPhiCDR;
-
-  /**
-   * @brief For holding the gradient of all Ito species densities
-   * @note Defined on the fluid realm
-   */
-  Vector<EBAMRCellData> m_fluidGradPhiIto;
-
-  /**
-   * @brief For holding the Ito species densities on the fluid realm
-   */
-  Vector<EBAMRCellData> m_fluidPhiIto;
-
-  /**
    * @brief Reaction products to be put in the CDR equations, as particles.
    * @details Holds both the photoionization products and the production computed by the KMC advance. The containers
    * are filled and emptied within a single call to advanceReactionNetwork() and carry no state across time steps.
@@ -718,8 +694,9 @@ protected:
   Vector<int> m_loadBalanceIndices;
 
   /**
-   * @brief Storage for current density.
-   * @note Defined over the fluid realm with SpaceDim components.
+   * @brief Current density for plot files.
+   * @details Allocated and filled in prePlot when the current density is plotted, and cleared in postPlot. Defined
+   * over the fluid realm with SpaceDim components.
    */
   EBAMRCellData m_currentDensity;
 
@@ -734,28 +711,11 @@ protected:
   EBAMRCellData m_neutralDensity;
 
   /**
-   * @brief Cell-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
+   * @brief Cell-centered conductivity for plot files.
+   * @details Allocated in prePlot when the conductivity is plotted and filled by the time stepper's prePlot, which
+   * knows the conductivity of its field solve. Cleared in postPlot. Defined on the fluid realm with 1 component.
    */
   EBAMRCellData m_conductivityCell;
-
-  /**
-   * @brief Face-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
-   */
-  EBAMRFluxData m_conductivityFace;
-
-  /**
-   * @brief EB-centered conductivity.
-   * @note Defined on the fluid realm with 1 component
-   */
-  EBAMRIVData m_conductivityEB;
-
-  /**
-   * @brief For holding the mean particle energy
-   * @note Defined on the particle realm with components = number of plasma species
-   */
-  EBAMRCellData m_particleEPS;
 
   /**
    * @brief Storage for holding the plasma phase electric field on the fluid realm
@@ -766,24 +726,6 @@ protected:
    * @brief Storage for holding the plasma phase electric field on the particle realm
    */
   EBAMRCellData m_electricFieldParticle;
-
-  /**
-   * @brief Storage for the non-critical time step computed by ItoKMCPhysics.
-   * @details This is computed using the non-critical reactions assuming eps=1
-   * @note Defined on the fluid realm.
-   */
-  EBAMRCellData m_kmcDt;
-
-  /**
-   * @brief Storage for holding the energy sources for each species.
-   * @note Defined on the particle realm but about to get deprecated when we switch to the new reaction algorithm.
-   */
-  Vector<EBAMRCellData> m_energySources;
-
-  /**
-   * @brief Storage for E·J (Ohmic heating) on the fluid realm. 1 component.
-   */
-  EBAMRCellData m_EdotJ;
 
   /**
    * @brief Scratch storage for the surface species on the particle realm, one component per surface species.
@@ -1174,13 +1116,23 @@ protected:
                           const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
 
   /**
-   * @brief Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm.
-   * @details This will compute the gradients using the results in the solvers. The user should make sure he/she
-   * deposits the Ito particles before calling this routine. The results are put in m_fluidGradPhiCDR and and
-   * m_fluidGradPhiito
+   * @brief Compute the densities and density gradients that the reaction kernels read, on the fluid realm.
+   * @details The fields are fetched from the scratch pool into a_storage. Only the species that the physics needs a
+   * gradient for are computed: for them, the fluid-realm Ito density and the density gradient. All other entries
+   * point to shared zero fields. The solvers' mesh densities are read as they are; the time step deposits the Ito
+   * particles of those species first.
+   * @param[out] a_storage              Handles of the fields. They must outlive the pointers below.
+   * @param[out] a_densitiesIto         Fluid-realm density per Ito species.
+   * @param[out] a_densityGradientsIto  Density gradient per Ito species.
+   * @param[out] a_densityGradientsCDR  Density gradient per CDR species.
+   * @param[in]  a_computeGradients     If false, every entry points to the zero fields.
    */
   virtual void
-  computeDensityGradients() noexcept;
+  computeDensityGradients(std::vector<Scratch<EBAMRCellData>>& a_storage,
+                          Vector<const EBAMRCellData*>&        a_densitiesIto,
+                          Vector<const EBAMRCellData*>&        a_densityGradientsIto,
+                          Vector<const EBAMRCellData*>&        a_densityGradientsCDR,
+                          const bool                           a_computeGradients) noexcept;
 
   /**
    * @brief Compute the current density.
@@ -1342,7 +1294,7 @@ protected:
    * @param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the
    * particle realm.
    * @param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the
-   * fluid realm.
+   * fluid realm. Null for species that do not diffuse.
    * @param[in]  a_electricField            Electric field. Must be defined on the fluid realm.
    * @param[in]  a_time                     Time
    */
@@ -1391,10 +1343,12 @@ protected:
                                const Real          a_time) noexcept;
 
   /**
-   * @brief Average cell-centered diffusion coefficient to faces
+   * @brief Average cell-centered diffusion coefficients to the faces of the CDR solvers.
+   * @param[in,out] a_cellCenteredDiffusionCoefficients Cell-centered diffusion coefficient per CDR species, null for
+   * species that do not diffuse. Coarsened and ghost-filled here before the averaging.
    */
   virtual void
-  averageDiffusionCoefficientsCellToFace() noexcept;
+  averageDiffusionCoefficientsCellToFace(const Vector<EBAMRCellData*>& a_cellCenteredDiffusionCoefficients) noexcept;
 
   /**
    * @brief Get the physical number of particles per cell.
@@ -1513,46 +1467,58 @@ protected:
                                      const EBISBox&  a_ebisbox) noexcept;
 
   /**
-   * @brief Chemistry advance over time a_dt
-   * @param[in] a_dt Time step
-   * @note This will call the other version. The kernel will only run over valid grid cells (not covered by a finer
-   * grid.
-   */
-  virtual void
-  advanceReactionNetwork(const Real a_dt) noexcept;
-
-  /**
    * @brief Chemistry advance over time a_dt. AMR version.
-   * @param[in] a_dt            Time step
    * @note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not
    * covered by a finer grid.
-   * @param[in] a_E E
+   * @param[out] a_physicsDt             Non-critical KMC time step per cell. Read by computePhysicsDt.
+   * @param[in]  a_E                     Electric field.
+   * @param[in]  a_densitiesIto          Fluid-realm density per Ito species, from computeDensityGradients.
+   * @param[in]  a_densityGradientsIto   Density gradient per Ito species, from computeDensityGradients.
+   * @param[in]  a_densityGradientsCDR   Density gradient per CDR species, from computeDensityGradients.
+   * @param[in]  a_dt                    Time step
    */
   virtual void
-  advanceReactionNetwork(const EBAMRCellData& a_E, const Real a_dt) noexcept;
+  advanceReactionNetwork(EBAMRCellData&                      a_physicsDt,
+                         const EBAMRCellData&                a_E,
+                         const Vector<const EBAMRCellData*>& a_densitiesIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                         const Real                          a_dt) noexcept;
 
   /**
    * @brief Chemistry advance over time a_dt. Level version.
    * @param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
    * @param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+   * @param[out]   a_physicsDt             Non-critical KMC time step per cell.
    * @param[in]    a_electricField         Electric field.
+   * @param[in]    a_densitiesIto          Fluid-realm density per Ito species.
+   * @param[in]    a_densityGradientsIto   Density gradient per Ito species.
+   * @param[in]    a_densityGradientsCDR   Density gradient per CDR species.
    * @param[in]    a_level                 Grid level
    * @param[in]    a_dt                    Time increment
    * @note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel
    * will only run over valid grid cells (not covered by a finer grid.
    */
   inline void
-  advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
-                         LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-                         const LevelData<EBCellFAB>& a_electricField,
-                         const int                   a_level,
-                         const Real                  a_dt) const noexcept;
+  advanceReactionNetwork(LevelData<EBCellFAB>&               a_particlesPerCell,
+                         LevelData<EBCellFAB>&               a_newPhotonsPerCell,
+                         LevelData<EBCellFAB>&               a_physicsDt,
+                         const LevelData<EBCellFAB>&         a_electricField,
+                         const Vector<const EBAMRCellData*>& a_densitiesIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                         const int                           a_level,
+                         const Real                          a_dt) const noexcept;
 
   /**
    * @brief Chemistry advance over time a_dt. Patch version.
    * @param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
    * @param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+   * @param[out]   a_physicsDt             Non-critical KMC time step per cell.
    * @param[in]    a_electricField         Electric field.
+   * @param[in]    a_densitiesIto          Fluid-realm density per Ito species.
+   * @param[in]    a_densityGradientsIto   Density gradient per Ito species.
+   * @param[in]    a_densityGradientsCDR   Density gradient per CDR species.
    * @param[in]    a_level                 Grid level
    * @param[in]    a_din                   Grid index.
    * @param[in]    a_box                   Grid box
@@ -1562,14 +1528,18 @@ protected:
    * will only run over valid grid cells (not covered by a finer grid.
    */
   inline void
-  advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
-                         EBCellFAB&       a_newPhotonsPerCell,
-                         const EBCellFAB& a_electricField,
-                         const int        a_level,
-                         const DataIndex  a_din,
-                         const Box        a_box,
-                         const Real       a_dx,
-                         const Real       a_dt) const noexcept;
+  advanceReactionNetwork(EBCellFAB&                          a_particlesPerCell,
+                         EBCellFAB&                          a_newPhotonsPerCell,
+                         EBCellFAB&                          a_physicsDt,
+                         const EBCellFAB&                    a_electricField,
+                         const Vector<const EBAMRCellData*>& a_densitiesIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsIto,
+                         const Vector<const EBAMRCellData*>& a_densityGradientsCDR,
+                         const int                           a_level,
+                         const DataIndex                     a_din,
+                         const Box                           a_box,
+                         const Real                          a_dx,
+                         const Real                          a_dt) const noexcept;
 
   /**
    * @brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -1723,11 +1693,13 @@ protected:
 
   /**
    * @brief Resolve particle injection at EBs.
-   * @param[in] a_dt Time step.
    * @note Calls the other version.
+   * @param[out] a_cdrFluxes CDR fluxes for the EB boundary conditions, on the particle realm, one per CDR species.
+   * Read by resolveSecondaryEmissionEB.
+   * @param[in]  a_dt        Time step.
    */
   virtual void
-  fillSecondaryEmissionEB(const Real a_dt) noexcept;
+  fillSecondaryEmissionEB(Vector<EBAMRIVData*>& a_cdrFluxes, const Real a_dt) noexcept;
 
   /**
    * @brief Compute secondary emission at the EB.
@@ -1747,7 +1719,7 @@ protected:
    */
   virtual void
   fillSecondaryEmissionEB(Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
-                          Vector<EBAMRIVData>&                                   a_cdrFluxes,
+                          Vector<EBAMRIVData*>&                                  a_cdrFluxes,
                           Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
                           EBAMRIVData&                                           a_surfaceSpecies,
                           Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
@@ -1760,10 +1732,20 @@ protected:
    * @brief Resolve secondary emission at the EB.
    * @details Calls the other version, which updates the surface charge, and then adds the change in the surface
    * species densities computed by fillSecondaryEmissionEB() to the surface species solvers.
-   * @param[in] a_dt Time step.
+   * @param[in] a_cdrFluxes CDR fluxes for the EB boundary conditions, from fillSecondaryEmissionEB.
+   * @param[in] a_dt        Time step.
    */
   virtual void
-  resolveSecondaryEmissionEB(const Real a_dt) noexcept;
+  resolveSecondaryEmissionEB(const Vector<EBAMRIVData*>& a_cdrFluxes, const Real a_dt) noexcept;
+
+  /**
+   * @brief Fetch the CDR fluxes that fillSecondaryEmissionEB and resolveSecondaryEmissionEB pass between them.
+   * @param[out] a_storage   Handles of the fluxes. They must outlive a_cdrFluxes.
+   * @param[out] a_cdrFluxes One flux per CDR species, on the particle realm.
+   */
+  virtual void
+  fetchSecondaryEmissionFluxesEB(std::vector<Scratch<EBAMRIVData>>& a_storage,
+                                 Vector<EBAMRIVData*>&              a_cdrFluxes) const noexcept;
 
   /**
    * @brief Resolve secondary emission at the EB.
@@ -1833,14 +1815,12 @@ protected:
 
   /**
    * @brief Compute a physics-based maximum time step.
-   * @details This routine simply returns the non-critical KMC time step. Note that this time step
-   * is the one computed AFTER advanceReactionNetwork has been called. I.e., this routine sets
-   * m_physicsDt based on m_nonCriticalTimeStep (which is filled in advanceReactionNetwork).
-   * @note Calling this routine without first calling advanceReactionNetwork is sure to lead to
-   * unintended side effects.
+   * @details Sets m_physicsDt to the smallest non-critical KMC time step that advanceReactionNetwork wrote into
+   * a_physicsDt.
+   * @param[in] a_physicsDt Non-critical KMC time step per cell, from advanceReactionNetwork.
    */
   virtual void
-  computePhysicsDt() noexcept;
+  computePhysicsDt(EBAMRCellData& a_physicsDt) noexcept;
 
   /**
    * @brief Special routine which performs a dummy KMC advance over a zero time step.
@@ -1923,14 +1903,6 @@ protected:
    */
   virtual void
   postCheckpointPoisson() noexcept;
-
-  /**
-   * @brief Compute the energy source term for the various plasma species
-   * @param[in] a_dt Time step during which the particles move.
-   * @note This fills m_EdotJ
-   */
-  virtual void
-  computeEdotJSource(const Real a_dt) noexcept;
 
   /**
    * @brief Fill surface charge solver with initial data taken from the physics interface.

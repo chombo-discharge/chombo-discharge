@@ -33,8 +33,7 @@
  * it is carried, and dropping the rest is lossless.
  *
  * @warning The old_x/y/z argument above expires the day anything writes those columns outside
- * ItoKMCGodunovStepper::advance(); ItoKMCStepper::computeEdotJSource() reads them and would be such a
- * caller if it were ever wired up (it has no callers anywhere in the tree today).
+ * ItoKMCGodunovStepper::advance().
  */
 struct ItoMergeParticle
 {
