@@ -58,50 +58,50 @@ public:
    * @brief Get the plasma reactants
    * @return Returns m_plasmaReactants
    */
-  const std::list<int>&
+  const std::vector<int>&
   getPlasmaReactants() const;
 
   /**
    * @brief Get the neutral reactants
    * @return Returns m_neutralReactants
    */
-  const std::list<int>&
+  const std::vector<int>&
   getNeutralReactants() const;
 
   /**
    * @brief Get the plasma products
    * @return Returns m_plasmaProducts
    */
-  const std::list<int>&
+  const std::vector<int>&
   getPlasmaProducts() const;
 
   /**
    * @brief Get the photon products
    * @return Returns m_photonProducts
    */
-  const std::list<int>&
+  const std::vector<int>&
   getPhotonProducts() const;
 
 protected:
   /**
    * @brief Plasma species on the left-hand side of the reaction
    */
-  std::list<int> m_plasmaReactants;
+  std::vector<int> m_plasmaReactants;
 
   /**
    * @brief Neutral species on the left-hand side of the reaction
    */
-  std::list<int> m_neutralReactants;
+  std::vector<int> m_neutralReactants;
 
   /**
    * @brief Particles on the right-hand side of the reaction
    */
-  std::list<int> m_plasmaProducts;
+  std::vector<int> m_plasmaProducts;
 
   /**
    * @brief Photons on the right-hand side of the reaction
    */
-  std::list<int> m_photonProducts;
+  std::vector<int> m_photonProducts;
 };
 } // namespace CdrPlasma
 } // namespace Physics

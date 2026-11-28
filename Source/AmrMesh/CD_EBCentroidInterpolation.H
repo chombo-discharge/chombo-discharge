@@ -128,7 +128,9 @@ protected:
   mutable LayoutData<VoFIterator> m_vofIterator;
 
   /**
-   * @brief Stencils. This is only populated when the interpolation is expressible as a stencil.
+   * @brief Stencils. For stencil-based interpolations, one stencil per cut cell. For the slope-limited interpolations,
+   * components 2*dir and 2*dir + 1 hold the cell's neighbor across the low and high face in direction dir (empty if
+   * there is none).
    */
   LayoutData<BaseIVFAB<VoFStencil>> m_interpStencils;
 

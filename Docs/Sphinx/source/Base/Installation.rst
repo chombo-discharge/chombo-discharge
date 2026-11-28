@@ -223,6 +223,10 @@ The main variables that the user needs to set are
 * ``USE_MF = TRUE`` — enables multifluid support. This is required.
 * ``USE_MT = TRUE/FALSE`` — enables ``Chombo`` memory tracking.
   Not compatible with OpenMP.
+* ``USE_TIMER = FALSE/TRUE`` — compiles in the ``Chombo`` function timers (``CH_TIME``).
+  The provided makefiles set ``FALSE``, because the timers cost time even when their output is disabled.
+  ``Chombo`` defaults to ``TRUE`` when the variable is not set.
+  See :ref:`Chap:PerformanceProfiling`.
 * ``USE_HDF = TRUE/FALSE`` — enables HDF5 output.
 * ``OPENMPCC = TRUE/FALSE`` — enables OpenMP threading.
 * ``USE_PETSC = TRUE/FALSE`` — links to PETSc.

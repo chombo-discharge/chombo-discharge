@@ -71,11 +71,6 @@ PetscHelmholtzDirichletEBBC::getEBFluxStencil(Real&            a_boundaryWeight,
                                               const DataIndex& a_din,
                                               const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzDirichletEBBC::getEBFluxStencil");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzDirichletEBBC::getEBFluxStencil" << endl;
-  }
-
   CH_assert(m_isDefined);
 
   // The flux is the one-sided normal derivative itself, with g = phi_B.
@@ -88,11 +83,6 @@ PetscHelmholtzDirichletEBBC::getBoundaryData(const int        a_phase,
                                              const DataIndex& a_din,
                                              const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzDirichletEBBC::getBoundaryData");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzDirichletEBBC::getBoundaryData" << endl;
-  }
-
   CH_assert(m_isDefined);
 
   Real value = 0.0;

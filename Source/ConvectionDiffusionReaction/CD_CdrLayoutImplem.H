@@ -55,11 +55,6 @@ template <class T>
 CdrIterator<T>
 CdrLayout<T>::iterator()
 {
-  CH_TIME("CdrLayout<T>::iterator()");
-  if (m_verbosity > 6) {
-    pout() << "CdrLayout<T>::iterator()" << endl;
-  }
-
   return CdrIterator<T>(*this);
 }
 
@@ -366,11 +361,6 @@ template <class T>
 Vector<RefCountedPtr<T>>&
 CdrLayout<T>::getSolvers()
 {
-  CH_TIME("CdrLayout<T>::getSolvers()");
-  if (m_verbosity > 5) {
-    pout() << "CdrLayout<T>::getSolvers()" << endl;
-  }
-
   return (m_solvers);
 }
 
@@ -378,11 +368,6 @@ template <class T>
 Vector<RefCountedPtr<CdrSpecies>>&
 CdrLayout<T>::getSpecies()
 {
-  CH_TIME("CdrLayout<T>::getSpecies()");
-  if (m_verbosity > 5) {
-    pout() << "CdrLayout<T>::getSpecies()" << endl;
-  }
-
   return (m_species);
 }
 

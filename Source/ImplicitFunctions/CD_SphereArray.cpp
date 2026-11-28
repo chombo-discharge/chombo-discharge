@@ -88,8 +88,6 @@ SphereArray::~SphereArray()
 Real
 SphereArray::value(const RealVect& a_point) const
 {
-  CH_TIME("SphereArray::value");
-
 #if CH_SPACEDIM == 2
   const EBGeometry::Vec3T<Real> x(a_point[0], a_point[1], 0.0);
 #else

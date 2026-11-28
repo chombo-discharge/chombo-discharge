@@ -63,8 +63,6 @@ NeedleIF::NeedleIF(const NeedleIF& a_inputIF)
 Real
 NeedleIF::value(const RealVect& a_point) const
 {
-  CH_TIME("NeedleIF::value");
-
   // round of the point of the needle with + m_tipRadius. Gives a curvature radius of m_tipRadius
   return m_implicitFunction->value(a_point) + m_tipRadius;
 }

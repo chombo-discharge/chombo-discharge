@@ -34,10 +34,8 @@ CellCentroidInterpolation::interpolate(T&               a_centroidData,
   CH_assert(a_cellData.isDefined());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
 
   const EBISBox&               ebisBox  = ebisl[a_din];
   const Box&                   cellBox  = dbl[a_din];
@@ -62,38 +60,27 @@ CellCentroidInterpolation::interpolate(T&               a_centroidData,
 
     // Kernel used when interpolation is done with a slope limiter.
     auto slopeKernel = [&](const VolIndex& vof) -> void {
-      const IntVect iv = vof.gridIndex();
-
       a_centroidData(vof, comp) = a_cellData(vof, comp);
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         Real slope = 0.0;
 
-        const bool onLoSide = (iv[dir] == domainBox.smallEnd(dir));
-        const bool onHiSide = (iv[dir] == domainBox.bigEnd(dir));
+        // Neighbors across the low and high faces, found in define().
+        const VoFStencil& neighborLeft  = stencils(vof, 2 * dir);
+        const VoFStencil& neighborRight = stencils(vof, 2 * dir + 1);
 
-        const bool hasFacesLeft  = (ebisBox.numFaces(vof, dir, Side::Lo) == 1) && !onLoSide;
-        const bool hasFacesRight = (ebisBox.numFaces(vof, dir, Side::Hi) == 1) && !onHiSide;
-
-        Vector<FaceIndex> facesLeft;
-        Vector<FaceIndex> facesRight;
-
-        VolIndex vofLeft;
-        VolIndex vofRight;
+        const bool hasFacesLeft  = neighborLeft.size() > 0;
+        const bool hasFacesRight = neighborRight.size() > 0;
 
         Real dwl = 0.0;
         Real dwr = 0.0;
 
         // Compute left and right slope
         if (hasFacesLeft) {
-          facesLeft = ebisBox.getFaces(vof, dir, Side::Lo);
-          vofLeft   = facesLeft[0].getVoF(Side::Lo);
-          dwl       = a_cellData(vof, comp) - a_cellData(vofLeft, comp);
+          dwl = a_cellData(vof, comp) - a_cellData(neighborLeft.vof(0), comp);
         }
         if (hasFacesRight) {
-          facesRight = ebisBox.getFaces(vof, dir, Side::Hi);
-          vofRight   = facesRight[0].getVoF(Side::Hi);
-          dwr        = a_cellData(vofRight, comp) - a_cellData(vof, comp);
+          dwr = a_cellData(neighborRight.vof(0), comp) - a_cellData(vof, comp);
         }
 
         if (!hasFacesLeft && hasFacesRight) {

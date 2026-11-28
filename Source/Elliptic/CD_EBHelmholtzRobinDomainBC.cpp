@@ -139,8 +139,6 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                       const DataIndex&      a_dit,
                                       const bool            a_useHomogeneous) const
 {
-  CH_TIME("EBHelmholtzRobinDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
-
   const int            isign   = (a_side == Side::Lo) ? -1 : 1;
   const IntVect        iv      = a_vof.gridIndex();
   const EBISBox&       ebisbox = m_eblg.getEBISL()[a_dit];
