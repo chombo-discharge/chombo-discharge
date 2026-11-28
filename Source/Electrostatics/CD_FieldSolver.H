@@ -696,6 +696,11 @@ protected:
   bool m_regridSlopes;
 
   /**
+   * @brief If true, solve() fills the covered cells with the electrode potential. Useful only for visualization.
+   */
+  bool m_fillElectrodePotential;
+
+  /**
    * @brief Verbosity for this class.
    */
   int m_verbosity;
@@ -764,6 +769,12 @@ protected:
    */
   virtual void
   parseRegridSlopes();
+
+  /**
+   * @brief Parse the optional fill_electrode_potential flag (default false).
+   */
+  virtual void
+  parseFillElectrodePotential();
 
   /**
    * @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction, which

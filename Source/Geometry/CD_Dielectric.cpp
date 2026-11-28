@@ -72,8 +72,6 @@ Dielectric::define(const RefCountedPtr<BaseIF>&                     a_baseIF,
 const RefCountedPtr<BaseIF>&
 Dielectric::getImplicitFunction() const
 {
-  CH_TIME("Dielectric::getImplicitFunction()");
-
   CH_assert(m_isDefined);
 
   return (m_baseIF);
@@ -82,8 +80,6 @@ Dielectric::getImplicitFunction() const
 Real
 Dielectric::getPermittivity(const RealVect& a_pos) const
 {
-  CH_TIME("Dielectric::getPermittivity(RealVect)");
-
   CH_assert(m_isDefined);
 
   Real ret = 1.0;

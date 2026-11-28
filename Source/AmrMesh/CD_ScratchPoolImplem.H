@@ -325,6 +325,13 @@ ScratchPool::typeName<EBAMRIVData>() noexcept
 
 template <>
 inline const char*
+ScratchPool::typeName<EBAMRIFData>() noexcept
+{
+  return "EBAMRIFData";
+}
+
+template <>
+inline const char*
 ScratchPool::typeName<EBAMRFAB>() noexcept
 {
   return "EBAMRFAB";

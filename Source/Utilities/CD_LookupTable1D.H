@@ -249,11 +249,23 @@ protected:
 
   /**
    * @brief Get the lower index that brackets the input variable between two data points in the structured grid.
+   * @details For exponential spacing, the index is estimated from approximateLog2 and then corrected by comparing a_x
+   * with the grid points, so that the returned interval contains a_x.
    * @param[in] a_x Independent variable.
    * @return Index lo
    */
   inline size_t
   getIndexLo(const T& a_x) const;
+
+  /**
+   * @brief Approximate log2(a_x) for a_x > 0, without calling the math library logarithm.
+   * @details Splits a_x into its binary exponent and mantissa and evaluates a cubic for the mantissa. The cubic is
+   * exact at the ends of each binade, and the error is at most about 1e-3. Only used to estimate table indices.
+   * @param[in] a_x Positive number.
+   * @return Approximation of log2(a_x).
+   */
+  static inline T
+  approximateLog2(const T a_x) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

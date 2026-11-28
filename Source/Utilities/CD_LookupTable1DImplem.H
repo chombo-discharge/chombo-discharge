@@ -15,6 +15,10 @@
 
 // Std includes
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <type_traits>
 #include <math.h>
 #include <iomanip>
 #include <fstream>
@@ -78,12 +82,15 @@ LookupTable1D<T, N, I>::swap(const size_t a_columnOne, const size_t a_columnTwo)
     r[a_columnTwo] = tmp;
   }
 
+  // If the independent variable was one of the swapped columns, it now lives in the other one.
   if (m_isGood) {
-    if (a_columnOne == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) = a_columnOne;
+    size_t& indVar = std::get<1>(m_grid);
+
+    if (a_columnOne == indVar) {
+      indVar = a_columnTwo;
     }
-    else if (a_columnTwo == std::get<4>(m_grid)) {
-      std::get<4>(m_grid) = a_columnTwo;
+    else if (a_columnTwo == indVar) {
+      indVar = a_columnOne;
     }
   }
 }
@@ -101,8 +108,15 @@ LookupTable1D<T, N, I>::scale(const T& a_scale) noexcept
     r[K] *= a_scale;
   }
 
-  if (m_isGood && K == std::get<2>(m_grid)) {
-    std::get<4>(m_grid) *= a_scale;
+  // Scaling the independent variable scales the grid range. Uniform spacing scales with it; exponential spacing is
+  // a spacing in log10(x) and does not change.
+  if (m_isGood && K == std::get<1>(m_grid)) {
+    std::get<2>(m_grid) *= a_scale;
+    std::get<3>(m_grid) *= a_scale;
+
+    if (std::get<0>(m_grid) == LookupTable::Spacing::Uniform) {
+      std::get<4>(m_grid) *= a_scale;
+    }
   }
 }
 
@@ -348,7 +362,13 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
     break;
   }
   case LookupTable::Spacing::Exponential: {
-    idxLo = static_cast<long long>(std::floor(log10(a_x / x0) / delta));
+    // log10(a_x/x0)/delta, but with log10 replaced by an approximation of log2: log10(r) = log2(r) * log10(2). The
+    // estimate may be off by an interval; it is corrected below by comparing a_x with the grid points.
+    constexpr T log10Two = 0.30102999566398119521;
+
+    const T ratio = a_x / x0;
+
+    idxLo = (ratio > T(0)) ? static_cast<long long>(std::floor(approximateLog2(ratio) * (log10Two / delta))) : 0LL;
 
     break;
   }
@@ -365,7 +385,59 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
   // 50 points over three. Clamping to the last interval is correct in both directions: linear
   // interpolation there returns the endpoint value exactly at xmax, and the lower clamp absorbs a
   // -0.0 at xmin.
-  return static_cast<size_t>(std::min(std::max(idxLo, 0LL), static_cast<long long>(numPoints) - 2));
+  size_t idx = static_cast<size_t>(std::min(std::max(idxLo, 0LL), static_cast<long long>(numPoints) - 2));
+
+  // The exponential estimate is approximate. Move to the interval [x_idx, x_{idx+1}) that contains a_x, staying inside
+  // the clamped range.
+  if (spacing == LookupTable::Spacing::Exponential) {
+    const size_t& indVar = std::get<1>(m_grid);
+
+    while (idx > 0 && a_x < m_structuredData[idx][indVar]) {
+      idx--;
+    }
+
+    while (idx < numPoints - 2 && a_x >= m_structuredData[idx + 1][indVar]) {
+      idx++;
+    }
+  }
+
+  return idx;
+}
+
+template <typename T, size_t N, typename I>
+inline T
+LookupTable1D<T, N, I>::approximateLog2(const T a_x) noexcept
+{
+  // Write a_x = (1 + t) * 2^exponent with t in [0, 1), and approximate log2(1 + t) by a cubic that is exact at t = 0
+  // and t = 1. The maximum error is about 1e-3.
+  auto log2OnePlus = [](const T t) -> T {
+    return t + t * (T(1) - t) * (T(0.42086454) - T(0.15638611) * t);
+  };
+
+  // Normal IEEE doubles: read the exponent and mantissa from the bits, which avoids the library call in std::frexp.
+  if constexpr (std::is_same<T, double>::value) {
+    std::uint64_t bits;
+
+    std::memcpy(&bits, &a_x, sizeof(bits));
+
+    const int biasedExponent = static_cast<int>((bits >> 52) & 0x7FF);
+
+    if (biasedExponent != 0 && biasedExponent != 0x7FF) {
+      const std::uint64_t mantissaBits = (bits & 0x000FFFFFFFFFFFFFULL) | 0x3FF0000000000000ULL;
+
+      double mantissa;
+
+      std::memcpy(&mantissa, &mantissaBits, sizeof(mantissa));
+
+      return T(biasedExponent - 1023) + log2OnePlus(mantissa - 1.0);
+    }
+  }
+
+  // Other types, zero, subnormals, infinity and NaN: a_x = m * 2^e with m in [0.5, 1), so t = 2m - 1.
+  int     exponent = 0;
+  const T mantissa = std::frexp(a_x, &exponent);
+
+  return T(exponent - 1) + log2OnePlus(T(2) * mantissa - T(1));
 }
 
 template <typename T, size_t N, typename I>

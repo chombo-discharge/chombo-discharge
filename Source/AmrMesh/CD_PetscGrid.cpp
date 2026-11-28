@@ -323,11 +323,6 @@ PetscGrid::getPetscStencil(const VoFStencil& a_stencil,
                            const DataIndex&  a_din,
                            const int         a_phase) const noexcept
 {
-  CH_TIME("PetscGrid::getPetscStencil");
-  if (m_verbose) {
-    pout() << "PetscGrid::getPetscStencil" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level <= m_finestLevel);
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
@@ -348,11 +343,6 @@ PetscGrid::getPetscStencilWithFinerLevel(const VoFStencil& a_stencil,
                                          const DataIndex&  a_din,
                                          const int         a_phase) const noexcept
 {
-  CH_TIME("PetscGrid::getPetscStencilWithFinerLevel");
-  if (m_verbose) {
-    pout() << "PetscGrid::getPetscStencilWithFinerLevel" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level < m_finestLevel);
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
@@ -375,11 +365,6 @@ PetscGrid::getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,
                                            const DataIndex&  a_din,
                                            const int         a_phase) const noexcept
 {
-  CH_TIME("PetscGrid::getPetscStencilWithCoarserLevel");
-  if (m_verbose) {
-    pout() << "PetscGrid::getPetscStencilWithCoarserLevel" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_level > 0 && a_level <= m_finestLevel);
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
@@ -402,11 +387,6 @@ PetscGrid::replaceGhostCells(VoFStencil&                                   a_ste
                              const int                                     a_level,
                              const DataIndex&                              a_din) const noexcept
 {
-  CH_TIME("PetscGrid::replaceGhostCells");
-  if (m_verbose) {
-    pout() << "PetscGrid::replaceGhostCells" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level <= m_finestLevel);
 
@@ -456,11 +436,6 @@ PetscGrid::getPetscStencilWithGhostCells(const VoFStencil&                      
                                          const DataIndex&                              a_din,
                                          const int                                     a_phase) const noexcept
 {
-  CH_TIME("PetscGrid::getPetscStencilWithGhostCells");
-  if (m_verbose) {
-    pout() << "PetscGrid::getPetscStencilWithGhostCells" << endl;
-  }
-
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level <= m_finestLevel);
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
@@ -501,11 +476,6 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
                    const int                    a_phase,
                    const std::string&           a_what) const noexcept
 {
-  CH_TIME("PetscGrid::addRows");
-  if (m_verbose) {
-    pout() << "PetscGrid::addRows" << endl;
-  }
-
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
 
   // Both checks abort in every build rather than being assertions. An entry outside the map would read out of bounds,

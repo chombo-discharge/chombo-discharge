@@ -673,8 +673,8 @@ public:
   /**
    * @brief Compute diffusion coefficients on cell centers. This version does the irregular cells.
    * @param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers.
-   * @param[in]  a_cdrDensities      Cell-centered CDR densities
-   * @param[in]  a_electricFieldCell Cell-centered electric field
+   * @param[in]  a_cdrDensities      CDR densities, holding the cell centroid values in the irregular cells
+   * @param[in]  a_electricFieldCell Electric field, holding the cell centroid values in the irregular cells
    * @param[in]  a_dx                Grid resolution
    * @param[in]  a_time              Time
    * @param[in]  a_lvl               Grid level
@@ -790,8 +790,8 @@ public:
    * @brief Compute the cell-centered CDR velocities.
    * @details This is patch version for irregular grid cells.
    * @param[out] a_cdrVelocities Cell-centered CDR drift velocities.
-   * @param[in]  a_cdrDensities  Cell-centered CDR densities.
-   * @param[in]  a_electricField The cell-centered electric field.
+   * @param[in]  a_cdrDensities  CDR densities, holding the cell centroid values in the irregular cells.
+   * @param[in]  a_electricField Electric field, holding the cell centroid values in the irregular cells.
    * @param[in]  a_time          Time.
    * @param[in]  a_dx            Grid resolution.
    * @param[in]  a_lvl           Grid level.
@@ -1000,7 +1000,8 @@ public:
                            const EBAMRCellData&     a_cellData);
 
   /**
-   * @brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+   * @brief Extrapolate cell-centered data to domain faces. This is the level version.
+   * @details Only the domain faces of the valid boxes are written.
    * @param[out] a_domainData Domain-centered data
    * @param[in]  a_phase      Phase
    * @param[in]  a_cellData   Cell-centered data.
@@ -1081,11 +1082,13 @@ public:
 
   /**
    * @brief Project flux onto domain edges/faces.
+   * @details Only the domain faces of the valid boxes are written.
    * @param[out] a_projectedFlux Projected flux -- must have one component.
    * @param[in]  a_flux          Vector flux -- must have SpaceDim components.
+   * @param[in]  a_phase         Phase of the data.
    */
   virtual void
-  projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux);
+  projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux, const phase::which_phase a_phase);
 
   /**
    * @brief Regrid internal storage. This MUST be overwritten by implementations.

@@ -97,7 +97,7 @@ public:
   regrid(const int a_lbase, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /**
-   * @brief Pre-regrid hook — releases the grown VoF iterators.
+   * @brief Pre-regrid hook — releases the grown VoF iterators and the cut-cell neighbors.
    * @param[in] a_lbase          Coarsest level that changes
    * @param[in] a_oldFinestLevel Finest level before regrid
    */
@@ -109,6 +109,14 @@ protected:
    * @brief Pre-built VoFIterators over grow(validBox,1) for the irregular kernel in computeNormalSlopes.
    */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_grownVofIter;
+
+  /**
+   * @brief Neighbors of the cut cells in m_grownVofIter, for the irregular kernel in computeNormalSlopes.
+   * @details Components 2*dir and 2*dir + 1 hold one entry for each face of the cut cell on the low and high side in
+   * direction dir, namely the VoF across that face. They are empty on the domain boundary side, so the number of
+   * entries is the number of interior faces on that side.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>> m_grownNeighbors;
 
   /**
    * @brief Get the EB normal of a cut cell, pointing into the fluid.
@@ -195,7 +203,7 @@ protected:
                 const Real       a_dt) noexcept;
 
   /**
-   * @brief Build m_grownVofIter for all AMR levels.
+   * @brief Build m_grownVofIter and m_grownNeighbors for all AMR levels.
    */
   void
   defineIterators();

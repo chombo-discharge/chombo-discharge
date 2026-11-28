@@ -164,6 +164,10 @@ PhaseRealm::preRegrid()
   m_faceIterNoBoundary.resize(0);
   m_faceIterTanGhost.resize(0);
   m_multiCutFaceIter.resize(0);
+  m_domainFaceIterLo.resize(0);
+  m_domainFaceIterHi.resize(0);
+  m_domainFaceIterTanGhostLo.resize(0);
+  m_domainFaceIterTanGhostHi.resize(0);
   m_coarAve.resize(0);
   m_multigridInterpolator.resize(0);
   m_ebFineInterp.resize(0);
@@ -1019,6 +1023,10 @@ PhaseRealm::defineVofIterator(const int a_lmin)
   m_faceIterNoBoundary.resize(1 + m_finestLevel);
   m_faceIterTanGhost.resize(1 + m_finestLevel);
   m_multiCutFaceIter.resize(1 + m_finestLevel);
+  m_domainFaceIterLo.resize(1 + m_finestLevel);
+  m_domainFaceIterHi.resize(1 + m_finestLevel);
+  m_domainFaceIterTanGhostLo.resize(1 + m_finestLevel);
+  m_domainFaceIterTanGhostHi.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
@@ -1031,6 +1039,14 @@ PhaseRealm::defineVofIterator(const int a_lmin)
     m_faceIterTanGhost[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
       new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
     m_multiCutFaceIter[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_domainFaceIterLo[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_domainFaceIterHi[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_domainFaceIterTanGhostLo[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_domainFaceIterTanGhostHi[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
       new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1084,6 +1100,35 @@ PhaseRealm::defineVofIterator(const int a_lmin)
       std::array<FaceIterator, SpaceDim>& multiCutFaceIter = (*m_multiCutFaceIter[lvl])[din];
       for (int dir = 0; dir < SpaceDim; dir++) {
         multiCutFaceIter[dir].define(multiCut, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+      }
+
+      // Domain-face iterators over the cells that lie next to each domain side, regular cells included. The first
+      // pair uses the cells of the valid box, the second the valid box grown by one cell in the tangential directions.
+      // The cell strips are empty for boxes that do not touch that side.
+      std::array<FaceIterator, SpaceDim>& domainFaceIterLo         = (*m_domainFaceIterLo[lvl])[din];
+      std::array<FaceIterator, SpaceDim>& domainFaceIterHi         = (*m_domainFaceIterHi[lvl])[din];
+      std::array<FaceIterator, SpaceDim>& domainFaceIterTanGhostLo = (*m_domainFaceIterTanGhostLo[lvl])[din];
+      std::array<FaceIterator, SpaceDim>& domainFaceIterTanGhostHi = (*m_domainFaceIterTanGhostHi[lvl])[din];
+
+      const Box& domainBox = m_domains[lvl].domainBox();
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        Box tanBox = cellBox;
+        for (int tanDir = 0; tanDir < SpaceDim; tanDir++) {
+          if (tanDir != dir) {
+            tanBox.grow(tanDir, 1);
+          }
+        }
+        tanBox &= domainBox;
+
+        const Box stripLo = adjCellLo(domainBox, dir, -1);
+        const Box stripHi = adjCellHi(domainBox, dir, -1);
+
+        domainFaceIterLo[dir].define(IntVectSet(stripLo & cellBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
+        domainFaceIterHi[dir].define(IntVectSet(stripHi & cellBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
+
+        domainFaceIterTanGhostLo[dir].define(IntVectSet(stripLo & tanBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
+        domainFaceIterTanGhostHi[dir].define(IntVectSet(stripHi & tanBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
       }
     }
   }
@@ -2410,6 +2455,18 @@ Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
 PhaseRealm::getMultiCutFaceIterator() const
 {
   return m_multiCutFaceIter;
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+PhaseRealm::getDomainFaceIterator(const Side::LoHiSide a_side) const
+{
+  return (a_side == Side::Lo) ? m_domainFaceIterLo : m_domainFaceIterHi;
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+PhaseRealm::getDomainFaceIteratorWithTangentialGhosts(const Side::LoHiSide a_side) const
+{
+  return (a_side == Side::Lo) ? m_domainFaceIterTanGhostLo : m_domainFaceIterTanGhostHi;
 }
 
 const Vector<RefCountedPtr<EBGradient>>&

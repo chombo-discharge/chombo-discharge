@@ -95,8 +95,10 @@ public:
 
   /**
    * @brief Evaluate the extra plot variables at a single grid point.
-   * @details Called by CdrPlasmaStepper when writing plot files. The length of the returned
-   * vector must match getNumberOfPlotVariables().
+   * @details Called by CdrPlasmaStepper when writing plot files. The default implementation sets every plot variable
+   * to one.
+   * @param[out] a_plotVariables Plot variable values. Sized to getNumberOfPlotVariables() by the caller; every entry
+   * is written.
    * @param[in] a_cdrDensities  CDR species densities at this point.
    * @param[in] a_cdrGradients  CDR species density gradients at this point.
    * @param[in] a_rteDensities  RTE photon densities at this point.
@@ -106,10 +108,10 @@ public:
    * @param[in] a_dt            Time step used in the last advance.
    * @param[in] a_time          Current simulation time.
    * @param[in] a_kappa         Volume fraction of the grid cell.
-   * @return Vector of plot variable values.
    */
-  virtual Vector<Real>
-  getPlotVariables(const Vector<Real>&     a_cdrDensities,
+  virtual void
+  getPlotVariables(Vector<Real>&           a_plotVariables,
+                   const Vector<Real>&     a_cdrDensities,
                    const Vector<RealVect>& a_cdrGradients,
                    const Vector<Real>&     a_rteDensities,
                    const RealVect&         a_E,
@@ -117,9 +119,11 @@ public:
                    const Real              a_dx,
                    const Real              a_dt,
                    const Real              a_time,
-                   const Real              a_kappa) const
+                   const Real              a_kappa) const noexcept
   {
-    return Vector<Real>(this->getNumberOfPlotVariables(), 1.0);
+    for (int i = 0; i < a_plotVariables.size(); i++) {
+      a_plotVariables[i] = 1.0;
+    }
   }
 
   /**
@@ -130,7 +134,7 @@ public:
    * @return Townsend ionization coefficient (1/m).
    */
   virtual Real
-  computeAlpha(const Real a_E, const RealVect& a_position) const = 0;
+  computeAlpha(const Real a_E, const RealVect& a_position) const noexcept = 0;
 
   /**
    * @brief Compute the Townsend attachment coefficient eta.
@@ -140,15 +144,17 @@ public:
    * @return Townsend attachment coefficient (1/m).
    */
   virtual Real
-  computeEta(const Real a_E, const RealVect& a_position) const = 0;
+  computeEta(const Real a_E, const RealVect& a_position) const noexcept = 0;
 
   /**
    * @brief Advance the reaction network over a time interval and return source terms.
    * @details The advance is assumed to take the form phi^{k+1} = phi^k + S * dt. Implementations
    * may either fill a_cdrSources and a_rteSources directly (explicit rule), or perform a
    * fully implicit sub-step and back out the equivalent source S from the result.
-   * @param[out] a_cdrSources   CDR source terms (same ordering as m_cdrSpecies).
-   * @param[out] a_rteSources   RTE source terms (same ordering as m_rtSpecies).
+   * @param[out] a_cdrSources   CDR source terms (same ordering as m_cdrSpecies). Sized to the number of CDR species by
+   * the caller; every entry is written.
+   * @param[out] a_rteSources   RTE source terms (same ordering as m_rtSpecies). Sized to the number of RTE species by
+   * the caller; every entry is written.
    * @param[in]  a_cdrDensities CDR species densities at this point.
    * @param[in]  a_cdrGradients CDR species density gradients at this point.
    * @param[in]  a_rteDensities RTE photon densities at this point.
@@ -170,40 +176,46 @@ public:
                          const Real              a_dx,
                          const Real              a_dt,
                          const Real              a_time,
-                         const Real              a_kappa) const = 0;
+                         const Real              a_kappa) const noexcept = 0;
 
   /**
    * @brief Compute drift velocities for all CDR species.
+   * @param[out] a_velocities  Drift velocity vectors in the same order as m_cdrSpecies. Sized to the number of CDR
+   * species by the caller; every entry is written.
    * @param[in] a_time         Current simulation time.
    * @param[in] a_pos          Physical position.
    * @param[in] a_E            Electric field vector.
    * @param[in] a_cdrDensities CDR species densities.
-   * @return Drift velocity vectors in the same order as m_cdrSpecies.
    */
-  virtual Vector<RealVect>
-  computeCdrDriftVelocities(const Real          a_time,
+  virtual void
+  computeCdrDriftVelocities(Vector<RealVect>&   a_velocities,
+                            const Real          a_time,
                             const RealVect&     a_pos,
                             const RealVect&     a_E,
-                            const Vector<Real>& a_cdrDensities) const = 0;
+                            const Vector<Real>& a_cdrDensities) const noexcept = 0;
 
   /**
    * @brief Compute diffusion coefficients for all CDR species.
+   * @param[out] a_diffusionCoefficients Scalar diffusion coefficients in the same order as m_cdrSpecies. Sized to the
+   * number of CDR species by the caller; every entry is written.
    * @param[in] a_time         Current simulation time.
    * @param[in] a_pos          Physical position.
    * @param[in] a_E            Electric field vector.
    * @param[in] a_cdrDensities CDR species densities.
-   * @return Scalar diffusion coefficients in the same order as m_cdrSpecies.
    */
-  virtual Vector<Real>
-  computeCdrDiffusionCoefficients(const Real          a_time,
+  virtual void
+  computeCdrDiffusionCoefficients(Vector<Real>&       a_diffusionCoefficients,
+                                  const Real          a_time,
                                   const RealVect&     a_pos,
                                   const RealVect&     a_E,
-                                  const Vector<Real>& a_cdrDensities) const = 0;
+                                  const Vector<Real>& a_cdrDensities) const noexcept = 0;
 
   /**
    * @brief Compute CDR species fluxes on electrode-gas EB interfaces.
    * @details Used as a boundary condition on electrode EB cells. A positive flux is directed
    * into the gas phase (outward from the electrode).
+   * @param[out] a_fluxes          Boundary fluxes in the same order as m_cdrSpecies. Sized to the number of CDR species
+   * by the caller; every entry is written.
    * @param[in] a_time            Current simulation time.
    * @param[in] a_pos             EB centroid position.
    * @param[in] a_normal          Outward unit normal pointing into the gas phase.
@@ -213,10 +225,10 @@ public:
    * @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.
    * @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.
    * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.
-   * @return Boundary fluxes in the same order as m_cdrSpecies.
    */
-  virtual Vector<Real>
-  computeCdrElectrodeFluxes(const Real          a_time,
+  virtual void
+  computeCdrElectrodeFluxes(Vector<Real>&       a_fluxes,
+                            const Real          a_time,
                             const RealVect&     a_pos,
                             const RealVect&     a_normal,
                             const RealVect&     a_E,
@@ -224,12 +236,14 @@ public:
                             const Vector<Real>& a_cdrVelocities,
                             const Vector<Real>& a_cdrGradients,
                             const Vector<Real>& a_rteFluxes,
-                            const Vector<Real>& a_extrapCdrFluxes) const = 0;
+                            const Vector<Real>& a_extrapCdrFluxes) const noexcept = 0;
 
   /**
    * @brief Compute CDR species fluxes on dielectric-gas EB interfaces.
    * @details Used as a boundary condition on dielectric EB cells. A positive flux is directed
    * into the gas phase (outward from the dielectric).
+   * @param[out] a_fluxes          Boundary fluxes in the same order as m_cdrSpecies. Sized to the number of CDR species
+   * by the caller; every entry is written.
    * @param[in] a_time            Current simulation time.
    * @param[in] a_pos             EB centroid position.
    * @param[in] a_normal          Outward unit normal pointing into the gas phase.
@@ -239,10 +253,10 @@ public:
    * @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.
    * @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.
    * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.
-   * @return Boundary fluxes in the same order as m_cdrSpecies.
    */
-  virtual Vector<Real>
-  computeCdrDielectricFluxes(const Real          a_time,
+  virtual void
+  computeCdrDielectricFluxes(Vector<Real>&       a_fluxes,
+                             const Real          a_time,
                              const RealVect&     a_pos,
                              const RealVect&     a_normal,
                              const RealVect&     a_E,
@@ -250,11 +264,13 @@ public:
                              const Vector<Real>& a_cdrVelocities,
                              const Vector<Real>& a_cdrGradients,
                              const Vector<Real>& a_rteFluxes,
-                             const Vector<Real>& a_extrapCdrFluxes) const = 0;
+                             const Vector<Real>& a_extrapCdrFluxes) const noexcept = 0;
 
   /**
    * @brief Compute CDR species fluxes through computational domain boundaries.
    * @details A positive flux is directed into the domain.
+   * @param[out] a_fluxes          Boundary fluxes in the same order as m_cdrSpecies. Sized to the number of CDR species
+   * by the caller; every entry is written.
    * @param[in] a_time            Current simulation time.
    * @param[in] a_pos             Position on the domain face.
    * @param[in] a_dir             Coordinate direction (0=x, 1=y, 2=z).
@@ -265,10 +281,10 @@ public:
    * @param[in] a_cdrGradients    Normal component of CDR density gradients at the domain face.
    * @param[in] a_rteFluxes       Normal component of RTE fluxes at the domain face.
    * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the interior.
-   * @return Boundary fluxes in the same order as m_cdrSpecies.
    */
-  virtual Vector<Real>
-  computeCdrDomainFluxes(const Real           a_time,
+  virtual void
+  computeCdrDomainFluxes(Vector<Real>&        a_fluxes,
+                         const Real           a_time,
                          const RealVect&      a_pos,
                          const int            a_dir,
                          const Side::LoHiSide a_side,
@@ -277,7 +293,7 @@ public:
                          const Vector<Real>&  a_cdrVelocities,
                          const Vector<Real>&  a_cdrGradients,
                          const Vector<Real>&  a_rteFluxes,
-                         const Vector<Real>&  a_extrapCdrFluxes) const = 0;
+                         const Vector<Real>&  a_extrapCdrFluxes) const noexcept = 0;
 
   /**
    * @brief Return the initial surface charge density on dielectric surfaces.
@@ -286,7 +302,7 @@ public:
    * @return Initial surface charge density (C/m^2 in 3D, C/m in 2D).
    */
   virtual Real
-  initialSigma(const Real a_time, const RealVect& a_pos) const = 0;
+  initialSigma(const Real a_time, const RealVect& a_pos) const noexcept = 0;
 
   /**
    * @brief Return the list of CDR species.

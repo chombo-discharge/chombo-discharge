@@ -79,16 +79,12 @@ ElectrostaticEbBc::getBc(const int a_electrode) const
 std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
 ElectrostaticEbBc::getBcs()
 {
-  CH_TIME("ElectrostaticEbBc::getBcs()");
-
   return m_bcFunctions;
 }
 
 const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
 ElectrostaticEbBc::getBcs() const
 {
-  CH_TIME("ElectrostaticEbBc::getBcs()");
-
   return m_bcFunctions;
 }
 

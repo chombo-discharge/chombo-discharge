@@ -20,33 +20,33 @@ CdrPlasmaReactionJSON::CdrPlasmaReactionJSON(const std::list<int>& a_plasmaReact
                                              const std::list<int>& a_neutralReactants,
                                              const std::list<int>& a_plasmaProducts,
                                              const std::list<int>& a_photonProducts)
-  : m_plasmaReactants(a_plasmaReactants),
-    m_neutralReactants(a_neutralReactants),
-    m_plasmaProducts(a_plasmaProducts),
-    m_photonProducts(a_photonProducts)
+  : m_plasmaReactants(a_plasmaReactants.begin(), a_plasmaReactants.end()),
+    m_neutralReactants(a_neutralReactants.begin(), a_neutralReactants.end()),
+    m_plasmaProducts(a_plasmaProducts.begin(), a_plasmaProducts.end()),
+    m_photonProducts(a_photonProducts.begin(), a_photonProducts.end())
 {}
 
 CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON() = default;
 
-const std::list<int>&
+const std::vector<int>&
 CdrPlasmaReactionJSON::getPlasmaReactants() const
 {
   return m_plasmaReactants;
 }
 
-const std::list<int>&
+const std::vector<int>&
 CdrPlasmaReactionJSON::getNeutralReactants() const
 {
   return m_neutralReactants;
 }
 
-const std::list<int>&
+const std::vector<int>&
 CdrPlasmaReactionJSON::getPlasmaProducts() const
 {
   return m_plasmaProducts;
 }
 
-const std::list<int>&
+const std::vector<int>&
 CdrPlasmaReactionJSON::getPhotonProducts() const
 {
   return m_photonProducts;
