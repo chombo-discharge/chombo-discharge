@@ -59,6 +59,7 @@ FieldSolverMG::parseOptions()
   this->parseDomainBc();
   this->parsePlotVariables();
   this->parseRegridSlopes();
+  this->parseFillElectrodePotential();
   this->parseSolverSettings();
 
   // The interface condition is fixed after the first parse, as in FieldSolverGMG. FieldSolverAMG reads it in
@@ -77,6 +78,7 @@ FieldSolverMG::parseRuntimeOptions()
   this->parseVerbosity();
   this->parsePlotVariables();
   this->parseRegridSlopes();
+  this->parseFillElectrodePotential();
   this->parseSolverSettings();
 }
 
@@ -469,13 +471,7 @@ FieldSolverMG::solveAMG(MFAMRCellData& a_phi, const MFAMRCellData& a_rho, const 
   const bool converged = m_amg->solve(a_phi, a_rho, a_sigma, false);
 
   // As in FieldSolverGMG: optionally fill the covered cells with the electrode potential, for visualization.
-  ParmParse pp(m_className.c_str());
-
-  bool fillElectrodePotential = false;
-
-  pp.query("fill_electrode_potential", fillElectrodePotential);
-
-  if (fillElectrodePotential) {
+  if (m_fillElectrodePotential) {
     this->fillCoveredPotential(a_phi);
   }
 

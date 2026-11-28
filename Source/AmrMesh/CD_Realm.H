@@ -441,6 +441,27 @@ public:
   getMultiCutFaceIterator(const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each valid grid box.
+   * @details The iterator in direction dir visits the domain faces of the cells next to the a_side domain side,
+   * including faces of regular cells. Faces are enumerated with FaceStop::AllBoundaryOnly.
+   * @param[in] a_phase Phase
+   * @param[in] a_side  Domain side
+   * @return Domain-face iterator
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIterator(const phase::which_phase a_phase, const Side::LoHiSide a_side) const;
+
+  /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each grid box grown by one cell in
+   * the tangential directions.
+   * @param[in] a_phase Phase
+   * @param[in] a_side  Domain side
+   * @return Domain-face iterator that includes the first tangential ghost layer
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase, const Side::LoHiSide a_side) const;
+
+  /**
    * @brief Get objects for computing "non-conservative divergences"
    * @param[in] a_phase Phase
    * @return Non conservative divergence

@@ -60,13 +60,20 @@ public:
    * @param[in]  a_domains   AMR domains.
    * @param[in]  a_tanGhosts Tangential ghost faces.
    * @param[in]  a_faceIter  Pre-built tangential-ghost face iterators for each level.
+   * @param[in]  a_domainFaceIterLo Pre-built iterators over the low-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
+   * @param[in]  a_domainFaceIterHi Pre-built iterators over the high-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
    */
   static void
-  averageCellVelocityToFaceVelocity(EBAMRFluxData&                                                         a_faceData,
-                                    const EBAMRCellData&                                                   a_cellData,
-                                    const Vector<ProblemDomain>&                                           a_domains,
-                                    const int                                                              a_tanGhosts,
-                                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+  averageCellVelocityToFaceVelocity(
+    EBAMRFluxData&                                                         a_faceData,
+    const EBAMRCellData&                                                   a_cellData,
+    const Vector<ProblemDomain>&                                           a_domains,
+    const int                                                              a_tanGhosts,
+    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi);
 
   /**
    * @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
@@ -75,13 +82,19 @@ public:
    * @param[in]  a_domain    Problem domain.
    * @param[in]  a_tanGhosts Tangential ghost faces.
    * @param[in]  a_faceIter  Pre-built tangential-ghost face iterators.
+   * @param[in]  a_domainFaceIterLo Pre-built iterators over the low-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
+   * @param[in]  a_domainFaceIterHi Pre-built iterators over the high-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
    */
   static void
   averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                           a_faceData,
                                     const LevelData<EBCellFAB>&                     a_cellData,
                                     const ProblemDomain&                            a_domain,
                                     const int                                       a_tanGhosts,
-                                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
+                                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter,
+                                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterLo,
+                                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterHi);
 
   /**
    * @brief Average all components of the cell-centered data to faces (arithmetic, no tangential ghost faces).
@@ -92,12 +105,18 @@ public:
    * @param[in]  a_cellData Cell data.
    * @param[in]  a_domains  AMR domains.
    * @param[in]  a_faceIter Pre-built face iterators (SurroundingNoBoundary) for each level.
+   * @param[in]  a_domainFaceIterLo Pre-built iterators over the low-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
+   * @param[in]  a_domainFaceIterHi Pre-built iterators over the high-side domain faces of the valid boxes. Use
+   * AmrMesh::getDomainFaceIterator.
    */
   static void
   averageCellToFace(EBAMRFluxData&                                                         a_faceData,
                     const EBAMRCellData&                                                   a_cellData,
                     const Vector<ProblemDomain>&                                           a_domains,
-                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi);
 
   /**
    * @brief Routine which averages a cell-centered component to faces.
@@ -110,6 +129,11 @@ public:
    * @param[in]  a_average      Averaging method.
    * @param[in]  a_faceIter     Pre-built face iterators (SurroundingNoBoundary with tangential ghosts) for each level.
    *                            Use AmrMesh::getFaceIteratorWithTangentialGhosts when a_tanGhosts > 0.
+   * @param[in]  a_domainFaceIterLo Pre-built iterators over the low-side domain faces, matching a_tanGhosts. Use
+   * AmrMesh::getDomainFaceIterator when a_tanGhosts = 0 and AmrMesh::getDomainFaceIteratorWithTangentialGhosts when
+   * a_tanGhosts = 1.
+   * @param[in]  a_domainFaceIterHi Pre-built iterators over the high-side domain faces, matching a_tanGhosts.
+   * a_tanGhosts must be 0 or 1.
    */
   static void
   averageCellToFace(EBAMRFluxData&                                                         a_faceData,
@@ -119,7 +143,9 @@ public:
                     const Interval&                                                        a_faceInterval,
                     const Interval&                                                        a_cellInterval,
                     const Average&                                                         a_average,
-                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterLo,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_domainFaceIterHi);
 
   /**
    * @brief Routine which averages a cell-centered component to faces.
@@ -131,6 +157,11 @@ public:
    * @param[in]  a_cellInterval Cell variables.
    * @param[in]  a_average      Averaging method.
    * @param[in]  a_faceIter     Pre-built tangential-ghost face iterators.
+   * @param[in]  a_domainFaceIterLo Pre-built iterators over the low-side domain faces, matching a_tanGhosts. Use
+   * AmrMesh::getDomainFaceIterator when a_tanGhosts = 0 and AmrMesh::getDomainFaceIteratorWithTangentialGhosts when
+   * a_tanGhosts = 1.
+   * @param[in]  a_domainFaceIterHi Pre-built iterators over the high-side domain faces, matching a_tanGhosts.
+   * a_tanGhosts must be 0 or 1.
    */
   static void
   averageCellToFace(LevelData<EBFluxFAB>&                           a_faceData,
@@ -140,7 +171,9 @@ public:
                     const Interval&                                 a_faceInterval,
                     const Interval&                                 a_cellInterval,
                     const Average&                                  a_average,
-                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
+                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter,
+                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterLo,
+                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_domainFaceIterHi);
 
   /**
    * @brief Average all components of face centered data to cell centers.

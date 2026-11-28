@@ -1252,9 +1252,20 @@ protected:
   LayoutData<BaseIFFAB<Real>> m_interpolant[SpaceDim];
 
   /**
-   * @brief Face centroid interpolation stencil
+   * @brief Face centroid interpolation stencil, for cell-centered data.
+   * @details Set by defineCutFaceStencils on the faces of the cut cells in each grid box and its first layer of ghost
+   * cells: the faces and weights that interpolate face-centered fluxes to the face centroid. Geometric, so it is
+   * computed once.
    */
   LayoutData<BaseIFFAB<FaceStencil>> m_interpStencil[SpaceDim];
+
+  /**
+   * @brief Face centroid gradient stencil, for centroid data.
+   * @details Set by defineCutFaceStencils on the faces of the cut cells in each grid box and its first layer of ghost
+   * cells: the least squares gradient at the face centroid, projected onto the face normal. Empty if no stencil could
+   * be found. Geometric, so it is computed once; the flux stencil is this stencil times the B-coefficient on the face.
+   */
+  LayoutData<BaseIFFAB<VoFStencil>> m_centroidGradStencil[SpaceDim];
 
   /**
    * @brief Face centroid flux stencil. Defined on all faces connecting one or more irregular vofs
@@ -1451,6 +1462,14 @@ protected:
   defineStencils();
 
   /**
+   * @brief Compute the geometric part of the flux stencils on the faces of the cut cells.
+   * @details Fills m_interpStencil (cell-centered data) or m_centroidGradStencil (centroid data). These do not depend
+   * on the coefficients, so this is done once, and getFaceCentroidFluxStencil multiplies in the B-coefficients.
+   */
+  void
+  defineCutFaceStencils();
+
+  /**
    * @brief Get the face-centered flux stencil
    * @param[in]  a_face Face
    * @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
@@ -1465,7 +1484,7 @@ protected:
    * @param[in]  a_face Face
    * @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
    * @return Returns a stencil for the face-centroid flux for the given face
-   * @note The current version just interpolates the centered fluxes.
+   * @details On faces of cut cells, this uses the geometric stencils from defineCutFaceStencils.
    */
   VoFStencil
   getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;

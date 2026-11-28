@@ -1650,7 +1650,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity(EBAMRFluxData&       a
     interv,
     interv,
     average,
-    (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase));
+    (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase),
+    (this->m_amr)->getDomainFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase, Side::Lo),
+    (this->m_amr)->getDomainFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase, Side::Hi));
 
   // Set the EB conductivity.
   DataOps::incr(a_conductivityEB,

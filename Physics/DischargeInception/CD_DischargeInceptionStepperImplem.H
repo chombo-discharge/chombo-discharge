@@ -5288,10 +5288,6 @@ DischargeInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
                                                         const RealVect& a_probHi) const noexcept
 {
 #ifndef NDEBUG
-  CH_TIME("DischargeInceptionStepper::particleOutsideGrid");
-  if (m_verbosity > 5) {
-    pout() << "DischargeInceptionStepper::particleOutsideGrid" << endl;
-  }
 #endif
 
   bool isOutside = false;
@@ -5310,10 +5306,6 @@ bool
 DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect& a_pos) const noexcept
 {
 #ifndef NDEBUG
-  CH_TIME("DischargeInceptionStepper::particleInsideEB");
-  if (m_verbosity > 5) {
-    pout() << "DischargeInceptionStepper::particleInsideEB" << endl;
-  }
 #endif
 
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
@@ -5467,7 +5459,9 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
                              Interval(0, 0),
                              Interval(0, 0),
                              Average::Arithmetic,
-                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase),
+                             m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Lo),
+                             m_amr->getDomainFaceIteratorWithTangentialGhosts(m_realm, m_phase, Side::Hi));
 }
 
 template <typename P, typename F, typename C>

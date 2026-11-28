@@ -46,11 +46,6 @@ PetscHelmholtzElectrostaticEBBC::getBoundaryData(const int        a_phase,
                                                  const DataIndex& a_din,
                                                  const VolIndex&  a_vof) const noexcept
 {
-  CH_TIME("PetscHelmholtzElectrostaticEBBC::getBoundaryData");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzElectrostaticEBBC::getBoundaryData" << endl;
-  }
-
   CH_assert(m_isDefined);
 
   return this->getElectrodePotential(this->getBoundaryPosition(a_phase, a_level, a_din, a_vof));
@@ -59,11 +54,6 @@ PetscHelmholtzElectrostaticEBBC::getBoundaryData(const int        a_phase,
 Real
 PetscHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) const noexcept
 {
-  CH_TIME("PetscHelmholtzElectrostaticEBBC::getElectrodePotential");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzElectrostaticEBBC::getElectrodePotential" << endl;
-  }
-
   const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>& electrodeBCs = m_electrostaticBCs.getBcs();
 
   // Checked in every build: an electrode face without electrodes has no potential.

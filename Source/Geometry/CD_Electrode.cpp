@@ -47,8 +47,6 @@ Electrode::define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, cons
 const RefCountedPtr<BaseIF>&
 Electrode::getImplicitFunction() const
 {
-  CH_TIME("Electrode::getImplicitFunction()");
-
   CH_assert(m_isDefined);
 
   return (m_baseIF);
