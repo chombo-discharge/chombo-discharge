@@ -673,8 +673,8 @@ public:
   /**
    * @brief Compute diffusion coefficients on cell centers. This version does the irregular cells.
    * @param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers.
-   * @param[in]  a_cdrDensities      Cell-centered CDR densities
-   * @param[in]  a_electricFieldCell Cell-centered electric field
+   * @param[in]  a_cdrDensities      CDR densities, holding the cell centroid values in the irregular cells
+   * @param[in]  a_electricFieldCell Electric field, holding the cell centroid values in the irregular cells
    * @param[in]  a_dx                Grid resolution
    * @param[in]  a_time              Time
    * @param[in]  a_lvl               Grid level
@@ -790,8 +790,8 @@ public:
    * @brief Compute the cell-centered CDR velocities.
    * @details This is patch version for irregular grid cells.
    * @param[out] a_cdrVelocities Cell-centered CDR drift velocities.
-   * @param[in]  a_cdrDensities  Cell-centered CDR densities.
-   * @param[in]  a_electricField The cell-centered electric field.
+   * @param[in]  a_cdrDensities  CDR densities, holding the cell centroid values in the irregular cells.
+   * @param[in]  a_electricField Electric field, holding the cell centroid values in the irregular cells.
    * @param[in]  a_time          Time.
    * @param[in]  a_dx            Grid resolution.
    * @param[in]  a_lvl           Grid level.

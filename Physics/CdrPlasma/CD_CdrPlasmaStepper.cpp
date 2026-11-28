@@ -1376,6 +1376,27 @@ CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>*>&       a
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit = dbl.dataIterator();
 
+  // The irregular kernels need the electric field and the densities on the cell centroids. Interpolate them once for
+  // the whole level, into temporaries from the scratch pool.
+  Scratch<LevelData<EBCellFAB>> centroidField = m_amr->fetchLevelScratch(m_realm,
+                                                                         m_phase,
+                                                                         a_lvl,
+                                                                         SpaceDim,
+                                                                         a_electricFieldCell.ghostVect()[0]);
+
+  m_amr->interpToCentroids(*centroidField, a_electricFieldCell, m_realm, m_phase, a_lvl);
+
+  std::vector<Scratch<LevelData<EBCellFAB>>> centroidDensities;
+
+  centroidDensities.reserve(numCdrSpecies);
+
+  for (int idx = 0; idx < numCdrSpecies; idx++) {
+    centroidDensities.emplace_back(
+      m_amr->fetchLevelScratch(m_realm, m_phase, a_lvl, 1, a_cdrDensities[idx]->ghostVect()[0]));
+
+    m_amr->interpToCentroids(*centroidDensities.back(), *a_cdrDensities[idx], m_realm, m_phase, a_lvl);
+  }
+
   const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
@@ -1414,10 +1435,16 @@ CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>*>&       a
                                          m_amr->getDx()[a_lvl],
                                          a_time);
 
-    // Re-do the irregular cells
+    // Re-do the irregular cells, using the data on the cell centroids.
+    Vector<EBCellFAB*> centroidDensitiesPatch(numCdrSpecies, nullptr);
+
+    for (int idx = 0; idx < numCdrSpecies; idx++) {
+      centroidDensitiesPatch[idx] = &(*centroidDensities[idx])[din];
+    }
+
     this->computeCdrDiffusionCellIrregular(cdrDcoCell,
-                                           cdrDensities,
-                                           electricField,
+                                           centroidDensitiesPatch,
+                                           (*centroidField)[din],
                                            m_amr->getDx()[a_lvl],
                                            a_time,
                                            a_lvl,
@@ -1554,21 +1581,8 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
     isDiffusive[solverIt.index()] = solverIt()->isDiffusive();
   }
 
-  // Electric field -- will be populated on the cell centroid
-  EBCellFAB Efield;
-  Efield.clone(a_electricFieldCell);
-  m_amr->interpToCentroids(Efield, a_electricFieldCell, m_realm, m_phase, a_lvl, a_dit);
-
-  // Some copies of the CDR densities so we can put them on the centroid
-  Vector<EBCellFAB*> tmp(numCdrSpecies, nullptr);
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    tmp[idx] = new EBCellFAB();
-    tmp[idx]->clone(*a_cdrDensities[idx]);
-
-    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
-  }
+  // The electric field and the densities hold the cell centroid values in the irregular cells.
+  const EBCellFAB& Efield = a_electricFieldCell;
 
   // Irreegular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -1577,7 +1591,7 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
 
     // Get CDR densities. They should also be on the centroid.
     for (int idx = 0; idx < numCdrSpecies; idx++) {
-      cdrDensities[idx] = std::max(zero, (*tmp[idx])(vof, comp));
+      cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));
     }
 
     // Let our nifty plasma physics framework take care of the diffusion coefficients.
@@ -1596,13 +1610,6 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
 
   // Launch the kernel.
   BoxLoops::loop(vofit, irregularKernel);
-
-  // Delete storage
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    delete tmp[idx];
-  }
 }
 
 void
@@ -1923,6 +1930,27 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
   const DataIterator&      dit = dbl.dataIterator();
   const Real               dx  = m_amr->getDx()[a_lvl];
 
+  // The irregular kernels need the electric field and the densities on the cell centroids. Interpolate them once for
+  // the whole level, into temporaries from the scratch pool.
+  Scratch<LevelData<EBCellFAB>> centroidField = m_amr->fetchLevelScratch(m_realm,
+                                                                         m_phase,
+                                                                         a_lvl,
+                                                                         SpaceDim,
+                                                                         a_electricField.ghostVect()[0]);
+
+  m_amr->interpToCentroids(*centroidField, a_electricField, m_realm, m_phase, a_lvl);
+
+  std::vector<Scratch<LevelData<EBCellFAB>>> centroidDensities;
+
+  centroidDensities.reserve(numCdrSpecies);
+
+  for (int idx = 0; idx < numCdrSpecies; idx++) {
+    centroidDensities.emplace_back(
+      m_amr->fetchLevelScratch(m_realm, m_phase, a_lvl, 1, a_cdrDensities[idx]->ghostVect()[0]));
+
+    m_amr->interpToCentroids(*centroidDensities.back(), *a_cdrDensities[idx], m_realm, m_phase, a_lvl);
+  }
+
   // Grid loop
   const int nbox = dit.size();
 
@@ -1964,8 +1992,20 @@ CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB>*>&      
     // be multicells here, also).
     this->computeCdrDriftVelocitiesRegular(cdrVelocitiesFAB, cdrDensitiesFAB, electricFieldFAB, cellBox, a_time, dx);
 
-    // Do the irregular and multi-valued cells.
-    this->computeCdrDriftVelocitiesIrregular(cdrVelocities, cdrDensities, electricField, a_time, dx, a_lvl, din);
+    // Do the irregular and multi-valued cells, using the data on the cell centroids.
+    Vector<EBCellFAB*> centroidDensitiesPatch(numCdrSpecies, nullptr);
+
+    for (int idx = 0; idx < numCdrSpecies; idx++) {
+      centroidDensitiesPatch[idx] = &(*centroidDensities[idx])[din];
+    }
+
+    this->computeCdrDriftVelocitiesIrregular(cdrVelocities,
+                                             centroidDensitiesPatch,
+                                             (*centroidField)[din],
+                                             a_time,
+                                             dx,
+                                             a_lvl,
+                                             din);
 
     // Velocities in covered cells are always bogus.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2099,21 +2139,8 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
     isMobile[solverIt.index()] = solverIt()->isMobile();
   }
 
-  // Electric field -- will be populated on the cell centroid
-  EBCellFAB Efield;
-  Efield.clone(a_electricField);
-  m_amr->interpToCentroids(Efield, a_electricField, m_realm, m_phase, a_lvl, a_dit);
-
-  // Some copies of the CDR densities so we can put them on the centroid
-  Vector<EBCellFAB*> tmp(numCdrSpecies, nullptr);
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    tmp[idx] = new EBCellFAB();
-    tmp[idx]->clone(*a_cdrDensities[idx]);
-
-    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
-  }
+  // The electric field and the densities hold the cell centroid values in the irregular cells.
+  const EBCellFAB& Efield = a_electricField;
 
   // Irregular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2122,7 +2149,7 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
 
     // Get CDR densities. They should also be on the centroid.
     for (int idx = 0; idx < numCdrSpecies; idx++) {
-      cdrDensities[idx] = std::max(zero, (*tmp[idx])(vof, comp));
+      cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));
     }
 
     // Plasma physics framework computes the velocities.
@@ -2144,13 +2171,6 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
 
   // Launch the kernel
   BoxLoops::loop(vofit, irregularKernel);
-
-  // Delete storage
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
-
-    delete tmp[idx];
-  }
 }
 
 void
