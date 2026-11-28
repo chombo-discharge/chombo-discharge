@@ -3130,8 +3130,6 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
                                    const Box&                          a_domain,
                                    const IntVect&                      a_cell)
 {
-  CH_TIME("PolyhedralGeometryShop::stitchBody");
-
   CH_assert(a_children == nullptr || a_edgeRefined != nullptr);
   CH_assert(a_domain.contains(a_cell));
 
@@ -3447,8 +3445,6 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
                                                const BaseFab<signed char>&         a_refined,
                                                const IntVect&                      a_cell) const
 {
-  CH_TIME("PolyhedralGeometryShop::defineBodyFromFunction");
-
   CH_assert(a_graph.isDefined());
   CH_assert(a_graph.getDomain().contains(a_cell));
 
@@ -3509,8 +3505,6 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
                                    const PolyhedralEB::CutCellFaceOverrides&   a_overrides,
                                    const IntVect&                              a_cell)
 {
-  CH_TIME("PolyhedralGeometryShop::defineBody");
-
   CH_assert(a_surfaces.getIVS().contains(a_cell));
 
   if (!a_body.define(a_surfaces(a_cell, 0), a_overrides, a_cell)) {

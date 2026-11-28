@@ -132,6 +132,8 @@ These are located in :file:`$DISCHARGE_HOME/Exec/Convergence`.
 The tests are too extensive to include in continuous integration, and they must be run locally like a regular ``chombo-discharge`` application.
 Our approach for convergence testing is found in :ref:`Chap:VV`.
 
+.. _Chap:PerformanceProfiling:
+
 Performance profiling
 ---------------------
 
@@ -140,12 +142,16 @@ There are two ways to run performance profiling of ``chombo-discharge``:
 * A posteriori profiling using Chombo macros.
   Most routines in ``chombo-discharge`` use these macros and they will compute the wall clock time spent in each routine.
 
-  To enable these timers, set ``CH_TIMER=1`` in the shell where you run your application.
+  The timers are compiled out by the provided makefiles.
+  To use them, build with ``USE_TIMER=TRUE``, either in :file:`Make.defs.local` or on the command line, and set ``CH_TIMER=1`` in the shell where you run your application.
   E.g,
 
   .. code-block:: bash
 
+     make -j8 USE_TIMER=TRUE
      export CH_TIMER=1
+
+  The library names do not depend on ``USE_TIMER``, so changing it requires a clean rebuild of ``Chombo`` and ``chombo-discharge`` (``make pristine``).
 
   The ``Chombo`` will not only compute the time spent in each function, but also figure out the parent-child relation between functions, and present the output as a hierarchical structure.
   This is often useful when optimizing functions at the development stage. 

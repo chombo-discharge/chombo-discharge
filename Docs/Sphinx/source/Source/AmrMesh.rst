@@ -161,7 +161,7 @@ Solvers and time steppers get their temporary mesh data from a pool of temporari
    DataOps::setValue(scratch, 0.0);
 
 The handle converts to a reference to the data, so it can be passed to functions that take the data by reference.
-``fetchScratch`` exists for ``EBAMRCellData``, ``EBAMRFluxData`` and ``EBAMRIVData`` (with a phase), and for ``EBAMRFAB``, ``MFAMRCellData``, ``MFAMRFluxData`` and ``MFAMRIVData`` (without one).
+``fetchScratch`` exists for ``EBAMRCellData``, ``EBAMRFluxData``, ``EBAMRIVData`` and ``EBAMRIFData`` (with a phase), and for ``EBAMRFAB``, ``MFAMRCellData``, ``MFAMRFluxData`` and ``MFAMRIVData`` (without one).
 ``AmrMesh::fetchLevelScratch`` returns a single level.
 
 The following rules apply:

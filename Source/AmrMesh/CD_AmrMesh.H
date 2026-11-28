@@ -652,7 +652,7 @@ public:
    * handle returns the temporary to the pool when it is destroyed. The data is uninitialized (NaN in debug
    * builds), and has exactly a_ghost ghost cells. Must not be called inside an OpenMP parallel
    * region.
-   * @tparam T EBAMRCellData, EBAMRFluxData or EBAMRIVData
+   * @tparam T EBAMRCellData, EBAMRFluxData, EBAMRIVData or EBAMRIFData
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase
    * @param[in] a_nComp Number of components
@@ -1500,6 +1500,23 @@ public:
                     const int                a_level) const noexcept;
 
   /**
+   * @brief Interpolate data to centroids on one level, into separate storage.
+   * @details a_centroidData becomes a copy of a_cellData in which the irregular cells hold the centroid values. Both
+   * must be defined on the grids of the realm on this level, with the same number of components.
+   * @param[out] a_centroidData Centroid-centered data
+   * @param[in]  a_cellData     Cell-centered data
+   * @param[in]  a_realm        Realm name
+   * @param[in]  a_phase        Phase (gas or solid)
+   * @param[in]  a_level        Grid level
+   */
+  void
+  interpToCentroids(LevelData<EBCellFAB>&       a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string&          a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept;
+
+  /**
    * @brief Interpolate data to centroids
    * @param[in,out] a_centroidData Centroid-centered data
    * @param[in]    a_cellData Cell-centered data
@@ -2203,6 +2220,36 @@ public:
    */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
   getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each valid grid box.
+   * @details The iterator in direction dir visits the domain faces of the cells next to the a_side domain side,
+   * including faces of regular cells, so that loops over domain faces do not build a FaceIterator on every call.
+   * Faces are enumerated with FaceStop::AllBoundaryOnly. The iterator is empty for boxes that do not touch that side.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @param[in] a_side  Domain side
+   * @return Per-level LayoutData of FaceIterator arrays
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIterator(const std::string&       a_realm,
+                        const phase::which_phase a_phase,
+                        const Side::LoHiSide     a_side) const;
+
+  /**
+   * @brief Get face iterators over the domain faces on one side of the domain, in each grid box grown by one cell in
+   * the tangential directions.
+   * @details As getDomainFaceIterator, but the iterator in direction dir also visits the domain faces of the cells in
+   * the first tangential ghost layer. For use with face data that is filled one cell into the tangential ghosts.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @param[in] a_side  Domain side
+   * @return Per-level LayoutData of FaceIterator arrays
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getDomainFaceIteratorWithTangentialGhosts(const std::string&       a_realm,
+                                            const phase::which_phase a_phase,
+                                            const Side::LoHiSide     a_side) const;
 
   /**
    * @brief Get levelset function, allocated over a grid for a Realm and phase

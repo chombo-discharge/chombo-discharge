@@ -2135,6 +2135,18 @@ Realm::getMultiCutFaceIterator(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getMultiCutFaceIterator();
 }
 
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+Realm::getDomainFaceIterator(const phase::which_phase a_phase, const Side::LoHiSide a_side) const
+{
+  return m_realms[a_phase]->getDomainFaceIterator(a_side);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+Realm::getDomainFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase, const Side::LoHiSide a_side) const
+{
+  return m_realms[a_phase]->getDomainFaceIteratorWithTangentialGhosts(a_side);
+}
+
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
 Realm::getNonConservativeDivergence(const phase::which_phase a_phase) const
 {

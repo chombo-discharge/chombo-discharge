@@ -357,6 +357,7 @@ private:
   std::tuple<std::vector<Entry<EBAMRCellData>>,
              std::vector<Entry<EBAMRFluxData>>,
              std::vector<Entry<EBAMRIVData>>,
+             std::vector<Entry<EBAMRIFData>>,
              std::vector<Entry<EBAMRFAB>>,
              std::vector<Entry<MFAMRCellData>>,
              std::vector<Entry<MFAMRFluxData>>,

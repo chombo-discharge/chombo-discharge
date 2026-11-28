@@ -175,8 +175,6 @@ MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>&
                                                     const int                    a_order,
                                                     const int                    a_weight) const
 {
-  CH_TIME("MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(...)");
-
   CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
 

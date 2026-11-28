@@ -1291,6 +1291,14 @@ EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& 
     const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
+    // Cached iterators over the domain faces of each valid box.
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesLo = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  m_phase,
+                                                                                                  Side::Lo)[lvl];
+    LayoutData<std::array<FaceIterator, SpaceDim>>& domainFacesHi = *m_amr->getDomainFaceIterator(m_realm,
+                                                                                                  m_phase,
+                                                                                                  Side::Hi)[lvl];
+
     const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
@@ -1305,12 +1313,9 @@ EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& 
         for (SideIterator sit; sit.ok(); ++sit) {
           BaseIFFAB<Real>& extrap = (*a_domainflux[lvl])[din](dir, sit());
 
-          const IntVectSet& ivs     = extrap.getIVS();
-          const EBGraph&    ebgraph = extrap.getEBGraph();
-
-          // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
-          const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-          FaceIterator               faceit(ivs, ebgraph, dir, crit);
+          // Extrapolate to the domain faces of the valid box. Use face-centered stuff for all faces (also multivalued
+          // ones)
+          FaceIterator& faceit = (sit() == Side::Lo) ? domainFacesLo[din][dir] : domainFacesHi[din][dir];
 
           auto kernel = [&](const FaceIndex& face) -> void {
             const int sgn = sign(sit()); // Lo = -1, Hi = 1
