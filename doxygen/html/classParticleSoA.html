@@ -79,6 +79,7 @@ $(function() {
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
@@ -108,6 +109,8 @@ Inheritance diagram for ParticleSoA&lt; P, Traits &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a0b56eb2d1548cd0da5cdd5e7f0fa82ad" id="r_a0b56eb2d1548cd0da5cdd5e7f0fa82ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b56eb2d1548cd0da5cdd5e7f0fa82ad">permute</a> (const std::vector&lt; std::size_t &gt; &amp;a_dest)</td></tr>
+<tr class="memdesc:a0b56eb2d1548cd0da5cdd5e7f0fa82ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).  <br /></td></tr>
 <tr id="pub-methods-0" class="groupHeader"><td colspan="2"><div class="groupHeader">Construction and lifetime</div></td></tr>
 <tr class="memitem:af10672f509ce1a14d38d49568bdbddc4" id="r_af10672f509ce1a14d38d49568bdbddc4"><td class="memItemLeft" align="right" valign="top"><a id="af10672f509ce1a14d38d49568bdbddc4" name="af10672f509ce1a14d38d49568bdbddc4"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ParticleSoA</b> ()=default</td></tr>
@@ -249,8 +252,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>growIfFull</b> ()</td
 <tr class="memdesc:acad9075e269ff06f8927507a7ce6667f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy one particle's every column from a_src[a_srcIdx] into this[a_dstIdx].  <br /></td></tr>
 <tr class="memitem:aeba9c32f36250dee8f1e1fd476c18eee" id="r_aeba9c32f36250dee8f1e1fd476c18eee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeba9c32f36250dee8f1e1fd476c18eee">reallocate</a> (const std::size_t a_capacity)</td></tr>
 <tr class="memdesc:aeba9c32f36250dee8f1e1fd476c18eee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a new arena and reallocate/move the columns into it (growth path).  <br /></td></tr>
-<tr class="memitem:a0b56eb2d1548cd0da5cdd5e7f0fa82ad" id="r_a0b56eb2d1548cd0da5cdd5e7f0fa82ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b56eb2d1548cd0da5cdd5e7f0fa82ad">permute</a> (const std::vector&lt; std::size_t &gt; &amp;a_dest)</td></tr>
-<tr class="memdesc:a0b56eb2d1548cd0da5cdd5e7f0fa82ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).  <br /></td></tr>
 <tr class="memitem:a78e53f339bd62fc9bc0a710a00f619ea" id="r_a78e53f339bd62fc9bc0a710a00f619ea"><td class="memTemplParams" colspan="2">template&lt;std::size_t K&gt; </td></tr>
 <tr class="memitem:a78e53f339bd62fc9bc0a710a00f619ea template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a78e53f339bd62fc9bc0a710a00f619ea">scatterColumn</a> (void *a_newBuf, const std::size_t a_off, const std::vector&lt; std::size_t &gt; &amp;a_dest) noexcept</td></tr>
 <tr class="memdesc:a78e53f339bd62fc9bc0a710a00f619ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-column scatter for <a class="el" href="#a0b56eb2d1548cd0da5cdd5e7f0fa82ad" title="Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i).">permute()</a>: newcol[dest[i]] = oldcol[i].  <br /></td></tr>
@@ -937,7 +938,7 @@ template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt
 </div><div class="memdoc">
 
 <p>Move every particle of another container into this one, leaving a_other empty (catenate). </p>
-<p>The move counterpart of <a class="el" href="#a63368c6e6751c74beadb7df16a85768b" title="Append every particle of another container (bulk catenate; all columns, incl. id/rank).">append(const ParticleSoA&amp;)</a>: appends all of a_other's particles (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas are swapped instead, so the common "drain into an empty destination" case is O(1) with zero copy. Invalidates the cell sort. Catenating a container into itself is a no-op. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The move counterpart of <a class="el" href="#a63368c6e6751c74beadb7df16a85768b" title="Append every particle of another container (bulk catenate; all columns, incl. id/rank).">append(const ParticleSoA&amp;)</a>: appends all of a_other's particles (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas are swapped instead, so the common "drain into an empty destination" case is O(1) with zero copy. Invalidates the cell sort, except that the swap into an empty container carries a_other's sort state along. Catenating a container into itself is a no-op. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_other</td><td>Source container, left empty afterwards. </td></tr>
   </table>
@@ -2817,15 +2818,15 @@ template&lt;typename P, typename Traits&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i). </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Invalidates the cell sort. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dest</td><td>Destination slot for each current particle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dest</td><td>Destination slot for each current particle. A permutation of 0..<a class="el" href="#a4a1ed9474a75b6142f7fccebaf059d13" title="Number of particles currently stored.">size()</a>-1. </td></tr>
   </table>
   </dd>
 </dl>

@@ -1561,6 +1561,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   * @param[out] a_kmcReactions Reaction rates to be set.</span>
 <span class="cm">   * @param[in] a_E       Electric field</span>
 <span class="cm">   * @param[in] a_pos     Physical position</span>
+<span class="cm">   * @param[in] a_numParticles Number of reactive particles in the cell, per plasma species.</span>
 <span class="cm">   * @param[in] a_phi     Plasma species densities</span>
 <span class="cm">   * @param[in] a_gradPhi Density gradients for plasma species.</span>
 <span class="cm">   * @param[in] a_dt      Time step</span>
@@ -1572,6 +1573,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="nf">updateReactionRates</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_kmcReactions</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                                   </span><span class="n">a_E</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                                   </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">                               </span><span class="n">a_numParticles</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                              </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w">                          </span><span class="n">a_gradPhi</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_dt</span><span class="p">,</span>

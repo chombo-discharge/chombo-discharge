@@ -217,6 +217,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()
 <tr class="memdesc:a2397eda58082392223a9b8a32d6ced77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the valid particles whose cell the mask marks true into the mask holder, one level.  <br /></td></tr>
 <tr class="memitem:a280f3bc5e2d37bd192018d46b135b84e" id="r_a280f3bc5e2d37bd192018d46b135b84e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a280f3bc5e2d37bd192018d46b135b84e">transferMaskParticlesCoarToFine</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a15ecd7b0b59d47c63bbfd9e043c6e815">AMRParticleGhostMask</a> &amp;a_coarToFine)</td></tr>
 <tr class="memdesc:a280f3bc5e2d37bd192018d46b135b84e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an acceptance box of a_coarToFine into the mask holder.  <br /></td></tr>
+<tr class="memitem:afabd7973cf993f270c52cc6d6eba1006" id="r_afabd7973cf993f270c52cc6d6eba1006"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afabd7973cf993f270c52cc6d6eba1006">returnMaskParticles</a> ()</td></tr>
+<tr class="memdesc:afabd7973cf993f270c52cc6d6eba1006"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the mask particles back into the valid holder, each to the index it was moved out of.  <br /></td></tr>
 <tr class="memitem:ab4ffb9e6f805669ca04061e64501b286" id="r_ab4ffb9e6f805669ca04061e64501b286"><td class="memItemLeft" align="right" valign="top"><a id="ab4ffb9e6f805669ca04061e64501b286" name="ab4ffb9e6f805669ca04061e64501b286"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>clearMaskParticles</b> ()</td></tr>
 <tr class="memdesc:ab4ffb9e6f805669ca04061e64501b286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all mask/halo particles on every level (keeps capacity). <br /></td></tr>
@@ -247,6 +249,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a3e5be9f836e89ceab4ed846de0880b4d" id="r_a3e5be9f836e89ceab4ed846de0880b4d"><td class="memItemLeft" align="right" valign="top"><a id="a3e5be9f836e89ceab4ed846de0880b4d" name="a3e5be9f836e89ceab4ed846de0880b4d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> ()</td></tr>
 <tr class="memdesc:a3e5be9f836e89ceab4ed846de0880b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grown grids (buffer-particle layout): boxes grown by the refinement factor. <br /></td></tr>
+<tr class="memitem:a34d03ce1a65743f36cbb8854ffeeeb1f" id="r_a34d03ce1a65743f36cbb8854ffeeeb1f"><td class="memTemplParams" colspan="2">template&lt;typename Select&gt; </td></tr>
+<tr class="memitem:a34d03ce1a65743f36cbb8854ffeeeb1f template"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34d03ce1a65743f36cbb8854ffeeeb1f">moveToMaskHolder</a> (<a class="el" href="#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &amp;a_src, <a class="el" href="#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &amp;a_dst, std::vector&lt; std::size_t &gt; &amp;a_origins, const Select &amp;a_select)</td></tr>
+<tr class="memdesc:a34d03ce1a65743f36cbb8854ffeeeb1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the particles of a patch that a_select picks into the mask holder of the patch.  <br /></td></tr>
 <tr class="memitem:abb9c7f95145a575ce9744ea37e9d2286" id="r_abb9c7f95145a575ce9744ea37e9d2286"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a0d192b81b029dc26508500f9784cd463">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abb9c7f95145a575ce9744ea37e9d2286">gatherToPool</a> (<a class="el" href="CD__ParticleContainer_8H.html#a26ae3d4ada1b422950cf75732e24a5c6">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;a_source, const Vector&lt; DisjointBoxLayout &gt; &amp;a_sourceGrids)</td></tr>
 <tr class="memdesc:abb9c7f95145a575ce9744ea37e9d2286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather every particle of a source holder into a per-rank, per-destination-patch pool.  <br /></td></tr>
 <tr class="memitem:a3f0a8ff5bd653a029d686fc83c511f34" id="r_a3f0a8ff5bd653a029d686fc83c511f34"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a0d192b81b029dc26508500f9784cd463">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f0a8ff5bd653a029d686fc83c511f34">gatherMoversToPool</a> ()</td></tr>
@@ -317,6 +322,9 @@ Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bot
 <tr class="memitem:a13d01ec93ebff90dd324a18e5d074c32" id="r_a13d01ec93ebff90dd324a18e5d074c32"><td class="memItemLeft" align="right" valign="top"><a id="a13d01ec93ebff90dd324a18e5d074c32" name="a13d01ec93ebff90dd324a18e5d074c32"></a>
 <a class="el" href="CD__ParticleContainer_8H.html#a26ae3d4ada1b422950cf75732e24a5c6">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_maskParticles</b></td></tr>
 <tr class="memdesc:a13d01ec93ebff90dd324a18e5d074c32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halo/mask particles per level. <br /></td></tr>
+<tr class="memitem:ab5b0739d9d90961f58b9520c12265594" id="r_ab5b0739d9d90961f58b9520c12265594"><td class="memItemLeft" align="right" valign="top"><a id="ab5b0739d9d90961f58b9520c12265594" name="ab5b0739d9d90961f58b9520c12265594"></a>
+Vector&lt; RefCountedPtr&lt; LayoutData&lt; std::vector&lt; std::size_t &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_maskOrigins</b></td></tr>
+<tr class="memdesc:ab5b0739d9d90961f58b9520c12265594"><td class="mdescLeft">&#160;</td><td class="mdescRight">For each patch, the indices in the valid holder that the mask particles were moved out of, in increasing order. Filled by the mask transfers and consumed by <a class="el" href="#afabd7973cf993f270c52cc6d6eba1006" title="Move the mask particles back into the valid holder, each to the index it was moved out of.">returnMaskParticles()</a>. <br /></td></tr>
 <tr class="memitem:a5c725b4975be1479b9b845e7d2d32c6a" id="r_a5c725b4975be1479b9b845e7d2d32c6a"><td class="memItemLeft" align="right" valign="top"><a id="a5c725b4975be1479b9b845e7d2d32c6a" name="a5c725b4975be1479b9b845e7d2d32c6a"></a>
 <a class="el" href="CD__ParticleContainer_8H.html#a26ae3d4ada1b422950cf75732e24a5c6">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferParticles</b></td></tr>
 <tr class="memdesc:a5c725b4975be1479b9b845e7d2d32c6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grown-grid buffer particles per level (on m_grownGrids; filled during halo deposition). <br /></td></tr>
@@ -363,10 +371,10 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <div class="line">  }</div>
 <div class="ttc" id="aclassParticleContainer_html_a436bc8a55380fbea2d491d02ba5b7466"><div class="ttname"><a href="#a436bc8a55380fbea2d491d02ba5b7466">ParticleContainer::ParticleContainer</a></div><div class="ttdeci">ParticleContainer()</div><div class="ttdoc">Construct an empty, undefined container. Call define() before use.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:143</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:194</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:265</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:268</div></div>
 <div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:502</div></div>
 <div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:655</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1195</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1196</div></div>
 <div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:882</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -547,7 +555,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Remove the ghost particles of one <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f" title="Ghost designation of a particle (container-owned metadata column).">GhostType</a> from all levels and patches. </p>
-<p>Like <a class="el" href="#a4e9dd5a2f8637551bb1dfbc7d5239380" title="Remove every ghost particle (any non-Valid GhostType) from all levels and patches.">clearGhostParticles()</a>, but every other particle, owned or ghost, is left untouched. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Like <a class="el" href="#a4e9dd5a2f8637551bb1dfbc7d5239380" title="Remove every ghost particle (any non-Valid GhostType) from all levels and patches.">clearGhostParticles()</a>, but every other particle, owned or ghost, is left untouched. Removal is by swap-and-pop, so the other particles keep their order only if the removed ones are all after them. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Ghost type to remove. Must not be <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d" title="Owned, valid particle of this patch (not a ghost).">GhostType::Valid</a>. </td></tr>
   </table>
@@ -1630,6 +1638,67 @@ template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt
 
 </div>
 </div>
+<a id="a34d03ce1a65743f36cbb8854ffeeeb1f" name="a34d03ce1a65743f36cbb8854ffeeeb1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34d03ce1a65743f36cbb8854ffeeeb1f">&#9670;&#160;</a></span>moveToMaskHolder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<div class="memtemplate">
+template&lt;typename Select&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::moveToMaskHolder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_src</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dst</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::size_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_origins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Select &amp;</td>          <td class="paramname"><span class="paramname"><em>a_select</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move the particles of a patch that a_select picks into the mask holder of the patch. </p>
+<p>The particles that stay keep their order. The moved particles are appended to a_dst in their original order, and their original indices are written to a_origins. Nothing is moved if a_dst is not empty. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Select</td><td>Callable (std::size_t index) -&gt; bool. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_src</td><td>Valid particles of the patch. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_dst</td><td>Mask particles of the patch. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_origins</td><td>Original indices of the moved particles, in increasing order. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_select</td><td>Selects the particles to move, by index in a_src. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>False if a_dst was not empty, true otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a35ddd88eda595d55ae5a072c8dfa7a59" name="a35ddd88eda595d55ae5a072c8dfa7a59"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35ddd88eda595d55ae5a072c8dfa7a59">&#9670;&#160;</a></span>operator=()</h2>
 
@@ -1964,6 +2033,36 @@ template&lt;typename P, typename Traits&gt; </div>
 
 </div>
 </div>
+<a id="afabd7973cf993f270c52cc6d6eba1006" name="afabd7973cf993f270c52cc6d6eba1006"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afabd7973cf993f270c52cc6d6eba1006">&#9670;&#160;</a></span>returnMaskParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P, typename Traits&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::returnMaskParticles </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move the mask particles back into the valid holder, each to the index it was moved out of. </p>
+<p>Undoes <a class="el" href="#a2c5aa826fa8ed13cdfbc390838c41d40" title="Move the valid particles selected by a per-cell mask into the mask holder, all levels.">transferMaskParticles()</a> or <a class="el" href="#a280f3bc5e2d37bd192018d46b135b84e" title="Move, on every level that has a finer level, the valid particles whose cell on the finer level lies i...">transferMaskParticlesCoarToFine()</a>, so that the valid holder has the same particles in the same order as before the transfer. Particles added to the valid holder in between must have been removed first. Aborts if the mask holder does not hold exactly the moved particles, or if the recorded indices no longer fit the valid holder. </p>
+
+</div>
+</div>
 <a id="a2397eda58082392223a9b8a32d6ced77" name="a2397eda58082392223a9b8a32d6ced77"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2397eda58082392223a9b8a32d6ced77">&#9670;&#160;</a></span>transferMaskParticles() <span class="overload">[1/2]</span></h2>
 
@@ -1994,7 +2093,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Move the valid particles whose cell the mask marks true into the mask holder, one level. </p>
-<p>Like copyMaskParticles but MOVES (removes from the valid holder via swap-and-pop, which does not preserve order). Does not clear the mask holder first (accumulates). Ids/rank preserved. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Like copyMaskParticles but moves them. The particles that stay keep their order, and the original index of each moved particle is recorded, so that <a class="el" href="#afabd7973cf993f270c52cc6d6eba1006" title="Move the mask particles back into the valid holder, each to the index it was moved out of.">returnMaskParticles()</a> can put it back where it was. The mask holder must be empty. All columns are moved, ids and ranks included. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level to fill. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>Per-cell boolean mask over that level's valid grids (box == grid box). </td></tr>
@@ -2030,7 +2129,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Move the valid particles selected by a per-cell mask into the mask holder, all levels. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>See the one-level version. <a class="el" href="#afabd7973cf993f270c52cc6d6eba1006" title="Move the mask particles back into the valid holder, each to the index it was moved out of.">returnMaskParticles()</a> puts them back. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>Per-level cell masks (skipped where null). </td></tr>
   </table>
@@ -2065,7 +2164,7 @@ template&lt;typename P, typename Traits&gt; </div>
 </div><div class="memdoc">
 
 <p>Move, on every level that has a finer level, the valid particles whose cell on the finer level lies in an acceptance box of a_coarToFine into the mask holder. </p>
-<p>Particles are selected at the finer level's cell granularity: those within the mask's width of a finer patch. Like transferMaskParticles, this accumulates into the mask holder and preserves ids and ranks. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Particles are selected at the finer level's cell granularity: those within the mask's width of a finer patch. Like transferMaskParticles, the particles that stay keep their order, the original indices of the moved ones are recorded for <a class="el" href="#afabd7973cf993f270c52cc6d6eba1006" title="Move the mask particles back into the valid holder, each to the index it was moved out of.">returnMaskParticles()</a>, and the mask holder must be empty. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarToFine</td><td>Coarse-to-fine particle ghost mask (<a class="el" href="classRealm.html#a1899e25e33de0ef01078ad785f18b7cc" title="Get the coarse-to-fine particle ghost mask for a registered width.">Realm::getParticleGhostMaskCoarToFine</a>). </td></tr>
   </table>
@@ -2100,7 +2199,7 @@ template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt
 </div><div class="memdoc">
 
 <p>Move all particles from another holder (on the same valid grids) into the valid holder. </p>
-<p>Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source empty. Used to return halo/mask particles to the valid holder after a HaloNGP deposition. Assumes a_source is defined over this container's valid grids. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source empty. Appends, so the particles do not go back where they came from; <a class="el" href="#afabd7973cf993f270c52cc6d6eba1006" title="Move the mask particles back into the valid holder, each to the index it was moved out of.">returnMaskParticles()</a> does that for the mask holder. Assumes a_source is defined over this container's valid grids. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_source</td><td>Holder to drain into the valid particles. </td></tr>
   </table>

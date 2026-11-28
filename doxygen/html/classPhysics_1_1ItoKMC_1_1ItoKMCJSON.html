@@ -137,10 +137,10 @@ Public Types</h2></td></tr>
 <tr class="memdesc:a58370def6388795ee7644d9564d7e418"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for encapsulating a function f = f(x) where x is the physical coordinates.  <br /></td></tr>
 <tr class="memitem:aa760331f9176fea7fb656d95fec40f13" id="r_aa760331f9176fea7fb656d95fec40f13"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> = std::function&lt;Real(const Real E, const RealVect&amp; x)&gt;</td></tr>
 <tr class="memdesc:aa760331f9176fea7fb656d95fec40f13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for encapsulating a function f = f(E, x) where E is the electric field at physical coordinates x.  <br /></td></tr>
-<tr class="memitem:a1318b8f06f3a46eb9933e74c28c911c8" id="r_a1318b8f06f3a46eb9933e74c28c911c8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1318b8f06f3a46eb9933e74c28c911c8">FunctionEVXTP</a></td></tr>
-<tr class="memdesc:a1318b8f06f3a46eb9933e74c28c911c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for encapsulating a function f = f(E, V, x) where E is the electric field at physical coordinates x, and V is a grid cell volume.  <br /></td></tr>
-<tr class="memitem:affdaf05ce27722557eed64ebe50404bc" id="r_affdaf05ce27722557eed64ebe50404bc"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#affdaf05ce27722557eed64ebe50404bc">FunctionDXP</a> = std::function&lt;Real(const Real dx, const Vector&lt;Real&gt;&amp; phi)&gt;</td></tr>
-<tr class="memdesc:affdaf05ce27722557eed64ebe50404bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function alias for f = f(dx, phi) where dx is the grid resolution and phi is the plasma species densities.  <br /></td></tr>
+<tr class="memitem:aa38cd99b915ba28d74402ddb01edde4e" id="r_aa38cd99b915ba28d74402ddb01edde4e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa38cd99b915ba28d74402ddb01edde4e">FunctionEVXTP</a></td></tr>
+<tr class="memdesc:aa38cd99b915ba28d74402ddb01edde4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for encapsulating a function f = f(E, V, x) where E is the electric field at physical coordinates x, and V is a grid cell volume.  <br /></td></tr>
+<tr class="memitem:a45fd5089e508eccea38f8df2407dfaec" id="r_a45fd5089e508eccea38f8df2407dfaec"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45fd5089e508eccea38f8df2407dfaec">FunctionN</a> = std::function&lt;Real(const Vector&lt;<a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a>&gt;&amp; numParticles)&gt;</td></tr>
+<tr class="memdesc:a45fd5089e508eccea38f8df2407dfaec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function alias for f = f(N) where N is the number of reactive particles in the cell, per plasma species.  <br /></td></tr>
 <tr class="memitem:a4ff4d5f10a4bd24afdba3aa1057aa4d9" id="r_a4ff4d5f10a4bd24afdba3aa1057aa4d9"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ff4d5f10a4bd24afdba3aa1057aa4d9">FunctionT</a> = std::function&lt;Real(const Real a_T)&gt;</td></tr>
 <tr class="memdesc:a4ff4d5f10a4bd24afdba3aa1057aa4d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for encapsulating a function f = f(T) where T is the temperature of some species.  <br /></td></tr>
 <tr class="memitem:a9f6708e2b14ef0c4f26f93ad81ea0b63" id="r_a9f6708e2b14ef0c4f26f93ad81ea0b63"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f6708e2b14ef0c4f26f93ad81ea0b63">FunctionTT</a> = std::function&lt;Real(const Real a_T1, const Real a_T2)&gt;</td></tr>
@@ -364,8 +364,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePar
 <tr class="memdesc:affd41e9d65670e6652b91dd5b982cc0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a reaction string into reactangs and products.  <br /></td></tr>
 <tr class="memitem:a8b71e1c2c4758e1f8396752ed92f2143" id="r_a8b71e1c2c4758e1f8396752ed92f2143"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b71e1c2c4758e1f8396752ed92f2143">getReactionSpecies</a> (std::list&lt; size_t &gt; &amp;a_backgroundReactants, std::list&lt; size_t &gt; &amp;a_plasmaReactants, std::list&lt; size_t &gt; &amp;a_photonReactants, std::list&lt; size_t &gt; &amp;a_backgroundProducts, std::list&lt; size_t &gt; &amp;a_plasmaProducts, std::list&lt; size_t &gt; &amp;a_photonProducts, const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products) const noexcept</td></tr>
 <tr class="memdesc:a8b71e1c2c4758e1f8396752ed92f2143"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn reactants and products strings into indices.  <br /></td></tr>
-<tr class="memitem:acdd6aa4c1dc8ee75aee7e9b7d8c4f877" id="r_acdd6aa4c1dc8ee75aee7e9b7d8c4f877"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; <a class="el" href="#a1318b8f06f3a46eb9933e74c28c911c8">FunctionEVXTP</a>, <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acdd6aa4c1dc8ee75aee7e9b7d8c4f877">parsePlasmaReactionRate</a> (const nlohmann::json &amp;a_reactionJSON, const std::list&lt; size_t &gt; &amp;a_backgroundReactants, const std::list&lt; size_t &gt; &amp;a_plasmaReactants) const</td></tr>
-<tr class="memdesc:acdd6aa4c1dc8ee75aee7e9b7d8c4f877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a plasma reaction rate and turn it into a function.  <br /></td></tr>
+<tr class="memitem:a8fc780e8ca57ff49853c06763d7a1f54" id="r_a8fc780e8ca57ff49853c06763d7a1f54"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; <a class="el" href="#aa38cd99b915ba28d74402ddb01edde4e">FunctionEVXTP</a>, <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8fc780e8ca57ff49853c06763d7a1f54">parsePlasmaReactionRate</a> (const nlohmann::json &amp;a_reactionJSON, const std::list&lt; size_t &gt; &amp;a_backgroundReactants, const std::list&lt; size_t &gt; &amp;a_plasmaReactants) const</td></tr>
+<tr class="memdesc:a8fc780e8ca57ff49853c06763d7a1f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a plasma reaction rate and turn it into a function.  <br /></td></tr>
 <tr class="memitem:a1073f55314acbde2fcb9db777380d231" id="r_a1073f55314acbde2fcb9db777380d231"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; bool, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1073f55314acbde2fcb9db777380d231">parsePlasmaReactionPlot</a> (const nlohmann::json &amp;a_reactionJSON) const</td></tr>
 <tr class="memdesc:a1073f55314acbde2fcb9db777380d231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not a reaction rate should be plotted.  <br /></td></tr>
 <tr class="memitem:aacc5378d13a9d0e1d7e7e9adb7ea9f5e" id="r_aacc5378d13a9d0e1d7e7e9adb7ea9f5e"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; bool, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aacc5378d13a9d0e1d7e7e9adb7ea9f5e">parsePlasmaReactionGradientCorrection</a> (const nlohmann::json &amp;a_reactionJSON) const</td></tr>
@@ -376,8 +376,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePar
 <tr class="memdesc:a4bd500f5b50a92554482ae5b38224d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a table which is stored in E/N format.  <br /></td></tr>
 <tr class="memitem:a65c007ad6bc243ccc02f900f8eab2ceb" id="r_a65c007ad6bc243ccc02f900f8eab2ceb"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65c007ad6bc243ccc02f900f8eab2ceb">parseReactionWildcards</a> (const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products, const nlohmann::json &amp;a_reactionJSON) const noexcept</td></tr>
 <tr class="memdesc:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a reaction set into a superset. This parses wildcards '@' in reaction string.  <br /></td></tr>
-<tr class="memitem:a4e3309066e93b4e53d7eacd98e2becfe" id="r_a4e3309066e93b4e53d7eacd98e2becfe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e3309066e93b4e53d7eacd98e2becfe">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#a8f47c91d68eaf41acfaf74ffb4027768">KMCReaction</a> &gt; &gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
-<tr class="memdesc:a4e3309066e93b4e53d7eacd98e2becfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <br /></td></tr>
+<tr class="memitem:a2579321e7bf573ca5f3b4d27252c5e4a" id="r_a2579321e7bf573ca5f3b4d27252c5e4a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2579321e7bf573ca5f3b4d27252c5e4a">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#a8f47c91d68eaf41acfaf74ffb4027768">KMCReaction</a> &gt; &gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_numParticles, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
+<tr class="memdesc:a2579321e7bf573ca5f3b4d27252c5e4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <br /></td></tr>
 <tr class="memitem:a9232747f83e6ab99818108ec6ccbc337" id="r_a9232747f83e6ab99818108ec6ccbc337"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9232747f83e6ab99818108ec6ccbc337">multinomial</a> (const size_t N, const std::discrete_distribution&lt; int &gt; &amp;a_distribution) const noexcept</td></tr>
 <tr class="memdesc:a9232747f83e6ab99818108ec6ccbc337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample a multinomial distribution with N samples.  <br /></td></tr>
 <tr class="inherit_header pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Member Functions inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html">Physics::ItoKMC::ItoKMCPhysics</a></td></tr>
@@ -495,7 +495,7 @@ std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">Function
 std::vector&lt; std::array&lt; <a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">CdrDomainBC::BcType</a>, 2 *SpaceDim &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solidDomainBcs</b></td></tr>
 <tr class="memdesc:aa564cdf37320e3a5cd04cb00cfc7ebb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain boundary conditions of the solid species, one per domain face in the order x.lo, x.hi, y.lo, ... <br /></td></tr>
 <tr class="memitem:a4a346269a1ec730fbab3b007605b8585" id="r_a4a346269a1ec730fbab3b007605b8585"><td class="memItemLeft" align="right" valign="top"><a id="a4a346269a1ec730fbab3b007605b8585" name="a4a346269a1ec730fbab3b007605b8585"></a>
-std::vector&lt; <a class="el" href="#a1318b8f06f3a46eb9933e74c28c911c8">FunctionEVXTP</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcReactionRates</b></td></tr>
+std::vector&lt; <a class="el" href="#aa38cd99b915ba28d74402ddb01edde4e">FunctionEVXTP</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcReactionRates</b></td></tr>
 <tr class="memdesc:a4a346269a1ec730fbab3b007605b8585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates. Same index as the actual reactions. <br /></td></tr>
 <tr class="memitem:a94551b03c14b3563f33d62dc91cfcc32" id="r_a94551b03c14b3563f33d62dc91cfcc32"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="#aa760331f9176fea7fb656d95fec40f13">FunctionEX</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94551b03c14b3563f33d62dc91cfcc32">m_fluidRates</a></td></tr>
 <tr class="memdesc:a94551b03c14b3563f33d62dc91cfcc32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function-based plasma reaction rates as if they appeared in the reaction rate equation. Same index as actual reactions.  <br /></td></tr>
@@ -677,29 +677,6 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implementation of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a> which parses input data from a JSON file. </p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
-<a id="affdaf05ce27722557eed64ebe50404bc" name="affdaf05ce27722557eed64ebe50404bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#affdaf05ce27722557eed64ebe50404bc">&#9670;&#160;</a></span>FunctionDXP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="#affdaf05ce27722557eed64ebe50404bc">Physics::ItoKMC::ItoKMCJSON::FunctionDXP</a> = std::function&lt;Real(const Real dx, const Vector&lt;Real&gt;&amp; phi)&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Function alias for f = f(dx, phi) where dx is the grid resolution and phi is the plasma species densities. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dx</td><td>Grid resolution. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">phi</td><td>List of plasma species densities. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a2533eaa4a0fa98b931d169dcaf494193" name="a2533eaa4a0fa98b931d169dcaf494193"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2533eaa4a0fa98b931d169dcaf494193">&#9670;&#160;</a></span>FunctionEN</h2>
 
@@ -725,19 +702,19 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
-<a id="a1318b8f06f3a46eb9933e74c28c911c8" name="a1318b8f06f3a46eb9933e74c28c911c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1318b8f06f3a46eb9933e74c28c911c8">&#9670;&#160;</a></span>FunctionEVXTP</h2>
+<a id="aa38cd99b915ba28d74402ddb01edde4e" name="aa38cd99b915ba28d74402ddb01edde4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa38cd99b915ba28d74402ddb01edde4e">&#9670;&#160;</a></span>FunctionEVXTP</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#a1318b8f06f3a46eb9933e74c28c911c8">Physics::ItoKMC::ItoKMCJSON::FunctionEVXTP</a></td>
+          <td class="memname">using <a class="el" href="#aa38cd99b915ba28d74402ddb01edde4e">Physics::ItoKMC::ItoKMCJSON::FunctionEVXTP</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"> std::function&lt;</div>
-<div class="line">    Real(<span class="keyword">const</span> Real E, <span class="keyword">const</span> Real V, <span class="keyword">const</span> Real dx, <span class="keyword">const</span> Real dt, <span class="keyword">const</span> RealVect&amp; x, <span class="keyword">const</span> Vector&lt;Real&gt;&amp; phi)&gt;</div>
+<div class="line">    Real(<span class="keyword">const</span> Real E, <span class="keyword">const</span> Real V, <span class="keyword">const</span> Real dx, <span class="keyword">const</span> Real dt, <span class="keyword">const</span> RealVect&amp; x, <span class="keyword">const</span> Vector&lt;FPR&gt;&amp; numParticles)&gt;</div>
 </div><!-- fragment -->
 <p>Function for encapsulating a function f = f(E, V, x) where E is the electric field at physical coordinates x, and V is a grid cell volume. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -747,7 +724,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
     <tr><td class="paramdir">[in]</td><td class="paramname">dx</td><td>Grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dt</td><td>Time step </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Physical coordinate </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">phi</td><td>List of plasma species densities </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">numParticles</td><td>Number of reactive particles in the cell, per plasma species. </td></tr>
   </table>
   </dd>
 </dl>
@@ -771,6 +748,28 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">E</td><td>Electric field magnitude in SI units. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Physical coordinates </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a45fd5089e508eccea38f8df2407dfaec" name="a45fd5089e508eccea38f8df2407dfaec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fd5089e508eccea38f8df2407dfaec">&#9670;&#160;</a></span>FunctionN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#a45fd5089e508eccea38f8df2407dfaec">Physics::ItoKMC::ItoKMCJSON::FunctionN</a> = std::function&lt;Real(const Vector&lt;<a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a>&gt;&amp; numParticles)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function alias for f = f(N) where N is the number of reactive particles in the cell, per plasma species. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">numParticles</td><td>Number of reactive particles in the cell, per plasma species. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2232,7 +2231,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div><div class="memdoc">
 
 <p>Return true if the physics model requires species density gradients. </p>
-<dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="#a4e3309066e93b4e53d7eacd98e2becfe" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="#a2579321e7bf573ca5f3b4d27252c5e4a" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aea4fc097ef2944cbc42c17b412d05817">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
@@ -2379,8 +2378,8 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
-<a id="acdd6aa4c1dc8ee75aee7e9b7d8c4f877" name="acdd6aa4c1dc8ee75aee7e9b7d8c4f877"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acdd6aa4c1dc8ee75aee7e9b7d8c4f877">&#9670;&#160;</a></span>parsePlasmaReactionRate()</h2>
+<a id="a8fc780e8ca57ff49853c06763d7a1f54" name="a8fc780e8ca57ff49853c06763d7a1f54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fc780e8ca57ff49853c06763d7a1f54">&#9670;&#160;</a></span>parsePlasmaReactionRate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2389,7 +2388,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::pair&lt; std::function&lt; Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect &amp;x, const Vector&lt; Real &gt; &amp;phi)&gt;, std::function&lt; Real(const Real E, const RealVect &amp;x)&gt; &gt; ItoKMCJSON::parsePlasmaReactionRate </td>
+          <td class="memname">std::pair&lt; std::function&lt; Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect &amp;x, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;numParticles)&gt;, std::function&lt; Real(const Real E, const RealVect &amp;x)&gt; &gt; ItoKMCJSON::parsePlasmaReactionRate </td>
           <td>(</td>
           <td class="paramtype">const nlohmann::json &amp;</td>          <td class="paramname"><span class="paramname"><em>a_reactionJSON</em></span>, </td>
         </tr>
@@ -3516,8 +3515,8 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
-<a id="a4e3309066e93b4e53d7eacd98e2becfe" name="a4e3309066e93b4e53d7eacd98e2becfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e3309066e93b4e53d7eacd98e2becfe">&#9670;&#160;</a></span>updateReactionRates()</h2>
+<a id="a2579321e7bf573ca5f3b4d27252c5e4a" name="a2579321e7bf573ca5f3b4d27252c5e4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2579321e7bf573ca5f3b4d27252c5e4a">&#9670;&#160;</a></span>updateReactionRates()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3539,6 +3538,11 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const RealVect</td>          <td class="paramname"><span class="paramname"><em>a_pos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_numParticles</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -3579,6 +3583,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
     <tr><td class="paramdir">[out]</td><td class="paramname">a_kmcReactions</td><td>Reaction rates to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of reactive particles in the cell, per plasma species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Plasma species densities </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gradPhi</td><td>Density gradients for plasma species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
@@ -3588,7 +3593,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a4273e7a9e0c0659547e8db580f6c7377">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>

@@ -79,7 +79,8 @@ $(function() {
 <div id="doc-content">
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">DischargeIO Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -98,6 +99,11 @@ Functions</h2></td></tr>
 <tr class="memitem:a10ce9adf5e883c8699c57ccfeffb05dc" id="r_a10ce9adf5e883c8699c57ccfeffb05dc"><td class="memTemplParams" colspan="2">template&lt;typename P, typename Traits&gt; </td></tr>
 <tr class="memitem:a10ce9adf5e883c8699c57ccfeffb05dc template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10ce9adf5e883c8699c57ccfeffb05dc">writeH5Part</a> (std::string a_filename, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, RealVect a_shift, Real a_time) noexcept</td></tr>
 <tr class="memdesc:a10ce9adf5e883c8699c57ccfeffb05dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write an SoA particle container to an <a class="el" href="namespaceH5Part.html" title="Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part (visualiza...">H5Part</a> file (quick visualization).  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a31b2048d09794aba1e98bf05adde0f26" id="r_a31b2048d09794aba1e98bf05adde0f26"><td class="memItemLeft" align="right" valign="top">const std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31b2048d09794aba1e98bf05adde0f26">particleBlockSize</a> = 1000000000000</td></tr>
+<tr class="memdesc:a31b2048d09794aba1e98bf05adde0f26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of particles that a rank writes with one H5Dwrite when writing particles to a checkpoint file.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace which encapsulates chombo-discharge IO functionality. </p>
@@ -264,6 +270,32 @@ template&lt;typename P, typename Traits&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a31b2048d09794aba1e98bf05adde0f26" name="a31b2048d09794aba1e98bf05adde0f26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31b2048d09794aba1e98bf05adde0f26">&#9670;&#160;</a></span>particleBlockSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::size_t DischargeIO::particleBlockSize = 1000000000000</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum number of particles that a rank writes with one H5Dwrite when writing particles to a checkpoint file. </p>
+<p>The particles are linearized into a buffer of at most this many particles, which is written each time it is full. The default is high enough that every rank writes its particles with one H5Dwrite. Lowering it bounds the memory used while writing, at the cost of more H5Dwrite calls; the file contents do not depend on it. </p>
 
 </div>
 </div>

@@ -262,8 +262,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDebug</b> () noe
 <tr class="memitem:a6d94b62f1977ad53336bde29833a8228" id="r_a6d94b62f1977ad53336bde29833a8228"><td class="memItemLeft" align="right" valign="top"><a id="a6d94b62f1977ad53336bde29833a8228" name="a6d94b62f1977ad53336bde29833a8228"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseAlgorithm</b> () noexcept</td></tr>
 <tr class="memdesc:a6d94b62f1977ad53336bde29833a8228"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse reaction algorithm. <br /></td></tr>
-<tr class="memitem:a12a370f24d9e421357c28631595be4b4" id="r_a12a370f24d9e421357c28631595be4b4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12a370f24d9e421357c28631595be4b4">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#a8f47c91d68eaf41acfaf74ffb4027768">KMCReaction</a> &gt; &gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const Real a_dx, const Real a_kappa) const noexcept=0</td></tr>
-<tr class="memdesc:a12a370f24d9e421357c28631595be4b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <br /></td></tr>
+<tr class="memitem:a4273e7a9e0c0659547e8db580f6c7377" id="r_a4273e7a9e0c0659547e8db580f6c7377"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4273e7a9e0c0659547e8db580f6c7377">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#a8f47c91d68eaf41acfaf74ffb4027768">KMCReaction</a> &gt; &gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;a_numParticles, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const Real a_dx, const Real a_kappa) const noexcept=0</td></tr>
+<tr class="memdesc:a4273e7a9e0c0659547e8db580f6c7377"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <br /></td></tr>
 <tr class="memitem:a7470e40fd0da1ee7d7481bf9b879deca" id="r_a7470e40fd0da1ee7d7481bf9b879deca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7470e40fd0da1ee7d7481bf9b879deca">removeParticles</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const long long a_numToRemove) const</td></tr>
 <tr class="memdesc:a7470e40fd0da1ee7d7481bf9b879deca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles from the input list.  <br /></td></tr>
 <tr class="memitem:a94df7d5ddca4354da82731c1f61cfac8" id="r_a94df7d5ddca4354da82731c1f61cfac8"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94df7d5ddca4354da82731c1f61cfac8">drawNewParticlePosition</a> (const bool a_hasParent, const bool a_hasDownstream, const RealVect a_parentPos, const RealVect a_upstreamPos, const RealVect a_upstreamLo, const RealVect a_upstreamHi, const RealVect a_downstreamDirection, const RealVect a_cellPos, const RealVect a_centroidPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_bndryNormal, const Real a_dx, const Real a_kappa) const noexcept</td></tr>
@@ -386,7 +386,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers. </p>
-<p>Subclasses must implement <span class="tt"><a class="el" href="#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a></span>, <span class="tt"><a class="el" href="#a6accd05bace5e41d24d901720ea8a892" title="Compute the Ito solver mobilities.">computeMobilities()</a></span>, <span class="tt"><a class="el" href="#ad1aed72f6a18742b38ff9ae254eca82e" title="Compute the Ito solver diffusion coefficients.">computeDiffusionCoefficients()</a></span>, <span class="tt"><a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a></span>, <span class="tt"><a class="el" href="#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a></span>, <span class="tt"><a class="el" href="#a89ebbbdf2ff907a6672ca00668a82f7d" title="Compute Townsend ionization coefficient.">computeAlpha()</a></span>, <span class="tt"><a class="el" href="#a08f01b701bbd61de8eda7e8bb94ea7ea" title="Compute Townsend attachment coefficient.">computeEta()</a></span>, and <span class="tt"><a class="el" href="#a7fcb534d048627466793e3d8c8cf916b" title="Get the neutral density at a position in space.">getNeutralDensity()</a></span>. The reaction network is specified by populating <span class="tt"><a class="el" href="#aaf93dd374d062265d09611aa5ea6677e" title="List of reactions for the KMC solver.">m_kmcReactions</a></span> and (optionally) <span class="tt"><a class="el" href="#a50274f528c0ad5aa85a7161b8d67892e" title="List of photoionization reactions.">m_photoReactions</a></span> and <span class="tt"><a class="el" href="#ab40ef30340dd1038995d29bf86ccd369" title="Surface reactions.">m_surfaceReactions</a></span> in the subclass constructor. </p>
+<p>Subclasses must implement <span class="tt"><a class="el" href="#a4273e7a9e0c0659547e8db580f6c7377" title="Update reaction rates.">updateReactionRates()</a></span>, <span class="tt"><a class="el" href="#a6accd05bace5e41d24d901720ea8a892" title="Compute the Ito solver mobilities.">computeMobilities()</a></span>, <span class="tt"><a class="el" href="#ad1aed72f6a18742b38ff9ae254eca82e" title="Compute the Ito solver diffusion coefficients.">computeDiffusionCoefficients()</a></span>, <span class="tt"><a class="el" href="#a3072257af3148ef72b6560f167e98a82" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a></span>, <span class="tt"><a class="el" href="#acd2e7de6988b3e989f8d407a9c246831" title="Resolve secondary emission on one face of the computational domain.">secondaryEmissionDomain()</a></span>, <span class="tt"><a class="el" href="#a89ebbbdf2ff907a6672ca00668a82f7d" title="Compute Townsend ionization coefficient.">computeAlpha()</a></span>, <span class="tt"><a class="el" href="#a08f01b701bbd61de8eda7e8bb94ea7ea" title="Compute Townsend attachment coefficient.">computeEta()</a></span>, and <span class="tt"><a class="el" href="#a7fcb534d048627466793e3d8c8cf916b" title="Get the neutral density at a position in space.">getNeutralDensity()</a></span>. The reaction network is specified by populating <span class="tt"><a class="el" href="#aaf93dd374d062265d09611aa5ea6677e" title="List of reactions for the KMC solver.">m_kmcReactions</a></span> and (optionally) <span class="tt"><a class="el" href="#a50274f528c0ad5aa85a7161b8d67892e" title="List of photoionization reactions.">m_photoReactions</a></span> and <span class="tt"><a class="el" href="#ab40ef30340dd1038995d29bf86ccd369" title="Surface reactions.">m_surfaceReactions</a></span> in the subclass constructor. </p>
 </div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Member Enumeration Documentation</h2>
 <a id="a988145ba22d311afbd51d4fa10d1cc6b" name="a988145ba22d311afbd51d4fa10d1cc6b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a988145ba22d311afbd51d4fa10d1cc6b">&#9670;&#160;</a></span>Algorithm</h2>
@@ -1884,7 +1884,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 <p>Refinement of <a class="el" href="#aea4fc097ef2944cbc42c17b412d05817" title="Return true if the physics model requires species density gradients.">needGradients()</a>, which answers the same question for the whole model at once. Computing a gradient costs a cross-realm copy, a coarsening and a ghost interpolation over the whole AMR hierarchy, per species &ndash; so a model that consults one species' gradient pays for every species' unless it can say which one it meant.</p>
 <p>The default is the conservative answer: whatever <a class="el" href="#aea4fc097ef2944cbc42c17b412d05817" title="Return true if the physics model requires species density gradients.">needGradients()</a> says, for every species. A model that knows better should override this; one that does not keeps working unchanged. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_plasmaIndex</td><td>Plasma species index, in the ordering used by <a class="el" href="#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a>'s density argument: the Ito species first, then the CDR species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_plasmaIndex</td><td>Plasma species index, in the ordering used by <a class="el" href="#a4273e7a9e0c0659547e8db580f6c7377" title="Update reaction rates.">updateReactionRates()</a>'s density argument: the Ito species first, then the CDR species. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1918,7 +1918,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </div><div class="memdoc">
 
 <p>Return true if the physics model requires species density gradients. </p>
-<dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="#a4273e7a9e0c0659547e8db580f6c7377" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab26daaca1d1373dc63bee1f6e7ee8a37">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
@@ -2886,8 +2886,8 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
-<a id="a12a370f24d9e421357c28631595be4b4" name="a12a370f24d9e421357c28631595be4b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12a370f24d9e421357c28631595be4b4">&#9670;&#160;</a></span>updateReactionRates()</h2>
+<a id="a4273e7a9e0c0659547e8db580f6c7377" name="a4273e7a9e0c0659547e8db580f6c7377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4273e7a9e0c0659547e8db580f6c7377">&#9670;&#160;</a></span>updateReactionRates()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2909,6 +2909,11 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const RealVect</td>          <td class="paramname"><span class="paramname"><em>a_pos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a4bffe9f3da397ffff4e232fe664d52af">FPR</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_numParticles</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2949,6 +2954,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
     <tr><td class="paramdir">[out]</td><td class="paramname">a_kmcReactions</td><td>Reaction rates to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of reactive particles in the cell, per plasma species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Plasma species densities </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gradPhi</td><td>Density gradients for plasma species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
@@ -2959,7 +2965,7 @@ static std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bott
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Must be implemented by the user. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4e3309066e93b4e53d7eacd98e2becfe">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a2579321e7bf573ca5f3b4d27252c5e4a">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
